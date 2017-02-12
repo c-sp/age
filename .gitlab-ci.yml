@@ -1,0 +1,22 @@
+image: registry.gitlab.com/csprenger/docker-qt-gcc:5.8.r2
+
+stages:
+    - build
+
+build-debug:
+    stage: build
+    script:
+        - "DIR=`mktemp -d` && cd $DIR"
+        - "qmake CONFIG+=debug /builds/csprenger/project-alpha/src/age.pro"
+        - make -j 4
+    tags:
+        - linux
+
+build-release:
+    stage: build
+    script:
+        - "DIR=`mktemp -d` && cd $DIR"
+        - "qmake CONFIG+=release /builds/csprenger/project-alpha/src/age.pro"
+        - make -j 4
+    tags:
+        - linux

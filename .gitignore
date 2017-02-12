@@ -1,0 +1,4 @@
+*.pro.user*
+doxygen/*out/*
+Thumbs.db
+build*
