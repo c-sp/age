@@ -2,7 +2,7 @@
 
 # AGE - Another Gameboy Emulator
 
-AGE is a Gameboy emulator aiming at accuracy and usability.
+AGE is a Gameboy emulator aiming at accuracy and usability. It is written in C++ and makes use of [Qt](https://www.qt.io) for platform independence.
 
 AGE allows you to:
 - run ***Gameboy*** and ***Gameboy Color*** roms.
@@ -13,11 +13,13 @@ AGE allows you to:
 - improve ***audio quality*** (applying a low pass filter with Kaiser window).
 - compile for Windows and Linux (and Mac? I did not try it yet) since it is not based on any OS specific code.
 
+I do not expect AGE to be finished any time soon. For details on my future plans please see the [milestones](../milestones).
+
 ## Improve visual quality
 
 AGE can scale the Gameboy's low resolution visuals up to current screen resolutions without making them look blurry or blocky. I slightly modified the [scale2x](http://www.scale2x.it/) graphics effect to achieve that.
 
-The following images show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening).
+The following two images show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening).
 
 | No Image Filter | AGE's default Image Filter |
 |:---------------:|:--------------------------:|
@@ -27,7 +29,7 @@ The following images show a scene from Nintendo's [The Legend of Zelda: Link’s
 
 Some Gameboy games make use of fast changing graphics to create a blur effect. On current screens this results in noticable flicker. AGE can migitate the flicker by blending a configurable number of frames together.
 
-The following images show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening). Note that the black ball is supposed to depict a dog.
+The following two images show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening). Note that the black ball is supposed to depict a dog.
 
 | Flicker | No Flicker |
 |:-------:|:----------:|
@@ -37,20 +39,9 @@ The following images show a scene from Nintendo's [The Legend of Zelda: Link’s
 
 AGE stores settings and savegames in a subdirectory called `.age_emulator` it creates in your home directory.
 
-## The AGE CI pipeline
+# The AGE CI pipeline
 
 AGE is continuously being built using GitLab's [CI pipeline](/../pipelines) with [docker-qt-gcc](https://gitlab.com/csprenger/docker-qt-gcc), a docker image I created to build [Qt](https://www.qt.io) applications.
-
-# Future plans
-
-I do not expect AGE to be finished any time soon. My plans for AGE are to:
-- *(Graphics)* migrate the rendering code from the old OpenGL fixed function pipeline to shaders.
-- *(CI)* extend the [CI pipeline](/../pipelines) by regression tests.
-- *(CI)* create a build job for the AGE doxygen documentation and deploy it where it is visible to the public.
-- *(Gameboy)* improve the Gameboy emulation accuracy more and more.
-- *(Gameboy, UI)* emulate a Game Link Cable over TCP/IP to allow for playing games over the network (maybe even the internet?).
-- *(Documentation)* explain how the modified [scale2x](http://www.scale2x.it/) graphics effect works and why I modified it.
-- create an installer so that everyone can easily download and install AGE.
 
 # History
 
