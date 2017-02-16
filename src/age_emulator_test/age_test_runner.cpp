@@ -1,3 +1,22 @@
+//
+// Copyright (c) 2010-2017 Christoph Sprenger
+//
+// This file is part of AGE ("Another Gameboy Emulator").
+// <https://gitlab.com/csprenger/AGE>
+//
+// AGE is free software: you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// AGE is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with AGE.  If not, see <http://www.gnu.org/licenses/>.
+//
 
 #include "age_test_runner.hpp"
 
@@ -35,21 +54,22 @@ age::test_runner_application::~test_runner_application()
 void age::test_runner_application::schedule_tests()
 {
     // look for test files to execute
-    if (!find_files())
+    QSet<QString> files;
+    if (!find_files(files))
     {
         fprintf(stderr, "%s is neither a file nor a directory\n", qPrintable(m_test));
         QCoreApplication::exit(EXIT_FAILURE);
     }
 
     // filter test files to ignore
-    else if (!ignore_files())
+    else if (!ignore_files(files))
     {
         fprintf(stderr, "could not read ignore list from file %s\n", qPrintable(m_ignore_file));
         QCoreApplication::exit(EXIT_FAILURE);
     }
 
     // terminate, if there are no tests to execute
-    else if (m_test_files.isEmpty())
+    else if (files.isEmpty())
     {
         qInfo("no tests found, terminating");
         QCoreApplication::exit(EXIT_SUCCESS);
@@ -58,47 +78,57 @@ void age::test_runner_application::schedule_tests()
     // schedule tests
     else
     {
-        qInfo("scheduling %d test(s) for execution", m_test_files.size());
-
-        for (QString file : m_test_files)
+        m_tests_running = files;
+        for (QString file : m_tests_running)
         {
-            emulator_test *test = new emulator_test(file);
+            gb_emulator_test *test = new gb_emulator_test(file);
             test->setAutoDelete(true); // let QThreadPool clean this up
 
             // connect via QueuedConnection since the signal is emitted across thread boundaries
-            connect(test, SIGNAL(test_passed(QString)), this, SLOT(test_passed(QString)), Qt::QueuedConnection);
+            // (the respective slot will be executed by this thread and thus after this method returns)
+            connect(test, SIGNAL(test_passed(QString,QString)), this, SLOT(test_passed(QString,QString)), Qt::QueuedConnection);
             connect(test, SIGNAL(test_failed(QString,QString)), this, SLOT(test_failed(QString,QString)), Qt::QueuedConnection);
 
             m_thread_pool.start(test);
         }
+
+        qInfo("scheduled %d test(s) for execution", m_tests_running.size());
     }
-}
-
-
-
-void age::test_runner_application::test_passed(QString test_file)
-{
-    qInfo("test passed:  %s", qPrintable(test_file));
-    m_test_files.remove(test_file);
-    check_finish();
-}
-
-void age::test_runner_application::test_failed(QString test_file, QString reason)
-{
-    qInfo("test failed:  %s, %s", qPrintable(test_file), qPrintable(reason));
-    m_test_files.remove(test_file);
-    check_finish();
 }
 
 void age::test_runner_application::about_to_quit()
 {
+    // remove all tests that are still queued to let the application
+    // terminate as fast as possible
     m_thread_pool.clear();
 
-    int remaining = m_test_files.size();
+    int remaining = m_tests_running.size();
     if (remaining > 0)
     {
         qInfo("cancelled %d queued tests", remaining);
     }
+}
+
+
+
+void age::test_runner_application::test_passed(QString test_file, QString pass_message)
+{
+    // save the result
+    m_pass_messages.append(create_message(test_file, pass_message));
+    m_tests_running.remove(test_file);
+
+    // check if all tests are finished
+    exit_app_on_finish();
+}
+
+void age::test_runner_application::test_failed(QString test_file, QString fail_message)
+{
+    // save the result
+    m_fail_messages.append(create_message(test_file, fail_message));
+    m_tests_running.remove(test_file);
+
+    // check if all tests are finished
+    exit_app_on_finish();
 }
 
 
@@ -111,7 +141,7 @@ void age::test_runner_application::about_to_quit()
 //
 //---------------------------------------------------------
 
-bool age::test_runner_application::find_files()
+bool age::test_runner_application::find_files(QSet<QString> &files) const
 {
     bool success = true;
 
@@ -121,14 +151,14 @@ bool age::test_runner_application::find_files()
     QFileInfo file_info(m_test);
     if (file_info.isFile())
     {
-        m_test_files.insert(m_test);
+        files.insert(m_test);
     }
 
     // if a directory was specified, search it for test files
     else if (file_info.isDir())
     {
         qInfo("looking for test files in directory %s", qPrintable(m_test));
-        find_files(file_info);
+        find_files(file_info, files);
     }
 
     // otherwise fail
@@ -140,7 +170,7 @@ bool age::test_runner_application::find_files()
     return success;
 }
 
-void age::test_runner_application::find_files(const QFileInfo &file_info)
+void age::test_runner_application::find_files(const QFileInfo &file_info, QSet<QString> &files) const
 {
     // traverse directory
     if (file_info.isDir())
@@ -159,7 +189,7 @@ void age::test_runner_application::find_files(const QFileInfo &file_info)
             QFileInfoList entries = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
             for (QFileInfo entry : entries)
             {
-                find_files(entry);
+                find_files(entry, files);
             }
         }
     }
@@ -167,13 +197,13 @@ void age::test_runner_application::find_files(const QFileInfo &file_info)
     // file match?
     else if (file_info.isFile() && m_test_file_pattern.exactMatch(file_info.absoluteFilePath()))
     {
-        m_test_files.insert(file_info.absoluteFilePath());
+        files.insert(file_info.absoluteFilePath());
     }
 }
 
 
 
-bool age::test_runner_application::ignore_files()
+bool age::test_runner_application::ignore_files(QSet<QString> &files) const
 {
     QStringList files_to_ignore;
     bool success = true;
@@ -197,8 +227,17 @@ bool age::test_runner_application::ignore_files()
             while (!stream.atEnd())
             {
                 QString line = stream.readLine();
-                files_to_ignore.append(line.trimmed());
+                line = line.trimmed();
+
+                // ignore empty lines and lines beginning with a '#'
+                if (!line.isEmpty() && !line.startsWith('#'))
+                {
+                    files_to_ignore.append(line);
+                }
             }
+
+            int entries = files_to_ignore.size();
+            qInfo("ignore list contains %d %s", entries, ((entries == 1) ? "entry" : "entries"));
         }
     }
 
@@ -206,7 +245,7 @@ bool age::test_runner_application::ignore_files()
     QStringList ignored_files;
     if (!files_to_ignore.isEmpty() && success)
     {
-        QMutableSetIterator<QString> itr(m_test_files);
+        QMutableSetIterator<QString> itr(files);
         while (itr.hasNext())
         {
             QString file = itr.next();
@@ -224,25 +263,49 @@ bool age::test_runner_application::ignore_files()
     }
 
     // tell the user about ignored files
-    if (!ignored_files.isEmpty())
-    {
-        qInfo("ignoring the following file(s):");
-        for (QString file : ignored_files)
-        {
-            qInfo("    %s", qPrintable(file));
-        }
-    }
+    ignored_files.sort();
+    print_message_list("ignoring the following file(s):", ignored_files);
 
     return success;
 }
 
 
 
-void age::test_runner_application::check_finish()
+QString age::test_runner_application::create_message(const QString &test_file, const QString &message) const
 {
-    if (m_test_files.isEmpty())
+    // don't append a white space to test_file if there is no message
+    return message.isEmpty() ? test_file : (test_file + ' ' + message);
+}
+
+void age::test_runner_application::exit_app_on_finish()
+{
+    // if all tests finished, we can exit the application
+    if (m_tests_running.isEmpty())
     {
-        qInfo("all tests executed, terminating");
-        QCoreApplication::exit(EXIT_SUCCESS);
+        qInfo("all tests executed");
+
+        // sort results alphabetically for better readability
+        m_pass_messages.sort(Qt::CaseInsensitive);
+        m_fail_messages.sort(Qt::CaseInsensitive);
+
+        // print a test summary
+        print_message_list("\ntests passed:", m_pass_messages);
+        print_message_list("\ntests failed:", m_fail_messages);
+
+        // calculate the return code and trigger exiting the application
+        int return_code = m_fail_messages.isEmpty() ? EXIT_SUCCESS : EXIT_FAILURE;
+        QCoreApplication::exit(return_code);
+    }
+}
+
+void age::test_runner_application::print_message_list(const QString &first_line, const QStringList &message_list) const
+{
+    if (!message_list.isEmpty())
+    {
+        qInfo("%s", qPrintable(first_line));
+        for (QString message : message_list)
+        {
+            qInfo("    %s", qPrintable(message));
+        }
     }
 }

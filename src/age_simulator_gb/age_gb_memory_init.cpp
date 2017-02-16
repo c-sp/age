@@ -888,7 +888,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, bool force_dmg)
       m_has_battery(has_battery(cart_rom)),
       m_cgb(!force_dmg && (safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80)),
 
-      m_mbc_write(get_mbc_write_function(m_mbc_data, cart_rom[gb_cia_ofs_type])),
+      m_mbc_write(get_mbc_write_function(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
 
       m_cart_ram_offset(m_num_cart_rom_banks * gb_cart_rom_bank_size),
       m_internal_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),

@@ -1,5 +1,22 @@
-#ifndef AGE_TEST_RUNNER_HPP
-#define AGE_TEST_RUNNER_HPP
+//
+// Copyright (c) 2010-2017 Christoph Sprenger
+//
+// This file is part of AGE ("Another Gameboy Emulator").
+// <https://gitlab.com/csprenger/AGE>
+//
+// AGE is free software: you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// AGE is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with AGE.  If not, see <http://www.gnu.org/licenses/>.
+//
 
 //!
 //! \file
@@ -21,35 +38,6 @@ enum class test_type : int
 
 
 
-template<typename _T>
-class optional
-{
-public:
-
-    bool is_set() const
-    {
-        return m_value_set;
-    }
-
-    _T get(_T default_value) const
-    {
-        return m_value_set ? m_value : default_value;
-    }
-
-    void set(_T t)
-    {
-        m_value = t;
-        m_value_set = true;
-    }
-
-private:
-
-    bool m_value_set = false;
-    _T m_value;
-};
-
-
-
 class test_runner_application : public QObject, non_copyable
 {
     Q_OBJECT
@@ -61,17 +49,20 @@ public:
 public slots:
 
     void schedule_tests();
-    void test_passed(QString test_file);
-    void test_failed(QString test_file, QString reason);
     void about_to_quit();
+
+    void test_passed(QString test_file, QString pass_message);
+    void test_failed(QString test_file, QString fail_message);
 
 private:
 
-    bool find_files();
-    void find_files(const QFileInfo &file_info);
-    bool ignore_files();
+    bool find_files(QSet<QString> &files) const;
+    void find_files(const QFileInfo &file_info, QSet<QString> &files) const;
+    bool ignore_files(QSet<QString> &files) const;
 
-    void check_finish();
+    QString create_message(const QString &test_file, const QString &message) const;
+    void exit_app_on_finish();
+    void print_message_list(const QString &first_line, const QStringList &message_list) const;
 
     const QRegExp m_test_file_pattern;
     const QString m_test;
@@ -79,7 +70,9 @@ private:
     const test_type m_type;
 
     QThreadPool m_thread_pool;
-    QSet<QString> m_test_files;
+    QSet<QString> m_tests_running;
+    QStringList m_pass_messages;
+    QStringList m_fail_messages;
 };
 
 } // namespace age

@@ -2,6 +2,7 @@
 // Copyright (c) 2010-2017 Christoph Sprenger
 //
 // This file is part of AGE ("Another Gameboy Emulator").
+// <https://gitlab.com/csprenger/AGE>
 //
 // AGE is free software: you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by
