@@ -41,6 +41,7 @@ public:
     gb_simulator(const uint8_vector &rom, bool force_dmg);
 
     bool is_cgb() const;
+    gb_test_info get_test_info() const;
 
     uint8_vector get_persistent_ram() const override;
     void set_persistent_ram(const uint8_vector &source) override;

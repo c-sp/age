@@ -1,0 +1,6 @@
+
+#
+# mooneye-gb tests to ignore
+#
+utils/dump_boot_hwio.gb
+

@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_test_runner.hpp"
+#include "age_test_application.hpp"
 
 constexpr const char *arg_type = "type";
 constexpr const char *arg_ignore_list = "ignore-list";
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     validate_arguments(parser);
 
     // create & connect test runner application
-    age::test_runner_application test_runner = {
+    age::test_application test_runner = {
         parser.positionalArguments().at(0),
         parser.value(arg_ignore_list),
         parse_test_type(parser.value(arg_type)).get(age::test_type::screenshot_test)

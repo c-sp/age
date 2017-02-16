@@ -95,11 +95,11 @@ signals:
 
 protected:
 
-    //virtual QString run_test(gb_simulator &emulator) = 0;
+    virtual QString run_test(gb_simulator &emulator) = 0;
 
 private:
 
-    bool load_test_file();
+    QString read_test_file();
 
     const QString m_test_file_name;
     uint8_vector m_test_file;

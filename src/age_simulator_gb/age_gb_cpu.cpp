@@ -688,6 +688,26 @@ age::gb_cpu::gb_cpu(gb_core &core, gb_bus &bus)
 
 
 
+age::gb_test_info age::gb_cpu::get_test_info() const
+{
+    gb_test_info result;
+
+    result.m_is_cgb = m_core.is_cgb();
+    result.m_found_invalid_opcode = m_found_invalid_opcode;
+
+    result.m_a = m_a;
+    result.m_b = m_b;
+    result.m_c = m_c;
+    result.m_d = m_d;
+    result.m_e = m_e;
+    result.m_h = m_h;
+    result.m_l = m_l;
+
+    return result;
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -724,6 +744,11 @@ void age::gb_cpu::simulate_instruction()
 
     switch (opcode)
     {
+        default:
+            m_found_invalid_opcode = true;
+            --m_pc; // stay here
+            break;
+
         // increment & decrement
 
         case 0x04: INC_REG(m_b) break;
