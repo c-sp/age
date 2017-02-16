@@ -28,6 +28,11 @@
 //
 //---------------------------------------------------------
 
+bool age::gb_simulator::is_cgb() const
+{
+    return m_memory.is_cgb();
+}
+
 age::uint8_vector age::gb_simulator::get_persistent_ram() const
 {
     return m_memory.get_persistent_ram();
