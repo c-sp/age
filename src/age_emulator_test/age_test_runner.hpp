@@ -18,6 +18,9 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef AGE_TEST_RUNNER_HPP
+#define AGE_TEST_RUNNER_HPP
+
 //!
 //! \file
 //!
