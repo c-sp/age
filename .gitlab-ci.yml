@@ -24,7 +24,8 @@ variables:
         - "DIR=`mktemp -d` && cd $DIR"
         - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/src/age.pro"
         - make -j 4
-        - cp age_emulator_test/${APP_NAME} ${TEST_APP}
+        - ls -lsah age_emulator_test
+        - cp age_emulator_test/${APP_NAME} ${TEST_DIR}
     artifacts:
         expire_in: 30 mins
         paths:
