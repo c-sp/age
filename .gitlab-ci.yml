@@ -63,12 +63,12 @@ build_release:
         TEST_TYPE: "--type mooneye"
         TEST_PATH: ${GB_REPO_MOONEYE_GB}/tests/build
 
-test_mooneye_debug
+test_mooneye_debug:
     <<: *mooneye_test_preset
     dependencies:
         - build_debug
 
-test_mooneye_release
+test_mooneye_release:
     <<: *mooneye_test_preset
     dependencies:
         - build_release
