@@ -53,6 +53,7 @@ build_release:
 .test: &test_preset
     stage: test
     script:
+        - ll ${TEST_DIR}
         - ${TEST_APP} ${TEST_TYPE} --ignore-list ${TEST_DIR}/tests_to_ignore.txt ${TEST_PATH}
     tags:
         - linux
