@@ -24,7 +24,6 @@ variables:
         - "DIR=`mktemp -d` && cd $DIR"
         - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/src/age.pro"
         - make -j 4
-        - ls -lsah age_emulator_test
         - cp age_emulator_test/${APP_NAME} ${TEST_DIR}
     artifacts:
         expire_in: 30 mins
@@ -42,3 +41,34 @@ build_release:
     <<: *build_preset
     variables:
         QMAKE_ARGUMENTS: "CONFIG+=release"
+
+
+
+############################################################
+##
+##   test
+##
+############################################################
+
+.test: &test_preset
+    stage: test
+    script:
+        - ${TEST_APP} ${TEST_TYPE} --ignore-list ${TEST_DIR}/tests_to_ignore.txt ${TEST_PATH}
+    tags:
+        - linux
+
+.test_mooneye: &mooneye_test_preset
+    <<: *test_preset
+    variables:
+        TEST_TYPE: "--type mooneye"
+        TEST_PATH: ${GB_REPO_MOONEYE_GB}/tests/build
+
+test_mooneye_debug
+    <<: *mooneye_test_preset
+    dependencies:
+        - build_debug
+
+test_mooneye_release
+    <<: *mooneye_test_preset
+    dependencies:
+        - build_release
