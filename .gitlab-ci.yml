@@ -1,22 +1,43 @@
-image: registry.gitlab.com/csprenger/docker-qt-gcc:5.8.r2
+image: registry.gitlab.com/csprenger/docker-age-ci:latest
 
 stages:
     - build
+    - test
 
-build-debug:
+variables:
+    TEST_SUBDIR: testing
+    TEST_DIR:    ${CI_PROJECT_DIR}/${TEST_SUBDIR}
+    APP_NAME:    age_emulator_test
+    TEST_APP:    ${TEST_DIR}/${APP_NAME}
+
+
+
+############################################################
+##
+##   build
+##
+############################################################
+
+.build: &build_preset
     stage: build
     script:
         - "DIR=`mktemp -d` && cd $DIR"
-        - "qmake CONFIG+=debug /builds/csprenger/AGE/src/age.pro"
+        - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/src/age.pro"
         - make -j 4
+        - cp age_emulator_test/${APP_NAME} ${TEST_APP}
+    artifacts:
+        expire_in: 30 mins
+        paths:
+            - ${TEST_SUBDIR}/
     tags:
         - linux
 
-build-release:
-    stage: build
-    script:
-        - "DIR=`mktemp -d` && cd $DIR"
-        - "qmake CONFIG+=release /builds/csprenger/AGE/src/age.pro"
-        - make -j 4
-    tags:
-        - linux
+build_debug:
+    <<: *build_preset
+    variables:
+        QMAKE_ARGUMENTS: "CONFIG+=debug"
+
+build_release:
+    <<: *build_preset
+    variables:
+        QMAKE_ARGUMENTS: "CONFIG+=release"
