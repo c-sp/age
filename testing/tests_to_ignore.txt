@@ -1,6 +1,61 @@
 
 #
-# mooneye-gb tests to ignore
+# mooneye-gb tests currently failing
 #
-utils/dump_boot_hwio.gb
+acceptance/add_sp_e_timing.gb
+acceptance/bits/unused_hwio-GS.gb
+acceptance/boot_hwio-dmg0.gb
+acceptance/boot_hwio-S.gb
+acceptance/boot_regs-dmg0.gb
+acceptance/boot_regs-mgb.gb
+acceptance/boot_regs-sgb.gb
+acceptance/boot_regs-sgb2.gb
+acceptance/call_cc_timing.gb
+acceptance/call_cc_timing2.gb
+acceptance/call_timing.gb
+acceptance/call_timing2.gb
+acceptance/gpu/hblank_ly_scx_timing-GS.gb
+acceptance/gpu/intr_2_0_timing.gb
+acceptance/gpu/intr_2_mode0_timing.gb
+acceptance/gpu/intr_2_mode0_timing_sprites.gb
+acceptance/gpu/intr_2_mode3_timing.gb
+acceptance/gpu/intr_2_oam_ok_timing.gb
+acceptance/gpu/vblank_stat_intr-GS.gb
+acceptance/jp_cc_timing.gb
+acceptance/jp_timing.gb
+acceptance/ld_hl_sp_e_timing.gb
+acceptance/oam_dma_restart.gb
+acceptance/oam_dma_start.gb
+acceptance/oam_dma_timing.gb
+acceptance/push_timing.gb
+acceptance/ret_cc_timing.gb
+acceptance/ret_timing.gb
+acceptance/reti_intr_timing.gb
+acceptance/reti_timing.gb
+acceptance/rst_timing.gb
+acceptance/timer/div_write.gb
+acceptance/timer/rapid_toggle.gb
+acceptance/timer/tim00.gb
+acceptance/timer/tim01_div_trigger.gb
+acceptance/timer/tim10.gb
+acceptance/timer/tim10_div_trigger.gb
+acceptance/timer/tim11.gb
+acceptance/timer/tim11_div_trigger.gb
+acceptance/timer/tima_reload.gb
+acceptance/timer/tima_write_reloading.gb
+acceptance/timer/tma_write_reloading.gb
+misc/bits/unused_hwio-C.gb
+misc/boot_hwio-C.gb
+misc/boot_regs-A.gb
+misc/boot_regs-cgb.gb
+misc/gpu/vblank_stat_intr-C.gb
 
+#
+# mooneye-gb non-test roms
+#
+logic-analysis/external-bus/read_timing/read_timing.gb
+logic-analysis/external-bus/write_timing/write_timing.gb
+logic-analysis/ppu/simple_scx/simple_scx.gb
+madness/mgb_oam_dma_halt_sprites.gb
+manual-only/sprite_priority.gb
+utils/dump_boot_hwio.gb
