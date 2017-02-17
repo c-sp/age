@@ -33,6 +33,11 @@ bool age::gb_simulator::is_cgb() const
     return m_memory.is_cgb();
 }
 
+age::gb_test_info age::gb_simulator::get_test_info() const
+{
+    return m_cpu.get_test_info();
+}
+
 age::uint8_vector age::gb_simulator::get_persistent_ram() const
 {
     return m_memory.get_persistent_ram();

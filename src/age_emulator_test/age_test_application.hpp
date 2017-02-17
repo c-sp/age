@@ -18,14 +18,14 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_TEST_RUNNER_HPP
-#define AGE_TEST_RUNNER_HPP
+#ifndef AGE_TEST_APPLICATION_HPP
+#define AGE_TEST_APPLICATION_HPP
 
 //!
 //! \file
 //!
 
-#include "age_test.hpp"
+#include "age_test_mooneye.hpp"
 
 
 
@@ -41,13 +41,13 @@ enum class test_type : int
 
 
 
-class test_runner_application : public QObject, non_copyable
+class test_application : public QObject, non_copyable
 {
     Q_OBJECT
 public:
 
-    test_runner_application(const QString &test, const QString &ignore_file, test_type type);
-    ~test_runner_application() override;
+    test_application(const QString &test, const QString &ignore_file, test_type type);
+    ~test_application() override;
 
 public slots:
 
@@ -62,10 +62,13 @@ private:
     bool find_files(QSet<QString> &files) const;
     void find_files(const QFileInfo &file_info, QSet<QString> &files) const;
     bool ignore_files(QSet<QString> &files) const;
+    gb_emulator_test* create_test(const QString &test_file) const;
 
-    QString create_message(const QString &test_file, const QString &message) const;
     void exit_app_on_finish();
-    void print_message_list(const QString &first_line, const QStringList &message_list) const;
+
+    QString test_message(const QString &test_file, const QString &message) const;
+    QString number_of_tests_message(QString message, int number_of_tests, int total) const;
+    void print_list(const QString &first_line, const QStringList &message_list) const;
 
     const QRegExp m_test_file_pattern;
     const QString m_test;
@@ -82,4 +85,4 @@ private:
 
 
 
-#endif // AGE_TEST_RUNNER_HPP
+#endif // AGE_TEST_APPLICATION_HPP

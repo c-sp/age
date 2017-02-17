@@ -43,24 +43,19 @@ age::gb_emulator_test::gb_emulator_test(const QString &test_file_name)
 
 void age::gb_emulator_test::run()
 {
-    QString error_cause;
+    // read the test file
+    QString error_cause = read_test_file();
+
+    // run the test, if the test file was sucessfully read
     optional<bool> is_cgb;
-
-    // load test file and create emulator
-    if (!load_test_file())
-    {
-        error_cause = "could not load test file";
-    }
-
-    // run the test
-    else
+    if (error_cause.isEmpty())
     {
         std::shared_ptr<gb_simulator> emulator = std::allocate_shared<gb_simulator>(std::allocator<gb_simulator>(), m_test_file, false);
         is_cgb.set(emulator->is_cgb());
-        //error_cause = run_test(*emulator);
+        error_cause = run_test(*emulator);
     }
 
-    // append a CGB/DMG marker to the test file name if we created an emulator
+    // create a CGB/DMG marker to be used within the result message
     QString gb_type = is_cgb.is_set()
             ? (is_cgb.get(false) ? "(CGB)" : "(DMG)")
             : "";
@@ -84,8 +79,46 @@ void age::gb_emulator_test::run()
 //
 //---------------------------------------------------------
 
-bool age::gb_emulator_test::load_test_file()
+QString age::gb_emulator_test::read_test_file()
 {
-    //! \todo load binary file
-    return true;
+    QString error_message;
+
+    // open the test file
+    QFile file(m_test_file_name);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        error_message = "could not open file";
+    }
+
+    // read the whole test file
+    else
+    {
+        const qint64 bytes_total = file.size();
+        qint64 bytes_read = 0;
+
+        m_test_file = uint8_vector(bytes_total, 0);
+        char *buffer = reinterpret_cast<char*>(m_test_file.data());
+
+        // read until the buffer is filled
+        while (bytes_read < bytes_total)
+        {
+            qint64 remaining = bytes_total - bytes_read;
+            qint64 read = file.read(buffer + bytes_read, remaining);
+
+            // break the loop, if an error occurred
+            if (read < 0)
+            {
+                break;
+            }
+            bytes_read += read;
+        }
+
+        // check if we read everything
+        if (bytes_read < bytes_total)
+        {
+            error_message = "could not read file";
+        }
+    }
+
+    return error_message;
 }
