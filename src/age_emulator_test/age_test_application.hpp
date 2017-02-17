@@ -64,11 +64,11 @@ private:
     bool ignore_files(QSet<QString> &files) const;
     gb_emulator_test* create_test(const QString &test_file) const;
 
+    void exit_app_on_finish();
+
     QString test_message(const QString &test_file, const QString &message) const;
     QString number_of_tests_message(QString message, int number_of_tests, int total) const;
-
-    void exit_app_on_finish();
-    void print_message_list(const QString &first_line, const QStringList &message_list) const;
+    void print_list(const QString &first_line, const QStringList &message_list) const;
 
     const QRegExp m_test_file_pattern;
     const QString m_test;

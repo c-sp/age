@@ -265,7 +265,7 @@ bool age::test_application::ignore_files(QSet<QString> &files) const
 
     // tell the user about ignored files
     ignored_files.sort();
-    print_message_list("ignoring the following file(s):", ignored_files);
+    print_list("ignoring the following file(s):", ignored_files);
 
     return success;
 }
@@ -296,6 +296,30 @@ age::gb_emulator_test* age::test_application::create_test(const QString &test_fi
 
 
 
+void age::test_application::exit_app_on_finish()
+{
+    // if all tests finished, we can exit the application
+    if (m_tests_running.isEmpty())
+    {
+        qInfo("all tests executed");
+
+        // sort results alphabetically for better readability
+        m_pass_messages.sort(Qt::CaseInsensitive);
+        m_fail_messages.sort(Qt::CaseInsensitive);
+
+        // print a test summary
+        int total = m_pass_messages.size() + m_fail_messages.size();
+        print_list(number_of_tests_message("passed", m_pass_messages.size(), total), m_pass_messages);
+        print_list(number_of_tests_message("failed", m_fail_messages.size(), total), m_fail_messages);
+
+        // calculate the return code and trigger exiting the application
+        int return_code = m_fail_messages.isEmpty() ? EXIT_SUCCESS : EXIT_FAILURE;
+        QCoreApplication::exit(return_code);
+    }
+}
+
+
+
 QString age::test_application::test_message(const QString &test_file, const QString &message) const
 {
     // don't append a white space to test_file if there is no message
@@ -320,37 +344,7 @@ QString age::test_application::number_of_tests_message(QString message, int numb
     return result;
 }
 
-
-
-void age::test_application::exit_app_on_finish()
-{
-    // if all tests finished, we can exit the application
-    if (m_tests_running.isEmpty())
-    {
-        qInfo("\rall tests executed                 ");
-
-        // sort results alphabetically for better readability
-        m_pass_messages.sort(Qt::CaseInsensitive);
-        m_fail_messages.sort(Qt::CaseInsensitive);
-
-        // print a test summary
-        int total = m_pass_messages.size() + m_fail_messages.size();
-        print_message_list(number_of_tests_message("passed", m_pass_messages.size(), total), m_pass_messages);
-        print_message_list(number_of_tests_message("failed", m_fail_messages.size(), total), m_fail_messages);
-
-        // calculate the return code and trigger exiting the application
-        int return_code = m_fail_messages.isEmpty() ? EXIT_SUCCESS : EXIT_FAILURE;
-        QCoreApplication::exit(return_code);
-    }
-
-    // if tests are still running, print the current status
-    else
-    {
-        printf("\r%d tests not yet finished          ", m_tests_running.size());
-    }
-}
-
-void age::test_application::print_message_list(const QString &first_line, const QStringList &message_list) const
+void age::test_application::print_list(const QString &first_line, const QStringList &message_list) const
 {
     if (!message_list.isEmpty())
     {

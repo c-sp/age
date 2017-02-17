@@ -32,12 +32,19 @@
 namespace age
 {
 
+//!
+//! \brief A mooneye-gb test runner.
+//!
+//! Mooneye-gb tests usually signal a finished test with an invalid opcode.
+//! The test success can then be verified by checking the contents of Gameboy CPU registers.
+//!
 class gb_emulator_test_mooneye : public gb_emulator_test
 {
     Q_OBJECT
 public:
 
     using gb_emulator_test::gb_emulator_test;
+
     virtual ~gb_emulator_test_mooneye() = default;
 
 protected:

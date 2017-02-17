@@ -2,9 +2,8 @@
 QT += core
 QT -= gui
 
-TARGET = age_simulator_test
+TARGET = age_emulator_test
 TEMPLATE = app
-CONFIG += console
 CONFIG -= app_bundle
 
 DEPENDENCIES = age_simulator_gb age_common
