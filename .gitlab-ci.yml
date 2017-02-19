@@ -50,15 +50,15 @@ build_release:
 
 # we run tests only on the release build since testing
 # the debug build is dead slow on the GitLab CI shared runner
-.test_release: &test_preset_release
+.test_release: &test_preset
     stage: test
     dependencies:
         - build_release
     tags:
         - linux
 
-test_mooneye_release:
-    <<: *test_preset_release
+test_mooneye:
+    <<: *test_preset
     script:
         - sh ${TEST_SUBDIR}/run_mooneye_tests.sh
 
