@@ -5,10 +5,7 @@ stages:
     - test
 
 variables:
-    TEST_SUBDIR: testing
-    TEST_DIR:    ${CI_PROJECT_DIR}/${TEST_SUBDIR}
-    APP_NAME:    age_emulator_test
-    TEST_APP:    ${TEST_DIR}/${APP_NAME}
+    TEST_SUBDIR: test
 
 
 
@@ -24,13 +21,14 @@ variables:
         - "DIR=`mktemp -d` && cd $DIR"
         - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/src/age.pro"
         - make -j 4
-        - cp age_emulator_test/${APP_NAME} ${TEST_DIR}
+        - cp age_emulator_test/age_emulator_test ${CI_PROJECT_DIR}/${TEST_SUBDIR}
     artifacts:
         expire_in: 30 mins
         paths:
             - ${TEST_SUBDIR}/
     tags:
         - linux
+
 
 build_debug:
     <<: *build_preset
@@ -50,26 +48,30 @@ build_release:
 ##
 ############################################################
 
-.test: &test_preset
+.test_debug: &test_preset_debug
     stage: test
-    script:
-        - ls -lsah ${TEST_DIR}
-        - ${TEST_APP} ${TEST_TYPE} --ignore-list ${TEST_DIR}/tests_to_ignore.txt ${TEST_PATH}
+    dependencies:
+        - build_debug
     tags:
         - linux
 
-.test_mooneye: &mooneye_test_preset
-    <<: *test_preset
-    variables:
-        TEST_TYPE: "--type mooneye"
-        TEST_PATH: ${GB_REPO_MOONEYE_GB}/tests/build
-
-test_mooneye_debug:
-    <<: *mooneye_test_preset
-    dependencies:
-        - build_debug
-
-test_mooneye_release:
-    <<: *mooneye_test_preset
+.test_release: &test_preset_release
+    stage: test
     dependencies:
         - build_release
+    tags:
+        - linux
+
+
+.test_mooneye_debug:
+    <<: *test_preset_debug
+    script:
+        - ls -lsah ${TEST_SUBDIR}
+        - sh ${TEST_SUBDIR}/run_mooneye_tests.sh
+
+.test_mooneye_release:
+    <<: *test_preset_release
+    script:
+        - ls -lsah ${TEST_SUBDIR}
+        - sh ${TEST_SUBDIR}/run_mooneye_tests.sh
+
