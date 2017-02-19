@@ -63,13 +63,13 @@ build_release:
         - linux
 
 
-.test_mooneye_debug:
+test_mooneye_debug:
     <<: *test_preset_debug
     script:
         - ls -lsah ${TEST_SUBDIR}
         - sh ${TEST_SUBDIR}/run_mooneye_tests.sh
 
-.test_mooneye_release:
+test_mooneye_release:
     <<: *test_preset_release
     script:
         - ls -lsah ${TEST_SUBDIR}
