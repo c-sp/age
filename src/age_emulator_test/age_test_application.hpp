@@ -75,6 +75,7 @@ private:
     const QString m_ignore_file;
     const test_type m_type;
 
+    std::shared_ptr<test_performance> m_test_performance = nullptr;
     QThreadPool m_thread_pool;
     QSet<QString> m_tests_running;
     QStringList m_pass_messages;

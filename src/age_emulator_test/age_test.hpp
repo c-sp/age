@@ -28,9 +28,12 @@
 // we skip the following includes for doxygen output since they would bloat the include graphs
 //! \cond
 
+#include <atomic>
+
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QRegExp>
@@ -84,6 +87,68 @@ private:
 
 
 //!
+//! \brief A utility class for collection performance information about executed tests.
+//!
+//! With this class the following performance numbers can be collected for executed tests:
+//! - The average, minimal and maximal time spent on file operations (e.g. loading test files).
+//! - The average, minimal and maximal time spent on executing a test.
+//! - The average, minimal and maximal number of ticks emulated for executing a test.
+//! - The average number of ticks emulated per second.
+//!
+//! This class is thread safe.
+//!
+class test_performance
+{
+public:
+
+    void file_loaded(qint64 duration_nanos);
+    void test_emulated(qint64 duration_nanos, uint64 emulated_ticks);
+
+    void print_summary() const;
+
+private:
+
+    template<typename _T>
+    struct measurement
+    {
+        void add_run(_T value)
+        {
+            AGE_ASSERT(value >= 0);
+            ++m_runs;
+            m_sum += value;
+
+            _T old;
+            while ((old = m_min) > value)
+            {
+                if (m_min.compare_exchange_strong(old, value))
+                {
+                    break;
+                }
+            }
+
+            while ((old = m_max) < value)
+            {
+                if (m_max.compare_exchange_strong(old, value))
+                {
+                    break;
+                }
+            }
+        }
+
+        std::atomic<uint> m_runs = {0};
+        std::atomic<_T> m_sum = {0};
+        std::atomic<_T> m_min = {std::numeric_limits<_T>::max()};
+        std::atomic<_T> m_max = {std::numeric_limits<_T>::min()};
+    };
+
+    measurement<qint64> m_file_load_nanos;
+    measurement<qint64> m_emulation_nanos;
+    measurement<uint64> m_emulation_ticks;
+};
+
+
+
+//!
 //! \brief This is the base class for all Gameboy emulator tests.
 //!
 //! The base class will load the test file and create an emulator using that file.
@@ -101,7 +166,7 @@ public:
     //! \brief Construct a gb_emulator_test based on the specified test file.
     //! \param test_file_name The test file to be loaded when running the test.
     //!
-    gb_emulator_test(const QString &test_file_name);
+    gb_emulator_test(const QString &test_file_name, std::shared_ptr<test_performance> performance = nullptr);
 
     virtual ~gb_emulator_test() = default;
 
@@ -145,6 +210,7 @@ private:
     QString read_test_file();
 
     const QString m_test_file_name;
+    std::shared_ptr<test_performance> m_test_performance = nullptr;
     uint8_vector m_test_file;
 };
 
