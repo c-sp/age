@@ -25,6 +25,12 @@ constexpr const char *arg_ignore_list = "ignore-list";
 
 
 
+//---------------------------------------------------------
+//
+//   utility methods used by main()
+//
+//---------------------------------------------------------
+
 age::optional<age::test_type> parse_test_type(const QString &type_string)
 {
     age::optional<age::test_type> result;
@@ -103,6 +109,12 @@ void validate_arguments(QCommandLineParser &parser)
 }
 
 
+
+//---------------------------------------------------------
+//
+//   main method
+//
+//---------------------------------------------------------
 
 int main(int argc, char *argv[])
 {

@@ -22,37 +22,118 @@
 
 
 
+
+
 //---------------------------------------------------------
 //
-//   object creation
+//   test_performance
 //
 //---------------------------------------------------------
 
-age::gb_emulator_test::gb_emulator_test(const QString &test_file_name)
-    : m_test_file_name(test_file_name)
+void age::test_performance::file_loaded(qint64 duration_nanos)
+{
+    if (duration_nanos >= 0)
+    {
+        m_file_load_nanos.add_run(duration_nanos);
+    }
+}
+
+void age::test_performance::test_emulated(qint64 duration_nanos, uint64 emulated_ticks)
+{
+    if ((duration_nanos >= 0) && (emulated_ticks > 0))
+    {
+        m_emulation_nanos.add_run(duration_nanos);
+        m_emulation_ticks.add_run(emulated_ticks);
+    }
+}
+
+
+
+void age::test_performance::print_summary() const
+{
+    qInfo("\nperformance:");
+
+    qInfo("    +----------------------+--------------+--------------+--------------+");
+    qInfo("    |                 task |      average |          min |          max |");
+    qInfo("    +----------------------+--------------+--------------+--------------+");
+
+    qInfo("    | %20s | %12lld | %12lld | %12lld |",
+          "file loading (us)",
+          (m_file_load_nanos.m_sum / m_file_load_nanos.m_runs) / 1000,
+          m_file_load_nanos.m_min / 1000,
+          m_file_load_nanos.m_max / 1000
+          );
+
+    qInfo("    | %20s | %12lld | %12lld | %12lld |",
+          "emulation (us)",
+          (m_emulation_nanos.m_sum / m_emulation_nanos.m_runs) / 1000,
+          m_emulation_nanos.m_min / 1000,
+          m_emulation_nanos.m_max / 1000
+          );
+
+    qInfo("    | %20s | %12lu | %12lu | %12lu |",
+          "emulation (ticks)",
+          m_emulation_ticks.m_sum / m_emulation_ticks.m_runs,
+          m_emulation_ticks.m_min.load(),
+          m_emulation_ticks.m_max.load()
+          );
+
+    qInfo("    +----------------------+--------------+--------------+--------------+");
+
+    qInfo("    %llu emulator ticks per second",
+          m_emulation_ticks.m_sum * 1000000000 / m_emulation_nanos.m_sum
+          );
+}
+
+
+
+
+
+//---------------------------------------------------------
+//
+//   gb_emulator_test
+//
+//---------------------------------------------------------
+
+age::gb_emulator_test::gb_emulator_test(const QString &test_file_name, std::shared_ptr<test_performance> performance)
+    : m_test_file_name(test_file_name),
+      m_test_performance(performance)
 {
 }
 
 
 
-//---------------------------------------------------------
-//
-//   public methods
-//
-//---------------------------------------------------------
-
 void age::gb_emulator_test::run()
 {
+    QElapsedTimer timer;
+
     // read the test file
+    timer.start();
     QString error_cause = read_test_file();
 
-    // run the test, if the test file was sucessfully read
+    // continue only if the file was sucessfully read
     optional<bool> is_cgb;
     if (error_cause.isEmpty())
     {
-        std::shared_ptr<gb_simulator> emulator = std::allocate_shared<gb_simulator>(std::allocator<gb_simulator>(), m_test_file, false);
+        // store the time required for loading the file
+        if (m_test_performance != nullptr)
+        {
+            m_test_performance->file_loaded(timer.nsecsElapsed());
+        }
+
+        // create a new emulator running the test file
+        std::shared_ptr<gb_simulator> emulator = std::make_shared<gb_simulator>(m_test_file, false);
         is_cgb.set(emulator->is_cgb());
+
+        // execute the test
+        timer.start();
         error_cause = run_test(*emulator);
+
+        // store the time required for executing the test
+        if (m_test_performance != nullptr)
+        {
+            m_test_performance->test_emulated(timer.nsecsElapsed(), emulator->get_simulated_ticks());
+        }
     }
 
     // create a CGB/DMG marker to be used within the result message
@@ -72,12 +153,6 @@ void age::gb_emulator_test::run()
 }
 
 
-
-//---------------------------------------------------------
-//
-//   private methods
-//
-//---------------------------------------------------------
 
 QString age::gb_emulator_test::read_test_file()
 {

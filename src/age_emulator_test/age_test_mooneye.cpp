@@ -30,7 +30,8 @@ QString age::gb_emulator_test_mooneye::run_test(gb_simulator &emulator)
     constexpr uint max_cycles = gb_cycles_per_second * 120;
 
     // run the test
-    for (uint cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
+    uint cycles;
+    for (cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
     {
         emulator.simulate(cycles_per_step);
 

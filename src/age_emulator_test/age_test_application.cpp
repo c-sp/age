@@ -22,6 +22,8 @@
 
 
 
+
+
 //---------------------------------------------------------
 //
 //   object creation & destruction
@@ -34,6 +36,7 @@ age::test_application::test_application(const QString &test, const QString &igno
       m_ignore_file(ignore_file),
       m_type(type)
 {
+    m_test_performance = std::make_shared<test_performance>();
 }
 
 age::test_application::~test_application()
@@ -279,7 +282,7 @@ age::gb_emulator_test* age::test_application::create_test(const QString &test_fi
     switch(m_type)
     {
         case test_type::mooneye_test:
-            result = new gb_emulator_test_mooneye(test_file);
+            result = new gb_emulator_test_mooneye(test_file, m_test_performance);
             break;
 
         case test_type::gambatte_test:
@@ -311,6 +314,7 @@ void age::test_application::exit_app_on_finish()
         int total = m_pass_messages.size() + m_fail_messages.size();
         print_list(number_of_tests_message("passed", m_pass_messages.size(), total), m_pass_messages);
         print_list(number_of_tests_message("failed", m_fail_messages.size(), total), m_fail_messages);
+        m_test_performance->print_summary();
 
         // calculate the return code and trigger exiting the application
         int return_code = m_fail_messages.isEmpty() ? EXIT_SUCCESS : EXIT_FAILURE;

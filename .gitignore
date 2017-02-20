@@ -2,3 +2,5 @@
 doxygen/*out/*
 Thumbs.db
 build*
+test/age_emulator_test
+

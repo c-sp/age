@@ -1,22 +1,64 @@
-image: registry.gitlab.com/csprenger/docker-qt-gcc:5.8.r2
+image: registry.gitlab.com/csprenger/docker-age-ci:latest
 
 stages:
     - build
+    - test
 
-build-debug:
+variables:
+    TEST_SUBDIR: test
+
+
+
+############################################################
+##
+##   build
+##
+############################################################
+
+.build: &build_preset
     stage: build
     script:
         - "DIR=`mktemp -d` && cd $DIR"
-        - "qmake CONFIG+=debug /builds/csprenger/AGE/src/age.pro"
+        - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/src/age.pro"
         - make -j 4
+        - cp age_emulator_test/age_emulator_test ${CI_PROJECT_DIR}/${TEST_SUBDIR}
+    artifacts:
+        expire_in: 30 mins
+        paths:
+            - ${TEST_SUBDIR}/
     tags:
         - linux
 
-build-release:
-    stage: build
-    script:
-        - "DIR=`mktemp -d` && cd $DIR"
-        - "qmake CONFIG+=release /builds/csprenger/AGE/src/age.pro"
-        - make -j 4
+
+build_debug:
+    <<: *build_preset
+    variables:
+        QMAKE_ARGUMENTS: "CONFIG+=debug"
+
+build_release:
+    <<: *build_preset
+    variables:
+        QMAKE_ARGUMENTS: "CONFIG+=release"
+
+
+
+############################################################
+##
+##   test
+##
+############################################################
+
+# we run tests only on the release build since testing
+# the debug build is dead slow on the GitLab CI shared runner
+.test_release: &test_preset
+    stage: test
+    dependencies:
+        - build_release
     tags:
         - linux
+
+test_mooneye:
+    <<: *test_preset
+    script:
+        - sh ${TEST_SUBDIR}/ci_run_mooneye_tests.sh
+
