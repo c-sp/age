@@ -41,7 +41,6 @@ QString age::gb_emulator_test_mooneye::run_test(gb_simulator &emulator)
             break;
         }
     }
-    AGE_LOG(emulator.get_simulated_ticks() << " = " << cycles);
 
     // evaluate the test result
     gb_test_info info = emulator.get_test_info();
