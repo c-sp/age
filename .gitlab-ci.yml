@@ -60,5 +60,5 @@ build_release:
 test_mooneye:
     <<: *test_preset
     script:
-        - sh ${TEST_SUBDIR}/run_mooneye_tests.sh
+        - sh ${TEST_SUBDIR}/ci_run_mooneye_tests.sh
 
