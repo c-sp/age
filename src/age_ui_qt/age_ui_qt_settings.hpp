@@ -89,7 +89,7 @@ public:
 
     qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, GLint max_texture_size, QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
-    void set_simulator_screen_size(GLint width, GLint height);
+    void set_emulator_screen_size(GLint width, GLint height);
 
     void toggle_filter_chain();
     void toggle_bilinear_filter();
@@ -127,8 +127,8 @@ private:
 
     std::shared_ptr<qt_user_value_store> m_user_value_store;
 
-    GLint m_simulator_screen_width = 0;
-    GLint m_simulator_screen_height = 0;
+    GLint m_emulator_screen_width = 0;
+    GLint m_emulator_screen_height = 0;
     const GLint m_max_texture_size;
 
     QCheckBox *m_use_filter_chain = nullptr;
@@ -302,15 +302,15 @@ public:
     bool show_menu_bar(bool fullscreen) const;
     bool show_status_bar(bool fullscreen) const;
 
-    void toggle_pause_simulation();
-    void toggle_synchronize_simulation();
-    void set_pause_simulation(bool pause_simulation);
+    void toggle_pause_emulator();
+    void toggle_synchronize_emulator();
+    void set_pause_emulator(bool pause_emulator);
     void emit_settings_signals();
 
 signals:
 
-    void pause_simulation_changed(bool pause_simulation);
-    void synchronize_simulation_changed(bool synchronize_simulation);
+    void pause_emulator_changed(bool pause_emulator);
+    void synchronize_emulator_changed(bool synchronize_emulator);
 
     void show_menu_bar_changed(bool show_menu_bar);
     void show_status_bar_changed(bool show_status_bar);
@@ -319,8 +319,8 @@ signals:
 
 private slots:
 
-    void pause_simulation_changed(int state);
-    void synchronize_simulation_changed(int state);
+    void pause_emulator_changed(int state);
+    void synchronize_emulator_changed(int state);
 
     void show_menu_bar_changed(int state);
     void show_status_bar_changed(int state);
@@ -331,8 +331,8 @@ private:
 
     std::shared_ptr<qt_user_value_store> m_user_value_store;
 
-    QCheckBox *m_pause_simulation = nullptr;
-    QCheckBox *m_synchronize_simulation = nullptr;
+    QCheckBox *m_pause_emulator = nullptr;
+    QCheckBox *m_synchronize_emulator = nullptr;
 
     QCheckBox *m_show_menu_bar = nullptr;
     QCheckBox *m_show_status_bar = nullptr;
@@ -363,8 +363,8 @@ public:
     bool show_status_bar(bool fullscreen) const;
 
     void set_open_file_dialog_directory(const QString &directory);
-    void set_simulator_screen_size(GLint width, GLint height);
-    void set_pause_simulation(bool pause_simulation);
+    void set_emulator_screen_size(GLint width, GLint height);
+    void set_pause_emulator(bool pause_emulator);
 
     bool trigger_settings_event(qt_key_event event);
     void emit_settings_signals();
@@ -380,8 +380,8 @@ signals:
     void audio_latency_changed(int latency_milliseconds);
     void audio_downsampler_quality_changed(age::qt_downsampler_quality quality);
 
-    void misc_pause_simulation_changed(bool pause_simulation);
-    void misc_synchronize_simulation_changed(bool synchronize_simulation);
+    void misc_pause_emulator_changed(bool pause_emulator);
+    void misc_synchronize_emulator_changed(bool synchronize_emulator);
     void misc_show_menu_bar_changed(bool show_menu_bar);
     void misc_show_status_bar_changed(bool show_status_bar);
     void misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen);
@@ -409,8 +409,8 @@ private slots:
     void emit_audio_latency_changed(int latency_milliseconds);
     void emit_audio_downsampler_quality_changed(age::qt_downsampler_quality quality);
 
-    void emit_misc_pause_simulation_changed(bool pause_simulation);
-    void emit_misc_synchronize_simulation_changed(bool synchronize_simulation);
+    void emit_misc_pause_emulator_changed(bool pause_emulator);
+    void emit_misc_synchronize_emulator_changed(bool synchronize_emulator);
     void emit_misc_show_menu_bar_changed(bool show_menu_bar);
     void emit_misc_show_status_bar_changed(bool show_status_bar);
     void emit_misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen);

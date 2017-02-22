@@ -40,18 +40,18 @@ age::qt_settings_miscellaneous::qt_settings_miscellaneous(std::shared_ptr<qt_use
     : QWidget(parent, flags),
       m_user_value_store(user_value_store)
 {
-    // simulation
+    // emulation
 
-    m_pause_simulation = new QCheckBox("pause simulation");
-    m_synchronize_simulation = new QCheckBox("synchronize simulation to clock");
+    m_pause_emulator = new QCheckBox("pause emulator");
+    m_synchronize_emulator = new QCheckBox("synchronize emulator to clock");
 
-    QVBoxLayout *simulation_layout = new QVBoxLayout;
-    simulation_layout->setAlignment(Qt::AlignCenter);
-    simulation_layout->addWidget(m_pause_simulation);
-    simulation_layout->addWidget(m_synchronize_simulation);
+    QVBoxLayout *emulator_layout = new QVBoxLayout;
+    emulator_layout->setAlignment(Qt::AlignCenter);
+    emulator_layout->addWidget(m_pause_emulator);
+    emulator_layout->addWidget(m_synchronize_emulator);
 
-    QGroupBox *simulation_group = new QGroupBox("simulation");
-    simulation_group->setLayout(simulation_layout);
+    QGroupBox *emulator_group = new QGroupBox("emulator");
+    emulator_group->setLayout(emulator_layout);
 
     // window elements
 
@@ -76,14 +76,14 @@ age::qt_settings_miscellaneous::qt_settings_miscellaneous(std::shared_ptr<qt_use
     QGridLayout *layout = new QGridLayout;
     layout->setContentsMargins(qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin);
     layout->setSpacing(qt_settings_layout_spacing);
-    layout->addWidget(simulation_group, 0, 0);
+    layout->addWidget(emulator_group, 0, 0);
     layout->addWidget(window_group, 1, 0);
     setLayout(layout);
 
     // connect signals to slots
 
-    connect(m_pause_simulation, SIGNAL(stateChanged(int)), this, SLOT(pause_simulation_changed(int)));
-    connect(m_synchronize_simulation, SIGNAL(stateChanged(int)), this, SLOT(synchronize_simulation_changed(int)));
+    connect(m_pause_emulator, SIGNAL(stateChanged(int)), this, SLOT(pause_emulator_changed(int)));
+    connect(m_synchronize_emulator, SIGNAL(stateChanged(int)), this, SLOT(synchronize_emulator_changed(int)));
     connect(m_show_menu_bar, SIGNAL(stateChanged(int)), this, SLOT(show_menu_bar_changed(int)));
     connect(m_show_status_bar, SIGNAL(stateChanged(int)), this, SLOT(show_status_bar_changed(int)));
     connect(m_show_menu_bar_fullscreen, SIGNAL(stateChanged(int)), this, SLOT(show_menu_bar_fullscreen_changed(int)));
@@ -91,8 +91,8 @@ age::qt_settings_miscellaneous::qt_settings_miscellaneous(std::shared_ptr<qt_use
 
     // set values from config
 
-    m_pause_simulation->setChecked(m_user_value_store->get_value(qt_settings_misc_pause_simulation, false).toBool());
-    m_synchronize_simulation->setChecked(m_user_value_store->get_value(qt_settings_misc_synchronize_simulation, true).toBool());
+    m_pause_emulator->setChecked(m_user_value_store->get_value(qt_settings_misc_pause_emulator, false).toBool());
+    m_synchronize_emulator->setChecked(m_user_value_store->get_value(qt_settings_misc_synchronize_emulator, true).toBool());
     m_show_menu_bar->setChecked(m_user_value_store->get_value(qt_settings_misc_menu_bar, true).toBool());
     m_show_status_bar->setChecked(m_user_value_store->get_value(qt_settings_misc_status_bar, true).toBool());
     m_show_menu_bar_fullscreen->setChecked(m_user_value_store->get_value(qt_settings_misc_menu_bar_fullscreen, true).toBool());
@@ -125,27 +125,27 @@ bool age::qt_settings_miscellaneous::show_status_bar(bool fullscreen) const
 
 
 
-void age::qt_settings_miscellaneous::toggle_pause_simulation()
+void age::qt_settings_miscellaneous::toggle_pause_emulator()
 {
-    m_pause_simulation->toggle();
+    m_pause_emulator->toggle();
 }
 
-void age::qt_settings_miscellaneous::toggle_synchronize_simulation()
+void age::qt_settings_miscellaneous::toggle_synchronize_emulator()
 {
-    m_synchronize_simulation->toggle();
+    m_synchronize_emulator->toggle();
 }
 
-void age::qt_settings_miscellaneous::set_pause_simulation(bool pause_simulation)
+void age::qt_settings_miscellaneous::set_pause_emulator(bool pause_emulator)
 {
-    m_pause_simulation->setChecked(pause_simulation);
+    m_pause_emulator->setChecked(pause_emulator);
 }
 
 void age::qt_settings_miscellaneous::emit_settings_signals()
 {
     LOG("emitting settings signals");
 
-    emit pause_simulation_changed(m_pause_simulation->isChecked());
-    emit synchronize_simulation_changed(m_synchronize_simulation->isChecked());
+    emit pause_emulator_changed(m_pause_emulator->isChecked());
+    emit synchronize_emulator_changed(m_synchronize_emulator->isChecked());
     emit show_menu_bar_changed(m_show_menu_bar->isChecked());
     emit show_status_bar_changed(m_show_status_bar->isChecked());
     emit show_menu_bar_fullscreen_changed(m_show_menu_bar_fullscreen->isChecked());
@@ -162,22 +162,22 @@ void age::qt_settings_miscellaneous::emit_settings_signals()
 //
 //---------------------------------------------------------
 
-void age::qt_settings_miscellaneous::pause_simulation_changed(int state)
+void age::qt_settings_miscellaneous::pause_emulator_changed(int state)
 {
     bool checked = is_checked(state);
-    m_user_value_store->set_value(qt_settings_misc_pause_simulation, checked);
+    m_user_value_store->set_value(qt_settings_misc_pause_emulator, checked);
 
     LOG(checked);
-    emit pause_simulation_changed(checked);
+    emit pause_emulator_changed(checked);
 }
 
-void age::qt_settings_miscellaneous::synchronize_simulation_changed(int state)
+void age::qt_settings_miscellaneous::synchronize_emulator_changed(int state)
 {
     bool checked = is_checked(state);
-    m_user_value_store->set_value(qt_settings_misc_synchronize_simulation, checked);
+    m_user_value_store->set_value(qt_settings_misc_synchronize_emulator, checked);
 
     LOG(checked);
-    emit synchronize_simulation_changed(checked);
+    emit synchronize_emulator_changed(checked);
 }
 
 void age::qt_settings_miscellaneous::show_menu_bar_changed(int state)

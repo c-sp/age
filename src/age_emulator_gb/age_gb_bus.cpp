@@ -404,12 +404,12 @@ void age::gb_bus::write_byte(uint16 address, uint8 byte)
 
 void age::gb_bus::handle_events()
 {
-    // simulate outstanding LCD events
+    // emulate outstanding LCD events
     //  - during mode 3 we do this more or less for every single cycle,
     //    scheduling events for this would be too much effort
     //  - do this before handling the LYC event, since the latter
     //    requires an up-to-date LCD state
-    m_lcd.simulate();
+    m_lcd.emulate();
 
     // handle outstanding events
     gb_event event;
@@ -448,7 +448,7 @@ void age::gb_bus::handle_events()
         }
     }
 
-    // simulate DMA, if necessary
+    // emulate DMA, if necessary
     if (m_oam_dma_active)
     {
         handle_oam_dma();

@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_UI_QT_SIMULATOR_HPP
-#define AGE_UI_QT_SIMULATOR_HPP
+#ifndef AGE_UI_QT_EMULATOR_HPP
+#define AGE_UI_QT_EMULATOR_HPP
 
 //!
 //! \file
@@ -33,14 +33,14 @@
 namespace age
 {
 
-class qt_simulator
+class qt_emulator
 {
 public:
 
-    qt_simulator(const QByteArray &rom, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store);
-    ~qt_simulator();
+    qt_emulator(const QByteArray &rom, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store);
+    ~qt_emulator();
 
-    std::shared_ptr<simulator> get_simulator();
+    std::shared_ptr<emulator> get_emulator();
 
 private:
 
@@ -48,7 +48,7 @@ private:
     static uint8_vector to_vector(const QByteArray &byte_array);
 
     QString m_ram_key;
-    std::shared_ptr<simulator> m_simulator;
+    std::shared_ptr<emulator> m_emulator;
     std::shared_ptr<qt_user_value_store> m_user_value_store;
 };
 
@@ -56,4 +56,4 @@ private:
 
 
 
-#endif // AGE_UI_QT_SIMULATOR_HPP
+#endif // AGE_UI_QT_EMULATOR_HPP

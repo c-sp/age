@@ -44,7 +44,7 @@ public:
     GLint get_max_texture_size() const;
     uint get_fps() const;
 
-    void set_simulator_screen_size(uint width, uint height);
+    void set_emulator_screen_size(uint width, uint height);
     void add_video_frame(const pixel_vector &new_video_frame);
     void set_blend_video_frames(uint num_video_frames_to_blend);
     void set_filter_chain(const qt_filter_vector &filter_chain);

@@ -22,10 +22,10 @@
 
 
 
-age::test_result age::create_gb_test_result(const gb_simulator &emulator, const QString &error_message)
+age::test_result age::create_gb_test_result(const gb_emulator &emulator, const QString &error_message)
 {
     age::test_result result;
-    result.m_cycles_emulated = emulator.get_simulated_ticks();
+    result.m_cycles_emulated = emulator.get_emulated_ticks();
     result.m_error_message = error_message;
     result.m_additional_message = emulator.is_cgb() ? "(CGB)" : "(DMG)";
     return result;
@@ -48,12 +48,12 @@ age::test_method age::mooneye_test_method()
         constexpr uint max_cycles = gb_cycles_per_second * 120;
 
         // create emulator
-        std::shared_ptr<gb_simulator> emulator = std::make_shared<gb_simulator>(test_rom, false);
+        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, false);
 
         // run the test
         for (uint cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
         {
-            emulator->simulate(cycles_per_step);
+            emulator->emulate(cycles_per_step);
             // if an invalid opcode was encountered, the test is finished
             if (emulator->get_test_info().m_found_invalid_opcode)
             {

@@ -126,7 +126,7 @@ void age::gb_lcd::write_lcdc(uint8 value)
             uint8 not_delayed = (old_lcdc & ~not_delayed_bits) | (value & not_delayed_bits);
             gb_lcd_ppu::write_lcdc(not_delayed);
 
-            simulate(m_core.get_oscillation_cycle() + 1);
+            emulate(m_core.get_oscillation_cycle() + 1);
         }
     }
 
@@ -570,7 +570,7 @@ void age::gb_lcd::write_scx(uint8 value)
     //
     if (m_cgb)
     {
-        simulate(m_core.get_oscillation_cycle() + 1);
+        emulate(m_core.get_oscillation_cycle() + 1);
     }
 
     gb_lcd_ppu::write_scx(value);
@@ -596,7 +596,7 @@ void age::gb_lcd::write_scy(uint8 value)
     //
     if (m_cgb)
     {
-        simulate(m_core.get_oscillation_cycle() + 1);
+        emulate(m_core.get_oscillation_cycle() + 1);
     }
 
     gb_lcd_ppu::write_scy(value);
@@ -619,7 +619,7 @@ void age::gb_lcd::write_wx(uint8 value)
     //      window/late_wx_ds_2_out3
     //
     LOG((uint)value);
-    simulate(m_core.get_oscillation_cycle() + 1);
+    emulate(m_core.get_oscillation_cycle() + 1);
     gb_lcd_ppu::write_wx(value);
 }
 
@@ -636,7 +636,7 @@ void age::gb_lcd::write_wy(uint8 value)
     //      window/late_wy_ffto2_ly2_scx5_1_dmg08_cgb_out3
     //
     LOG((uint)value);
-    simulate(m_core.get_oscillation_cycle() + 1);
+    emulate(m_core.get_oscillation_cycle() + 1);
     gb_lcd_ppu::write_wy(value);
     write_late_wy();
 

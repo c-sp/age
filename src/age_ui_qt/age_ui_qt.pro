@@ -4,7 +4,7 @@ QT += core gui widgets opengl multimedia
 TARGET = age
 TEMPLATE = app
 
-DEPENDENCIES = age_common age_simulator_gb age_ui_common
+DEPENDENCIES = age_common age_emulator_gb age_ui_common
 include($$PWD/../age.pri)
 
 
@@ -34,9 +34,9 @@ SOURCES += \
     age_ui_qt_settings_keys.cpp \
     age_ui_qt_settings_miscellaneous.cpp \
     age_ui_qt_settings_video.cpp \
-    age_ui_qt_simulation_runner.cpp \
-    age_ui_qt_simulator.cpp \
-    age_ui_qt_user_value_store.cpp
+    age_ui_qt_user_value_store.cpp \
+    age_ui_qt_emulator.cpp \
+    age_ui_qt_emulation_runner.cpp
 
 HEADERS  += \
     age_ui_qt.hpp \
@@ -44,6 +44,6 @@ HEADERS  += \
     age_ui_qt_gl_renderer.hpp \
     age_ui_qt_main_window.hpp \
     age_ui_qt_settings.hpp \
-    age_ui_qt_simulation_runner.hpp \
-    age_ui_qt_simulator.hpp \
-    age_ui_qt_user_value_store.hpp
+    age_ui_qt_user_value_store.hpp \
+    age_ui_qt_emulation_runner.hpp \
+    age_ui_qt_emulator.hpp

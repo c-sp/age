@@ -330,89 +330,89 @@ private:
 
 //---------------------------------------------------------
 //
-//   simulator base class
+//   emulator base class
 //
 //---------------------------------------------------------
 
 //!
-//! \brief This is the simulator base class. Every simulator derives from it.
+//! \brief This is the emulator base class. Every emulator derives from it.
 //!
-class simulator : public non_copyable
+class emulator : public non_copyable
 {
 public:
 
-    virtual ~simulator() = default;
+    virtual ~emulator() = default;
 
     //!
-    //! \brief Get a human readable title for this simulator.
+    //! \brief Get a human readable title for this emulator.
     //!
     //! The title is for informational purposes only and may depend on what ever data
-    //! has been loaded into the simulator.
+    //! has been loaded into the emulator.
     //! E.g. for gameboy cartridges the cartridge title is returned.
-    //! A title is made of up to 32 characters and may also be empty.
+    //! A title is made of up to 32 characters and may be empty.
     //! It contains only the following characters:
     //! - a-z
     //! - A-Z
     //! - 0-9
     //! - _ (underscore)
     //!
-    //! \return A human readable title for this simulator.
+    //! \return A human readable title for this emulator.
     //!
-    std::string get_simulator_title() const;
+    std::string get_emulator_title() const;
 
     //!
-    //! \return The native screen width in pixel of the simulated device. The returned value will be >0.
+    //! \return The native screen width in pixel of the emulated device. The returned value will be >0.
     //!
     uint get_screen_width() const;
 
     //!
-    //! \return The native screen height in pixel of the simulated device. The returned value will be >0.
+    //! \return The native screen height in pixel of the emulated device. The returned value will be >0.
     //!
     uint get_screen_height() const;
 
     //!
-    //! \return The current video front buffer containing the simulated device's screen.
+    //! \return The current video front buffer containing the emulated device's screen.
     //!
     const pixel_vector& get_video_front_buffer() const;
 
     //!
-    //! Get the vector of {@link lpcm_stereo_sample}s calculated by the last call to simulate().
-    //! You will have to handle these frames before the next call to simulate(),
+    //! Get the vector of {@link lpcm_stereo_sample}s calculated by the last call to emulate().
+    //! You will have to handle these frames before the next call to emulate(),
     //! because the latter will discard the audio buffer'S old contents.
     //! To use the returned PCM data for audio playback, the data should be resampled.
     //!
-    //! \return The LPCM samples calculated by the last call to simulate().
+    //! \return The LPCM samples calculated by the last call to emulate().
     //!
     const pcm_vector& get_audio_buffer() const;
 
     //!
-    //! Get the sampling rate of the PCM data calculated by this simulator.
+    //! Get the sampling rate of the PCM data calculated by this emulator.
     //! The sampling rate is expected to be constant.
     //! Note that the returned values is not necessarily one of the common sampling rates
     //! like 44100 or 48000 and may even be in the MHz range.
     //! The returned value will be greater than zero.
     //!
-    //! \return The sampling rate of the PCM data calculated by this simulator.
+    //! \return The sampling rate of the PCM data calculated by this emulator.
     //!
     uint get_pcm_sampling_rate() const;
 
     uint get_ticks_per_second() const;
-    uint64 get_simulated_ticks() const;
+    uint64 get_emulated_ticks() const;
 
     //!
-    //! Get a copy of this simulator's persistent ram.
+    //! Get a copy of this emulator's persistent ram.
     //! You may want to save this ram to some file to reuse it some other time.
-    //! If this simulator does not contain any persistent ram, the returned vector is empty.
+    //! If this emulator does not contain any persistent ram, the returned vector is empty.
     //!
-    //! \return A vector containing this simulator's persistent ram.
+    //! \return A vector containing this emulator's persistent ram.
     //!
     virtual uint8_vector get_persistent_ram() const = 0;
 
     //!
-    //! \brief Set the contents of this simulator's persistent ram.
+    //! \brief Set the contents of this emulator's persistent ram.
     //!
     //! The persistent ram is set to the contents of the specified vector.
-    //! If this simulator does not have any persistent ram, this method has no effect.
+    //! If this emulator does not have any persistent ram, this method has no effect.
     //! If the specified vector is bigger than the persistent ram, only the first bytes are copied.
     //! If the specified vector is smaller than the persistent ram, the gap is filled with zeroes.
     //!
@@ -423,18 +423,18 @@ public:
     virtual void set_buttons_down(uint buttons) = 0;
     virtual void set_buttons_up(uint buttons) = 0;
 
-    bool simulate(uint64 min_ticks_to_simulate);
+    bool emulate(uint64 min_ticks_to_emulate);
 
 protected:
 
-    simulator(uint screen_width, uint screen_height, uint sampling_rate, uint ticks_per_second);
+    emulator(uint screen_width, uint screen_height, uint sampling_rate, uint ticks_per_second);
 
     video_buffer_handler& get_video_buffer_handler();
     pcm_vector& get_pcm_vector();
 
-    virtual uint64 inner_simulate(uint64 min_ticks_to_simulate) = 0;
+    virtual uint64 inner_emulate(uint64 min_ticks_to_emulate) = 0;
 
-    virtual std::string inner_get_simulator_title() const = 0;
+    virtual std::string inner_get_emulator_title() const = 0;
 
 private:
 
@@ -443,7 +443,7 @@ private:
 
     video_buffer_handler m_video_buffer_handler;
     pcm_vector m_audio_buffer;
-    uint64 m_simulated_ticks = 0;
+    uint64 m_emulated_ticks = 0;
 };
 
 

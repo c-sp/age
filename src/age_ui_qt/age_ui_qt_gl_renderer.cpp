@@ -121,7 +121,7 @@ age::uint age::qt_gl_renderer::get_fps() const
 //
 //---------------------------------------------------------
 
-void age::qt_gl_renderer::set_simulator_screen_size(uint width, uint height)
+void age::qt_gl_renderer::set_emulator_screen_size(uint width, uint height)
 {
     AGE_ASSERT(width > 0);
     AGE_ASSERT(height > 0);
@@ -133,7 +133,7 @@ void age::qt_gl_renderer::set_simulator_screen_size(uint width, uint height)
         m_events.m_screen_width = static_cast<GLuint>(width);
         m_events.m_screen_height = static_cast<GLuint>(height);
     };
-    locked_flag_operation<uint, uint>(tmp, qt_renderer_change_simulator_screen_size, width, height);
+    locked_flag_operation<uint, uint>(tmp, qt_renderer_change_emulator_screen_size, width, height);
 }
 
 void age::qt_gl_renderer::set_blend_video_frames(uint num_frames_to_blend)
@@ -358,7 +358,7 @@ void age::qt_gl_renderer::process_events(events &eve, video_frame_manager &frame
     }
 
     // screen size changed -> update frame texture size
-    if (eve.is_flagged(qt_renderer_change_simulator_screen_size))
+    if (eve.is_flagged(qt_renderer_change_emulator_screen_size))
     {
         frame_manager.set_frame_size(eve.m_screen_width, eve.m_screen_height);
         eve.m_flags |= qt_renderer_change_viewport; // we have to calculate a new viewport now

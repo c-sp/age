@@ -58,8 +58,8 @@ age::qt_settings_keys::qt_settings_keys(std::shared_ptr<qt_user_value_store> use
                          std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, "audio settings"),
                          std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, "audio settings"),
 
-                         std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_simulation, "miscellaneous settings"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_simulation, "miscellaneous settings")
+                         std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "miscellaneous settings"),
+                         std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "miscellaneous settings")
                          }),
 
       m_event_strings({
@@ -80,8 +80,8 @@ age::qt_settings_keys::qt_settings_keys(std::shared_ptr<qt_user_value_store> use
                       std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, "increase volume"),
                       std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, "decrease volume"),
 
-                      std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_simulation, "toggle pause simulation"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_simulation, "toggle synchronize simulation clock")
+                      std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "toggle pause emulator"),
+                      std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "toggle synchronize emulator clock")
                       }),
 
       m_event_setting_strings({
@@ -102,8 +102,8 @@ age::qt_settings_keys::qt_settings_keys(std::shared_ptr<qt_user_value_store> use
                               std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, qt_settings_keys_audio_increase_volume),
                               std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, qt_settings_keys_audio_decrease_volume),
 
-                              std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_simulation, qt_settings_keys_misc_toggle_pause_simulation),
-                              std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_simulation, qt_settings_keys_misc_toggle_synchronize_simulation)
+                              std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, qt_settings_keys_misc_toggle_pause_emulator),
+                              std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, qt_settings_keys_misc_toggle_synchronize_emulator)
                               }),
 
       m_allowed_keys({
@@ -219,10 +219,10 @@ age::qt_settings_keys::qt_settings_keys(std::shared_ptr<qt_user_value_store> use
     // miscellaneous keys
 
     QGridLayout *misc_keys_layout = new QGridLayout;
-    add_key_widgets(misc_keys_layout, 0, qt_key_event::misc_toggle_pause_simulation, Qt::Key_F9);
-    add_key_widgets(misc_keys_layout, 1, qt_key_event::misc_toggle_synchronize_simulation, Qt::Key_F10);
+    add_key_widgets(misc_keys_layout, 0, qt_key_event::misc_toggle_pause_emulator, Qt::Key_F9);
+    add_key_widgets(misc_keys_layout, 1, qt_key_event::misc_toggle_synchronize_emulator, Qt::Key_F10);
 
-    const char *misc_cagegory = m_category_strings.value(qt_key_event::misc_toggle_pause_simulation);
+    const char *misc_cagegory = m_category_strings.value(qt_key_event::misc_toggle_pause_emulator);
     QGroupBox *misc_keys_group = new QGroupBox(misc_cagegory);
     misc_keys_group->setLayout(misc_keys_layout);
 

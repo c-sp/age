@@ -232,7 +232,7 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 
 
 
-bool evaluate_out_string_result(const age::gb_simulator &emulator, const age::uint8_vector &expected_result)
+bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uint8_vector &expected_result)
 {
     const age::pixel_vector &screen = emulator.get_video_front_buffer();
 
@@ -279,8 +279,8 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
     return [=](const age::uint8_vector &test_rom) {
 
         // create emulator & run test
-        std::shared_ptr<age::gb_simulator> emulator = std::make_shared<age::gb_simulator>(test_rom, force_dmg);
-        emulator->simulate(test_cycles);
+        std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, force_dmg);
+        emulator->emulate(test_cycles);
 
         // evaluate test result
         bool pass = evaluate_out_string_result(*emulator, out_string);
@@ -333,8 +333,8 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
     return [=](const age::uint8_vector &test_rom) {
 
         // create emulator & run test
-        std::shared_ptr<age::gb_simulator> emulator = std::make_shared<age::gb_simulator>(test_rom, force_dmg);
-        emulator->simulate(test_cycles);
+        std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, force_dmg);
+        emulator->emulate(test_cycles);
 
         // evaluate test result by checking the first gb_cycles_per_frame
         // pcm samples for equality

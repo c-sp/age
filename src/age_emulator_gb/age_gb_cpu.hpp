@@ -57,7 +57,7 @@ class gb_cpu : public non_copyable
 {
 public:
 
-    void simulate_instruction();
+    void emulate_instruction();
 
     gb_cpu(gb_core &core, gb_bus &bus);
 

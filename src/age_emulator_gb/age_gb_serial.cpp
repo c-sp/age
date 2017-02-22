@@ -103,11 +103,11 @@ void age::gb_serial::write_sc(uint8 value)
 
 //---------------------------------------------------------
 //
-//   Serial i/o simulation.
+//   Serial i/o emulation.
 //
 //---------------------------------------------------------
 
-void age::gb_serial::simulate(uint cycles_elapsed)
+void age::gb_serial::emulate(uint cycles_elapsed)
 {
     // perform serial transfer with internal clock
     if (m_state == gb_serial_state::during_transfer_internal)

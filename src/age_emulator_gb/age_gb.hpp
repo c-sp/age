@@ -162,7 +162,7 @@ constexpr uint8 gb_tile_attribute_priority = 0x80;
 
 // sound
 
-constexpr uint gb_sample_cycle_shift = 1; // 2097152 samples per second for easier simulation (will be downsampled later on)
+constexpr uint gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
 constexpr uint gb_sampling_rate = gb_cycles_per_second >> gb_sample_cycle_shift;
 constexpr uint gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
 constexpr uint gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);

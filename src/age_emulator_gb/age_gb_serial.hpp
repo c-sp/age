@@ -52,7 +52,7 @@ public:
     void write_sb(uint8 value);
     void write_sc(uint8 value);
 
-    void simulate(uint cycles_elapsed);
+    void emulate(uint cycles_elapsed);
     void switch_double_speed_mode();
 
     gb_serial(gb_core &core);

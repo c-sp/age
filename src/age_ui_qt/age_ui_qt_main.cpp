@@ -22,7 +22,7 @@
 
 // allow special types to be used as event parameter
 // (e.g. for connecting signals and slots with that parameter across multiple threads)
-Q_DECLARE_METATYPE(std::shared_ptr<age::qt_simulator>)
+Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
 Q_DECLARE_METATYPE(age::uint)
 Q_DECLARE_METATYPE(age::qt_downsampler_quality)
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     // register special types to allow queueing arguments of that type
     // (e.g. for connecting signals and slots with that parameter across multiple threads)
-    qRegisterMetaType<std::shared_ptr<age::qt_simulator>>();
+    qRegisterMetaType<std::shared_ptr<age::qt_emulator>>();
     qRegisterMetaType<age::uint>();
     qRegisterMetaType<age::qt_downsampler_quality>();
 

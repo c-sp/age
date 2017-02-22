@@ -164,10 +164,10 @@ bool age::gb_lcd::is_hdma_active() const
 
 
 
-void age::gb_lcd::simulate()
+void age::gb_lcd::emulate()
 {
     uint current_cycle = m_core.get_oscillation_cycle();
-    simulate(current_cycle);
+    emulate(current_cycle);
 }
 
 void age::gb_lcd::set_hdma_active(bool hdma_active)
@@ -208,7 +208,7 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
 //
 //---------------------------------------------------------
 
-void age::gb_lcd::simulate(uint to_cycle)
+void age::gb_lcd::emulate(uint to_cycle)
 {
     while (to_cycle >= m_next_event_cycle)
     {
@@ -235,7 +235,7 @@ void age::gb_lcd::switch_frames()
 
 //---------------------------------------------------------
 //
-//   simulate mode 0
+//   emulate mode 0
 //
 //---------------------------------------------------------
 
@@ -329,7 +329,7 @@ void age::gb_lcd::mode0_next_event()
 
 //---------------------------------------------------------
 //
-//   simulate mode 1
+//   emulate mode 1
 //
 //---------------------------------------------------------
 
@@ -428,7 +428,7 @@ void age::gb_lcd::mode1_last_cycles_mode0(gb_lcd &lcd)
 
 //---------------------------------------------------------
 //
-//   simulate mode 2
+//   emulate mode 2
 //
 //---------------------------------------------------------
 
@@ -504,7 +504,7 @@ void age::gb_lcd::mode2_start(gb_lcd &lcd)
 
 //---------------------------------------------------------
 //
-//   simulate mode 3
+//   emulate mode 3
 //
 //---------------------------------------------------------
 

@@ -46,7 +46,7 @@
 
 //! \endcond
 
-#include <age_gb_simulator.hpp>
+#include <age_gb_emulator.hpp>
 
 
 

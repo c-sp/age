@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_GB_SIMULATOR_HPP
-#define AGE_GB_SIMULATOR_HPP
+#ifndef AGE_GB_EMULATOR_HPP
+#define AGE_GB_EMULATOR_HPP
 
 //!
 //! \file
@@ -32,13 +32,13 @@
 namespace age
 {
 
-class gb_simulator : public simulator
+class gb_emulator : public emulator
 {
 public:
 
     static std::string extract_rom_name(const uint8_vector &rom);
 
-    gb_simulator(const uint8_vector &rom, bool force_dmg);
+    gb_emulator(const uint8_vector &rom, bool force_dmg);
 
     bool is_cgb() const;
     gb_test_info get_test_info() const;
@@ -51,9 +51,9 @@ public:
 
 protected:
 
-    uint64 inner_simulate(uint64 min_ticks_to_simulate) override;
+    uint64 inner_emulate(uint64 min_ticks_to_emulate) override;
 
-    std::string inner_get_simulator_title() const override;
+    std::string inner_get_emulator_title() const override;
 
 private:
 
@@ -72,4 +72,4 @@ private:
 
 
 
-#endif // AGE_GB_SIMULATOR_HPP
+#endif // AGE_GB_EMULATOR_HPP

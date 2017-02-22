@@ -26,7 +26,7 @@
 //!
 
 #include "age_ui_qt_settings.hpp"
-#include "age_ui_qt_simulation_runner.hpp"
+#include "age_ui_qt_emulation_runner.hpp"
 
 
 
@@ -45,9 +45,9 @@ public:
 
 signals:
 
-    void simulator_loaded(std::shared_ptr<age::qt_simulator> new_simulator);
-    void simulator_button_down(uint button);
-    void simulator_button_up(uint button);
+    void emulator_loaded(std::shared_ptr<age::qt_emulator> new_emulator);
+    void emulator_button_down(uint button);
+    void emulator_button_up(uint button);
 
 private:
 
@@ -74,12 +74,12 @@ private:
     qt_settings_dialog *m_settings = nullptr;
     qt_gl_renderer *m_renderer = nullptr;
 
-    QLabel *m_simulated_time_label = nullptr;
+    QLabel *m_emulated_time_label = nullptr;
     QLabel *m_speed_label = nullptr;
     QLabel *m_fps_label = nullptr;
 
-    qt_simulation_runner *m_simulation_runner = nullptr;
-    QThread m_simulation_runner_thread;
+    qt_emulation_runner *m_emulation_runner = nullptr;
+    QThread m_emulation_runner_thread;
 
 private slots:
 

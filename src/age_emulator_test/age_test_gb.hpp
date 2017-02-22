@@ -32,7 +32,7 @@
 namespace age
 {
 
-test_result create_gb_test_result(const gb_simulator &emulator, const QString &error_message);
+test_result create_gb_test_result(const gb_emulator &emulator, const QString &error_message);
 
 test_method mooneye_test_method();
 

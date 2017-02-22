@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_UI_QT_SIMULATION_RUNNER_HPP
-#define AGE_UI_QT_SIMULATION_RUNNER_HPP
+#ifndef AGE_UI_QT_EMULATION_RUNNER_HPP
+#define AGE_UI_QT_EMULATION_RUNNER_HPP
 
 //!
 //! \file
@@ -27,7 +27,7 @@
 
 #include "age_ui_qt_gl_renderer.hpp"
 #include "age_ui_qt_audio.hpp"
-#include "age_ui_qt_simulator.hpp"
+#include "age_ui_qt_emulator.hpp"
 
 
 
@@ -35,21 +35,21 @@ namespace age
 {
 
 //!
-//! \brief The qt_simulation_runner runs a simulation and handles audio output.
+//! \brief The qt_emulation_runner runs an emulation and handles audio output.
 //!
-//! Can be passed to another thread for async simulation (slots triggered automatically
+//! Can be passed to another thread for async emulation (slots triggered automatically
 //! as events).
 //!
-class qt_simulation_runner : public QObject, non_copyable
+class qt_emulation_runner : public QObject, non_copyable
 {
     Q_OBJECT
 public:
 
-    qt_simulation_runner(qt_gl_renderer &renderer, int simulation_interval_milliseconds);
-    virtual ~qt_simulation_runner();
+    qt_emulation_runner(qt_gl_renderer &renderer, int emulation_interval_milliseconds);
+    virtual ~qt_emulation_runner();
 
     uint get_speed_percent() const;
-    uint64 get_simulated_milliseconds() const;
+    uint64 get_emulated_milliseconds() const;
 
 signals:
 
@@ -62,12 +62,12 @@ public slots:
 
     void initialize();
 
-    void set_simulator(std::shared_ptr<age::qt_simulator> new_simulator);
-    void set_simulator_buttons_down(uint buttons);
-    void set_simulator_buttons_up(uint buttons);
+    void set_emulator(std::shared_ptr<age::qt_emulator> new_emulator);
+    void set_emulator_buttons_down(uint buttons);
+    void set_emulator_buttons_up(uint buttons);
 
-    void set_simulation_synchronize(bool synchronize);
-    void set_simulation_paused(bool paused);
+    void set_emulator_synchronize(bool synchronize);
+    void set_emulator_paused(bool paused);
 
     void set_audio_output(QAudioDeviceInfo device, QAudioFormat format);
     void set_audio_volume(int volume_percent);
@@ -82,21 +82,21 @@ private slots:
 
 private:
 
-    void simulate(std::shared_ptr<simulator> sim);
-    void set_simulation_timer_interval();
+    void emulate(std::shared_ptr<emulator> emu);
+    void set_emulation_timer_interval();
     void emit_audio_output_activated();
 
     // usable by multiple threads
 
     atomic_uint m_speed_percent = {0};
-    atomic_uint64 m_simulation_timer_ticks = {0};
+    atomic_uint64 m_emulation_timer_ticks = {0};
 
     // used only by event handling thread
 
-    const int m_simulation_interval_milliseconds;
-    const uint64 m_simulation_interval_ticks;
+    const int m_emulation_interval_milliseconds;
+    const uint64 m_emulation_interval_ticks;
     QElapsedTimer m_timer;
-    QTimer *m_simulation_event_trigger = nullptr;
+    QTimer *m_emulation_event_trigger = nullptr;
 
     qt_gl_renderer &m_renderer;
     qt_audio_output m_audio_output;
@@ -108,7 +108,7 @@ private:
     uint64 m_last_timer_ticks = 0;
     speed_calculator<50> m_speed_calculator;
 
-    std::shared_ptr<qt_simulator> m_simulator;
+    std::shared_ptr<qt_emulator> m_emulator;
     uint m_buttons_down = 0;
     uint m_buttons_up = 0;
 };
@@ -117,4 +117,4 @@ private:
 
 
 
-#endif // AGE_UI_QT_SIMULATION_RUNNER_HPP
+#endif // AGE_UI_QT_EMULATION_RUNNER_HPP

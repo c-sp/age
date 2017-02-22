@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_ui_qt_simulator.hpp"
+#include "age_ui_qt_emulator.hpp"
 
 #if 0
 #define LOG(x) AGE_LOG(x)
@@ -36,13 +36,13 @@
 //
 //---------------------------------------------------------
 
-age::qt_simulator::qt_simulator(const QByteArray &rom_contents, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store)
+age::qt_emulator::qt_emulator(const QByteArray &rom_contents, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store)
     : m_user_value_store(user_value_store)
 {
-    // create simulator
+    // create emulator
     uint8_vector rom = to_vector(rom_contents);
-    std::shared_ptr<gb_simulator> gb_sim = std::allocate_shared<gb_simulator>(std::allocator<gb_simulator>(), rom, force_dmg);
-    LOG("simulator created");
+    std::shared_ptr<gb_emulator> gb_sim = std::allocate_shared<gb_emulator>(std::allocator<gb_emulator>(), rom, force_dmg);
+    LOG("emulator created");
 
     // load persistent ram, if this cartridge supports it
     if (!gb_sim->get_persistent_ram().empty())
@@ -50,7 +50,7 @@ age::qt_simulator::qt_simulator(const QByteArray &rom_contents, bool force_dmg, 
         // create the user value identifier string for loading the persistent ram
         {
             std::stringstream ram_id;
-            ram_id << gb_sim->get_simulator_title() << "_";
+            ram_id << gb_sim->get_emulator_title() << "_";
             ram_id << std::hex << hash(rom) << ".ram";
             m_ram_key = {ram_id.str().c_str()};
         }
@@ -68,19 +68,19 @@ age::qt_simulator::qt_simulator(const QByteArray &rom_contents, bool force_dmg, 
     }
 
     // done
-    m_simulator = gb_sim;
+    m_emulator = gb_sim;
 }
 
 
 
-age::qt_simulator::~qt_simulator()
+age::qt_emulator::~qt_emulator()
 {
     // save persistent ram
     if (m_ram_key.length() > 0)
     {
         LOG("storing persistent ram with key " << std::quoted(m_ram_key.toStdString()));
 
-        uint8_vector ram = m_simulator->get_persistent_ram();
+        uint8_vector ram = m_emulator->get_persistent_ram();
         const char *ram_data = reinterpret_cast<const char*>(ram.data());
         int ram_size = static_cast<int>(ram.size());
         AGE_ASSERT(ram.size() <= std::numeric_limits<int>::max());
@@ -100,9 +100,9 @@ age::qt_simulator::~qt_simulator()
 //
 //---------------------------------------------------------
 
-std::shared_ptr<age::simulator> age::qt_simulator::get_simulator()
+std::shared_ptr<age::emulator> age::qt_emulator::get_emulator()
 {
-    return m_simulator;
+    return m_emulator;
 }
 
 
@@ -115,7 +115,7 @@ std::shared_ptr<age::simulator> age::qt_simulator::get_simulator()
 //
 //---------------------------------------------------------
 
-age::uint64 age::qt_simulator::hash(const uint8_vector &vector)
+age::uint64 age::qt_emulator::hash(const uint8_vector &vector)
 {
     uint64 result = 0;
 
@@ -131,7 +131,7 @@ age::uint64 age::qt_simulator::hash(const uint8_vector &vector)
 
 
 
-age::uint8_vector age::qt_simulator::to_vector(const QByteArray &byte_array)
+age::uint8_vector age::qt_emulator::to_vector(const QByteArray &byte_array)
 {
     // this looks redundant, but I don't see any other way
     // to convert a QByteArray to an std::vector ...

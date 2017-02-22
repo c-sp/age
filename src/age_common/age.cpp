@@ -145,11 +145,11 @@ void age::video_buffer_handler::switch_buffers()
 
 //---------------------------------------------------------
 //
-//   simulator base class
+//   emulator base class
 //
 //---------------------------------------------------------
 
-age::simulator::simulator(uint screen_width, uint screen_height, uint sampling_rate, uint ticks_per_second)
+age::emulator::emulator(uint screen_width, uint screen_height, uint sampling_rate, uint ticks_per_second)
     : m_sampling_rate(sampling_rate),
       m_ticks_per_second(ticks_per_second),
       m_video_buffer_handler(screen_width, screen_height)
@@ -160,7 +160,7 @@ age::simulator::simulator(uint screen_width, uint screen_height, uint sampling_r
 
 
 
-std::string age::simulator::get_simulator_title() const
+std::string age::emulator::get_emulator_title() const
 {
     constexpr char ascii_white_space = 0x20;
     constexpr char ascii_underscore = 0x5F;
@@ -171,7 +171,7 @@ std::string age::simulator::get_simulator_title() const
     constexpr char ascii_A = 0x41;
     constexpr char ascii_Z = 0x5A;
 
-    std::string inner_title = inner_get_simulator_title();
+    std::string inner_title = inner_get_emulator_title();
     std::string result;
     uint chars = 0;
 
@@ -209,49 +209,49 @@ std::string age::simulator::get_simulator_title() const
 
 
 
-age::uint age::simulator::get_screen_width() const
+age::uint age::emulator::get_screen_width() const
 {
     return m_video_buffer_handler.get_screen_width();
 }
 
-age::uint age::simulator::get_screen_height() const
+age::uint age::emulator::get_screen_height() const
 {
     return m_video_buffer_handler.get_screen_height();
 }
 
-const age::pixel_vector& age::simulator::get_video_front_buffer() const
+const age::pixel_vector& age::emulator::get_video_front_buffer() const
 {
     return m_video_buffer_handler.get_front_buffer();
 }
 
-const age::pcm_vector& age::simulator::get_audio_buffer() const
+const age::pcm_vector& age::emulator::get_audio_buffer() const
 {
     return m_audio_buffer;
 }
 
-age::uint age::simulator::get_pcm_sampling_rate() const
+age::uint age::emulator::get_pcm_sampling_rate() const
 {
     return m_sampling_rate;
 }
 
-age::uint age::simulator::get_ticks_per_second() const
+age::uint age::emulator::get_ticks_per_second() const
 {
     return m_ticks_per_second;
 }
 
-age::uint64 age::simulator::get_simulated_ticks() const
+age::uint64 age::emulator::get_emulated_ticks() const
 {
-    return m_simulated_ticks;
+    return m_emulated_ticks;
 }
 
-bool age::simulator::simulate(uint64 min_ticks_to_simulate)
+bool age::emulator::emulate(uint64 min_ticks_to_emulate)
 {
     uint current_front_buffer = m_video_buffer_handler.get_front_buffer_index();
     m_audio_buffer.clear();
 
-    uint64 simulated_ticks = inner_simulate(min_ticks_to_simulate);
-    AGE_ASSERT(simulated_ticks >= min_ticks_to_simulate);
-    m_simulated_ticks += simulated_ticks;
+    uint64 emulated_ticks = inner_emulate(min_ticks_to_emulate);
+    AGE_ASSERT(emulated_ticks >= min_ticks_to_emulate);
+    m_emulated_ticks += emulated_ticks;
 
     bool new_frame = m_video_buffer_handler.get_front_buffer_index() != current_front_buffer;
     return new_frame;
@@ -259,12 +259,12 @@ bool age::simulator::simulate(uint64 min_ticks_to_simulate)
 
 
 
-age::video_buffer_handler& age::simulator::get_video_buffer_handler()
+age::video_buffer_handler& age::emulator::get_video_buffer_handler()
 {
     return m_video_buffer_handler;
 }
 
-age::pcm_vector& age::simulator::get_pcm_vector()
+age::pcm_vector& age::emulator::get_pcm_vector()
 {
     return m_audio_buffer;
 }

@@ -712,11 +712,11 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 
 //---------------------------------------------------------
 //
-//   cpu instruction simulation
+//   cpu instruction emulation
 //
 //---------------------------------------------------------
 
-void age::gb_cpu::simulate_instruction()
+void age::gb_cpu::emulate_instruction()
 {
     AGE_ASSERT(m_core.get_mode() == gb_mode::cpu_active);
 
@@ -732,7 +732,7 @@ void age::gb_cpu::simulate_instruction()
         return;
     }
 
-    // no event handling necessary here, done in simulator's main loop
+    // no event handling necessary here, done in emulator's main loop
     uint8 opcode = m_bus.read_byte(m_pc);
     INC_CYCLES;
 

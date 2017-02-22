@@ -355,19 +355,19 @@ public:
     bool is_oam_writable() const;
     bool is_hdma_active() const;
 
-    void simulate();
+    void emulate();
     void set_hdma_active(bool hdma_active);
 
 private:
 
-    void simulate(uint to_cycle);
+    void emulate(uint to_cycle);
     void next_step(uint cycle_offset, std::function<void(gb_lcd&)> next_method);
     void switch_frames();
 
     void update_color(uint index);
     bool is_cgb_palette_accessible() const;
 
-    // LCD mode simulation
+    // LCD mode emulation
     void mode0_start_lcd_enabled();
     void mode0_interrupt();
     void mode0_next_event();

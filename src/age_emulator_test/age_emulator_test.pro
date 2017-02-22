@@ -6,7 +6,7 @@ TARGET = age_emulator_test
 TEMPLATE = app
 CONFIG -= app_bundle
 
-DEPENDENCIES = age_simulator_gb age_common
+DEPENDENCIES = age_emulator_gb age_common
 include($$PWD/../age.pri)
 
 

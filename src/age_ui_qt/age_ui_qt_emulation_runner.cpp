@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_ui_qt_simulation_runner.hpp"
+#include "age_ui_qt_emulation_runner.hpp"
 
 #if 0
 #define LOG(x) AGE_LOG(x)
@@ -34,27 +34,27 @@
 //
 //---------------------------------------------------------
 
-age::qt_simulation_runner::qt_simulation_runner(qt_gl_renderer &renderer, int simulation_interval_milliseconds)
+age::qt_emulation_runner::qt_emulation_runner(qt_gl_renderer &renderer, int emulation_interval_milliseconds)
     : QObject(),
-      m_simulation_interval_milliseconds(simulation_interval_milliseconds),
-      m_simulation_interval_ticks(static_cast<uint64>(m_simulation_interval_milliseconds * 1000000)),
+      m_emulation_interval_milliseconds(emulation_interval_milliseconds),
+      m_emulation_interval_ticks(static_cast<uint64>(m_emulation_interval_milliseconds * 1000000)),
       m_renderer(renderer)
 {
-    AGE_ASSERT(m_simulation_interval_milliseconds > 0);
+    AGE_ASSERT(m_emulation_interval_milliseconds > 0);
 
-    LOG("simulation interval: " << m_simulation_interval_milliseconds
-        << " milliseconds (" << m_simulation_interval_ticks << " ticks)");
+    LOG("emulation interval: " << m_emulation_interval_milliseconds
+        << " milliseconds (" << m_emulation_interval_ticks << " ticks)");
 
     m_timer.start();
 }
 
-age::qt_simulation_runner::~qt_simulation_runner()
+age::qt_emulation_runner::~qt_emulation_runner()
 {
-    // if the simulation timer has been activated, disconnect the timer event to prevent running
+    // if the emulation timer has been activated, disconnect the timer event to prevent running
     // into a timer_event() during object destruction (which may trigger a seg fault)
-    if (m_simulation_event_trigger != nullptr)
+    if (m_emulation_event_trigger != nullptr)
     {
-        disconnect(m_simulation_event_trigger, SIGNAL(timeout()), this, SLOT(timer_event()));
+        disconnect(m_emulation_event_trigger, SIGNAL(timeout()), this, SLOT(timer_event()));
     }
 }
 
@@ -66,14 +66,14 @@ age::qt_simulation_runner::~qt_simulation_runner()
 //
 //---------------------------------------------------------
 
-age::uint age::qt_simulation_runner::get_speed_percent() const
+age::uint age::qt_emulation_runner::get_speed_percent() const
 {
     return m_speed_percent;
 }
 
-age::uint64 age::qt_simulation_runner::get_simulated_milliseconds() const
+age::uint64 age::qt_emulation_runner::get_emulated_milliseconds() const
 {
-    return m_simulation_timer_ticks / 1000000;
+    return m_emulation_timer_ticks / 1000000;
 }
 
 
@@ -84,51 +84,51 @@ age::uint64 age::qt_simulation_runner::get_simulated_milliseconds() const
 //
 //---------------------------------------------------------
 
-void age::qt_simulation_runner::initialize()
+void age::qt_emulation_runner::initialize()
 {
     // create a timer and connect the timeout signal to this object's timer_event() method
     // (this object takes ownership of the timer so we don't have to care about it's destruction)
-    m_simulation_event_trigger = new QTimer(this);
-    connect(m_simulation_event_trigger, SIGNAL(timeout()), this, SLOT(timer_event()));
+    m_emulation_event_trigger = new QTimer(this);
+    connect(m_emulation_event_trigger, SIGNAL(timeout()), this, SLOT(timer_event()));
 
-    // start continuous simulation
-    m_simulation_event_trigger->setTimerType(Qt::PreciseTimer); // if possible, use millisecond accuracy
-    m_simulation_event_trigger->start(m_simulation_interval_milliseconds);
+    // start continuous emulation
+    m_emulation_event_trigger->setTimerType(Qt::PreciseTimer); // if possible, use millisecond accuracy
+    m_emulation_event_trigger->start(m_emulation_interval_milliseconds);
 
-    LOG("started simulation timer with interval of " << m_simulation_interval_milliseconds << " millisecond(s)");
+    LOG("started emulation timer with interval of " << m_emulation_interval_milliseconds << " millisecond(s)");
 }
 
 
 
-void age::qt_simulation_runner::set_simulator(std::shared_ptr<qt_simulator> new_simulator)
+void age::qt_emulation_runner::set_emulator(std::shared_ptr<qt_emulator> new_emulator)
 {
     LOG("");
 
-    AGE_ASSERT(new_simulator != nullptr);
-    std::shared_ptr<simulator> sim = new_simulator->get_simulator();
+    AGE_ASSERT(new_emulator != nullptr);
+    std::shared_ptr<emulator> sim = new_emulator->get_emulator();
     AGE_ASSERT(sim != nullptr);
 
     m_speed_percent = 0;
-    m_simulation_timer_ticks = 0;
+    m_emulation_timer_ticks = 0;
 
-    m_renderer.set_simulator_screen_size(sim->get_screen_width(), sim->get_screen_height());
+    m_renderer.set_emulator_screen_size(sim->get_screen_width(), sim->get_screen_height());
     m_audio_output.set_input_sampling_rate(sim->get_pcm_sampling_rate());
 
     m_last_timer_ticks = m_timer.nsecsElapsed();
     m_speed_calculator.clear();
 
-    m_simulator = new_simulator;
+    m_emulator = new_emulator;
     m_buttons_down = 0;
     m_buttons_up = 0;
 }
 
-void age::qt_simulation_runner::set_simulator_buttons_down(uint buttons)
+void age::qt_emulation_runner::set_emulator_buttons_down(uint buttons)
 {
     LOG(buttons);
     m_buttons_down |= buttons;
 }
 
-void age::qt_simulation_runner::set_simulator_buttons_up(uint buttons)
+void age::qt_emulation_runner::set_emulator_buttons_up(uint buttons)
 {
     LOG(buttons);
     m_buttons_up |= buttons;
@@ -136,18 +136,18 @@ void age::qt_simulation_runner::set_simulator_buttons_up(uint buttons)
 
 
 
-void age::qt_simulation_runner::set_simulation_synchronize(bool synchronize)
+void age::qt_emulation_runner::set_emulator_synchronize(bool synchronize)
 {
     LOG(synchronize);
 
     if (m_synchronize != synchronize)
     {
         m_synchronize = synchronize;
-        set_simulation_timer_interval();
+        set_emulation_timer_interval();
     }
 }
 
-void age::qt_simulation_runner::set_simulation_paused(bool paused)
+void age::qt_emulation_runner::set_emulator_paused(bool paused)
 {
     LOG(paused);
 
@@ -165,26 +165,26 @@ void age::qt_simulation_runner::set_simulation_paused(bool paused)
             m_last_timer_ticks = m_timer.nsecsElapsed();
         }
 
-        set_simulation_timer_interval();
+        set_emulation_timer_interval();
     }
 }
 
 
 
-void age::qt_simulation_runner::set_audio_output(QAudioDeviceInfo device, QAudioFormat format)
+void age::qt_emulation_runner::set_audio_output(QAudioDeviceInfo device, QAudioFormat format)
 {
     LOG(device.deviceName() << " @ " << format.sampleRate() << " hz");
     m_audio_output.set_output(device, format);
     emit_audio_output_activated();
 }
 
-void age::qt_simulation_runner::set_audio_volume(int volume_percent)
+void age::qt_emulation_runner::set_audio_volume(int volume_percent)
 {
     LOG(volume_percent);
     m_audio_output.set_volume(volume_percent);
 }
 
-void age::qt_simulation_runner::set_audio_latency(int latency_milliseconds)
+void age::qt_emulation_runner::set_audio_latency(int latency_milliseconds)
 {
     LOG(latency_milliseconds);
 
@@ -195,7 +195,7 @@ void age::qt_simulation_runner::set_audio_latency(int latency_milliseconds)
     m_audio_latency_changed = true;
 }
 
-void age::qt_simulation_runner::set_audio_downsampler_quality(age::qt_downsampler_quality quality)
+void age::qt_emulation_runner::set_audio_downsampler_quality(age::qt_downsampler_quality quality)
 {
     LOG("");
     m_audio_output.set_downsampler_quality(quality);
@@ -210,7 +210,7 @@ void age::qt_simulation_runner::set_audio_downsampler_quality(age::qt_downsample
 //
 //---------------------------------------------------------
 
-void age::qt_simulation_runner::timer_event()
+void age::qt_emulation_runner::timer_event()
 {
     // check for changede audio settings
     if (m_audio_latency_changed)
@@ -220,21 +220,21 @@ void age::qt_simulation_runner::timer_event()
         emit_audio_output_activated();
     }
 
-    // run the simulation, if we have a simulator available
+    // run the emulation, if we have an emulator available
     bool buffer_audio_silence = true;
 
-    if (m_simulator != nullptr)
+    if (m_emulator != nullptr)
     {
-        std::shared_ptr<simulator> sim = m_simulator->get_simulator();
+        std::shared_ptr<emulator> sim = m_emulator->get_emulator();
 
         // handle "button down" events even when paused
         sim->set_buttons_down(m_buttons_down);
         m_buttons_down = 0;
 
-        // run simulation, if we're not paused
+        // run the emulation, if we're not paused
         if (!m_paused)
         {
-            simulate(sim);
+            emulate(sim);
             buffer_audio_silence = false;
         }
 
@@ -244,7 +244,7 @@ void age::qt_simulation_runner::timer_event()
     }
 
     // Keep the audio stream alive. If no new audio data is available
-    // (e.g. because the simulation is paused), allow silent samples
+    // (e.g. because the emulation is paused), allow silent samples
     // to be streamed.
     if (buffer_audio_silence)
     {
@@ -261,30 +261,30 @@ void age::qt_simulation_runner::timer_event()
 //
 //---------------------------------------------------------
 
-void age::qt_simulation_runner::simulate(std::shared_ptr<simulator> sim)
+void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> sim)
 {
     uint64 current_timer_ticks = m_timer.nsecsElapsed();
     uint64 timer_ticks_elapsed = current_timer_ticks - m_last_timer_ticks;
-    uint64 timer_ticks_to_add = m_synchronize ? timer_ticks_elapsed : m_simulation_interval_ticks;
+    uint64 timer_ticks_to_add = m_synchronize ? timer_ticks_elapsed : m_emulation_interval_ticks;
 
-    // limit the ticks to simulate to not stall the system in case the CPU can't keep up
-    // (use a multiple of m_simulation_interval_ticks to allow evening out load spikes)
-    timer_ticks_to_add = std::min(timer_ticks_to_add, m_simulation_interval_ticks << 1);
+    // limit the ticks to emulate to not stall the system in case the CPU can't keep up
+    // (use a multiple of m_emulation_interval_ticks to allow evening out load spikes)
+    timer_ticks_to_add = std::min(timer_ticks_to_add, m_emulation_interval_ticks << 1);
 
-    // simulate
-    uint64 simulated_ticks = sim->get_simulated_ticks();
-    uint64 simulation_timer_ticks = (m_simulation_timer_ticks += timer_ticks_to_add);
-    uint64 simulated_ticks_to_go = simulation_timer_ticks * sim->get_ticks_per_second() / 1000000000;
+    // emulate
+    uint64 emulated_ticks = sim->get_emulated_ticks();
+    uint64 emulation_timer_ticks = (m_emulation_timer_ticks += timer_ticks_to_add);
+    uint64 emulated_ticks_to_go = emulation_timer_ticks * sim->get_ticks_per_second() / 1000000000;
 
     bool new_frame = false;
-    if (simulated_ticks_to_go > simulated_ticks)
+    if (emulated_ticks_to_go > emulated_ticks)
     {
-        uint64 ticks_to_simulate = simulated_ticks_to_go - simulated_ticks;
-        new_frame = sim->simulate(ticks_to_simulate);
+        uint64 ticks_to_emulate = emulated_ticks_to_go - emulated_ticks;
+        new_frame = sim->emulate(ticks_to_emulate);
 
-        // calculate simulation speed & time
-        uint ticks_simulated = static_cast<uint>(sim->get_simulated_ticks() - simulated_ticks);
-        m_speed_calculator.add_value(ticks_simulated, timer_ticks_elapsed);
+        // calculate emulation speed & time
+        uint ticks_emulated = static_cast<uint>(sim->get_emulated_ticks() - emulated_ticks);
+        m_speed_calculator.add_value(ticks_emulated, timer_ticks_elapsed);
         m_speed_percent = m_speed_calculator.get_speed_percent(sim->get_ticks_per_second(), 1000000000);
     }
 
@@ -295,21 +295,21 @@ void age::qt_simulation_runner::simulate(std::shared_ptr<simulator> sim)
     }
     m_audio_output.buffer_samples(sim->get_audio_buffer());
 
-    // store the current ticks as reference for future simulate() calls
+    // store the current ticks as reference for future emulate() calls
     m_last_timer_ticks = current_timer_ticks;
 }
 
 
 
-void age::qt_simulation_runner::set_simulation_timer_interval()
+void age::qt_emulation_runner::set_emulation_timer_interval()
 {
-    int millis = (!m_paused && !m_synchronize) ? 0 : m_simulation_interval_milliseconds;
-    m_simulation_event_trigger->setInterval(millis);
+    int millis = (!m_paused && !m_synchronize) ? 0 : m_emulation_interval_milliseconds;
+    m_emulation_event_trigger->setInterval(millis);
 }
 
 
 
-void age::qt_simulation_runner::emit_audio_output_activated()
+void age::qt_emulation_runner::emit_audio_output_activated()
 {
     QAudioDeviceInfo device_info = m_audio_output.get_device_info();
     QAudioFormat format = m_audio_output.get_format();

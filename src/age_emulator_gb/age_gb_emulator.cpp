@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_gb_simulator.hpp"
+#include "age_gb_emulator.hpp"
 
 
 
@@ -28,32 +28,32 @@
 //
 //---------------------------------------------------------
 
-bool age::gb_simulator::is_cgb() const
+bool age::gb_emulator::is_cgb() const
 {
     return m_memory.is_cgb();
 }
 
-age::gb_test_info age::gb_simulator::get_test_info() const
+age::gb_test_info age::gb_emulator::get_test_info() const
 {
     return m_cpu.get_test_info();
 }
 
-age::uint8_vector age::gb_simulator::get_persistent_ram() const
+age::uint8_vector age::gb_emulator::get_persistent_ram() const
 {
     return m_memory.get_persistent_ram();
 }
 
-void age::gb_simulator::set_persistent_ram(const uint8_vector &source)
+void age::gb_emulator::set_persistent_ram(const uint8_vector &source)
 {
     m_memory.set_persistent_ram(source);
 }
 
-void age::gb_simulator::set_buttons_down(uint buttons)
+void age::gb_emulator::set_buttons_down(uint buttons)
 {
     m_joypad.set_buttons_down(buttons);
 }
 
-void age::gb_simulator::set_buttons_up(uint buttons)
+void age::gb_emulator::set_buttons_up(uint buttons)
 {
     m_joypad.set_buttons_up(buttons);
 }
@@ -66,10 +66,10 @@ void age::gb_simulator::set_buttons_up(uint buttons)
 //
 //---------------------------------------------------------
 
-age::uint64 age::gb_simulator::inner_simulate(uint64 min_ticks_to_simulate)
+age::uint64 age::gb_emulator::inner_emulate(uint64 min_ticks_to_emulate)
 {
     uint starting_cycle = m_core.get_oscillation_cycle();
-    uint cycle_to_go = starting_cycle + min_ticks_to_simulate;
+    uint cycle_to_go = starting_cycle + min_ticks_to_emulate;
 
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
@@ -81,7 +81,7 @@ age::uint64 age::gb_simulator::inner_simulate(uint64 min_ticks_to_simulate)
                 break;
 
             case gb_mode::cpu_active:
-                m_cpu.simulate_instruction();
+                m_cpu.emulate_instruction();
                 break;
 
             case gb_mode::dma:
@@ -94,13 +94,13 @@ age::uint64 age::gb_simulator::inner_simulate(uint64 min_ticks_to_simulate)
 
     m_sound.generate_samples();
 
-    uint cycles_simulated = m_core.get_oscillation_cycle() - starting_cycle;
-    return cycles_simulated;
+    uint cycles_emulated = m_core.get_oscillation_cycle() - starting_cycle;
+    return cycles_emulated;
 }
 
 
 
-std::string age::gb_simulator::inner_get_simulator_title() const
+std::string age::gb_emulator::inner_get_emulator_title() const
 {
     return m_memory.get_cartridge_title();
 }
@@ -113,8 +113,8 @@ std::string age::gb_simulator::inner_get_simulator_title() const
 //
 //---------------------------------------------------------
 
-age::gb_simulator::gb_simulator(const uint8_vector &rom, bool force_dmg)
-    : simulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_cycles_per_second),
+age::gb_emulator::gb_emulator(const uint8_vector &rom, bool force_dmg)
+    : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_cycles_per_second),
       m_memory(rom, force_dmg),
       m_core(m_memory.is_cgb()),
       m_sound(m_core, get_pcm_vector()),
