@@ -58,7 +58,7 @@ wram_dumper.gbc
 
 ###   mooneye-gb
 
-acceptance/add_sp_e_timing.gb
+#acceptance/add_sp_e_timing.gb
 acceptance/bits/unused_hwio-GS.gb
 acceptance/boot_hwio-dmg0.gb
 acceptance/boot_hwio-S.gb
