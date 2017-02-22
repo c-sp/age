@@ -25,7 +25,7 @@
 //! \file
 //!
 
-#include "age_test_mooneye.hpp"
+#include "age_test_gb.hpp"
 
 
 
@@ -62,7 +62,7 @@ private:
     bool find_files(QSet<QString> &files) const;
     void find_files(const QFileInfo &file_info, QSet<QString> &files) const;
     bool ignore_files(QSet<QString> &files) const;
-    gb_emulator_test* create_test(const QString &test_file) const;
+    QList<test_method> collect_test_methods(const QString &test_file) const;
 
     void exit_app_on_finish();
 
@@ -77,9 +77,10 @@ private:
 
     std::shared_ptr<test_performance> m_test_performance = nullptr;
     QThreadPool m_thread_pool;
-    QSet<QString> m_tests_running;
+    int m_tests_running = 0;
     QStringList m_pass_messages;
     QStringList m_fail_messages;
+    QStringList m_no_test_method_found;
 };
 
 } // namespace age

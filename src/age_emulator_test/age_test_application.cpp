@@ -81,22 +81,34 @@ void age::test_application::schedule_tests()
     // schedule tests
     else
     {
-        m_tests_running = files;
-        for (QString file : m_tests_running)
+        for (QString file : files)
         {
-            gb_emulator_test *test = create_test(file);
-            test->setAutoDelete(true); // let QThreadPool clean this up
+            QList<test_method> methods = collect_test_methods(file);
+            if (methods.isEmpty())
+            {
+                m_no_test_method_found.append(file);
+            }
 
-            // connect via QueuedConnection since the signal is emitted across thread boundaries
-            // (the respective slot will be executed by this thread and thus after this method returns)
-            connect(test, SIGNAL(test_passed(QString,QString)), this, SLOT(test_passed(QString,QString)), Qt::QueuedConnection);
-            connect(test, SIGNAL(test_failed(QString,QString)), this, SLOT(test_failed(QString,QString)), Qt::QueuedConnection);
+            for (test_method method : methods)
+            {
+                test_runner *test = new test_runner(file, method, m_test_performance);
+                test->setAutoDelete(true); // let QThreadPool clean this up
 
-            m_thread_pool.start(test);
+                // connect via QueuedConnection since the signal is emitted across thread boundaries
+                // (the respective slot will be executed by this thread after the current method returns)
+                connect(test, SIGNAL(test_passed(QString,QString)), this, SLOT(test_passed(QString,QString)), Qt::QueuedConnection);
+                connect(test, SIGNAL(test_failed(QString,QString)), this, SLOT(test_failed(QString,QString)), Qt::QueuedConnection);
+
+                m_thread_pool.start(test);
+                ++m_tests_running;
+            }
         }
 
-        qInfo("scheduled %d test(s) for execution", m_tests_running.size());
+        qInfo("scheduled %d test(s) for execution", m_tests_running);
         qInfo("thread pool has %d thread(s)", m_thread_pool.maxThreadCount());
+
+        // if we did not schedule any tests, exist immediately
+        exit_app_on_finish();
     }
 }
 
@@ -106,10 +118,9 @@ void age::test_application::about_to_quit()
     // terminate as fast as possible
     m_thread_pool.clear();
 
-    int remaining = m_tests_running.size();
-    if (remaining > 0)
+    if (m_tests_running > 0)
     {
-        qInfo("cancelled %d queued tests", remaining);
+        qInfo("cancelled %d queued tests", m_tests_running);
     }
 }
 
@@ -119,7 +130,7 @@ void age::test_application::test_passed(QString test_file, QString pass_message)
 {
     // save the result
     m_pass_messages.append(test_message(test_file, pass_message));
-    m_tests_running.remove(test_file);
+    --m_tests_running;
 
     // check if all tests are finished
     exit_app_on_finish();
@@ -129,7 +140,7 @@ void age::test_application::test_failed(QString test_file, QString fail_message)
 {
     // save the result
     m_fail_messages.append(test_message(test_file, fail_message));
-    m_tests_running.remove(test_file);
+    --m_tests_running;
 
     // check if all tests are finished
     exit_app_on_finish();
@@ -275,25 +286,32 @@ bool age::test_application::ignore_files(QSet<QString> &files) const
 
 
 
-age::gb_emulator_test* age::test_application::create_test(const QString &test_file) const
+QList<age::test_method> age::test_application::collect_test_methods(const QString &test_file) const
 {
-    gb_emulator_test* result;
-
+    QList<test_method> result;
     switch(m_type)
     {
         case test_type::mooneye_test:
-            result = new gb_emulator_test_mooneye(test_file, m_test_performance);
+            result.append(mooneye_test_method());
             break;
 
         case test_type::gambatte_test:
-            qInfo("wrong type, gambatte_test");
-            ::exit(1);
+        {
+            test_method method_dmg = gambatte_dmg_test(test_file);
+            if (method_dmg) {
+                result.append(method_dmg);
+            }
+            test_method method_cgb = gambatte_cgb_test(test_file);
+            if (method_cgb) {
+                result.append(method_cgb);
+            }
+            break;
+        }
 
         case test_type::screenshot_test:
-            qInfo("wrong type, screenshot_test");
+            qInfo("type not yet supported: screenshot_test");
             ::exit(1);
     }
-
     return result;
 }
 
@@ -302,23 +320,36 @@ age::gb_emulator_test* age::test_application::create_test(const QString &test_fi
 void age::test_application::exit_app_on_finish()
 {
     // if all tests finished, we can exit the application
-    if (m_tests_running.isEmpty())
+    if (m_tests_running <= 0)
     {
-        qInfo("all tests executed");
+        int tests_executed = m_pass_messages.size() + m_fail_messages.size();
+        int tests = tests_executed + m_no_test_method_found.size();
+
+        qInfo("%d test(s) executed", tests_executed);
 
         // sort results alphabetically for better readability
         m_pass_messages.sort(Qt::CaseInsensitive);
         m_fail_messages.sort(Qt::CaseInsensitive);
+        m_no_test_method_found.sort(Qt::CaseInsensitive);
 
         // print a test summary
-        int total = m_pass_messages.size() + m_fail_messages.size();
-        print_list(number_of_tests_message("passed", m_pass_messages.size(), total), m_pass_messages);
-        print_list(number_of_tests_message("failed", m_fail_messages.size(), total), m_fail_messages);
-        m_test_performance->print_summary();
+        print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
+        print_list(number_of_tests_message("failed", m_fail_messages.size(), tests), m_fail_messages);
+        print_list(number_of_tests_message("failed with unknown type", m_no_test_method_found.size(), tests), m_no_test_method_found);
+
+        qInfo("\ntest summary:");
+        qInfo("    passed:        %d of %d", m_pass_messages.size(), tests);
+        qInfo("    failed:        %d of %d", m_fail_messages.size(), tests);
+        qInfo("    unknown type:  %d of %d", m_no_test_method_found.size(), tests);
+
+        if (m_test_performance->summary_available())
+        {
+            m_test_performance->print_summary();
+        }
 
         // calculate the return code and trigger exiting the application
-        int return_code = m_fail_messages.isEmpty() ? EXIT_SUCCESS : EXIT_FAILURE;
-        QCoreApplication::exit(return_code);
+        bool success = m_fail_messages.isEmpty() && m_no_test_method_found.isEmpty();
+        QCoreApplication::exit(success ? EXIT_SUCCESS : EXIT_FAILURE);
     }
 }
 
@@ -333,7 +364,7 @@ QString age::test_application::test_message(const QString &test_file, const QStr
 QString age::test_application::number_of_tests_message(QString message, int number_of_tests, int total) const
 {
     QString result = "\n";
-    result += QString::number(number_of_tests);
+    result += QString::number(number_of_tests) + " of " + QString::number(total);
     result += (number_of_tests == 1) ? " test " : " tests ";
     result += message;
 

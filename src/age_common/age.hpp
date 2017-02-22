@@ -284,6 +284,11 @@ struct lpcm_stereo_sample
         return m_stereo_sample == other.m_stereo_sample;
     }
 
+    bool operator!=(const lpcm_stereo_sample &other) const
+    {
+        return m_stereo_sample != other.m_stereo_sample;
+    }
+
     union
     {
         uint32 m_stereo_sample;

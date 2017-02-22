@@ -30,6 +30,32 @@
 //
 //---------------------------------------------------------
 
+void age::test_performance::measurement::add_run(qint64 value)
+{
+    AGE_ASSERT(value >= 0);
+    ++m_runs;
+    m_sum += value;
+
+    qint64 old;
+    while ((old = m_min) > value)
+    {
+        if (m_min.compare_exchange_strong(old, value))
+        {
+            break;
+        }
+    }
+
+    while ((old = m_max) < value)
+    {
+        if (m_max.compare_exchange_strong(old, value))
+        {
+            break;
+        }
+    }
+}
+
+
+
 void age::test_performance::file_loaded(qint64 duration_nanos)
 {
     if (duration_nanos >= 0)
@@ -38,51 +64,43 @@ void age::test_performance::file_loaded(qint64 duration_nanos)
     }
 }
 
-void age::test_performance::test_emulated(qint64 duration_nanos, uint64 emulated_ticks)
+void age::test_performance::test_executed(qint64 duration_nanos, uint64 emulated_cycles)
 {
-    if ((duration_nanos >= 0) && (emulated_ticks > 0))
+    if (duration_nanos >= 0)
     {
-        m_emulation_nanos.add_run(duration_nanos);
-        m_emulation_ticks.add_run(emulated_ticks);
+        m_test_execution_nanos.add_run(duration_nanos);
+        m_emulation_cycles.add_run(emulated_cycles);
     }
 }
 
 
 
+bool age::test_performance::summary_available() const
+{
+    return (m_file_load_nanos.m_runs > 0) || (m_emulation_cycles.m_runs > 0);
+}
+
 void age::test_performance::print_summary() const
 {
-    qInfo("\nperformance:");
+    qInfo("\nperformance:                    +--------------+--------------+--------------+");
+    qInfo("                                |      average |          min |          max |");
+    qInfo("    +---------------------------+--------------+--------------+--------------+");
 
-    qInfo("    +----------------------+--------------+--------------+--------------+");
-    qInfo("    |                 task |      average |          min |          max |");
-    qInfo("    +----------------------+--------------+--------------+--------------+");
+    print_measurement(m_file_load_nanos, "file loading (us)", 1000);
+    print_measurement(m_test_execution_nanos, "test execution (us)", 1000);
+    print_measurement(m_emulation_cycles, "emulated cycles per test", 1);
 
-    qInfo("    | %20s | %12lld | %12lld | %12lld |",
-          "file loading (us)",
-          (m_file_load_nanos.m_sum / m_file_load_nanos.m_runs) / 1000,
-          m_file_load_nanos.m_min / 1000,
-          m_file_load_nanos.m_max / 1000
-          );
+    qInfo("    +---------------------------+--------------+--------------+--------------+");
+}
 
-    qInfo("    | %20s | %12lld | %12lld | %12lld |",
-          "emulation (us)",
-          (m_emulation_nanos.m_sum / m_emulation_nanos.m_runs) / 1000,
-          m_emulation_nanos.m_min / 1000,
-          m_emulation_nanos.m_max / 1000
-          );
+void age::test_performance::print_measurement(const measurement &m, const QString &task, qint64 divisor)
+{
+    qint64 runs = m.m_runs;
+    qint64 avg = (runs < 1) ? 0 : m.m_sum / runs / divisor;
+    qint64 min = (runs < 1) ? 0 : m.m_min / divisor;
+    qint64 max = (runs < 1) ? 0 : m.m_max / divisor;
 
-    qInfo("    | %20s | %12lu | %12lu | %12lu |",
-          "emulation (ticks)",
-          m_emulation_ticks.m_sum / m_emulation_ticks.m_runs,
-          m_emulation_ticks.m_min.load(),
-          m_emulation_ticks.m_max.load()
-          );
-
-    qInfo("    +----------------------+--------------+--------------+--------------+");
-
-    qInfo("    %llu emulator ticks per second",
-          m_emulation_ticks.m_sum * 1000000000 / m_emulation_nanos.m_sum
-          );
+    qInfo("    | %25s | %12lld | %12lld | %12lld |", qPrintable(task), avg, min, max);
 }
 
 
@@ -91,29 +109,30 @@ void age::test_performance::print_summary() const
 
 //---------------------------------------------------------
 //
-//   gb_emulator_test
+//   test_runner
 //
 //---------------------------------------------------------
 
-age::gb_emulator_test::gb_emulator_test(const QString &test_file_name, std::shared_ptr<test_performance> performance)
+age::test_runner::test_runner(const QString &test_file_name, test_method method, std::shared_ptr<test_performance> performance)
     : m_test_file_name(test_file_name),
-      m_test_performance(performance)
+      m_test_performance(performance),
+      m_test_method(method)
 {
 }
 
 
 
-void age::gb_emulator_test::run()
+void age::test_runner::run()
 {
+    test_result result;
     QElapsedTimer timer;
 
     // read the test file
     timer.start();
-    QString error_cause = read_test_file();
+    result.m_error_message = read_test_file();
 
     // continue only if the file was sucessfully read
-    optional<bool> is_cgb;
-    if (error_cause.isEmpty())
+    if (result.m_error_message.isEmpty())
     {
         // store the time required for loading the file
         if (m_test_performance != nullptr)
@@ -121,40 +140,35 @@ void age::gb_emulator_test::run()
             m_test_performance->file_loaded(timer.nsecsElapsed());
         }
 
-        // create a new emulator running the test file
-        std::shared_ptr<gb_simulator> emulator = std::make_shared<gb_simulator>(m_test_file, false);
-        is_cgb.set(emulator->is_cgb());
-
         // execute the test
         timer.start();
-        error_cause = run_test(*emulator);
+        result = m_test_method(m_test_file);
 
         // store the time required for executing the test
         if (m_test_performance != nullptr)
         {
-            m_test_performance->test_emulated(timer.nsecsElapsed(), emulator->get_simulated_ticks());
+            m_test_performance->test_executed(timer.nsecsElapsed(), result.m_cycles_emulated);
         }
     }
 
-    // create a CGB/DMG marker to be used within the result message
-    QString gb_type = is_cgb.is_set()
-            ? (is_cgb.get(false) ? "(CGB)" : "(DMG)")
-            : "";
-
     // emit the result signal
-    if (error_cause.isEmpty())
+    if (result.m_error_message.isEmpty())
     {
-        emit test_passed(m_test_file_name, gb_type);
+        emit test_passed(m_test_file_name, result.m_additional_message);
     }
     else
     {
-        emit test_failed(m_test_file_name, (gb_type.isEmpty() ? error_cause : gb_type + ' ' + error_cause));
+        QString message = result.m_additional_message.isEmpty()
+                ? result.m_error_message
+                : result.m_additional_message + ' ' + result.m_error_message;
+
+        emit test_failed(m_test_file_name, message);
     }
 }
 
 
 
-QString age::gb_emulator_test::read_test_file()
+QString age::test_runner::read_test_file()
 {
     QString error_message;
 

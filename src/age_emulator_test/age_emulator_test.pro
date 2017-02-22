@@ -15,9 +15,10 @@ SOURCES += \
     age_test_main.cpp \
     age_test.cpp \
     age_test_application.cpp \
-    age_test_mooneye.cpp
+    age_test_gb.cpp \
+    age_test_gb_gambatte.cpp
 
 HEADERS += \
     age_test.hpp \
     age_test_application.hpp \
-    age_test_mooneye.hpp
+    age_test_gb.hpp

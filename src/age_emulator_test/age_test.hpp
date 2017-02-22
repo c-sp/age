@@ -29,6 +29,7 @@
 //! \cond
 
 #include <atomic>
+#include <functional>
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -92,8 +93,8 @@ private:
 //! With this class the following performance numbers can be collected for executed tests:
 //! - The average, minimal and maximal time spent on file operations (e.g. loading test files).
 //! - The average, minimal and maximal time spent on executing a test.
-//! - The average, minimal and maximal number of ticks emulated for executing a test.
-//! - The average number of ticks emulated per second.
+//! - The average, minimal and maximal number of cycles emulated for executing a test.
+//! - The average number of cycles emulated per second.
 //!
 //! This class is thread safe.
 //!
@@ -102,108 +103,60 @@ class test_performance
 public:
 
     void file_loaded(qint64 duration_nanos);
-    void test_emulated(qint64 duration_nanos, uint64 emulated_ticks);
+    void test_executed(qint64 duration_nanos, uint64 emulated_cycles);
 
+    bool summary_available() const;
     void print_summary() const;
 
 private:
 
-    template<typename _T>
     struct measurement
     {
-        void add_run(_T value)
-        {
-            AGE_ASSERT(value >= 0);
-            ++m_runs;
-            m_sum += value;
+        void add_run(qint64 value);
 
-            _T old;
-            while ((old = m_min) > value)
-            {
-                if (m_min.compare_exchange_strong(old, value))
-                {
-                    break;
-                }
-            }
-
-            while ((old = m_max) < value)
-            {
-                if (m_max.compare_exchange_strong(old, value))
-                {
-                    break;
-                }
-            }
-        }
-
-        std::atomic<uint> m_runs = {0};
-        std::atomic<_T> m_sum = {0};
-        std::atomic<_T> m_min = {std::numeric_limits<_T>::max()};
-        std::atomic<_T> m_max = {std::numeric_limits<_T>::min()};
+        std::atomic<qint64> m_runs = {0};
+        std::atomic<qint64> m_sum = {0};
+        std::atomic<qint64> m_min = {std::numeric_limits<qint64>::max()};
+        std::atomic<qint64> m_max = {std::numeric_limits<qint64>::min()};
     };
 
-    measurement<qint64> m_file_load_nanos;
-    measurement<qint64> m_emulation_nanos;
-    measurement<uint64> m_emulation_ticks;
+    static void print_measurement(const measurement &m, const QString &task, qint64 divisor);
+
+    measurement m_file_load_nanos;
+    measurement m_test_execution_nanos;
+    measurement m_emulation_cycles;
 };
 
 
 
-//!
-//! \brief This is the base class for all Gameboy emulator tests.
-//!
-//! The base class will load the test file and create an emulator using that file.
-//! The actual test execution has to be implemented by deriving classes with run_test().
-//! Depending on the test result, this class will emit either a test_passed() or a test_failed() signal.
-//!
-//! This class derives from QRunnable to allow for asynchronously running the test in a QThreadPool.
-//!
-class gb_emulator_test : public QObject, public QRunnable
+struct test_result
+{
+    uint64 m_cycles_emulated = 0;
+    QString m_error_message;
+    QString m_additional_message;
+};
+
+typedef std::function<test_result(const uint8_vector &test_rom)> test_method;
+
+
+
+class test_runner : public QObject, public QRunnable
 {
     Q_OBJECT
 public:
 
-    //!
-    //! \brief Construct a gb_emulator_test based on the specified test file.
-    //! \param test_file_name The test file to be loaded when running the test.
-    //!
-    gb_emulator_test(const QString &test_file_name, std::shared_ptr<test_performance> performance = nullptr);
+    virtual ~test_runner() = default;
 
-    virtual ~gb_emulator_test() = default;
+    test_runner(const QString &test_file_name,
+                test_method method,
+                std::shared_ptr<test_performance> performance = nullptr);
 
-    //!
-    //! \brief Run the test.
-    //!
-    //! This method will load the test file, create a gb_simulator with that file
-    //! and call the run_test() method.
-    //! If loading the file or run_test() fails, the test_failed() signal is emitted.
-    //! If the test passes, the test_passed() signal is emitted.
-    //!
     void run() override;
 
 signals:
 
-    //!
-    //! \brief This signal is emitted after the test passes.
-    //! \param test_file_name The test file passed to the constructor.
-    //! \param pass_message Additional human readable information on this test.
-    //!
     void test_passed(QString test_file_name, QString pass_message);
-
-    //!
-    //! \brief This signal is emitted after the test fails.
-    //! \param test_file_name The test file passed to the constructor.
-    //! \param pass_message Additional human readable information on the failure's cause.
-    //!
     void test_failed(QString test_file_name, QString fail_message);
-
-protected:
-
-    //!
-    //! \brief the actual test execution
-    //! \param emulator The gb_simulator instance loaded with the test file.
-    //! \return A QString describing the test failure or an empty QString if the test passes.
-    //!
-    virtual QString run_test(gb_simulator &emulator) = 0;
 
 private:
 
@@ -211,6 +164,7 @@ private:
 
     const QString m_test_file_name;
     std::shared_ptr<test_performance> m_test_performance = nullptr;
+    test_method m_test_method;
     uint8_vector m_test_file;
 };
 
