@@ -102,7 +102,7 @@ protected:
     void set_cycles_per_sample(uint cycles_per_sample)
     {
         AGE_ASSERT(cycles_per_sample > 0);
-        AGE_ASSERT(cycles_per_sample < gb_cycles_per_second);
+        AGE_ASSERT(cycles_per_sample < gb_machine_cycles_per_second);
         AGE_ASSERT(cycles_per_sample >= gb_cycles_per_sample);
         AGE_ASSERT((cycles_per_sample % gb_cycles_per_sample) == 0);
         m_cycles_per_sample = cycles_per_sample;

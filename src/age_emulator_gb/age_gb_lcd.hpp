@@ -140,7 +140,7 @@ class gb_lcd_ppu : public lyc_interrupter
 {
 public:
 
-    gb_lcd_ppu(gb_core &core, const gb_memory &memory);
+    gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_green);
 
     uint8 read_lcdc() const;
     uint8 read_scx() const;
@@ -245,6 +245,7 @@ private:
 
     // common stuff
     const bool m_cgb;
+    const bool m_dmg_green;
     gb_core &m_core;
     const gb_memory &m_memory;
     uint8_array<gb_oam_size> m_oam;
@@ -311,7 +312,7 @@ class gb_lcd : private gb_lcd_ppu
 {
 public:
 
-    gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler);
+    gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler, bool dmg_green);
 
     using gb_lcd_ppu::read_lcdc;
     using gb_lcd_ppu::read_scx;

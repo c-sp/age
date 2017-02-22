@@ -20,14 +20,6 @@
 
 #include "age_gb_lcd.hpp"
 
-#define GB_DMG_BLACK_WHITE
-
-#if defined GB_DMG_BLACK_WHITE
-#define CLASSIC_WHITE pixel(255, 255, 255)
-#else
-#define CLASSIC_WHITE pixel(152, 192, 15)
-#endif
-
 #if 0
 #define LOG(x) { if ((m_core.get_oscillation_cycle() < 13000) && ((uint)get_ly() < 2)) \
 { AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ", x_current " << m_x_current << ", " << m_tile_offset << ", ly " << (uint)get_ly() << ": " << x); }}
@@ -76,9 +68,10 @@ constexpr const age::uint8_array<0xA0> dmg_oam_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd_ppu::gb_lcd_ppu(gb_core &core, const gb_memory &memory)
+age::gb_lcd_ppu::gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_green)
     : lyc_interrupter(core),
       m_cgb(core.is_cgb()),
+      m_dmg_green(dmg_green),
       m_core(core),
       m_memory(memory)
 {
@@ -176,19 +169,25 @@ void age::gb_lcd_ppu::create_classic_palette(uint index, uint8 colors)
         for (uint max = index + 4; index < max; ++index)
         {
             // greenish Gameboy colors (taken from some googled gameboy photo) for regular build,
-            // grayish colors for testing
-            switch (colors & 0x03)
+            if (m_dmg_green)
             {
-                case 0x00: m_colors[index] = CLASSIC_WHITE; break;
-#if defined GB_DMG_BLACK_WHITE
-                case 0x01: m_colors[index] = pixel(170, 170, 170); break;
-                case 0x02: m_colors[index] = pixel(85, 85, 85); break;
-                case 0x03: m_colors[index] = pixel(0, 0, 0); break;
-#else
-                case 0x01: m_colors[index] = pixel(112, 152, 15); break;
-                case 0x02: m_colors[index] = pixel(48, 96, 15); break;
-                case 0x03: m_colors[index] = pixel(15, 56, 15); break;
-#endif
+                switch (colors & 0x03)
+                {
+                    case 0x00: m_colors[index] = pixel(152, 192, 15); break;
+                    case 0x01: m_colors[index] = pixel(112, 152, 15); break;
+                    case 0x02: m_colors[index] = pixel(48, 96, 15); break;
+                    case 0x03: m_colors[index] = pixel(15, 56, 15); break;
+                }
+            }
+            else
+            {
+                switch (colors & 0x03)
+                {
+                    case 0x00: m_colors[index] = pixel(255, 255, 255); break;
+                    case 0x01: m_colors[index] = pixel(170, 170, 170); break;
+                    case 0x02: m_colors[index] = pixel(85, 85, 85); break;
+                    case 0x03: m_colors[index] = pixel(0, 0, 0); break;
+                }
             }
             colors >>= 2;
         }
@@ -218,7 +217,7 @@ void age::gb_lcd_ppu::update_color(uint index, uint8 high_byte, uint8 low_byte)
 
 void age::gb_lcd_ppu::white_screen(pixel_vector &screen)
 {
-    pixel p = m_cgb ? pixel(255, 255, 255) : CLASSIC_WHITE;
+    pixel p = (m_cgb || !m_dmg_green) ? pixel(255, 255, 255) : pixel(152, 192, 15);
     std::fill(begin(screen), end(screen), p);
 }
 

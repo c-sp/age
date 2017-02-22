@@ -49,8 +49,8 @@ constexpr const age::uint8_array<0x40> cgb_objp_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler)
-    : gb_lcd_ppu(core, memory),
+age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler, bool dmg_green)
+    : gb_lcd_ppu(core, memory, dmg_green),
       m_cgb(core.is_cgb()),
       m_core(core),
       m_video_buffer_handler(frame_handler)

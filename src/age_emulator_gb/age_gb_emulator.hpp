@@ -38,7 +38,7 @@ public:
 
     static std::string extract_rom_name(const uint8_vector &rom);
 
-    gb_emulator(const uint8_vector &rom, bool force_dmg);
+    gb_emulator(const uint8_vector &rom, bool force_dmg = false, bool dmg_green = true);
 
     bool is_cgb() const;
     gb_test_info get_test_info() const;

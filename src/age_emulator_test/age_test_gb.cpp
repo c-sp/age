@@ -48,7 +48,7 @@ age::test_method age::mooneye_test_method()
         constexpr uint max_cycles = gb_machine_cycles_per_second * 120;
 
         // create emulator
-        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, false);
+        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom);
 
         // run the test
         for (uint cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
