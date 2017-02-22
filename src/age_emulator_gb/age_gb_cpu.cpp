@@ -49,7 +49,7 @@
     m_l = static_cast<uint8>(value); \
     }
 
-#define INC_CYCLES m_core.oscillate_cpu_tick()
+#define INC_CYCLES m_core.oscillate_cpu_cycle()
 
 
 

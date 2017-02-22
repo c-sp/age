@@ -151,7 +151,7 @@ bool age::gb_lcd::is_oam_writable() const
         {
             int current_cycle = m_core.get_oscillation_cycle();
             uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
-            result &= next_scanline_offset > m_core.get_cycles_per_cpu_tick();
+            result &= next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle();
         }
     }
     return result;
@@ -189,7 +189,7 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
     {
         uint8 mode = m_stat & gb_stat_modes;
         uint next_scanline_offset = m_lcd_enabled ? get_next_scanline_cycle_offset(m_core.get_oscillation_cycle()) : gb_no_cycle;
-        if ((mode == 0) && (next_scanline_offset > m_core.get_cycles_per_cpu_tick()))
+        if ((mode == 0) && (next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle()))
         {
             m_core.insert_event(0, gb_event::start_hdma);
         }
@@ -318,7 +318,7 @@ void age::gb_lcd::mode0_next_event()
     //
     else
     {
-        uint offset = get_next_scanline_cycle_offset(m_next_event_cycle) - m_core.get_cycles_per_cpu_tick();
+        uint offset = get_next_scanline_cycle_offset(m_next_event_cycle) - m_core.get_machine_cycles_per_cpu_cycle();
         next_step(offset, &mode2_early_interrupt);
     }
 }

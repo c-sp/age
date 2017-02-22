@@ -48,7 +48,7 @@ namespace age
 {
 
 constexpr uint gb_no_cycle = uint_max;
-constexpr uint gb_cycles_per_second = 4194304;
+constexpr uint gb_machine_cycles_per_second = 4194304;
 
 constexpr const uint8_array<5> gb_interrupt_pc_lookup =
 {{
@@ -78,7 +78,7 @@ constexpr uint gb_oam_size = 0xA0;
 
 // serial i/o
 
-constexpr uint gb_serial_transfer_cycles = gb_cycles_per_second / (8192 / 8); // bit transfer with 8192 Hz
+constexpr uint gb_serial_transfer_cycles = gb_machine_cycles_per_second / (8192 / 8); // bit transfer with 8192 Hz
 
 constexpr uint8 gb_sc_start_transfer = 0x80;
 constexpr uint8 gb_sc_terminal_selection = 0x01;
@@ -163,7 +163,7 @@ constexpr uint8 gb_tile_attribute_priority = 0x80;
 // sound
 
 constexpr uint gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
-constexpr uint gb_sampling_rate = gb_cycles_per_second >> gb_sample_cycle_shift;
+constexpr uint gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
 constexpr uint gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
 constexpr uint gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);
 

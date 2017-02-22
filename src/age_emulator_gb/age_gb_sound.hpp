@@ -86,7 +86,7 @@ public:
     uint8 read_wave_ram(uint offset);
     void write_wave_ram(uint offset, uint8 value);
 
-    void frame_sequencer_tick();
+    void frame_sequencer_cycle();
     void generate_samples();
 
 
@@ -110,9 +110,9 @@ private:
     }
 
     template<uint channel>
-    void tick_length_counter()
+    void cycle_length_counter()
     {
-        if (m_length_counter[channel].tick())
+        if (m_length_counter[channel].cycle())
         {
             generate_samples();
             deactivate_channel<channel>();

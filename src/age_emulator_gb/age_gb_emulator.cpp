@@ -66,10 +66,10 @@ void age::gb_emulator::set_buttons_up(uint buttons)
 //
 //---------------------------------------------------------
 
-age::uint64 age::gb_emulator::inner_emulate(uint64 min_ticks_to_emulate)
+age::uint64 age::gb_emulator::inner_emulate(uint64 min_cycles_to_emulate)
 {
     uint starting_cycle = m_core.get_oscillation_cycle();
-    uint cycle_to_go = starting_cycle + min_ticks_to_emulate;
+    uint cycle_to_go = starting_cycle + min_cycles_to_emulate;
 
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
@@ -77,7 +77,7 @@ age::uint64 age::gb_emulator::inner_emulate(uint64 min_ticks_to_emulate)
         switch (m_core.get_mode())
         {
             case gb_mode::halted:
-                m_core.oscillate_cpu_tick();
+                m_core.oscillate_cpu_cycle();
                 break;
 
             case gb_mode::cpu_active:
@@ -114,7 +114,7 @@ std::string age::gb_emulator::inner_get_emulator_title() const
 //---------------------------------------------------------
 
 age::gb_emulator::gb_emulator(const uint8_vector &rom, bool force_dmg)
-    : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_cycles_per_second),
+    : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_machine_cycles_per_second),
       m_memory(rom, force_dmg),
       m_core(m_memory.is_cgb()),
       m_sound(m_core, get_pcm_vector()),

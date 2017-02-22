@@ -312,7 +312,7 @@ void age::gb_lcd::write_stat(uint8 value)
                 //      m0enable/late_enable_ds_1_out3
                 //      m0enable/late_enable_ds_2_out1
                 //
-                raise_lcd_interrupt &= !m_cgb || (next_scanline_offset > m_core.get_cycles_per_cpu_tick());
+                raise_lcd_interrupt &= !m_cgb || (next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle());
                 //
                 // The mode 0 interrupt is not raised before it
                 // would be raised automatically after mode 3
@@ -960,7 +960,7 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
         //      cgbpal_m3/cgbpal_m3end_scx5_ds_4_out1
         //
         uint m3_cycle_diff = current_cycle - m_m3_last_finished;
-        uint min_cycle_diff = m_core.get_cycles_per_cpu_tick();
+        uint min_cycle_diff = m_core.get_machine_cycles_per_cpu_cycle();
         allowed &= m3_cycle_diff >= min_cycle_diff;
 
         //

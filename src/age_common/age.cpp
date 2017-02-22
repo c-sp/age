@@ -149,13 +149,13 @@ void age::video_buffer_handler::switch_buffers()
 //
 //---------------------------------------------------------
 
-age::emulator::emulator(uint screen_width, uint screen_height, uint sampling_rate, uint ticks_per_second)
+age::emulator::emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second)
     : m_sampling_rate(sampling_rate),
-      m_ticks_per_second(ticks_per_second),
+      m_cycles_per_second(cycles_per_second),
       m_video_buffer_handler(screen_width, screen_height)
 {
     AGE_ASSERT(m_sampling_rate > 0);
-    AGE_ASSERT(m_ticks_per_second > 0);
+    AGE_ASSERT(m_cycles_per_second > 0);
 }
 
 
@@ -234,24 +234,24 @@ age::uint age::emulator::get_pcm_sampling_rate() const
     return m_sampling_rate;
 }
 
-age::uint age::emulator::get_ticks_per_second() const
+age::uint age::emulator::get_cycles_per_second() const
 {
-    return m_ticks_per_second;
+    return m_cycles_per_second;
 }
 
-age::uint64 age::emulator::get_emulated_ticks() const
+age::uint64 age::emulator::get_emulated_cycles() const
 {
-    return m_emulated_ticks;
+    return m_emulated_cycles;
 }
 
-bool age::emulator::emulate(uint64 min_ticks_to_emulate)
+bool age::emulator::emulate(uint64 min_cycles_to_emulate)
 {
     uint current_front_buffer = m_video_buffer_handler.get_front_buffer_index();
     m_audio_buffer.clear();
 
-    uint64 emulated_ticks = inner_emulate(min_ticks_to_emulate);
-    AGE_ASSERT(emulated_ticks >= min_ticks_to_emulate);
-    m_emulated_ticks += emulated_ticks;
+    uint64 emulated_cycles = inner_emulate(min_cycles_to_emulate);
+    AGE_ASSERT(emulated_cycles >= min_cycles_to_emulate);
+    m_emulated_cycles += emulated_cycles;
 
     bool new_frame = m_video_buffer_handler.get_front_buffer_index() != current_front_buffer;
     return new_frame;

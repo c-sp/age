@@ -66,9 +66,9 @@ age::uint age::gb_core::get_oscillation_cycle() const
     return m_oscillation_cycle;
 }
 
-age::uint age::gb_core::get_cycles_per_cpu_tick() const
+age::uint age::gb_core::get_machine_cycles_per_cpu_cycle() const
 {
-    return m_cycles_per_cpu_tick;
+    return m_machine_cycles_per_cpu_cycle;
 }
 
 bool age::gb_core::is_double_speed() const
@@ -88,9 +88,9 @@ age::gb_mode age::gb_core::get_mode() const
 
 
 
-void age::gb_core::oscillate_cpu_tick()
+void age::gb_core::oscillate_cpu_cycle()
 {
-    m_oscillation_cycle += m_cycles_per_cpu_tick;
+    m_oscillation_cycle += m_machine_cycles_per_cpu_cycle;
 }
 
 void age::gb_core::oscillate_2_cycles()
@@ -178,8 +178,8 @@ void age::gb_core::stop()
         m_key1 ^= 0x81;
     }
     m_double_speed = (m_key1 & 0x80) > 0;
-    m_cycles_per_cpu_tick = m_double_speed ? 2 : 4;
-    LOG("double speed " << m_double_speed << ", cycles per cpu tick " << m_cycles_per_cpu_tick);
+    m_machine_cycles_per_cpu_cycle = m_double_speed ? 2 : 4;
+    LOG("double speed " << m_double_speed << ", machine cycles per cpu cycle " << m_machine_cycles_per_cpu_cycle);
     insert_event(0, gb_event::switch_double_speed);
 }
 
@@ -282,7 +282,7 @@ void age::gb_core::check_halt_mode()
         // on interrupts during a halt)
         if (m_cgb)
         {
-            oscillate_cpu_tick();
+            oscillate_cpu_cycle();
         }
 
         LOG("halt mode terminated");

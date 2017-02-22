@@ -427,7 +427,7 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::sound_frame_sequencer:
-                m_sound.frame_sequencer_tick();
+                m_sound.frame_sequencer_cycle();
                 break;
 
             case gb_event::lcd_lyc_check:
@@ -520,7 +520,7 @@ void age::gb_bus::handle_dma()
         ++m_dma_destination;
     }
 
-    m_core.oscillate_cpu_tick();
+    m_core.oscillate_cpu_cycle();
 
     // update HDMA5
     uint remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
@@ -619,7 +619,7 @@ void age::gb_bus::handle_oam_dma()
 
     uint oscillation_cycle = m_core.get_oscillation_cycle();
     uint cycles_elapsed = oscillation_cycle - m_oam_dma_last_cycle;
-    cycles_elapsed &= ~(m_core.get_cycles_per_cpu_tick() - 1);
+    cycles_elapsed &= ~(m_core.get_machine_cycles_per_cpu_cycle() - 1);
     m_oam_dma_last_cycle += cycles_elapsed;
     cycles_elapsed <<= m_core.is_double_speed() ? 1 : 0;
 

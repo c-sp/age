@@ -237,7 +237,7 @@ bool age::gb_length_counter::write_nrX4(uint8 nrX4, bool next_frame_sequencer_st
     return disable;
 }
 
-bool age::gb_length_counter::tick()
+bool age::gb_length_counter::cycle()
 {
     bool deactivate = false;
 

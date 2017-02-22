@@ -25,7 +25,7 @@
 age::test_result age::create_gb_test_result(const gb_emulator &emulator, const QString &error_message)
 {
     age::test_result result;
-    result.m_cycles_emulated = emulator.get_emulated_ticks();
+    result.m_cycles_emulated = emulator.get_emulated_cycles();
     result.m_error_message = error_message;
     result.m_additional_message = emulator.is_cgb() ? "(CGB)" : "(DMG)";
     return result;
@@ -44,8 +44,8 @@ age::test_method age::mooneye_test_method()
     // this method is based on mooneye-gb/src/acceptance_tests/fixture.rs
     return [](const uint8_vector &test_rom) {
 
-        constexpr uint cycles_per_step = gb_cycles_per_second >> 8;
-        constexpr uint max_cycles = gb_cycles_per_second * 120;
+        constexpr uint cycles_per_step = gb_machine_cycles_per_second >> 8;
+        constexpr uint max_cycles = gb_machine_cycles_per_second * 120;
 
         // create emulator
         std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, false);

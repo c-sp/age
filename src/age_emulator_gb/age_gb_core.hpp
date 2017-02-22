@@ -67,12 +67,12 @@ class gb_core : public non_copyable
 public:
 
     uint get_oscillation_cycle() const;
-    uint get_cycles_per_cpu_tick() const;
+    uint get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
     bool is_cgb() const;
     gb_mode get_mode() const;
 
-    void oscillate_cpu_tick();
+    void oscillate_cpu_cycle();
     void oscillate_2_cycles();
     void insert_event(uint oscillation_cycle_offset, gb_event event);
     void remove_event(gb_event event);
@@ -129,7 +129,7 @@ private:
     gb_mode m_mode = gb_mode::cpu_active;
 
     uint m_oscillation_cycle = 0;
-    uint m_cycles_per_cpu_tick = 4;
+    uint m_machine_cycles_per_cpu_cycle = 4;
 
     bool m_halt = false;
     bool m_ei = false;

@@ -396,8 +396,8 @@ public:
     //!
     uint get_pcm_sampling_rate() const;
 
-    uint get_ticks_per_second() const;
-    uint64 get_emulated_ticks() const;
+    uint get_cycles_per_second() const;
+    uint64 get_emulated_cycles() const;
 
     //!
     //! Get a copy of this emulator's persistent ram.
@@ -423,27 +423,27 @@ public:
     virtual void set_buttons_down(uint buttons) = 0;
     virtual void set_buttons_up(uint buttons) = 0;
 
-    bool emulate(uint64 min_ticks_to_emulate);
+    bool emulate(uint64 min_cycles_to_emulate);
 
 protected:
 
-    emulator(uint screen_width, uint screen_height, uint sampling_rate, uint ticks_per_second);
+    emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second);
 
     video_buffer_handler& get_video_buffer_handler();
     pcm_vector& get_pcm_vector();
 
-    virtual uint64 inner_emulate(uint64 min_ticks_to_emulate) = 0;
+    virtual uint64 inner_emulate(uint64 min_cycles_to_emulate) = 0;
 
     virtual std::string inner_get_emulator_title() const = 0;
 
 private:
 
     const uint m_sampling_rate;
-    const uint m_ticks_per_second;
+    const uint m_cycles_per_second;
 
     video_buffer_handler m_video_buffer_handler;
     pcm_vector m_audio_buffer;
-    uint64 m_emulated_ticks = 0;
+    uint64 m_emulated_cycles = 0;
 };
 
 

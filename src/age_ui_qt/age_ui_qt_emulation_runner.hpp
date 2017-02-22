@@ -89,12 +89,12 @@ private:
     // usable by multiple threads
 
     atomic_uint m_speed_percent = {0};
-    atomic_uint64 m_emulation_timer_ticks = {0};
+    atomic_uint64 m_emulation_timer_cycles = {0};
 
     // used only by event handling thread
 
     const int m_emulation_interval_milliseconds;
-    const uint64 m_emulation_interval_ticks;
+    const uint64 m_emulation_interval_nanos;
     QElapsedTimer m_timer;
     QTimer *m_emulation_event_trigger = nullptr;
 
@@ -105,7 +105,7 @@ private:
 
     bool m_synchronize = true;
     bool m_paused = false;
-    uint64 m_last_timer_ticks = 0;
+    uint64 m_last_timer_nanos = 0;
     speed_calculator<50> m_speed_calculator;
 
     std::shared_ptr<qt_emulator> m_emulator;

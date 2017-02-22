@@ -37,13 +37,13 @@
 age::qt_emulation_runner::qt_emulation_runner(qt_gl_renderer &renderer, int emulation_interval_milliseconds)
     : QObject(),
       m_emulation_interval_milliseconds(emulation_interval_milliseconds),
-      m_emulation_interval_ticks(static_cast<uint64>(m_emulation_interval_milliseconds * 1000000)),
+      m_emulation_interval_nanos(static_cast<uint64>(m_emulation_interval_milliseconds * 1000000)),
       m_renderer(renderer)
 {
     AGE_ASSERT(m_emulation_interval_milliseconds > 0);
 
     LOG("emulation interval: " << m_emulation_interval_milliseconds
-        << " milliseconds (" << m_emulation_interval_ticks << " ticks)");
+        << " milliseconds (" << m_emulation_interval_nanos << " nanos)");
 
     m_timer.start();
 }
@@ -73,7 +73,7 @@ age::uint age::qt_emulation_runner::get_speed_percent() const
 
 age::uint64 age::qt_emulation_runner::get_emulated_milliseconds() const
 {
-    return m_emulation_timer_ticks / 1000000;
+    return m_emulation_timer_cycles / 1000000;
 }
 
 
@@ -109,12 +109,12 @@ void age::qt_emulation_runner::set_emulator(std::shared_ptr<qt_emulator> new_emu
     AGE_ASSERT(sim != nullptr);
 
     m_speed_percent = 0;
-    m_emulation_timer_ticks = 0;
+    m_emulation_timer_cycles = 0;
 
     m_renderer.set_emulator_screen_size(sim->get_screen_width(), sim->get_screen_height());
     m_audio_output.set_input_sampling_rate(sim->get_pcm_sampling_rate());
 
-    m_last_timer_ticks = m_timer.nsecsElapsed();
+    m_last_timer_nanos = m_timer.nsecsElapsed();
     m_speed_calculator.clear();
 
     m_emulator = new_emulator;
@@ -162,7 +162,7 @@ void age::qt_emulation_runner::set_emulator_paused(bool paused)
         }
         else
         {
-            m_last_timer_ticks = m_timer.nsecsElapsed();
+            m_last_timer_nanos = m_timer.nsecsElapsed();
         }
 
         set_emulation_timer_interval();
@@ -263,29 +263,29 @@ void age::qt_emulation_runner::timer_event()
 
 void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> sim)
 {
-    uint64 current_timer_ticks = m_timer.nsecsElapsed();
-    uint64 timer_ticks_elapsed = current_timer_ticks - m_last_timer_ticks;
-    uint64 timer_ticks_to_add = m_synchronize ? timer_ticks_elapsed : m_emulation_interval_ticks;
+    uint64 current_timer_nanos = m_timer.nsecsElapsed();
+    uint64 timer_nanos_elapsed = current_timer_nanos - m_last_timer_nanos;
+    uint64 timer_nanos_to_add = m_synchronize ? timer_nanos_elapsed : m_emulation_interval_nanos;
 
-    // limit the ticks to emulate to not stall the system in case the CPU can't keep up
-    // (use a multiple of m_emulation_interval_ticks to allow evening out load spikes)
-    timer_ticks_to_add = std::min(timer_ticks_to_add, m_emulation_interval_ticks << 1);
+    // limit the cycles to emulate to not stall the system in case the CPU can't keep up
+    // (use a multiple of m_emulation_interval_nanos to allow evening out load spikes)
+    timer_nanos_to_add = std::min(timer_nanos_to_add, m_emulation_interval_nanos << 1);
 
     // emulate
-    uint64 emulated_ticks = sim->get_emulated_ticks();
-    uint64 emulation_timer_ticks = (m_emulation_timer_ticks += timer_ticks_to_add);
-    uint64 emulated_ticks_to_go = emulation_timer_ticks * sim->get_ticks_per_second() / 1000000000;
+    uint64 emulated_cycles = sim->get_emulated_cycles();
+    uint64 emulation_timer_nanos = (m_emulation_timer_cycles += timer_nanos_to_add);
+    uint64 emulated_cycles_to_go = emulation_timer_nanos * sim->get_cycles_per_second() / 1000000000;
 
     bool new_frame = false;
-    if (emulated_ticks_to_go > emulated_ticks)
+    if (emulated_cycles_to_go > emulated_cycles)
     {
-        uint64 ticks_to_emulate = emulated_ticks_to_go - emulated_ticks;
-        new_frame = sim->emulate(ticks_to_emulate);
+        uint64 cycles_to_emulate = emulated_cycles_to_go - emulated_cycles;
+        new_frame = sim->emulate(cycles_to_emulate);
 
         // calculate emulation speed & time
-        uint ticks_emulated = static_cast<uint>(sim->get_emulated_ticks() - emulated_ticks);
-        m_speed_calculator.add_value(ticks_emulated, timer_ticks_elapsed);
-        m_speed_percent = m_speed_calculator.get_speed_percent(sim->get_ticks_per_second(), 1000000000);
+        uint cycles_emulated = static_cast<uint>(sim->get_emulated_cycles() - emulated_cycles);
+        m_speed_calculator.add_value(cycles_emulated, timer_nanos_elapsed);
+        m_speed_percent = m_speed_calculator.get_speed_percent(sim->get_cycles_per_second(), 1000000000);
     }
 
     // update video & audio
@@ -295,8 +295,8 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> sim)
     }
     m_audio_output.buffer_samples(sim->get_audio_buffer());
 
-    // store the current ticks as reference for future emulate() calls
-    m_last_timer_ticks = current_timer_ticks;
+    // store the current nanos as reference for future emulate() calls
+    m_last_timer_nanos = current_timer_nanos;
 }
 
 

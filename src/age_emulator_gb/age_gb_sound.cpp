@@ -222,7 +222,7 @@ void age::gb_sound::write_nr52(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::frame_sequencer_tick()
+void age::gb_sound::frame_sequencer_cycle()
 {
     // see http://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Frame_Sequencer
 
@@ -238,10 +238,10 @@ void age::gb_sound::frame_sequencer_tick()
             // fall through
         case 0:
         case 4:
-            tick_length_counter<gb_channel_1>();
-            tick_length_counter<gb_channel_2>();
-            tick_length_counter<gb_channel_3>();
-            tick_length_counter<gb_channel_4>();
+            cycle_length_counter<gb_channel_1>();
+            cycle_length_counter<gb_channel_2>();
+            cycle_length_counter<gb_channel_3>();
+            cycle_length_counter<gb_channel_4>();
             // fall through
         case 1:
         case 3:

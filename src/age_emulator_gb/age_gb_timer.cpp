@@ -72,7 +72,7 @@ age::uint8 age::gb_timer::read_tima()
         {
             LOG("cleared tima");
             tima = 0;
-            m_tma_copy_cycle = m_tima_last_update_cycle + m_core.get_cycles_per_cpu_tick() - 1;
+            m_tma_copy_cycle = m_tima_last_update_cycle + m_core.get_machine_cycles_per_cpu_cycle() - 1;
         }
 
         // set TIMA to TMA, if necessary
@@ -189,7 +189,7 @@ void age::gb_timer::write_tac(uint8 value)
         read_tima();
 
         // perform timer "jump" by modifying cycle offsets
-        uint offset = (1ul << (m_tima_tick_cycle_shift - 1)) + m_core.get_cycles_per_cpu_tick() - 1;
+        uint offset = (1ul << (m_tima_tick_cycle_shift - 1)) + m_core.get_machine_cycles_per_cpu_cycle() - 1;
         m_tima_last_update_cycle -= offset;
         if (m_tma_copy_cycle != gb_no_cycle)
         {
@@ -278,17 +278,17 @@ void age::gb_timer::switch_double_speed_mode()
 
         // adjust TIMA offsets to new CPU speed
         read_tima();
-        uint next_tick = m_tima_last_update_cycle + (1ul << m_tima_tick_cycle_shift);
+        uint next_tick_cycle = m_tima_last_update_cycle + (1ul << m_tima_tick_cycle_shift);
 
         m_tima_tick_cycle_shift_offset = m_core.is_double_speed() ? 3 : 4;
         calculate_tima_cycle_shift();
         if (m_tima_running)
         {
-            AGE_ASSERT(next_tick >= cycle);
-            uint tima_cycle_diff = next_tick - cycle;
+            AGE_ASSERT(next_tick_cycle >= cycle);
+            uint tima_cycle_diff = next_tick_cycle - cycle;
 
-            next_tick = cycle + (switch_to_double_speed ? tima_cycle_diff >> 1 : tima_cycle_diff << 1);
-            m_tima_last_update_cycle = next_tick - (1ul << m_tima_tick_cycle_shift);
+            next_tick_cycle = cycle + (switch_to_double_speed ? tima_cycle_diff >> 1 : tima_cycle_diff << 1);
+            m_tima_last_update_cycle = next_tick_cycle - (1ul << m_tima_tick_cycle_shift);
             AGE_ASSERT(m_tima_last_update_cycle <= cycle);
 
             schedule_tima_event();
@@ -307,7 +307,7 @@ age::uint age::gb_timer::copy_tma(uint current_tima, uint current_cycle)
     {
         result = m_tma;
         LOG("tima set to tma " << result);
-        if (current_cycle >= m_tma_copy_cycle + m_core.get_cycles_per_cpu_tick())
+        if (current_cycle >= m_tma_copy_cycle + m_core.get_machine_cycles_per_cpu_cycle())
         {
             m_tma_copy_cycle = gb_no_cycle;
             LOG("cleared tma copy cycle");
@@ -342,7 +342,7 @@ void age::gb_timer::schedule_tima_event()
 {
     AGE_ASSERT(m_tima_running);
 
-    m_tima_next_overflow = m_tima_last_update_cycle + ((0x100 - m_tima) << m_tima_tick_cycle_shift) + m_core.get_cycles_per_cpu_tick() - 1;
+    m_tima_next_overflow = m_tima_last_update_cycle + ((0x100 - m_tima) << m_tima_tick_cycle_shift) + m_core.get_machine_cycles_per_cpu_cycle() - 1;
     LOG("last tima update on cycle " << m_tima_last_update_cycle);
     LOG("next tima overflow on cycle " << m_tima_next_overflow);
     uint current_cycle = m_core.get_oscillation_cycle();
