@@ -213,10 +213,10 @@ age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> u
 //
 //---------------------------------------------------------
 
-void age::qt_settings_video::set_simulator_screen_size(GLint width, GLint height)
+void age::qt_settings_video::set_emulator_screen_size(GLint width, GLint height)
 {
-    m_simulator_screen_width = width;
-    m_simulator_screen_height = height;
+    m_emulator_screen_width = width;
+    m_emulator_screen_height = height;
 
     update_filter_chain_controls(true);
 }
@@ -430,8 +430,8 @@ void age::qt_settings_video::update_filter_chain_controls(bool only_controls)
     uint i = 0;
     QString filter_string;
 
-    GLint width = m_simulator_screen_width;
-    GLint height = m_simulator_screen_height;
+    GLint width = m_emulator_screen_width;
+    GLint height = m_emulator_screen_height;
 
     // adjust filter chain widgets & create settings value
     for (qt_filter filter : m_filter_chain)

@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_test_application.hpp"
+#include "age_test_app.hpp"
 
 constexpr const char *arg_type = "type";
 constexpr const char *arg_ignore_list = "ignore-list";

@@ -18,29 +18,32 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_ui_qt_main_window.hpp"
+#ifndef AGE_TEST_MOONEYE_HPP
+#define AGE_TEST_MOONEYE_HPP
 
-// allow special types to be used as event parameter
-// (e.g. for connecting signals and slots with that parameter across multiple threads)
-Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
-Q_DECLARE_METATYPE(age::uint)
-Q_DECLARE_METATYPE(age::qt_downsampler_quality)
+//!
+//! \file
+//!
+
+#include "age_test.hpp"
 
 
 
-int main(int argc, char *argv[])
+namespace age
 {
-    QApplication a(argc, argv);
 
-    // register special types to allow queueing arguments of that type
-    // (e.g. for connecting signals and slots with that parameter across multiple threads)
-    qRegisterMetaType<std::shared_ptr<age::qt_emulator>>();
-    qRegisterMetaType<age::uint>();
-    qRegisterMetaType<age::qt_downsampler_quality>();
+test_result create_gb_test_result(const gb_emulator &emulator, const QString &error_message);
 
-    age::qt_main_window w;
-    w.show();
-    w.start();
+test_method mooneye_test_method();
 
-    return a.exec();
+test_method screenshot_test_png(bool force_dmg, bool dmg_green, uint cycles_to_emulate);
+
+test_method gambatte_dmg_test(const QString &test_file_name, QString &result_file_name);
+
+test_method gambatte_cgb_test(const QString &test_file_name, QString &result_file_name);
+
 }
+
+
+
+#endif // AGE_TEST_MOONEYE_HPP

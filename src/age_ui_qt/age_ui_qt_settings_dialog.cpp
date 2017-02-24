@@ -66,8 +66,8 @@ age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store>
     connect(m_settings_audio, SIGNAL(latency_changed(int)), this, SLOT(emit_audio_latency_changed(int)));
     connect(m_settings_audio, SIGNAL(downsampler_quality_changed(age::qt_downsampler_quality)), this, SLOT(emit_audio_downsampler_quality_changed(age::qt_downsampler_quality)));
 
-    connect(m_settings_miscellaneous, SIGNAL(pause_simulation_changed(bool)), this, SLOT(emit_misc_pause_simulation_changed(bool)));
-    connect(m_settings_miscellaneous, SIGNAL(synchronize_simulation_changed(bool)), this, SLOT(emit_misc_synchronize_simulation_changed(bool)));
+    connect(m_settings_miscellaneous, SIGNAL(pause_emulator_changed(bool)), this, SLOT(emit_misc_pause_emulator_changed(bool)));
+    connect(m_settings_miscellaneous, SIGNAL(synchronize_emulator_changed(bool)), this, SLOT(emit_misc_synchronize_emulator_changed(bool)));
     connect(m_settings_miscellaneous, SIGNAL(show_menu_bar_changed(bool)), this, SLOT(emit_misc_show_menu_bar_changed(bool)));
     connect(m_settings_miscellaneous, SIGNAL(show_status_bar_changed(bool)), this, SLOT(emit_misc_show_status_bar_changed(bool)));
     connect(m_settings_miscellaneous, SIGNAL(show_menu_bar_fullscreen_changed(bool)), this, SLOT(emit_misc_show_menu_bar_fullscreen_changed(bool)));
@@ -113,14 +113,14 @@ void age::qt_settings_dialog::set_open_file_dialog_directory(const QString &dire
     m_user_value_store->set_value(qt_settings_open_file_directory, directory);
 }
 
-void age::qt_settings_dialog::set_simulator_screen_size(GLint width, GLint height)
+void age::qt_settings_dialog::set_emulator_screen_size(GLint width, GLint height)
 {
-    m_settings_video->set_simulator_screen_size(width, height);
+    m_settings_video->set_emulator_screen_size(width, height);
 }
 
-void age::qt_settings_dialog::set_pause_simulation(bool pause_simulation)
+void age::qt_settings_dialog::set_pause_emulator(bool pause_emulator)
 {
-    m_settings_miscellaneous->set_pause_simulation(pause_simulation);
+    m_settings_miscellaneous->set_pause_emulator(pause_emulator);
 }
 
 
@@ -155,12 +155,12 @@ bool age::qt_settings_dialog::trigger_settings_event(qt_key_event event)
         m_settings_audio->decrease_volume();
         break;
 
-    case qt_key_event::misc_toggle_pause_simulation:
-        m_settings_miscellaneous->toggle_pause_simulation();
+    case qt_key_event::misc_toggle_pause_emulator:
+        m_settings_miscellaneous->toggle_pause_emulator();
         break;
 
-    case qt_key_event::misc_toggle_synchronize_simulation:
-        m_settings_miscellaneous->toggle_synchronize_simulation();
+    case qt_key_event::misc_toggle_synchronize_emulator:
+        m_settings_miscellaneous->toggle_synchronize_emulator();
         break;
 
     default:
@@ -274,14 +274,14 @@ void age::qt_settings_dialog::emit_audio_downsampler_quality_changed(age::qt_dow
 
 
 
-void age::qt_settings_dialog::emit_misc_pause_simulation_changed(bool pause_simulation)
+void age::qt_settings_dialog::emit_misc_pause_emulator_changed(bool pause_emulator)
 {
-    emit misc_pause_simulation_changed(pause_simulation);
+    emit misc_pause_emulator_changed(pause_emulator);
 }
 
-void age::qt_settings_dialog::emit_misc_synchronize_simulation_changed(bool synchronize_simulation)
+void age::qt_settings_dialog::emit_misc_synchronize_emulator_changed(bool synchronize_emulator)
 {
-    emit misc_synchronize_simulation_changed(synchronize_simulation);
+    emit misc_synchronize_emulator_changed(synchronize_emulator);
 }
 
 void age::qt_settings_dialog::emit_misc_show_menu_bar_changed(bool show_menu_bar)

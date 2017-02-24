@@ -28,7 +28,7 @@
 #include <age_ui_pcm_ring_buffer.hpp>
 #include <age_ui_downsampler.hpp>
 #include <age_ui_speed_calculator.hpp>
-#include <age_gb_simulator.hpp>
+#include <age_gb_emulator.hpp>
 
 // we skip the following includes for doxygen output since they would bloat the include graphs
 //! \cond
@@ -83,7 +83,7 @@ namespace age
 //!
 //! The num contains all available key events.
 //! Examples of key events are setting adjustments (e.g. increasing the audio volume)
-//! or pressing a simulator specific button (e.g. pressing the Gameboy's "start" button).
+//! or pressing a emulator specific button (e.g. pressing the Gameboy's "start" button).
 //!
 //! The value qt_key_event::none does not represent any actual key event.
 //! It is used for example when parsing a key event from a string fails because the
@@ -110,8 +110,8 @@ enum class qt_key_event
     audio_increase_volume,
     audio_decrease_volume,
 
-    misc_toggle_pause_simulation,
-    misc_toggle_synchronize_simulation
+    misc_toggle_pause_emulator,
+    misc_toggle_synchronize_emulator
 };
 
 
@@ -178,11 +178,11 @@ constexpr const char *qt_settings_keys_video_cycle_frames_to_blend = "keys/video
 constexpr const char *qt_settings_keys_audio_toggle_mute = "keys/audio_toggle_mute";
 constexpr const char *qt_settings_keys_audio_increase_volume = "keys/audio_increase_volume";
 constexpr const char *qt_settings_keys_audio_decrease_volume = "keys/audio_decrease_volume";
-constexpr const char *qt_settings_keys_misc_toggle_pause_simulation = "keys/misc_toggle_pause_simulation";
-constexpr const char *qt_settings_keys_misc_toggle_synchronize_simulation = "keys/misc_toggle_synchronize_simulation";
+constexpr const char *qt_settings_keys_misc_toggle_pause_emulator = "keys/misc_toggle_pause_emulator";
+constexpr const char *qt_settings_keys_misc_toggle_synchronize_emulator = "keys/misc_toggle_synchronize_emulator";
 
-constexpr const char *qt_settings_misc_pause_simulation = "miscellaneous/pause_simulation";
-constexpr const char *qt_settings_misc_synchronize_simulation = "miscellaneous/synchronize_simulation";
+constexpr const char *qt_settings_misc_pause_emulator = "miscellaneous/pause_emulator";
+constexpr const char *qt_settings_misc_synchronize_emulator = "miscellaneous/synchronize_emulator";
 constexpr const char *qt_settings_misc_menu_bar = "miscellaneous/menu_bar";
 constexpr const char *qt_settings_misc_status_bar = "miscellaneous/status_bar";
 constexpr const char *qt_settings_misc_menu_bar_fullscreen = "miscellaneous/menu_bar_fullscreen";
@@ -240,7 +240,7 @@ constexpr uint qt_renderer_new_video_frame = 2;
 constexpr uint qt_renderer_change_filter_chain = 4;
 constexpr uint qt_renderer_change_bilinear = 8;
 constexpr uint qt_renderer_change_viewport = 16;
-constexpr uint qt_renderer_change_simulator_screen_size = 32;
+constexpr uint qt_renderer_change_emulator_screen_size = 32;
 constexpr uint qt_renderer_change_frames_to_blend = 64;
 
 constexpr uint qt_video_frame_history_size = 4;

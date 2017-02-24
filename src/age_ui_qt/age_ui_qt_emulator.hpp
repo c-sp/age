@@ -18,29 +18,42 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_ui_qt_main_window.hpp"
+#ifndef AGE_UI_QT_EMULATOR_HPP
+#define AGE_UI_QT_EMULATOR_HPP
 
-// allow special types to be used as event parameter
-// (e.g. for connecting signals and slots with that parameter across multiple threads)
-Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
-Q_DECLARE_METATYPE(age::uint)
-Q_DECLARE_METATYPE(age::qt_downsampler_quality)
+//!
+//! \file
+//!
+
+#include "age_ui_qt.hpp"
+#include "age_ui_qt_user_value_store.hpp"
 
 
 
-int main(int argc, char *argv[])
+namespace age
 {
-    QApplication a(argc, argv);
 
-    // register special types to allow queueing arguments of that type
-    // (e.g. for connecting signals and slots with that parameter across multiple threads)
-    qRegisterMetaType<std::shared_ptr<age::qt_emulator>>();
-    qRegisterMetaType<age::uint>();
-    qRegisterMetaType<age::qt_downsampler_quality>();
+class qt_emulator
+{
+public:
 
-    age::qt_main_window w;
-    w.show();
-    w.start();
+    qt_emulator(const QByteArray &rom, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store);
+    ~qt_emulator();
 
-    return a.exec();
-}
+    std::shared_ptr<emulator> get_emulator();
+
+private:
+
+    static uint64 hash(const uint8_vector &vector);
+    static uint8_vector to_vector(const QByteArray &byte_array);
+
+    QString m_ram_key;
+    std::shared_ptr<emulator> m_emulator;
+    std::shared_ptr<qt_user_value_store> m_user_value_store;
+};
+
+} // namespace age
+
+
+
+#endif // AGE_UI_QT_EMULATOR_HPP
