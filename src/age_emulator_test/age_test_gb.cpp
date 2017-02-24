@@ -42,7 +42,7 @@ age::test_result age::create_gb_test_result(const gb_emulator &emulator, const Q
 age::test_method age::mooneye_test_method()
 {
     // this method is based on mooneye-gb/src/acceptance_tests/fixture.rs
-    return [](const uint8_vector &test_rom) {
+    return [](const uint8_vector &test_rom, const uint8_vector&) {
 
         constexpr uint cycles_per_step = gb_machine_cycles_per_second >> 8;
         constexpr uint max_cycles = gb_machine_cycles_per_second * 120;
@@ -74,5 +74,80 @@ age::test_method age::mooneye_test_method()
 
         // return an error message, if the test failed
         return create_gb_test_result(*emulator, pass ? "" : "failed");
+    };
+}
+
+
+
+//---------------------------------------------------------
+//
+//   screenshot test
+//
+//---------------------------------------------------------
+
+age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint cycles_to_emulate)
+{
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot) {
+
+        // create emulator & run test
+        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, force_dmg, dmg_green);
+        emulator->emulate(cycles_to_emulate);
+
+        // load the screenshot image data
+        QString error_message;
+        QImage image = QImage::fromData(screenshot.data(), screenshot.size());
+
+        // is the data format supported?
+        if (image.isNull())
+        {
+            error_message = "data format of screenshot not supported";
+        }
+
+        // check the screenshot size
+        else if ((emulator->get_screen_width() != static_cast<uint>(image.width()))
+                || (emulator->get_screen_height() != static_cast<uint>(image.height()))) {
+
+            QTextStream(&error_message)
+                    << "screen size ("
+                    << emulator->get_screen_width() << "x" << emulator->get_screen_height()
+                    << ") does not match screenshot size ("
+                    << image.width() << "x" << image.height() << ")";
+        }
+
+        // check the screenshot depth
+        else if ((sizeof(pixel) * 8) != image.depth())
+        {
+            QTextStream(&error_message)
+                    << "screen depth (" << (sizeof(pixel) * 8)
+                    << " bits) does not match screenshot depth ("
+                    << image.depth() << " bits)";
+        }
+
+        // compare the gameboy screen with the screenshot
+        else
+        {
+            image = image.mirrored(false, true); // the gameboy screen is stored upside down
+            const pixel *screenshot = reinterpret_cast<pixel*>(image.bits());
+            const pixel *screen = emulator->get_video_front_buffer().data();
+
+            for (uint i = 0, max = emulator->get_screen_width() * emulator->get_screen_height(); i < max; ++i)
+            {
+                if (*screen != *screenshot)
+                {
+                    uint x = i % emulator->get_screen_width();
+                    uint y = emulator->get_screen_height() - 1 - (i / emulator->get_screen_width());
+
+                    QTextStream(&error_message)
+                            << "screen and screenshot differ at position ("
+                            << x << ',' << y << ')';
+                    break;
+                }
+                ++screen;
+                ++screenshot;
+            }
+        }
+
+        // return an error message, if the test failed
+        return create_gb_test_result(*emulator, error_message);
     };
 }

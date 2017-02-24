@@ -20,6 +20,10 @@
 
 #include "age_test_gb.hpp"
 
+// gambatte tests run for 15 frames
+// (see gambatte/test/testrunner.cpp)
+constexpr age::uint test_cycles = age::gb_cycles_per_frame * 15;
+
 
 
 
@@ -29,10 +33,6 @@
 //   gambatte "out string" tests
 //
 //---------------------------------------------------------
-
-// gambatte tests run for 15 frames
-// (see gambatte/test/testrunner.cpp)
-constexpr age::uint test_cycles = age::gb_cycles_per_frame * 15;
 
 // the following tile_data array contents were copied from gambatte code
 // (gambatte/test/testrunner.cpp)
@@ -276,7 +276,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
 
 age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, bool force_dmg)
 {
-    return [=](const age::uint8_vector &test_rom) {
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&) {
 
         // create emulator & run test
         std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, force_dmg);
@@ -330,7 +330,7 @@ age::optional<bool> parse_outaudio_flag(const QString &string, const QString &pr
 
 age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg)
 {
-    return [=](const age::uint8_vector &test_rom) {
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&) {
 
         // create emulator & run test
         std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, force_dmg);
@@ -367,6 +367,17 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 //
 //---------------------------------------------------------
 
+QString find_screenshot_file(const QString &test_file, const QString &suffix)
+{
+    QFileInfo test_file_info(test_file);
+    QDir test_file_dir = test_file_info.absoluteDir();
+
+    QString screenshot_file_name = test_file_info.completeBaseName() + suffix;
+    bool screenshot_exists = test_file_dir.exists(screenshot_file_name);
+
+    return screenshot_exists ? test_file_dir.absoluteFilePath(screenshot_file_name) : "";
+}
+
 
 
 
@@ -377,31 +388,43 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 //
 //---------------------------------------------------------
 
-age::test_method gambatte_test(const QString &test_file, bool try_dmg)
+age::test_method gambatte_test(const QString &test_file_name, QString &result_file_name, bool for_dmg)
 {
+    // determine the type of the test by looking for different types of results
+    // (based on gambatte/test/testrunner.cpp)
+
     // check if the test result is a string on the gameboy screen
-    age::optional<bool> outaudio_flag = parse_outaudio_flag(test_file, try_dmg ? "dmg08_outaudio" : "cgb04c_outaudio");
+    age::optional<bool> outaudio_flag = parse_outaudio_flag(test_file_name, for_dmg ? "dmg08_outaudio" : "cgb04c_outaudio");
     if (!outaudio_flag.is_set())
     {
-        outaudio_flag = parse_outaudio_flag(test_file, "dmg08_cgb04c_outaudio");
+        outaudio_flag = parse_outaudio_flag(test_file_name, "dmg08_cgb04c_outaudio");
     }
     if (outaudio_flag.is_set())
     {
-        return gambatte_outaudio_test(outaudio_flag.get(true), try_dmg);
+        return gambatte_outaudio_test(outaudio_flag.get(true), for_dmg);
     }
 
     // check if the test result is a string on the gameboy screen
-    age::uint8_vector out_string = parse_out_string(test_file, try_dmg ? "dmg08_out" : "cgb04c_out");
+    age::uint8_vector out_string = parse_out_string(test_file_name, for_dmg ? "dmg08_out" : "cgb04c_out");
     if (out_string.empty())
     {
-        out_string = parse_out_string(test_file, "dmg08_cgb04c_out");
+        out_string = parse_out_string(test_file_name, "dmg08_cgb04c_out");
     }
     if (!out_string.empty())
     {
-        return gambatte_out_string_test(out_string, try_dmg);
+        return gambatte_out_string_test(out_string, for_dmg);
     }
 
-    //! \todo check if the test result is a screenshot
+    // check if the test result is a screenshot
+    result_file_name = find_screenshot_file(test_file_name, for_dmg ? "_dmg08.png" : "_cgb04c.png");
+    if (result_file_name.isEmpty())
+    {
+        result_file_name = find_screenshot_file(test_file_name, "_dmg08_cgb04c.png");
+    }
+    if (!result_file_name.isEmpty())
+    {
+        return age::screenshot_test_png(for_dmg, false, test_cycles);
+    }
 
     // return an empty method as we don't know the gambatte test type
     return age::test_method{};
@@ -409,12 +432,12 @@ age::test_method gambatte_test(const QString &test_file, bool try_dmg)
 
 
 
-age::test_method age::gambatte_dmg_test(const QString &test_file)
+age::test_method age::gambatte_dmg_test(const QString &test_file_name, QString &result_file_name)
 {
-    return gambatte_test(test_file, true);
+    return gambatte_test(test_file_name, result_file_name, true);
 }
 
-age::test_method age::gambatte_cgb_test(const QString &test_file)
+age::test_method age::gambatte_cgb_test(const QString &test_file_name, QString &result_file_name)
 {
-    return gambatte_test(test_file, false);
+    return gambatte_test(test_file_name, result_file_name, false);
 }

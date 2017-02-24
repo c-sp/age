@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_test.hpp"
+#include "age_test_app.hpp"
 
 
 
@@ -82,8 +82,8 @@ bool age::test_performance::summary_available() const
 
 void age::test_performance::print_summary() const
 {
-    qInfo("\nperformance:                    +--------------+--------------+--------------+");
-    qInfo("                                |      average |          min |          max |");
+    qInfo("\ntest performance:               +--------------+--------------+--------------+");
+    qInfo("                                |          min |      average |          max |");
     qInfo("    +---------------------------+--------------+--------------+--------------+");
 
     print_measurement(m_file_load_nanos, "file loading (us)", 1000);
@@ -100,7 +100,7 @@ void age::test_performance::print_measurement(const measurement &m, const QStrin
     qint64 min = (runs < 1) ? 0 : m.m_min / divisor;
     qint64 max = (runs < 1) ? 0 : m.m_max / divisor;
 
-    qInfo("    | %25s | %12lld | %12lld | %12lld |", qPrintable(task), avg, min, max);
+    qInfo("    | %25s | %12lld | %12lld | %12lld |", qPrintable(task), min, avg, max);
 }
 
 
@@ -113,8 +113,13 @@ void age::test_performance::print_measurement(const measurement &m, const QStrin
 //
 //---------------------------------------------------------
 
-age::test_runner::test_runner(const QString &test_file_name, test_method method, std::shared_ptr<test_performance> performance)
+age::test_runner::test_runner(const QString &test_file_name,
+                              const QString &result_file_name,
+                              test_method method,
+                              std::shared_ptr<test_performance> performance)
+
     : m_test_file_name(test_file_name),
+      m_result_file_name(result_file_name),
       m_test_performance(performance),
       m_test_method(method)
 {
@@ -124,59 +129,64 @@ age::test_runner::test_runner(const QString &test_file_name, test_method method,
 
 void age::test_runner::run()
 {
-    test_result result;
-    QElapsedTimer timer;
+    QString error_message;
 
     // read the test file
-    timer.start();
-    result.m_error_message = read_test_file();
-
-    // continue only if the file was sucessfully read
-    if (result.m_error_message.isEmpty())
+    if (!read_file(m_test_file_name, m_test_file, error_message))
     {
-        // store the time required for loading the file
-        if (m_test_performance != nullptr)
-        {
-            m_test_performance->file_loaded(timer.nsecsElapsed());
-        }
-
-        // execute the test
+        emit test_failed(m_test_file_name, error_message);
+    }
+    // read the result file, if there is one
+    else if (!m_result_file_name.isEmpty() && !read_file(m_result_file_name, m_result_file, error_message))
+    {
+        emit test_failed(m_test_file_name, error_message);
+    }
+    // execute the test
+    else
+    {
+        QElapsedTimer timer;
         timer.start();
-        result = m_test_method(m_test_file);
+
+        test_result result = m_test_method(m_test_file, m_result_file);
 
         // store the time required for executing the test
         if (m_test_performance != nullptr)
         {
             m_test_performance->test_executed(timer.nsecsElapsed(), result.m_cycles_emulated);
         }
-    }
 
-    // emit the result signal
-    if (result.m_error_message.isEmpty())
-    {
-        emit test_passed(m_test_file_name, result.m_additional_message);
-    }
-    else
-    {
-        QString message = result.m_additional_message.isEmpty()
-                ? result.m_error_message
-                : result.m_additional_message + ' ' + result.m_error_message;
+        // emit the result signal
+        if (result.m_error_message.isEmpty())
+        {
+            emit test_passed(m_test_file_name, result.m_additional_message);
+        }
+        else
+        {
+            QString message = result.m_additional_message.isEmpty()
+                    ? result.m_error_message
+                    : result.m_additional_message + ' ' + result.m_error_message;
 
-        emit test_failed(m_test_file_name, message);
+            emit test_failed(m_test_file_name, message);
+        }
     }
 }
 
 
 
-QString age::test_runner::read_test_file()
+bool age::test_runner::read_file(const QString &file_name, uint8_vector &destination, QString &error_message)
 {
-    QString error_message;
+    bool result = true;
+
+    // start timer for measuring the time spent on loading the file
+    QElapsedTimer timer;
+    timer.start();
 
     // open the test file
-    QFile file(m_test_file_name);
+    QFile file(file_name);
     if (!file.open(QIODevice::ReadOnly))
     {
-        error_message = "could not open file";
+        error_message = QString{"could not open file: "} + file_name;
+        result = false;
     }
 
     // read the whole test file
@@ -185,8 +195,8 @@ QString age::test_runner::read_test_file()
         const qint64 bytes_total = file.size();
         qint64 bytes_read = 0;
 
-        m_test_file = uint8_vector(bytes_total, 0);
-        char *buffer = reinterpret_cast<char*>(m_test_file.data());
+        destination.resize(bytes_total, 0);
+        char *buffer = reinterpret_cast<char*>(destination.data());
 
         // read until the buffer is filled
         while (bytes_read < bytes_total)
@@ -205,9 +215,16 @@ QString age::test_runner::read_test_file()
         // check if we read everything
         if (bytes_read < bytes_total)
         {
-            error_message = "could not read file";
+            error_message = QString{"could not read file: "} + file_name;
+            result = false;
         }
     }
 
-    return error_message;
+    // store the time required for loading the file on success
+    if (result && (m_test_performance != nullptr))
+    {
+        m_test_performance->file_loaded(timer.nsecsElapsed());
+    }
+
+    return result;
 }

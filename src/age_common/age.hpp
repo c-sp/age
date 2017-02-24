@@ -237,6 +237,11 @@ struct pixel
         return m_x8r8g8b8 == other.m_x8r8g8b8;
     }
 
+    bool operator!=(const pixel &other) const
+    {
+        return m_x8r8g8b8 != other.m_x8r8g8b8;
+    }
+
     uint32 m_x8r8g8b8;
 };
 

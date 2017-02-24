@@ -1,6 +1,6 @@
 
-QT += core
-QT -= gui
+# we need Qt GUI for QImage
+QT += core gui
 
 TARGET = age_emulator_test
 TEMPLATE = app
@@ -13,12 +13,12 @@ include($$PWD/../age.pri)
 
 SOURCES += \
     age_test_main.cpp \
-    age_test.cpp \
-    age_test_application.cpp \
     age_test_gb.cpp \
-    age_test_gb_gambatte.cpp
+    age_test_gb_gambatte.cpp \
+    age_test_app.cpp \
+    age_test_app_utils.cpp
 
 HEADERS += \
     age_test.hpp \
-    age_test_application.hpp \
-    age_test_gb.hpp
+    age_test_gb.hpp \
+    age_test_app.hpp

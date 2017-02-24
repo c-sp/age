@@ -18,7 +18,7 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "age_test_application.hpp"
+#include "age_test_app.hpp"
 
 
 
@@ -83,24 +83,32 @@ void age::test_application::schedule_tests()
     {
         for (QString file : files)
         {
-            QList<test_method> methods = collect_test_methods(file);
-            if (methods.isEmpty())
+            QString result_file;
+            test_method method;
+            uint scheduled = 0;
+
+            switch(m_type)
             {
-                m_no_test_method_found.append(file);
+                case test_type::mooneye_test:
+                    method = mooneye_test_method();
+                    scheduled += schedule_test(file, method);
+                    break;
+
+                case test_type::gambatte_test:
+                    method = gambatte_dmg_test(file, result_file);
+                    scheduled += schedule_test(file, method, result_file);
+                    method = gambatte_cgb_test(file, result_file);
+                    scheduled += schedule_test(file, method, result_file);
+                    break;
+
+                case test_type::screenshot_test:
+                    // not yet implemented
+                    break;
             }
 
-            for (test_method method : methods)
+            if (scheduled < 1)
             {
-                test_runner *test = new test_runner(file, method, m_test_performance);
-                test->setAutoDelete(true); // let QThreadPool clean this up
-
-                // connect via QueuedConnection since the signal is emitted across thread boundaries
-                // (the respective slot will be executed by this thread after the current method returns)
-                connect(test, SIGNAL(test_passed(QString,QString)), this, SLOT(test_passed(QString,QString)), Qt::QueuedConnection);
-                connect(test, SIGNAL(test_failed(QString,QString)), this, SLOT(test_failed(QString,QString)), Qt::QueuedConnection);
-
-                m_thread_pool.start(test);
-                ++m_tests_running;
+                m_no_test_method_found.append(file);
             }
         }
 
@@ -286,31 +294,22 @@ bool age::test_application::ignore_files(QSet<QString> &files) const
 
 
 
-QList<age::test_method> age::test_application::collect_test_methods(const QString &test_file) const
+int age::test_application::schedule_test(const QString &file_name, test_method method, const QString &result_file_name)
 {
-    QList<test_method> result;
-    switch(m_type)
+    int result = 0;
+    if (method)
     {
-        case test_type::mooneye_test:
-            result.append(mooneye_test_method());
-            break;
+        test_runner *test = new test_runner(file_name, result_file_name, method, m_test_performance);
+        test->setAutoDelete(true); // let QThreadPool clean this up
 
-        case test_type::gambatte_test:
-        {
-            test_method method_dmg = gambatte_dmg_test(test_file);
-            if (method_dmg) {
-                result.append(method_dmg);
-            }
-            test_method method_cgb = gambatte_cgb_test(test_file);
-            if (method_cgb) {
-                result.append(method_cgb);
-            }
-            break;
-        }
+        // connect via QueuedConnection since the signal is emitted across thread boundaries
+        // (the respective slot will be executed by this thread after the current method returns)
+        connect(test, SIGNAL(test_passed(QString,QString)), this, SLOT(test_passed(QString,QString)), Qt::QueuedConnection);
+        connect(test, SIGNAL(test_failed(QString,QString)), this, SLOT(test_failed(QString,QString)), Qt::QueuedConnection);
 
-        case test_type::screenshot_test:
-            qInfo("type not yet supported: screenshot_test");
-            ::exit(1);
+        m_thread_pool.start(test);
+        ++m_tests_running;
+        result = 1;
     }
     return result;
 }
@@ -337,10 +336,14 @@ void age::test_application::exit_app_on_finish()
         print_list(number_of_tests_message("failed", m_fail_messages.size(), tests), m_fail_messages);
         print_list(number_of_tests_message("failed with unknown type", m_no_test_method_found.size(), tests), m_no_test_method_found);
 
+        int length = 1 + static_cast<int>(std::log10(tests));
+        QString format;
+        QTextStream(&format) << "%16s: %" << length << "d of %" << length << "d, %3d%%";
+
         qInfo("\ntest summary:");
-        qInfo("    passed:        %d of %d", m_pass_messages.size(), tests);
-        qInfo("    failed:        %d of %d", m_fail_messages.size(), tests);
-        qInfo("    unknown type:  %d of %d", m_no_test_method_found.size(), tests);
+        qInfo(qPrintable(format), "passed", m_pass_messages.size(), tests, percent(m_pass_messages.size(), tests));
+        qInfo(qPrintable(format), "failed", m_fail_messages.size(), tests, percent(m_fail_messages.size(), tests));
+        qInfo(qPrintable(format), "unknown type", m_no_test_method_found.size(), tests, percent(m_no_test_method_found.size(), tests));
 
         if (m_test_performance->summary_available())
         {
@@ -363,19 +366,13 @@ QString age::test_application::test_message(const QString &test_file, const QStr
 
 QString age::test_application::number_of_tests_message(QString message, int number_of_tests, int total) const
 {
-    QString result = "\n";
-    result += QString::number(number_of_tests) + " of " + QString::number(total);
-    result += (number_of_tests == 1) ? " test " : " tests ";
-    result += message;
+    QString result;
+    QTextStream(&result)
+           << "\n" << number_of_tests << " of " << total
+           << ((number_of_tests == 1) ? " test " : " tests ")
+           << message
+           << " (" << percent(number_of_tests, total) << "%):";
 
-    if (total > 0)
-    {
-        result += " (";
-        result += QString::number(number_of_tests * 100 / total);
-        result += "%)";
-    }
-
-    result += ':';
     return result;
 }
 
@@ -389,4 +386,9 @@ void age::test_application::print_list(const QString &first_line, const QStringL
             qInfo("    %s", qPrintable(message));
         }
     }
+}
+
+int age::test_application::percent(int value, int total)
+{
+    return (0 == total) ? 0 : value * 100 / total;
 }
