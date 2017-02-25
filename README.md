@@ -11,9 +11,9 @@ AGE allows you to:
 - automatically store and load ***savegames*** (if supported by the Gameboy rom).
 - configure ***buttons*** and ***hotkeys*** as you like.
 - improve ***audio quality*** (applying a low pass filter with Kaiser window).
-- compile for Windows and Linux (and Mac? I did not try it yet) since AGE is not based on any OS specific code.
+- compile for Windows and Linux (and Mac? I did not try it yet) since AGE does not include any OS specific code.
 
-I do not expect AGE to be finished (in terms of "I will not continue working on it") any time soon. For details on my future plans please see the [milestones](../milestones).
+I do not expect AGE to be finished (in terms of "I will stop working on it") any time soon. For details on my future plans please see the [milestones](../milestones).
 
 ## Improve visual quality
 
