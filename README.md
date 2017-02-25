@@ -13,7 +13,7 @@ AGE allows you to:
 - improve ***audio quality*** (applying a low pass filter with Kaiser window).
 - compile for Windows and Linux (and Mac? I did not try it yet) since AGE is not based on any OS specific code.
 
-I do not expect AGE to be finished any time soon. For details on my future plans please see the [milestones](../milestones).
+I do not expect AGE to be finished (in terms of "I will not continue working on it") any time soon. For details on my future plans please see the [milestones](../milestones).
 
 ## Improve visual quality
 
