@@ -2,46 +2,42 @@
 
 # AGE - Another Gameboy Emulator
 
-AGE is a Gameboy emulator aiming at accuracy and usability. It is written in C++ and makes use of [Qt](https://www.qt.io) for platform independence.
+AGE is a [Gameboy](https://en.wikipedia.org/wiki/Game_Boy) emulator aiming at accuracy and usability. It is written in [C++](https://en.wikipedia.org/wiki/C%2B%2B) and makes use of [Qt](https://www.qt.io) to be platform independent.
 
 AGE allows you to:
 - run ***Gameboy*** and ***Gameboy Color*** roms.
 - improve the ***visual quality*** with image filters.
 - ***reduce flicker*** for some Gameboy roms.
-- automatically store and load ***savegames*** (if supported by the respective Gameboy rom).
+- automatically store and load ***savegames*** (if supported by the Gameboy rom).
 - configure ***buttons*** and ***hotkeys*** as you like.
 - improve ***audio quality*** (applying a low pass filter with Kaiser window).
-- compile for Windows and Linux (and Mac? I did not try it yet) since it is not based on any OS specific code.
+- compile for Windows and Linux (and Mac? I did not try it yet) since AGE is not based on any OS specific code.
 
 I do not expect AGE to be finished any time soon. For details on my future plans please see the [milestones](../milestones).
 
 ## Improve visual quality
 
-AGE can scale the Gameboy's low resolution visuals up to current screen resolutions without making them look blurry or blocky. I slightly modified the [scale2x](http://www.scale2x.it/) graphics effect to achieve that.
+AGE can scale the Gameboy's low resolution visuals up to current screen resolutions without making them look blurry or blocky. I slightly modified the [scale2x](http://www.scale2x.it/) graphics effect to achieve that. The following two images illustrate AGE's image filtering capabilities. They show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening).
 
-The following two images show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening).
-
-| No Image Filter | AGE's default Image Filter |
-|:---------------:|:--------------------------:|
-|![AGE - Zelda, no image filter](/readme_files/age_zelda_no_image_filter.png)*The scene looks "blocky" with the Gameboy's low resolution.*|![AGE - Zelda, image filter](/readme_files/age_zelda_image_filter.png)*Applying AGE's default image filters makes the scene look much better on current screen resolutions.*|
+| AGE's default Image Filter | No Image Filter |
+|:--------------------------:|:---------------:|
+|![AGE - Zelda, image filter](/readme_files/age_zelda_image_filter.png)*Applying AGE's default image filters makes the scene look much better on current screen resolutions.*|![AGE - Zelda, no image filter](/readme_files/age_zelda_no_image_filter.png)*The scene looks "blocky" which is caused by the Gameboy's low resolution.*|
 
 ## Reduce flicker
 
-Some Gameboy games make use of fast changing graphics to create a blur effect. On current screens this results in noticable flicker. AGE can migitate the flicker by blending a configurable number of frames together.
+Some Gameboy games make use of fast changing graphics to create a transparency effect. On current screens this results in noticable flicker. AGE can migitate the flicker by blending frames together. The following two images demonstrate that. They show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening). Note that the black ball is supposed to depict a dog.
 
-The following two images show a scene from Nintendo's [The Legend of Zelda: Link’s Awakening DX](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Link's_Awakening). Note that the black ball is supposed to depict a dog.
-
-| Flicker | No Flicker |
-|:-------:|:----------:|
-|![AGE - Zelda, flicker](/readme_files/age_zelda_flicker.png)*The dog's chain and shadow flicker since they are visible only on every other frame.*|![AGE - Zelda, no flicker](/readme_files/age_zelda_no_flicker.png)*Blending two frames causes the dog's chain and shadow to not flicker any more.*|
+| No Flicker | Flicker |
+|:----------:|:-------:|
+|![AGE - Zelda, no flicker](/readme_files/age_zelda_no_flicker.png)*Blending two frames prevents flicker on the dog's chain and shadow.*|![AGE - Zelda, flicker](/readme_files/age_zelda_flicker.png)*The dog's chain and shadow flicker since they are visible only on every other frame.*|
 
 ## Settings and savegames
 
-AGE stores settings and savegames in a subdirectory called `.age_emulator` it creates in your home directory.
+AGE stores all settings and savegames in a subdirectory called `.age_emulator` it creates in your home directory.
 
 # The AGE CI pipeline
 
-AGE is continuously being built using GitLab's [CI pipeline](/../pipelines) with [docker-qt-gcc](https://gitlab.com/csprenger/docker-qt-gcc), a docker image I created to build [Qt](https://www.qt.io) applications.
+AGE is continuously being built and tested using GitLab's [CI pipeline](/../pipelines) with [docker-age-ci](https://gitlab.com/csprenger/docker-age-ci), which is based on [docker-qt-gcc](https://gitlab.com/csprenger/docker-qt-gcc), a docker image I created to build [Qt](https://www.qt.io) applications.
 
 # History
 
