@@ -79,8 +79,9 @@ test_gambatte_release:
     script:
         - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
 
-test_gambatte_debug:
-    <<: *test_preset_debug
-    script:
-        - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
+# gambatte tests run for longer than 10 minutes with the debug build
+#test_gambatte_debug:
+#    <<: *test_preset_debug
+#    script:
+#        - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
 
