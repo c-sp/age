@@ -53,7 +53,7 @@ wram_dumper.gbc
 
 ##################################################################
 ###
-###   gambatte tests missing a valid result indicator
+###   gambatte tests with no known result
 ###
 ##################################################################
 
