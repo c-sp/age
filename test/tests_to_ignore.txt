@@ -175,17 +175,12 @@ window/on_screen/late_wx_ds_2.gbc
 
 ###   mooneye-gb
 
-acceptance/bits/unused_hwio-GS.gb
 acceptance/boot_hwio-dmg0.gb
 acceptance/boot_hwio-S.gb
 acceptance/boot_regs-dmg0.gb
 acceptance/boot_regs-mgb.gb
 acceptance/boot_regs-sgb.gb
 acceptance/boot_regs-sgb2.gb
-acceptance/call_cc_timing.gb
-acceptance/call_cc_timing2.gb
-acceptance/call_timing.gb
-acceptance/call_timing2.gb
 acceptance/gpu/hblank_ly_scx_timing-GS.gb
 acceptance/gpu/intr_2_0_timing.gb
 acceptance/gpu/intr_2_mode0_timing.gb
@@ -193,10 +188,6 @@ acceptance/gpu/intr_2_mode0_timing_sprites.gb
 acceptance/gpu/intr_2_mode3_timing.gb
 acceptance/gpu/intr_2_oam_ok_timing.gb
 acceptance/gpu/vblank_stat_intr-GS.gb
-acceptance/push_timing.gb
-acceptance/ret_cc_timing.gb
-acceptance/reti_intr_timing.gb
-acceptance/rst_timing.gb
 acceptance/timer/div_write.gb
 acceptance/timer/rapid_toggle.gb
 acceptance/timer/tim00.gb

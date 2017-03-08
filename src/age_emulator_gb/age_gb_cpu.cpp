@@ -143,9 +143,9 @@
 
 // RST (16 cycles)
 #define RST(opcode) { \
+    INC_CYCLES; \
     PUSH_PC \
     m_pc = opcode & 0x38; \
-    INC_CYCLES; \
     }
 
 // JP (16 cycles)
@@ -172,9 +172,9 @@
 // CALL (24 cycles)
 #define CALL { \
     uint16 _ret_pc = m_pc + 2; \
+    JP \
     PUSH_BYTE(_ret_pc >> 8) \
     PUSH_BYTE(_ret_pc) \
-    JP \
     }
 
 // CALL <cond> (24 cycles if jumped, 12 cycles if not)
@@ -201,6 +201,7 @@
 // RET <cond> (20 cycles if jumped, 8 cycles if not)
 #define RET_IF(condition) { \
     if (condition) { \
+    INC_CYCLES; \
     RET \
     } \
     INC_CYCLES; \
@@ -999,7 +1000,7 @@ void age::gb_cpu::emulate_instruction()
         case 0xDA: JP_IF(CARRY_FLAGGED) break;
 
         case 0xC9: RET break;
-        case 0xD9: RET m_core.ei(); break;
+        case 0xD9: RET m_core.ei_now(); break; // RETI
         case 0xC0: RET_IF(!ZERO_FLAGGED) break;
         case 0xC8: RET_IF(ZERO_FLAGGED) break;
         case 0xD0: RET_IF(!CARRY_FLAGGED) break;
@@ -1013,10 +1014,10 @@ void age::gb_cpu::emulate_instruction()
 
             // stack (push & pop)
 
-        case 0xC5: PUSH_BYTE(m_b) PUSH_BYTE(m_c) INC_CYCLES; break; // PUSH BC (16 cycles)
-        case 0xD5: PUSH_BYTE(m_d) PUSH_BYTE(m_e) INC_CYCLES; break; // PUSH DE (16 cycles)
-        case 0xE5: PUSH_BYTE(m_h) PUSH_BYTE(m_l) INC_CYCLES; break; // PUSH HL (16 cycles)
-        case 0xF5: PUSH_BYTE(m_a) { uint8 f; STORE_FLAGS_TO(f) PUSH_BYTE(f) } INC_CYCLES; break; // PUSH AF (16 cycles)
+        case 0xC5: INC_CYCLES; PUSH_BYTE(m_b) PUSH_BYTE(m_c) break; // PUSH BC (16 cycles)
+        case 0xD5: INC_CYCLES; PUSH_BYTE(m_d) PUSH_BYTE(m_e) break; // PUSH DE (16 cycles)
+        case 0xE5: INC_CYCLES; PUSH_BYTE(m_h) PUSH_BYTE(m_l) break; // PUSH HL (16 cycles)
+        case 0xF5: INC_CYCLES; PUSH_BYTE(m_a) { uint8 f; STORE_FLAGS_TO(f) PUSH_BYTE(f) } break; // PUSH AF (16 cycles)
 
         case 0xC1: POP_BYTE(m_c) POP_BYTE(m_b) break; // POP BC (12 cycles)
         case 0xD1: POP_BYTE(m_e) POP_BYTE(m_d) break; // POP DE (12 cycles)
@@ -1036,8 +1037,8 @@ void age::gb_cpu::emulate_instruction()
         case 0x37: m_carry_indicator = 0x100; m_hcs_flags = m_hcs_operand = 0; break;   // SCF
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
         case 0x76: m_next_byte_twice = m_core.halt() && !m_core.is_cgb(); break;        // HALT
-        case 0xF3: m_core.di(); break;   // DI
-        case 0xFB: m_core.ei(); break;   // EI
+        case 0xF3: m_core.di(); break; // DI
+        case 0xFB: m_core.ei_delayed(); break; // EI
 
         case 0x27: // DAA
         {

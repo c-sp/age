@@ -139,10 +139,18 @@ void age::gb_core::request_interrupt(gb_interrupt interrupt)
     LOG("interrupt requested: " << (uint)to_integral(interrupt));
 }
 
-void age::gb_core::ei()
+void age::gb_core::ei_delayed()
 {
     AGE_ASSERT(m_mode == gb_mode::cpu_active);
     m_ei = !m_ime;
+    LOG("ei " << m_ei << ", ime " << m_ime);
+}
+
+void age::gb_core::ei_now()
+{
+    AGE_ASSERT(m_mode == gb_mode::cpu_active);
+    m_ei = false;
+    m_ime = true;
     LOG("ei " << m_ei << ", ime " << m_ime);
 }
 
@@ -197,19 +205,19 @@ age::uint16 age::gb_core::get_interrupt_to_service()
     }
     else if (m_ime)
     {
-        uint8 interrupts = m_ie & m_if;
-        if (interrupts > 0)
+        uint8 interrupt = m_ie & m_if & 0x1F;
+        if (interrupt > 0)
         {
             AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
 
             // lower interrupt bits have higher priority
-            interrupts &= ~(interrupts - 1); // get lowest interrupt bit that is set
-            AGE_ASSERT(interrupts <= 0x60);
+            interrupt &= ~(interrupt - 1); // get lowest interrupt bit that is set
+            AGE_ASSERT(interrupt <= 0x20);
 
-            m_if &= ~interrupts; // clear interrupt bit
+            m_if &= ~interrupt; // clear interrupt bit
             m_ime = false; // disable interrupts
 
-            result = (interrupts < 8) ? gb_interrupt_pc_lookup[interrupts] : interrupts + 0x50;
+            result = (interrupt < 8) ? gb_interrupt_pc_lookup[interrupt] : interrupt + 0x50;
             LOG("noticed interrupt 0x" << std::hex << result << std::dec);
         }
     }
@@ -226,7 +234,7 @@ age::uint8 age::gb_core::read_key1() const
 
 age::uint8 age::gb_core::read_if() const
 {
-    LOG((uint)(m_if & 0x1F));
+    LOG((uint)m_if);
     return m_if;
 }
 
@@ -253,7 +261,7 @@ void age::gb_core::write_if(uint8 value)
 void age::gb_core::write_ie(uint8 value)
 {
     LOG((uint)value);
-    m_ie = value & 0x1F;
+    m_ie = value;
     check_halt_mode();
 }
 
@@ -268,7 +276,7 @@ void age::gb_core::write_ie(uint8 value)
 void age::gb_core::check_halt_mode()
 {
     // terminate halt mode once ie & if > 0, even if ime is cleared
-    if (m_halt && ((m_if & m_ie) > 0))
+    if (m_halt && ((m_if & m_ie & 0x1F) > 0))
     {
         m_halt = false;
         if (m_mode == gb_mode::halted)

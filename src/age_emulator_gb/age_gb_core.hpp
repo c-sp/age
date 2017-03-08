@@ -84,7 +84,8 @@ public:
     void finish_dma();
 
     void request_interrupt(gb_interrupt interrupt);
-    void ei();
+    void ei_delayed();
+    void ei_now();
     void di();
     bool halt();
     void stop();
