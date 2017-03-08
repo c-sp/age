@@ -182,10 +182,6 @@ acceptance/boot_regs-dmg0.gb
 acceptance/boot_regs-mgb.gb
 acceptance/boot_regs-sgb.gb
 acceptance/boot_regs-sgb2.gb
-acceptance/call_cc_timing.gb
-acceptance/call_cc_timing2.gb
-acceptance/call_timing.gb
-acceptance/call_timing2.gb
 acceptance/gpu/hblank_ly_scx_timing-GS.gb
 acceptance/gpu/intr_2_0_timing.gb
 acceptance/gpu/intr_2_mode0_timing.gb

@@ -172,9 +172,9 @@
 // CALL (24 cycles)
 #define CALL { \
     uint16 _ret_pc = m_pc + 2; \
+    JP \
     PUSH_BYTE(_ret_pc >> 8) \
     PUSH_BYTE(_ret_pc) \
-    JP \
     }
 
 // CALL <cond> (24 cycles if jumped, 12 cycles if not)
