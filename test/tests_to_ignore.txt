@@ -191,7 +191,6 @@ acceptance/gpu/intr_2_oam_ok_timing.gb
 acceptance/gpu/vblank_stat_intr-GS.gb
 acceptance/ret_cc_timing.gb
 acceptance/reti_intr_timing.gb
-acceptance/rst_timing.gb
 acceptance/timer/div_write.gb
 acceptance/timer/rapid_toggle.gb
 acceptance/timer/tim00.gb

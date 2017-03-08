@@ -143,9 +143,9 @@
 
 // RST (16 cycles)
 #define RST(opcode) { \
+    INC_CYCLES; \
     PUSH_PC \
     m_pc = opcode & 0x38; \
-    INC_CYCLES; \
     }
 
 // JP (16 cycles)
