@@ -189,7 +189,6 @@ acceptance/gpu/intr_2_mode0_timing_sprites.gb
 acceptance/gpu/intr_2_mode3_timing.gb
 acceptance/gpu/intr_2_oam_ok_timing.gb
 acceptance/gpu/vblank_stat_intr-GS.gb
-acceptance/push_timing.gb
 acceptance/ret_cc_timing.gb
 acceptance/reti_intr_timing.gb
 acceptance/rst_timing.gb

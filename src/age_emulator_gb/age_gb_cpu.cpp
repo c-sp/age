@@ -1013,10 +1013,10 @@ void age::gb_cpu::emulate_instruction()
 
             // stack (push & pop)
 
-        case 0xC5: PUSH_BYTE(m_b) PUSH_BYTE(m_c) INC_CYCLES; break; // PUSH BC (16 cycles)
-        case 0xD5: PUSH_BYTE(m_d) PUSH_BYTE(m_e) INC_CYCLES; break; // PUSH DE (16 cycles)
-        case 0xE5: PUSH_BYTE(m_h) PUSH_BYTE(m_l) INC_CYCLES; break; // PUSH HL (16 cycles)
-        case 0xF5: PUSH_BYTE(m_a) { uint8 f; STORE_FLAGS_TO(f) PUSH_BYTE(f) } INC_CYCLES; break; // PUSH AF (16 cycles)
+        case 0xC5: INC_CYCLES; PUSH_BYTE(m_b) PUSH_BYTE(m_c) break; // PUSH BC (16 cycles)
+        case 0xD5: INC_CYCLES; PUSH_BYTE(m_d) PUSH_BYTE(m_e) break; // PUSH DE (16 cycles)
+        case 0xE5: INC_CYCLES; PUSH_BYTE(m_h) PUSH_BYTE(m_l) break; // PUSH HL (16 cycles)
+        case 0xF5: INC_CYCLES; PUSH_BYTE(m_a) { uint8 f; STORE_FLAGS_TO(f) PUSH_BYTE(f) } break; // PUSH AF (16 cycles)
 
         case 0xC1: POP_BYTE(m_c) POP_BYTE(m_b) break; // POP BC (12 cycles)
         case 0xD1: POP_BYTE(m_e) POP_BYTE(m_d) break; // POP DE (12 cycles)
