@@ -201,6 +201,7 @@
 // RET <cond> (20 cycles if jumped, 8 cycles if not)
 #define RET_IF(condition) { \
     if (condition) { \
+    INC_CYCLES; \
     RET \
     } \
     INC_CYCLES; \
@@ -999,7 +1000,7 @@ void age::gb_cpu::emulate_instruction()
         case 0xDA: JP_IF(CARRY_FLAGGED) break;
 
         case 0xC9: RET break;
-        case 0xD9: RET m_core.ei(); break;
+        case 0xD9: RET m_core.ei_now(); break; // RETI
         case 0xC0: RET_IF(!ZERO_FLAGGED) break;
         case 0xC8: RET_IF(ZERO_FLAGGED) break;
         case 0xD0: RET_IF(!CARRY_FLAGGED) break;
@@ -1036,8 +1037,8 @@ void age::gb_cpu::emulate_instruction()
         case 0x37: m_carry_indicator = 0x100; m_hcs_flags = m_hcs_operand = 0; break;   // SCF
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
         case 0x76: m_next_byte_twice = m_core.halt() && !m_core.is_cgb(); break;        // HALT
-        case 0xF3: m_core.di(); break;   // DI
-        case 0xFB: m_core.ei(); break;   // EI
+        case 0xF3: m_core.di(); break; // DI
+        case 0xFB: m_core.ei_delayed(); break; // EI
 
         case 0x27: // DAA
         {
