@@ -56,8 +56,9 @@ enum class gb_event : uint
     lcd_lyc_check = 3,
     lcd_late_lyc_interrupt = 4,
     start_hdma = 5,
+    start_oam_dma = 6,
 
-    none = 6 // must always be the last value
+    none = 7 // must always be the last value
 };
 
 
