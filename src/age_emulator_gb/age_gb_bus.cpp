@@ -150,7 +150,7 @@ age::uint8 age::gb_bus::read_byte(uint16 address)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
-        if (m_lcd.is_oam_readable())
+        if (m_lcd.is_oam_readable() && !m_oam_dma_active)
         {
             result = m_lcd.get_oam()[address - 0xFE00];
         }
@@ -279,7 +279,7 @@ void age::gb_bus::write_byte(uint16 address, uint8 byte)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
-        if (m_lcd.is_oam_writable())
+        if (m_lcd.is_oam_writable() && !m_oam_dma_active)
         {
             m_lcd.get_oam()[address - 0xFE00] = byte;
         }
@@ -442,6 +442,13 @@ void age::gb_bus::handle_events()
                 m_core.start_dma();
                 break;
 
+            case gb_event::start_oam_dma:
+                m_oam_dma_last_cycle = m_core.get_oscillation_cycle();
+                m_oam_dma_active = true;
+                m_oam_dma_address = m_oam_dma_byte * 0x100;
+                m_oam_dma_offset = 0;
+                break;
+
             default:
                 AGE_ASSERT(false);
                 break;
@@ -551,10 +558,26 @@ void age::gb_bus::write_dma(uint8 value)
     // activate OAM DMA only, if value <= 0xDF
     if (value <= 0xDF)
     {
-        m_oam_dma_active = true;
-        m_oam_dma_address = value * 0x100;
-        m_oam_dma_offset = 0;
-        m_oam_dma_last_cycle = m_core.get_oscillation_cycle();
+        //
+        // verified by mooneye-gb tests
+        //
+        // OAM DMA starts after the next cpu cycle finishes
+        //
+        //      acceptance/oam_dma_start
+        //
+        // verified by gambatte tests
+        //
+        // there is no delay for CGB, the OAM DMA starts after
+        // the current cpu cycle finishes
+        //
+        //      oamdma/oamdma_src8000_vrambankchange_1_cgb04c_out0
+        //      oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
+        //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
+        //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
+        //
+        m_oam_dma_byte = value;
+        uint factor = m_core.is_cgb() ? 1 : 2;
+        m_core.insert_event(m_core.get_machine_cycles_per_cpu_cycle() * factor, gb_event::start_oam_dma);
     }
 }
 

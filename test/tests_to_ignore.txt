@@ -175,7 +175,6 @@ window/on_screen/late_wx_ds_2.gbc
 
 ###   mooneye-gb
 
-acceptance/add_sp_e_timing.gb
 acceptance/bits/unused_hwio-GS.gb
 acceptance/boot_hwio-dmg0.gb
 acceptance/boot_hwio-S.gb
@@ -194,17 +193,9 @@ acceptance/gpu/intr_2_mode0_timing_sprites.gb
 acceptance/gpu/intr_2_mode3_timing.gb
 acceptance/gpu/intr_2_oam_ok_timing.gb
 acceptance/gpu/vblank_stat_intr-GS.gb
-acceptance/jp_cc_timing.gb
-acceptance/jp_timing.gb
-acceptance/ld_hl_sp_e_timing.gb
-acceptance/oam_dma_restart.gb
-acceptance/oam_dma_start.gb
-acceptance/oam_dma_timing.gb
 acceptance/push_timing.gb
 acceptance/ret_cc_timing.gb
-acceptance/ret_timing.gb
 acceptance/reti_intr_timing.gb
-acceptance/reti_timing.gb
 acceptance/rst_timing.gb
 acceptance/timer/div_write.gb
 acceptance/timer/rapid_toggle.gb
