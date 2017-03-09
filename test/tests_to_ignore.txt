@@ -188,17 +188,6 @@ acceptance/gpu/intr_2_mode0_timing_sprites.gb
 acceptance/gpu/intr_2_mode3_timing.gb
 acceptance/gpu/intr_2_oam_ok_timing.gb
 acceptance/gpu/vblank_stat_intr-GS.gb
-acceptance/timer/div_write.gb
-acceptance/timer/rapid_toggle.gb
-acceptance/timer/tim00.gb
-acceptance/timer/tim01_div_trigger.gb
-acceptance/timer/tim10.gb
-acceptance/timer/tim10_div_trigger.gb
-acceptance/timer/tim11.gb
-acceptance/timer/tim11_div_trigger.gb
-acceptance/timer/tima_reload.gb
-acceptance/timer/tima_write_reloading.gb
-acceptance/timer/tma_write_reloading.gb
 misc/bits/unused_hwio-C.gb
 misc/boot_hwio-C.gb
 misc/boot_regs-A.gb
