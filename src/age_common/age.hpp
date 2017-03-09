@@ -104,11 +104,11 @@ private:
 //!
 //! \brief Utility class for creating an std::string containing a human readable form of the current time.
 //!
-class dbg_log_time : public std::string
+class age_log_time : public std::string
 {
 public:
 
-    dbg_log_time();
+    age_log_time();
 
 private:
 
@@ -120,7 +120,7 @@ private:
 
 
 #define AGE_ASSERT(x) assert(x)
-#define AGE_LOG(x) (age::concurrent_cout() << age::dbg_log_time() << " thread " << std::this_thread::get_id() << " " << __func__ << "  -  " << x).log_line()
+#define AGE_LOG(x) (age::concurrent_cout() << age::age_log_time() << " thread " << std::this_thread::get_id() << " " << __func__ << "  -  " << x).log_line()
 
 #else // #ifdef AGE_DEBUG
 

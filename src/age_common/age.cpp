@@ -46,12 +46,12 @@ void age::concurrent_cout::log_line()
 
 
 
-age::dbg_log_time::dbg_log_time()
+age::age_log_time::age_log_time()
     : std::string(get_timestamp())
 {
 }
 
-std::string age::dbg_log_time::get_timestamp()
+std::string age::age_log_time::get_timestamp()
 {
     using namespace std::chrono;
 

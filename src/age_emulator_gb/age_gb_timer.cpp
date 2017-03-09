@@ -21,7 +21,7 @@
 #include "age_gb_timer.hpp"
 
 #if 1
-#define LOG(x) DBG_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CYCLE_LOG(x)
 #else
 #define LOG(x)
 #endif

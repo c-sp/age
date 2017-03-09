@@ -21,7 +21,7 @@
 #include "age_gb_timer.hpp"
 
 #if 0
-#define COUNTER_LOG(x) DBG_GB_CYCLE_LOG(x)
+#define COUNTER_LOG(x) AGE_GB_CYCLE_LOG(x)
 #else
 #define COUNTER_LOG(x)
 #endif

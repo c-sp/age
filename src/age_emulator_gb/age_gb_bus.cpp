@@ -21,7 +21,7 @@
 #include "age_gb_bus.hpp"
 
 #if 0
-#define LOG(x) if (m_core.get_oscillation_cycle() < 150000) { DBG_GB_CYCLE_LOG(x); }
+#define LOG(x) if (m_core.get_oscillation_cycle() < 150000) { AGE_GB_CYCLE_LOG(x); }
 #else
 #define LOG(x)
 #endif

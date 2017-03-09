@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) { if ((m_core.get_oscillation_cycle() - 0 < 15000) && (get_ly() <= 2)) { DBG_GB_CYCLE_LOG("ly " << (uint)get_ly() << ", " << x); }}
+#define LOG(x) { if ((m_core.get_oscillation_cycle() - 0 < 15000) && (get_ly() <= 2)) { AGE_GB_CYCLE_LOG("ly " << (uint)get_ly() << ", " << x); }}
 #else
 #define LOG(x)
 #endif
