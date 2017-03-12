@@ -60,9 +60,9 @@ public:
     gb_tima_counter(gb_common_counter &counter);
 
     uint get_current_value() const;
-    uint get_counter_offset(uint for_tima_offset) const;
-    uint get_increment_bit(uint8 for_tac) const;
-    uint get_counts_since_increment() const;
+    uint get_cycle_offset(uint for_tima_offset) const;
+    uint get_trigger_bit(uint8 for_tac) const;
+    uint get_past_tima_counter(uint8 for_tima) const;
 
     void set_tima(uint tima);
     void set_frequency(uint tac);
@@ -110,7 +110,7 @@ private:
     gb_common_counter m_counter = {m_core};
     gb_tima_counter m_tima_counter = {m_counter};
     bool m_tima_running = false;
-    uint m_counts_since_tima_overflow = gb_no_cycle;
+    uint m_last_overflow_counter = 0;
 };
 
 } // namespace age

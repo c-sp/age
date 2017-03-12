@@ -106,20 +106,20 @@ age::uint age::gb_tima_counter::get_current_value() const
     return tima;
 }
 
-age::uint age::gb_tima_counter::get_counter_offset(uint for_tima_offset) const
+age::uint age::gb_tima_counter::get_cycle_offset(uint for_tima_offset) const
 {
     AGE_ASSERT(for_tima_offset > 0);
 
     uint counter = m_counter.get_current_value();
-
     uint tima = counter >> m_counter_shift;
     tima += for_tima_offset;
+    uint counter_offset = (tima << m_counter_shift) - counter;
 
-    uint offset = (tima << m_counter_shift) - counter;
-    return offset;
+    uint cycle_offset = m_counter.get_cycle_offset(counter_offset);
+    return cycle_offset;
 }
 
-age::uint age::gb_tima_counter::get_increment_bit(uint8 for_tac) const
+age::uint age::gb_tima_counter::get_trigger_bit(uint8 for_tac) const
 {
     uint counter = m_counter.get_current_value();
     uint shift = calculate_counter_shift(for_tac);
@@ -128,11 +128,14 @@ age::uint age::gb_tima_counter::get_increment_bit(uint8 for_tac) const
     return increment_bit;
 }
 
-age::uint age::gb_tima_counter::get_counts_since_increment() const
+age::uint age::gb_tima_counter::get_past_tima_counter(uint8 for_tima) const
 {
-    uint mask = (1 << m_counter_shift) - 1;
-    uint masked = m_counter.get_current_value() & mask;
-    return masked;
+    AGE_ASSERT(for_tima <= get_current_value());
+
+    uint tima = m_tima_origin + for_tima;
+    uint counter = tima << m_counter_shift;
+
+    return counter;
 }
 
 
