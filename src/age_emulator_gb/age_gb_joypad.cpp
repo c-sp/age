@@ -21,7 +21,7 @@
 #include "age_gb_joypad.hpp"
 
 #if 0
-#define LOG(x) DBG_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CYCLE_LOG(x)
 #else
 #define LOG(x)
 #endif

@@ -37,9 +37,9 @@
 
 
 #ifdef AGE_DEBUG
-#define DBG_GB_CYCLE_LOG(x) AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ": " << x)
+#define AGE_GB_CYCLE_LOG(x) AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ": " << x)
 #else
-#define DBG_GB_CYCLE_LOG(x)
+#define AGE_GB_CYCLE_LOG(x)
 #endif
 
 

@@ -32,6 +32,52 @@
 namespace age
 {
 
+class gb_common_counter : public non_copyable
+{
+public:
+
+    gb_common_counter(const gb_core &core);
+
+    uint get_current_value() const;
+    uint get_cycle_offset(uint for_counter_offset) const;
+
+    void reset();
+    void switch_double_speed_mode();
+
+private:
+
+    const gb_core &m_core;
+    uint m_counter_origin = 0;
+    uint m_cycle_shift = 2;
+};
+
+
+
+class gb_tima_counter
+{
+public:
+
+    gb_tima_counter(gb_common_counter &counter);
+
+    uint get_current_value() const;
+    uint get_cycle_offset(uint for_tima_offset) const;
+    uint get_trigger_bit(uint8 for_tac) const;
+    uint get_past_tima_counter(uint8 for_tima) const;
+
+    void set_tima(uint tima);
+    void set_frequency(uint tac);
+
+private:
+
+    static uint calculate_counter_shift(uint8 for_tac);
+
+    const gb_common_counter &m_counter;
+    uint m_tima_origin = 0;
+    uint m_counter_shift = 2;
+};
+
+
+
 class gb_timer : public non_copyable
 {
 public:
@@ -53,27 +99,18 @@ public:
 
 private:
 
-    uint copy_tma(uint current_tima, uint current_cycle);
-    void calculate_tima_cycle_shift();
-    uint calculate_next_overflow_cycle();
-    uint refresh_last_update_cycle(uint current_cycle);
-    void schedule_tima_event();
+    uint check_for_early_increment(uint new_increment_bit);
+    void schedule_timer_overflow();
 
-    mutable uint8 m_tima = 0;
+    uint8 m_tima = 0;
     uint8 m_tma = 0;
     uint8 m_tac = 0;
 
     gb_core &m_core;
-
-    uint m_div_cycle_offset = 0;
-    uint m_div_tick_cycle_shift = 8;
-
+    gb_common_counter m_counter = {m_core};
+    gb_tima_counter m_tima_counter = {m_counter};
     bool m_tima_running = false;
-    uint m_tima_tick_cycle_shift = 0;
-    uint m_tima_tick_cycle_shift_offset = 4;
-    uint m_tima_next_overflow = 0;
-    uint m_tima_last_update_cycle = 0;
-    uint m_tma_copy_cycle = gb_no_cycle;
+    uint m_last_overflow_counter = 0;
 };
 
 } // namespace age

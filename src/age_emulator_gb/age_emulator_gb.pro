@@ -27,7 +27,8 @@ SOURCES += \
     age_gb_sound_channels.cpp \
     age_gb_sound_utilities.cpp \
     age_gb_timer.cpp \
-    age_gb_emulator.cpp
+    age_gb_emulator.cpp \
+    age_gb_timer_utils.cpp
 
 HEADERS += \
     age_gb.hpp \
