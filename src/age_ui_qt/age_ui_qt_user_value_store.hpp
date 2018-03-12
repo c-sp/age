@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_UI_QT_USER_VALUES_HPP
-#define AGE_UI_QT_USER_VALUES_HPP
+#ifndef AGE_UI_QT_USER_VALUE_STORE_HPP
+#define AGE_UI_QT_USER_VALUE_STORE_HPP
 
 //!
 //! \file
@@ -88,4 +88,4 @@ private:
 
 
 
-#endif // AGE_UI_QT_USER_VALUES_HPP
+#endif // AGE_UI_QT_USER_VALUE_STORE_HPP

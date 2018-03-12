@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_TEST_MOONEYE_HPP
-#define AGE_TEST_MOONEYE_HPP
+#ifndef AGE_TEST_GB_HPP
+#define AGE_TEST_GB_HPP
 
 //!
 //! \file
@@ -46,4 +46,4 @@ test_method gambatte_cgb_test(const QString &test_file_name, QString &result_fil
 
 
 
-#endif // AGE_TEST_MOONEYE_HPP
+#endif // AGE_TEST_GB_HPP
