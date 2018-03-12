@@ -77,7 +77,7 @@ void age::gb_serial::write_sc(uint8 value)
     // trigger serial i/o transfer, if possible
     if (((m_sc & gb_sc_start_transfer) > 0) && (m_state == gb_serial_state::idle))
     {
-        if ((m_sc && gb_sc_terminal_selection) > 0)
+        if ((m_sc & gb_sc_terminal_selection) > 0)
         {
             m_state = gb_serial_state::during_transfer_internal;
             m_cycles_left = gb_serial_transfer_cycles;
