@@ -29,7 +29,6 @@
 //! \cond
 
 #include <atomic>
-#include <functional>
 #include <cmath>
 
 #include <QCommandLineParser>

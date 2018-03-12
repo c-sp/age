@@ -40,6 +40,7 @@
 #include <limits>
 #include <algorithm> // std::generate, std::fill, std::sort
 #include <memory> // std::shared_ptr
+#include <functional>
 
 #include <array>
 #include <vector>
