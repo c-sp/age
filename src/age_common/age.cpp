@@ -53,14 +53,13 @@ age::age_log_time::age_log_time()
 
 std::string age::age_log_time::get_timestamp()
 {
-    using namespace std::chrono;
-
-    system_clock::time_point tp = system_clock::now();
-    time_t tt = system_clock::to_time_t(tp);
+    std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(tp);
     tm *time_info = localtime(&tt);
 
-    system_clock::duration dtn = tp.time_since_epoch();
-    size_t milliseconds = dtn.count() * system_clock::period::num * 1000 / system_clock::period::den;
+    std::chrono::system_clock::duration dtn = tp.time_since_epoch();
+    size_t milliseconds = dtn.count() * std::chrono::system_clock::period::num * 1000
+                                      / std::chrono::system_clock::period::den;
 
     char tmp [80];
     strftime(tmp, 80, "%H:%M:%S", time_info);
