@@ -25,6 +25,8 @@
 //! \file
 //!
 
+#include <memory> // std::shared_ptr
+
 #include <QFileInfo>
 #include <QObject>
 #include <QThreadPool>

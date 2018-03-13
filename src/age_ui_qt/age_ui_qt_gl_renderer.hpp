@@ -25,6 +25,9 @@
 //! \file
 //!
 
+#include <functional>
+#include <memory>
+
 #include <QElapsedTimer>
 #include <QGLFunctions>
 #include <QGLWidget>
