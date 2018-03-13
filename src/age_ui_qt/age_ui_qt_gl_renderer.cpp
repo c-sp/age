@@ -18,8 +18,6 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <condition_variable>
-
 #include <QPaintEvent>
 #include <QResizeEvent>
 
