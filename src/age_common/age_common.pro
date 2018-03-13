@@ -10,10 +10,17 @@ include($$PWD/../age.pri)
 
 
 SOURCES += \
-    age.cpp
+    age_graphics.cpp \
+    age_debug.cpp \
+    age_emulator.cpp
 
 HEADERS += \
-    age.hpp
+    age_graphics.hpp \
+    age_types.hpp \
+    age_debug.hpp \
+    age_non_copyable.hpp \
+    age_audio.hpp \
+    age_emulator.hpp
 
 unix {
     target.path = /usr/lib

@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+
 #include "age_gb_lcd.hpp"
 
 #if 0

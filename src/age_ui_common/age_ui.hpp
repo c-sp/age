@@ -25,7 +25,7 @@
 //! \file
 //!
 
-#include <age.hpp>
+#include <age_types.hpp>
 
 // we skip the following includes for doxygen output since they would bloat the include graphs
 //! \cond

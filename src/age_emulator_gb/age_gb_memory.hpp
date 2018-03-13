@@ -25,6 +25,8 @@
 //! \file
 //!
 
+#include <functional>
+
 #include "age_gb.hpp"
 
 

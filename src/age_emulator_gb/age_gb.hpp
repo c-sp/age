@@ -32,7 +32,8 @@
 
 //! \endcond
 
-#include <age.hpp>
+#include <age_debug.hpp>
+#include <age_emulator.hpp>
 
 
 
