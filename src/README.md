@@ -21,5 +21,7 @@ AGE code has to stick to the following rules.
     include guard,
     e.g. the file *age_foo.hpp* would have the include guard
     *AGE_FOO_HPP*.
+1. **Do not include more than a header file really needs.**
+    Code required just for *cpp* files must not bloat header files.
 
 

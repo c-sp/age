@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <QGroupBox>
+
 #include "age_ui_qt_settings.hpp"
 
 #if 0

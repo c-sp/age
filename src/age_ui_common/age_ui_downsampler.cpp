@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <cmath>
+
 #include "age_ui_downsampler.hpp"
 
 #if 0

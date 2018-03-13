@@ -22,9 +22,6 @@
 //! \cond
 
 #include <cassert>
-#include <chrono>
-#include <iostream> // std::cout
-#include <iomanip> // std::quoted
 #include <sstream> // std::stringstream
 
 #include <thread>

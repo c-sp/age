@@ -18,6 +18,9 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <QCommandLineParser>
+#include <QTimer>
+
 #include "age_test_app.hpp"
 
 constexpr const char *arg_type = "type";

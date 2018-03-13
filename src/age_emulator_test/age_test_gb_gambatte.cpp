@@ -18,6 +18,11 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <memory> // std::shared_ptr
+
+#include <QDir>
+#include <QFileInfo>
+
 #include "age_test_gb.hpp"
 
 // gambatte tests run for 15 frames

@@ -25,6 +25,8 @@
 //! \file
 //!
 
+#include <age_audio.hpp>
+
 #include "age_gb_core.hpp"
 #include "age_gb_sound_utilities.hpp"
 

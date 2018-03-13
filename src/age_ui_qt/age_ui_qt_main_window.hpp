@@ -25,6 +25,10 @@
 //! \file
 //!
 
+#include <QMainWindow>
+
+#include <age_non_copyable.hpp>
+
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulation_runner.hpp"
 

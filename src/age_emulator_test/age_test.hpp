@@ -25,30 +25,10 @@
 //! \file
 //!
 
-// we skip the following includes for doxygen output since they would bloat the include graphs
-//! \cond
+#include <functional>
+#include <QString>
 
-#include <atomic>
-#include <cmath>
-
-#include <QCommandLineParser>
-#include <QCoreApplication>
-#include <QDir>
-#include <QElapsedTimer>
-#include <QFile>
-#include <QFileInfo>
-#include <QImage>
-#include <QRegExp>
-#include <QRunnable>
-#include <QSet>
-#include <QTextStream>
-#include <QThreadPool>
-#include <QTimer>
-
-//! \endcond
-
-#include <age_gb_emulator.hpp>
-
+#include <age_types.hpp>
 
 
 namespace age

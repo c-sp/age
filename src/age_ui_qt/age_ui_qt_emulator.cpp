@@ -18,6 +18,10 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <sstream>
+
+#include <age_gb_emulator.hpp>
+
 #include "age_ui_qt_emulator.hpp"
 
 #if 0

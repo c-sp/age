@@ -18,6 +18,16 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <QAction>
+#include <QContextMenuEvent>
+#include <QFileDialog>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QMenuBar>
+#include <QStatusBar>
+
+#include <age_gb.hpp>
+
 #include "age_ui_qt_main_window.hpp"
 
 #if 0

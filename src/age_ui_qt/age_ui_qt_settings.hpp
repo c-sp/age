@@ -25,6 +25,18 @@
 //! \file
 //!
 
+#include <QAudioDeviceInfo>
+#include <QAudioFormat>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialog>
+#include <QFrame>
+#include <QGridLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSet>
+
 #include "age_ui_qt_user_value_store.hpp"
 
 

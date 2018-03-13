@@ -18,6 +18,11 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <memory> // std::shared_ptr
+
+#include <QImage>
+#include <QTextStream>
+
 #include "age_test_gb.hpp"
 
 

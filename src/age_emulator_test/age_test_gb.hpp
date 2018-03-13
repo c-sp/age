@@ -25,6 +25,10 @@
 //! \file
 //!
 
+#include <QString>
+
+#include <age_gb_emulator.hpp>
+
 #include "age_test.hpp"
 
 

@@ -15,7 +15,6 @@ SOURCES += \
     age_ui_pcm_ring_buffer.cpp
 
 HEADERS += \
-    age_ui.hpp \
     age_ui_downsampler.hpp \
     age_ui_pcm_ring_buffer.hpp \
     age_ui_speed_calculator.hpp

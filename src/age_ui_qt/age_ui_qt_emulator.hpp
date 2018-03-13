@@ -25,6 +25,8 @@
 //! \file
 //!
 
+#include <age_emulator.hpp>
+
 #include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 

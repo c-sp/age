@@ -18,6 +18,9 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <QFile>
+#include <QElapsedTimer>
+
 #include "age_test_app.hpp"
 
 

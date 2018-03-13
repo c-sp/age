@@ -25,15 +25,8 @@
 //! \file
 //!
 
-// we skip the following includes for doxygen output since they would bloat the include graphs
-//! \cond
-
-#include <map> // std::multimap
-
-//! \endcond
-
 #include <age_debug.hpp>
-#include <age_emulator.hpp>
+#include <age_types.hpp>
 
 
 

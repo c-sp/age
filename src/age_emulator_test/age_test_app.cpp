@@ -18,6 +18,15 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <cmath>
+
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
+#include <QSet>
+#include <QStringList>
+#include <QTextStream>
+
 #include "age_test_app.hpp"
 
 

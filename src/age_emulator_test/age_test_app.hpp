@@ -25,6 +25,10 @@
 //! \file
 //!
 
+#include <QFileInfo>
+#include <QObject>
+#include <QThreadPool>
+
 #include "age_test_gb.hpp"
 
 

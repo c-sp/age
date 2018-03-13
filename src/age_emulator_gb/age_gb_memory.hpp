@@ -27,6 +27,8 @@
 
 #include <functional>
 
+#include <age_non_copyable.hpp>
+
 #include "age_gb.hpp"
 
 

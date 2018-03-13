@@ -25,6 +25,17 @@
 //! \file
 //!
 
+#include <QElapsedTimer>
+#include <QGLFunctions>
+#include <QGLWidget>
+#include <QOpenGLFunctions_3_0>
+#include <QOpenGLShaderProgram>
+#include <QThread>
+
+#include <age_graphics.hpp>
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
+
 #include "age_ui_qt.hpp"
 
 

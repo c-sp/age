@@ -25,6 +25,14 @@
 //! \file
 //!
 
+#include <memory> // std::shared_ptr
+
+#include <QSettings>
+#include <QString>
+#include <QVariant>
+
+#include <age_non_copyable.hpp>
+
 #include "age_ui_qt.hpp"
 
 

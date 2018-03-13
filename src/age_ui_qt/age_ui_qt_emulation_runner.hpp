@@ -25,6 +25,12 @@
 //! \file
 //!
 
+#include <QElapsedTimer>
+#include <QTimer>
+
+#include <age_non_copyable.hpp>
+#include <age_ui_speed_calculator.hpp>
+
 #include "age_ui_qt_gl_renderer.hpp"
 #include "age_ui_qt_audio.hpp"
 #include "age_ui_qt_emulator.hpp"

@@ -25,6 +25,8 @@
 //! \file
 //!
 
+#include <age_graphics.hpp>
+
 #include "age_gb_core.hpp"
 #include "age_gb_memory.hpp"
 

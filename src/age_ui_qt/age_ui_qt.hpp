@@ -25,50 +25,13 @@
 //! \file
 //!
 
-#include <age_ui_pcm_ring_buffer.hpp>
-#include <age_ui_downsampler.hpp>
-#include <age_ui_speed_calculator.hpp>
-#include <age_gb_emulator.hpp>
+#include <atomic>
 
-// we skip the following includes for doxygen output since they would bloat the include graphs
-//! \cond
+#include <QString>
+#include <QtGui/qopengl.h>
 
-#include <QOpenGLShaderProgram>
-#include <QOpenGLFunctions_3_0> // we don't use Qt's frame buffer object class since it's not flexible enough
+#include <age_types.hpp>
 
-#include <QApplication>
-#include <QDrag>
-#include <QElapsedTimer>
-#include <QFile>
-#include <QKeySequence>
-#include <QMainWindow>
-#include <QMap>
-#include <QMenuBar>
-#include <QMimeData>
-#include <QSet>
-#include <QSettings>
-#include <QThread>
-#include <QTimer>
-
-#include <QtGui/QResizeEvent>
-
-#include <QtMultimedia/QAudioOutput>
-
-#include <QtOpenGL/QGLFunctions>
-
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QRadioButton>
-#include <QtWidgets/QSpacerItem>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QVBoxLayout>
-
-//! \endcond
 
 
 // The following operators must be declared outside of any namespace.
@@ -79,6 +42,9 @@ std::string operator+(const std::string &std_string, const QString &q_string);
 
 namespace age
 {
+
+typedef std::atomic_size_t  atomic_uint;
+typedef std::atomic<uint64> atomic_uint64;
 
 //!
 //! The num contains all available key events.

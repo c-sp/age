@@ -18,6 +18,12 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
+#include <QGroupBox>
+#include <QMimeData>
+
 #include "age_ui_qt_settings.hpp"
 
 #if 0
