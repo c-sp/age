@@ -346,7 +346,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         // pcm samples for equality
         // (similar to gambatte/test/testrunner.cpp)
         bool all_equal = true;
-        const age::lpcm_stereo_sample first_sample = emulator->get_audio_buffer()[0];
+        const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
 
         for (age::uint i = 1; i < age::gb_cycles_per_frame; ++i)
         {

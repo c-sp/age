@@ -27,7 +27,7 @@
 
 #include <array>
 
-#include <age_audio.hpp>
+#include <age_pcm_sample.hpp>
 #include <age_debug.hpp>
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
@@ -143,7 +143,7 @@ private:
         channel_s01 = ((m_nr51 & channel_bit) > 0) ? channel_s01 : 0;
         channel_s02 = (((m_nr51 >> 4) & channel_bit) > 0) ? channel_s02 : 0;
 
-        lpcm_stereo_sample channel_multiplier = {channel_s02, channel_s01};
+        pcm_sample channel_multiplier = {channel_s02, channel_s01};
         set_channel_multiplier<channel>(channel_multiplier.m_stereo_sample);
     }
 

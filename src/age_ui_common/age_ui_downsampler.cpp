@@ -78,10 +78,10 @@ void age::downsampler::set_volume(float volume)
 
 void age::downsampler::add_output_sample(int16 left, int16 right)
 {
-    add_output_sample(lpcm_stereo_sample(left, right));
+    add_output_sample(pcm_sample(left, right));
 }
 
-void age::downsampler::add_output_sample(lpcm_stereo_sample sample)
+void age::downsampler::add_output_sample(pcm_sample sample)
 {
     sample *= m_volume;
     m_output_samples.push_back(sample);
@@ -146,7 +146,7 @@ void age::downsampler_linear::add_input_samples(const pcm_vector &samples)
 
 
 
-void age::downsampler_linear::add_output_sample(const lpcm_stereo_sample &left_sample, const lpcm_stereo_sample &right_sample)
+void age::downsampler_linear::add_output_sample(const pcm_sample &left_sample, const pcm_sample &right_sample)
 {
     int32 fraction = static_cast<int32>(m_right_sample_fraction);
     int32 diff[2], interpolated[2];

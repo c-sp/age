@@ -28,7 +28,7 @@
 #include <functional>
 #include <vector>
 
-#include <age_audio.hpp>
+#include <age_pcm_sample.hpp>
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
@@ -53,7 +53,7 @@ public:
 protected:
 
     void add_output_sample(int16 left, int16 right);
-    void add_output_sample(lpcm_stereo_sample sample);
+    void add_output_sample(pcm_sample sample);
 
     //!
     //! This variable contains the number of input samples required for
@@ -88,12 +88,12 @@ public:
 
 private:
 
-    void add_output_sample(const lpcm_stereo_sample &left_sample, const lpcm_stereo_sample &right_sample);
+    void add_output_sample(const pcm_sample &left_sample, const pcm_sample &right_sample);
 
     uint m_right_sample_index = 1; // 0 = use last sample as left, 1 = use first sample of new samples as left
     uint m_right_sample_fraction = 0;
 
-    lpcm_stereo_sample m_last_input_sample;
+    pcm_sample m_last_input_sample;
 };
 
 

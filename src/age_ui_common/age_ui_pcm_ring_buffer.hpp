@@ -25,7 +25,7 @@
 //! \file
 //!
 
-#include <age_audio.hpp>
+#include <age_pcm_sample.hpp>
 #include <age_types.hpp>
 
 
@@ -34,7 +34,7 @@ namespace age
 {
 
 //!
-//! \brief Provides a simple ring buffer to store a fixed amount of {@link lpcm_stereo_sample}s.
+//! \brief Provides a simple ring buffer to store a fixed amount of {@link pcm_sample}s.
 //!
 //! While samples can be constantly added to the buffer even if it is completely filled, only the last \c C
 //! will be kept, where \c C is the buffer's capacity.
@@ -49,7 +49,7 @@ public:
     //! \brief Create a ring buffer of the specified capacity.
     //!
     //! \param max_buffered_samples The ring buffer's capacity.
-    //! This is the maximal number of {@link lpcm_stereo_sample}s this ring buffer can store.
+    //! This is the maximal number of {@link pcm_sample}s this ring buffer can store.
     //!
     pcm_ring_buffer(uint max_buffered_samples);
 
@@ -57,12 +57,12 @@ public:
     //! \brief Get the ring buffer's capacity.
     //!
     //! \return The ring buffer's capcity.
-    //! This is equivalent to the maximal number of {@link lpcm_stereo_sample}s this ring buffer can store.
+    //! This is equivalent to the maximal number of {@link pcm_sample}s this ring buffer can store.
     //!
     uint get_max_buffered_samples() const;
 
     //!
-    //! \brief Get the actual number of {@link lpcm_stereo_sample}s currently buffered.
+    //! \brief Get the actual number of {@link pcm_sample}s currently buffered.
     //!
     uint get_buffered_samples() const;
 
@@ -75,7 +75,7 @@ public:
     uint get_last_discarded_samples() const;
 
     //!
-    //! \brief Get a pointer to the currently buffered {@link lpcm_stereo_sample}s.
+    //! \brief Get a pointer to the currently buffered {@link pcm_sample}s.
     //!
     //! Since buffered samples might wrap around from the internal buffer's end to the buffer's beginning, calling
     //! this method immediately after discarding the returned samples using discard_buffered_samples()
@@ -87,26 +87,26 @@ public:
     //! returned pointer.
     //! If no samples are available, it will be set to 0 (zero).
     //!
-    //! \return A pointer to the currently buffered {@link lpcm_stereo_sample}s.
+    //! \return A pointer to the currently buffered {@link pcm_sample}s.
     //! If no samples are buffered, \c nullptr will be returned.
     //!
-    const lpcm_stereo_sample* get_buffered_samples_ptr(uint &available_stereo_samples) const;
+    const pcm_sample* get_buffered_samples_ptr(uint &available_stereo_samples) const;
 
 
 
     //!
-    //! \brief Add the specified {@link lpcm_stereo_sample}s to this ring buffer.
+    //! \brief Add the specified {@link pcm_sample}s to this ring buffer.
     //!
     //! This convenience method simply calls
     //! add_samples(const pcm_vector &samples_to_add, uint num_samples_to_add)
     //! with \c num_samples_to_add set to the size of \c samples_to_add.
     //!
-    //! \param samples_to_add The {@link lpcm_stereo_sample}s to be added to this ring buffer.
+    //! \param samples_to_add The {@link pcm_sample}s to be added to this ring buffer.
     //!
     void add_samples(const pcm_vector &samples_to_add);
 
     //!
-    //! \brief Add the specified {@link lpcm_stereo_sample}s to this ring buffer.
+    //! \brief Add the specified {@link pcm_sample}s to this ring buffer.
     //!
     //! Add the first \c num_samples_to_add samples of \c samples_to_add to this ring buffer.
     //! If \c num_samples_to_add is bigger than the size of \c samples_to_add, the whole contents
@@ -117,25 +117,25 @@ public:
     //! If more samples shall be buffered than this ring buffer can hold, only the last \c C samples
     //! will be stored into the ring buffer, where \c C is the ring buffer's capacity.
     //!
-    //! \param samples_to_add The {@link lpcm_stereo_sample}s to be added to this ring buffer.
+    //! \param samples_to_add The {@link pcm_sample}s to be added to this ring buffer.
     //! \param num_samples_to_add The number of samples to copy from \c samples_to_add into
     //! this ring buffer.
     //!
     void add_samples(const pcm_vector &samples_to_add, uint num_samples_to_add);
 
     //!
-    //! \brief Replace the buffered samples with the specified lpcm_stereo_sample.
+    //! \brief Replace the buffered samples with the specified pcm_sample.
     //!
     //! This will discard the buffer's current content and fill the whole buffer with the specified sample.
     //! Thus, when this method finishes, get_buffered_samples() will be equal to get_max_buffered_samples().
     //! Calling this method will cause get_last_discarded_samples() to return 0 (zero).
     //!
-    //! \param sample The lpcm_stereo_sample to fill the buffer with.
+    //! \param sample The pcm_sample to fill the buffer with.
     //!
-    void set_to(lpcm_stereo_sample sample);
+    void set_to(pcm_sample sample);
 
     //!
-    //! \brief Discard the specified amount of buffered {@link lpcm_stereo_sample}s.
+    //! \brief Discard the specified amount of buffered {@link pcm_sample}s.
     //!
     //! Calling this method causes the pointer returned by get_buffered_samples_ptr() to move forward by
     //! \c samples_to_discard samples.
@@ -145,14 +145,14 @@ public:
     //! If \c samples_to_discard is greater than the number of currently buffered samples, the outcome will be
     //! the same as if \c samples_to_discard was the exact number of buffered samples.
     //!
-    //! \param samples_to_discard The number of buffered {@link lpcm_stereo_sample}s to discard.
+    //! \param samples_to_discard The number of buffered {@link pcm_sample}s to discard.
     //!
     void discard_buffered_samples(uint samples_to_discard);
 
     //!
     //! \brief Clear the whole ring buffer.
     //!
-    //! Discard all currently buffered {@link lpcm_stereo_sample}s.
+    //! Discard all currently buffered {@link pcm_sample}s.
     //! The value returned by get_last_discarded_samples() is not influenced.
     //!
     void clear();

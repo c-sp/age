@@ -28,7 +28,7 @@
 #include <algorithm> // std::min
 #include <limits>
 
-#include <age_audio.hpp>
+#include <age_pcm_sample.hpp>
 #include <age_debug.hpp>
 #include <age_types.hpp>
 

@@ -26,7 +26,7 @@
 #include <QSizePolicy>
 #include <QVBoxLayout>
 
-#include <age_audio.hpp>
+#include <age_pcm_sample.hpp>
 #include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
@@ -177,7 +177,7 @@ void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo &dev
 
     m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
 
-    int samples = buffer_size / sizeof(lpcm_stereo_sample);
+    int samples = buffer_size / sizeof_pcm_sample;
     int millis = samples * 1000 / format.sampleRate();
     m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
                             + QString::number(samples) + " samples, "

@@ -15,19 +15,21 @@
 
 namespace age {
 
-struct lpcm_stereo_sample
+
+
+struct pcm_sample
 {
-    lpcm_stereo_sample()
-        : lpcm_stereo_sample(0, 0)
+    pcm_sample()
+        : pcm_sample(0, 0)
     {}
 
-    lpcm_stereo_sample(int16 left_sample, int16 right_sample)
+    pcm_sample(int16 left_sample, int16 right_sample)
     {
         m_samples[0] = left_sample;
         m_samples[1] = right_sample;
     }
 
-    lpcm_stereo_sample& operator*=(float factor)
+    pcm_sample& operator*=(float factor)
     {
         AGE_ASSERT(factor <= 1);
         AGE_ASSERT(factor >= 0);
@@ -36,26 +38,26 @@ struct lpcm_stereo_sample
         return *this;
     }
 
-    lpcm_stereo_sample& operator-=(const lpcm_stereo_sample &other)
+    pcm_sample& operator-=(const pcm_sample &other)
     {
         m_samples[0] -= other.m_samples[0];
         m_samples[1] -= other.m_samples[1];
         return *this;
     }
 
-    lpcm_stereo_sample& operator+=(const lpcm_stereo_sample &other)
+    pcm_sample& operator+=(const pcm_sample &other)
     {
         m_samples[0] += other.m_samples[0];
         m_samples[1] += other.m_samples[1];
         return *this;
     }
 
-    bool operator==(const lpcm_stereo_sample &other) const
+    bool operator==(const pcm_sample &other) const
     {
         return m_stereo_sample == other.m_stereo_sample;
     }
 
-    bool operator!=(const lpcm_stereo_sample &other) const
+    bool operator!=(const pcm_sample &other) const
     {
         return m_stereo_sample != other.m_stereo_sample;
     }
@@ -67,10 +69,13 @@ struct lpcm_stereo_sample
     };
 };
 
-typedef std::vector<lpcm_stereo_sample> pcm_vector;
+constexpr uint sizeof_pcm_sample = sizeof(pcm_sample);
+static_assert(4 == sizeof_pcm_sample, "expected pcm_sample size of 4 bytes (16 bit stereo)");
+
+typedef std::vector<pcm_sample> pcm_vector;
+
+
 
 } // namespace age
-
-
 
 #endif // AGE_AUDIO_HPP

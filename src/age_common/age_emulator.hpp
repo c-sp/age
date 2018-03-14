@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include <age_audio.hpp>
+#include <age_pcm_sample.hpp>
 #include <age_non_copyable.hpp>
 #include <age_graphics.hpp>
 #include <age_types.hpp>
@@ -61,7 +61,7 @@ public:
     const pixel_vector& get_video_front_buffer() const;
 
     //!
-    //! Get the vector of {@link lpcm_stereo_sample}s calculated by the last call to emulate().
+    //! Get the vector of {@link pcm_sample}s calculated by the last call to emulate().
     //! You will have to handle these frames before the next call to emulate(),
     //! because the latter will discard the audio buffer'S old contents.
     //! To use the returned PCM data for audio playback, the data should be resampled.
