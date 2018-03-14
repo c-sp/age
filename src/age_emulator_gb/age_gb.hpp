@@ -104,15 +104,6 @@ constexpr uint gb_cia_ofs_ram_size = 0x0149;
 
 // joypad
 
-constexpr uint gb_right = 0x01;
-constexpr uint gb_left = 0x02;
-constexpr uint gb_up = 0x04;
-constexpr uint gb_down = 0x08;
-constexpr uint gb_a = 0x10;
-constexpr uint gb_b = 0x20;
-constexpr uint gb_select = 0x40;
-constexpr uint gb_start = 0x80;
-
 constexpr uint8 gb_p14 = 0x10;
 constexpr uint8 gb_p15 = 0x20;
 

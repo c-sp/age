@@ -34,7 +34,7 @@
 #include <QTimer>
 
 #include <age_debug.hpp>
-#include <age_gb.hpp>
+#include <age_gb_emulator.hpp>
 
 #include "age_ui_qt_main_window.hpp"
 
