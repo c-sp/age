@@ -109,14 +109,14 @@ void age::qt_emulation_runner::set_emulator(std::shared_ptr<qt_emulator> new_emu
     LOG("");
 
     AGE_ASSERT(new_emulator != nullptr);
-    std::shared_ptr<emulator> sim = new_emulator->get_emulator();
-    AGE_ASSERT(sim != nullptr);
+    std::shared_ptr<emulator> emu = new_emulator->get_emulator();
+    AGE_ASSERT(emu != nullptr);
 
     m_speed_percent = 0;
     m_emulation_timer_cycles = 0;
 
-    m_renderer.set_emulator_screen_size(sim->get_screen_width(), sim->get_screen_height());
-    m_audio_output.set_input_sampling_rate(sim->get_pcm_sampling_rate());
+    m_renderer.set_emulator_screen_size(emu->get_screen_width(), emu->get_screen_height());
+    m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
 
     m_last_timer_nanos = m_timer.nsecsElapsed();
     m_speed_calculator.clear();
@@ -229,21 +229,21 @@ void age::qt_emulation_runner::timer_event()
 
     if (m_emulator != nullptr)
     {
-        std::shared_ptr<emulator> sim = m_emulator->get_emulator();
+        std::shared_ptr<emulator> emu = m_emulator->get_emulator();
 
         // handle "button down" events even when paused
-        sim->set_buttons_down(m_buttons_down);
+        emu->set_buttons_down(m_buttons_down);
         m_buttons_down = 0;
 
         // run the emulation, if we're not paused
         if (!m_paused)
         {
-            emulate(sim);
+            emulate(emu);
             buffer_audio_silence = false;
         }
 
         // handle "button up" events even when paused
-        sim->set_buttons_up(m_buttons_up);
+        emu->set_buttons_up(m_buttons_up);
         m_buttons_up = 0;
     }
 
@@ -265,7 +265,7 @@ void age::qt_emulation_runner::timer_event()
 //
 //---------------------------------------------------------
 
-void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> sim)
+void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
 {
     uint64 current_timer_nanos = m_timer.nsecsElapsed();
     uint64 timer_nanos_elapsed = current_timer_nanos - m_last_timer_nanos;
@@ -276,28 +276,28 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> sim)
     timer_nanos_to_add = std::min(timer_nanos_to_add, m_emulation_interval_nanos << 1);
 
     // emulate
-    uint64 emulated_cycles = sim->get_emulated_cycles();
+    uint64 emulated_cycles = emu->get_emulated_cycles();
     uint64 emulation_timer_nanos = (m_emulation_timer_cycles += timer_nanos_to_add);
-    uint64 emulated_cycles_to_go = emulation_timer_nanos * sim->get_cycles_per_second() / 1000000000;
+    uint64 emulated_cycles_to_go = emulation_timer_nanos * emu->get_cycles_per_second() / 1000000000;
 
     bool new_frame = false;
     if (emulated_cycles_to_go > emulated_cycles)
     {
         uint64 cycles_to_emulate = emulated_cycles_to_go - emulated_cycles;
-        new_frame = sim->emulate(cycles_to_emulate);
+        new_frame = emu->emulate(cycles_to_emulate);
 
         // calculate emulation speed & time
-        uint cycles_emulated = static_cast<uint>(sim->get_emulated_cycles() - emulated_cycles);
+        uint cycles_emulated = static_cast<uint>(emu->get_emulated_cycles() - emulated_cycles);
         m_speed_calculator.add_value(cycles_emulated, timer_nanos_elapsed);
-        m_speed_percent = m_speed_calculator.get_speed_percent(sim->get_cycles_per_second(), 1000000000);
+        m_speed_percent = m_speed_calculator.get_speed_percent(emu->get_cycles_per_second(), 1000000000);
     }
 
     // update video & audio
     if (new_frame)
     {
-        m_renderer.add_video_frame(sim->get_screen_front_buffer());
+        m_renderer.add_video_frame(emu->get_screen_front_buffer());
     }
-    m_audio_output.buffer_samples(sim->get_audio_buffer());
+    m_audio_output.buffer_samples(emu->get_audio_buffer());
 
     // store the current nanos as reference for future emulate() calls
     m_last_timer_nanos = current_timer_nanos;

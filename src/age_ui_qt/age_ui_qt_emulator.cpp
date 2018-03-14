@@ -52,16 +52,16 @@ age::qt_emulator::qt_emulator(const QByteArray &rom_contents, bool force_dmg, st
 {
     // create emulator
     uint8_vector rom = to_vector(rom_contents);
-    std::shared_ptr<gb_emulator> gb_sim = std::allocate_shared<gb_emulator>(std::allocator<gb_emulator>(), rom, force_dmg);
+    std::shared_ptr<gb_emulator> gb_emu = std::allocate_shared<gb_emulator>(std::allocator<gb_emulator>(), rom, force_dmg);
     LOG("emulator created");
 
     // load persistent ram, if this cartridge supports it
-    if (!gb_sim->get_persistent_ram().empty())
+    if (!gb_emu->get_persistent_ram().empty())
     {
         // create the user value identifier string for loading the persistent ram
         {
             std::stringstream ram_id;
-            ram_id << gb_sim->get_emulator_title() << "_";
+            ram_id << gb_emu->get_emulator_title() << "_";
             ram_id << std::hex << hash(rom) << ".ram";
             m_ram_key = {ram_id.str().c_str()};
         }
@@ -74,12 +74,12 @@ age::qt_emulator::qt_emulator(const QByteArray &rom_contents, bool force_dmg, st
 
         if (ram.size() > 0)
         {
-            gb_sim->set_persistent_ram(to_vector(ram));
+            gb_emu->set_persistent_ram(to_vector(ram));
         }
     }
 
     // done
-    m_emulator = gb_sim;
+    m_emulator = gb_emu;
 }
 
 
