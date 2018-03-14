@@ -18,8 +18,13 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <memory>
+
 #include <QApplication>
 
+#include <age_types.hpp>
+
+#include "age_ui_qt_emulator.hpp"
 #include "age_ui_qt_main_window.hpp"
 
 // allow special types to be used as event parameter

@@ -1,4 +1,6 @@
 
+#include <age_debug.hpp>
+
 #include "age_graphics.hpp"
 
 

@@ -25,17 +25,35 @@
 //! \file
 //!
 
+#include <array>
+#include <memory>
+
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCloseEvent>
 #include <QDialog>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
+#include <QDropEvent>
 #include <QFrame>
 #include <QGridLayout>
+#include <QtGui/qopengl.h> // GLint
+#include <QKeyEvent>
 #include <QLabel>
+#include <QMap>
+#include <QMouseEvent>
+#include <QObject>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSet>
+#include <QSlider>
+#include <QString>
+#include <QWidget>
+
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
 
 #include "age_ui_qt_user_value_store.hpp"
 

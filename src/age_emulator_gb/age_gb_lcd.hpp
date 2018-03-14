@@ -25,7 +25,12 @@
 //! \file
 //!
 
+#include <functional>
+#include <vector>
+
 #include <age_graphics.hpp>
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
 
 #include "age_gb_core.hpp"
 #include "age_gb_memory.hpp"

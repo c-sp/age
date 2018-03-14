@@ -18,9 +18,16 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+
+#include <QChar> // QLatin1Char
 #include <QGroupBox>
+#include <QList>
+#include <QSizePolicy>
+#include <QVBoxLayout>
 
 #include <age_audio.hpp>
+#include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
 
@@ -90,7 +97,7 @@ age::qt_settings_audio::qt_settings_audio(std::shared_ptr<qt_user_value_store> u
 
     m_slider_latency = new QSlider(Qt::Horizontal);
     m_slider_latency->setRange(qt_audio_latency_milliseconds_min / qt_audio_latency_milliseconds_step,
-                             qt_audio_latency_milliseconds_max / qt_audio_latency_milliseconds_step);
+                               qt_audio_latency_milliseconds_max / qt_audio_latency_milliseconds_step);
     m_label_latency = new QLabel;
 
     QHBoxLayout *audio_latency_layout = new QHBoxLayout;

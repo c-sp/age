@@ -10,6 +10,7 @@
 #include <cstdint> // std::uint8_t etc.
 #include <limits> // std::numeric_limits
 #include <string>
+#include <type_traits> // std::underlying_type
 #include <vector>
 
 

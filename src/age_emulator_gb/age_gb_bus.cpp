@@ -18,6 +18,10 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+
+#include <age_debug.hpp>
+
 #include "age_gb_bus.hpp"
 
 #if 0
@@ -77,12 +81,12 @@ constexpr const age::uint8_array<0x80> cgb_FF80_dump =
 //---------------------------------------------------------
 
 age::gb_bus::gb_bus(gb_core &core,
-                     gb_memory &memory,
-                     gb_sound &sound,
-                     gb_lcd &lcd,
-                     gb_timer &timer,
-                     gb_joypad &joypad,
-                     gb_serial &serial)
+                    gb_memory &memory,
+                    gb_sound &sound,
+                    gb_lcd &lcd,
+                    gb_timer &timer,
+                    gb_joypad &joypad,
+                    gb_serial &serial)
     : m_core(core),
       m_memory(memory),
       m_sound(sound),

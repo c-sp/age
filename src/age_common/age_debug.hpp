@@ -22,6 +22,7 @@
 //! \cond
 
 #include <cassert>
+#include <string>
 #include <sstream> // std::stringstream
 
 #include <thread>

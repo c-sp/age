@@ -18,8 +18,11 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <QPaintEvent>
-#include <QResizeEvent>
+#include <limits>
+
+#include <QSize>
+
+#include <age_debug.hpp>
 
 #include "age_ui_qt_gl_renderer.hpp"
 

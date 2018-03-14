@@ -25,7 +25,10 @@
 //! \file
 //!
 
+#include <string>
+
 #include <age_emulator.hpp>
+#include <age_types.hpp>
 
 #include "age_gb_cpu.hpp"
 

@@ -26,9 +26,12 @@
 //!
 
 #include <atomic>
+#include <ostream>
+#include <string>
+#include <vector>
 
 #include <QString>
-#include <QtGui/qopengl.h>
+#include <QtGui/qopengl.h> // GLenum, GLint
 
 #include <age_types.hpp>
 

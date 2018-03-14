@@ -19,6 +19,7 @@
 //
 
 #include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QTimer>
 
 #include "age_test_app.hpp"

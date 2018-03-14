@@ -18,9 +18,14 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <iomanip> // std::quoted
+
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
+#include <QMetaType>
+
+#include <age_debug.hpp>
 
 #include "age_ui_qt_user_value_store.hpp"
 

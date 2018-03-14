@@ -18,8 +18,15 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+#include <iomanip> // std::quoted
+#include <ios> // std::hex
+#include <limits>
 #include <sstream>
 
+#include <QVariant>
+
+#include <age_debug.hpp>
 #include <age_gb_emulator.hpp>
 
 #include "age_ui_qt_emulator.hpp"

@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <age_debug.hpp>
+
 #include "age_ui_qt_gl_renderer.hpp"
 
 #if 0

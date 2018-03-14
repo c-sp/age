@@ -23,8 +23,6 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
-#include <QSet>
-#include <QStringList>
 #include <QTextStream>
 
 #include "age_test_app.hpp"

@@ -20,6 +20,7 @@
 
 #include <memory> // std::shared_ptr
 
+#include <QChar>
 #include <QDir>
 #include <QFileInfo>
 

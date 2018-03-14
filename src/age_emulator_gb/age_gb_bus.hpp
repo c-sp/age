@@ -25,6 +25,11 @@
 //! \file
 //!
 
+#include <vector>
+
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
+
 #include "age_gb_memory.hpp"
 #include "age_gb_sound.hpp"
 #include "age_gb_lcd.hpp"

@@ -19,6 +19,9 @@
 //
 
 #include <QGroupBox>
+#include <QVBoxLayout>
+
+#include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
 

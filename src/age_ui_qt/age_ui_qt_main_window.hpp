@@ -25,12 +25,25 @@
 //! \file
 //!
 
+#include <memory>
+
+#include <QAction>
+#include <QContextMenuEvent>
+#include <QKeyEvent>
+#include <QLabel>
 #include <QMainWindow>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QThread>
+#include <QWidget>
 
 #include <age_non_copyable.hpp>
+#include <age_types.hpp>
 
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulation_runner.hpp"
+#include "age_ui_qt_emulator.hpp"
+#include "age_ui_qt_user_value_store.hpp"
 
 
 

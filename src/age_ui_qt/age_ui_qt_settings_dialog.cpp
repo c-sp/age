@@ -19,6 +19,8 @@
 //
 
 #include <QKeyEvent>
+#include <QTabWidget>
+#include <QVBoxLayout>
 
 #include "age_ui_qt_settings.hpp"
 

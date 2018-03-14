@@ -18,11 +18,22 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+
+#include <QByteArray>
+#include <QDataStream>
 #include <QDrag>
-#include <QDragEnterEvent>
-#include <QDragLeaveEvent>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QMimeData>
+#include <QVBoxLayout>
+#include <QPixmap>
+#include <QSizePolicy>
+#include <QSpacerItem>
+#include <QStringList>
+#include <QVariant>
+
+#include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
 

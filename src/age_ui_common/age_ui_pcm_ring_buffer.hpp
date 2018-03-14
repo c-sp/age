@@ -26,6 +26,7 @@
 //!
 
 #include <age_audio.hpp>
+#include <age_types.hpp>
 
 
 

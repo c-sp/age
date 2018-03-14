@@ -18,6 +18,10 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <ios> // std::hex
+
+#include <age_debug.hpp>
+
 #include "age_gb_core.hpp"
 
 #if 0

@@ -18,7 +18,12 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 #include <cmath>
+#include <ios> // std::hex
+#include <limits>
+
+#include <age_debug.hpp>
 
 #include "age_ui_downsampler.hpp"
 

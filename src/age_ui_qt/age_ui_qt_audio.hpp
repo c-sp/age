@@ -26,15 +26,18 @@
 //!
 
 #include <memory> // std::unique_ptr
+#include <vector>
 
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QAudioOutput>
+#include <QIODevice>
 
 #include <age_audio.hpp>
 #include <age_non_copyable.hpp>
 #include <age_ui_downsampler.hpp>
 #include <age_ui_pcm_ring_buffer.hpp>
+#include <age_types.hpp>
 
 #include "age_ui_qt.hpp"
 

@@ -26,8 +26,10 @@
 //!
 
 #include <functional>
+#include <string>
 
 #include <age_non_copyable.hpp>
+#include <age_types.hpp>
 
 #include "age_gb.hpp"
 

@@ -20,6 +20,10 @@
 
 #include <QGroupBox>
 #include <QKeyEvent>
+#include <QKeySequence>
+#include <QSpacerItem>
+
+#include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
 

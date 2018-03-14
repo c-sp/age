@@ -26,6 +26,7 @@
 //!
 
 #include <functional>
+
 #include <QString>
 
 #include <age_types.hpp>

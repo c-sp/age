@@ -18,14 +18,22 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <QAction>
-#include <QContextMenuEvent>
-#include <QFileDialog>
-#include <QKeyEvent>
-#include <QMenu>
-#include <QMenuBar>
-#include <QStatusBar>
+#include <iomanip> // std::quoted
+#include <string>
 
+#include <QAudioDeviceInfo>
+#include <QAudioFormat>
+#include <QByteArray>
+#include <QFile>
+#include <QFileDialog>
+#include <QMenuBar>
+#include <QObject>
+#include <QStatusBar>
+#include <QString>
+#include <QStringList>
+#include <QTimer>
+
+#include <age_debug.hpp>
 #include <age_gb.hpp>
 
 #include "age_ui_qt_main_window.hpp"
@@ -283,7 +291,6 @@ age::qt_key_event age::qt_main_window::get_event_for_key(int key)
 
 void age::qt_main_window::open_file(bool force_dmg)
 {
-
     QString file_name;
     QFileDialog dialog(this, "Open file", m_settings->get_open_file_dialog_directory(), "Gameboy files (*.gb *.gbc)");
     dialog.setFileMode(QFileDialog::ExistingFile);

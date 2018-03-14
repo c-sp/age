@@ -25,6 +25,8 @@
 //! \file
 //!
 
+#include <array>
+
 #include <age_debug.hpp>
 #include <age_types.hpp>
 

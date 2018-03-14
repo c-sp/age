@@ -2,6 +2,12 @@
 #ifndef AGE_EMULATOR_HPP
 #define AGE_EMULATOR_HPP
 
+//!
+//! \file
+//!
+
+#include <string>
+
 #include <age_audio.hpp>
 #include <age_non_copyable.hpp>
 #include <age_graphics.hpp>

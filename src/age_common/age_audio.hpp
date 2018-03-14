@@ -2,6 +2,12 @@
 #ifndef AGE_AUDIO_HPP
 #define AGE_AUDIO_HPP
 
+//!
+//! \file
+//!
+
+#include <vector>
+
 #include <age_debug.hpp>
 #include <age_types.hpp>
 

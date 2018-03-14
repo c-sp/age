@@ -2,6 +2,10 @@
 #ifndef AGE_NON_COPYABLE_HPP
 #define AGE_NON_COPYABLE_HPP
 
+//!
+//! \file
+//!
+
 
 
 namespace age {

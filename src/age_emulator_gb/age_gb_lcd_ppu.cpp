@@ -20,6 +20,8 @@
 
 #include <algorithm>
 
+#include <age_debug.hpp>
+
 #include "age_gb_lcd.hpp"
 
 #if 0

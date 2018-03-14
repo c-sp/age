@@ -25,15 +25,21 @@
 //! \file
 //!
 
+#include <array>
 #include <condition_variable>
 #include <functional>
 #include <memory>
+#include <mutex>
+#include <vector>
 
 #include <QElapsedTimer>
 #include <QGLFunctions>
 #include <QGLWidget>
+#include <QtGui/qopengl.h> // GLint, GLuint
 #include <QOpenGLFunctions_3_0>
 #include <QOpenGLShaderProgram>
+#include <QPaintEvent>
+#include <QResizeEvent>
 #include <QThread>
 
 #include <age_graphics.hpp>

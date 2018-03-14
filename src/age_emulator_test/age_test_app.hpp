@@ -25,11 +25,20 @@
 //! \file
 //!
 
+#include <atomic>
+#include <limits>
 #include <memory> // std::shared_ptr
 
 #include <QFileInfo>
 #include <QObject>
+#include <QRegExp>
+#include <QRunnable>
+#include <QSet>
+#include <QString>
+#include <QStringList>
 #include <QThreadPool>
+
+#include <age_types.hpp>
 
 #include "age_test_gb.hpp"
 

@@ -6,6 +6,9 @@
 //! \file
 //!
 
+#include <array>
+#include <vector>
+
 #include <age_debug.hpp>
 #include <age_types.hpp>
 

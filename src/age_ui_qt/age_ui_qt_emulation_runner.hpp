@@ -25,11 +25,17 @@
 //! \file
 //!
 
+#include <memory> // std::shared_ptr
+
+#include <QAudioDeviceInfo>
+#include <QAudioFormat>
 #include <QElapsedTimer>
+#include <QObject>
 #include <QTimer>
 
 #include <age_non_copyable.hpp>
 #include <age_ui_speed_calculator.hpp>
+#include <age_types.hpp>
 
 #include "age_ui_qt_gl_renderer.hpp"
 #include "age_ui_qt_audio.hpp"
