@@ -295,7 +295,7 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> sim)
     // update video & audio
     if (new_frame)
     {
-        m_renderer.add_video_frame(sim->get_video_front_buffer());
+        m_renderer.add_video_frame(sim->get_screen_front_buffer());
     }
     m_audio_output.buffer_samples(sim->get_audio_buffer());
 

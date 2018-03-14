@@ -53,11 +53,11 @@ constexpr const age::uint8_array<0x40> cgb_objp_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler, bool dmg_green)
+age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
     : gb_lcd_ppu(core, memory, dmg_green),
       m_cgb(core.is_cgb()),
       m_core(core),
-      m_video_buffer_handler(frame_handler)
+      m_screen_buffer(frame_handler)
 {
     // initialize color palettes
     std::fill(begin(m_palette), begin(m_palette) + 0x40, 0xFF);
@@ -230,7 +230,7 @@ void age::gb_lcd::next_step(uint cycle_offset, std::function<void(gb_lcd&)> step
 
 void age::gb_lcd::switch_frames()
 {
-    m_video_buffer_handler.switch_buffers();
+    m_screen_buffer.switch_buffers();
 }
 
 
@@ -541,7 +541,7 @@ void age::gb_lcd::mode3_start(gb_lcd &lcd)
     LOG("mode 3 started");
 
     // init PPU for this scanline
-    pixel *first_scanline_pixel = lcd.m_video_buffer_handler.get_first_scanline_pixel(lcd.get_scanline());
+    pixel *first_scanline_pixel = lcd.m_screen_buffer.get_first_scanline_pixel(lcd.get_scanline());
     lcd.scanline_init(first_scanline_pixel);
 
     // next step

@@ -28,8 +28,9 @@
 #include <functional>
 #include <vector>
 
-#include <age_graphics.hpp>
 #include <age_non_copyable.hpp>
+#include <age_pixel.hpp>
+#include <age_screen_buffer.hpp>
 #include <age_types.hpp>
 
 #include "age_gb_core.hpp"
@@ -319,7 +320,7 @@ class gb_lcd : private gb_lcd_ppu
 {
 public:
 
-    gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler, bool dmg_green);
+    gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green);
 
     using gb_lcd_ppu::read_lcdc;
     using gb_lcd_ppu::read_scx;
@@ -395,7 +396,7 @@ private:
     // common stuff
     const bool m_cgb;
     gb_core &m_core;
-    video_buffer_handler &m_video_buffer_handler;
+    screen_buffer &m_screen_buffer;
     uint8_array<gb_num_palette_colors * 2> m_palette; // 2 bytes per color
     std::function<void(gb_lcd&)> m_next_event = nullptr;
     uint m_next_event_cycle = 0;

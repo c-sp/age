@@ -1,11 +1,11 @@
 
 #include <age_debug.hpp>
 
-#include "age_graphics.hpp"
+#include "age_screen_buffer.hpp"
 
 
 
-age::video_buffer_handler::video_buffer_handler(uint screen_width, uint screen_height)
+age::screen_buffer::screen_buffer(uint screen_width, uint screen_height)
     : m_screen_width(screen_width),
       m_screen_height(screen_height)
 {
@@ -20,39 +20,39 @@ age::video_buffer_handler::video_buffer_handler(uint screen_width, uint screen_h
 
 
 
-age::uint age::video_buffer_handler::get_front_buffer_index() const
+age::uint age::screen_buffer::get_front_buffer_index() const
 {
     return m_current_front_buffer;
 }
 
-age::uint age::video_buffer_handler::get_screen_width() const
+age::uint age::screen_buffer::get_screen_width() const
 {
     return m_screen_width;
 }
 
-age::uint age::video_buffer_handler::get_screen_height() const
+age::uint age::screen_buffer::get_screen_height() const
 {
     return m_screen_height;
 }
 
-const age::pixel_vector& age::video_buffer_handler::get_front_buffer() const
+const age::pixel_vector& age::screen_buffer::get_front_buffer() const
 {
     return m_buffers[m_current_front_buffer];
 }
 
-const age::pixel_vector& age::video_buffer_handler::get_back_buffer() const
+const age::pixel_vector& age::screen_buffer::get_back_buffer() const
 {
     return m_buffers[1 - m_current_front_buffer];
 }
 
 
 
-age::pixel_vector& age::video_buffer_handler::get_back_buffer()
+age::pixel_vector& age::screen_buffer::get_back_buffer()
 {
     return m_buffers[1 - m_current_front_buffer];
 }
 
-age::pixel* age::video_buffer_handler::get_first_scanline_pixel(uint scanline)
+age::pixel* age::screen_buffer::get_first_scanline_pixel(uint scanline)
 {
     AGE_ASSERT(scanline < m_screen_height);
     // frames are currently stored upside-down
@@ -60,7 +60,7 @@ age::pixel* age::video_buffer_handler::get_first_scanline_pixel(uint scanline)
     return result;
 }
 
-void age::video_buffer_handler::switch_buffers()
+void age::screen_buffer::switch_buffers()
 {
     m_current_front_buffer = 1 - m_current_front_buffer;
 }

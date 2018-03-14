@@ -120,10 +120,10 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint c
         }
 
         // check the screenshot depth
-        else if ((sizeof(pixel) * 8) != image.depth())
+        else if ((sizeof_pixel * 8) != image.depth())
         {
             QTextStream(&error_message)
-                    << "screen depth (" << (sizeof(pixel) * 8)
+                    << "screen depth (" << (sizeof_pixel * 8)
                     << " bits) does not match screenshot depth ("
                     << image.depth() << " bits)";
         }
@@ -133,7 +133,7 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint c
         {
             image = image.mirrored(false, true); // the gameboy screen is stored upside down
             const pixel *screenshot = reinterpret_cast<pixel*>(image.bits());
-            const pixel *screen = emulator->get_video_front_buffer().data();
+            const pixel *screen = emulator->get_screen_front_buffer().data();
 
             for (uint i = 0, max = emulator->get_screen_width() * emulator->get_screen_height(); i < max; ++i)
             {

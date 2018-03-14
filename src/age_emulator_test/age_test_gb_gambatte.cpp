@@ -240,7 +240,7 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 
 bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uint8_vector &expected_result)
 {
-    const age::pixel_vector &screen = emulator.get_video_front_buffer();
+    const age::pixel_vector &screen = emulator.get_screen_front_buffer();
 
     // start with the first line
     // (the emulator screen buffer is filled upside down)

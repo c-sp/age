@@ -27,7 +27,7 @@
 age::emulator::emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second)
     : m_sampling_rate(sampling_rate),
       m_cycles_per_second(cycles_per_second),
-      m_video_buffer_handler(screen_width, screen_height)
+      m_screen_buffer(screen_width, screen_height)
 {
     AGE_ASSERT(m_sampling_rate > 0);
     AGE_ASSERT(m_cycles_per_second > 0);
@@ -86,17 +86,17 @@ std::string age::emulator::get_emulator_title() const
 
 age::uint age::emulator::get_screen_width() const
 {
-    return m_video_buffer_handler.get_screen_width();
+    return m_screen_buffer.get_screen_width();
 }
 
 age::uint age::emulator::get_screen_height() const
 {
-    return m_video_buffer_handler.get_screen_height();
+    return m_screen_buffer.get_screen_height();
 }
 
-const age::pixel_vector& age::emulator::get_video_front_buffer() const
+const age::pixel_vector& age::emulator::get_screen_front_buffer() const
 {
-    return m_video_buffer_handler.get_front_buffer();
+    return m_screen_buffer.get_front_buffer();
 }
 
 const age::pcm_vector& age::emulator::get_audio_buffer() const
@@ -121,22 +121,22 @@ age::uint64 age::emulator::get_emulated_cycles() const
 
 bool age::emulator::emulate(uint64 min_cycles_to_emulate)
 {
-    uint current_front_buffer = m_video_buffer_handler.get_front_buffer_index();
+    uint current_front_buffer = m_screen_buffer.get_front_buffer_index();
     m_audio_buffer.clear();
 
     uint64 emulated_cycles = inner_emulate(min_cycles_to_emulate);
     AGE_ASSERT(emulated_cycles >= min_cycles_to_emulate);
     m_emulated_cycles += emulated_cycles;
 
-    bool new_frame = m_video_buffer_handler.get_front_buffer_index() != current_front_buffer;
+    bool new_frame = m_screen_buffer.get_front_buffer_index() != current_front_buffer;
     return new_frame;
 }
 
 
 
-age::video_buffer_handler& age::emulator::get_video_buffer_handler()
+age::screen_buffer& age::emulator::get_screen_buffer()
 {
-    return m_video_buffer_handler;
+    return m_screen_buffer;
 }
 
 age::pcm_vector& age::emulator::get_pcm_vector()

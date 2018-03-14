@@ -8,9 +8,10 @@
 
 #include <string>
 
-#include <age_pcm_sample.hpp>
 #include <age_non_copyable.hpp>
-#include <age_graphics.hpp>
+#include <age_pcm_sample.hpp>
+#include <age_pixel.hpp>
+#include <age_screen_buffer.hpp>
 #include <age_types.hpp>
 
 
@@ -56,9 +57,9 @@ public:
     uint get_screen_height() const;
 
     //!
-    //! \return The current video front buffer containing the emulated device's screen.
+    //! \return The current front buffer containing the emulated device's screen.
     //!
-    const pixel_vector& get_video_front_buffer() const;
+    const pixel_vector& get_screen_front_buffer() const;
 
     //!
     //! Get the vector of {@link pcm_sample}s calculated by the last call to emulate().
@@ -66,7 +67,7 @@ public:
     //! because the latter will discard the audio buffer'S old contents.
     //! To use the returned PCM data for audio playback, the data should be resampled.
     //!
-    //! \return The LPCM samples calculated by the last call to emulate().
+    //! \return The PCM samples calculated by the last call to emulate().
     //!
     const pcm_vector& get_audio_buffer() const;
 
@@ -114,7 +115,7 @@ protected:
 
     emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second);
 
-    video_buffer_handler& get_video_buffer_handler();
+    screen_buffer& get_screen_buffer();
     pcm_vector& get_pcm_vector();
 
     virtual uint64 inner_emulate(uint64 min_cycles_to_emulate) = 0;
@@ -126,7 +127,7 @@ private:
     const uint m_sampling_rate;
     const uint m_cycles_per_second;
 
-    video_buffer_handler m_video_buffer_handler;
+    screen_buffer m_screen_buffer;
     pcm_vector m_audio_buffer;
     uint64 m_emulated_cycles = 0;
 };

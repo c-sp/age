@@ -42,7 +42,7 @@
 #include <QResizeEvent>
 #include <QThread>
 
-#include <age_graphics.hpp>
+#include <age_pixel.hpp>
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
 

@@ -38,7 +38,7 @@ namespace age
 //! It uses the usual fluent interface for passing values to an std::ostream using operator<<
 //! but collects the logging output to some buffer until we explicitly tell it to pass it to std::cout.
 //! Streaming to std::cout is done after locking a mutex, so that there is always only one thread
-//! using st::cout (provided all threads use concurrent_cout).
+//! using std::cout (provided all threads use concurrent_cout).
 //!
 class concurrent_cout
 {

@@ -118,7 +118,7 @@ age::gb_emulator::gb_emulator(const uint8_vector &rom, bool force_dmg, bool dmg_
       m_memory(rom, force_dmg),
       m_core(m_memory.is_cgb()),
       m_sound(m_core, get_pcm_vector()),
-      m_lcd(m_core, m_memory, get_video_buffer_handler(), dmg_green),
+      m_lcd(m_core, m_memory, get_screen_buffer(), dmg_green),
       m_timer(m_core),
       m_joypad(m_core),
       m_serial(m_core),
