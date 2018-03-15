@@ -9,7 +9,7 @@ AGE source code is structured into _groups_ of coherent code.
 While code within a _group_ may be tightly coupled,
 code of different _groups_ is only loosely coupled (if at all).
 
-Coupling is achieved by including shared C++ header files found at *`include`*.
+Coupling is achieved by including shared C++ header files found at `include`.
 Thus if a _group_ does not provide any shared C++ header file,
 it cannot be coupled to another _group_.
 
