@@ -31,6 +31,13 @@
 #define LOG(x)
 #endif
 
+constexpr const char *qt_settings_misc_pause_emulator = "miscellaneous/pause_emulator";
+constexpr const char *qt_settings_misc_synchronize_emulator = "miscellaneous/synchronize_emulator";
+constexpr const char *qt_settings_misc_menu_bar = "miscellaneous/menu_bar";
+constexpr const char *qt_settings_misc_status_bar = "miscellaneous/status_bar";
+constexpr const char *qt_settings_misc_menu_bar_fullscreen = "miscellaneous/menu_bar_fullscreen";
+constexpr const char *qt_settings_misc_status_bar_fullscreen = "miscellaneous/status_bar_fullscreen";
+
 
 
 

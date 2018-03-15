@@ -62,6 +62,44 @@
 namespace age
 {
 
+constexpr int qt_settings_layout_margin = 30;
+constexpr int qt_settings_layout_spacing = 30;
+constexpr int qt_settings_element_spacing = 15;
+
+//!
+//! The enum contains all key events known by the AGE Qt GUI.
+//! Examples of key events are setting adjustments (e.g. increasing the audio volume)
+//! or pressing a emulator specific button (e.g. pressing the Gameboy's "start" button).
+//!
+//! The value qt_key_event::none does not represent any actual key event.
+//! It is used for example when parsing a key event from a string fails because the
+//! string is not parsable.
+//!
+enum class qt_key_event
+{
+    none,
+
+    gb_up,
+    gb_down,
+    gb_left,
+    gb_right,
+    gb_a,
+    gb_b,
+    gb_start,
+    gb_select,
+
+    video_toggle_filter_chain,
+    video_toggle_bilinear_filter,
+    video_cycle_frames_to_blend,
+
+    audio_toggle_mute,
+    audio_increase_volume,
+    audio_decrease_volume,
+
+    misc_toggle_pause_emulator,
+    misc_toggle_synchronize_emulator
+};
+
 
 
 

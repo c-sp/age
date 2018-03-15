@@ -28,6 +28,9 @@
 #define LOG(x)
 #endif
 
+constexpr age::uint8 gb_p14 = 0x10;
+constexpr age::uint8 gb_p15 = 0x20;
+
 
 
 age::uint8 age::gb_joypad::read_p1() const

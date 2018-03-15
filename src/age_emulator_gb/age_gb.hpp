@@ -46,13 +46,6 @@ namespace age
 constexpr uint gb_no_cycle = uint_max;
 constexpr uint gb_machine_cycles_per_second = 4194304;
 
-constexpr const uint8_array<5> gb_interrupt_pc_lookup =
-{{
-     0x00, 0x40, 0x48, 0x48, 0x50
- }};
-
-constexpr uint8 gb_tac_start_timer = 0x04;
-
 constexpr uint8 gb_hdma_start = 0x80;
 
 
@@ -72,19 +65,9 @@ constexpr uint gb_oam_size = 0xA0;
 
 
 
-// serial i/o
-
-constexpr uint gb_serial_transfer_cycles = gb_machine_cycles_per_second / (8192 / 8); // bit transfer with 8192 Hz
-
-constexpr uint8 gb_sc_start_transfer = 0x80;
-constexpr uint8 gb_sc_terminal_selection = 0x01;
-constexpr uint8 gb_sc_shift_clock = 0x02;
-
-
-
 // cartridge information area
 
-constexpr uint gb_header_size = 0x0150;
+//constexpr uint gb_header_size = 0x0150;
 constexpr uint gb_cia_ofs_title = 0x0134;
 constexpr uint gb_cia_ofs_cgb = 0x0143;
 //constexpr uint gb_cia_ofs_licensee_new_low = 0x0144;
@@ -99,13 +82,6 @@ constexpr uint gb_cia_ofs_ram_size = 0x0149;
 //constexpr uint gb_cia_ofs_header_checksum = 0x014D;
 //constexpr uint gb_cia_ofs_global_checksum_low = 0x014E;
 //constexpr uint gb_cia_ofs_global_checksum_high = 0x014F;
-
-
-
-// joypad
-
-constexpr uint8 gb_p14 = 0x10;
-constexpr uint8 gb_p15 = 0x20;
 
 
 
@@ -180,21 +156,6 @@ constexpr const uint8_array<4> gb_channel_bit =
 
 
 
-// cpu
-
-constexpr uint8 gb_zero_flag = 0x80;
-constexpr uint8 gb_subtract_flag = 0x40;
-constexpr uint8 gb_half_carry_flag = 0x20;
-constexpr uint8 gb_carry_flag = 0x10;
-
-constexpr uint gb_hcs_shift = 4;
-constexpr uint gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
-constexpr uint gb_hcs_subtract = gb_subtract_flag << gb_hcs_shift;
-constexpr uint gb_hcs_old_carry = gb_carry_flag << gb_hcs_shift;
-constexpr uint gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
-
 } // namespace age
-
-
 
 #endif // AGE_GB_HPP

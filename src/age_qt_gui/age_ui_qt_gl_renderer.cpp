@@ -32,6 +32,16 @@
 #define LOG(x)
 #endif
 
+constexpr qint64 qt_fps_update_millis = 500;
+
+constexpr uint qt_renderer_stopped = 1;
+constexpr uint qt_renderer_new_video_frame = 2;
+constexpr uint qt_renderer_change_filter_chain = 4;
+constexpr uint qt_renderer_change_bilinear = 8;
+constexpr uint qt_renderer_change_viewport = 16;
+constexpr uint qt_renderer_change_emulator_screen_size = 32;
+constexpr uint qt_renderer_change_frames_to_blend = 64;
+
 
 
 //---------------------------------------------------------

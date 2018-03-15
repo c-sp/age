@@ -35,6 +35,8 @@
 #define LOG(x)
 #endif
 
+constexpr const char *user_value_directory = ".age_emulator";
+
 
 
 

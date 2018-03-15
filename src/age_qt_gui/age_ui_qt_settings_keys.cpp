@@ -33,6 +33,23 @@
 #define LOG(x)
 #endif
 
+constexpr const char *qt_settings_keys_gameboy_up = "keys/gameboy_up";
+constexpr const char *qt_settings_keys_gameboy_down = "keys/gameboy_down";
+constexpr const char *qt_settings_keys_gameboy_left = "keys/gameboy_left";
+constexpr const char *qt_settings_keys_gameboy_right = "keys/gameboy_right";
+constexpr const char *qt_settings_keys_gameboy_a = "keys/gameboy_a";
+constexpr const char *qt_settings_keys_gameboy_b = "keys/gameboy_b";
+constexpr const char *qt_settings_keys_gameboy_start = "keys/gameboy_start";
+constexpr const char *qt_settings_keys_gameboy_select = "keys/gameboy_select";
+constexpr const char *qt_settings_keys_video_toggle_filter_chain = "keys/video_toggle_filter_chain";
+constexpr const char *qt_settings_keys_video_toggle_bilinear_filter = "keys/video_toggle_bilinear_filter";
+constexpr const char *qt_settings_keys_video_cycle_frames_to_blend = "keys/video_cycle_frames_to_blend";
+constexpr const char *qt_settings_keys_audio_toggle_mute = "keys/audio_toggle_mute";
+constexpr const char *qt_settings_keys_audio_increase_volume = "keys/audio_increase_volume";
+constexpr const char *qt_settings_keys_audio_decrease_volume = "keys/audio_decrease_volume";
+constexpr const char *qt_settings_keys_misc_toggle_pause_emulator = "keys/misc_toggle_pause_emulator";
+constexpr const char *qt_settings_keys_misc_toggle_synchronize_emulator = "keys/misc_toggle_synchronize_emulator";
+
 
 
 

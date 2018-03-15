@@ -49,6 +49,23 @@
 #define LOG_DRAG(x)
 #endif
 
+constexpr const char *qt_settings_dnd_mime_type = "application/x-age-filter-dnd";
+constexpr const char *qt_settings_property_frames_to_blend = "age_frames_to_blend";
+constexpr const char *qt_settings_property_filter = "age_filter";
+
+constexpr const char *qt_settings_video_use_filter_chain = "video/use_filter_chain";
+constexpr const char *qt_settings_video_bilinear_filter = "video/bilinear_filter";
+constexpr const char *qt_settings_video_frames_to_blend = "video/frames_to_blend";
+constexpr const char *qt_settings_video_filter_chain = "video/filter_chain";
+
+constexpr const char *qt_filter_name_none = "none";
+constexpr const char *qt_filter_name_scale2x = "scale2x";
+constexpr const char *qt_filter_name_age_scale2x = "age-scale2x";
+constexpr const char *qt_filter_name_gauss3x3 = "weak blur";
+constexpr const char *qt_filter_name_gauss5x5 = "strong blur";
+constexpr const char *qt_filter_name_emboss3x3 = "weak emboss";
+constexpr const char *qt_filter_name_emboss5x5 = "strong emboss";
+
 
 
 

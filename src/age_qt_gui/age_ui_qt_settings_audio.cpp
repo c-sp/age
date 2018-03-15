@@ -37,6 +37,17 @@
 #define LOG(x)
 #endif
 
+constexpr const char *qt_settings_default_audio_device_name = "default";
+
+constexpr const char *qt_settings_audio_device = "audio/device";
+constexpr const char *qt_settings_audio_volume = "audio/volume";
+constexpr const char *qt_settings_audio_mute = "audio/mute";
+constexpr const char *qt_settings_audio_latency = "audio/latency";
+constexpr const char *qt_settings_audio_downsampler_quality = "audio/downsampler_quality";
+
+constexpr int qt_audio_volume_percent_min = 0;
+constexpr int qt_audio_volume_percent_max = 100;
+
 
 
 

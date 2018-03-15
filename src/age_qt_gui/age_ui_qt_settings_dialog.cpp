@@ -24,6 +24,8 @@
 
 #include "age_ui_qt_settings.hpp"
 
+constexpr const char *qt_settings_open_file_directory = "open_file_directory";
+
 
 
 

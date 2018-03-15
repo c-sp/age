@@ -28,6 +28,17 @@
 #define LOG(x)
 #endif
 
+constexpr age::uint8 gb_zero_flag = 0x80;
+constexpr age::uint8 gb_subtract_flag = 0x40;
+constexpr age::uint8 gb_half_carry_flag = 0x20;
+constexpr age::uint8 gb_carry_flag = 0x10;
+
+constexpr age::uint gb_hcs_shift = 4;
+constexpr age::uint gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
+constexpr age::uint gb_hcs_subtract = gb_subtract_flag << gb_hcs_shift;
+constexpr age::uint gb_hcs_old_carry = gb_carry_flag << gb_hcs_shift;
+constexpr age::uint gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
+
 
 
 //---------------------------------------------------------

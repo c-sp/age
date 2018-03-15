@@ -30,6 +30,11 @@
 #define LOG(x)
 #endif
 
+constexpr const age::uint8_array<5> gb_interrupt_pc_lookup =
+{{
+     0x00, 0x40, 0x48, 0x48, 0x50
+ }};
+
 
 
 age::gb_core::gb_core(bool cgb)

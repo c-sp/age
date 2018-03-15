@@ -30,6 +30,8 @@
 #define LOG(x)
 #endif
 
+constexpr age::uint8 gb_tac_start_timer = 0x04;
+
 
 
 
