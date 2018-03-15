@@ -21,6 +21,10 @@
 #ifndef AGE_GB_EMULATOR_IMPL_HPP
 #define AGE_GB_EMULATOR_IMPL_HPP
 
+//!
+//! \file
+//!
+
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_emulator.hpp>
