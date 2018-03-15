@@ -25,7 +25,6 @@
 //! \file
 //!
 
-#include <memory>
 #include <string>
 
 #include <age_types.hpp>
