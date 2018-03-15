@@ -1,6 +1,7 @@
 *.pro.user*
-doxygen/*out/*
 Thumbs.db
-build*
-test/age_emulator_test
 
+build/doxygen/*out/*
+build/build*
+
+test/age_qt_emu_test

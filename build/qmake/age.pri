@@ -30,7 +30,7 @@ equals(TEMPLATE, app) {
 
 # add shared headers to include path
 
-INCLUDEPATH += $$PWD/include
+INCLUDEPATH += $$PWD/../../src/include
 
 # add dependencies declared in DEPENDENCIES to LIBS and DEPENDPATH
 
