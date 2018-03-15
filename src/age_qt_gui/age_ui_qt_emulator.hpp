@@ -18,52 +18,50 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_SCREEN_BUFFER_HPP
-#define AGE_SCREEN_BUFFER_HPP
+#ifndef AGE_UI_QT_EMULATOR_HPP
+#define AGE_UI_QT_EMULATOR_HPP
 
 //!
 //! \file
 //!
 
-#include <array>
+#include <memory> // std::shared_ptr
 
-#include <age_pixel.hpp>
+#include <QByteArray>
+#include <QString>
+
 #include <age_types.hpp>
+#include <emulator/age_emulator.hpp>
+
+#include "age_ui_qt.hpp"
+#include "age_ui_qt_user_value_store.hpp"
 
 
 
-namespace age {
+namespace age
+{
 
-
-
-class screen_buffer
+class qt_emulator
 {
 public:
 
-    screen_buffer(uint screen_width, uint screen_height);
+    qt_emulator(const QByteArray &rom, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store);
+    ~qt_emulator();
 
-    uint get_front_buffer_index() const;
-    uint get_screen_width() const;
-    uint get_screen_height() const;
-
-    const pixel_vector& get_front_buffer() const;
-    const pixel_vector& get_back_buffer() const;
-
-    pixel_vector& get_back_buffer();
-    pixel* get_first_scanline_pixel(uint scanline);
-    void switch_buffers();
+    std::shared_ptr<emulator> get_emulator();
 
 private:
 
-    const uint m_screen_width;
-    const uint m_screen_height;
+    static uint64 hash(const uint8_vector &vector);
+    static uint8_vector to_vector(const QByteArray &byte_array);
 
-    std::array<pixel_vector, 2> m_buffers;
-    uint m_current_front_buffer = 0;
+    QString m_ram_key;
+    std::shared_ptr<emulator> m_emulator;
+    std::shared_ptr<qt_user_value_store> m_user_value_store;
 };
-
-
 
 } // namespace age
 
-#endif // AGE_SCREEN_BUFFER_HPP
+
+
+#endif // AGE_UI_QT_EMULATOR_HPP

@@ -20,7 +20,7 @@
 
 #include <age_debug.hpp>
 
-#include "age_screen_buffer.hpp"
+#include <gfx/age_screen_buffer.hpp>
 
 
 

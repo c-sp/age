@@ -27,10 +27,10 @@
 
 #include <array>
 
-#include <age_pcm_sample.hpp>
 #include <age_debug.hpp>
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 #include "age_gb_core.hpp"
 #include "age_gb_sound_utilities.hpp"

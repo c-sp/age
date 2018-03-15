@@ -28,10 +28,10 @@
 #include <string>
 
 #include <age_non_copyable.hpp>
-#include <age_pcm_sample.hpp>
-#include <age_pixel.hpp>
-#include <age_screen_buffer.hpp>
 #include <age_types.hpp>
+#include <gfx/age_pixel.hpp>
+#include <gfx/age_screen_buffer.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 
 

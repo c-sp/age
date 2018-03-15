@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_UI_SPEED_CALCULATOR_HPP
-#define AGE_UI_SPEED_CALCULATOR_HPP
+#ifndef AGE_SPEED_CALCULATOR_HPP
+#define AGE_SPEED_CALCULATOR_HPP
 
 //!
 //! \file
@@ -136,4 +136,4 @@ private:
 
 
 
-#endif // AGE_UI_SPEED_CALCULATOR_HPP
+#endif // AGE_SPEED_CALCULATOR_HPP

@@ -27,6 +27,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
+#include <emulator/age_gb_emulator.hpp>
 
 #include "age_gb_bus.hpp"
 
@@ -34,25 +35,6 @@
 
 namespace age
 {
-
-//!
-//! \brief Struct containing parts of the Gameboy CPU state.
-//!
-//! This struct exists only for evaluating Gameboy test results.
-//!
-struct gb_test_info
-{
-    bool m_is_cgb;
-    bool m_found_invalid_opcode;
-
-    uint8 m_a = 0;
-    uint8 m_b = 0;
-    uint8 m_c = 0;
-    uint8 m_d = 0;
-    uint8 m_e = 0;
-    uint8 m_h = 0;
-    uint8 m_l = 0;
-};
 
 
 

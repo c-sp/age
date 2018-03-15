@@ -25,12 +25,11 @@
 //! \file
 //!
 
+#include <memory>
 #include <string>
 
-#include <age_emulator.hpp>
 #include <age_types.hpp>
-
-#include "age_gb_cpu.hpp"
+#include <emulator/age_emulator.hpp>
 
 
 
@@ -48,22 +47,46 @@ constexpr uint gb_start = 0x80;
 
 
 
+//!
+//! \brief Struct containing parts of the Gameboy CPU state.
+//!
+//! This struct exists only for evaluating Gameboy test results.
+//!
+struct gb_test_info
+{
+    bool m_is_cgb;
+    bool m_found_invalid_opcode;
+
+    uint8 m_a = 0;
+    uint8 m_b = 0;
+    uint8 m_c = 0;
+    uint8 m_d = 0;
+    uint8 m_e = 0;
+    uint8 m_h = 0;
+    uint8 m_l = 0;
+};
+
+
+
+class gb_emulator_impl; // forward class declaration to decouple the actual implementation
+
 class gb_emulator : public emulator
 {
 public:
 
-    static std::string extract_rom_name(const uint8_vector &rom);
-
     gb_emulator(const uint8_vector &rom, bool force_dmg = false, bool dmg_green = true);
-
-    bool is_cgb() const;
-    gb_test_info get_test_info() const;
+    virtual ~gb_emulator() override;
 
     uint8_vector get_persistent_ram() const override;
     void set_persistent_ram(const uint8_vector &source) override;
 
     void set_buttons_down(uint buttons) override;
     void set_buttons_up(uint buttons) override;
+
+    bool is_cgb() const;
+    gb_test_info get_test_info() const;
+
+    static std::string extract_rom_name(const uint8_vector &rom);
 
 protected:
 
@@ -73,15 +96,8 @@ protected:
 
 private:
 
-    gb_memory m_memory;
-    gb_core m_core;
-    gb_sound m_sound;
-    gb_lcd m_lcd;
-    gb_timer m_timer;
-    gb_joypad m_joypad;
-    gb_serial m_serial;
-    gb_bus m_bus;
-    gb_cpu m_cpu;
+    // cannot use std::unique_ptr<gb_emulator_impl> since it does not work on incomplete types
+    gb_emulator_impl *m_impl = nullptr;
 };
 
 } // namespace age

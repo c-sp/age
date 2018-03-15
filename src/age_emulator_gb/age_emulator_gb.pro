@@ -28,7 +28,8 @@ SOURCES += \
     age_gb_sound_utilities.cpp \
     age_gb_timer.cpp \
     age_gb_emulator.cpp \
-    age_gb_timer_utils.cpp
+    age_gb_timer_utils.cpp \
+    age_gb_emulator_impl.cpp
 
 HEADERS += \
     age_gb.hpp \
@@ -42,7 +43,8 @@ HEADERS += \
     age_gb_sound.hpp \
     age_gb_sound_utilities.hpp \
     age_gb_timer.hpp \
-    age_gb_emulator.hpp
+    ../include/emulator/age_gb_emulator.hpp \
+    age_gb_emulator_impl.hpp
 
 unix {
     target.path = /usr/lib

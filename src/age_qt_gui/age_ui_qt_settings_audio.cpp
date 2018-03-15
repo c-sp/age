@@ -26,8 +26,8 @@
 #include <QSizePolicy>
 #include <QVBoxLayout>
 
-#include <age_pcm_sample.hpp>
 #include <age_debug.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 #include "age_ui_qt_settings.hpp"
 

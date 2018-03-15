@@ -33,11 +33,11 @@
 #include <QAudioOutput>
 #include <QIODevice>
 
-#include <age_pcm_sample.hpp>
 #include <age_non_copyable.hpp>
-#include <age_ui_downsampler.hpp>
-#include <age_ui_pcm_ring_buffer.hpp>
 #include <age_types.hpp>
+#include <pcm/age_downsampler.hpp>
+#include <pcm/age_pcm_ring_buffer.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 #include "age_ui_qt.hpp"
 

@@ -27,7 +27,7 @@
 #include <QVariant>
 
 #include <age_debug.hpp>
-#include <age_gb_emulator.hpp>
+#include <emulator/age_gb_emulator.hpp>
 
 #include "age_ui_qt_emulator.hpp"
 

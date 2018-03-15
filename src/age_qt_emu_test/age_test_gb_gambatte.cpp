@@ -26,9 +26,22 @@
 
 #include "age_test_gb.hpp"
 
-// gambatte tests run for 15 frames
-// (see gambatte/test/testrunner.cpp)
-constexpr age::uint test_cycles = age::gb_cycles_per_frame * 15;
+
+
+constexpr age::uint gb_frames_per_second = 59;
+
+age::uint gb_cycles_per_frame(const age::gb_emulator &emulator)
+{
+    return emulator.get_cycles_per_second() / gb_frames_per_second;
+}
+
+age::uint test_cycles(const age::gb_emulator &emulator)
+{
+    // gambatte tests run for 15 frames
+    // (see gambatte/test/testrunner.cpp)
+    uint cycles_per_frame = gb_cycles_per_frame(emulator);
+    return cycles_per_frame * 15;
+}
 
 
 
@@ -244,7 +257,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
 
     // start with the first line
     // (the emulator screen buffer is filled upside down)
-    age::uint line_offset = (age::gb_screen_height - 1) * age::gb_screen_width;
+    age::uint line_offset = (emulator.get_screen_height() - 1) * emulator.get_screen_width();
     age::uint tile_offset = 0;
 
     // the first pixel in the first line is always expected to be "white"
@@ -271,7 +284,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
         }
 
         // next line
-        line_offset -= age::gb_screen_width;
+        line_offset -= emulator.get_screen_width();
         tile_offset += 8;
     }
 
@@ -286,7 +299,7 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
 
         // create emulator & run test
         std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, force_dmg);
-        emulator->emulate(test_cycles);
+        emulator->emulate(test_cycles(*emulator));
 
         // evaluate test result
         bool pass = evaluate_out_string_result(*emulator, out_string);
@@ -340,15 +353,20 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 
         // create emulator & run test
         std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, force_dmg);
-        emulator->emulate(test_cycles);
 
-        // evaluate test result by checking the first gb_cycles_per_frame
+        // gambatte tests run for 15 frames
+        // (see gambatte/test/testrunner.cpp)
+        uint cycles_per_frame = gb_cycles_per_frame(*emulator);
+
+        emulator->emulate(test_cycles(*emulator));
+
+        // evaluate test result by checking the first cycles_per_frame
         // pcm samples for equality
         // (similar to gambatte/test/testrunner.cpp)
         bool all_equal = true;
         const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
 
-        for (age::uint i = 1; i < age::gb_cycles_per_frame; ++i)
+        for (age::uint i = 1; i < cycles_per_frame; ++i)
         {
             if (emulator->get_audio_buffer()[i] != first_sample)
             {
@@ -429,7 +447,7 @@ age::test_method gambatte_test(const QString &test_file_name, QString &result_fi
     }
     if (!result_file_name.isEmpty())
     {
-        return age::screenshot_test_png(for_dmg, false, test_cycles);
+        return age::screenshot_test_png(for_dmg, false, 1000 / gb_frames_per_second);
     }
 
     // return an empty method as we don't know the gambatte test type

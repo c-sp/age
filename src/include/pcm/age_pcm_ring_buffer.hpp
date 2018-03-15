@@ -18,15 +18,15 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_UI_PCM_RING_BUFFER_HPP
-#define AGE_UI_PCM_RING_BUFFER_HPP
+#ifndef AGE_PCM_RING_BUFFER_HPP
+#define AGE_PCM_RING_BUFFER_HPP
 
 //!
 //! \file
 //!
 
-#include <age_pcm_sample.hpp>
 #include <age_types.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 
 
@@ -176,4 +176,4 @@ private:
 
 
 
-#endif // AGE_UI_PCM_RING_BUFFER_HPP
+#endif // AGE_PCM_RING_BUFFER_HPP

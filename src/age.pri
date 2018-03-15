@@ -28,13 +28,16 @@ equals(TEMPLATE, app) {
 
 
 
-# add dependencies declared in DEPENDENCIES to LIBS, INCLUDEPATH and DEPENDPATH
+# add shared headers to include path
+
+INCLUDEPATH += $$PWD/include
+
+# add dependencies declared in DEPENDENCIES to LIBS and DEPENDPATH
 
 win32:CONFIG(release, debug|release):    LIB_PATH_SUFFIX = release/
 else:win32:CONFIG(debug, debug|release): LIB_PATH_SUFFIX = debug/
 
 for(_DEP, DEPENDENCIES) {
-    INCLUDEPATH += $$PWD/$$_DEP
     DEPENDPATH += $$PWD/$$_DEP
     LIBS += -L$$OUT_PWD/../$$_DEP/$$LIB_PATH_SUFFIX -l$$_DEP
 }

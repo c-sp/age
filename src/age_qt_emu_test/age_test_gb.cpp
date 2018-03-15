@@ -49,13 +49,13 @@ age::test_method age::mooneye_test_method()
     // this method is based on mooneye-gb/src/acceptance_tests/fixture.rs
     return [](const uint8_vector &test_rom, const uint8_vector&) {
 
-        constexpr uint cycles_per_step = gb_machine_cycles_per_second >> 8;
-        constexpr uint max_cycles = gb_machine_cycles_per_second * 120;
-
         // create emulator
         std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom);
 
         // run the test
+        uint cycles_per_step = emulator->get_cycles_per_second() >> 8;
+        uint max_cycles = emulator->get_cycles_per_second() * 120;
+
         for (uint cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
         {
             emulator->emulate(cycles_per_step);
@@ -90,12 +90,14 @@ age::test_method age::mooneye_test_method()
 //
 //---------------------------------------------------------
 
-age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint cycles_to_emulate)
+age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint millis_to_emulate)
 {
     return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot) {
 
         // create emulator & run test
         std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, force_dmg, dmg_green);
+
+        uint cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
         emulator->emulate(cycles_to_emulate);
 
         // load the screenshot image data

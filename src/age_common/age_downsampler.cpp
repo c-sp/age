@@ -24,8 +24,7 @@
 #include <limits>
 
 #include <age_debug.hpp>
-
-#include "age_ui_downsampler.hpp"
+#include <pcm/age_downsampler.hpp>
 
 #if 0
 #define LOG(x) AGE_LOG(x)

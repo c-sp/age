@@ -4,9 +4,8 @@ TEMPLATE = subdirs
 SUBDIRS += \
     age_common \
     age_emulator_gb \
-    age_emulator_test \
-    age_ui_common \
-    age_ui_qt
+    age_qt_emu_test \
+    age_qt_gui
 
 
 
@@ -14,7 +13,5 @@ SUBDIRS += \
 # (tells QMake about the correct build order)
 
 age_emulator_gb.depends = age_common
-age_emulator_test.depends = age_emulator_gb
-
-age_ui_common.depends = age_common
-age_ui_qt.depends = age_ui_common age_emulator_gb
+age_qt_emu_test.depends = age_emulator_gb
+age_qt_gui.depends = age_emulator_gb

@@ -18,8 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef AGE_UI_DOWNSAMPLER_HPP
-#define AGE_UI_DOWNSAMPLER_HPP
+#ifndef AGE_DOWNSAMPLER_HPP
+#define AGE_DOWNSAMPLER_HPP
 
 //!
 //! \file
@@ -28,9 +28,9 @@
 #include <functional>
 #include <vector>
 
-#include <age_pcm_sample.hpp>
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 
 
@@ -144,4 +144,4 @@ private:
 
 
 
-#endif // AGE_UI_DOWNSAMPLER_HPP
+#endif // AGE_DOWNSAMPLER_HPP

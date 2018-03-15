@@ -21,8 +21,7 @@
 #include <algorithm>
 
 #include <age_debug.hpp>
-
-#include "age_ui_pcm_ring_buffer.hpp"
+#include <pcm/age_pcm_ring_buffer.hpp>
 
 #if 0
 #define LOG(x) AGE_LOG(x)

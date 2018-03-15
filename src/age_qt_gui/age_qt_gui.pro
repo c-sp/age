@@ -4,7 +4,7 @@ QT += core gui widgets opengl multimedia
 TARGET = age
 TEMPLATE = app
 
-DEPENDENCIES = age_common age_emulator_gb age_ui_common
+DEPENDENCIES = age_common age_emulator_gb
 include($$PWD/../age.pri)
 
 

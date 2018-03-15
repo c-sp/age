@@ -2,7 +2,7 @@
 # we need Qt GUI for QImage
 QT += core gui
 
-TARGET = age_emulator_test
+TARGET = age_qt_emu_test
 TEMPLATE = app
 CONFIG -= app_bundle
 
