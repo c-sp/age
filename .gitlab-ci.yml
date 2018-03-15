@@ -19,7 +19,7 @@ variables:
     stage: build
     script:
         - "DIR=`mktemp -d` && cd $DIR"
-        - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/src/age.pro"
+        - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/build/age.pro"
         - make -j 4
         - cp age_qt_emu_test/age_qt_emu_test ${CI_PROJECT_DIR}/${TEST_SUBDIR}
     artifacts:
