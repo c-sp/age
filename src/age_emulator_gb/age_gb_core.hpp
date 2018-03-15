@@ -28,7 +28,6 @@
 #include <array>
 #include <map>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_gb.hpp"
@@ -69,7 +68,7 @@ enum class gb_event : uint
 
 
 
-class gb_core : public non_copyable
+class gb_core
 {
 public:
 
