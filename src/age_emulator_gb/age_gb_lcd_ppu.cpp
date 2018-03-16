@@ -160,7 +160,6 @@ age::uint age::gb_lcd_ppu::get_mode0_interrupt_cycle_offset() const
 
 age::uint8* age::gb_lcd_ppu::get_oam()
 {
-    AGE_ASSERT(m_oam.size() == gb_oam_size);
     return &m_oam[0];
 }
 

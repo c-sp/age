@@ -28,8 +28,12 @@
 #define LOG(x)
 #endif
 
-constexpr age::uint8 gb_p14 = 0x10;
-constexpr age::uint8 gb_p15 = 0x20;
+namespace age {
+
+constexpr uint8 gb_p14 = 0x10;
+constexpr uint8 gb_p15 = 0x20;
+
+}
 
 
 

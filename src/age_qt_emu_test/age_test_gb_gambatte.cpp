@@ -28,22 +28,26 @@
 
 
 
+namespace age {
+
 //!
 //! gambatte tests run for 15 frames
 //! (see gambatte/test/testrunner.cpp)
 //!
-constexpr age::uint gb_gambatte_test_frames = 15;
-constexpr age::uint gb_frames_per_second = 59;
+constexpr uint gb_gambatte_test_frames = 15;
+constexpr uint gb_frames_per_second = 59;
 
-age::uint gb_cycles_per_frame(const age::gb_emulator &emulator)
+uint gb_cycles_per_frame(const gb_emulator &emulator)
 {
     return emulator.get_cycles_per_second() / gb_frames_per_second;
 }
 
-age::uint test_cycles(const age::gb_emulator &emulator)
+uint test_cycles(const gb_emulator &emulator)
 {
     uint cycles_per_frame = gb_cycles_per_frame(emulator);
     return cycles_per_frame * gb_gambatte_test_frames;
+}
+
 }
 
 
@@ -450,7 +454,7 @@ age::test_method gambatte_test(const QString &test_file_name, QString &result_fi
     }
     if (!result_file_name.isEmpty())
     {
-        return age::screenshot_test_png(for_dmg, false, gb_gambatte_test_frames * 1000 / gb_frames_per_second);
+        return age::screenshot_test_png(for_dmg, false, age::gb_gambatte_test_frames * 1000 / age::gb_frames_per_second);
     }
 
     // return an empty method as we don't know the gambatte test type

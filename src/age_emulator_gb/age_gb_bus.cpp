@@ -30,6 +30,12 @@
 #define LOG(x)
 #endif
 
+namespace age {
+
+constexpr uint8 gb_hdma_start = 0x80;
+
+}
+
 
 
 // memory dumps,

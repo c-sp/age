@@ -20,11 +20,15 @@
 
 #include "age_gb_serial.hpp"
 
-constexpr age::uint gb_serial_transfer_cycles = age::gb_machine_cycles_per_second / (8192 / 8); // bit transfer with 8192 Hz
+namespace age {
 
-constexpr age::uint8 gb_sc_start_transfer = 0x80;
-constexpr age::uint8 gb_sc_terminal_selection = 0x01;
-constexpr age::uint8 gb_sc_shift_clock = 0x02;
+constexpr uint gb_serial_transfer_cycles = gb_machine_cycles_per_second / (8192 / 8); // bit transfer with 8192 Hz
+
+constexpr uint8 gb_sc_start_transfer = 0x80;
+constexpr uint8 gb_sc_terminal_selection = 0x01;
+constexpr uint8 gb_sc_shift_clock = 0x02;
+
+}
 
 
 

@@ -40,6 +40,20 @@
 namespace age
 {
 
+constexpr uint gb_channel_1 = 0;
+constexpr uint gb_channel_2 = 1;
+constexpr uint gb_channel_3 = 2;
+constexpr uint gb_channel_4 = 3;
+
+constexpr uint8 gb_master_switch = 0x80;
+
+constexpr const uint8_array<4> gb_channel_bit =
+{{
+     0x01, 0x02, 0x04, 0x08
+ }};
+
+
+
 class gb_sound : public non_copyable
 {
 public:
