@@ -312,26 +312,31 @@ age::uint age::qt_audio_output::write_samples()
 
     uint samples_written = 0;
 
-    // check how many samples we can stream to the audio output device
-    int bytes_free_int = m_output->bytesFree();
-    if (bytes_free_int > 0)
+    // don't try to write samples, if no audio device has been opened
+    // (may happen, if there is no audio device available)
+    if (m_device != nullptr)
     {
-        uint bytes_free = static_cast<uint>(bytes_free_int);
-        uint samples_free = bytes_free / sizeof_pcm_sample;
+        // check how many samples we can stream to the audio output device
+        int bytes_free_int = m_output->bytesFree();
+        if (bytes_free_int > 0)
+        {
+            uint bytes_free = static_cast<uint>(bytes_free_int);
+            uint samples_free = bytes_free / sizeof_pcm_sample;
 
-        // check how many samples we have available for streaming
-        uint samples_available;
-        const pcm_sample* buffer = m_buffer.get_buffered_samples_ptr(samples_available);
+            // check how many samples we have available for streaming
+            uint samples_available;
+            const pcm_sample* buffer = m_buffer.get_buffered_samples_ptr(samples_available);
 
-        // write samples to audio output device
-        uint samples_to_write = std::min(samples_available, samples_free);
-        const char *char_buffer = reinterpret_cast<const char*>(buffer);
+            // write samples to audio output device
+            uint samples_to_write = std::min(samples_available, samples_free);
+            const char *char_buffer = reinterpret_cast<const char*>(buffer);
 
-        qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_sample);
+            qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_sample);
 
-        // calculate the number of samples that were written
-        samples_written = bytes_written / sizeof_pcm_sample;
-        m_buffer.discard_buffered_samples(samples_written);
+            // calculate the number of samples that were written
+            samples_written = bytes_written / sizeof_pcm_sample;
+            m_buffer.discard_buffered_samples(samples_written);
+        }
     }
 
     return samples_written;
