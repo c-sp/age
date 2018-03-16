@@ -133,7 +133,6 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint m
         // compare the gameboy screen with the screenshot
         else
         {
-            image = image.mirrored(false, true); // the gameboy screen is stored upside down
             const pixel *screenshot = reinterpret_cast<pixel*>(image.bits());
             const pixel *screen = emulator->get_screen_front_buffer().data();
 

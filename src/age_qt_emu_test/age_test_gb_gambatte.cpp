@@ -264,7 +264,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
 
     // start with the first line
     // (the emulator screen buffer is filled upside down)
-    age::uint line_offset = (emulator.get_screen_height() - 1) * emulator.get_screen_width();
+    age::uint line_offset = 0;
     age::uint tile_offset = 0;
 
     // the first pixel in the first line is always expected to be "white"
@@ -291,7 +291,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
         }
 
         // next line
-        line_offset -= emulator.get_screen_width();
+        line_offset += emulator.get_screen_width();
         tile_offset += 8;
     }
 

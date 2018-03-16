@@ -316,10 +316,10 @@ void age::qt_gl_renderer::render(video_frame_manager &frame_manager)
 
         m_opengl_3.glColor4d(1.0, 1.0, 1.0, 1.0 / frame);
         m_opengl_3.glBegin(GL_TRIANGLE_STRIP);
-        m_opengl_3.glTexCoord2f(0.0, 0.0); m_opengl_3.glVertex2f(0.0, 0.0);
-        m_opengl_3.glTexCoord2f(0.0, 1.0); m_opengl_3.glVertex2f(0.0, 1.0);
-        m_opengl_3.glTexCoord2f(1.0, 0.0); m_opengl_3.glVertex2f(1.0, 0.0);
-        m_opengl_3.glTexCoord2f(1.0, 1.0); m_opengl_3.glVertex2f(1.0, 1.0);
+        m_opengl_3.glTexCoord2f(0.0, 1.0); m_opengl_3.glVertex2f(0.0, 0.0);
+        m_opengl_3.glTexCoord2f(0.0, 0.0); m_opengl_3.glVertex2f(0.0, 1.0);
+        m_opengl_3.glTexCoord2f(1.0, 1.0); m_opengl_3.glVertex2f(1.0, 0.0);
+        m_opengl_3.glTexCoord2f(1.0, 0.0); m_opengl_3.glVertex2f(1.0, 1.0);
         m_opengl_3.glEnd();
     }
 

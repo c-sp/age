@@ -74,8 +74,7 @@ age::pixel_vector& age::screen_buffer::get_back_buffer()
 age::pixel* age::screen_buffer::get_first_scanline_pixel(uint scanline)
 {
     AGE_ASSERT(scanline < m_screen_height);
-    // frames are currently stored upside-down
-    pixel *result = get_back_buffer().data() + (m_screen_height - 1 - scanline) * m_screen_width;
+    pixel *result = get_back_buffer().data() + scanline * m_screen_width;
     return result;
 }
 
