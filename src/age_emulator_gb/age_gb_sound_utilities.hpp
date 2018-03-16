@@ -25,12 +25,26 @@
 //! \file
 //!
 
-#include "age_gb.hpp"
+#include <algorithm> // std::min
+#include <limits>
+
+#include <age_debug.hpp>
+#include <age_types.hpp>
+#include <pcm/age_pcm_sample.hpp>
 
 
 
 namespace age
 {
+
+constexpr uint gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
+constexpr uint gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
+constexpr uint gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);
+
+constexpr uint8 gb_nrX4_length_counter = 0x40;
+constexpr uint8 gb_nrX4_initialize = 0x80;
+
+
 
 template<typename TYPE>
 class gb_sample_generator
@@ -102,7 +116,6 @@ protected:
     void set_cycles_per_sample(uint cycles_per_sample)
     {
         AGE_ASSERT(cycles_per_sample > 0);
-        AGE_ASSERT(cycles_per_sample < gb_machine_cycles_per_second);
         AGE_ASSERT(cycles_per_sample >= gb_cycles_per_sample);
         AGE_ASSERT((cycles_per_sample % gb_cycles_per_sample) == 0);
         m_cycles_per_sample = cycles_per_sample;

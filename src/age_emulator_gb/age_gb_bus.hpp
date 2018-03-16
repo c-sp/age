@@ -25,6 +25,11 @@
 //! \file
 //!
 
+#include <vector>
+
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
+
 #include "age_gb_memory.hpp"
 #include "age_gb_sound.hpp"
 #include "age_gb_lcd.hpp"
@@ -151,7 +156,7 @@ private:
     gb_joypad &m_joypad;
     gb_serial &m_serial;
 
-    uint8_array<gb_high_ram_size> m_high_ram;
+    uint8_array<0x200> m_high_ram;  // 0xFE00 - 0xFFFF (including OAM ram and i/o ports for easier handling)
     uint8 m_rp = 0x3E;
     uint8 m_un6c = 0xFE;
     uint8 m_un72 = 0;

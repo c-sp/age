@@ -18,6 +18,10 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <ios> // std::hex
+
+#include <age_debug.hpp>
+
 #include "age_gb_core.hpp"
 
 #if 0
@@ -25,6 +29,11 @@
 #else
 #define LOG(x)
 #endif
+
+constexpr const age::uint8_array<5> gb_interrupt_pc_lookup =
+{{
+     0x00, 0x40, 0x48, 0x48, 0x50
+ }};
 
 
 

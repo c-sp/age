@@ -25,6 +25,14 @@
 //! \file
 //!
 
+#include <functional>
+#include <vector>
+
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
+#include <gfx/age_pixel.hpp>
+#include <gfx/age_screen_buffer.hpp>
+
 #include "age_gb_core.hpp"
 #include "age_gb_memory.hpp"
 
@@ -32,6 +40,39 @@
 
 namespace age
 {
+
+constexpr uint gb_screen_width = 160;
+constexpr uint gb_screen_height = 144;
+
+constexpr uint gb_cycles_per_scanline = 456;
+constexpr uint gb_cycles_per_frame = 154 * gb_cycles_per_scanline;
+constexpr uint gb_cycles_ly153 = 4;
+constexpr uint gb_cycles_mode2 = 80;
+
+constexpr uint8 gb_lcdc_enable = 0x80;
+constexpr uint8 gb_lcdc_win_map = 0x40;
+constexpr uint8 gb_lcdc_win_enable = 0x20;
+constexpr uint8 gb_lcdc_bg_win_data = 0x10;
+constexpr uint8 gb_lcdc_bg_map = 0x08;
+constexpr uint8 gb_lcdc_obj_size = 0x04;
+constexpr uint8 gb_lcdc_obj_enable = 0x02;
+constexpr uint8 gb_lcdc_bg_enable = 0x01;
+
+constexpr uint8 gb_stat_interrupt_coincidence = 0x40;
+constexpr uint8 gb_stat_interrupt_mode2 = 0x20;
+constexpr uint8 gb_stat_interrupt_mode1 = 0x10;
+constexpr uint8 gb_stat_interrupt_mode0 = 0x08;
+constexpr uint8 gb_stat_coincidence = 0x04;
+constexpr uint8 gb_stat_modes = 0x03;
+
+constexpr uint gb_num_palette_colors = 16 * 4;
+constexpr uint gb_palette_bgp = 0x00;
+constexpr uint gb_palette_obp0 = 0x20;
+constexpr uint gb_palette_obp1 = 0x30;
+
+constexpr uint8 gb_tile_attribute_x_flip = 0x20;
+constexpr uint8 gb_tile_attribute_y_flip = 0x40;
+constexpr uint8 gb_tile_attribute_priority = 0x80;
 
 
 
@@ -248,7 +289,7 @@ private:
     const bool m_dmg_green;
     gb_core &m_core;
     const gb_memory &m_memory;
-    uint8_array<gb_oam_size> m_oam;
+    uint8_array<0xA0> m_oam;
     std::function<void(gb_lcd_ppu&)> m_next_fetch_step = nullptr;
     std::function<void(gb_lcd_ppu&)> m_next_plot_step = nullptr;
 
@@ -312,7 +353,7 @@ class gb_lcd : private gb_lcd_ppu
 {
 public:
 
-    gb_lcd(gb_core &core, const gb_memory &memory, video_buffer_handler &frame_handler, bool dmg_green);
+    gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green);
 
     using gb_lcd_ppu::read_lcdc;
     using gb_lcd_ppu::read_scx;
@@ -388,7 +429,7 @@ private:
     // common stuff
     const bool m_cgb;
     gb_core &m_core;
-    video_buffer_handler &m_video_buffer_handler;
+    screen_buffer &m_screen_buffer;
     uint8_array<gb_num_palette_colors * 2> m_palette; // 2 bytes per color
     std::function<void(gb_lcd&)> m_next_event = nullptr;
     uint m_next_event_cycle = 0;

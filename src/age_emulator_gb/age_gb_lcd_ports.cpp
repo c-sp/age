@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <age_debug.hpp>
+
 #include "age_gb_lcd.hpp"
 
 #if 0
@@ -71,7 +73,7 @@ void age::gb_lcd::write_lcdc(uint8 value)
             m_next_event_cycle = gb_no_cycle;
             m_next_event = nullptr;
 
-            pixel_vector &back_buffer = m_video_buffer_handler.get_back_buffer();
+            pixel_vector &back_buffer = m_screen_buffer.get_back_buffer();
             white_screen(back_buffer);
             switch_frames();
 

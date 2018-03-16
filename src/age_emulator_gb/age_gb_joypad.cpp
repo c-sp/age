@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <age_debug.hpp>
+
 #include "age_gb_joypad.hpp"
 
 #if 0
@@ -25,6 +27,13 @@
 #else
 #define LOG(x)
 #endif
+
+namespace age {
+
+constexpr uint8 gb_p14 = 0x10;
+constexpr uint8 gb_p15 = 0x20;
+
+}
 
 
 

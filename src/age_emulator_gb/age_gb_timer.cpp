@@ -18,6 +18,10 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <ios> // std::hex
+
+#include <age_debug.hpp>
+
 #include "age_gb_timer.hpp"
 
 #if 0
@@ -25,6 +29,12 @@
 #else
 #define LOG(x)
 #endif
+
+namespace age {
+
+constexpr uint8 gb_tac_start_timer = 0x04;
+
+}
 
 
 

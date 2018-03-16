@@ -25,6 +25,13 @@
 //! \file
 //!
 
+#include <array>
+
+#include <age_debug.hpp>
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
+#include <pcm/age_pcm_sample.hpp>
+
 #include "age_gb_core.hpp"
 #include "age_gb_sound_utilities.hpp"
 
@@ -32,6 +39,20 @@
 
 namespace age
 {
+
+constexpr uint gb_channel_1 = 0;
+constexpr uint gb_channel_2 = 1;
+constexpr uint gb_channel_3 = 2;
+constexpr uint gb_channel_4 = 3;
+
+constexpr uint8 gb_master_switch = 0x80;
+
+constexpr const uint8_array<4> gb_channel_bit =
+{{
+     0x01, 0x02, 0x04, 0x08
+ }};
+
+
 
 class gb_sound : public non_copyable
 {
@@ -136,7 +157,7 @@ private:
         channel_s01 = ((m_nr51 & channel_bit) > 0) ? channel_s01 : 0;
         channel_s02 = (((m_nr51 >> 4) & channel_bit) > 0) ? channel_s02 : 0;
 
-        lpcm_stereo_sample channel_multiplier = {channel_s02, channel_s01};
+        pcm_sample channel_multiplier = {channel_s02, channel_s01};
         set_channel_multiplier<channel>(channel_multiplier.m_stereo_sample);
     }
 

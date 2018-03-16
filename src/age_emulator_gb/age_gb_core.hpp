@@ -25,7 +25,17 @@
 //! \file
 //!
 
-#include "age_gb.hpp"
+#include <array>
+#include <map>
+
+#include <age_debug.hpp>
+#include <age_types.hpp>
+
+#ifdef AGE_DEBUG
+#define AGE_GB_CYCLE_LOG(x) AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ": " << x)
+#else
+#define AGE_GB_CYCLE_LOG(x)
+#endif
 
 
 
@@ -61,9 +71,12 @@ enum class gb_event : uint
     none = 7 // must always be the last value
 };
 
+constexpr uint gb_no_cycle = uint_max;
+constexpr uint gb_machine_cycles_per_second = 4194304;
 
 
-class gb_core : public non_copyable
+
+class gb_core
 {
 public:
 

@@ -18,6 +18,11 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
+#include <array>
+
+#include <age_debug.hpp>
+
 #include "age_gb_memory.hpp"
 
 #if 0

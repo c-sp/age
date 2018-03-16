@@ -25,12 +25,44 @@
 //! \file
 //!
 
-#include "age_gb.hpp"
+#include <functional>
+#include <string>
+
+#include <age_non_copyable.hpp>
+#include <age_types.hpp>
 
 
 
 namespace age
 {
+
+constexpr uint gb_cart_rom_bank_size = 0x4000;
+constexpr uint gb_cart_ram_bank_size = 0x2000;
+constexpr uint gb_internal_ram_bank_size = 0x1000;
+constexpr uint gb_video_ram_bank_size = 0x2000;
+
+constexpr uint gb_internal_ram_size = 8 * gb_internal_ram_bank_size;
+constexpr uint gb_video_ram_size = 2 * gb_video_ram_bank_size;
+
+// cartridge information area
+
+//constexpr uint gb_header_size = 0x0150;
+constexpr uint gb_cia_ofs_title = 0x0134;
+constexpr uint gb_cia_ofs_cgb = 0x0143;
+//constexpr uint gb_cia_ofs_licensee_new_low = 0x0144;
+//constexpr uint gb_cia_ofs_licensee_new_high = 0x0145;
+//constexpr uint gb_cia_ofs_sgb = 0x0146;
+constexpr uint gb_cia_ofs_type = 0x0147;
+constexpr uint gb_cia_ofs_rom_size = 0x0148;
+constexpr uint gb_cia_ofs_ram_size = 0x0149;
+//constexpr uint gb_cia_ofs_destination = 0x014A;
+//constexpr uint gb_cia_ofs_licensee = 0x014B;
+//constexpr uint gb_cia_ofs_version = 0x014C;
+//constexpr uint gb_cia_ofs_header_checksum = 0x014D;
+//constexpr uint gb_cia_ofs_global_checksum_low = 0x014E;
+//constexpr uint gb_cia_ofs_global_checksum_high = 0x014F;
+
+
 
 class gb_memory : public non_copyable
 {

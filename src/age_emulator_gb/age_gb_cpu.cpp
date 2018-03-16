@@ -18,6 +18,8 @@
 // along with AGE.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <age_debug.hpp>
+
 #include "age_gb_cpu.hpp"
 
 #if 0
@@ -25,6 +27,21 @@
 #else
 #define LOG(x)
 #endif
+
+namespace age {
+
+constexpr uint8 gb_zero_flag = 0x80;
+constexpr uint8 gb_subtract_flag = 0x40;
+constexpr uint8 gb_half_carry_flag = 0x20;
+constexpr uint8 gb_carry_flag = 0x10;
+
+constexpr uint gb_hcs_shift = 4;
+constexpr uint gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
+constexpr uint gb_hcs_subtract = gb_subtract_flag << gb_hcs_shift;
+constexpr uint gb_hcs_old_carry = gb_carry_flag << gb_hcs_shift;
+constexpr uint gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
+
+}
 
 
 
