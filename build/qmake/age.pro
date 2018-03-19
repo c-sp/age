@@ -5,7 +5,8 @@ SUBDIRS += \
     age_common \
     age_emulator_gb \
     age_qt_emu_test \
-    age_qt_gui
+    age_qt_gui \
+    age_wasm
 
 
 
@@ -15,3 +16,4 @@ SUBDIRS += \
 age_emulator_gb.depends = age_common
 age_qt_emu_test.depends = age_emulator_gb
 age_qt_gui.depends = age_emulator_gb
+age_wasm.depends = age_emulator_gb
