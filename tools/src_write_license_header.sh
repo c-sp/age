@@ -6,6 +6,8 @@ if [ $# != 1 ]; then
     exit 1
 fi
 
+YEAR=`date +%Y`
+
 # Build a new file containing the license header and the contents of
 # the specified file beginning with the first empty line.
 #
@@ -17,7 +19,7 @@ FILE=$1
 TEMP_FILE=$FILE.tmp
 SOURCE_DIR=`dirname $0`
 
-cat $SOURCE_DIR/license_header.txt > $TEMP_FILE
+cat $SOURCE_DIR/license_header.txt | sed "s/\$YEAR/$YEAR/" > $TEMP_FILE
 cat $FILE | sed -n '/^\s*$/,$p' >> $TEMP_FILE
 
 # Replace the original file with the newly built one.
