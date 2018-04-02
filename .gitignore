@@ -2,6 +2,6 @@
 Thumbs.db
 
 build/doxygen/*out/*
-build/build*
+build/artifacts
 
 test/age_qt_emu_test

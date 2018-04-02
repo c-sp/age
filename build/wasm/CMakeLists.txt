@@ -1,0 +1,90 @@
+
+##############################################
+######                                  ######
+###### build the AGE WebAssembly binary ######
+######                                  ######
+##############################################
+
+#
+# The emscripten environment has to be set up first.
+# (emsdk/emsdk_env.sh)
+#
+
+#
+# CMake Links:
+#
+#   CMake Documentation: https://cmake.org/cmake/help/v3.10/
+#   CMake Tutorial:      https://cmake.org/cmake-tutorial/
+#
+#   Emscripten & CMake: https://stackoverflow.com/a/45277855
+#
+
+cmake_minimum_required (VERSION 3.10)
+
+project (AGE-WebAssembly)
+
+
+#####   source files
+
+set (DIR_AGE             "../../src")
+set (DIR_AGE_COMMON      ${DIR_AGE}/age_common)
+set (DIR_AGE_EMULATOR_GB ${DIR_AGE}/age_emulator_gb)
+set (DIR_AGE_WASM        ${DIR_AGE}/age_wasm)
+
+set (SOURCES_AGE_COMMON
+    ${DIR_AGE_COMMON}/age_debug.cpp
+    ${DIR_AGE_COMMON}/age_downsampler.cpp
+    ${DIR_AGE_COMMON}/age_emulator.cpp
+    ${DIR_AGE_COMMON}/age_pcm_ring_buffer.cpp
+    ${DIR_AGE_COMMON}/age_screen_buffer.cpp
+)
+
+set (SOURCES_AGE_EMULATOR_GB
+    ${DIR_AGE_EMULATOR_GB}/age_gb_bus.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_core.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_cpu.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_emulator.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_emulator_impl.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_joypad.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_ly_lyc.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_old_render.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_ports.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_ppu.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_memory.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_memory_init.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_serial.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_sound.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_sound_channels.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_sound_utilities.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_timer.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_timer_utils.cpp
+)
+
+set (SOURCES_AGE_WASM
+    ${DIR_AGE_WASM}/age_wasm.cpp
+)
+
+
+#####   C++ options
+
+# use C++14
+set(CMAKE_CXX_STANDARD 14)
+
+# additional include directories
+include_directories (
+    ${DIR_AGE}/include
+    ${EMSCRIPTEN}/system/include
+)
+
+
+#####   AGE binaries
+
+add_library(age_common STATIC ${SOURCES_AGE_COMMON})
+
+add_library(age_emulator_gb STATIC ${SOURCES_AGE_EMULATOR_GB})
+target_link_libraries(age_emulator_gb age_common)
+
+add_executable(age_wasm ${SOURCES_AGE_WASM})
+target_link_libraries(age_wasm age_emulator_gb)
+set_target_properties(age_wasm PROPERTIES LINK_FLAGS "-s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s NO_FILESYSTEM=1")
