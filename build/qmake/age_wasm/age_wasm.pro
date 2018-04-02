@@ -40,3 +40,7 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+DISTFILES += \
+    ../../wasm/CMakeLists.txt \
+    ../../wasm/run_cmake.sh
