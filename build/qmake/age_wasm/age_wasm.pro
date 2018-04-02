@@ -20,7 +20,15 @@ DEPENDENCIES = age_common age_emulator_gb
 include($$PWD/../age.pri)
 
 
-INCLUDEPATH += $$(EMSCRIPTEN)/system/include
+# if emscripten is installed and the environment
+# has been set up accordingly,
+# add the emscripten include path and define EMSCRIPTEN
+_EMSCRIPTEN = $$(EMSCRIPTEN)
+!isEmpty(_EMSCRIPTEN) {
+    INCLUDEPATH += $$(EMSCRIPTEN)/system/include
+    DEFINES += EMSCRIPTEN
+}
+
 
 SOURCES += \
     ../../../src/age_wasm/age_wasm.cpp

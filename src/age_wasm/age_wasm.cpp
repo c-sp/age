@@ -19,11 +19,20 @@
 //
 
 
-// Emscripten includes are added to INCLUDEPATH in age_wasm.pro
-// to allow for evaluation of header files in Qt Creator.
-#include <emscripten.h>
+#include <cstring> // memcpy
 
 #include <emulator/age_gb_emulator.hpp>
+
+#ifdef EMSCRIPTEN
+// If emscripten is available include it's header.
+#include <emscripten.h>
+
+#else
+// If emscripten is not available define an empty
+// EMSCRIPTEN_KEEPALIVE macro to allow for successful
+// compilation.
+#define EMSCRIPTEN_KEEPALIVE
+#endif
 
 #if 1
 #define LOG(x) AGE_LOG(x)
@@ -71,14 +80,14 @@ age::uint gb_get_screen_height()
 }
 
 EMSCRIPTEN_KEEPALIVE
-const age::pixel* gb_get_video_front_buffer()
+const age::pixel* gb_get_screen_front_buffer()
 {
-    const age::pixel_vector &vec = gb_emu->get_video_front_buffer();
+    const age::pixel_vector &vec = gb_emu->get_screen_front_buffer();
     return vec.data();
 }
 
 EMSCRIPTEN_KEEPALIVE
-const age::lpcm_stereo_sample* gb_get_audio_buffer()
+const age::pcm_sample* gb_get_audio_buffer()
 {
     const age::pcm_vector &vec = gb_emu->get_audio_buffer();
     return vec.data();
