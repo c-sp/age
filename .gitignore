@@ -1,7 +1,11 @@
 *.pro.user*
+.idea
+
 Thumbs.db
 
 build/doxygen/*out/*
 build/artifacts
+
+src/age_js/node_modules
 
 test/age_qt_emu_test
