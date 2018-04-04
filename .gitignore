@@ -1,13 +1,16 @@
+
+# IDE files
 *.pro.user*
 .idea
 
-Thumbs.db
-
+# build artifacts
 build/doxygen/*out/*
 build/artifacts
 
+# AGE-JS build artifacts
 src/age_js/node_modules
 src/age_js/dist
 src/age_js/src/environments/version.ts
 
-test/age_qt_emu_test
+# miscellaneous files
+Thumbs.db
