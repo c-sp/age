@@ -359,7 +359,7 @@
         "no-unused-variable": true,
 
         // discouraged rule: https://palantir.github.io/tslint/rules/no-use-before-declare/
-        // "no-use-before-declare": true,
+        //"no-use-before-declare": true,
 
         // "let" or "const" instead of "var"
         //  -> https://palantir.github.io/tslint/rules/no-var-keyword
@@ -419,7 +419,7 @@
 
         // marking private variables as "readonly" collides with Angular's injection
         //  -> https://palantir.github.io/tslint/rules/prefer-readonly
-        // "prefer-readonly": true,
+        //"prefer-readonly": true,
 
         // use single quotation marks, allow double quotation marks only if it prevents escaping
         //  -> https://palantir.github.io/tslint/rules/quotemark
@@ -613,18 +613,17 @@
         ],
 
         // TODO not displayed by WebStorm
-        // TODO add i18n after the first prototype is finished
         // ensure i18n best practices
         //  -> http://codelyzer.com/rules/i18n
-//        "i18n": [
-//            true,
-//            "check-id",
-//            "check-text"
-//        ],
+        //"i18n": [
+        //    true,
+        //    // every HTML element containing text should have an i18n attribute
+        //    "check-text"
+        //],
 
         // no whitespaces for imports
         //  -> http://codelyzer.com/rules/import-destructuring-spacing
-        // "import-destructuring-spacing": true,
+        //"import-destructuring-spacing": true,
 
         // use @Input instead of @Attribute
         //  -> http://codelyzer.com/rules/no-attribute-parameter-decorator
@@ -660,7 +659,7 @@
 
         // we don't have any pipe naming rules at this time
         //  -> http://codelyzer.com/rules/pipe-naming
-        // "pipe-naming" : true,
+        //"pipe-naming" : true,
 
         // use strict equality for evaluating async pipe output,
         // as an async pipe evaluates to null before the first emit
