@@ -1,6 +1,13 @@
+
+//
+// use this file to bild the AGE wasm binary
+// and it's "glue code"
+//
+
 const child_process = require('child_process');
 const path = require('path');
 const fs = require('fs');
+
 
 
 // path to Emscripten.cmake
@@ -54,3 +61,14 @@ child_process.execSync('make', {cwd: build_path});
 
 
 // copy build artifacts
+
+const asset_path = path.resolve(__dirname, '..', 'src', 'assets');
+
+const src_age_wasm_js = path.resolve(build_path, 'age_wasm.js');
+const src_age_wasm_wasm = path.resolve(build_path, 'age_wasm.wasm');
+
+const dst_age_wasm_js = path.resolve(asset_path, path.basename(src_age_wasm_js));
+const dst_age_wasm_wasm = path.resolve(asset_path, path.basename(src_age_wasm_wasm));
+
+fs.copyFileSync(src_age_wasm_js, dst_age_wasm_js);
+fs.copyFileSync(src_age_wasm_wasm, dst_age_wasm_wasm);

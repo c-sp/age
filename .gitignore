@@ -7,10 +7,11 @@
 build/doxygen/*out/*
 build/artifacts
 
-# AGE-JS build artifacts
+# AGE-JS build files
 src/age_js/dist
 src/age_js/node_modules
 src/age_js/npm-debug.log*
+src/age_js/src/assets/age_wasm*
 src/age_js/src/environments/version.ts
 
 # miscellaneous files
