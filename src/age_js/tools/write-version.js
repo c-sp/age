@@ -11,8 +11,8 @@ const version_info = {
     hash: parts[2]
 };
 
-const file = path.resolve(__dirname, '..', 'src', 'environments', 'version.ts');
-fs.writeFileSync(file, `
+const file_path = path.resolve(__dirname, '..', 'src', 'environments', 'version.ts');
+fs.writeFileSync(file_path, `
 // THIS FILE IS AUTO GENERATED, DON'T EDIT IT MANUALLY!
 /* tslint:disable */
 export const VERSION_INFO = ${JSON.stringify(version_info, null, 4)};

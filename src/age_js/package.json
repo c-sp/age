@@ -4,11 +4,13 @@
     "license": "MIT",
     "scripts": {
         "ng": "ng",
-        "start": "npm run write-version && ng serve",
-        "build": "npm run write-version && ng build --prod",
+        "start": "npm run pre-build && ng serve",
+        "build": "npm run pre-build && ng build --prod",
         "test": "ng test",
         "lint": "ng lint",
-        "write-version": "node tools/write-version.js"
+        "pre-build": "npm run pre-build:write-version && npm run pre-build:cmake-age-wasm",
+        "pre-build:write-version": "node tools/write-version.js",
+        "pre-build:cmake-age-wasm": "node tools/cmake-age-wasm.js"
     },
     "private": true,
     "dependencies": {
