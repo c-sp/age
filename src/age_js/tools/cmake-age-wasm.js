@@ -56,8 +56,11 @@ const cmd = 'cmake -G "Unix Makefiles"'
     + ' -DCMAKE_TOOLCHAIN_FILE=' + toolchain_file_path
     + ' ' + path.dirname(cmake_file_path);
 
-child_process.execSync(cmd, {cwd: build_path});
-child_process.execSync('make', {cwd: build_path});
+const cmake_out = child_process.execSync(cmd, {cwd: build_path}).toString();
+console.log(cmake_out);
+
+const make_out = child_process.execSync('make', {cwd: build_path}).toString();
+console.log(make_out);
 
 
 // copy build artifacts
@@ -65,10 +68,13 @@ child_process.execSync('make', {cwd: build_path});
 const asset_path = path.resolve(__dirname, '..', 'src', 'assets');
 
 const src_age_wasm_js = path.resolve(build_path, 'age_wasm.js');
-const src_age_wasm_wasm = path.resolve(build_path, 'age_wasm.wasm');
-
 const dst_age_wasm_js = path.resolve(asset_path, path.basename(src_age_wasm_js));
+
+console.log(`copying ${src_age_wasm_js} to ${dst_age_wasm_js}`);
+fs.copyFileSync(src_age_wasm_js, dst_age_wasm_js);
+
+const src_age_wasm_wasm = path.resolve(build_path, 'age_wasm.wasm');
 const dst_age_wasm_wasm = path.resolve(asset_path, path.basename(src_age_wasm_wasm));
 
-fs.copyFileSync(src_age_wasm_js, dst_age_wasm_js);
+console.log(`copying ${src_age_wasm_wasm} to ${dst_age_wasm_wasm}`);
 fs.copyFileSync(src_age_wasm_wasm, dst_age_wasm_wasm);
