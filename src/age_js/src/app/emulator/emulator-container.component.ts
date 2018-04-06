@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {TaskState} from './task-state';
 
 
@@ -30,8 +30,6 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
                 </ng-container>
             </div>
 
-            <canvas id="emu_screen" width="160" height="144"></canvas>
-
         </div>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -48,8 +46,10 @@ export class EmulatorContainerComponent implements OnInit, OnDestroy {
     private _javascriptLoadingState: TaskState | undefined;
     private _runtimeInitState: TaskState | undefined;
 
+    private _gbModule: EmGbModule | undefined;
 
-    constructor(private _changeDetector: ChangeDetectorRef) {
+
+    constructor(@Inject(ChangeDetectorRef) private _changeDetector: ChangeDetectorRef) {
     }
 
     ngOnInit(): void {
@@ -71,6 +71,13 @@ export class EmulatorContainerComponent implements OnInit, OnDestroy {
         return this._runtimeInitState;
     }
 
+    get gbModule(): EmGbModule {
+        if (!this._gbModule) {
+            throw new Error('EmGbModule not available');
+        }
+        return this._gbModule;
+    }
+
 
     private createEmscriptenModule(): void {
         if (this._window.Module) {
@@ -88,6 +95,7 @@ export class EmulatorContainerComponent implements OnInit, OnDestroy {
             // notify us once WebAssembly compilation is complete
             onRuntimeInitialized: () => {
                 this._runtimeInitState = TaskState.SUCCESS;
+                this._gbModule = this._window.Module;
                 this._changeDetector.detectChanges();
             },
 
@@ -141,6 +149,7 @@ export class EmulatorContainerComponent implements OnInit, OnDestroy {
             }
         }
 
+        this._gbModule = undefined;
         this._window.Module = undefined;
         this._runtimeInitState = undefined;
     }
