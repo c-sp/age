@@ -1,6 +1,9 @@
+interface EmModule {
 
+    HEAPU8: Uint8Array;
+}
 
-interface EmGbModule {
+interface EmGbModule extends EmModule {
 
     _gb_allocate_rom_buffer(romSize: number): number;
     _gb_new_emulator(): void;
