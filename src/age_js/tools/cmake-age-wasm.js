@@ -51,8 +51,10 @@ if (!fs.existsSync(build_path)) {
 
 // run cmake && make
 
+const build_type = process.argv.some(arg => arg.toLowerCase() === 'debug') ? 'Debug' : 'Release';
+
 const cmd = 'cmake -G "Unix Makefiles"'
-    + ' -DCMAKE_BUILD_TYPE=Release'
+    + ' -DCMAKE_BUILD_TYPE=' + build_type
     + ' -DCMAKE_TOOLCHAIN_FILE=' + toolchain_file_path
     + ' ' + path.dirname(cmake_file_path);
 
