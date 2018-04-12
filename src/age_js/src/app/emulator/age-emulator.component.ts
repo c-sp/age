@@ -4,6 +4,7 @@ import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, On
 @Component({
     selector: 'age-emulator',
     template: `
+        <div>The Emulator</div>
         <canvas #emulatorCanvas width="160" height="144"></canvas>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush

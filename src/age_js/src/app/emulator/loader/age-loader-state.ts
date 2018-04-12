@@ -1,4 +1,4 @@
-export enum TaskState {
+export enum AgeLoaderState {
     WORKING,
     SUCCESS,
     ERROR

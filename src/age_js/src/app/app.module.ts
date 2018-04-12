@@ -2,20 +2,16 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
-import {AgeEmulatorContainerComponent} from './emulator/emulator-container.component';
-import {AgeTaskStateComponent} from './emulator/task-state.component';
-import {AgeEmulatorComponent} from './emulator/emulator.component';
+import {AgeEmulatorModule} from './emulator/age-emulator.module';
 
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        AgeEmulatorContainerComponent,
-        AgeTaskStateComponent,
-        AgeEmulatorComponent
-    ],
     imports: [
-        BrowserModule
+        BrowserModule,
+        AgeEmulatorModule
+    ],
+    declarations: [
+        AppComponent
     ],
     providers: [],
     bootstrap: [AppComponent]
