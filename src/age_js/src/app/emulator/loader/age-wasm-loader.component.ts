@@ -10,25 +10,17 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
     template: `
         <ng-container *ngIf="showState">
 
-            <div>
-                <age-loader-state-icon [state]="javascriptLoadingState"></age-loader-state-icon>
+            <age-loader-state [state]="javascriptLoadingState">
+                <ng-container ageLoaderWorking>loading Javascript ...</ng-container>
+                <ng-container ageLoaderSuccess>Javascript loaded</ng-container>
+                <ng-container ageLoaderError>error loading Javascript</ng-container>
+            </age-loader-state>
 
-                <ng-container [ngSwitch]="javascriptLoadingState">
-                    <ng-container *ngSwitchCase="AgeLoaderState.WORKING">loading Javascript ...</ng-container>
-                    <ng-container *ngSwitchCase="AgeLoaderState.SUCCESS">Javascript loaded</ng-container>
-                    <ng-container *ngSwitchCase="AgeLoaderState.ERROR">error loading Javascript</ng-container>
-                </ng-container>
-            </div>
-
-            <div *ngIf="javascriptLoadingState === AgeLoaderState.SUCCESS">
-                <age-loader-state-icon [state]="runtimeInitState"></age-loader-state-icon>
-
-                <ng-container [ngSwitch]="runtimeInitState">
-                    <ng-container *ngSwitchCase="AgeLoaderState.WORKING">initializing WebAssembly ...</ng-container>
-                    <ng-container *ngSwitchCase="AgeLoaderState.SUCCESS">WebAssembly initialized</ng-container>
-                    <ng-container *ngSwitchCase="AgeLoaderState.ERROR">error initializing WebAssembly</ng-container>
-                </ng-container>
-            </div>
+            <age-loader-state [state]="runtimeInitState" *ngIf="javascriptLoadingState === AgeLoaderState.SUCCESS">
+                <ng-container ageLoaderWorking>initializing WebAssembly ...</ng-container>
+                <ng-container ageLoaderSuccess>WebAssembly initialized</ng-container>
+                <ng-container ageLoaderError>error initializing WebAssembly</ng-container>
+            </age-loader-state>
 
         </ng-container>
     `,
