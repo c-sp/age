@@ -38,7 +38,7 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
     `,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EmulatorContainerComponent implements OnInit, OnDestroy {
+export class AgeEmulatorContainerComponent implements OnInit, OnDestroy {
 
     readonly TaskState = TaskState;
 
