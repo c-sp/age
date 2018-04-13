@@ -1,3 +1,5 @@
+import {AgeGbButton} from './age-emulator-keymap';
+
 export interface AgeEmulation {
 
     /**
@@ -16,6 +18,10 @@ export interface AgeEmulation {
     getScreenWidth(): number;
 
     getScreenHeight(): number;
+
+    buttonDown(button: AgeGbButton): void;
+
+    buttonUp(button: AgeGbButton): void;
 }
 
 
@@ -74,5 +80,19 @@ export class AgeGbEmulation implements AgeEmulation {
      */
     getScreenWidth(): number {
         return this._emGbModule._gb_get_screen_width();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    buttonDown(button: AgeGbButton): void {
+        this._emGbModule._gb_set_buttons_down(button);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    buttonUp(button: AgeGbButton): void {
+        this._emGbModule._gb_set_buttons_up(button);
     }
 }

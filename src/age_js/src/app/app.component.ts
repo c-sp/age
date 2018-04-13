@@ -10,7 +10,7 @@ import {AgeRomFile} from './rom-file-selector/age-rom-file';
     template: `
         <div style="text-align:center">
 
-            <h1>test</h1>
+            <h1>Welcome to the AGE-JS prototype</h1>
 
             <div>
                 <div><b>Build Details</b></div>
