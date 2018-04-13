@@ -1,13 +1,16 @@
 import {Component} from '@angular/core';
 import {VERSION_INFO} from '../environments/version';
+import {AgeRomFile} from './rom-file-selector/age-rom-file';
 
+
+// TODO h1 Text
 
 @Component({
     selector: 'age-app-root',
     template: `
         <div style="text-align:center">
 
-            <h1>Welcome to the AGE-JS prototype</h1>
+            <h1>test</h1>
 
             <div>
                 <div><b>Build Details</b></div>
@@ -15,27 +18,26 @@ import {VERSION_INFO} from '../environments/version';
                 <div>Committed on: {{versionDate | date:'y-MM-dd HH:mm:ss'}}</div>
             </div>
 
-            <div class="emulator">
-                <button (click)="showEmulator = true">load emulator</button>
-                <button (click)="showEmulator = false">exit emulator</button>
-                <age-emulator-container *ngIf="showEmulator"></age-emulator-container>
+            <div class="container">
+                <age-local-rom-file-selector (fileSelected)="selectFile($event)"></age-local-rom-file-selector>
+            </div>
+
+            <div class="container">
+                <age-emulator-container *ngIf="romFile"
+                                        [romFile]="romFile"></age-emulator-container>
             </div>
 
         </div>
     `,
     styles: [`
-        .emulator {
+        .container {
             margin-top: 2em;
-        }
-
-        .emulator button {
-            margin-bottom: 1em;
         }
     `]
 })
 export class AppComponent {
 
-    showEmulator = false;
+    romFile: AgeRomFile | undefined;
 
     private _versionInfo = VERSION_INFO;
 
@@ -45,5 +47,9 @@ export class AppComponent {
 
     get versionHash(): string {
         return this._versionInfo.hash;
+    }
+
+    selectFile(file: File): void {
+        this.romFile = !file ? undefined : new AgeRomFile(file);
     }
 }

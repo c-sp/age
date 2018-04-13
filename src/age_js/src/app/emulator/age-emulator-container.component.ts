@@ -1,4 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input} from '@angular/core';
+import {AgeRomFile} from '../rom-file-selector/age-rom-file';
 
 
 @Component({
@@ -7,24 +8,30 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject} from '@an
         <age-wasm-loader [showState]="!allLoaded"
                          (emGbModuleLoaded)="setEmGbModule($event)"></age-wasm-loader>
 
+        <age-rom-file-loader [showState]="!allLoaded"
+                             [romFile]="romFile"
+                             (fileLoaded)="setRomFileContents($event)"></age-rom-file-loader>
+
         <ng-container *ngIf="allLoaded">
-            <age-emulator [emGbModule]="emGbModule"></age-emulator>
+            <age-emulator [emGbModule]="emGbModule"
+                          [romFileContents]="romFileContents"></age-emulator>
         </ng-container>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeEmulatorContainerComponent {
 
-    private _allLoaded = false;
     private _emGbModule: EmGbModule | undefined;
+    private _romFile: AgeRomFile | undefined;
+    private _romFileContents: ArrayBuffer | undefined;
 
     constructor(@Inject(ChangeDetectorRef) private _changeDetector: ChangeDetectorRef) {
     }
 
-
     get allLoaded(): boolean {
-        return this._allLoaded;
+        return !!this._emGbModule && !!this._romFileContents;
     }
+
 
     get emGbModule(): EmGbModule {
         if (!this._emGbModule) {
@@ -37,7 +44,27 @@ export class AgeEmulatorContainerComponent {
 
     setEmGbModule(emGbModule: EmGbModule | undefined): void {
         this._emGbModule = emGbModule;
-        this._allLoaded = !!this._emGbModule;
+        this._changeDetector.detectChanges();
+    }
+
+
+    get romFile(): AgeRomFile | undefined {
+        return this._romFile;
+    }
+
+    @Input()
+    set romFile(romFile: AgeRomFile | undefined) {
+        this._romFile = romFile;
+        this._romFileContents = undefined;
+    }
+
+
+    get romFileContents(): ArrayBuffer | undefined {
+        return this._romFileContents;
+    }
+
+    setRomFileContents(romFileContents: ArrayBuffer | undefined): void {
+        this._romFileContents = romFileContents;
         this._changeDetector.detectChanges();
     }
 }
