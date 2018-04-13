@@ -64,7 +64,8 @@ void delete_current_emulator()
         delete gb_emu;
         gb_emu = nullptr;
 
-        free_memory(gb_rom);
+        // don't free the gb_rom as it may have been reallocated for new rom data
+        // free_memory(gb_rom);
         free_memory(gb_persistent_ram);
 
         gb_persistent_ram_dirty = false;
