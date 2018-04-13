@@ -43,7 +43,7 @@ struct pixel
     {}
 
     pixel(uint r, uint g, uint b)
-        : pixel(0xFF000000 + (r << 16) + (g << 8) + b)
+        : pixel(0xFF000000 + (b << 16) + (g << 8) + r)
     {
         AGE_ASSERT(r <= 255);
         AGE_ASSERT(g <= 255);
