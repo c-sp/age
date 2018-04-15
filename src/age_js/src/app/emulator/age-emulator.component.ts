@@ -91,7 +91,6 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyDown(event: KeyboardEvent) {
-        console.log(`key down: '${event.key}'`);
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
         if (this._emulation && gbButton) {
@@ -102,7 +101,6 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @HostListener('document:keyup', ['$event'])
     handleKeyUp(event: KeyboardEvent) {
-        console.log(`key up: '${event.key}'`);
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
         if (this._emulation && gbButton) {
