@@ -18,59 +18,16 @@ import {AgeGbKeyMap} from './age-emulator-keymap';
 @Component({
     selector: 'age-emulator',
     template: `
-        <div class="key-mappings">
-
-            <div>Key Mappings</div>
-
-            <div><span>Gameboy</span><span>Keyboard</span></div>
-
-            <div><span>Up</span><span>Up Arrow</span></div>
-            <div><span>Down</span><span>Down Arrow</span></div>
-            <div><span>Left</span><span>Left Arrow</span></div>
-            <div><span>Right</span><span>Right Arrow</span></div>
-            <div><span>A</span><span>A</span></div>
-            <div><span>B</span><span>S</span></div>
-            <div><span>Start</span><span>Space</span></div>
-            <div><span>Select</span><span>Enter</span></div>
-
-        </div>
-
         <canvas #emulatorCanvas width="160" height="144"></canvas>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     styles: [`
-        .key-mappings {
-            width: 20em;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: .5em;
+        :host {
+            width: 100%;
+            height: 100%;
+            background-color: aquamarine;
         }
-
-        .key-mappings > div:nth-child(1) {
-            font-weight: bold;
-            margin-bottom: .5em;
-        }
-
-        .key-mappings > div:nth-child(2) {
-            margin-bottom: .5em;
-            font-style: italic;
-        }
-
-        .key-mappings div span {
-            display: inline-block;
-            width: 6em;
-            margin-left: .5em;
-            margin-right: .5em;
-        }
-
-        .key-mappings div span:nth-child(odd) {
-            text-align: right;
-        }
-
-        .key-mappings div span:nth-child(even) {
-            text-align: left;
-        }
-    `]
+    `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeEmulatorComponent implements OnInit, OnDestroy, AfterViewInit {
 
