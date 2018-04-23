@@ -1,9 +1,9 @@
-import {Component} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 import {VERSION_INFO} from '../environments/version';
-import {AgeRomFile} from './rom-file-selector/age-rom-file';
+import {AgeRect} from './modules/common/age-rect';
+import {AgeEmulationPackage} from './modules/common/age-emulation-package';
+import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
 
-
-// TODO h1 Text
 
 @Component({
     selector: 'age-app-root',
@@ -11,17 +11,13 @@ import {AgeRomFile} from './rom-file-selector/age-rom-file';
         <div class="container">
 
             <div>
-                Welcome to the AGE-JS prototype
+                Test
             </div>
 
             <div>
                 <div><b>Build Details</b></div>
                 <div>Commit Hash: {{versionHash}}</div>
                 <div>Committed on: {{versionDate | date:'y-MM-dd HH:mm:ss'}}</div>
-            </div>
-
-            <div>
-                <age-local-rom-file-selector (fileSelected)="selectFile($event)"></age-local-rom-file-selector>
             </div>
 
             <div>
@@ -63,8 +59,15 @@ import {AgeRomFile} from './rom-file-selector/age-rom-file';
             </div>
 
             <div>
-                <age-emulator-container *ngIf="romFile"
-                                        [romFile]="romFile"></age-emulator-container>
+                <age-local-rom-file-selector (fileSelected)="selectFile($event)"></age-local-rom-file-selector>
+            </div>
+
+            <div #emulatorContainer>
+                <age-loader [loadRomFile]="romFileToLoad"
+                            (loadingComplete)="emulationPackage = $event"></age-loader>
+
+                <age-emulator [emulationPackage]="emulationPackage"
+                              [viewport]="viewport"></age-emulator>
             </div>
 
         </div>
@@ -74,16 +77,17 @@ import {AgeRomFile} from './rom-file-selector/age-rom-file';
             display: flex;
             height: 100%;
             flex-direction: column;
-            align-items: center;
+            overflow: auto;
         }
 
         .container > div {
             margin-top: 2em;
             text-align: center;
+            font-size: medium;
         }
 
         .container > div:nth-child(1) {
-            font-size: larger;
+            font-size: x-large;
             font-weight: bold;
         }
 
@@ -92,9 +96,14 @@ import {AgeRomFile} from './rom-file-selector/age-rom-file';
         }
 
         .container > div:nth-child(5) {
-            flex: 1 1;
-            width: 100%;
-            background-color: black;
+            flex: 1;
+            min-height: 200px;
+            min-width: 200px;
+            overflow: hidden;
+        }
+
+        table {
+            margin: auto;
         }
 
         table th {
@@ -122,13 +131,25 @@ import {AgeRomFile} from './rom-file-selector/age-rom-file';
             text-align: left;
             padding-left: .5em;
         }
-    `]
+    `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
 
-    romFile: AgeRomFile | undefined;
+    @Input() romFileToLoad?: AgeRomFileToLoad;
+    @Input() emulationPackage?: AgeEmulationPackage;
+
+    @ViewChild('emulatorContainer')
+    private _emulatorContainer: ElementRef;
+    private _viewport = new AgeRect(1, 1);
 
     private _versionInfo = VERSION_INFO;
+
+
+    ngAfterViewInit(): void {
+        this.emulatorContainerResize();
+    }
+
 
     get versionDate(): string {
         return this._versionInfo.date;
@@ -138,7 +159,20 @@ export class AppComponent {
         return this._versionInfo.hash;
     }
 
+    get viewport(): AgeRect {
+        return this._viewport;
+    }
+
+
     selectFile(file: File): void {
-        this.romFile = !file ? undefined : new AgeRomFile(file);
+        this.romFileToLoad = !file ? undefined : new AgeRomFileToLoad(file);
+    }
+
+    @HostListener('window:resize')
+    emulatorContainerResize(): void {
+        this._viewport = new AgeRect(
+            this._emulatorContainer.nativeElement.offsetWidth,
+            this._emulatorContainer.nativeElement.offsetHeight
+        );
     }
 }

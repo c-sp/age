@@ -1,5 +1,6 @@
-export class AgeRomFile {
+export class AgeRomFileToLoad {
 
     constructor(readonly file: File) {
     }
 }
+

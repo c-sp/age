@@ -1,5 +1,11 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {AgeLoaderState} from './age-loader-state';
+
+
+export enum AgeLoaderState {
+    WORKING,
+    SUCCESS,
+    ERROR
+}
 
 
 @Component({

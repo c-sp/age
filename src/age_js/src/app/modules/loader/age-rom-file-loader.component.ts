@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
-import {AgeRomFile} from '../../rom-file-selector/age-rom-file';
-import {AgeLoaderState} from './age-loader-state';
+import {AgeLoaderState} from './age-loader-state.component';
+import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
 
 
 class FileLoader {
@@ -38,22 +38,15 @@ class FileLoader {
 @Component({
     selector: 'age-rom-file-loader',
     template: `
-        <ng-container *ngIf="showState">
-
-            <age-loader-state [state]="fileLoaderState">
-                <ng-container ageLoaderWorking>loading rom file ...</ng-container>
-                <ng-container ageLoaderSuccess>rom file loaded</ng-container>
-                <ng-container ageLoaderError>error loading rom file</ng-container>
-            </age-loader-state>
-
-        </ng-container>
+        <age-loader-state [state]="fileLoaderState">
+            <ng-container ageLoaderWorking>loading rom file ...</ng-container>
+            <ng-container ageLoaderSuccess>rom file loaded</ng-container>
+            <ng-container ageLoaderError>error loading rom file</ng-container>
+        </age-loader-state>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeRomFileLoaderComponent implements OnDestroy {
-
-    @Input()
-    showState = false;
 
     @Output()
     readonly fileLoaded = new EventEmitter<ArrayBuffer>();
@@ -71,7 +64,7 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     }
 
     @Input()
-    set romFile(romFile: AgeRomFile) {
+    set romFile(romFile: AgeRomFileToLoad) {
         this.cleanupLoader(); // stop any ongoing loader before starting a new one
 
         this._fileLoader = new FileLoader(

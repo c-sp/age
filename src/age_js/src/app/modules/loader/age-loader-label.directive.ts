@@ -2,9 +2,9 @@ import {Directive} from '@angular/core';
 
 
 @Directive({
-    selector: '[ageLoaderWorking]'
+    selector: '[ageLoaderError]'
 })
-export class AgeLoaderWorkingDirective {
+export class AgeLoaderErrorDirective {
 }
 
 
@@ -16,7 +16,7 @@ export class AgeLoaderSuccessDirective {
 
 
 @Directive({
-    selector: '[ageLoaderError]'
+    selector: '[ageLoaderWorking]'
 })
-export class AgeLoaderErrorDirective {
+export class AgeLoaderWorkingDirective {
 }

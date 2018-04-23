@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {AgeLoaderState} from './age-loader-state';
+import {AgeLoaderState} from './age-loader-state.component';
 
 
 const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
@@ -16,7 +16,7 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
                 <ng-container ageLoaderError>error loading Javascript</ng-container>
             </age-loader-state>
 
-            <age-loader-state [state]="runtimeInitState" *ngIf="javascriptLoadingState === AgeLoaderState.SUCCESS">
+            <age-loader-state [state]="runtimeInitState">
                 <ng-container ageLoaderWorking>initializing WebAssembly ...</ng-container>
                 <ng-container ageLoaderSuccess>WebAssembly initialized</ng-container>
                 <ng-container ageLoaderError>error initializing WebAssembly</ng-container>
@@ -27,8 +27,6 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
-
-    readonly AgeLoaderState = AgeLoaderState;
 
     @Input()
     showState = false;
