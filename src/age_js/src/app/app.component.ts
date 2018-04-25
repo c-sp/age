@@ -11,7 +11,7 @@ import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
         <div class="container">
 
             <div>
-                Test
+                Welcome to the AGE-JS prototype
             </div>
 
             <div>
@@ -59,7 +59,7 @@ import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
             </div>
 
             <div>
-                <age-local-rom-file-selector (fileSelected)="selectFile($event)"></age-local-rom-file-selector>
+                <age-file-selector (fileSelected)="selectFileToLoad($event)"></age-file-selector>
             </div>
 
             <div #emulatorContainer>
@@ -81,7 +81,7 @@ import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
         }
 
         .container > div {
-            margin-top: 2em;
+            margin-bottom: 2em;
             text-align: center;
             font-size: medium;
         }
@@ -92,6 +92,10 @@ import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
         }
 
         .container > div:nth-child(2) {
+            font-size: smaller;
+        }
+
+        .container > div:nth-child(3) {
             font-size: smaller;
         }
 
@@ -164,8 +168,8 @@ export class AppComponent implements AfterViewInit {
     }
 
 
-    selectFile(file: File): void {
-        this.romFileToLoad = !file ? undefined : new AgeRomFileToLoad(file);
+    selectFileToLoad(fileToLoad: AgeRomFileToLoad): void {
+        this.romFileToLoad = fileToLoad;
     }
 
     @HostListener('window:resize')

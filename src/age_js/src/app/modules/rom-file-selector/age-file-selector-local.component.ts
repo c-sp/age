@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
 
 
 @Component({
-    selector: 'age-local-rom-file-selector',
+    selector: 'age-file-selector-local',
     template: `
         Open local gameboy rom file:
         <input #fileInput
@@ -18,7 +18,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AgeLocalFileSelectorComponent {
+export class AgeFileSelectorLocalComponent {
 
     @Output()
     readonly fileSelected = new EventEmitter<File>();

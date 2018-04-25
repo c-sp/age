@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {AgeEmulatorModule} from './modules/emulator/age-emulator.module';
-import {AgeRomFileSelectorModule} from './modules/rom-file-selector/age-rom-file-selector.module';
+import {AgeFileSelectorModule} from './modules/rom-file-selector/age-file-selector.module';
 import {AgeLoaderModule} from './modules/loader/age-loader.module';
 
 
@@ -12,7 +12,7 @@ import {AgeLoaderModule} from './modules/loader/age-loader.module';
         BrowserModule,
         AgeEmulatorModule,
         AgeLoaderModule,
-        AgeRomFileSelectorModule
+        AgeFileSelectorModule
     ],
     declarations: [
         AppComponent

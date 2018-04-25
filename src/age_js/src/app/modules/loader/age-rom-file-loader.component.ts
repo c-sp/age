@@ -1,38 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
 import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
-
-
-class FileLoader {
-
-    private readonly fileReader: FileReader;
-
-    constructor(file: File,
-                onLoad: (fileContents: ArrayBuffer) => void,
-                onError: (ev: ErrorEvent) => void) {
-
-        this.fileReader = new FileReader();
-
-        this.fileReader.onload = event => {
-            /* tslint:disable:no-any */
-            const eventTarget: any = event.target;
-            /* tslint:enable:no-any */
-            onLoad(eventTarget.result);
-        };
-        this.fileReader.onerror = event => {
-            onError(event);
-        };
-
-        this.fileReader.readAsArrayBuffer(file);
-    }
-
-    abortReading(): void {
-        // readyState LOADING = 1
-        if (this.fileReader.readyState === 1) {
-            this.fileReader.abort();
-        }
-    }
-}
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 
 
 @Component({
@@ -52,10 +21,13 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     readonly fileLoaded = new EventEmitter<ArrayBuffer>();
 
     private _loaderState: AgeLoaderState | undefined;
-    private _fileLoader: FileLoader | undefined;
+    private _fileReader: FileReader | undefined;
+
+    constructor(private _httpClient: HttpClient) {
+    }
 
     ngOnDestroy(): void {
-        this.cleanupLoader();
+        this.cleanupReader();
     }
 
 
@@ -64,16 +36,64 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     }
 
     @Input()
-    set romFile(romFile: AgeRomFileToLoad) {
-        this.cleanupLoader(); // stop any ongoing loader before starting a new one
+    set romFileToLoad(romFileToLoad: AgeRomFileToLoad) {
+        this.cleanupReader(); // stop any ongoing loader before starting a new one
 
-        this._fileLoader = new FileLoader(
-            romFile.file,
-            this.loaderFinished.bind(this),
-            this.loaderError.bind(this)
-        );
+        if (romFileToLoad.file) {
+            this.loadLocalFile(romFileToLoad.file);
+
+        } else if (romFileToLoad.url) {
+            this.loadFileFromUrl(romFileToLoad.url);
+        }
 
         this._loaderState = AgeLoaderState.WORKING;
+    }
+
+
+    private loadLocalFile(file: File) {
+        this._fileReader = new FileReader();
+
+        this._fileReader.onload = event => {
+            /* tslint:disable:no-any */
+            const eventTarget: any = event.target;
+            /* tslint:enable:no-any */
+            this.loaderFinished(eventTarget.result);
+        };
+        this._fileReader.onerror = () => {
+            this.loaderError();
+        };
+
+        this._fileReader.readAsArrayBuffer(file);
+    }
+
+    private loadFileFromUrl(url: string) {
+        this._httpClient.get(
+            url,
+            {
+                responseType: 'arraybuffer',
+                observe: 'response'
+            }
+        ).subscribe(
+            httpResponse => {
+                const contentType = httpResponse.headers.get('content-type');
+                if (contentType !== 'application/octet-stream') {
+                    throw new Error(`unknown content-type: ${contentType}`);
+                }
+
+                const fileContents = httpResponse.body;
+                if (fileContents) {
+                    this.loaderFinished(fileContents);
+                } else {
+                    this.loaderError();
+                }
+            },
+            (httpErrorResponse: HttpErrorResponse) => {
+                httpErrorResponse.headers.keys().map(key => {
+                    console.log(`header ${key}: ${httpErrorResponse.headers.get(key)}`);
+                });
+                console.log(`error reading url ${url}`, httpErrorResponse);
+            }
+        );
     }
 
 
@@ -86,10 +106,15 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
         this._loaderState = AgeLoaderState.ERROR;
     }
 
-    private cleanupLoader(): void {
-        if (this._fileLoader) {
-            this._fileLoader.abortReading();
-            this._fileLoader = undefined;
+    private cleanupReader(): void {
+        if (this._fileReader) {
+
+            // readyState LOADING = 1
+            if (this._fileReader.readyState === 1) {
+                this._fileReader.abort();
+            }
+
+            this._fileReader = undefined;
         }
     }
 }

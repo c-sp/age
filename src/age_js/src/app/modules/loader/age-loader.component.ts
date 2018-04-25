@@ -16,7 +16,7 @@ import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
 
         <ng-container *ngIf="loading">
 
-            <age-rom-file-loader [romFile]="romFileToLoad"
+            <age-rom-file-loader [romFileToLoad]="romFileToLoad"
                                  (fileLoaded)="romFileLoaded($event)"></age-rom-file-loader>
 
         </ng-container>
