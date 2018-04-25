@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
 import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
@@ -23,7 +23,8 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     private _loaderState: AgeLoaderState | undefined;
     private _fileReader: FileReader | undefined;
 
-    constructor(private _httpClient: HttpClient) {
+    constructor(private _httpClient: HttpClient,
+                private _changeDetector: ChangeDetectorRef) {
     }
 
     ngOnDestroy(): void {
@@ -86,12 +87,15 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
                 } else {
                     this.loaderError();
                 }
+                this._changeDetector.detectChanges();
             },
             (httpErrorResponse: HttpErrorResponse) => {
                 httpErrorResponse.headers.keys().map(key => {
                     console.log(`header ${key}: ${httpErrorResponse.headers.get(key)}`);
                 });
                 console.log(`error reading url ${url}`, httpErrorResponse);
+                this.loaderError();
+                this._changeDetector.detectChanges();
             }
         );
     }
