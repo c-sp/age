@@ -20,8 +20,8 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     @Output()
     readonly fileLoaded = new EventEmitter<ArrayBuffer>();
 
-    private _loaderState: AgeLoaderState | undefined;
-    private _fileReader: FileReader | undefined;
+    private _loaderState: AgeLoaderState | undefined = undefined;
+    private _fileReader: FileReader | undefined = undefined;
 
     constructor(private _httpClient: HttpClient,
                 private _changeDetector: ChangeDetectorRef) {
@@ -39,15 +39,16 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     @Input()
     set romFileToLoad(romFileToLoad: AgeRomFileToLoad) {
         this.cleanupReader(); // stop any ongoing loader before starting a new one
+        this._loaderState = undefined;
 
         if (romFileToLoad.file) {
             this.loadLocalFile(romFileToLoad.file);
+            this._loaderState = AgeLoaderState.WORKING;
 
         } else if (romFileToLoad.url) {
             this.loadFileFromUrl(romFileToLoad.url);
+            this._loaderState = AgeLoaderState.WORKING;
         }
-
-        this._loaderState = AgeLoaderState.WORKING;
     }
 
 

@@ -17,7 +17,10 @@ import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
         <ng-container *ngIf="loading">
 
             <age-rom-file-loader [romFileToLoad]="romFileToLoad"
-                                 (fileLoaded)="romFileLoaded($event)"></age-rom-file-loader>
+                                 (fileLoaded)="romArchiveContents = $event"></age-rom-file-loader>
+
+            <age-rom-file-extractor [fileContents]="romArchiveContents"
+                                    (fileExtracted)="romFileExtracted($event)"></age-rom-file-extractor>
 
         </ng-container>
     `,
@@ -32,6 +35,7 @@ export class AgeLoaderComponent {
     private _romFileToLoad: AgeRomFileToLoad | undefined = undefined;
 
     private _emGbModule: EmGbModule | undefined = undefined;
+    private _romArchiveContents: ArrayBuffer | undefined = undefined;
     private _romFileContents: ArrayBuffer | undefined = undefined;
 
 
@@ -40,9 +44,18 @@ export class AgeLoaderComponent {
         // stop any loading process, if the file was cleared
         this._loading = !!romFileToLoad;
         this._romFileToLoad = romFileToLoad;
+        this._romArchiveContents = undefined;
         this._romFileContents = undefined;
     }
 
+    @Input()
+    set romArchiveContents(romArchiveContents: ArrayBuffer | undefined) {
+        this._romArchiveContents = romArchiveContents;
+    }
+
+    get romArchiveContents(): ArrayBuffer | undefined {
+        return this._romArchiveContents;
+    }
 
     get loading(): boolean {
         return this._loading;
@@ -58,10 +71,11 @@ export class AgeLoaderComponent {
         this.checkForLoadingComplete();
     }
 
-    romFileLoaded(romFileContents?: ArrayBuffer): void {
+    romFileExtracted(romFileContents?: ArrayBuffer): void {
         this._romFileContents = romFileContents;
         this.checkForLoadingComplete();
     }
+
 
     private checkForLoadingComplete(): void {
         if (!!this._emGbModule && !!this._romFileContents) {

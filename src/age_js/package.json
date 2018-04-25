@@ -27,7 +27,9 @@
         "@angular/platform-browser-dynamic": "5.2.10",
         "@angular/router": "5.2.10",
         "core-js": "2.5.5",
+        "file-type": "7.6.0",
         "font-awesome": "4.7.0",
+        "jszip": "3.1.5",
         "rxjs": "5.5.10",
         "zone.js": "0.8.26"
     },
