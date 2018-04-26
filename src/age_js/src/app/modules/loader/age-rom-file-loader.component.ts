@@ -17,6 +17,11 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 })
 export class AgeRomFileLoaderComponent implements OnDestroy {
 
+    readonly supportedContentTypes = [
+        'application/octet-stream',
+        'application/zip'
+    ];
+
     @Output()
     readonly fileLoaded = new EventEmitter<ArrayBuffer>();
 
@@ -77,8 +82,8 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
             }
         ).subscribe(
             httpResponse => {
-                const contentType = httpResponse.headers.get('content-type');
-                if (contentType !== 'application/octet-stream') {
+                const contentType = httpResponse.headers.get('content-type') || '';
+                if (this.supportedContentTypes.indexOf(contentType) < 0) {
                     throw new Error(`unknown content-type: ${contentType}`);
                 }
 

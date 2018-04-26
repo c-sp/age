@@ -5,8 +5,8 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
     selector: 'age-file-selector-url',
     template: `
         Open gameboy rom file from URL:
-        <input #urlInput type="url" value="https://raw.githubusercontent.com/mills32/CUTE_DEMO/master/0_rom/CUTEDEMO.gbc">
-        <!--<input #urlInput type="url" value="http://privat.bahnhof.se/wb800787/gb/files/PHT-PZ.ZIP">-->
+        <!--<input #urlInput type="url" value="https://raw.githubusercontent.com/mills32/CUTE_DEMO/master/0_rom/CUTEDEMO.gbc">-->
+        <input #urlInput type="url" value="http://gameboy.modermodemet.se/files/PHT-PZ.ZIP">
         <!--<input #urlInput type="url" value="http://www.pouet.net/prod.php?which=73290">-->
         <button (click)="openUrl()">open</button>
     `,
@@ -19,6 +19,8 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
 })
 export class AgeFileSelectorURLComponent {
 
+    readonly corsAnywhereUrl = 'https://cors-anywhere.herokuapp.com/';
+
     @Output()
     readonly urlSelected = new EventEmitter<string>();
 
@@ -28,7 +30,7 @@ export class AgeFileSelectorURLComponent {
     openUrl(): void {
         const url = this._urlInput.nativeElement.value;
         if (!!url) {
-            this.urlSelected.emit(url);
+            this.urlSelected.emit(this.corsAnywhereUrl + url);
         }
     }
 }
