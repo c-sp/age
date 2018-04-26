@@ -8,7 +8,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
         <input #fileInput
                type="file"
                id="fileInput"
-               accept=".gb, .gbc"
+               accept=".gb, .gbc, .zip"
                (change)="selectFile()">
     `,
     styles: [`

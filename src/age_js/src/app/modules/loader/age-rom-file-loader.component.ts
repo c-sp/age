@@ -20,8 +20,8 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
     @Output()
     readonly fileLoaded = new EventEmitter<ArrayBuffer>();
 
-    private _loaderState: AgeLoaderState | undefined = undefined;
-    private _fileReader: FileReader | undefined = undefined;
+    private _loaderState?: AgeLoaderState;
+    private _fileReader?: FileReader;
 
     constructor(private _httpClient: HttpClient,
                 private _changeDetector: ChangeDetectorRef) {
@@ -38,7 +38,7 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
 
     @Input()
     set romFileToLoad(romFileToLoad: AgeRomFileToLoad) {
-        this.cleanupReader(); // stop any ongoing loader before starting a new one
+        this.cleanupReader(); // stop the current loader before starting a new one
         this._loaderState = undefined;
 
         if (romFileToLoad.file) {
@@ -88,7 +88,6 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
                 } else {
                     this.loaderError();
                 }
-                this._changeDetector.detectChanges();
             },
             (httpErrorResponse: HttpErrorResponse) => {
                 httpErrorResponse.headers.keys().map(key => {
@@ -96,19 +95,23 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
                 });
                 console.log(`error reading url ${url}`, httpErrorResponse);
                 this.loaderError();
-                this._changeDetector.detectChanges();
             }
         );
     }
 
 
     private loaderFinished(fileContents: ArrayBuffer): void {
-        this._loaderState = AgeLoaderState.SUCCESS;
+        this.setLoaderState(AgeLoaderState.SUCCESS);
         this.fileLoaded.emit(fileContents);
     }
 
     private loaderError(): void {
-        this._loaderState = AgeLoaderState.ERROR;
+        this.setLoaderState(AgeLoaderState.ERROR);
+    }
+
+    private setLoaderState(loaderState: AgeLoaderState) {
+        this._loaderState = loaderState;
+        this._changeDetector.detectChanges();
     }
 
     private cleanupReader(): void {

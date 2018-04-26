@@ -1,5 +1,7 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
+import * as FileType from 'file-type';
+import * as JSZip from 'jszip';
 
 
 @Component({
@@ -15,10 +17,33 @@ import {AgeLoaderState} from './age-loader-state.component';
 })
 export class AgeRomFileExtractorComponent {
 
-    @Output()
-    readonly fileExtracted = new EventEmitter<ArrayBuffer>();
+    private static async extractRomFile(fileContents: ArrayBuffer) {
+        const zip = await JSZip.loadAsync(fileContents);
 
-    private _extractorState: AgeLoaderState | undefined = undefined;
+        // get a list of all rom files within that archive
+        const files = zip.file(/.*(\.gb)|(\.gbc)$/);
+        if (!files || !files.length) {
+            throw Error('no Gameboy rom file found');
+        }
+
+        // sort the files in case there are multiple rom files available
+        // (deterministic rom file loading)
+        files.sort((a, b) => {
+            return a.name.localeCompare(b.name);
+        });
+
+        // extract the first file
+        return files[0].async('arraybuffer');
+    }
+
+
+    @Output()
+    readonly fileExtracted = new EventEmitter<ArrayBuffer>(true); // must be async as we call emit() during change detection at times
+
+    private _extractorState?: AgeLoaderState;
+
+    constructor(private _changeDetector: ChangeDetectorRef) {
+    }
 
 
     get fileExtractorState(): AgeLoaderState | undefined {
@@ -26,8 +51,38 @@ export class AgeRomFileExtractorComponent {
     }
 
     @Input()
-    set fileContents(fileContents: ArrayBuffer) {
-        // TODO check for zip file and extract rom file
-        setTimeout(() => this.fileExtracted.emit(fileContents), 0);
+    set fileContents(fileContents: ArrayBuffer | undefined) {
+        this._extractorState = undefined;
+        if (fileContents) {
+
+            // If this is a zip file, look for a rom file within that zip file.
+            // Otherwise we just pass on the file contents.
+            // (funnily enough Gameboy roms are sometimes identified as MP3 files)
+            const type = FileType(new Uint8Array(fileContents));
+            if (type && (type.ext === 'zip')) {
+                this._extractorState = AgeLoaderState.WORKING;
+
+                AgeRomFileExtractorComponent.extractRomFile(fileContents).then(
+                    extractedFile => {
+                        this.setExtractorState(AgeLoaderState.SUCCESS);
+                        this.fileExtracted.emit(extractedFile);
+                    },
+                    error => {
+                        console.error(error);
+                        this.setExtractorState(AgeLoaderState.ERROR);
+                    }
+                );
+
+            } else {
+                // don't set any loader state, as we don't really do anything here
+                this.fileExtracted.emit(fileContents);
+            }
+        }
+    }
+
+
+    private setExtractorState(extractorState: AgeLoaderState): void {
+        this._extractorState = extractorState;
+        this._changeDetector.detectChanges();
     }
 }

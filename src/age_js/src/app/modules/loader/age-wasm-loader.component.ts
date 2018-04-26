@@ -38,8 +38,8 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
     /* tslint:disable:no-any */
     private _window: any = window;
     /* tslint:enable:no-any */
-    private _javascriptLoadingState: AgeLoaderState | undefined;
-    private _runtimeInitState: AgeLoaderState | undefined;
+    private _javascriptLoadingState?: AgeLoaderState;
+    private _runtimeInitState?: AgeLoaderState;
 
 
     constructor(@Inject(ChangeDetectorRef) private _changeDetector: ChangeDetectorRef) {

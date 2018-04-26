@@ -63,8 +63,8 @@ import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
             </div>
 
             <div #emulatorContainer>
-                <age-loader [loadRomFile]="romFileToLoad"
-                            (loadingComplete)="emulationPackage = $event"></age-loader>
+                <age-loader [romFileToLoad]="romFileToLoad"
+                            (loadingComplete)="loadingComplete($event)"></age-loader>
 
                 <age-emulator [emulationPackage]="emulationPackage"
                               [viewport]="viewport"></age-emulator>
@@ -141,10 +141,10 @@ import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
 export class AppComponent implements AfterViewInit {
 
     @Input() romFileToLoad?: AgeRomFileToLoad;
-    @Input() emulationPackage?: AgeEmulationPackage;
 
     @ViewChild('emulatorContainer')
     private _emulatorContainer: ElementRef;
+    private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
 
     private _versionInfo = VERSION_INFO;
@@ -163,6 +163,10 @@ export class AppComponent implements AfterViewInit {
         return this._versionInfo.hash;
     }
 
+    get emulationPackage(): AgeEmulationPackage | undefined {
+        return this._emulationPackage;
+    }
+
     get viewport(): AgeRect {
         return this._viewport;
     }
@@ -170,6 +174,11 @@ export class AppComponent implements AfterViewInit {
 
     selectFileToLoad(fileToLoad: AgeRomFileToLoad): void {
         this.romFileToLoad = fileToLoad;
+        this._emulationPackage = undefined;
+    }
+
+    loadingComplete(emulationPackage: AgeEmulationPackage) {
+        this._emulationPackage = emulationPackage;
     }
 
     @HostListener('window:resize')
