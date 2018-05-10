@@ -102,7 +102,7 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint m
 
         // load the screenshot image data
         QString error_message;
-        QImage image = QImage::fromData(screenshot.data(), screenshot.size());
+        QImage image = QImage::fromData(screenshot.data(), screenshot.size()).rgbSwapped();
 
         // is the data format supported?
         if (image.isNull())
@@ -145,7 +145,8 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint m
 
                     QTextStream(&error_message)
                             << "screen and screenshot differ at position ("
-                            << x << ',' << y << ')';
+                            << x << ',' << y << ')'
+                            << ": expected 0x" << hex << screenshot->m_a8b8g8r8 << ", found 0x" << screen->m_a8b8g8r8;
                     break;
                 }
                 ++screen;

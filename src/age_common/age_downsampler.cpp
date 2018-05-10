@@ -193,6 +193,8 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector &samples)
 
             for (uint i = 0; i < m_fir_values.size(); ++i)
             {
+                // this is no accurate downsampling as we ignore the sample index fraction
+                //  => we don't reconstruct the actual data for non-integer downsampling
                 int64 sample0 = m_prev_samples[m_next_output_index + i].m_samples[0];
                 int64 sample1 = m_prev_samples[m_next_output_index + i].m_samples[1];
 
@@ -345,6 +347,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(uint input_samplin
 
     double transition_width = transition_width_hz;
     transition_width /= input_sampling_rate; // we're creating the FIR for the input signal
+    AGE_ASSERT(transition_width < 0.5);
 
     LOG("transition width " << transition_width << " (" << transition_width_hz << " hz)");
 
@@ -353,6 +356,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(uint input_samplin
     uint transition_frequency_hz = nyquist_frequency_hz - transition_width_hz / 2;
     double transition_frequency = transition_frequency_hz;
     transition_frequency /= input_sampling_rate; // we're creating the FIR for the input signal
+    AGE_ASSERT(transition_width < 0.5);
 
     LOG("transition frequency " << transition_frequency << " (" << transition_frequency_hz << " hz)");
 

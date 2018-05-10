@@ -1,0 +1,716 @@
+{
+    "rulesDirectory": [
+        "node_modules/codelyzer"
+    ],
+    "rules": {
+
+        //
+        //  -------------
+        //  TS-LINT RULES
+        //  -------------
+        //
+
+        // place all signatures of a method next to each other (e.g. getter and setter)
+        //  -> https://palantir.github.io/tslint/rules/adjacent-overload-signatures
+        "adjacent-overload-signatures": true,
+
+        // code and function parameters are to be vertically aligned
+        //  -> https://palantir.github.io/tslint/rules/align
+        "align": [
+            true,
+            "parameters",
+            "statements"
+        ],
+
+        // use parenthesis around arrow function parameters (not for a single parameter though)
+        //  -> https://palantir.github.io/tslint/rules/arrow-parens
+        "arrow-parens": [
+            true,
+            "ban-single-arg-parens"
+        ],
+
+        // convert "() => { return x; }" to "() => x"
+        //  -> https://palantir.github.io/tslint/rules/arrow-return-shorthand
+        "arrow-return-shorthand": true,
+
+        // don't await a non-promise
+        //  -> https://palantir.github.io/tslint/rules/await-promise
+        "await-promise": true,
+
+        // use primitive data types instead of their boxed versions
+        //  -> https://palantir.github.io/tslint/rules/ban-types
+        "ban-types": [
+            true,
+            [
+                "Object",
+                "Avoid using the `Object` type. Did you mean `object`?"
+            ],
+            [
+                "Function",
+                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."
+            ],
+            [
+                "Boolean",
+                "Avoid using the `Boolean` type. Did you mean `boolean`?"
+            ],
+            [
+                "Number",
+                "Avoid using the `Number` type. Did you mean `number`?"
+            ],
+            [
+                "String",
+                "Avoid using the `String` type. Did you mean `string`?"
+            ],
+            [
+                "Symbol",
+                "Avoid using the `Symbol` type. Did you mean `symbol`?"
+            ]
+        ],
+
+        // use Upper Camel Case (=Pascal Case) for class names
+        //  -> https://palantir.github.io/tslint/rules/class-name
+        "class-name": true,
+
+        // white space after "//"
+        //  -> https://palantir.github.io/tslint/rules/comment-format
+        "comment-format": [
+            true,
+            "check-space"
+        ],
+
+        // if/for/do/while always with curly braces
+        //  -> https://palantir.github.io/tslint/rules/curly
+        "curly": true,
+
+        // deprecated code is not allowed
+        //  -> https://palantir.github.io/tslint/rules/deprecation
+        "deprecation": true,
+
+        // always use UTF-8
+        //  -> https://palantir.github.io/tslint/rules/encoding
+        "encoding": true,
+
+        // put a newline at the end of every file
+        //  -> https://palantir.github.io/tslint/rules/eofline
+        "eofline": true,
+
+        // filter "for ... in" loops with an "if" to prevent accidental iteration over inherited properties
+        //  -> https://palantir.github.io/tslint/rules/forin
+        "forin": true,
+
+        // proper spacing between import statements
+        //  -> https://palantir.github.io/tslint/rules/import-spacing
+        "import-spacing": true,
+
+        // blacklisted imports
+        //  -> https://palantir.github.io/tslint/rules/import-blacklist
+        "import-blacklist": [
+            true,
+            // don't import all of rxjs
+            "rxjs",
+            "rxjs/Rx",
+            // don't import all rxjs operators at once (better: e.g. rxjs/operators/map)
+            //  -> https://github.com/ReactiveX/rxjs/blob/master/doc/pipeable-operators.md
+            "rxjs/operators"
+        ],
+
+        // four-space-indentation
+        //  -> https://palantir.github.io/tslint/rules/indent
+        "indent": [
+            true,
+            "spaces",
+            4
+        ],
+
+        // prefer interfaces over type literals (e.g. "type T = { ... }")
+        //  -> https://palantir.github.io/tslint/rules/interface-over-type-literal
+        "interface-over-type-literal": true,
+
+        // basic JSDoc formatting rules
+        //  -> https://palantir.github.io/tslint/rules/jsdoc-format
+        "jsdoc-format": true,
+
+        // allow labels only for do/for/while/switch
+        //  -> https://palantir.github.io/tslint/rules/label-position
+        "label-position": true,
+
+        // limit the max line length
+        //  -> https://palantir.github.io/tslint/rules/max-line-length
+        "max-line-length": [
+            true,
+            140
+        ],
+
+        // don't explicitly specify "public" accessibility, because it's the default
+        //  -> https://palantir.github.io/tslint/rules/member-access
+        "member-access": [
+            true,
+            "no-public"
+        ],
+
+        // consistent class member ordering
+        //  -> https://palantir.github.io/tslint/rules/member-ordering
+        "member-ordering": [
+            true,
+            {
+                "order": [
+                    // static attributes
+                    "public-static-field",
+                    "protected-static-field",
+                    "private-static-field",
+                    // static methods
+                    "public-static-method",
+                    "protected-static-method",
+                    "private-static-method",
+                    // instance attributes
+                    "public-instance-field",
+                    "protected-instance-field",
+                    "private-instance-field",
+                    // constructor
+                    "public-constructor",
+                    "protected-constructor",
+                    "private-constructor",
+                    // instance methods
+                    "public-instance-method",
+                    "protected-instance-method",
+                    "private-instance-method"
+                ]
+            }
+        ],
+
+        // use parenthesis when invoking a constructor with "new"
+        //  -> https://palantir.github.io/tslint/rules/new-parens
+        "new-parens": true,
+
+        // use "as Type" instead of "<Type>"
+        //  -> https://palantir.github.io/tslint/rules/no-angle-bracket-type-assertion
+        "no-angle-bracket-type-assertion": true,
+
+        // no "any" as type declaration
+        //  -> https://palantir.github.io/tslint/rules/no-any
+        "no-any": true,
+
+        // don't use "arguments.callee" as it might prevent performance optimizations
+        //  -> https://palantir.github.io/tslint/rules/no-arg
+        "no-arg": true,
+
+        // no bitwise operators (these are usually typos or overly clever code reducing maintainability)
+        //  -> https://palantir.github.io/tslint/rules/no-bitwise
+        "no-bitwise": true,
+
+        // use "if (x)" instead of "if (x === true)"
+        //  -> https://palantir.github.io/tslint/rules/no-boolean-literal-compare
+        "no-boolean-literal-compare": true,
+
+        // no assignments in conditional statements as these are often typos,
+        // e.g. "if (var1 = var2)" although the intention was "if (var1 == var2)"
+        //  -> https://palantir.github.io/tslint/rules/no-conditional-assignment
+        "no-conditional-assignment": true,
+
+        // don't use the constructors of String, Number and Boolean
+        //  -> https://palantir.github.io/tslint/rules/no-construct
+        "no-construct": true,
+
+        // no "debugger" statements
+        //  -> https://palantir.github.io/tslint/rules/no-debugger
+        "no-debugger": true,
+
+        // prevent multiple import statements from the same module for the sake of readability
+        //  -> https://palantir.github.io/tslint/rules/no-duplicate-imports
+        "no-duplicate-imports": true,
+
+        // no more than one "super()" in a constructor
+        //  -> https://palantir.github.io/tslint/rules/no-duplicate-super
+        "no-duplicate-super": true,
+
+        // no duplicate cases in a switch
+        //  -> https://palantir.github.io/tslint/rules/no-duplicate-switch-case
+        "no-duplicate-switch-case": true,
+
+        // no duplicate variables in the same scope
+        //  -> https://palantir.github.io/tslint/rules/no-duplicate-variable
+        "no-duplicate-variable": [
+            true,
+            "check-parameters"
+        ],
+
+        // don't delete dynamically computed keys (dangerous and not optimized)
+        //  -> https://palantir.github.io/tslint/rules/no-dynamic-delete
+        "no-dynamic-delete": true,
+
+        // no empty blocks (a commented block is not empty)
+        //  -> https://palantir.github.io/tslint/rules/no-empty
+        "no-empty": true,
+
+        // no empty interfaces
+        //  -> https://palantir.github.io/tslint/rules/no-empty-interface
+        "no-empty-interface": true,
+
+        // no "eval" invocations as it allows arbitrary code execution
+        //  -> https://palantir.github.io/tslint/rules/no-eval
+        "no-eval": true,
+
+        // don't import modules that are not listed as dependency in package.json
+        //  -> https://palantir.github.io/tslint/rules/no-implicit-dependencies
+        "no-implicit-dependencies": true,
+
+        // no imports with side effects
+        //  -> https://palantir.github.io/tslint/rules/no-import-side-effect
+        "no-import-side-effect": true,
+
+        // no explicit type declaration of number, string and boolean variables/parameters
+        //  -> https://palantir.github.io/tslint/rules/no-inferrable-types
+        "no-inferrable-types": true,
+
+        // no internal "module" as it may be confusing
+        //  -> https://palantir.github.io/tslint/rules/no-internal-module
+        "no-internal-module": true,
+
+        // use "${" only in template string
+        //  -> https://palantir.github.io/tslint/rules/no-invalid-template-strings
+        "no-invalid-template-strings": true,
+
+        // never use "this" outside of classes
+        //  -> https://palantir.github.io/tslint/rules/no-invalid-this
+        "no-invalid-this": true,
+
+        // no irregular white spaces (e.g. tabs [0x0B] or form feeds [0x0C])
+        //  -> https://palantir.github.io/tslint/rules/no-irregular-whitespace
+        "no-irregular-whitespace": true,
+
+        // don't define constructors for interfaces
+        //  -> https://palantir.github.io/tslint/rules/no-misused-new
+        "no-misused-new": true,
+
+        // no internal modules and namespaces (use ES6-style external modules to modularize the code)
+        //  -> https://palantir.github.io/tslint/rules/no-namespace
+        "no-namespace": true,
+
+        // no non-null assertions using the ! postfix operator as it cancels the benefits of strict null checking
+        //  -> https://palantir.github.io/tslint/rules/no-non-null-assertion
+        "no-non-null-assertion": true,
+
+        // prefer "const x: T = { ... }" over "const x = { ... } as T"
+        //  -> https://palantir.github.io/tslint/rules/no-object-literal-type-assertion
+        "no-object-literal-type-assertion": true,
+
+        // explicitly allow parameter properties in class constructors
+        //  -> https://palantir.github.io/tslint/rules/no-parameter-properties
+        "no-parameter-properties": false,
+
+        // no JSDoc which duplicates TypeScript functionality
+        //  -> https://palantir.github.io/tslint/rules/no-redundant-jsdoc
+        "no-redundant-jsdoc": true,
+
+        // no "/// <reference path=>" imports (use ES6-style imports instead)
+        //  -> https://palantir.github.io/tslint/rules/no-reference
+        "no-reference": true,
+
+        // no "<reference types='foo' />" if "foo" is imported anyway
+        //  -> https://palantir.github.io/tslint/rules/no-reference-import
+        "no-reference-import": true,
+
+        // no "return await" in async functions
+        //  -> https://palantir.github.io/tslint/rules/no-return-await
+        "no-return-await": true,
+
+        // don't shadow variable declarations
+        //  -> https://palantir.github.io/tslint/rules/no-shadowed-variable
+        "no-shadowed-variable": true,
+
+        // array literals must not contain missing elements (may be an accidentally duplicated comma)
+        //  -> https://palantir.github.io/tslint/rules/no-sparse-arrays
+        "no-sparse-arrays": true,
+
+        // use obj.foo instead of obj['foo']
+        //  -> https://palantir.github.io/tslint/rules/no-string-literal
+        "no-string-literal": true,
+
+        // don't throw strings, throw Errors instead
+        //  -> https://palantir.github.io/tslint/rules/no-string-throw
+        "no-string-throw": true,
+
+        // no implicit falling through case statements (allows explicit falling through via "/* falls through */")
+        //  -> https://palantir.github.io/tslint/rules/no-switch-case-fall-through
+        "no-switch-case-fall-through": true,
+
+        //  -> https://palantir.github.io/tslint/rules/no-this-assignment
+        "no-this-assignment": true,
+
+        //  -> https://palantir.github.io/tslint/rules/no-trailing-whitespace
+        "no-trailing-whitespace": true,
+
+        // replace "x => f(x)" with "f"
+        //  -> https://palantir.github.io/tslint/rules/no-unnecessary-callback-wrapper
+        "no-unnecessary-callback-wrapper": true,
+
+        // TODO not displayed by WebStorm
+        //  -> https://palantir.github.io/tslint/rules/no-unsafe-any
+        //"no-unsafe-any": true,
+
+        // no control flow statements (e.g. return, continue or break) in "finally" statements
+        //  -> https://palantir.github.io/tslint/rules/no-unsafe-finally
+        "no-unsafe-finally": true,
+
+        //  -> https://palantir.github.io/tslint/rules/no-unused-expression
+        "no-unused-expression": true,
+
+        //  -> https://palantir.github.io/tslint/rules/no-unused-variable
+        "no-unused-variable": true,
+
+        // discouraged rule: https://palantir.github.io/tslint/rules/no-use-before-declare/
+        //"no-use-before-declare": true,
+
+        // "let" or "const" instead of "var"
+        //  -> https://palantir.github.io/tslint/rules/no-var-keyword
+        "no-var-keyword": true,
+
+        // use "import foo = require('foo')" instead of "var module = require('module')"
+        //  -> https://palantir.github.io/tslint/rules/no-var-requires
+        "no-var-requires": true,
+
+        // consistent object literal property quote style
+        //  -> https://palantir.github.io/tslint/rules/object-literal-key-quotes
+        "object-literal-key-quotes": [
+            true,
+            "consistent-as-needed"
+        ],
+
+        // enforce object literal shorthand
+        //  -> https://palantir.github.io/tslint/rules/object-literal-shorthand
+        "object-literal-shorthand": true,
+
+        // no sorting required for keys in object literals
+        //  -> https://palantir.github.io/tslint/rules/object-literal-sort-keys
+        "object-literal-sort-keys": false,
+
+        //  -> https://palantir.github.io/tslint/rules/one-variable-per-declaration
+        "one-variable-per-declaration": [
+            true,
+            "ignore-for-loop"
+        ],
+
+        // disallow non-arrow function expressions
+        //  -> https://palantir.github.io/tslint/rules/only-arrow-functions
+        "only-arrow-functions": [
+            true,
+            "allow-declarations"
+        ],
+
+        // if possible, use conditional expression instead of several if-branches
+        //  -> https://palantir.github.io/tslint/rules/prefer-conditional-expression
+        "prefer-conditional-expression": true,
+
+        // use "const" if possible
+        //  -> https://palantir.github.io/tslint/rules/prefer-const
+        "prefer-const": true,
+
+        // prefer "for-of" loop over standard "for" loop
+        //  -> https://palantir.github.io/tslint/rules/prefer-for-of
+        "prefer-for-of": true,
+
+        // prefer "foo(): void" over "foo: () => void"
+        //  -> https://palantir.github.io/tslint/rules/prefer-method-signature
+        "prefer-method-signature": true,
+
+        // use ES2015 object spread operator instead of "Object.assign()" for better type checking
+        //  -> https://palantir.github.io/tslint/rules/prefer-object-spread
+        "prefer-object-spread": true,
+
+        // marking private variables as "readonly" collides with Angular's injection
+        //  -> https://palantir.github.io/tslint/rules/prefer-readonly
+        //"prefer-readonly": true,
+
+        // use single quotation marks, allow double quotation marks only if it prevents escaping
+        //  -> https://palantir.github.io/tslint/rules/quotemark
+        "quotemark": [
+            true,
+            "single",
+            "avoid-escape"
+        ],
+
+        // always specify a radix parameter for "parseInt"
+        //  -> https://palantir.github.io/tslint/rules/radix
+        "radix": true,
+
+        // prefer "return undefined" over "return" in value-returning functions
+        //  -> https://palantir.github.io/tslint/rules/return-undefined
+        "return-undefined": true,
+
+        // TODO not displayed by WebStorm
+        //  -> https://palantir.github.io/tslint/rules/restrict-plus-operands
+        //"restrict-plus-operands": true,
+
+        // semicolon after each statement
+        //  -> https://palantir.github.io/tslint/rules/semicolon
+        "semicolon": [
+            true,
+            "always"
+        ],
+
+        // space before function parenthesis
+        //  -> https://palantir.github.io/tslint/rules/space-before-function-paren
+        "space-before-function-paren": [
+            true,
+            {
+                "anonymous": "never",
+                "asyncArrow": "always",
+                "constructor": "never",
+                "method": "never",
+                "named": "never"
+            }
+        ],
+
+        //  -> https://palantir.github.io/tslint/rules/space-within-parens
+        "space-within-parens": [
+            true,
+            0
+        ],
+
+        // the final clause of a "switch" ends wioth a "break"
+        //  -> https://palantir.github.io/tslint/rules/switch-final-break
+        "switch-final-break": [
+            true,
+            "always"
+        ],
+
+        // no trailing comma
+        //  -> https://palantir.github.io/tslint/rules/trailing-comma
+        "trailing-comma": [
+            true,
+            {
+                "multiline": "never",
+                "singleline": "never"
+            }
+        ],
+
+        // prefer "===" and "!==" (no type conversion) over "==" and "!="
+        //  -> https://palantir.github.io/tslint/rules/triple-equals
+        "triple-equals": [
+            true,
+            "allow-null-check"
+        ],
+
+        //  -> https://palantir.github.io/tslint/rules/typedef-whitespace
+        "typedef-whitespace": [
+            true,
+            // left of a typedef colon
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace"
+            },
+            // right of a typedef colon
+            {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace"
+            }
+        ],
+
+        // unify overloads into one if possible
+        //  -> https://palantir.github.io/tslint/rules/unified-signatures
+        "unified-signatures": true,
+
+        //  -> https://palantir.github.io/tslint/rules/use-default-type-parameter
+        "use-default-type-parameter": true,
+
+        // use isNaN() since NaN !== NaN
+        //  -> https://palantir.github.io/tslint/rules/use-isnan
+        "use-isnan": true,
+
+        // variable name rules:
+        //  * no keywords
+        //  * lowerCamelCase or PascalCase
+        //  * a leading "_" is allowed
+        //  -> https://palantir.github.io/tslint/rules/variable-name
+        "variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-leading-underscore",
+            "allow-pascal-case"
+        ],
+
+        // miscellaneous whitespace rules
+        //  -> https://palantir.github.io/tslint/rules/whitespace
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-preblock",
+            "check-rest-spread",
+            "check-separator",
+            "check-type",
+            "check-type-operator",
+            "check-typecast"
+        ],
+
+        //
+        //  -------------------------
+        //  CODELYZER RULES (ANGULAR)
+        //  -------------------------
+        //
+
+        // formatting for angular expressions
+        //  -> http://codelyzer.com/rules/angular-whitespace
+        "angular-whitespace": true,
+
+        // ensure correct two-way data binding "[(...)]" stattfinden.
+        //  -> http://codelyzer.com/rules/banana-in-box
+        "banana-in-box": true,
+
+        // allowed suffixes for components
+        //  -> http://codelyzer.com/rules/component-class-suffix
+        "component-class-suffix": [
+            true,
+            "Component",
+            "View"
+        ],
+
+        // naming rules for component selectors
+        //  -> http://codelyzer.com/rules/component-selector
+        "component-selector": [
+            true,
+            // components are HTML elements
+            "element",
+            // prefix
+            "age",
+            // case
+            "kebab-case"
+        ],
+
+        // some life cycle methods can be used only by certain classes
+        //  -> http://codelyzer.com/rules/contextual-life-cycle
+        "contextual-life-cycle": true,
+
+        // some decorators can be used only by certain classes
+        //  -> http://codelyzer.com/rules/decorator-not-allowed
+        "decorator-not-allowed": true,
+
+        // mandatory suffix for all directives
+        //  -> http://codelyzer.com/rules/directive-class-suffix
+        "directive-class-suffix": [
+            true,
+            "Directive"
+        ],
+
+        // naming rules for directive selectors
+        //  -> http://codelyzer.com/rules/directive-selector
+        "directive-selector": [
+            true,
+            // directives are HTML attributes
+            "attribute",
+            // prefix
+            "age",
+            // case
+            "camelCase"
+        ],
+
+        // make component selectors mandatory
+        // (the DOM can be hard to debug with a lot of autogenerated "ng-component" tags)
+        "enforce-component-selector": true,
+
+        // TODO not displayed by WebStorm
+        // ensure i18n best practices
+        //  -> http://codelyzer.com/rules/i18n
+        //"i18n": [
+        //    true,
+        //    // every HTML element containing text should have an i18n attribute
+        //    "check-text"
+        //],
+
+        // no whitespaces for imports
+        //  -> http://codelyzer.com/rules/import-destructuring-spacing
+        //"import-destructuring-spacing": true,
+
+        // use @Input instead of @Attribute
+        //  -> http://codelyzer.com/rules/no-attribute-parameter-decorator
+        "no-attribute-parameter-decorator": true,
+
+        // don't implement OnChanges and DoCheck on the same class
+        //  -> https://angular.io/api/core/DoCheck#description
+        "no-conflicting-life-cycle-hooks": true,
+
+        // no forward references for DI
+        //  -> http://codelyzer.com/rules/no-forward-ref
+        "no-forward-ref": true,
+
+        // no @Input renaming for directives
+        //  -> http://codelyzer.com/rules/no-input-rename
+        "no-input-rename": true,
+
+        // no explicit calls to lifecycle hooks as such calls can be confusing to debug
+        //  -> https://gitter.im/angular/angular?at=59daa728f7299e8f53c2c4f3
+        "no-life-cycle-call": true,
+
+        // don't name an @Output after a standard DOM event
+        //  -> http://codelyzer.com/rules/no-output-named-after-standard-event
+        "no-output-named-after-standard-event": true,
+
+        // no "on" prefix for events
+        //  -> http://codelyzer.com/rules/no-output-on-prefix
+        "no-output-on-prefix": true,
+
+        // no @Output renaming for directives
+        //  -> http://codelyzer.com/rules/no-output-rename
+        "no-output-rename": true,
+
+        // no unused CSS in a component's style sheet
+        //  -> http://codelyzer.com/rules/no-unused-css
+        "no-unused-css": true,
+
+        // no impure pipes as they don't perform well
+        //  -> http://codelyzer.com/rules/pipe-impure
+        "pipe-impure": true,
+
+        // we don't have any pipe naming rules at this time
+        //  -> http://codelyzer.com/rules/pipe-naming
+        //"pipe-naming" : true,
+
+        // @Outputs (Angular EventEmitters) should be readonly to prevent accidental reassignment
+        "prefer-output-readonly": true,
+
+        // use strict equality for evaluating async pipe output,
+        // as an async pipe evaluates to null before the first emit
+        //  -> http://codelyzer.com/rules/templates-no-negated-async
+        "templates-no-negated-async": true,
+
+        // use trackBy as it's considered best practice
+        //  -> http://codelyzer.com/rules/trackBy-function
+        "trackBy-function": true,
+
+        // use @HostProperty instead of the "host" property of @Component and @Directive metadata
+        //  -> http://codelyzer.com/rules/use-host-property-decorator
+        "use-host-property-decorator": true,
+
+        // use @Input instead of the "inputs" property of @Component and @Directive metadata
+        //  -> http://codelyzer.com/rules/use-input-property-decorator
+        "use-input-property-decorator": true,
+
+        // implement lifecycle interfaces if you use them
+        //  -> http://codelyzer.com/rules/use-life-cycle-interface
+        "use-life-cycle-interface": true,
+
+        // use @Output instead of the "outputs" property of @Component and @Directive metadata
+        //  -> http://codelyzer.com/rules/use-output-property-decorator
+        "use-output-property-decorator": true,
+
+        // use the @Pipe decorator when implementing the PipeTransform interface
+        //  -> http://codelyzer.com/rules/use-pipe-decorator
+        "use-pipe-decorator": true,
+
+        // pipes implement the PipeTransform interface
+        //  -> http://codelyzer.com/rules/use-pipe-transform-interface
+        "use-pipe-transform-interface": true,
+
+        // don't use ViewEncapsulation.NONE
+        //  -> http://codelyzer.com/rules/use-view-encapsulation
+        "use-view-encapsulation": true
+    }
+}

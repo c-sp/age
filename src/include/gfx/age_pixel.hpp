@@ -43,7 +43,7 @@ struct pixel
     {}
 
     pixel(uint r, uint g, uint b)
-        : pixel(0xFF000000 + (r << 16) + (g << 8) + b)
+        : pixel(0xFF000000 + (b << 16) + (g << 8) + r)
     {
         AGE_ASSERT(r <= 255);
         AGE_ASSERT(g <= 255);
@@ -51,20 +51,20 @@ struct pixel
     }
 
     pixel(uint32 x8r8g8b8)
-        : m_x8r8g8b8(x8r8g8b8)
+        : m_a8b8g8r8(x8r8g8b8)
     {}
 
     bool operator==(const pixel &other) const
     {
-        return m_x8r8g8b8 == other.m_x8r8g8b8;
+        return m_a8b8g8r8 == other.m_a8b8g8r8;
     }
 
     bool operator!=(const pixel &other) const
     {
-        return m_x8r8g8b8 != other.m_x8r8g8b8;
+        return m_a8b8g8r8 != other.m_a8b8g8r8;
     }
 
-    uint32 m_x8r8g8b8;
+    uint32 m_a8b8g8r8;
 };
 
 constexpr uint sizeof_pixel = sizeof(pixel);
