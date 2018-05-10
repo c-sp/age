@@ -15,7 +15,7 @@ variables:
 ##
 ############################################################
 
-.build: &build_preset
+.build: &build-qt-preset
     stage: build
     script:
         - "DIR=`mktemp -d` && cd $DIR"
@@ -29,14 +29,13 @@ variables:
     tags:
         - linux
 
-
-build_debug:
-    <<: *build_preset
+build-qt-debug:
+    <<: *build-qt-preset
     variables:
         QMAKE_ARGUMENTS: "CONFIG+=debug"
 
-build_release:
-    <<: *build_preset
+build-qt-release:
+    <<: *build-qt-preset
     variables:
         QMAKE_ARGUMENTS: "CONFIG+=release"
 
@@ -48,40 +47,40 @@ build_release:
 ##
 ############################################################
 
-.test_release: &test_preset_release
+.test-release: &test-preset-release
     stage: test
     dependencies:
-        - build_release
+        - build-qt-release
     tags:
         - linux
 
-.test_debug: &test_preset_debug
+.test-debug: &test-preset-debug
     stage: test
     dependencies:
-        - build_debug
+        - build-qt-debug
     tags:
         - linux
 
 
-test_mooneye_release:
-    <<: *test_preset_release
+test-mooneye-release:
+    <<: *test-preset-release
     script:
         - sh ${TEST_SUBDIR}/ci_run_mooneye_tests.sh
 
-test_mooneye_debug:
-    <<: *test_preset_debug
+test-mooneye-debug:
+    <<: *test-preset-debug
     script:
         - sh ${TEST_SUBDIR}/ci_run_mooneye_tests.sh
 
 
-test_gambatte_release:
-    <<: *test_preset_release
+test-gambatte-release:
+    <<: *test-preset-release
     script:
         - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
 
 # gambatte tests run for longer than 10 minutes with the debug build
-#test_gambatte_debug:
-#    <<: *test_preset_debug
+#test-gambatte-debug:
+#    <<: *test-preset-debug
 #    script:
 #        - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
 
