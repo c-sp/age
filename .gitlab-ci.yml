@@ -5,7 +5,7 @@ stages:
     - test
 
 variables:
-    ARTIFACTS_SUBDIR:   build/artifacts
+    ARTIFACTS_SUBDIR:   build/ci_artifacts
     ARTIFACTS_DIR:      ${CI_PROJECT_DIR}/${ARTIFACTS_SUBDIR}
     ARTIFACTS_DIR_TEST: ${ARTIFACTS_DIR}/test
     ARTIFACTS_DIR_WASM: ${ARTIFACTS_DIR_WASM}/wasm
