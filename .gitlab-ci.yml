@@ -5,10 +5,9 @@ stages:
     - test
 
 variables:
-    ARTIFACTS_SUBDIR:   build/ci_artifacts
-    ARTIFACTS_DIR:      ${CI_PROJECT_DIR}/${ARTIFACTS_SUBDIR}
-    ARTIFACTS_DIR_TEST: ${ARTIFACTS_DIR}/test
-    ARTIFACTS_DIR_WASM: ${ARTIFACTS_DIR_WASM}/wasm
+    ARTIFACTS:      build/ci_artifacts
+    ARTIFACTS_TEST: ${ARTIFACTS}/test
+    ARTIFACTS_WASM: ${ARTIFACTS}/wasm
     TEST_SUBDIR: test
 
 
@@ -21,11 +20,17 @@ variables:
 
 .build: &build-preset
     stage: build
+    before_script:
+        - mkdir -p ${ARTIFACTS_TEST}
+        - mkdir -p ${ARTIFACTS_WASM}
+    after_script:
+        - ls -lsahR ${ARTIFACTS}
     artifacts:
         expire_in: 30 mins
         untracked: true
     tags:
         - linux
+
 
 .build-qt: &build-qt-preset
     <<: *build-preset
@@ -33,9 +38,7 @@ variables:
         - "DIR=`mktemp -d` && cd $DIR"
         - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/build/qmake/age.pro"
         - make -j 4
-        - mkdir -p ${ARTIFACTS_DIR_TEST}
-        - ls -lsahR ${ARTIFACTS_DIR}
-        - cp age_qt_emu_test/age_qt_emu_test ${ARTIFACTS_DIR_TEST}
+        - cp age_qt_emu_test/age_qt_emu_test ${CI_PROJECT_DIR}/${ARTIFACTS_TEST}
 
 build-qt-debug:
     <<: *build-qt-preset
