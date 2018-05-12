@@ -24,7 +24,7 @@ variables:
     artifacts:
         expire_in: 30 mins
         paths:
-            - ${ARTIFACTS_SUBDIR}/
+            - ${ARTIFACTS_SUBDIR}
     tags:
         - linux
 
