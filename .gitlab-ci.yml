@@ -34,6 +34,7 @@ variables:
         - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/build/qmake/age.pro"
         - make -j 4
         - mkdir -p ${ARTIFACTS_DIR_TEST}
+        - ls -lsahR ${ARTIFACTS_DIR}
         - cp age_qt_emu_test/age_qt_emu_test ${ARTIFACTS_DIR_TEST}
 
 build-qt-debug:
