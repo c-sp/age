@@ -23,8 +23,7 @@ variables:
     stage: build
     artifacts:
         expire_in: 30 mins
-        paths:
-            - ${ARTIFACTS_SUBDIR}
+        untracked: true
     tags:
         - linux
 
