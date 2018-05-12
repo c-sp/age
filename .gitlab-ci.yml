@@ -8,7 +8,6 @@ variables:
     ARTIFACTS:      build/ci_artifacts
     ARTIFACTS_TEST: ${ARTIFACTS}/test
     ARTIFACTS_WASM: ${ARTIFACTS}/wasm
-    TEST_SUBDIR: test
 
 
 
@@ -23,8 +22,6 @@ variables:
     before_script:
         - mkdir -p ${ARTIFACTS_TEST}
         - mkdir -p ${ARTIFACTS_WASM}
-    after_script:
-        - ls -lsahR ${ARTIFACTS}
     artifacts:
         expire_in: 30 mins
         untracked: true
@@ -84,22 +81,22 @@ build-wasm:
 test-mooneye-release:
     <<: *test-preset-release
     script:
-        - sh ${TEST_SUBDIR}/ci_run_mooneye_tests.sh
+        - sh test/ci_run_mooneye_tests.sh
 
 test-mooneye-debug:
     <<: *test-preset-debug
     script:
-        - sh ${TEST_SUBDIR}/ci_run_mooneye_tests.sh
+        - sh test/ci_run_mooneye_tests.sh
 
 
 test-gambatte-release:
     <<: *test-preset-release
     script:
-        - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
+        - sh test/ci_run_gambatte_tests.sh
 
 # gambatte tests run for longer than 10 minutes with the debug build
 #test-gambatte-debug:
 #    <<: *test-preset-debug
 #    script:
-#        - sh ${TEST_SUBDIR}/ci_run_gambatte_tests.sh
+#        - sh test/ci_run_gambatte_tests.sh
 
