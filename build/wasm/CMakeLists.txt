@@ -19,7 +19,7 @@
 #   Emscripten & CMake: https://stackoverflow.com/a/45277855
 #
 
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.7.2)
 
 project (AGE-WebAssembly)
 
