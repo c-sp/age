@@ -24,7 +24,8 @@ variables:
         - mkdir -p ${ARTIFACTS_WASM}
     artifacts:
         expire_in: 30 mins
-        untracked: true
+        paths:
+            - ${ARTIFACTS}
     tags:
         - linux
 
