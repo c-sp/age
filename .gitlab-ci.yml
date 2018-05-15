@@ -33,20 +33,18 @@ variables:
 .build-qt: &build-qt-preset
     <<: *build-preset
     script:
-        - "DIR=`mktemp -d` && cd $DIR"
-        - "qmake ${QMAKE_ARGUMENTS} ${CI_PROJECT_DIR}/build/qmake/age.pro"
-        - make -j 4
-        - cp age_qt_emu_test/age_qt_emu_test ${CI_PROJECT_DIR}/${ARTIFACTS_TEST}
+        - build/age_build.sh qt $BUILD_TYPE
+        - cp build/qt/build_out/age_qt_emu_test/age_qt_emu_test ${ARTIFACTS_TEST}
 
 build-qt-debug:
     <<: *build-qt-preset
     variables:
-        QMAKE_ARGUMENTS: "CONFIG+=debug"
+        BUILD_TYPE: debug
 
 build-qt-release:
     <<: *build-qt-preset
     variables:
-        QMAKE_ARGUMENTS: "CONFIG+=release"
+        BUILD_TYPE: release
 
 
 build-wasm:
