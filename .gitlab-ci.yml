@@ -93,25 +93,29 @@ build-wasm:
         - linux
 
 
+.tests-mooneye: &tests-mooneye
+    script:
+        - ./build/age_ci.sh test mooneye "${GB_REPO_MOONEYE}/tests/build"
+
+.tests-gambatte: &tests-gambatte
+    script:
+        - ./build/age_ci.sh test gambatte "${GB_REPO_GAMBATTE}/test/hwtests"
+
+
 test-mooneye-release:
     <<: *test-release
-    script:
-        - sh test/ci_run_mooneye_tests.sh
+    <<: *tests-mooneye
 
 test-mooneye-debug:
     <<: *test-debug
-    script:
-        - sh test/ci_run_mooneye_tests.sh
+    <<: *tests-mooneye
 
 
 test-gambatte-release:
     <<: *test-release
-    script:
-        - sh test/ci_run_gambatte_tests.sh
+    <<: *tests-gambatte
 
 # gambatte tests run for longer than 10 minutes with the debug build
 #test-gambatte-debug:
 #    <<: *test-debug
-#    script:
-#        - sh test/ci_run_gambatte_tests.sh
-
+#    <<: *tests-gambatte

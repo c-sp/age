@@ -6,9 +6,13 @@ QT_BUILD_TYPE_RELEASE=release
 WASM_BUILD_TYPE_DEBUG=Debug
 WASM_BUILD_TYPE_RELEASE=Release
 
+TESTS_GAMBATTE=gambatte
+TESTS_MOONEYE=mooneye
+
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_DOXYGEN=doxygen
+CMD_TEST=test
 
 
 ###
@@ -18,17 +22,27 @@ CMD_DOXYGEN=doxygen
 print_usage_and_exit()
 {
     echo "usages:"
-    echo "  $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
-    echo "  $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
-    echo "  $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
-    echo "  $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
-    echo "  $0 $CMD_DOXYGEN"
+    echo "  builds:"
+    echo "    $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
+    echo "  tests:"
+    echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
+    echo "    $0 $CMD_TEST $TESTS_MOONEYE <path-to-mooneye-tests>"
+    echo "  miscellaneous:"
+    echo "    $0 $CMD_DOXYGEN"
     exit 1
+}
+
+out_dir()
+{
+    echo "$BUILD_DIR/artifacts/$1"
 }
 
 switch_to_out_dir()
 {
-    OUT_DIR="$BUILD_DIR/artifacts/$1"
+    OUT_DIR=$(out_dir $1)
 
     # remove previous build artifacts
     if [ -e "$OUT_DIR" ]; then
@@ -42,7 +56,7 @@ switch_to_out_dir()
 
 
 ###
-###   builds
+###   commands
 ###
 
 build_age_qt()
@@ -106,6 +120,31 @@ run_doxygen()
     mv html "$OUT_DIR"
 }
 
+run_tests()
+{
+    case $1 in
+        ${TESTS_GAMBATTE}) ;;
+        ${TESTS_MOONEYE}) ;;
+        *) print_usage_and_exit ;;
+    esac
+
+    # exit if the test file path has not been specified
+    if ! [ -n "$2" ]; then
+        print_usage_and_exit
+    fi
+
+    # the executable file must exist
+    TEST_EXEC="$(out_dir qt)/age_qt_emu_test/age_qt_emu_test"
+    if ! [ -f "$TEST_EXEC" ]; then
+        echo "The AGE test executable could not be found at:"
+        echo "$TEST_EXEC"
+        exit 1
+    fi
+
+    # run the tests
+    ${TEST_EXEC} --type $1 --ignore-list "$BUILD_DIR/tests_to_ignore.txt" $2
+}
+
 
 ###
 ###   script starting point
@@ -125,8 +164,10 @@ fi
 
 # check the command in the first parameter
 case $1 in
-    ${CMD_QT}) build_age_qt $2 ;;
-    ${CMD_WASM}) build_age_wasm $2 ;;
+    ${CMD_QT})      build_age_qt $2 ;;
+    ${CMD_WASM})    build_age_wasm $2 ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
+    ${CMD_TEST})    run_tests $2 $3 ;;
+
     *) print_usage_and_exit ;;
 esac
