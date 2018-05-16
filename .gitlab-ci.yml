@@ -27,9 +27,13 @@ variables:
     before_script:
         - rm -rf "${ARTIFACTS}"
         - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
+        - ls -lsah "${ARTIFACTS}"
+        - ls -lsah "${CI_ARTIFACTS}"
     after_script:
         - rm -rf "${CI_ARTIFACTS}"
         - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
+        - ls -lsah "${ARTIFACTS}"
+        - ls -lsah "${CI_ARTIFACTS}"
     artifacts:
         expire_in: 30 mins
         paths:
