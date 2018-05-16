@@ -23,7 +23,7 @@ variables:
 # to another directory after job execution in order to pass them to other stages
 # and move them back to their original position for job execution.
 
-.artifacts-definition: &artifacts-definition
+.artifacts-definition: &artifacts-handling
     before_script:
         - rm -rf "${ARTIFACTS}"
         - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
@@ -49,7 +49,7 @@ variables:
 
 .build-qt: &build-qt
     stage: build
-    <<: *artifacts-definition
+    <<: *artifacts-handling
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
 
@@ -66,7 +66,7 @@ build-qt-release:
 
 build-wasm:
     stage: build
-    <<: *artifacts-definition
+    <<: *artifacts-handling
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
@@ -80,19 +80,21 @@ build-wasm:
 ##
 ############################################################
 
-.test-release: &test-release
+.test-common: $test-common
     stage: test
-    dependencies:
-        - build-qt-release
+    <<: *artifacts-handling
     tags:
         - linux
 
+.test-release: &test-release
+    <<: *test-common
+    dependencies:
+        - build-qt-release
+
 .test-debug: &test-debug
-    stage: test
+    <<: *test-common
     dependencies:
         - build-qt-debug
-    tags:
-        - linux
 
 
 .tests-mooneye: &tests-mooneye
