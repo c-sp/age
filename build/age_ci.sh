@@ -135,7 +135,7 @@ run_tests()
 
     # the executable file must exist
     TEST_EXEC="$(out_dir qt)/age_qt_emu_test/age_qt_emu_test"
-    if ! [ -f "$TEST_EXEC" ]; then
+    if ! [ -x "$TEST_EXEC" ]; then
         echo "The AGE test executable could not be found at:"
         echo "$TEST_EXEC"
         exit 1
