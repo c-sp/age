@@ -4,6 +4,10 @@ stages:
     - build
     - test
 
+variables:
+    ARTIFACTS: build/artifacts
+    CI_ARTIFACTS: build/ci_artifacts
+
 
 
 ############################################################
@@ -20,9 +24,6 @@ stages:
 # and move them back to their original position for job execution.
 
 .artifacts-definition: &artifacts-definition
-    variables:
-        ARTIFACTS: build/artifacts
-        CI_ARTIFACTS: build/ci_artifacts
     before_script:
         - rm -rf "${ARTIFACTS}"
         - mv "${CI_ARTIFACTS}" "${ARTIFACTS}"
