@@ -4,10 +4,37 @@ stages:
     - build
     - test
 
-variables:
-    ARTIFACTS:      build/ci_artifacts
-    ARTIFACTS_TEST: ${ARTIFACTS}/test
-    ARTIFACTS_WASM: ${ARTIFACTS}/wasm
+
+
+############################################################
+##
+##   artifacts
+##
+############################################################
+
+# Build artifacts are ignored by git (as they are part of .gitignore).
+# Unfortunately because of that they cannot be used as GitLab CI artifacts.
+#
+# The current (non-invasive) solution is to temporarily move build artifacts
+# to another directory after job execution in order to pass them to other stages
+# and move them back to their original position for job execution.
+
+.artifacts-definition: &artifacts-definition
+    variables:
+        ARTIFACTS: build/artifacts
+        CI_ARTIFACTS: build/ci_artifacts
+    before_script:
+        - rm -rf "${ARTIFACTS}"
+        - mv "${CI_ARTIFACTS}" "${ARTIFACTS}"
+    after_script:
+        - rm -rf "${CI_ARTIFACTS}"
+        - mv "${ARTIFACTS}" "${CI_ARTIFACTS}"
+    artifacts:
+        expire_in: 30 mins
+        paths:
+            - ${CI_ARTIFACTS}
+    tags:
+        - linux
 
 
 
@@ -17,42 +44,30 @@ variables:
 ##
 ############################################################
 
-.build: &build-preset
+.build-qt: &build-qt
     stage: build
-    before_script:
-        - mkdir -p ${ARTIFACTS_TEST}
-        - mkdir -p ${ARTIFACTS_WASM}
-    artifacts:
-        expire_in: 30 mins
-        paths:
-            - ${ARTIFACTS}
-    tags:
-        - linux
-
-
-.build-qt: &build-qt-preset
-    <<: *build-preset
+    <<: *artifacts-definition
     script:
-        - build/age_build.sh qt $BUILD_TYPE
-        - cp build/qt/build_out/age_qt_emu_test/age_qt_emu_test ${ARTIFACTS_TEST}
+        - ./build/age_build.sh qt ${BUILD_TYPE}
 
 build-qt-debug:
-    <<: *build-qt-preset
+    <<: *build-qt
     variables:
         BUILD_TYPE: debug
 
 build-qt-release:
-    <<: *build-qt-preset
+    <<: *build-qt
     variables:
         BUILD_TYPE: release
 
 
 build-wasm:
-    <<: *build-preset
+    stage: build
+    <<: *artifacts-definition
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
-        - source ${REPO_EMSDK}/emsdk_env.sh
-        - ${CI_PROJECT_DIR}/build/wasm/run_cmake.sh
+        - source "${REPO_EMSDK}/emsdk_env.sh"
+        - ./build/age_build.sh wasm Release
 
 
 
@@ -62,14 +77,14 @@ build-wasm:
 ##
 ############################################################
 
-.test-release: &test-preset-release
+.test-release: &test-release
     stage: test
     dependencies:
         - build-qt-release
     tags:
         - linux
 
-.test-debug: &test-preset-debug
+.test-debug: &test-debug
     stage: test
     dependencies:
         - build-qt-debug
@@ -78,24 +93,24 @@ build-wasm:
 
 
 test-mooneye-release:
-    <<: *test-preset-release
+    <<: *test-release
     script:
         - sh test/ci_run_mooneye_tests.sh
 
 test-mooneye-debug:
-    <<: *test-preset-debug
+    <<: *test-debug
     script:
         - sh test/ci_run_mooneye_tests.sh
 
 
 test-gambatte-release:
-    <<: *test-preset-release
+    <<: *test-release
     script:
         - sh test/ci_run_gambatte_tests.sh
 
 # gambatte tests run for longer than 10 minutes with the debug build
 #test-gambatte-debug:
-#    <<: *test-preset-debug
+#    <<: *test-debug
 #    script:
 #        - sh test/ci_run_gambatte_tests.sh
 

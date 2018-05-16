@@ -1,129 +1,132 @@
 #!/bin/sh -e
 
-BUILD_TYPE_DEBUG=debug
-BUILD_TYPE_RELEASE=release
+QT_BUILD_TYPE_DEBUG=debug
+QT_BUILD_TYPE_RELEASE=release
+
+WASM_BUILD_TYPE_DEBUG=Debug
+WASM_BUILD_TYPE_RELEASE=Release
 
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_DOXYGEN=doxygen
 
-BUILD_OUT=build_out
 
-
-##
-#####   utility methods
-##
+###
+###   utility methods
+###
 
 print_usage_and_exit()
 {
-    echo "usage:"
-    echo "  $0 $CMD_QT <build_type>"
-    echo "  $0 $CMD_WASM <build_type>"
+    echo "usages:"
+    echo "  $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
+    echo "  $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
+    echo "  $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
+    echo "  $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
     echo "  $0 $CMD_DOXYGEN"
-    echo "with:"
-    echo "  <build_type> = $BUILD_TYPE_DEBUG | $BUILD_TYPE_RELEASE"
     exit 1
-}
-
-is_valid_build_type()
-{
-    case $1 in
-        $BUILD_TYPE_DEBUG) ;;
-        $BUILD_TYPE_RELEASE) ;;
-        *) print_usage_and_exit ;;
-    esac
 }
 
 switch_to_out_dir()
 {
-    OUT_DIR=$SCRIPT_DIR/$1/$BUILD_OUT
-    echo "build output dir: $OUT_DIR"
+    OUT_DIR="$BUILD_DIR/artifacts/$1"
 
-    # create the build directory if it does not exist
-    if [ -e $OUT_DIR ]; then
-        echo "deleting existing build output dir"
-        rm -rf $OUT_DIR
+    # remove previous build artifacts
+    if [ -e "$OUT_DIR" ]; then
+        rm -rf "$OUT_DIR"
     fi
-    mkdir -p $OUT_DIR
 
-    cd $OUT_DIR
+    # create the directory and change to it
+    mkdir -p "$OUT_DIR"
+    cd "$OUT_DIR"
 }
 
 
-##
-#####   build age-qt
-##
+###
+###   builds
+###
 
 build_age_qt()
 {
-    is_valid_build_type $1
+    case $1 in
+        ${QT_BUILD_TYPE_DEBUG}) ;;
+        ${QT_BUILD_TYPE_RELEASE}) ;;
+        *) print_usage_and_exit ;;
+    esac
+
     switch_to_out_dir qt
-    qmake "CONFIG+=$1" $SCRIPT_DIR/qt/age.pro
-    make -j $NUM_CORES
+    echo "running AGE qt $1 build in \"`pwd -P`\" using $NUM_CORES cores"
+
+    qmake "CONFIG+=$1" "$BUILD_DIR/qt/age.pro"
+    make -j ${NUM_CORES}
+}
+
+build_age_wasm()
+{
+    case $1 in
+        ${WASM_BUILD_TYPE_DEBUG}) ;;
+        ${WASM_BUILD_TYPE_RELEASE}) ;;
+        *) print_usage_and_exit ;;
+    esac
+
+    if ! [ -n "$EMSCRIPTEN" ]; then
+        echo "EMSCRIPTEN is not set!"
+        echo "We require this variable to point to the emscripten repository."
+        exit 1
+    fi
+
+    TOOLCHAIN_FILE="$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake"
+    if ! [ -f "$TOOLCHAIN_FILE" ]; then
+        echo "The emscripten toolchain file could not be found:"
+        echo "$TOOLCHAIN_FILE"
+        exit 1
+    fi
+
+    switch_to_out_dir wasm
+    echo "running AGE wasm $1 build in \"`pwd -P`\" using $NUM_CORES cores"
+
+    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$1 -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$BUILD_DIR/wasm"
+    make -j ${NUM_CORES}
+}
+
+run_doxygen()
+{
+    switch_to_out_dir doxygen
+
+    # The doxygen configuration contains several paths that doxygen interprets
+    # based on the current directory.
+    # We have to change into the doxygen configuration directory for this to
+    # work properly.
+    OUT_DIR=`pwd -P`
+    cd "$BUILD_DIR/doxygen"
+    echo "running doxygen in \"`pwd -P`\""
+
+    doxygen doxygen_config
+
+    # move the doxygen output
+    mv html "$OUT_DIR"
 }
 
 
-##
-#####   check arguments
-##
+###
+###   script starting point
+###
 
-# get the directory of this script
+# get the AGE build directory based on the path of this script
 # (used to determine the target directories of builds)
-SCRIPT_DIR=`dirname $0`
-SCRIPT_DIR=`cd $SCRIPT_DIR && pwd -P`
-echo "script dir: $SCRIPT_DIR"
+BUILD_DIR=`dirname $0`
+BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
 
 # get the number of CPU cores
 # (used for e.g. make)
 NUM_CORES=`grep -c '^processor' /proc/cpuinfo`
-echo "number of cpu cores: $NUM_CORES"
+if [ ${NUM_CORES} -lt 4 ]; then
+    NUM_CORES=4
+fi
 
 # check the command in the first parameter
 case $1 in
-    $CMD_QT) build_age_qt $2 ;;
-    $CMD_WASM) ;;
-    $CMD_DOXYGEN) ;;
+    ${CMD_QT}) build_age_qt $2 ;;
+    ${CMD_WASM}) build_age_wasm $2 ;;
+    ${CMD_DOXYGEN}) run_doxygen ;;
     *) print_usage_and_exit ;;
 esac
-
-exit 0
-
-
-
-
-#
-# The emscripten environment has to be set up first.
-# (emsdk/emsdk_env.sh)
-#
-
-# set the build type (debug or release)
-BUILD_TYPE=Release
-if [ "$1" = "debug" ]; then
-    BUILD_TYPE=Debug
-fi
-
-# store the current directory
-PWD=`pwd -P`
-
-# get the absolute directory of the CMakeLists.txt file
-# (used as cmake parameter after changing to the build directory)
-SCRIPT_DIR=`dirname $0`
-SCRIPT_DIR=`cd $SCRIPT_DIR && pwd -P`
-BUILD_DIR="$SCRIPT_DIR/../artifacts/wasm"
-
-echo "current directory: $PWD"
-echo "script directory:  $SCRIPT_DIR"
-echo "build directory:   $BUILD_DIR"
-
-# create the build directory if it does not exist
-if [ ! -d "$BUILD_DIR" ]; then
-    mkdir -p "$BUILD_DIR"
-fi
-
-# switch to the build directory and run cmake
-cd $BUILD_DIR
-cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake $SCRIPT_DIR
-make
-
-# restore the pwd
-cd $PWD
