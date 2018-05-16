@@ -27,11 +27,9 @@ variables:
     before_script:
         - rm -rf "${ARTIFACTS}"
         - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
-        - ls -lsah build
     after_script:
         - rm -rf "${CI_ARTIFACTS}"
         - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
-        - ls -lsah build
     artifacts:
         expire_in: 30 mins
         paths:
@@ -99,12 +97,11 @@ build-wasm:
 
 .tests-mooneye: &tests-mooneye
     script:
-        - ls -lsah build
+        - env
         - ./build/age_ci.sh test mooneye "${GB_REPO_MOONEYE}/tests/build"
 
 .tests-gambatte: &tests-gambatte
     script:
-        - ls -lsah build
         - ./build/age_ci.sh test gambatte "${GB_REPO_GAMBATTE}/test/hwtests"
 
 
