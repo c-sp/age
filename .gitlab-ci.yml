@@ -26,10 +26,10 @@ variables:
 .artifacts-definition: &artifacts-definition
     before_script:
         - rm -rf "${ARTIFACTS}"
-        - mv "${CI_ARTIFACTS}" "${ARTIFACTS}"
+        - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
     after_script:
         - rm -rf "${CI_ARTIFACTS}"
-        - mv "${ARTIFACTS}" "${CI_ARTIFACTS}"
+        - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
     artifacts:
         expire_in: 30 mins
         paths:
