@@ -48,7 +48,7 @@ stages:
     stage: build
     <<: *artifacts-definition
     script:
-        - ./build/age_build.sh qt ${BUILD_TYPE}
+        - ./build/age_ci.sh qt ${BUILD_TYPE}
 
 build-qt-debug:
     <<: *build-qt
@@ -67,7 +67,7 @@ build-wasm:
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
-        - ./build/age_build.sh wasm Release
+        - ./build/age_ci.sh wasm Release
 
 
 
