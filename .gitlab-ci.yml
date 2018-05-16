@@ -23,7 +23,7 @@ variables:
 # to another directory after job execution in order to pass them to other stages
 # and move them back to their original position for job execution.
 
-.artifacts-definition: &artifacts-handling
+.artifacts-handling: &artifacts-handling
     before_script:
         - rm -rf "${ARTIFACTS}"
         - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
@@ -80,7 +80,7 @@ build-wasm:
 ##
 ############################################################
 
-.test-common: $test-common
+.test-common: &test-common
     stage: test
     <<: *artifacts-handling
     tags:
