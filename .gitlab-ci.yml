@@ -97,10 +97,12 @@ build-wasm:
 
 .tests-mooneye: &tests-mooneye
     script:
+        - ls -lsah build
         - ./build/age_ci.sh test mooneye "${GB_REPO_MOONEYE}/tests/build"
 
 .tests-gambatte: &tests-gambatte
     script:
+        - ls -lsah build
         - ./build/age_ci.sh test gambatte "${GB_REPO_GAMBATTE}/test/hwtests"
 
 
