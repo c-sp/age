@@ -97,8 +97,7 @@ build-wasm:
 
 .tests-mooneye: &tests-mooneye
     script:
-        - env
-        - ./build/age_ci.sh test mooneye "${GB_REPO_MOONEYE}/tests/build"
+        - ./build/age_ci.sh test mooneye "${GB_REPO_MOONEYE_GB}/tests/build"
 
 .tests-gambatte: &tests-gambatte
     script:
