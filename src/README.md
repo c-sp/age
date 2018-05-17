@@ -6,19 +6,22 @@
 AGE source code is structured into _groups_ of coherent code.
 While code within a _group_ may be tightly coupled,
 code of different _groups_ is only loosely coupled (if at all).
-Coupling is achieved by including shared C++ header files found at `include`.
-Thus if a _group_ does not provide any shared C++ header file,
-it cannot be coupled to another _group_.
+Loose coupling is achieved by including shared C++ header files found at
+`include`.
 
 The following _groups_ exist:
 
 * **`age_common`** contains basic code used throughout the AGE project,
-    e.g. AGE-specific data types.
+    like for example AGE-specific data types.
     This _group_ does not require any library beside the
     [C++14 STL](http://en.cppreference.com/w/cpp).
 * **`age_emulator_gb`** contains the actual gameboy emulation code.
     This _group_ does not require any library beside the
     [C++14 STL](http://en.cppreference.com/w/cpp).
+* **`age_js`** contains the AGE browser application created with
+    [Angular](https://angular.io).
+    This _group_ requires the `age_wasm` binaries to run the emulator within
+    the browser.
 * **`age_qt_emu_test`** contains an emulator test runner created with
     [Qt](https://www.qt.io/).
 * **`age_qt_gui`** contains the AGE desktop application created with
