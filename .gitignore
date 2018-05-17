@@ -4,7 +4,7 @@
 .idea
 
 # build artifacts
-build/doxygen/*out/*
+build/doxygen/html
 build/artifacts
 
 # AGE-JS build files
