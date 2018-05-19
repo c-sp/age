@@ -39,16 +39,19 @@ variables:
 
 
 # All age-js jobs are configured to cache the node_modules.
+# Jobs of each branch use the same cache.
+#
 # The GitLab.com shared runners use distributed caches:
 # https://docs.gitlab.com/ee/ci/caching/#good-caching-practices
 
 .age-js-common: &age-js-common
     image: node:8-alpine
     cache:
+        key: ${CI_COMMIT_REF_SLUG}
         paths:
             - src/age_js/node_modules
     tags:
-        -linux
+        - linux
 
 
 
