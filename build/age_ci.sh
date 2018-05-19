@@ -115,7 +115,7 @@ age_js()
     npm install
 
     # run the requested NG command
-    npm run ng -- $1 ${PARAMS}
+    npm run $1 -- ${PARAMS}
 
     # move build artifacts
     if [ $1 = ${JS_BUILD} ]; then
