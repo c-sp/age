@@ -139,3 +139,10 @@ test-gambatte-release:
 #test-gambatte-debug:
 #    <<: *test-debug
 #    <<: *tests-gambatte
+
+
+lint-age-js:
+    stage: test
+    <<: *age-js-common
+    script:
+        - build/age_ci.sh js lint
