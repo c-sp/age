@@ -23,7 +23,7 @@ variables:
     ARTIFACTS: build/artifacts
     CI_ARTIFACTS: build/ci_artifacts
 
-.artifacts-handling: &artifacts-handling
+.artifacts-common: &artifacts-common
     before_script:
         - rm -rf "${ARTIFACTS}"
         - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
@@ -39,7 +39,7 @@ variables:
 
 
 # All age-js jobs are configured to cache the node_modules.
-# Jobs of each branch use the same cache.
+# Jobs of each branch use the same cache (see cache key).
 #
 # The GitLab.com shared runners use distributed caches:
 # https://docs.gitlab.com/ee/ci/caching/#good-caching-practices
@@ -63,7 +63,7 @@ variables:
 
 .build-qt: &build-qt
     stage: build
-    <<: *artifacts-handling
+    <<: *artifacts-common
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
 
@@ -80,7 +80,7 @@ build-qt-release:
 
 build-wasm:
     stage: build
-    <<: *artifacts-handling
+    <<: *artifacts-common
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
@@ -102,7 +102,7 @@ build-age-js:
 
 .test-common: &test-common
     stage: test
-    <<: *artifacts-handling
+    <<: *artifacts-common
 
 .test-release: &test-release
     <<: *test-common
