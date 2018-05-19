@@ -88,6 +88,7 @@ build-wasm:
 
 build-age-js:
     stage: build
+    <<: *artifacts-common
     <<: *age-js-common
     script:
         - build/age_ci.sh js build
