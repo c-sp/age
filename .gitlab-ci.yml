@@ -4,10 +4,6 @@ stages:
     - build
     - test
 
-variables:
-    ARTIFACTS: build/artifacts
-    CI_ARTIFACTS: build/ci_artifacts
-
 
 
 ############################################################
@@ -23,6 +19,10 @@ variables:
 # to another directory after job execution in order to pass them to other stages
 # and move them back to their original position for job execution.
 
+variables:
+    ARTIFACTS: build/artifacts
+    CI_ARTIFACTS: build/ci_artifacts
+
 .artifacts-handling: &artifacts-handling
     before_script:
         - rm -rf "${ARTIFACTS}"
@@ -36,6 +36,19 @@ variables:
             - ${CI_ARTIFACTS}
     tags:
         - linux
+
+
+# All age-js jobs are configured to cache the node_modules.
+# The GitLab.com shared runners use distributed caches:
+# https://docs.gitlab.com/ee/ci/caching/#good-caching-practices
+
+.age-js-common: &age-js-common
+    image: node:8-alpine
+    cache:
+        paths:
+            - src/age_js/node_modules
+    tags:
+        -linux
 
 
 
@@ -70,6 +83,12 @@ build-wasm:
         - source "${REPO_EMSDK}/emsdk_env.sh"
         - ./build/age_ci.sh wasm Release
 
+build-age-js:
+    stage: build
+    <<: *age-js-common
+    script:
+        - build/age_ci.sh js build
+
 
 
 ############################################################
@@ -81,8 +100,6 @@ build-wasm:
 .test-common: &test-common
     stage: test
     <<: *artifacts-handling
-    tags:
-        - linux
 
 .test-release: &test-release
     <<: *test-common
@@ -93,7 +110,6 @@ build-wasm:
     <<: *test-common
     dependencies:
         - build-qt-debug
-
 
 .tests-mooneye: &tests-mooneye
     script:
@@ -111,7 +127,6 @@ test-mooneye-release:
 test-mooneye-debug:
     <<: *test-debug
     <<: *tests-mooneye
-
 
 test-gambatte-release:
     <<: *test-release
