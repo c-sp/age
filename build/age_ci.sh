@@ -1,23 +1,12 @@
 #!/bin/sh -e
 
-QT_BUILD_TYPE_DEBUG=debug
-QT_BUILD_TYPE_RELEASE=release
-
-WASM_BUILD_TYPE_DEBUG=Debug
-WASM_BUILD_TYPE_RELEASE=Release
-
-TESTS_GAMBATTE=gambatte
-TESTS_MOONEYE=mooneye
-
-CMD_QT=qt
-CMD_WASM=wasm
-CMD_DOXYGEN=doxygen
-CMD_TEST=test
 
 
-###
-###   utility methods
-###
+###############################################################################
+##
+##   utility methods
+##
+###############################################################################
 
 print_usage_and_exit()
 {
@@ -27,6 +16,9 @@ print_usage_and_exit()
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_JS $JS_BUILD"
+    echo "    $0 $CMD_JS $JS_TEST"
+    echo "    $0 $CMD_JS $JS_LINT"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
     echo "    $0 $CMD_TEST $TESTS_MOONEYE <path-to-mooneye-tests>"
@@ -55,9 +47,12 @@ switch_to_out_dir()
 }
 
 
-###
-###   commands
-###
+
+###############################################################################
+##
+##   commands
+##
+###############################################################################
 
 build_age_qt()
 {
@@ -102,14 +97,44 @@ build_age_wasm()
     make -j ${NUM_CORES}
 }
 
+age_js()
+{
+    PARAMS=""
+    case $1 in
+        ${JS_BUILD}) PARAMS=--prod ;;
+        ${JS_TEST}) PARAMS=--watch=false ;;
+        ${JS_LINT}) ;;
+        *) print_usage_and_exit ;;
+    esac
+
+    AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
+    cd "$AGE_JS_DIR"
+    echo "running AGE-JS $1 in \"`pwd -P`\""
+
+    # always run npm install to make sure node_modules exists and is up to date
+    npm install
+
+    # run the requested NG command
+    npm run $1 -- ${PARAMS}
+
+    # move build artifacts
+    if [ $1 = ${JS_BUILD} ]; then
+        # make sure that the age-js out-dir exists and is empty
+        switch_to_out_dir js
+        # took me a while to figure out: do NOT quote the asterisk!
+        cp -r "$AGE_JS_DIR/dist/"* .
+    fi
+}
+
 run_doxygen()
 {
+    # make sure that the doxygen out-dir exists and is empty
     switch_to_out_dir doxygen
 
     # The doxygen configuration contains several paths that doxygen interprets
     # based on the current directory.
-    # We have to change into the doxygen configuration directory for this to
-    # work properly.
+    # Thus we have to change into the doxygen configuration directory for
+    # doxygen to work properly.
     OUT_DIR=`pwd -P`
     cd "$BUILD_DIR/doxygen"
     echo "running doxygen in \"`pwd -P`\""
@@ -146,9 +171,31 @@ run_tests()
 }
 
 
-###
-###   script starting point
-###
+
+###############################################################################
+##
+##   script starting point
+##
+###############################################################################
+
+QT_BUILD_TYPE_DEBUG=debug
+QT_BUILD_TYPE_RELEASE=release
+
+WASM_BUILD_TYPE_DEBUG=Debug
+WASM_BUILD_TYPE_RELEASE=Release
+
+JS_BUILD=build
+JS_TEST=test
+JS_LINT=lint
+
+TESTS_GAMBATTE=gambatte
+TESTS_MOONEYE=mooneye
+
+CMD_QT=qt
+CMD_WASM=wasm
+CMD_JS=js
+CMD_DOXYGEN=doxygen
+CMD_TEST=test
 
 # get the AGE build directory based on the path of this script
 # (used to determine the target directories of builds)
@@ -166,6 +213,7 @@ fi
 case $1 in
     ${CMD_QT})      build_age_qt $2 ;;
     ${CMD_WASM})    build_age_wasm $2 ;;
+    ${CMD_JS})      age_js $2 ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
     ${CMD_TEST})    run_tests $2 $3 ;;
 

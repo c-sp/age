@@ -4,10 +4,6 @@ stages:
     - build
     - test
 
-variables:
-    ARTIFACTS: build/artifacts
-    CI_ARTIFACTS: build/ci_artifacts
-
 
 
 ############################################################
@@ -23,7 +19,11 @@ variables:
 # to another directory after job execution in order to pass them to other stages
 # and move them back to their original position for job execution.
 
-.artifacts-handling: &artifacts-handling
+variables:
+    ARTIFACTS: build/artifacts
+    CI_ARTIFACTS: build/ci_artifacts
+
+.artifacts-common: &artifacts-common
     before_script:
         - rm -rf "${ARTIFACTS}"
         - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
@@ -38,6 +38,22 @@ variables:
         - linux
 
 
+# All age-js jobs are configured to cache the node_modules.
+# Jobs of each branch use the same cache (see cache key).
+#
+# The GitLab.com shared runners use distributed caches:
+# https://docs.gitlab.com/ee/ci/caching/#good-caching-practices
+
+.age-js-common: &age-js-common
+    image: registry.gitlab.com/csprenger/docker-age-ci/js:latest
+    cache:
+        key: ${CI_COMMIT_REF_SLUG}
+        paths:
+            - src/age_js/node_modules
+    tags:
+        - linux
+
+
 
 ############################################################
 ##
@@ -47,7 +63,7 @@ variables:
 
 .build-qt: &build-qt
     stage: build
-    <<: *artifacts-handling
+    <<: *artifacts-common
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
 
@@ -64,11 +80,18 @@ build-qt-release:
 
 build-wasm:
     stage: build
-    <<: *artifacts-handling
+    <<: *artifacts-common
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
         - ./build/age_ci.sh wasm Release
+
+build-age-js:
+    stage: build
+    <<: *artifacts-common
+    <<: *age-js-common
+    script:
+        - build/age_ci.sh js build
 
 
 
@@ -80,9 +103,7 @@ build-wasm:
 
 .test-common: &test-common
     stage: test
-    <<: *artifacts-handling
-    tags:
-        - linux
+    <<: *artifacts-common
 
 .test-release: &test-release
     <<: *test-common
@@ -93,7 +114,6 @@ build-wasm:
     <<: *test-common
     dependencies:
         - build-qt-debug
-
 
 .tests-mooneye: &tests-mooneye
     script:
@@ -112,7 +132,6 @@ test-mooneye-debug:
     <<: *test-debug
     <<: *tests-mooneye
 
-
 test-gambatte-release:
     <<: *test-release
     <<: *tests-gambatte
@@ -121,3 +140,10 @@ test-gambatte-release:
 #test-gambatte-debug:
 #    <<: *test-debug
 #    <<: *tests-gambatte
+
+
+lint-age-js:
+    stage: test
+    <<: *age-js-common
+    script:
+        - build/age_ci.sh js lint
