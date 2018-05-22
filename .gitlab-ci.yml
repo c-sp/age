@@ -45,7 +45,7 @@ variables:
 # https://docs.gitlab.com/ee/ci/caching/#good-caching-practices
 
 .age-js-common: &age-js-common
-    image: node:8-alpine
+    image: registry.gitlab.com/csprenger/docker-age-ci/js:latest
     cache:
         key: ${CI_COMMIT_REF_SLUG}
         paths:
