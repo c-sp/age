@@ -12,7 +12,7 @@ stages:
 ##
 ############################################################
 
-# Build artifacts are ignored by git (as they are part of .gitignore).
+# Build artifacts are ignored by git (they are part of .gitignore).
 # Unfortunately because of that they cannot be used as GitLab CI artifacts.
 #
 # The current (non-invasive) solution is to temporarily move build artifacts
@@ -23,19 +23,25 @@ variables:
     ARTIFACTS: build/artifacts
     CI_ARTIFACTS: build/ci_artifacts
 
-.artifacts-common: &artifacts-common
-    before_script:
-        - rm -rf "${ARTIFACTS}"
-        - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
-    after_script:
-        - rm -rf "${CI_ARTIFACTS}"
-        - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
+.artifacts: &artifacts
     artifacts:
         expire_in: 30 mins
         paths:
             - ${CI_ARTIFACTS}
     tags:
         - linux
+
+.artifacts-read: &artifacts-read
+    <<: *artifacts
+    before_script:
+        - rm -rf "${ARTIFACTS}"
+        - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
+
+.artifacts-write: &artifacts-write
+    <<: *artifacts
+    after_script:
+        - rm -rf "${CI_ARTIFACTS}"
+        - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
 
 
 # All age-js jobs are configured to cache the node_modules.
@@ -63,7 +69,7 @@ variables:
 
 .build-qt: &build-qt
     stage: build
-    <<: *artifacts-common
+    <<: *artifacts-write
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
 
@@ -80,15 +86,15 @@ build-qt-release:
 
 build-wasm:
     stage: build
-    <<: *artifacts-common
+    <<: *artifacts-write
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
         - ./build/age_ci.sh wasm Release
 
-build-age-js:
+build-js:
     stage: build
-    <<: *artifacts-common
+    <<: *artifacts-write
     <<: *age-js-common
     script:
         - build/age_ci.sh js build
@@ -103,7 +109,7 @@ build-age-js:
 
 .test-common: &test-common
     stage: test
-    <<: *artifacts-common
+    <<: *artifacts-read
 
 .test-release: &test-release
     <<: *test-common
