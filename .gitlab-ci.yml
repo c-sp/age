@@ -153,3 +153,5 @@ lint-age-js:
     <<: *age-js-common
     script:
         - build/age_ci.sh js lint
+    # don't download any artifacts
+    dependencies: []
