@@ -3,6 +3,7 @@ image: registry.gitlab.com/csprenger/docker-age-ci:latest
 stages:
     - build
     - test
+    - deploy
 
 
 
@@ -155,3 +156,23 @@ lint-age-js:
         - build/age_ci.sh js lint
     # don't download any artifacts
     dependencies: []
+
+
+
+############################################################
+##
+##   deploy
+##
+############################################################
+
+deploy-age-js:
+    stage: deploy
+    <<: *artifacts-read
+    dependencies:
+        - build-wasm
+        - build-js
+    script:
+        - ls -lsahR ${ARTIFACTS}
+# uncomment before merge!
+#    only:
+#        master
