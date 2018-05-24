@@ -21,7 +21,6 @@ stages:
 variables:
     ARTIFACTS_SUBDIR: ci_artifacts
     ARTIFACTS: build/${ARTIFACTS_SUBDIR}
-    PAGES_OUT: public
 
 before_script:
     - export AGE_ARTIFACTS_SUBDIR=${ARTIFACTS_SUBDIR} # evaluated by age_ci.sh
@@ -31,7 +30,6 @@ before_script:
         expire_in: 30 mins
         paths:
             - ${ARTIFACTS}
-            - ${PAGES_OUT} # used only by pages job
     tags:
         - linux
 
@@ -154,12 +152,19 @@ lint-age-js:
 # TODO rename job to "pages"
 deploy-age-js:
     stage: deploy
-    <<: *artifacts
     dependencies:
         - build-wasm
         - build-js
+    variables:
+        PAGES_OUT: public
     script:
         - build/age_ci.sh pages "${PAGES_OUT}"
+    artifacts:
+        expire_in: 30 mins
+        paths:
+            - ${PAGES_OUT}
+    tags:
+        - linux
 # TODO uncomment before merge!
 #    only:
 #        master
