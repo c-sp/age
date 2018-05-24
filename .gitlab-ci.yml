@@ -149,8 +149,7 @@ lint-age-js:
 ##
 ############################################################
 
-# TODO rename job to "pages"
-deploy-age-js:
+pages:
     stage: deploy
     dependencies:
         - build-wasm
