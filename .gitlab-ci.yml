@@ -98,17 +98,13 @@ build-js:
 ##
 ############################################################
 
-.test-common: &test-common
-    stage: test
-    <<: *artifacts # TODO can this be removed?
-
 .test-release: &test-release
-    <<: *test-common
+    stage: test
     dependencies:
         - build-qt-release
 
 .test-debug: &test-debug
-    <<: *test-common
+    stage: test
     dependencies:
         - build-qt-debug
 
