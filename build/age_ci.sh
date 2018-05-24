@@ -101,7 +101,7 @@ age_js()
 {
     PARAMS=""
     case $1 in
-        ${JS_BUILD}) PARAMS=--prod ;;
+        ${JS_BUILD}) PARAMS="--prod --output-path $(out_dir js)" ;;
         ${JS_TEST}) PARAMS=--watch=false ;;
         ${JS_LINT}) ;;
         *) print_usage_and_exit ;;
@@ -116,14 +116,6 @@ age_js()
 
     # run the requested NG command
     npm run $1 -- ${PARAMS}
-
-    # move build artifacts
-    if [ $1 = ${JS_BUILD} ]; then
-        # make sure that the age-js out-dir exists and is empty
-        switch_to_out_dir js
-        # took me a while to figure out: do NOT quote the asterisk!
-        cp -r "$AGE_JS_DIR/dist/"* .
-    fi
 }
 
 run_doxygen()
