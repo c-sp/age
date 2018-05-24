@@ -9,43 +9,31 @@ stages:
 
 ############################################################
 ##
-##   artifacts
+##   common definitions
 ##
 ############################################################
 
-# Build artifacts are ignored by git (they are part of .gitignore).
+# Build artifacts in './build/artifacts' are ignored by git (see .gitignore).
 # Unfortunately because of that they cannot be used as GitLab CI artifacts.
-#
-# The current (non-invasive) solution is to temporarily move build artifacts
-# to another directory after job execution in order to pass them to other stages
-# and move them back to their original position for job execution.
+# We thus change the artifacts path for GitLab CI jobs by setting
+# AGE_ARTIFACT_SUBDIR which is evaluated by the age_ci.sh script.
 
 variables:
-    ARTIFACTS: build/artifacts
-    CI_ARTIFACTS: build/ci_artifacts
+    ARTIFACTS_SUBDIR: ci_artifacts
+    ARTIFACTS: build/${ARTIFACTS_SUBDIR}
+
+before_script:
+    - export AGE_ARTIFACTS_SUBDIR=${ARTIFACTS_SUBDIR} # evaluated by age_ci.sh
 
 .artifacts: &artifacts
     artifacts:
         expire_in: 30 mins
         paths:
-            - ${CI_ARTIFACTS}
+            - ${ARTIFACTS}
     tags:
         - linux
 
-.artifacts-read: &artifacts-read
-    <<: *artifacts
-    before_script:
-        - rm -rf "${ARTIFACTS}"
-        - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
-
-.artifacts-write: &artifacts-write
-    <<: *artifacts
-    after_script:
-        - rm -rf "${CI_ARTIFACTS}"
-        - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
-
-
-# All age-js jobs are configured to cache the node_modules.
+# All AGE-JS jobs are configured to cache the node_modules.
 # Jobs of each branch use the same cache (see cache key).
 #
 # The GitLab.com shared runners use distributed caches:
@@ -70,7 +58,7 @@ variables:
 
 .build-qt: &build-qt
     stage: build
-    <<: *artifacts-write
+    <<: *artifacts
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
 
@@ -87,7 +75,7 @@ build-qt-release:
 
 build-wasm:
     stage: build
-    <<: *artifacts-write
+    <<: *artifacts
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
@@ -95,7 +83,7 @@ build-wasm:
 
 build-js:
     stage: build
-    <<: *artifacts-write
+    <<: *artifacts
     <<: *age-js-common
     script:
         - build/age_ci.sh js build
@@ -110,7 +98,7 @@ build-js:
 
 .test-common: &test-common
     stage: test
-    <<: *artifacts-read
+    <<: *artifacts
 
 .test-release: &test-release
     <<: *test-common
@@ -167,7 +155,7 @@ lint-age-js:
 
 deploy-age-js:
     stage: deploy
-    <<: *artifacts-read
+    <<: *artifacts
     dependencies:
         - build-wasm
         - build-js

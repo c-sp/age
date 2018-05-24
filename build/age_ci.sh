@@ -29,7 +29,7 @@ print_usage_and_exit()
 
 out_dir()
 {
-    echo "$BUILD_DIR/artifacts/$1"
+    echo "$BUILD_DIR/$AGE_ARTIFACTS_SUBDIR/$1"
 }
 
 switch_to_out_dir()
@@ -201,6 +201,12 @@ CMD_TEST=test
 # (used to determine the target directories of builds)
 BUILD_DIR=`dirname $0`
 BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
+
+# set the artifacts subdirectory,
+# if it has not been set yet (e.g. as environment variable)
+if ! [ -n "$AGE_ARTIFACTS_SUBDIR" ]; then
+    AGE_ARTIFACTS_SUBDIR=artifacts
+fi
 
 # get the number of CPU cores
 # (used for e.g. make)
