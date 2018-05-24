@@ -19,6 +19,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_BUILD"
     echo "    $0 $CMD_JS $JS_TEST"
     echo "    $0 $CMD_JS $JS_LINT"
+    echo "    $0 $CMD_PAGES <gitlab-pages-subdir>"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
     echo "    $0 $CMD_TEST $TESTS_MOONEYE <path-to-mooneye-tests>"
@@ -118,6 +119,35 @@ age_js()
     npm run $1 -- ${PARAMS}
 }
 
+assemble_pages()
+{
+    # exit if the output path has not been specified
+    if ! [ -n "$1" ]; then
+        print_usage_and_exit
+    fi
+
+    PAGES_DIR=`cd "$BUILD_DIR/.." && pwd -P`
+    PAGES_DIR="$PAGES_DIR/$1"
+    ASSETS_DIR="$PAGES_DIR/assets"
+
+    WASM_DIR="$(out_dir wasm)"
+    JS_DIR="$(out_dir js)"
+
+    # remove previous pages
+    if [ -e "$PAGES_DIR" ]; then
+        rm -rf "$PAGES_DIR"
+    fi
+
+    # create the directory and change to it
+    mkdir -p "$ASSETS_DIR"
+    echo "assembling pages in \"$PAGES_DIR\""
+
+    # copy artifacts
+    cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
+    cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
+    cp "$JS_DIR/"* "$PAGES_DIR"
+}
+
 run_doxygen()
 {
     # make sure that the doxygen out-dir exists and is empty
@@ -186,6 +216,7 @@ TESTS_MOONEYE=mooneye
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_JS=js
+CMD_PAGES=pages
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -212,6 +243,7 @@ case $1 in
     ${CMD_QT})      build_age_qt $2 ;;
     ${CMD_WASM})    build_age_wasm $2 ;;
     ${CMD_JS})      age_js $2 ;;
+    ${CMD_PAGES})   assemble_pages $2 ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
     ${CMD_TEST})    run_tests $2 $3 ;;
 

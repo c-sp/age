@@ -21,6 +21,7 @@ stages:
 variables:
     ARTIFACTS_SUBDIR: ci_artifacts
     ARTIFACTS: build/${ARTIFACTS_SUBDIR}
+    PAGES_OUT: public
 
 before_script:
     - export AGE_ARTIFACTS_SUBDIR=${ARTIFACTS_SUBDIR} # evaluated by age_ci.sh
@@ -30,6 +31,7 @@ before_script:
         expire_in: 30 mins
         paths:
             - ${ARTIFACTS}
+            - ${PAGES_OUT} # used only by pages job
     tags:
         - linux
 
@@ -98,7 +100,7 @@ build-js:
 
 .test-common: &test-common
     stage: test
-    <<: *artifacts
+    <<: *artifacts # TODO can this be removed?
 
 .test-release: &test-release
     <<: *test-common
@@ -153,6 +155,7 @@ lint-age-js:
 ##
 ############################################################
 
+# TODO rename job to "pages"
 deploy-age-js:
     stage: deploy
     <<: *artifacts
@@ -160,7 +163,7 @@ deploy-age-js:
         - build-wasm
         - build-js
     script:
-        - ls -lsahR ${ARTIFACTS}
-# uncomment before merge!
+        - build/age_ci.sh pages "${PAGES_OUT}"
+# TODO uncomment before merge!
 #    only:
 #        master
