@@ -166,6 +166,5 @@ pages:
             - ${PAGES_OUT}
     tags:
         - linux
-# TODO uncomment before merge!
-#    only:
-#        master
+    only:
+        master
