@@ -20,7 +20,6 @@ stages:
 
 variables:
     ARTIFACTS_SUBDIR: ci_artifacts
-    ARTIFACTS: build/${ARTIFACTS_SUBDIR}
 
 before_script:
     - export AGE_ARTIFACTS_SUBDIR=${ARTIFACTS_SUBDIR} # evaluated by age_ci.sh
@@ -29,7 +28,7 @@ before_script:
     artifacts:
         expire_in: 30 mins
         paths:
-            - ${ARTIFACTS}
+            - build/${ARTIFACTS_SUBDIR}
     tags:
         - linux
 
@@ -58,6 +57,7 @@ before_script:
 
 .build-qt: &build-qt
     stage: build
+    image: registry.gitlab.com/csprenger/docker-qt-gcc:5.10.r1
     <<: *artifacts
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
@@ -151,6 +151,7 @@ lint-age-js:
 
 pages:
     stage: deploy
+    image: alpine:3.7
     dependencies:
         - build-wasm
         - build-js
@@ -158,6 +159,7 @@ pages:
         PAGES_OUT: public
     script:
         - build/age_ci.sh pages "${PAGES_OUT}"
+        - ls -lsahR "${PAGES_OUT}"
     artifacts:
         expire_in: 30 mins
         paths:
