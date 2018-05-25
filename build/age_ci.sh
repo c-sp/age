@@ -19,6 +19,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_BUILD"
     echo "    $0 $CMD_JS $JS_TEST"
     echo "    $0 $CMD_JS $JS_LINT"
+    echo "    $0 $CMD_PAGES <gitlab-pages-subdir>"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
     echo "    $0 $CMD_TEST $TESTS_MOONEYE <path-to-mooneye-tests>"
@@ -29,7 +30,7 @@ print_usage_and_exit()
 
 out_dir()
 {
-    echo "$BUILD_DIR/artifacts/$1"
+    echo "$BUILD_DIR/$AGE_ARTIFACTS_SUBDIR/$1"
 }
 
 switch_to_out_dir()
@@ -99,31 +100,55 @@ build_age_wasm()
 
 age_js()
 {
-    PARAMS=""
-    case $1 in
-        ${JS_BUILD}) PARAMS=--prod ;;
-        ${JS_TEST}) PARAMS=--watch=false ;;
+    CMD=$1
+    shift
+    PARAMS="$@"
+    # --base-href /myUrl/
+    case ${CMD} in
+        ${JS_BUILD}) PARAMS="--prod --output-path $(out_dir js) $PARAMS" ;;
+        ${JS_TEST}) PARAMS="--watch=false $PARAMS" ;;
         ${JS_LINT}) ;;
         *) print_usage_and_exit ;;
     esac
 
     AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
     cd "$AGE_JS_DIR"
-    echo "running AGE-JS $1 in \"`pwd -P`\""
+    echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
 
     # always run npm install to make sure node_modules exists and is up to date
     npm install
 
     # run the requested NG command
-    npm run $1 -- ${PARAMS}
+    npm run ${CMD} -- ${PARAMS}
+}
 
-    # move build artifacts
-    if [ $1 = ${JS_BUILD} ]; then
-        # make sure that the age-js out-dir exists and is empty
-        switch_to_out_dir js
-        # took me a while to figure out: do NOT quote the asterisk!
-        cp -r "$AGE_JS_DIR/dist/"* .
+assemble_pages()
+{
+    # exit if the output path has not been specified
+    if ! [ -n "$1" ]; then
+        print_usage_and_exit
     fi
+
+    PAGES_DIR=`cd "$BUILD_DIR/.." && pwd -P`
+    PAGES_DIR="$PAGES_DIR/$1"
+    ASSETS_DIR="$PAGES_DIR/assets"
+
+    WASM_DIR="$(out_dir wasm)"
+    JS_DIR="$(out_dir js)"
+
+    # remove previous pages
+    if [ -e "$PAGES_DIR" ]; then
+        rm -rf "$PAGES_DIR"
+    fi
+
+    # create the directory and change to it
+    mkdir -p "$ASSETS_DIR"
+    echo "assembling pages in \"$PAGES_DIR\""
+
+    # copy artifacts
+    cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
+    cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
+    cp "$JS_DIR/"* "$PAGES_DIR"
 }
 
 run_doxygen()
@@ -194,6 +219,7 @@ TESTS_MOONEYE=mooneye
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_JS=js
+CMD_PAGES=pages
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -201,6 +227,12 @@ CMD_TEST=test
 # (used to determine the target directories of builds)
 BUILD_DIR=`dirname $0`
 BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
+
+# set the artifacts subdirectory,
+# if it has not been set yet (e.g. as environment variable)
+if ! [ -n "$AGE_ARTIFACTS_SUBDIR" ]; then
+    AGE_ARTIFACTS_SUBDIR=artifacts
+fi
 
 # get the number of CPU cores
 # (used for e.g. make)
@@ -210,12 +242,18 @@ if [ ${NUM_CORES} -lt 4 ]; then
 fi
 
 # check the command in the first parameter
-case $1 in
-    ${CMD_QT})      build_age_qt $2 ;;
-    ${CMD_WASM})    build_age_wasm $2 ;;
-    ${CMD_JS})      age_js $2 ;;
+CMD=$1
+if [ -n "$CMD" ]; then
+    shift
+fi
+
+case ${CMD} in
+    ${CMD_QT})      build_age_qt $@ ;;
+    ${CMD_WASM})    build_age_wasm $@ ;;
+    ${CMD_JS})      age_js $@ ;;
+    ${CMD_PAGES})   assemble_pages $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
-    ${CMD_TEST})    run_tests $2 $3 ;;
+    ${CMD_TEST})    run_tests $@ $@ ;;
 
     *) print_usage_and_exit ;;
 esac

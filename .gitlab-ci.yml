@@ -3,42 +3,36 @@ image: registry.gitlab.com/csprenger/docker-age-ci:latest
 stages:
     - build
     - test
+    - deploy
 
 
 
 ############################################################
 ##
-##   artifacts
+##   common definitions
 ##
 ############################################################
 
-# Build artifacts are ignored by git (as they are part of .gitignore).
+# Build artifacts in './build/artifacts' are ignored by git (see .gitignore).
 # Unfortunately because of that they cannot be used as GitLab CI artifacts.
-#
-# The current (non-invasive) solution is to temporarily move build artifacts
-# to another directory after job execution in order to pass them to other stages
-# and move them back to their original position for job execution.
+# We thus change the artifacts path for GitLab CI jobs by setting
+# AGE_ARTIFACT_SUBDIR which is evaluated by the age_ci.sh script.
 
 variables:
-    ARTIFACTS: build/artifacts
-    CI_ARTIFACTS: build/ci_artifacts
+    ARTIFACTS_SUBDIR: ci_artifacts
 
-.artifacts-common: &artifacts-common
-    before_script:
-        - rm -rf "${ARTIFACTS}"
-        - (if [ -d "${CI_ARTIFACTS}" ]; then mv "${CI_ARTIFACTS}" "${ARTIFACTS}"; fi);
-    after_script:
-        - rm -rf "${CI_ARTIFACTS}"
-        - (if [ -d "${ARTIFACTS}" ]; then mv "${ARTIFACTS}" "${CI_ARTIFACTS}"; fi);
+before_script:
+    - export AGE_ARTIFACTS_SUBDIR=${ARTIFACTS_SUBDIR} # evaluated by age_ci.sh
+
+.artifacts: &artifacts
     artifacts:
         expire_in: 30 mins
         paths:
-            - ${CI_ARTIFACTS}
+            - build/${ARTIFACTS_SUBDIR}
     tags:
         - linux
 
-
-# All age-js jobs are configured to cache the node_modules.
+# All AGE-JS jobs are configured to cache the node_modules.
 # Jobs of each branch use the same cache (see cache key).
 #
 # The GitLab.com shared runners use distributed caches:
@@ -63,7 +57,8 @@ variables:
 
 .build-qt: &build-qt
     stage: build
-    <<: *artifacts-common
+    image: registry.gitlab.com/csprenger/docker-qt-gcc:5.10.r1
+    <<: *artifacts
     script:
         - ./build/age_ci.sh qt ${BUILD_TYPE}
 
@@ -80,18 +75,18 @@ build-qt-release:
 
 build-wasm:
     stage: build
-    <<: *artifacts-common
+    <<: *artifacts
     image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
         - ./build/age_ci.sh wasm Release
 
-build-age-js:
+build-js:
     stage: build
-    <<: *artifacts-common
+    <<: *artifacts
     <<: *age-js-common
     script:
-        - build/age_ci.sh js build
+        - build/age_ci.sh js build --base-href /AGE/
 
 
 
@@ -101,17 +96,13 @@ build-age-js:
 ##
 ############################################################
 
-.test-common: &test-common
-    stage: test
-    <<: *artifacts-common
-
 .test-release: &test-release
-    <<: *test-common
+    stage: test
     dependencies:
         - build-qt-release
 
 .test-debug: &test-debug
-    <<: *test-common
+    stage: test
     dependencies:
         - build-qt-debug
 
@@ -147,3 +138,33 @@ lint-age-js:
     <<: *age-js-common
     script:
         - build/age_ci.sh js lint
+    # don't download any artifacts
+    dependencies: []
+
+
+
+############################################################
+##
+##   deploy
+##
+############################################################
+
+pages:
+    stage: deploy
+    image: alpine:3.7
+    dependencies:
+        - build-wasm
+        - build-js
+    variables:
+        PAGES_OUT: public
+    script:
+        - build/age_ci.sh pages "${PAGES_OUT}"
+        - ls -lsahR "${PAGES_OUT}"
+    artifacts:
+        expire_in: 30 mins
+        paths:
+            - ${PAGES_OUT}
+    tags:
+        - linux
+    only:
+        - master
