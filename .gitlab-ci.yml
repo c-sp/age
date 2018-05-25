@@ -86,7 +86,7 @@ build-js:
     <<: *artifacts
     <<: *age-js-common
     script:
-        - build/age_ci.sh js build
+        - build/age_ci.sh js build --base-href /AGE/
 
 
 

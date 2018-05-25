@@ -100,23 +100,26 @@ build_age_wasm()
 
 age_js()
 {
-    PARAMS=""
-    case $1 in
-        ${JS_BUILD}) PARAMS="--prod --output-path $(out_dir js)" ;;
-        ${JS_TEST}) PARAMS=--watch=false ;;
+    CMD=$1
+    shift
+    PARAMS="$@"
+    # --base-href /myUrl/
+    case ${CMD} in
+        ${JS_BUILD}) PARAMS="--prod --output-path $(out_dir js) $PARAMS" ;;
+        ${JS_TEST}) PARAMS="--watch=false $PARAMS" ;;
         ${JS_LINT}) ;;
         *) print_usage_and_exit ;;
     esac
 
     AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
     cd "$AGE_JS_DIR"
-    echo "running AGE-JS $1 in \"`pwd -P`\""
+    echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
 
     # always run npm install to make sure node_modules exists and is up to date
     npm install
 
     # run the requested NG command
-    npm run $1 -- ${PARAMS}
+    npm run ${CMD} -- ${PARAMS}
 }
 
 assemble_pages()
@@ -239,13 +242,18 @@ if [ ${NUM_CORES} -lt 4 ]; then
 fi
 
 # check the command in the first parameter
-case $1 in
-    ${CMD_QT})      build_age_qt $2 ;;
-    ${CMD_WASM})    build_age_wasm $2 ;;
-    ${CMD_JS})      age_js $2 ;;
-    ${CMD_PAGES})   assemble_pages $2 ;;
+CMD=$1
+if [ -n "$CMD" ]; then
+    shift
+fi
+
+case ${CMD} in
+    ${CMD_QT})      build_age_qt $@ ;;
+    ${CMD_WASM})    build_age_wasm $@ ;;
+    ${CMD_JS})      age_js $@ ;;
+    ${CMD_PAGES})   assemble_pages $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
-    ${CMD_TEST})    run_tests $2 $3 ;;
+    ${CMD_TEST})    run_tests $@ $@ ;;
 
     *) print_usage_and_exit ;;
 esac
