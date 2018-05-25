@@ -167,4 +167,4 @@ pages:
     tags:
         - linux
     only:
-        master
+        - master
