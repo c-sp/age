@@ -28,6 +28,9 @@ const os = require('os');
 const util = require('util');
 
 
+/**
+ * the license header to put into every file
+ */
 const license_header = `
 //
 // Copyright ${(new Date()).getFullYear()} Christoph Sprenger
@@ -45,6 +48,21 @@ const license_header = `
 // limitations under the License.
 //
 `.trim();
+
+/**
+ * extensions of the files that should include a license header
+ */
+const file_extensions = ['.hpp', '.cpp', '.ts', '.js'];
+
+/**
+ * names of the files to ignore
+ */
+const ignore_files = [
+    'karma.conf.js',
+    'environment.prod.ts',
+    'environment.ts',
+    'polyfills.ts'
+];
 
 
 (async function main() {
@@ -104,7 +122,8 @@ async function get_files_to_check() {
 
     return await Promise.all(ls_files.map(async (ls_file) => {
         const file = path.resolve(__dirname, ls_file)
-        const ignore = ['.hpp', '.cpp', '.ts', '.js'].indexOf(path.extname(file)) < 0;
+        const ignore = (file_extensions.indexOf(path.extname(file)) < 0)
+            || (ignore_files.indexOf(path.basename(file)) >= 0);
         const header = await read_license_header(file);
         const update = !ignore && (header.trim() !== license_header);
         return {
