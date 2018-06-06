@@ -40,7 +40,7 @@ export class AgeFileSelectorLocalComponent {
     readonly fileSelected = new EventEmitter<File>();
 
     @ViewChild('fileInput')
-    private _fileInput: ElementRef;
+    private _fileInput!: ElementRef;
 
     selectFile() {
         const files: FileList = this._fileInput.nativeElement.files;

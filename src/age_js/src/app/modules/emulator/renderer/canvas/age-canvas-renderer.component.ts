@@ -33,7 +33,7 @@ import {AgeScreenBuffer} from '../../age-emulation';
 export class AgeCanvasRendererComponent implements AfterViewInit {
 
     @ViewChild('rendererDisplay')
-    private _canvas: ElementRef;
+    private _canvas!: ElementRef;
     private _canvas2dCtx?: CanvasRenderingContext2D;
 
     private _screenSize = new AgeRect(1, 1);

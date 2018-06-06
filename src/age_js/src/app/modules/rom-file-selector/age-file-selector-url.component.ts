@@ -41,7 +41,7 @@ export class AgeFileSelectorURLComponent {
     readonly urlSelected = new EventEmitter<string>();
 
     @ViewChild('urlInput')
-    private _urlInput: ElementRef;
+    private _urlInput!: ElementRef;
 
     openUrl(): void {
         const url = this._urlInput.nativeElement.value;

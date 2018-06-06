@@ -104,15 +104,10 @@
 
         // blacklisted imports
         //  -> https://palantir.github.io/tslint/rules/import-blacklist
-        "import-blacklist": [
-            true,
-            // don't import all of rxjs
-            "rxjs",
-            "rxjs/Rx",
-            // don't import all rxjs operators at once (better: e.g. rxjs/operators/map)
-            //  -> https://github.com/ReactiveX/rxjs/blob/master/doc/pipeable-operators.md
-            "rxjs/operators"
-        ],
+        //"import-blacklist": [
+        //    true,
+        //    "rxjs/Rx"
+        //],
 
         // four-space-indentation
         //  -> https://palantir.github.io/tslint/rules/indent

@@ -159,7 +159,7 @@ export class AppComponent implements AfterViewInit {
     @Input() romFileToLoad?: AgeRomFileToLoad;
 
     @ViewChild('emulatorContainer')
-    private _emulatorContainer: ElementRef;
+    private _emulatorContainer!: ElementRef;
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
 
