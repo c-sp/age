@@ -14,11 +14,13 @@ The following _groups_ exist:
 * **`age_common`** contains basic code used throughout the AGE project,
     like for example AGE-specific data types.
     This _group_ does not require any library beside the
-    [C++14 STL](http://en.cppreference.com/w/cpp).
+    [C++14 STL](https://en.cppreference.com/w/cpp).
 * **`age_emulator_gb`** contains the actual gameboy emulation code.
     This _group_ does not require any library beside the
-    [C++14 STL](http://en.cppreference.com/w/cpp).
-* **`age_js`** contains the AGE browser application created with
+    [C++14 STL](https://en.cppreference.com/w/cpp).
+* **`age_js`** contains the
+    [AGE browser application](https://csprenger.gitlab.io/AGE/) written in
+    [TypeScript](https://www.typescriptlang.org/index.html) and using
     [Angular](https://angular.io).
     This _group_ requires the `age_wasm` binaries to run the emulator within
     the browser.
@@ -28,13 +30,13 @@ The following _groups_ exist:
     [Qt](https://www.qt.io/).
 * **`age_wasm`** contains a [WebAssembly](https://webassembly.org/) interface
     to `age_emulator_gb`.
-    It depends on [emscripten](http://kripken.github.io/emscripten-site/) for
+    It depends on [emscripten](https://kripken.github.io/emscripten-site/) for
     making specific C++ methods callable from JavaScript.
 
 
 ## Code Quality
 
-AGE code has to stick to the following rules.
+AGE code sticks to the following rules:
 
 ### C++
 
