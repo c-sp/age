@@ -11,18 +11,18 @@ aiming for accuracy over performance.
 
 ## Features
 
-- run ***Gameboy*** and ***Gameboy Color*** roms
-- improve ***visual quality*** with configurable image filters
+- run **Gameboy** and **Gameboy Color** roms
+- improve **visual quality** with configurable image filters
     (custom [scale2x](https://www.scale2x.it/),
     [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur)
     and [embossing](https://en.wikipedia.org/wiki/Image_embossing))
-- improve ***audio quality*** with a
+- improve **audio quality** with a
     [low pass filter](https://en.wikipedia.org/wiki/Low-pass_filter)
-- ***reduce flicker*** for some Gameboy roms
-- automatically store and load ***savegames***
+- **reduce flicker** for some Gameboy roms
+- automatically store and load **savegames**
     (if supported by the respective Gameboy rom)
-- configure ***buttons*** and ***hotkeys*** as you like
-- compile for ***Windows*** and ***Linux***
+- configure **buttons** and **hotkeys** as you like
+- compile for **Windows** and **Linux**
     (and maybe macOS? I did not try it yet ...)
 
 The AGE desktop GUI stores all settings and savegames in a subdirectory called
