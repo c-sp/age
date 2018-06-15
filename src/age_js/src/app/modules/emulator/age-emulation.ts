@@ -39,6 +39,8 @@ export interface AgeEmulation {
     buttonDown(button: number): void;
 
     buttonUp(button: number): void;
+
+    getAudioBuffer(): Int16Array;
 }
 
 
@@ -80,6 +82,13 @@ export class AgeGbEmulation implements AgeEmulation {
     buttonUp(button: AgeGbButton): void {
         this._emGbModule._gb_set_buttons_up(button);
     }
+
+    getAudioBuffer(): Int16Array {
+        const bufferOffsetBytes = this._emGbModule._gb_get_audio_buffer();
+        const bufferSizeBytes = this._emGbModule._gb_get_audio_buffer_size() * 4;
+        const bufferEndBytes = bufferOffsetBytes + bufferSizeBytes;
+        return this._emGbModule.HEAP16.slice(bufferOffsetBytes / 2, bufferEndBytes / 2);
+    }
 }
 
 
@@ -89,15 +98,21 @@ export class AgeEmulationRunner {
 
     private _lastEmuTime: number;
     private _screenBuffer: AgeScreenBuffer;
+    private _audioBuffer: Int16Array;
 
     constructor(private readonly _emulation: AgeEmulation) {
         this.screenSize = this._emulation.getScreenSize();
         this._lastEmuTime = Date.now();
         this._screenBuffer = this._emulation.getScreenBuffer();
+        this._audioBuffer = this._emulation.getAudioBuffer();
     }
 
     get screenBuffer(): AgeScreenBuffer {
         return this._screenBuffer;
+    }
+
+    get audioBuffer(): Int16Array {
+        return this._audioBuffer;
     }
 
     /**
@@ -119,6 +134,7 @@ export class AgeEmulationRunner {
 
         // emulate
         const newFrame = this._emulation.emulateCycles(cyclesToEmulate);
+        this._audioBuffer = this._emulation.getAudioBuffer();
         if (newFrame) {
             this._screenBuffer = this._emulation.getScreenBuffer();
         }

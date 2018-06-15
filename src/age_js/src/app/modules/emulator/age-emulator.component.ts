@@ -19,6 +19,7 @@ import {AgeEmulationRunner, AgeGbEmulation} from './age-emulation';
 import {AgeGbKeyMap} from './age-emulator-keymap';
 import {AgeRect} from '../common/age-rect';
 import {AgeEmulationPackage} from '../common/age-emulation-package';
+import {AgeAudio} from './audio/age-audio';
 
 
 @Component({
@@ -36,20 +37,30 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     @Input() viewport = new AgeRect(1, 1);
 
+    count = 0;
     private readonly _keyMap = new AgeGbKeyMap();
 
+    private _audio!: AgeAudio;
+    private _timerHandle!: number;
     private _emulationRunner?: AgeEmulationRunner;
-    private _timerHandle?: number;
 
     constructor(@Inject(ChangeDetectorRef) private readonly _changeDetector: ChangeDetectorRef) {
     }
 
     ngOnInit(): void {
+        this._audio = new AgeAudio();
         this._timerHandle = window.setInterval(
             () => {
                 if (this._emulationRunner) {
                     this._emulationRunner.emulate();
+                    this._audio.stream(this._emulationRunner.audioBuffer);
                     this._changeDetector.detectChanges();
+
+                    if (this.count > 30) {
+                        this.count = 0;
+                        console.log('###', (this._emulationRunner as any)._emulation._emGbModule.HEAPU8.length);
+                    }
+                    ++this.count;
                 }
             },
             10
@@ -57,10 +68,8 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if (this._timerHandle) {
-            window.clearInterval(this._timerHandle);
-            this._timerHandle = undefined;
-        }
+        window.clearInterval(this._timerHandle);
+        this._audio.close();
     }
 
 
