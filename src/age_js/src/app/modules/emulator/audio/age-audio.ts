@@ -28,7 +28,11 @@ export class AgeAudio {
     private _workletNode!: AudioWorkletNode;
 
     constructor() {
-        (this._audioCtx as any).audioWorklet.addModule('assets/age-audio-stream.js').then(() => {
+        /* tslint:disable no-any */ // at the moment I see no other way ...
+        const audioCtx: any = this._audioCtx;
+        /* tslint:enable no-any */
+
+        audioCtx.audioWorklet.addModule('assets/age-audio-stream.js').then(() => {
             this._workletNode = new AudioWorkletNode(this._audioCtx, 'age-audio-stream', {
                 numberOfInputs: 1,
                 numberOfOutputs: 1,
