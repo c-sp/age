@@ -204,7 +204,7 @@ const age::pcm_sample* gb_get_audio_buffer()
 }
 
 EMSCRIPTEN_KEEPALIVE
-const age::uint gb_get_audio_buffer_size()
+age::uint gb_get_audio_buffer_size()
 {
     return emulator_exists() ? downsampler->get_output_samples().size() : 0;
 }
