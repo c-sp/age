@@ -39,7 +39,7 @@
 
 
 std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler = nullptr;
-age::uint output_sampling_rate = 48000;
+age::uint output_sampling_rate = 44100;
 
 std::unique_ptr<age::gb_emulator> gb_emu = nullptr;
 age::uint8_vector gb_rom;

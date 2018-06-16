@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-const BUFFER_MILLIS = 500;
+const BUFFER_MILLIS = 50;
+const GAIN = 0.2;
 
 
 class Int16Buffer {
@@ -53,8 +54,8 @@ class Int16Buffer {
                      i < end;
                      i += 2, ++outputIdx) {
 
-                    outputChannels[0][outputIdx] = this._buffers[0][i];
-                    outputChannels[1][outputIdx] = this._buffers[0][i + 1];
+                    outputChannels[0][outputIdx] = GAIN * this._buffers[0][i] / 32768;
+                    outputChannels[1][outputIdx] = GAIN * this._buffers[0][i + 1] / 32768;
                 }
 
                 this._bufferOffset += values;
