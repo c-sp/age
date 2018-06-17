@@ -8,12 +8,10 @@
 
 ###   mooneye-gb
 
-logic-analysis/external-bus/read_timing/read_timing.gb
-logic-analysis/external-bus/write_timing/write_timing.gb
-logic-analysis/ppu/simple_scx/simple_scx.gb
 madness/mgb_oam_dma_halt_sprites.gb
 manual-only/sprite_priority.gb
 utils/dump_boot_hwio.gb
+utils/bootrom_dumper.gb
 
 
 
@@ -181,18 +179,31 @@ acceptance/boot_regs-dmg0.gb
 acceptance/boot_regs-mgb.gb
 acceptance/boot_regs-sgb.gb
 acceptance/boot_regs-sgb2.gb
-acceptance/gpu/hblank_ly_scx_timing-GS.gb
-acceptance/gpu/intr_2_0_timing.gb
-acceptance/gpu/intr_2_mode0_timing.gb
-acceptance/gpu/intr_2_mode0_timing_sprites.gb
-acceptance/gpu/intr_2_mode3_timing.gb
-acceptance/gpu/intr_2_oam_ok_timing.gb
-acceptance/gpu/vblank_stat_intr-GS.gb
+acceptance/interrupts/ie_push.gb
+acceptance/oam_dma/reg_read.gb
+acceptance/oam_dma/sources-dmgABCmgbS.gb
+acceptance/ppu/hblank_ly_scx_timing-GS.gb
+acceptance/ppu/intr_2_0_timing.gb
+acceptance/ppu/intr_2_mode0_timing.gb
+acceptance/ppu/intr_2_mode0_timing_sprites.gb
+acceptance/ppu/intr_2_mode3_timing.gb
+acceptance/ppu/intr_2_oam_ok_timing.gb
+acceptance/ppu/lcdon_timing-dmgABCmgbS.gb
+acceptance/ppu/lcdon_write_timing-GS.gb
+acceptance/ppu/stat_lyc_onoff.gb
+acceptance/ppu/vblank_stat_intr-GS.gb
+acceptance/serial/boot_sclk_align-dmgABCmgb.gb
+emulator-only/mbc1/bits_ram_en.gb
+emulator-only/mbc1/multicart_rom_8Mb.gb
+emulator-only/mbc1/ram_256Kb.gb
+emulator-only/mbc1/ram_64Kb.gb
+emulator-only/mbc1/rom_16Mb.gb
+emulator-only/mbc1/rom_8Mb.gb
 misc/bits/unused_hwio-C.gb
 misc/boot_hwio-C.gb
 misc/boot_regs-A.gb
 misc/boot_regs-cgb.gb
-misc/gpu/vblank_stat_intr-C.gb
+misc/ppu/vblank_stat_intr-C.gb
 
 
 
