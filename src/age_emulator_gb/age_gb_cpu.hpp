@@ -55,7 +55,7 @@ private:
     uint m_hcs_operand = 0; //!< second operand of the last instruction relevant for subtract- and half-carry-flag
 
     bool m_next_byte_twice = false;
-    bool m_found_invalid_opcode = false;
+    bool m_mooneye_debug_op = false; //!< used to indicate the finishing of a mooneye-gb test
     uint16 m_pc = 0;
     uint16 m_sp = 0;
 

@@ -50,7 +50,7 @@ constexpr uint gb_start = 0x80;
 struct gb_test_info
 {
     bool m_is_cgb;
-    bool m_found_invalid_opcode;
+    bool m_mooneye_debug_op;
 
     uint8 m_a = 0;
     uint8 m_b = 0;
