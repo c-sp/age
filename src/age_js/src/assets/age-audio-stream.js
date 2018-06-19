@@ -114,7 +114,7 @@ class AgeAudioStream extends AudioWorkletProcessor {
         if (now - this.time >= 1000) {
             this.time = now;
 
-            console.log(this.buffer._bufferSize / 2);
+            // console.log(this.buffer._bufferSize / 2);
             // console.log(
             //     'inputs', inputs.length, inputs[0].length, inputs[0][0].length,
             //     'outputs', outputs.length, outputs[0].length, outputs[0][0].length

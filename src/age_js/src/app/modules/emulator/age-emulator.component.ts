@@ -51,7 +51,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
         this._timerHandle = window.setInterval(
             () => {
                 if (this._emulationRunner) {
-                    this._emulationRunner.emulate();
+                    this._emulationRunner.emulate(this._audio.sampleRate);
                     this._audio.stream(this._emulationRunner.audioBuffer);
                     this._changeDetector.detectChanges();
                 }

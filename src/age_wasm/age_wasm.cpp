@@ -39,7 +39,7 @@
 
 
 std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler = nullptr;
-age::uint output_sampling_rate = 44100;
+age::uint output_sample_rate = 44100;
 
 std::unique_ptr<age::gb_emulator> gb_emu = nullptr;
 age::uint8_vector gb_rom;
@@ -50,13 +50,6 @@ void free_memory(age::uint8_vector &vec)
 {
     LOG("freeing memory buffer of " << vec.size() << " bytes at " << (void*)vec.data());
     age::uint8_vector().swap(vec);
-}
-
-void create_downsampler()
-{
-    downsampler = std::unique_ptr<age::downsampler_kaiser_low_pass>(
-        new age::downsampler_kaiser_low_pass(gb_emu->get_pcm_sampling_rate(), output_sampling_rate, 0.1)
-    );
 }
 
 bool emulator_exists()
@@ -83,8 +76,7 @@ void gb_new_emulator()
 {
     LOG("creating emulator from rom vector of " << gb_rom.size() << " bytes at " << (void*)gb_rom.data());
     gb_emu = std::unique_ptr<age::gb_emulator>(new age::gb_emulator(gb_rom));
-
-    create_downsampler();
+    downsampler = nullptr;
 
     free_memory(gb_persistent_ram);
     free_memory(gb_rom);
@@ -125,13 +117,26 @@ void gb_set_persistent_ram()
 
 
 
+// 32 bit vs. 64 bit:
+// https://github.com/kripken/emscripten/issues/5130
+//  -> use 32 bit min_cycles_to_emulate for now
 EMSCRIPTEN_KEEPALIVE
-bool gb_emulate(age::uint64 min_cycles_to_emulate)
+bool gb_emulate(age::uint min_cycles_to_emulate, age::uint sample_rate)
 {
     bool result = false;
 
     if (emulator_exists())
     {
+        if ((output_sample_rate != sample_rate) || (downsampler == nullptr))
+        {
+            output_sample_rate = sample_rate;
+            downsampler = std::unique_ptr<age::downsampler_kaiser_low_pass>(
+                new age::downsampler_kaiser_low_pass(
+                    gb_emu->get_pcm_sampling_rate(), output_sample_rate, 0.1
+                )
+            );
+        }
+
         downsampler->clear_output_samples();
 
         gb_persistent_ram_dirty = true;
@@ -200,25 +205,13 @@ const age::pixel* gb_get_screen_front_buffer()
 EMSCRIPTEN_KEEPALIVE
 const age::pcm_sample* gb_get_audio_buffer()
 {
-    return emulator_exists() ? downsampler->get_output_samples().data() : nullptr;
+    return (downsampler != nullptr) ? downsampler->get_output_samples().data() : nullptr;
 }
 
 EMSCRIPTEN_KEEPALIVE
 age::uint gb_get_audio_buffer_size()
 {
-    return emulator_exists() ? downsampler->get_output_samples().size() : 0;
-}
-
-EMSCRIPTEN_KEEPALIVE
-void gb_set_pcm_sampling_rate(age::uint sampling_rate)
-{
-    bool diff = output_sampling_rate != sampling_rate;
-    output_sampling_rate = sampling_rate;
-
-    if (emulator_exists() && diff)
-    {
-        create_downsampler();
-    }
+    return (downsampler != nullptr) ? downsampler->get_output_samples().size() : 0;
 }
 
 } // extern "C"

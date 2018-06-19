@@ -40,14 +40,17 @@ export class AgeAudio {
             });
 
             this._workletNode.connect(this._audioCtx.destination);
-
-            console.log('initialized audio worklet');
-            console.log('sampleRate', this._audioCtx.sampleRate);
         });
     }
 
     close(): void {
         this._audioCtx.close();
+    }
+
+    get sampleRate(): number {
+        // according to http://blog.mecheye.net/2017/09/i-dont-know-who-the-web-audio-api-is-designed-for/
+        // the sample rate can change when switching audio devices
+        return this._audioCtx.sampleRate;
     }
 
     stream(buffer: Int16Array): void {

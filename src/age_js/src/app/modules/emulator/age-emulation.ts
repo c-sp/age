@@ -34,7 +34,7 @@ export interface AgeEmulation {
 
     getScreenBuffer(): AgeScreenBuffer;
 
-    emulateCycles(cyclesToEmulate: number): boolean;
+    emulateCycles(cyclesToEmulate: number, sampleRate: number): boolean;
 
     buttonDown(button: number): void;
 
@@ -71,8 +71,8 @@ export class AgeGbEmulation implements AgeEmulation {
         return new AgeScreenBuffer(this._emGbModule.HEAPU8, screenBuffer);
     }
 
-    emulateCycles(cyclesToEmulate: number): boolean {
-        return this._emGbModule._gb_emulate(cyclesToEmulate);
+    emulateCycles(cyclesToEmulate: number, sampleRate: number): boolean {
+        return this._emGbModule._gb_emulate(cyclesToEmulate, sampleRate);
     }
 
     buttonDown(button: AgeGbButton): void {
@@ -121,7 +121,7 @@ export class AgeEmulationRunner {
      *
      * @returns true if the emulated screen has changed, false otherwise
      */
-    emulate(): boolean {
+    emulate(sampleRate: number): boolean {
         const now = Date.now();
         const millisElapsed = now - this._lastEmuTime;
         this._lastEmuTime = now;
@@ -133,7 +133,7 @@ export class AgeEmulationRunner {
         const cyclesToEmulate = Math.min(maxCyclesToEmulate, cyclesPerSecond * millisElapsed / 1000);
 
         // emulate
-        const newFrame = this._emulation.emulateCycles(cyclesToEmulate);
+        const newFrame = this._emulation.emulateCycles(cyclesToEmulate, sampleRate);
         this._audioBuffer = this._emulation.getAudioBuffer();
         if (newFrame) {
             this._screenBuffer = this._emulation.getScreenBuffer();
