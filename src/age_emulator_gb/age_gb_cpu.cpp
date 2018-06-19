@@ -707,7 +707,7 @@ age::gb_test_info age::gb_cpu::get_test_info() const
     gb_test_info result;
 
     result.m_is_cgb = m_core.is_cgb();
-    result.m_found_invalid_opcode = m_found_invalid_opcode;
+    result.m_mooneye_debug_op = m_mooneye_debug_op;
 
     result.m_a = m_a;
     result.m_b = m_b;
@@ -759,7 +759,6 @@ void age::gb_cpu::emulate_instruction()
     switch (opcode)
     {
         default:
-            m_found_invalid_opcode = true;
             --m_pc; // stay here
             break;
 
@@ -804,7 +803,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x36: LD_IMM8_MEM_HL break;      // LD [HL], x (12 cycles)
         case 0x3E: POP_BYTE_AT_PC(m_a) break; // LD A, x (8 cycles)
 
-        case 0x40: break; // LD B, B (4 cycles)
+        case 0x40: m_mooneye_debug_op = true; break; // LD B, B (4 cycles)
         case 0x41: m_b = m_c; break; // LD B, C (4 cycles)
         case 0x42: m_b = m_d; break; // LD B, D (4 cycles)
         case 0x43: m_b = m_e; break; // LD B, E (4 cycles)

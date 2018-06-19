@@ -55,8 +55,8 @@ age::test_method age::mooneye_test_method()
         for (uint cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
         {
             emulator->emulate(cycles_per_step);
-            // if an invalid opcode was encountered, the test is finished
-            if (emulator->get_test_info().m_found_invalid_opcode)
+            // the test is finished when executing a specific instruction
+            if (emulator->get_test_info().m_mooneye_debug_op)
             {
                 break;
             }

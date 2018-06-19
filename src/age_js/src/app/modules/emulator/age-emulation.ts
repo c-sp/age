@@ -34,11 +34,13 @@ export interface AgeEmulation {
 
     getScreenBuffer(): AgeScreenBuffer;
 
-    emulateCycles(cyclesToEmulate: number): boolean;
+    emulateCycles(cyclesToEmulate: number, sampleRate: number): boolean;
 
     buttonDown(button: number): void;
 
     buttonUp(button: number): void;
+
+    getAudioBuffer(): Int16Array;
 }
 
 
@@ -69,8 +71,8 @@ export class AgeGbEmulation implements AgeEmulation {
         return new AgeScreenBuffer(this._emGbModule.HEAPU8, screenBuffer);
     }
 
-    emulateCycles(cyclesToEmulate: number): boolean {
-        return this._emGbModule._gb_emulate(cyclesToEmulate);
+    emulateCycles(cyclesToEmulate: number, sampleRate: number): boolean {
+        return this._emGbModule._gb_emulate(cyclesToEmulate, sampleRate);
     }
 
     buttonDown(button: AgeGbButton): void {
@@ -79,6 +81,13 @@ export class AgeGbEmulation implements AgeEmulation {
 
     buttonUp(button: AgeGbButton): void {
         this._emGbModule._gb_set_buttons_up(button);
+    }
+
+    getAudioBuffer(): Int16Array {
+        const bufferOffsetBytes = this._emGbModule._gb_get_audio_buffer();
+        const bufferSizeBytes = this._emGbModule._gb_get_audio_buffer_size() * 4;
+        const bufferEndBytes = bufferOffsetBytes + bufferSizeBytes;
+        return this._emGbModule.HEAP16.slice(bufferOffsetBytes / 2, bufferEndBytes / 2);
     }
 }
 
@@ -89,15 +98,21 @@ export class AgeEmulationRunner {
 
     private _lastEmuTime: number;
     private _screenBuffer: AgeScreenBuffer;
+    private _audioBuffer: Int16Array;
 
     constructor(private readonly _emulation: AgeEmulation) {
         this.screenSize = this._emulation.getScreenSize();
         this._lastEmuTime = Date.now();
         this._screenBuffer = this._emulation.getScreenBuffer();
+        this._audioBuffer = this._emulation.getAudioBuffer();
     }
 
     get screenBuffer(): AgeScreenBuffer {
         return this._screenBuffer;
+    }
+
+    get audioBuffer(): Int16Array {
+        return this._audioBuffer;
     }
 
     /**
@@ -106,7 +121,7 @@ export class AgeEmulationRunner {
      *
      * @returns true if the emulated screen has changed, false otherwise
      */
-    emulate(): boolean {
+    emulate(sampleRate: number): boolean {
         const now = Date.now();
         const millisElapsed = now - this._lastEmuTime;
         this._lastEmuTime = now;
@@ -118,7 +133,8 @@ export class AgeEmulationRunner {
         const cyclesToEmulate = Math.min(maxCyclesToEmulate, cyclesPerSecond * millisElapsed / 1000);
 
         // emulate
-        const newFrame = this._emulation.emulateCycles(cyclesToEmulate);
+        const newFrame = this._emulation.emulateCycles(cyclesToEmulate, sampleRate);
+        this._audioBuffer = this._emulation.getAudioBuffer();
         if (newFrame) {
             this._screenBuffer = this._emulation.getScreenBuffer();
         }
