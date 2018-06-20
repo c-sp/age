@@ -142,13 +142,13 @@ assemble_pages()
     fi
 
     # create the directory and change to it
-    mkdir -p "$ASSETS_DIR"
-    echo "assembling pages in \"$PAGES_DIR\""
+    mkdir -p "$PAGES_DIR"
+    echo "assembling pages in \"$PAGES_DIR\" (assets in \"$ASSETS_DIR\")"
 
     # copy artifacts
+    cp -r "$JS_DIR/"* "$PAGES_DIR"
     cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
     cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
-    cp "$JS_DIR/"* "$PAGES_DIR"
 }
 
 run_doxygen()
