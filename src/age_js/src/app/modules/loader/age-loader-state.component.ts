@@ -51,6 +51,11 @@ export enum AgeLoaderState {
             </ng-container>
         </div>
     `,
+    styles: [`
+        i {
+            margin-right: .5em;
+        }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeLoaderStateComponent {
