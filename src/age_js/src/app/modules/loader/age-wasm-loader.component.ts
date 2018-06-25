@@ -16,6 +16,7 @@
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
+import {EmGbModule} from '../../common';
 
 
 const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';

@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+import {EmGbModule} from './em-modules';
+
 export class AgeEmulationPackage {
 
     constructor(readonly emGbModule: EmGbModule,

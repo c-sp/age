@@ -17,9 +17,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, Input, OnDestroy, OnInit} from '@angular/core';
 import {AgeEmulationRunner, AgeGbEmulation} from './age-emulation';
 import {AgeGbKeyMap} from './age-emulator-keymap';
-import {AgeRect} from '../common/age-rect';
-import {AgeEmulationPackage} from '../common/age-emulation-package';
 import {AgeAudio} from './audio/age-audio';
+import {AgeEmulationPackage, AgeRect} from '../../common';
 
 
 @Component({

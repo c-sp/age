@@ -16,7 +16,7 @@
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
-import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
+import {AgeRomFileToLoad} from '../../common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 
 

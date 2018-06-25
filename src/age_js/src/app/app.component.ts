@@ -16,9 +16,7 @@
 
 import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 import {VERSION_INFO} from '../environments/version';
-import {AgeRect} from './modules/common/age-rect';
-import {AgeEmulationPackage} from './modules/common/age-emulation-package';
-import {AgeRomFileToLoad} from './modules/common/age-rom-file-to-load';
+import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad} from './common';
 
 
 @Component({

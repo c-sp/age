@@ -15,7 +15,7 @@
 //
 
 import {AgeGbButton} from './age-emulator-keymap';
-import {AgeRect} from '../common/age-rect';
+import {AgeRect, EmGbModule} from '../../common';
 
 
 export class AgeScreenBuffer {

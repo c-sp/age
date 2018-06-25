@@ -25,7 +25,7 @@ interface AudioWorkletNode extends AudioNode {
 
 declare var AudioWorkletNode: {
     prototype: AudioWorkletNode;
-    new(context: AudioContextBase, name: DOMString, options?: any): AudioWorkletNode;
+    new(context: AudioContextBase, name: DOMString, options?: AudioWorkletNodeOptions): AudioWorkletNode;
 };
 
 

@@ -15,7 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
-import {AgeRomFileToLoad} from '../common/age-rom-file-to-load';
+import {AgeRomFileToLoad} from '../../common';
 
 
 @Component({
