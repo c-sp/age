@@ -14,9 +14,21 @@
 // limitations under the License.
 //
 
-export class AgeEmulationPackage {
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {AgeBarComponent} from './age-bar.component';
 
-    constructor(readonly emGbModule: EmGbModule,
-                readonly romFileContents: ArrayBuffer) {
-    }
+
+@NgModule({
+    imports: [
+        CommonModule
+    ],
+    declarations: [
+        AgeBarComponent
+    ],
+    exports: [
+        AgeBarComponent
+    ]
+})
+export class AgeBarModule {
 }

@@ -15,7 +15,7 @@
 //
 
 import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {AgeRect} from '../../../common/age-rect';
+import {AgeRect} from '../../../../common';
 import {AgeScreenBuffer} from '../../age-emulation';
 
 

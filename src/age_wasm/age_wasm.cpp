@@ -43,6 +43,7 @@ age::uint output_sample_rate = 44100;
 
 std::unique_ptr<age::gb_emulator> gb_emu = nullptr;
 age::uint8_vector gb_rom;
+std::string rom_name;
 age::uint8_vector gb_persistent_ram;
 bool gb_persistent_ram_dirty = false; // true => emulator_exists() == true
 
@@ -76,6 +77,7 @@ void gb_new_emulator()
 {
     LOG("creating emulator from rom vector of " << gb_rom.size() << " bytes at " << (void*)gb_rom.data());
     gb_emu = std::unique_ptr<age::gb_emulator>(new age::gb_emulator(gb_rom));
+    rom_name = gb_emu->get_emulator_title();
     downsampler = nullptr;
 
     free_memory(gb_persistent_ram);
@@ -155,7 +157,7 @@ age::uint gb_get_cycles_per_second()
 }
 
 EMSCRIPTEN_KEEPALIVE
-age::uint64 gb_get_emulated_cycles()
+double gb_get_emulated_cycles()
 {
     return emulator_exists() ? gb_emu->get_emulated_cycles() : 0;
 }
@@ -212,6 +214,14 @@ EMSCRIPTEN_KEEPALIVE
 age::uint gb_get_audio_buffer_size()
 {
     return (downsampler != nullptr) ? downsampler->get_output_samples().size() : 0;
+}
+
+
+
+EMSCRIPTEN_KEEPALIVE
+const char* gb_get_rom_name()
+{
+    return rom_name.c_str();
 }
 
 } // extern "C"

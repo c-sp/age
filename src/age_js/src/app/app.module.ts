@@ -21,11 +21,13 @@ import {AppComponent} from './app.component';
 import {AgeEmulatorModule} from './modules/emulator/age-emulator.module';
 import {AgeFileSelectorModule} from './modules/rom-file-selector/age-file-selector.module';
 import {AgeLoaderModule} from './modules/loader/age-loader.module';
+import {AgeBarModule} from './modules/bar/age-bar.module';
 
 
 @NgModule({
     imports: [
         BrowserModule,
+        AgeBarModule,
         AgeEmulatorModule,
         AgeLoaderModule,
         AgeFileSelectorModule
