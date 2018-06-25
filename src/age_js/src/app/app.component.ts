@@ -14,9 +14,15 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {VERSION_INFO} from '../environments/version';
-import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad} from './common';
+import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
+
+
+// TODO display warning if AudioWorklets are not available
+
+// TODO display warning on timer precision (Date.now and Performance.now),
+//      see https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
 
 
 @Component({
@@ -25,7 +31,7 @@ import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad} from './common';
         <div class="container">
 
             <div>
-                Welcome to the AGE-JS prototype
+                <age-bar [runtimeInfo]="emulationRuntimeInfo"></age-bar>
             </div>
 
             <div>
@@ -81,7 +87,8 @@ import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad} from './common';
                             (loadingComplete)="loadingComplete($event)"></age-loader>
 
                 <age-emulator [emulationPackage]="emulationPackage"
-                              [viewport]="viewport"></age-emulator>
+                              [viewport]="viewport"
+                              (updateRuntimeInfo)="emulationRuntimeInfo = $event"></age-emulator>
             </div>
 
         </div>
@@ -92,17 +99,13 @@ import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad} from './common';
             height: 100%;
             flex-direction: column;
             overflow: auto;
+            font-family: sans-serif;
         }
 
         .container > div {
             margin-bottom: 2em;
             text-align: center;
             font-size: medium;
-        }
-
-        .container > div:nth-child(1) {
-            font-size: x-large;
-            font-weight: bold;
         }
 
         .container > div:nth-child(2) {
@@ -154,7 +157,8 @@ import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad} from './common';
 })
 export class AppComponent implements AfterViewInit {
 
-    @Input() romFileToLoad?: AgeRomFileToLoad;
+    romFileToLoad?: AgeRomFileToLoad;
+    emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
 
     @ViewChild('emulatorContainer')
     private _emulatorContainer!: ElementRef;
@@ -189,6 +193,7 @@ export class AppComponent implements AfterViewInit {
     selectFileToLoad(fileToLoad: AgeRomFileToLoad): void {
         this.romFileToLoad = fileToLoad;
         this._emulationPackage = undefined;
+        this.emulationRuntimeInfo = undefined;
     }
 
     loadingComplete(emulationPackage: AgeEmulationPackage) {

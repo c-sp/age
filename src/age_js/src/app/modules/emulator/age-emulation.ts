@@ -15,7 +15,7 @@
 //
 
 import {AgeGbButton} from './age-emulator-keymap';
-import {AgeRect, EmGbModule} from '../../common';
+import {AgeEmulationRuntimeInfo, AgeRect, EmGbModule} from '../../common';
 
 
 export class AgeScreenBuffer {
@@ -26,9 +26,13 @@ export class AgeScreenBuffer {
 }
 
 
-export interface AgeEmulation {
+interface AgeEmulation {
 
     getCyclesPerSecond(): number;
+
+    getEmulatedCycles(): number;
+
+    getRomName(): string;
 
     getScreenSize(): AgeRect;
 
@@ -57,6 +61,30 @@ export class AgeGbEmulation implements AgeEmulation {
 
     getCyclesPerSecond(): number {
         return this._emGbModule._gb_get_cycles_per_second();
+    }
+
+    getEmulatedCycles(): number {
+        return this._emGbModule._gb_get_emulated_cycles();
+    }
+
+    getRomName(): string {
+        let romName = '';
+
+        for (let i = this._emGbModule._gb_get_rom_name(), end = i + 32; i < end; ++i) {
+            // the rom name is null terminated and made of ascii chars
+            const code = this._emGbModule.HEAPU8[i];
+            if (!code) {
+                break;
+            }
+            romName += String.fromCharCode(code);
+        }
+
+        // some rom names seem to be padded with underscores: trim them
+        while (romName.endsWith('_')) {
+            romName = romName.substr(0, romName.length - 1);
+        }
+
+        return romName;
     }
 
     getScreenSize(): AgeRect {
@@ -99,12 +127,14 @@ export class AgeEmulationRunner {
     private _lastEmuTime: number;
     private _screenBuffer: AgeScreenBuffer;
     private _audioBuffer: Int16Array;
+    private _runtimeInfoGenerator: AgeEmulationRuntimeInfoGenerator;
 
     constructor(private readonly _emulation: AgeEmulation) {
         this.screenSize = this._emulation.getScreenSize();
         this._lastEmuTime = Date.now();
         this._screenBuffer = this._emulation.getScreenBuffer();
         this._audioBuffer = this._emulation.getAudioBuffer();
+        this._runtimeInfoGenerator = new AgeEmulationRuntimeInfoGenerator(this._emulation);
     }
 
     get screenBuffer(): AgeScreenBuffer {
@@ -113,6 +143,10 @@ export class AgeEmulationRunner {
 
     get audioBuffer(): Int16Array {
         return this._audioBuffer;
+    }
+
+    get runtimeInfo(): AgeEmulationRuntimeInfo {
+        return this._runtimeInfoGenerator.runtimeInfo;
     }
 
     /**
@@ -133,11 +167,17 @@ export class AgeEmulationRunner {
         const cyclesToEmulate = Math.min(maxCyclesToEmulate, cyclesPerSecond * millisElapsed / 1000);
 
         // emulate
+        const pNow = performance.now();
         const newFrame = this._emulation.emulateCycles(cyclesToEmulate, sampleRate);
+        const emuMillis = performance.now() - pNow;
+
+        // update buffers and runtime information
         this._audioBuffer = this._emulation.getAudioBuffer();
         if (newFrame) {
             this._screenBuffer = this._emulation.getScreenBuffer();
         }
+        this._runtimeInfoGenerator.checkForUpdate(now, emuMillis);
+
         return newFrame;
     }
 
@@ -147,5 +187,46 @@ export class AgeEmulationRunner {
 
     buttonUp(button: number): void {
         this._emulation.buttonUp(button);
+    }
+}
+
+
+class AgeEmulationRuntimeInfoGenerator {
+
+    private _runtimeInfo: AgeEmulationRuntimeInfo;
+    private _lastRuntimeInfoTime = Date.now();
+    private _lastEmulatedCycles = 0;
+    private _emuMillis = 0;
+
+    constructor(private readonly _emulation: AgeEmulation) {
+        this._runtimeInfo = {
+            romName: this._emulation.getRomName()
+        };
+    }
+
+    get runtimeInfo(): AgeEmulationRuntimeInfo {
+        return this._runtimeInfo;
+    }
+
+    checkForUpdate(now: number, emuMillis: number): void {
+        this._emuMillis += emuMillis;
+        const elapsedMillis = now - this._lastRuntimeInfoTime;
+
+        if (elapsedMillis > 500) {
+            const cyclesPerSecond = this._emulation.getCyclesPerSecond();
+            const emulatedCycles = this._emulation.getEmulatedCycles();
+            const elapsedCycles = emulatedCycles - this._lastEmulatedCycles;
+
+            this._runtimeInfo = {
+                romName: this._runtimeInfo.romName,
+                emulatedSeconds: emulatedCycles / cyclesPerSecond,
+                emulationSpeed: elapsedCycles * 1000 / elapsedMillis / cyclesPerSecond,
+                emulationMaxSpeed: elapsedCycles * 1000 / Math.max(1, this._emuMillis) / cyclesPerSecond
+            };
+
+            this._lastRuntimeInfoTime = now;
+            this._lastEmulatedCycles = emulatedCycles;
+            this._emuMillis = 0;
+        }
     }
 }

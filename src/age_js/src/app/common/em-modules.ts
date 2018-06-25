@@ -42,4 +42,6 @@ export interface EmGbModule extends EmModule {
 
     _gb_get_audio_buffer(): number;
     _gb_get_audio_buffer_size(): number;
+
+    _gb_get_rom_name(): number;
 }

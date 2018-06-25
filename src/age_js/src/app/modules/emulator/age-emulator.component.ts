@@ -14,11 +14,22 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    HostListener,
+    Inject,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output
+} from '@angular/core';
 import {AgeEmulationRunner, AgeGbEmulation} from './age-emulation';
 import {AgeGbKeyMap} from './age-emulator-keymap';
 import {AgeAudio} from './audio/age-audio';
-import {AgeEmulationPackage, AgeRect} from '../../common';
+import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, compareRuntimeInfo} from '../../common';
 
 
 @Component({
@@ -35,12 +46,14 @@ import {AgeEmulationPackage, AgeRect} from '../../common';
 export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     @Input() viewport = new AgeRect(1, 1);
+    @Output() readonly updateRuntimeInfo = new EventEmitter<AgeEmulationRuntimeInfo | undefined>();
 
     private readonly _keyMap = new AgeGbKeyMap();
 
     private _audio!: AgeAudio;
     private _timerHandle!: number;
     private _emulationRunner?: AgeEmulationRunner;
+    private _lastRuntimeInfo?: AgeEmulationRuntimeInfo;
 
     constructor(@Inject(ChangeDetectorRef) private readonly _changeDetector: ChangeDetectorRef) {
     }
@@ -48,13 +61,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this._audio = new AgeAudio();
         this._timerHandle = window.setInterval(
-            () => {
-                if (this._emulationRunner) {
-                    this._emulationRunner.emulate(this._audio.sampleRate);
-                    this._audio.stream(this._emulationRunner.audioBuffer);
-                    this._changeDetector.detectChanges();
-                }
-            },
+            () => this.runEmulation(),
             10
         );
     }
@@ -101,6 +108,24 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
         if (this._emulationRunner && gbButton) {
             this._emulationRunner.buttonUp(gbButton);
             event.preventDefault();
+        }
+    }
+
+
+    private runEmulation(): void {
+        let newRuntimeInfo = undefined;
+
+        if (this._emulationRunner) {
+            this._emulationRunner.emulate(this._audio.sampleRate);
+            newRuntimeInfo = this._emulationRunner.runtimeInfo;
+
+            this._audio.stream(this._emulationRunner.audioBuffer);
+            this._changeDetector.detectChanges();
+        }
+
+        if (!compareRuntimeInfo(newRuntimeInfo, this._lastRuntimeInfo)) {
+            this._lastRuntimeInfo = newRuntimeInfo;
+            this.updateRuntimeInfo.emit(this._lastRuntimeInfo);
         }
     }
 }

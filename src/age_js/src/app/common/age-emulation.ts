@@ -16,9 +16,26 @@
 
 import {EmGbModule} from './em-modules';
 
+
 export class AgeEmulationPackage {
 
     constructor(readonly emGbModule: EmGbModule,
                 readonly romFileContents: ArrayBuffer) {
     }
+}
+
+
+export interface AgeEmulationRuntimeInfo {
+    romName: string;
+    emulatedSeconds?: number;
+    emulationSpeed?: number;
+    emulationMaxSpeed?: number;
+}
+
+export function compareRuntimeInfo(x?: AgeEmulationRuntimeInfo, y?: AgeEmulationRuntimeInfo): boolean {
+    return !!x && !!y
+        && (x.romName === y.romName)
+        && (x.emulatedSeconds === y.emulatedSeconds)
+        && (x.emulationSpeed === y.emulationSpeed)
+        && (x.emulationMaxSpeed === y.emulationMaxSpeed);
 }
