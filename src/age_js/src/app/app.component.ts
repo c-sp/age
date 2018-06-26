@@ -14,8 +14,15 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
-import {VERSION_INFO} from '../environments/version';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    ElementRef,
+    HostListener,
+    Input,
+    ViewChild
+} from '@angular/core';
 import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
 import {BarButton} from './modules/bar/age-bar.component';
 
@@ -94,21 +101,11 @@ export class AppComponent implements AfterViewInit {
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
 
-    private _versionInfo = VERSION_INFO;
-
 
     ngAfterViewInit(): void {
         this.emulatorContainerResize();
     }
 
-
-    get versionDate(): string {
-        return this._versionInfo.date;
-    }
-
-    get versionHash(): string {
-        return this._versionInfo.hash;
-    }
 
     get emulationPackage(): AgeEmulationPackage | undefined {
         return this._emulationPackage;
