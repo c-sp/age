@@ -36,14 +36,14 @@ import {BarButton} from './modules/bar/age-bar.component';
 @Component({
     selector: 'age-app-root',
     template: `
-        <div class="container">
+        <div class="container" (click)="closeDialogs($event)">
 
             <div>
                 <age-bar [runtimeInfo]="emulationRuntimeInfo"
                          (buttonClicked)="barButtonClick($event)"></age-bar>
             </div>
 
-            <div>
+            <div #dialogDiv>
                 <age-info *ngIf="showInfo" class="dialog" (closeClicked)="closeDialogs()"></age-info>
             </div>
 
@@ -96,10 +96,12 @@ export class AppComponent implements AfterViewInit {
     @Input() romFileToLoad?: AgeRomFileToLoad;
     @Input() emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
 
-    @ViewChild('emulatorContainer')
-    private _emulatorContainer!: ElementRef;
+    @ViewChild('emulatorContainer') private _emulatorContainer!: ElementRef;
+    @ViewChild('dialogDiv') private _dialogDiv!: ElementRef;
+
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
+    private _ignoreClick = false; // TODO kind of ugly, any better solution?
 
 
     ngAfterViewInit(): void {
@@ -130,14 +132,18 @@ export class AppComponent implements AfterViewInit {
         switch (button) {
             case BarButton.INFO:
                 this.showInfo = !this.showInfo;
+                this._ignoreClick = this.showInfo; // the same click triggers an immediate "hide"
                 break;
             default:
                 throw new Error(`invalid button identifier: ${button}`);
         }
     }
 
-    closeDialogs(): void {
-        this.showInfo = false;
+    closeDialogs(event?: Event): void {
+        if (!event || (!this._dialogDiv.nativeElement.contains(event.target) && !this._ignoreClick)) {
+            this.showInfo = false;
+        }
+        this._ignoreClick = false;
     }
 
     @HostListener('window:resize')
