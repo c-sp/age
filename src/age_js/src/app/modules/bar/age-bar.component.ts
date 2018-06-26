@@ -27,7 +27,7 @@ export enum BarButton {
 @Component({
     selector: 'age-bar',
     template: `
-        <div class="container">
+        <div class="container age-ui">
 
             <div class="runtime">
                 <ng-container *ngIf="runtimeInfo as info">
@@ -61,13 +61,13 @@ export enum BarButton {
             </div>
 
             <div class="buttons">
-                <!--<i class="fa fa-folder-open"-->
+                <!--<i class="fa fa-folder-open age-clickable"-->
                    <!--title="open Gameboy rom file ..."-->
                    <!--(click)="buttonClicked.emit(BarButton.OPEN_ROM_FILE)"></i>-->
 
-                <!--<i class="fa fa-info-circle"-->
-                   <!--title="about AGE ..."-->
-                   <!--(click)="buttonClicked.emit(BarButton.INFO)"></i>-->
+                <i class="fa fa-info-circle age-clickable"
+                   title="about AGE ..."
+                   (click)="buttonClicked.emit(BarButton.INFO)"></i>
             </div>
 
         </div>
@@ -77,13 +77,11 @@ export enum BarButton {
             display: flex;
             align-items: center;
             width: 100%;
-            background-color: #404040;
-            color: #C0C0C0;
+            cursor: default;
         }
 
         .container > div {
             padding: .5em;
-            cursor: default;
         }
 
         .container > .runtime {
@@ -116,11 +114,6 @@ export enum BarButton {
 
         .container > .buttons > i {
             margin-right: .5em;
-            cursor: pointer;
-        }
-
-        .container > .buttons > i:hover {
-            color: #F0F0F0;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush

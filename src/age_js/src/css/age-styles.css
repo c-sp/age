@@ -1,0 +1,25 @@
+
+body {
+    font-family: sans-serif;
+    background-color: black;
+    color: white;
+}
+
+a {
+    color: #B0C0E0;
+    text-decoration: none;
+}
+
+
+.age-ui {
+    background-color: #404040;
+    color: #C0C0C0;
+}
+
+
+.age-clickable {
+    cursor: pointer;
+}
+.age-clickable:hover {
+    color: #F0F0F0;
+}
