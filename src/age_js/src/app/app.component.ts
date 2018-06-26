@@ -14,9 +14,10 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 import {VERSION_INFO} from '../environments/version';
 import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
+import {BarButton} from './modules/bar/age-bar.component';
 
 
 // TODO display warning if AudioWorklets are not available
@@ -31,51 +32,12 @@ import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad}
         <div class="container">
 
             <div>
-                <age-bar [runtimeInfo]="emulationRuntimeInfo"></age-bar>
+                <age-bar [runtimeInfo]="emulationRuntimeInfo"
+                         (buttonClicked)="barButtonClick($event)"></age-bar>
             </div>
 
             <div>
-                <div><b>Build Details</b></div>
-                <div>Commit Hash: {{versionHash}}</div>
-                <div>Committed on: {{versionDate | date:'y-MM-dd HH:mm:ss'}}</div>
-            </div>
-
-            <div>
-                <table>
-                    <tr>
-                        <th colspan="4">Key Mappings</th>
-                    </tr>
-                    <tr>
-                        <th>Gameboy</th>
-                        <th>Keyboard</th>
-                        <th>Gameboy</th>
-                        <th>Keyboard</th>
-                    </tr>
-                    <tr>
-                        <td>Up</td>
-                        <td>Up Arrow</td>
-                        <td>A</td>
-                        <td>A</td>
-                    </tr>
-                    <tr>
-                        <td>Down</td>
-                        <td>Down Arrow</td>
-                        <td>B</td>
-                        <td>S</td>
-                    </tr>
-                    <tr>
-                        <td>Left</td>
-                        <td>Left Arrow</td>
-                        <td>Start</td>
-                        <td>Space</td>
-                    </tr>
-                    <tr>
-                        <td>Right</td>
-                        <td>Right Arrow</td>
-                        <td>Select</td>
-                        <td>Enter</td>
-                    </tr>
-                </table>
+                <age-info *ngIf="showInfo" class="dialog" (closeClicked)="closeDialogs()"></age-info>
             </div>
 
             <div>
@@ -98,67 +60,34 @@ import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad}
             display: flex;
             height: 100%;
             flex-direction: column;
-            overflow: auto;
-            font-family: sans-serif;
         }
 
-        .container > div {
-            margin-bottom: 2em;
-            text-align: center;
-            font-size: medium;
-        }
-
-        .container > div:nth-child(2) {
-            font-size: smaller;
+        .dialog {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) translateY(.5em);
         }
 
         .container > div:nth-child(3) {
-            font-size: smaller;
-        }
-
-        .container > div:nth-child(5) {
-            flex: 1;
-            min-height: 200px;
-            min-width: 200px;
-            overflow: hidden;
-        }
-
-        table {
-            margin: auto;
-        }
-
-        table th {
-            font-style: italic;
-            font-weight: normal;
-            text-align: right;
-        }
-
-        table th:nth-child(even) {
-            text-align: left;
-            padding-left: .5em;
-        }
-
-        table tr:nth-child(1) th {
-            font-style: normal;
-            font-weight: bold;
+            margin-top: 2em;
+            margin-bottom: 2em;
             text-align: center;
         }
 
-        table td {
-            text-align: right;
-        }
-
-        table td:nth-child(even) {
-            text-align: left;
-            padding-left: .5em;
+        .container > div:nth-last-child(1) {
+            text-align: center;
+            margin: 5px;
+            flex: 1;
+            min-height: 200px;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements AfterViewInit {
 
-    romFileToLoad?: AgeRomFileToLoad;
-    emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
+    @Input() showInfo = false;
+    @Input() romFileToLoad?: AgeRomFileToLoad;
+    @Input() emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
 
     @ViewChild('emulatorContainer')
     private _emulatorContainer!: ElementRef;
@@ -198,6 +127,20 @@ export class AppComponent implements AfterViewInit {
 
     loadingComplete(emulationPackage: AgeEmulationPackage) {
         this._emulationPackage = emulationPackage;
+    }
+
+    barButtonClick(button: BarButton): void {
+        switch (button) {
+            case BarButton.INFO:
+                this.showInfo = !this.showInfo;
+                break;
+            default:
+                throw new Error(`invalid button identifier: ${button}`);
+        }
+    }
+
+    closeDialogs(): void {
+        this.showInfo = false;
     }
 
     @HostListener('window:resize')

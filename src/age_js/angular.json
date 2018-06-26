@@ -21,7 +21,8 @@
             ],
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/solid.css",
-              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css"
+              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
+              "src/css/age-styles.css"
             ],
             "scripts": []
           },
@@ -70,11 +71,13 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
-            "styles": [
-              "node_modules/font-awesome/css/font-awesome.css"
-            ],
             "assets": [
               "src/assets"
+            ],
+            "styles": [
+              "node_modules/@fortawesome/fontawesome-free/css/solid.css",
+              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
+              "src/css/age-styles.css"
             ]
           }
         },
