@@ -21,7 +21,7 @@ import {VERSION_INFO} from '../../../environments/version';
 @Component({
     selector: 'age-repo-commit-link',
     template: `
-        <a href="https://gitlab.com/csprenger/AGE/tree/{{commitHash}}" target="_blank">
+        <a href="https://gitlab.com/csprenger/AGE/tree/{{commitHash}}" target="_blank" class="age-ui-clickable">
             <ng-content></ng-content>
             {{commitHash | slice:0:8}}
         </a>

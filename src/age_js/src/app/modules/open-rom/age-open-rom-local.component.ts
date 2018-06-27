@@ -18,35 +18,42 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
 
 
 @Component({
-    selector: 'age-file-selector-local',
+    selector: 'age-open-rom-local',
     template: `
-        Open local gameboy rom file:
+        <label for="fileInput" class="age-ui-clickable">
+            from disk <i class="fa fa-hdd"></i>
+        </label>
+
         <input #fileInput
                type="file"
                id="fileInput"
                accept=".gb, .gbc, .zip"
-               (change)="selectFile()">
+               (change)="fileInputChange()">
     `,
     styles: [`
-        input {
+        label {
             margin-left: 1em;
+        }
+
+        input {
+            display: none;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AgeFileSelectorLocalComponent {
+export class AgeOpenRomLocalComponent {
 
     @Output()
-    readonly fileSelected = new EventEmitter<File>();
+    readonly openFile = new EventEmitter<File>();
 
     @ViewChild('fileInput')
     private _fileInput!: ElementRef;
 
-    selectFile() {
+    fileInputChange() {
         const files: FileList = this._fileInput.nativeElement.files;
 
         if (files && files.length) {
-            this.fileSelected.emit(files[0]);
+            this.openFile.emit(files[0]);
         }
     }
 }

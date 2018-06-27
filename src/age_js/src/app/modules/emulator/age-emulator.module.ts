@@ -30,8 +30,7 @@ import {AgeCanvasRendererModule} from './renderer/canvas/age-canvas-renderer.mod
     ],
     exports: [
         AgeEmulatorComponent
-    ],
-    providers: []
+    ]
 })
 export class AgeEmulatorModule {
 }

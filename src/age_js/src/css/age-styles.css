@@ -5,21 +5,36 @@ body {
     color: white;
 }
 
-a {
+
+.age-ui {
+    background-color: #404040;
+    color: #B8B8B8;
+    cursor: default;
+}
+
+.age-ui-title {
+    font-size: large;
+    font-weight: bold;
+    color: #C8C8C8;
+}
+
+.age-ui-subtitle {
+    font-weight: bold;
+    color: #C8C8C8;
+}
+
+.age-ui-top-right {
+    position: absolute;
+    top: .25em;
+    right: .25em;
+}
+
+.age-ui-clickable {
+    cursor: pointer;
     color: #B0C0E0;
     text-decoration: none;
 }
 
-
-.age-ui {
-    background-color: #404040;
-    color: #C0C0C0;
-}
-
-
-.age-clickable {
-    cursor: pointer;
-}
-.age-clickable:hover {
+.age-ui-clickable:hover {
     color: #FFFFFF;
 }

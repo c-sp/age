@@ -18,14 +18,14 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@
 import {AgeEmulationRuntimeInfo} from '../../common';
 
 
-export enum BarButton {
-    OPEN_ROM_FILE,
+export enum TitleBarButton {
+    OPEN_ROM,
     INFO
 }
 
 
 @Component({
-    selector: 'age-bar',
+    selector: 'age-title-bar',
     template: `
         <div class="container age-ui">
 
@@ -48,7 +48,9 @@ export enum BarButton {
             </div>
 
             <div class="title">
-                AGE
+                <div class="age-ui-title">
+                    AGE
+                </div>
                 <div *ngIf="runtimeInfo as info; else noRom"
                      title="title of the rom currently being emulated">
                     running {{info.romName}}
@@ -61,13 +63,13 @@ export enum BarButton {
             </div>
 
             <div class="buttons">
-                <!--<i class="fa fa-folder-open age-clickable"-->
-                   <!--title="open Gameboy rom file ..."-->
-                   <!--(click)="buttonClicked.emit(BarButton.OPEN_ROM_FILE)"></i>-->
+                <i class="fa fa-folder-open age-ui-clickable"
+                   title="open Gameboy rom file ..."
+                   (click)="buttonClicked.emit(TitleBarButton.OPEN_ROM)"></i>
 
-                <i class="fa fa-info-circle age-clickable"
+                <i class="fa fa-info-circle age-ui-clickable"
                    title="about AGE ..."
-                   (click)="buttonClicked.emit(BarButton.INFO)"></i>
+                   (click)="buttonClicked.emit(TitleBarButton.INFO)"></i>
             </div>
 
         </div>
@@ -77,7 +79,6 @@ export enum BarButton {
             display: flex;
             align-items: center;
             width: 100%;
-            cursor: default;
         }
 
         .container > div {
@@ -99,12 +100,10 @@ export enum BarButton {
         .container > .title {
             width: 12em;
             text-align: center;
-            font-weight: bold;
         }
 
-        .container > .title > div {
+        .container > .title > div:nth-child(n+2) {
             font-size: x-small;
-            font-weight: normal;
         }
 
         .container > .buttons {
@@ -118,13 +117,13 @@ export enum BarButton {
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AgeBarComponent {
+export class AgeTitleBarComponent {
 
-    readonly BarButton = BarButton;
+    readonly TitleBarButton = TitleBarButton;
 
     @Input() runtimeInfo?: AgeEmulationRuntimeInfo;
 
-    @Output() readonly buttonClicked = new EventEmitter<BarButton>();
+    @Output() readonly buttonClicked = new EventEmitter<TitleBarButton>();
 
     percent(value: number): number {
         return Math.round(value * 100);

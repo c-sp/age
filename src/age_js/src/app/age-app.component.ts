@@ -14,17 +14,9 @@
 // limitations under the License.
 //
 
-import {
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    ElementRef,
-    HostListener,
-    Input,
-    ViewChild
-} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
-import {BarButton} from './modules/bar/age-bar.component';
+import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
 
 
 // TODO display warning if AudioWorklets are not available
@@ -39,16 +31,19 @@ import {BarButton} from './modules/bar/age-bar.component';
         <div class="container" (click)="closeDialogs($event)">
 
             <div>
-                <age-bar [runtimeInfo]="emulationRuntimeInfo"
-                         (buttonClicked)="barButtonClick($event)"></age-bar>
+                <age-title-bar [runtimeInfo]="emulationRuntimeInfo"
+                               (buttonClicked)="toggleDialog($event)"></age-title-bar>
             </div>
 
             <div #dialogDiv>
-                <age-info *ngIf="showInfo" class="dialog" (closeClicked)="closeDialogs()"></age-info>
-            </div>
+                <age-info *ngIf="showInfo"
+                          class="dialog"
+                          (closeClicked)="closeDialogs()"></age-info>
 
-            <div>
-                <age-file-selector (fileSelected)="selectFileToLoad($event)"></age-file-selector>
+                <age-open-rom *ngIf="showOpenRom"
+                              class="dialog"
+                              (openRom)="openRom($event)"
+                              (closeClicked)="closeDialogs()"></age-open-rom>
             </div>
 
             <div #emulatorContainer>
@@ -75,24 +70,17 @@ import {BarButton} from './modules/bar/age-bar.component';
             transform: translateX(-50%) translateY(.5em);
         }
 
-        .container > div:nth-child(3) {
-            margin-top: 2em;
-            margin-bottom: 2em;
-            text-align: center;
-        }
-
         .container > div:nth-last-child(1) {
             text-align: center;
-            margin: 5px;
+            margin: .25em;
             flex: 1;
             min-height: 200px;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements AfterViewInit {
+export class AgeAppComponent implements AfterViewInit {
 
-    @Input() showInfo = false;
     @Input() romFileToLoad?: AgeRomFileToLoad;
     @Input() emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
 
@@ -101,7 +89,8 @@ export class AppComponent implements AfterViewInit {
 
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
-    private _ignoreClick = false; // TODO kind of ugly, any better solution?
+    private _showDialog?: TitleBarButton = TitleBarButton.OPEN_ROM;
+    private _ignoreCloseDialogs = false; // TODO kind of ugly, any better solution?
 
 
     ngAfterViewInit(): void {
@@ -117,33 +106,38 @@ export class AppComponent implements AfterViewInit {
         return this._viewport;
     }
 
+    get showInfo(): boolean {
+        return this._showDialog === TitleBarButton.INFO;
+    }
 
-    selectFileToLoad(fileToLoad: AgeRomFileToLoad): void {
+    get showOpenRom(): boolean {
+        return this._showDialog === TitleBarButton.OPEN_ROM;
+    }
+
+
+    openRom(fileToLoad: AgeRomFileToLoad): void {
         this.romFileToLoad = fileToLoad;
         this._emulationPackage = undefined;
         this.emulationRuntimeInfo = undefined;
+        this.closeDialogs();
     }
 
     loadingComplete(emulationPackage: AgeEmulationPackage) {
         this._emulationPackage = emulationPackage;
     }
 
-    barButtonClick(button: BarButton): void {
-        switch (button) {
-            case BarButton.INFO:
-                this.showInfo = !this.showInfo;
-                this._ignoreClick = this.showInfo; // the same click triggers an immediate "hide"
-                break;
-            default:
-                throw new Error(`invalid button identifier: ${button}`);
+    toggleDialog(button: TitleBarButton): void {
+        if (this._showDialog !== button) {
+            this._showDialog = button;
+            this._ignoreCloseDialogs = true; // the same click triggers an immediate "closeDialogs"
         }
     }
 
     closeDialogs(event?: Event): void {
-        if (!event || (!this._dialogDiv.nativeElement.contains(event.target) && !this._ignoreClick)) {
-            this.showInfo = false;
+        if (!event || (!this._dialogDiv.nativeElement.contains(event.target) && !this._ignoreCloseDialogs)) {
+            this._showDialog = undefined;
         }
-        this._ignoreClick = false;
+        this._ignoreCloseDialogs = false;
     }
 
     @HostListener('window:resize')

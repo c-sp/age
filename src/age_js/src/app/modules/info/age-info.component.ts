@@ -23,20 +23,21 @@ import {VERSION_INFO} from '../../../environments/version';
     template: `
         <div class="container age-ui">
 
-            <i class="fa fa-times-circle age-clickable"
+            <i class="fa fa-times-circle age-ui-clickable age-ui-top-right"
                (click)="closeClicked.emit()"></i>
 
             <div>
-                <div class="title">
-                    <age-repo-link>AGE</age-repo-link>
-                </div>
-                <div class="subtitle">
-                    <age-repo-link>Another Gameboy Emulator</age-repo-link>
+                <div class="age-ui-title">
+                    <age-repo-link>
+                        <span>A</span>nother
+                        <span>G</span>ameboy
+                        <span>E</span>mulator
+                    </age-repo-link>
                 </div>
             </div>
 
             <div>
-                <div class="subtitle">Build Details</div>
+                <div class="age-ui-subtitle subtitle">Build Details</div>
                 <div>
                     <age-repo-commit-link>commit</age-repo-commit-link>
                 </div>
@@ -44,7 +45,7 @@ import {VERSION_INFO} from '../../../environments/version';
             </div>
 
             <div>
-                <div class="subtitle">Key Mappings</div>
+                <div class="age-ui-subtitle subtitle">Key Mappings</div>
                 <table>
                     <tr>
                         <th>Gameboy</th>
@@ -85,32 +86,21 @@ import {VERSION_INFO} from '../../../environments/version';
         .container {
             padding: 2em;
             opacity: 0.95;
-            cursor: default;
-        }
-
-        .container > i {
-            position: absolute;
-            top: .25em;
-            right: .25em;
-        }
-
-        .container > div {
-            text-align: center;
             font-size: smaller;
+            text-align: center;
         }
 
         .container > div:nth-last-child(n+2) {
             margin-bottom: 2em;
         }
 
-        .title {
-            font-size: large;
-            font-weight: bold;
+        .container > div:nth-child(n+3) > div:nth-child(1) {
+            padding-bottom: .5em;
         }
 
-        .subtitle {
-            font-weight: bold;
-            padding-bottom: .5em;
+        span {
+            font-size: larger;
+            color: #E0E8FF;
         }
 
         table {
@@ -119,7 +109,6 @@ import {VERSION_INFO} from '../../../environments/version';
 
         table th {
             font-style: italic;
-            font-weight: normal;
             text-align: right;
         }
 
