@@ -20,7 +20,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 @Component({
     selector: 'age-repo-link',
     template: `
-        <a href="https://gitlab.com/csprenger/AGE" target="_blank">
+        <a href="https://gitlab.com/csprenger/AGE" target="_blank" class="age-ui-clickable">
             <ng-content></ng-content>
         </a>
     `,

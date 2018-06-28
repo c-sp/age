@@ -37,5 +37,6 @@ export function compareRuntimeInfo(x?: AgeEmulationRuntimeInfo, y?: AgeEmulation
         && (x.romName === y.romName)
         && (x.emulatedSeconds === y.emulatedSeconds)
         && (x.emulationSpeed === y.emulationSpeed)
-        && (x.emulationMaxSpeed === y.emulationMaxSpeed);
+        && (x.emulationMaxSpeed === y.emulationMaxSpeed)
+        || (!x && !y);
 }

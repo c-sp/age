@@ -26,7 +26,8 @@ import {AgeEmulationPackage, AgeRomFileToLoad, EmGbModule} from '../../common';
          The WASM loader is special in that it also unloads the WASM when destroyed.
          Thus we keep it alive the whole time, though not always visible.
          -->
-        <age-wasm-loader [showState]="loading"
+        <age-wasm-loader *ngIf="loading || emGbModuleAvailable"
+                         [showState]="loading"
                          (emGbModuleLoaded)="emGbModuleLoaded($event)"></age-wasm-loader>
 
         <ng-container *ngIf="loading">
@@ -67,6 +68,10 @@ export class AgeLoaderComponent {
 
     get loading(): boolean {
         return !!this._romFileToLoad && (!this._emGbModule || !this._romFileContents);
+    }
+
+    get emGbModuleAvailable(): boolean {
+        return !!this._emGbModule;
     }
 
 

@@ -16,7 +16,7 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {AgeBarComponent} from './age-bar.component';
+import {AgeTitleBarComponent} from './age-title-bar.component';
 
 
 @NgModule({
@@ -24,11 +24,11 @@ import {AgeBarComponent} from './age-bar.component';
         CommonModule
     ],
     declarations: [
-        AgeBarComponent
+        AgeTitleBarComponent
     ],
     exports: [
-        AgeBarComponent
+        AgeTitleBarComponent
     ]
 })
-export class AgeBarModule {
+export class AgeTitleBarModule {
 }

@@ -14,28 +14,30 @@
 // limitations under the License.
 //
 
+import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {AgeFileSelectorLocalComponent} from './age-file-selector-local.component';
-import {AgeFileSelectorURLComponent} from './age-file-selector-url.component';
-import {HttpClientModule} from '@angular/common/http';
-import {AgeFileSelectorComponent} from './age-file-selector.component';
+
+import {AgeAppComponent} from './age-app.component';
+import {AgeEmulatorModule} from './modules/emulator/age-emulator.module';
+import {AgeLoaderModule} from './modules/loader/age-loader.module';
+import {AgeTitleBarModule} from './modules/title-bar/age-title-bar.module';
+import {AgeInfoModule} from './modules/info/age-info.module';
+import {AgeOpenRomModule} from './modules/open-rom/age-open-rom.module';
 
 
 @NgModule({
     imports: [
-        CommonModule,
-        HttpClientModule
+        BrowserModule,
+        AgeInfoModule,
+        AgeEmulatorModule,
+        AgeLoaderModule,
+        AgeOpenRomModule,
+        AgeTitleBarModule
     ],
     declarations: [
-        AgeFileSelectorComponent,
-        AgeFileSelectorLocalComponent,
-        AgeFileSelectorURLComponent
+        AgeAppComponent
     ],
-    exports: [
-        AgeFileSelectorComponent
-    ],
-    providers: []
+    bootstrap: [AgeAppComponent]
 })
-export class AgeFileSelectorModule {
+export class AgeAppModule {
 }
