@@ -37,7 +37,7 @@ export class AgeRomFileExtractorComponent {
         const zip = await JSZip.loadAsync(fileContents);
 
         // get a list of all rom files within that archive
-        const files = zip.file(/.*(\.gb)|(\.gbc)$/);
+        const files = zip.file(/.*(\.gb)|(\.gbc)$/i);
         if (!files || !files.length) {
             throw Error('no Gameboy rom file found');
         }
