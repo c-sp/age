@@ -26,8 +26,19 @@ import {AgeRomFileToLoad} from '../../common';
             <i class="fa fa-times-circle age-ui-clickable age-ui-top-right"
                (click)="closeClicked.emit()"></i>
 
-            <div class="age-ui-title">
-                Open Gameboy rom file
+            <div>
+                <!-- inner span for css class "age-ui-title" to prevent differently sized div margins -->
+                <span class="age-ui-title">Open Gameboy rom file</span>
+            </div>
+
+            <div class="info">
+                <i class="fa fa-exclamation-circle"></i>
+                <div>
+                    AGE can load Gameboy rom files <span class="age-ui-highlight">(*.gb)</span>,
+                    Gameboy Color rom files <span class="age-ui-highlight">(*.gbc)</span>
+                    and zip files <span class="age-ui-highlight">(*.zip)</span>
+                    containing such a rom file.
+                </div>
             </div>
 
             <div>
@@ -44,12 +55,27 @@ import {AgeRomFileToLoad} from '../../common';
         .container {
             padding: 2em;
             opacity: 0.95;
-            font-size: smaller;
+        }
+
+        .container > :nth-child(2) {
             text-align: center;
         }
 
         .container > div:nth-last-child(n+2) {
             margin-bottom: 2em;
+        }
+
+        .info {
+            display: flex;
+        }
+
+        .info > i {
+            margin-right: .5em;
+        }
+
+        .info span {
+            font-family: monospace;
+            font-weight: bold;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush

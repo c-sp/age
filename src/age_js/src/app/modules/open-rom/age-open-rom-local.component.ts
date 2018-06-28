@@ -20,19 +20,32 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
 @Component({
     selector: 'age-open-rom-local',
     template: `
-        <label for="fileInput" class="age-ui-clickable">
-            from disk <i class="fa fa-hdd"></i>
-        </label>
+        <!-- the div is used to limit the size of the label -->
+        <div>
+            <label for="fileInput" class="age-ui-clickable">
+                <i class="fa fa-folder-open age-ui-big-icon"></i>
+                <span>open local file</span>
+            </label>
+        </div>
 
         <input #fileInput
                type="file"
                id="fileInput"
                accept=".gb, .gbc, .zip"
-               (change)="fileInputChange()">
+               (change)="emitSelectedFile()">
     `,
     styles: [`
+        div {
+            display: flex;
+        }
+
         label {
-            margin-left: 1em;
+            display: flex;
+            align-items: center;
+        }
+
+        label i {
+            margin-right: .25em;
         }
 
         input {
@@ -49,7 +62,7 @@ export class AgeOpenRomLocalComponent {
     @ViewChild('fileInput')
     private _fileInput!: ElementRef;
 
-    fileInputChange() {
+    emitSelectedFile() {
         const files: FileList = this._fileInput.nativeElement.files;
 
         if (files && files.length) {

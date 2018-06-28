@@ -19,7 +19,7 @@ import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad}
 import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
 
 
-// TODO display warning if AudioWorklets are not available
+// TODO display warning if AudioWorklet is not available or use polyfill
 
 // TODO display warning on timer precision (Date.now and Performance.now),
 //      see https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
@@ -64,17 +64,18 @@ import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
             flex-direction: column;
         }
 
+        .container > :nth-last-child(1) {
+            text-align: center;
+            margin: .2em;
+            flex: 1;
+            min-height: 200px;
+        }
+
         .dialog {
             position: absolute;
             left: 50%;
+            max-width: 30em;
             transform: translateX(-50%) translateY(.5em);
-        }
-
-        .container > div:nth-last-child(1) {
-            text-align: center;
-            margin: .25em;
-            flex: 1;
-            min-height: 200px;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -89,8 +90,8 @@ export class AgeAppComponent implements AfterViewInit {
 
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
-    private _showDialog?: TitleBarButton = TitleBarButton.OPEN_ROM;
-    private _ignoreCloseDialogs = false; // TODO kind of ugly, any better solution?
+    private _showDialog?: TitleBarButton;
+    private _ignoreCloseDialogs = false;
 
 
     ngAfterViewInit(): void {

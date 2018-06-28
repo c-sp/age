@@ -34,18 +34,14 @@ import {VERSION_INFO} from '../../../environments/version';
                         <span>E</span>mulator
                     </age-repo-link>
                 </div>
-            </div>
-
-            <div>
-                <div class="age-ui-subtitle subtitle">Build Details</div>
+                <div>{{versionDate | date:'long'}}</div>
                 <div>
                     <age-repo-commit-link>commit</age-repo-commit-link>
                 </div>
-                <div>{{versionDate | date:'long'}}</div>
             </div>
 
             <div>
-                <div class="age-ui-subtitle subtitle">Key Mappings</div>
+                <div class="age-ui-highlight">Key Mappings</div>
                 <table>
                     <tr>
                         <th>Gameboy</th>
@@ -86,21 +82,25 @@ import {VERSION_INFO} from '../../../environments/version';
         .container {
             padding: 2em;
             opacity: 0.95;
-            font-size: smaller;
             text-align: center;
         }
 
-        .container > div:nth-last-child(n+2) {
+        .container > :nth-child(2) {
             margin-bottom: 2em;
         }
 
-        .container > div:nth-child(n+3) > div:nth-child(1) {
-            padding-bottom: .5em;
+        .container > :nth-child(2) > :nth-child(2) {
+            margin-top: 1em;
         }
 
-        span {
-            font-size: larger;
+        .container > :nth-child(2) span {
             color: #E0E8FF;
+        }
+
+        .container > div:nth-child(n+3) > :nth-child(1) {
+            font-size: large;
+            font-weight: bold;
+            padding-bottom: .5em;
         }
 
         table {

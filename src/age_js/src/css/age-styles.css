@@ -1,10 +1,10 @@
 
-body {
-    font-family: sans-serif;
-    background-color: black;
-    color: white;
+.age-ui-input {
+    background-color: #202020;
+    color: #C8C8C8;
+    padding: .1em;
+    border: double #404040;
 }
-
 
 .age-ui {
     background-color: #404040;
@@ -12,13 +12,16 @@ body {
     cursor: default;
 }
 
-.age-ui-title {
-    font-size: large;
-    font-weight: bold;
+.age-ui-error {
+    color: #FFA0A0;
+}
+
+.age-ui-highlight {
     color: #C8C8C8;
 }
 
-.age-ui-subtitle {
+.age-ui-title {
+    font-size: x-large;
     font-weight: bold;
     color: #C8C8C8;
 }
@@ -37,4 +40,8 @@ body {
 
 .age-ui-clickable:hover {
     color: #FFFFFF;
+}
+
+.age-ui-big-icon {
+    font-size: xx-large;
 }

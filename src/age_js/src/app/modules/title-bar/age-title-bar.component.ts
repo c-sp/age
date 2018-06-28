@@ -63,11 +63,11 @@ export enum TitleBarButton {
             </div>
 
             <div class="buttons">
-                <i class="fa fa-folder-open age-ui-clickable"
+                <i class="fa fa-folder-open age-ui-clickable age-ui-big-icon"
                    title="open Gameboy rom file ..."
                    (click)="buttonClicked.emit(TitleBarButton.OPEN_ROM)"></i>
 
-                <i class="fa fa-info-circle age-ui-clickable"
+                <i class="fa fa-info-circle age-ui-clickable age-ui-big-icon"
                    title="about AGE ..."
                    (click)="buttonClicked.emit(TitleBarButton.INFO)"></i>
             </div>
@@ -79,6 +79,7 @@ export enum TitleBarButton {
             display: flex;
             align-items: center;
             width: 100%;
+            font-size: small;
         }
 
         .container > div {
@@ -88,7 +89,6 @@ export enum TitleBarButton {
         .container > .runtime {
             flex: 1 1;
             text-align: right;
-            font-size: x-small;
         }
 
         .container > .runtime > span {
@@ -98,12 +98,8 @@ export enum TitleBarButton {
         }
 
         .container > .title {
-            width: 12em;
+            width: 18em;
             text-align: center;
-        }
-
-        .container > .title > div:nth-child(n+2) {
-            font-size: x-small;
         }
 
         .container > .buttons {
@@ -112,7 +108,7 @@ export enum TitleBarButton {
         }
 
         .container > .buttons > i {
-            margin-right: .5em;
+            margin-right: .25em;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush

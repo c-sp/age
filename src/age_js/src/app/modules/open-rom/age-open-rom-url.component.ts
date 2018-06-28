@@ -20,47 +20,112 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
 @Component({
     selector: 'age-open-rom-url',
     template: `
-        <div class="container">
-            <div>
-                from URL:
-            </div>
+        <div>
+            <span [class.age-ui-clickable]="!urlHint" (click)="emitValidUrl()">
+                <i class="fa fa-globe-africa age-ui-big-icon"></i>
+                open URL
+            </span>
+            <span *ngIf="urlHint as hint" class="age-ui-error">
+                <ng-container [ngSwitch]="hint">
 
-            <div>
-                <input #urlInput type="url" value="http://gameboy.modermodemet.se/files/PHT-PZ.ZIP">
-                <button (click)="click()">ok</button>
-            </div>
+                    <ng-container *ngSwitchCase="urlEmpty">
+                        (no URL entered)
+                    </ng-container>
+
+                    <ng-container *ngSwitchCase="urlInvalid">
+                        (URL invalid)
+                    </ng-container>
+
+                </ng-container>
+            </span>
+        </div>
+
+        <div>
+            <!--
+             we subscribe to the "input" event with a no-op to automatically trigger the Angular change detection
+             when the input's value changes
+              -->
+            <input #urlInput
+                   type="url"
+                   class="age-ui-input"
+                   placeholder="please enter URL"
+                   list="suggestedURLs"
+                   (input)="urlHint">
+
+            <datalist id="suggestedURLs">
+
+                <option label="(Demo) Back To Color"
+                        value="https://github.com/AntonioND/back-to-color/archive/v1.0.zip">
+
+                <option label="(Demo) Cenotaph"
+                        value="https://files.scene.org/get/parties/2012/revision12/oldskool_demo/dcs-ctph.zip">
+
+                <option label="(Demo) child's play"
+                        value="https://files.scene.org/get/parties/2002/assembly02/mobiledemo/child_s_play_by_cncd--gbc.zip">
+
+                <option label="(Demo) Demotronic"
+                        value="http://lcp.c64.org/files/2002-LCP/compo/demos/mb-dtrnc.zip">
+
+                <option label="(Demo) It Came from Planet Zilog"
+                        value="http://gameboy.modermodemet.se/files/PHT-PZ.ZIP">
+
+                <option label="(Demo) Mental Respirator"
+                        value="https://files.scene.org/get/parties/2005/breakpoint05/wild/pht-mr.zip">
+
+                <option label="(Demo) Oh!"
+                        value="http://www.nordloef.com/gbdemos/oh.zip">
+
+                <option label="(Demo) Pickpocket"
+                        value="http://www.izik.se/files/demos/inka-PP.zip">
+
+            </datalist>
         </div>
     `,
     styles: [`
-        .container > div:nth-child(1) {
-            padding-bottom: .5em;
+        :nth-child(1) {
+            margin-bottom: .1em;
         }
 
-        .container > div:nth-child(2) {
-            display: flex;
+        :nth-child(1) i {
+            margin-right: .25em;
+        }
+
+        :nth-child(1) > :nth-child(2) {
+            font-size: smaller;
         }
 
         input {
-            flex: 1;
-            margin-right: .5em;
+            width: 100%;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeOpenRomUrlComponent {
 
-    readonly corsAnywhereUrl = 'https://cors-anywhere.herokuapp.com/';
+    readonly urlEmpty = 'urlEmpty';
+    readonly urlInvalid = 'urlInvalid';
 
-    @Output()
-    readonly openUrl = new EventEmitter<string>();
+    @Output() readonly openUrl = new EventEmitter<string>();
 
-    @ViewChild('urlInput')
-    private _urlInput!: ElementRef;
+    @ViewChild('urlInput') private _urlInput!: ElementRef;
 
-    click(): void {
-        const url = this._urlInput.nativeElement.value;
-        if (!!url) {
-            this.openUrl.emit(this.corsAnywhereUrl + url);
+    get urlHint(): string {
+        let result = '';
+
+        if (!this._urlInput.nativeElement.value) {
+            result = this.urlEmpty;
+
+        } else if (!this._urlInput.nativeElement.checkValidity()) {
+            result = this.urlInvalid;
+        }
+
+        return result;
+    }
+
+    emitValidUrl(): void {
+        if (!this.urlHint) {
+            const url = `https://cors-anywhere.herokuapp.com/${this._urlInput.nativeElement.value}`;
+            this.openUrl.emit(url);
         }
     }
 }
