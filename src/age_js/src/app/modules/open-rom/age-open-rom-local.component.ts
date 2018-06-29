@@ -22,9 +22,14 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
     template: `
         <!-- the div is used to limit the size of the label -->
         <div>
-            <label for="fileInput" class="age-ui-clickable">
+            <label for="fileInput"
+                   class="age-ui-clickable"
+                   title="Open a Gameboy rom file on the local device.
+The rom file is not being uploaded anywhere, it will not leave your device.">
+
                 <i class="fa fa-folder-open age-ui-big-icon"></i>
                 <span>open local file</span>
+
             </label>
         </div>
 

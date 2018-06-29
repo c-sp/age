@@ -131,7 +131,7 @@ export class AgeEmulationRunner {
 
     constructor(private readonly _emulation: AgeEmulation) {
         this.screenSize = this._emulation.getScreenSize();
-        this._lastEmuTime = Date.now();
+        this._lastEmuTime = performance.now();
         this._screenBuffer = this._emulation.getScreenBuffer();
         this._audioBuffer = this._emulation.getAudioBuffer();
         this._runtimeInfoGenerator = new AgeEmulationRuntimeInfoGenerator(this._emulation);
@@ -156,7 +156,7 @@ export class AgeEmulationRunner {
      * @returns true if the emulated screen has changed, false otherwise
      */
     emulate(sampleRate: number): boolean {
-        const now = Date.now();
+        const now = performance.now();
         const millisElapsed = now - this._lastEmuTime;
         this._lastEmuTime = now;
 
@@ -194,7 +194,7 @@ export class AgeEmulationRunner {
 class AgeEmulationRuntimeInfoGenerator {
 
     private _runtimeInfo: AgeEmulationRuntimeInfo;
-    private _lastRuntimeInfoTime = Date.now();
+    private _lastRuntimeInfoTime = performance.now();
     private _lastEmulatedCycles = 0;
     private _emuMillis = 0;
 

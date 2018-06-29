@@ -71,9 +71,6 @@ class Int16Buffer {
 
             // start buffering, if there are no samples left
             this._buffering = !this._bufferSize;
-            if (this._buffering) {
-                console.log('buffering ...');
-            }
         }
     }
 }
@@ -85,8 +82,6 @@ class AgeAudioStream extends AudioWorkletProcessor {
         super(options);
         this.buffer = new Int16Buffer(1);
         this.port.onmessage = this.handleMessage.bind(this);
-
-        this.time = Date.now();
     }
 
     handleMessage(event) {
@@ -103,24 +98,11 @@ class AgeAudioStream extends AudioWorkletProcessor {
         }
     }
 
-    // noinspection JSUnusedGlobalSymbols
     /**
      * called once per render quantum (128 samples) according to spec
      */
     process(inputs, outputs) {
         this.buffer.writeAudioOutput(outputs[0]);
-
-        const now = Date.now();
-        if (now - this.time >= 1000) {
-            this.time = now;
-
-            // console.log(this.buffer._bufferSize / 2);
-            // console.log(
-            //     'inputs', inputs.length, inputs[0].length, inputs[0][0].length,
-            //     'outputs', outputs.length, outputs[0].length, outputs[0][0].length
-            // );
-        }
-
         return true;
     }
 }

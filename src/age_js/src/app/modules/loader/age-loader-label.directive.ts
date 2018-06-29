@@ -36,3 +36,10 @@ export class AgeLoaderSuccessDirective {
 })
 export class AgeLoaderWorkingDirective {
 }
+
+
+@Directive({
+    selector: '[ageLoaderNoState]'
+})
+export class AgeLoaderNoStateDirective {
+}

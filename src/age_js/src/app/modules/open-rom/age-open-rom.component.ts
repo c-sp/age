@@ -23,9 +23,6 @@ import {AgeRomFileToLoad} from '../../common';
     template: `
         <div class="container age-ui">
 
-            <i class="fa fa-times-circle age-ui-clickable age-ui-top-right"
-               (click)="closeClicked.emit()"></i>
-
             <div>
                 <!-- inner span for css class "age-ui-title" to prevent differently sized div margins -->
                 <span class="age-ui-title">Open Gameboy rom file</span>
@@ -57,7 +54,7 @@ import {AgeRomFileToLoad} from '../../common';
             opacity: 0.95;
         }
 
-        .container > :nth-child(2) {
+        .container > :nth-child(1) {
             text-align: center;
         }
 
@@ -82,7 +79,6 @@ import {AgeRomFileToLoad} from '../../common';
 })
 export class AgeOpenRomComponent {
 
-    @Output() readonly closeClicked = new EventEmitter();
     @Output() readonly openRom = new EventEmitter<AgeRomFileToLoad>();
 
     selectLocalFile(file: File) {

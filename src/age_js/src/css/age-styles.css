@@ -26,20 +26,20 @@
     color: #C8C8C8;
 }
 
-.age-ui-top-right {
-    position: absolute;
-    top: .25em;
-    right: .25em;
+.age-ui-subtitle {
+    font-size: large;
+    font-weight: bold;
+    color: #C8C8C8;
 }
 
 .age-ui-clickable {
     cursor: pointer;
-    color: #B0C0E0;
+    color: #98A8E0;
     text-decoration: none;
 }
 
 .age-ui-clickable:hover {
-    color: #FFFFFF;
+    color: #E0F0FF;
 }
 
 .age-ui-big-icon {

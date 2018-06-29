@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {VERSION_INFO} from '../../../environments/version';
 
 
@@ -22,9 +22,6 @@ import {VERSION_INFO} from '../../../environments/version';
     selector: 'age-info',
     template: `
         <div class="container age-ui">
-
-            <i class="fa fa-times-circle age-ui-clickable age-ui-top-right"
-               (click)="closeClicked.emit()"></i>
 
             <div>
                 <div class="age-ui-title">
@@ -41,7 +38,7 @@ import {VERSION_INFO} from '../../../environments/version';
             </div>
 
             <div>
-                <div class="age-ui-highlight">Key Mappings</div>
+                <div class="age-ui-subtitle">Key Mappings</div>
                 <table>
                     <tr>
                         <th>Gameboy</th>
@@ -85,19 +82,19 @@ import {VERSION_INFO} from '../../../environments/version';
             text-align: center;
         }
 
-        .container > :nth-child(2) {
+        .container > :nth-child(1) {
             margin-bottom: 2em;
         }
 
-        .container > :nth-child(2) > :nth-child(2) {
+        .container > :nth-child(1) > :nth-child(2) {
             margin-top: 1em;
         }
 
-        .container > :nth-child(2) span {
-            color: #E0E8FF;
+        .container > :nth-child(1) span {
+            color: #E0F0FF;
         }
 
-        .container > div:nth-child(n+3) > :nth-child(1) {
+        .container > :nth-child(2) > :nth-child(1) {
             font-size: large;
             font-weight: bold;
             padding-bottom: .5em;
@@ -131,6 +128,4 @@ import {VERSION_INFO} from '../../../environments/version';
 export class AgeInfoComponent {
 
     readonly versionDate = VERSION_INFO.date;
-
-    @Output() readonly closeClicked = new EventEmitter();
 }
