@@ -53,8 +53,8 @@ export class AgeRomFileExtractorComponent {
     }
 
 
-    @Output()
-    readonly fileExtracted = new EventEmitter<ArrayBuffer>(true); // must be async as we call emit() during change detection at times
+    // the following EventEmitter must be async as we call emit() during change detection at times
+    @Output() readonly fileExtracted = new EventEmitter<ArrayBuffer>(true);
 
     private _extractorState?: AgeLoaderState;
 
@@ -66,8 +66,7 @@ export class AgeRomFileExtractorComponent {
         return this._extractorState;
     }
 
-    @Input()
-    set fileContents(fileContents: ArrayBuffer | undefined) {
+    @Input() set fileContents(fileContents: ArrayBuffer | undefined) {
         this._extractorState = undefined;
         if (fileContents) {
 

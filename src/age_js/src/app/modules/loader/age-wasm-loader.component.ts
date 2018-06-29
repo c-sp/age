@@ -46,11 +46,9 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
 })
 export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
 
-    @Input()
-    showState = false;
+    @Input() showState = false;
 
-    @Output()
-    readonly emGbModuleLoaded = new EventEmitter<EmGbModule | undefined>();
+    @Output() readonly emGbModuleLoaded = new EventEmitter<EmGbModule | undefined>();
 
     // I currently see no other way than to use "any" here
     /* tslint:disable:no-any */

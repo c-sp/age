@@ -61,11 +61,9 @@ The rom file is not being uploaded anywhere, it will not leave your device.">
 })
 export class AgeOpenRomLocalComponent {
 
-    @Output()
-    readonly openFile = new EventEmitter<File>();
+    @Output() readonly openFile = new EventEmitter<File>();
 
-    @ViewChild('fileInput')
-    private _fileInput!: ElementRef;
+    @ViewChild('fileInput') private _fileInput!: ElementRef;
 
     emitSelectedFile() {
         const files: FileList = this._fileInput.nativeElement.files;

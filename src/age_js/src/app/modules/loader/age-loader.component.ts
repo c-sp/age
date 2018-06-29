@@ -44,8 +44,7 @@ import {AgeEmulationPackage, AgeRomFileToLoad, EmGbModule} from '../../common';
 })
 export class AgeLoaderComponent {
 
-    @Output()
-    readonly loadingComplete = new EventEmitter<AgeEmulationPackage>();
+    @Output() readonly loadingComplete = new EventEmitter<AgeEmulationPackage>();
 
     private _emGbModule?: EmGbModule;
     private _romFileToLoad?: AgeRomFileToLoad;
@@ -55,8 +54,7 @@ export class AgeLoaderComponent {
     }
 
 
-    @Input()
-    set romFileToLoad(romFileToLoad: AgeRomFileToLoad | undefined) {
+    @Input() set romFileToLoad(romFileToLoad: AgeRomFileToLoad | undefined) {
         // stop any loading process, if the file was cleared
         this._romFileToLoad = romFileToLoad;
         this._romFileContents = undefined;

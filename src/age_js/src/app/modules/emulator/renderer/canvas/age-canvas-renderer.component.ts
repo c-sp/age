@@ -32,8 +32,8 @@ import {AgeScreenBuffer} from '../../age-emulation';
 })
 export class AgeCanvasRendererComponent implements AfterViewInit {
 
-    @ViewChild('rendererDisplay')
-    private _canvas!: ElementRef;
+    @ViewChild('rendererDisplay') private _canvas!: ElementRef;
+
     private _canvas2dCtx?: CanvasRenderingContext2D;
 
     private _screenSize = new AgeRect(1, 1);
@@ -58,13 +58,11 @@ export class AgeCanvasRendererComponent implements AfterViewInit {
         return this._screenSize;
     }
 
-    @Input()
-    set screenSize(screenSize: AgeRect) {
+    @Input() set screenSize(screenSize: AgeRect) {
         this._screenSize = screenSize;
     }
 
-    @Input()
-    set viewport(viewport: AgeRect) {
+    @Input() set viewport(viewport: AgeRect) {
         const widthFactor = viewport.width / this._screenSize.width;
         const heightFactor = viewport.height / this._screenSize.height;
 
@@ -78,8 +76,7 @@ export class AgeCanvasRendererComponent implements AfterViewInit {
         }
     }
 
-    @Input()
-    set newFrame(screenBuffer: AgeScreenBuffer) {
+    @Input() set newFrame(screenBuffer: AgeScreenBuffer) {
         if (this._canvas2dCtx) {
             const numBytes = this.screenSize.width * this.screenSize.height * 4;
             const bytes = new Uint8ClampedArray(screenBuffer.buffer.buffer, screenBuffer.offset, numBytes);

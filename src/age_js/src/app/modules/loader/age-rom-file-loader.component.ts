@@ -38,8 +38,7 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
         'application/zip'
     ];
 
-    @Output()
-    readonly fileLoaded = new EventEmitter<ArrayBuffer>();
+    @Output() readonly fileLoaded = new EventEmitter<ArrayBuffer>();
 
     private _loaderState?: AgeLoaderState;
     private _fileReader?: FileReader;
@@ -57,8 +56,7 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
         return this._loaderState;
     }
 
-    @Input()
-    set romFileToLoad(romFileToLoad: AgeRomFileToLoad) {
+    @Input() set romFileToLoad(romFileToLoad: AgeRomFileToLoad) {
         this.cleanupReader(); // stop the current loader before starting a new one
         this._loaderState = undefined;
 

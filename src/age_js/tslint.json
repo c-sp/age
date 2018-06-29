@@ -1,6 +1,7 @@
 {
     "rulesDirectory": [
-        "node_modules/codelyzer"
+        "node_modules/codelyzer",
+        "node_modules/rxjs-tslint"
     ],
     "rules": {
 
@@ -660,6 +661,9 @@
         //  -> http://codelyzer.com/rules/no-unused-css
         "no-unused-css": true,
 
+        // use @ContentChild, @ViewChild, etc. instead of queries property
+        "no-queries-parameter": true,
+
         // no impure pipes as they don't perform well
         //  -> http://codelyzer.com/rules/pipe-impure
         "pipe-impure": true,
@@ -667,6 +671,10 @@
         // we don't have any pipe naming rules at this time
         //  -> http://codelyzer.com/rules/pipe-naming
         //"pipe-naming" : true,
+
+        // put decorators on the same line as the property/method being decorated
+        //  -> https://angular.io/guide/styleguide#style-05-12
+        "prefer-inline-decorator": true,
 
         // @Outputs (Angular EventEmitters) should be readonly to prevent accidental reassignment
         "prefer-output-readonly": true,
@@ -706,6 +714,27 @@
 
         // don't use ViewEncapsulation.NONE
         //  -> http://codelyzer.com/rules/use-view-encapsulation
-        "use-view-encapsulation": true
-    }
+        "use-view-encapsulation": true,
+
+        //
+        //  ----------
+        //  RXJS RULES
+        //  ----------
+        //
+        //  see also:
+        //  https://github.com/reactivex/rxjs-tslint#rules
+        //
+
+        // collapse multiple RxJS imports into a single one
+        "rxjs-collapse-imports": true,
+
+        // use pipeable operators instead of side-effect operators
+        "rxjs-pipeable-operators-only": true,
+
+        // don't use static observable methods
+        "rxjs-no-static-observable-methods": true,
+
+        // use RxJS 6.0 imports instead of RxJS 5.x imports
+        "rxjs-proper-imports": true
+  }
 }

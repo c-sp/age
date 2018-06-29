@@ -76,8 +76,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
         return this._emulationRunner;
     }
 
-    @Input()
-    set emulationPackage(emulationPackage: AgeEmulationPackage | undefined) {
+    @Input() set emulationPackage(emulationPackage: AgeEmulationPackage | undefined) {
         if (!emulationPackage) {
             this._emulationRunner = undefined;
         } else {
@@ -91,8 +90,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
     }
 
 
-    @HostListener('document:keydown', ['$event'])
-    handleKeyDown(event: KeyboardEvent) {
+    @HostListener('document:keydown', ['$event']) handleKeyDown(event: KeyboardEvent) {
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
         if (this._emulationRunner && gbButton) {
@@ -101,8 +99,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
         }
     }
 
-    @HostListener('document:keyup', ['$event'])
-    handleKeyUp(event: KeyboardEvent) {
+    @HostListener('document:keyup', ['$event']) handleKeyUp(event: KeyboardEvent) {
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
         if (this._emulationRunner && gbButton) {

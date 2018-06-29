@@ -152,8 +152,7 @@ export class AgeAppComponent {
         this._ignoreCloseDialogs = false;
     }
 
-    @HostListener('window:resize')
-    emulatorContainerResize(): void {
+    @HostListener('window:resize') emulatorContainerResize(): void {
         if (this._emulatorContainer) {
             this._viewport = new AgeRect(
                 this._emulatorContainer.nativeElement.offsetWidth,

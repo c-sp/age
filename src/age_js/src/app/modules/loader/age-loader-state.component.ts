@@ -70,6 +70,5 @@ export class AgeLoaderStateComponent {
 
     readonly AgeLoaderState = AgeLoaderState;
 
-    @Input()
-    state?: AgeLoaderState;
+    @Input() state?: AgeLoaderState;
 }
