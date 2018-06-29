@@ -15,7 +15,12 @@
 //
 
 import {NgModule} from '@angular/core';
-import {AgeLoaderErrorDirective, AgeLoaderSuccessDirective, AgeLoaderWorkingDirective} from './age-loader-label.directive';
+import {
+    AgeLoaderErrorDirective,
+    AgeLoaderNoStateDirective,
+    AgeLoaderSuccessDirective,
+    AgeLoaderWorkingDirective
+} from './age-loader-label.directive';
 import {AgeLoaderStateComponent} from './age-loader-state.component';
 import {AgeRomFileLoaderComponent} from './age-rom-file-loader.component';
 import {AgeWasmLoaderComponent} from './age-wasm-loader.component';
@@ -33,6 +38,7 @@ import {AgeRomFileExtractorComponent} from './age-rom-file-extractor.component';
         AgeLoaderErrorDirective,
         AgeLoaderSuccessDirective,
         AgeLoaderWorkingDirective,
+        AgeLoaderNoStateDirective,
         AgeLoaderStateComponent,
         AgeRomFileExtractorComponent,
         AgeRomFileLoaderComponent,

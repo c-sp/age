@@ -14,21 +14,16 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
 import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
-
-
-// TODO display warning if AudioWorklet is not available or use polyfill
-
-// TODO display warning on timer precision (Date.now and Performance.now),
-//      see https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
 
 
 @Component({
     selector: 'age-app-root',
     template: `
-        <div class="container" (click)="closeDialogs($event)">
+        <div class="container"
+             (click)="closeDialogs($event)">
 
             <div>
                 <age-title-bar [runtimeInfo]="emulationRuntimeInfo"
@@ -36,21 +31,29 @@ import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
             </div>
 
             <div #dialogDiv>
-                <age-info *ngIf="showInfo"
-                          class="dialog"
-                          (closeClicked)="closeDialogs()"></age-info>
+                <div *ngIf="showDialog" class="dialog">
 
-                <age-open-rom *ngIf="showOpenRom"
-                              class="dialog"
-                              (openRom)="openRom($event)"
-                              (closeClicked)="closeDialogs()"></age-open-rom>
+                    <age-info *ngIf="showDialog === TitleBarButton.INFO"></age-info>
+
+                    <age-open-rom *ngIf="showDialog === TitleBarButton.OPEN_ROM"
+                                  (openRom)="openRom($event)"></age-open-rom>
+
+                    <i class="fa fa-times-circle age-ui-clickable"
+                       title="Close this dialog"
+                       (click)="closeDialogs()"></i>
+                </div>
             </div>
 
             <div #emulatorContainer>
+                <div *ngIf="showSplashScreen">
+                    <age-splash-screen (openRom)="openRom($event)"></age-splash-screen>
+                </div>
+
                 <age-loader [romFileToLoad]="romFileToLoad"
                             (loadingComplete)="loadingComplete($event)"></age-loader>
 
-                <age-emulator [emulationPackage]="emulationPackage"
+                <age-emulator *ngIf="!showSplashScreen"
+                              [emulationPackage]="emulationPackage"
                               [viewport]="viewport"
                               (updateRuntimeInfo)="emulationRuntimeInfo = $event"></age-emulator>
             </div>
@@ -71,33 +74,45 @@ import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
             min-height: 200px;
         }
 
+        .container > :nth-last-child(1) > div {
+            margin-top: 3em;
+            margin-bottom: 3em;
+        }
+
         .dialog {
             position: absolute;
             left: 50%;
             max-width: 30em;
             transform: translateX(-50%) translateY(.5em);
         }
+
+        .dialog > i {
+            position: absolute;
+            top: .25em;
+            right: .25em;
+        }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AgeAppComponent implements AfterViewInit {
+export class AgeAppComponent {
+
+    readonly TitleBarButton = TitleBarButton;
 
     @Input() romFileToLoad?: AgeRomFileToLoad;
     @Input() emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
+    @Input() showDialog?: TitleBarButton;
 
-    @ViewChild('emulatorContainer') private _emulatorContainer!: ElementRef;
-    @ViewChild('dialogDiv') private _dialogDiv!: ElementRef;
+    @ViewChild('emulatorContainer') private _emulatorContainer?: ElementRef;
+    @ViewChild('dialogDiv') private _dialogDiv?: ElementRef;
 
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
-    private _showDialog?: TitleBarButton;
     private _ignoreCloseDialogs = false;
 
 
-    ngAfterViewInit(): void {
-        this.emulatorContainerResize();
+    get showSplashScreen(): boolean {
+        return !this.romFileToLoad;
     }
-
 
     get emulationPackage(): AgeEmulationPackage | undefined {
         return this._emulationPackage;
@@ -105,14 +120,6 @@ export class AgeAppComponent implements AfterViewInit {
 
     get viewport(): AgeRect {
         return this._viewport;
-    }
-
-    get showInfo(): boolean {
-        return this._showDialog === TitleBarButton.INFO;
-    }
-
-    get showOpenRom(): boolean {
-        return this._showDialog === TitleBarButton.OPEN_ROM;
     }
 
 
@@ -125,27 +132,33 @@ export class AgeAppComponent implements AfterViewInit {
 
     loadingComplete(emulationPackage: AgeEmulationPackage) {
         this._emulationPackage = emulationPackage;
+        this.emulatorContainerResize(); // initial load: update emulator screen size
     }
 
     toggleDialog(button: TitleBarButton): void {
-        if (this._showDialog !== button) {
-            this._showDialog = button;
+        if (this.showDialog !== button) {
+            this.showDialog = button;
             this._ignoreCloseDialogs = true; // the same click triggers an immediate "closeDialogs"
         }
+        // we rely on the immediate "closeDialogs" to close the dialog
     }
 
     closeDialogs(event?: Event): void {
-        if (!event || (!this._dialogDiv.nativeElement.contains(event.target) && !this._ignoreCloseDialogs)) {
-            this._showDialog = undefined;
+        const eventContainsDialog = event && this._dialogDiv && this._dialogDiv.nativeElement.contains(event.target);
+
+        if (!event || (!eventContainsDialog && !this._ignoreCloseDialogs)) {
+            this.showDialog = undefined;
         }
         this._ignoreCloseDialogs = false;
     }
 
     @HostListener('window:resize')
     emulatorContainerResize(): void {
-        this._viewport = new AgeRect(
-            this._emulatorContainer.nativeElement.offsetWidth,
-            this._emulatorContainer.nativeElement.offsetHeight
-        );
+        if (this._emulatorContainer) {
+            this._viewport = new AgeRect(
+                this._emulatorContainer.nativeElement.offsetWidth,
+                this._emulatorContainer.nativeElement.offsetHeight
+            );
+        }
     }
 }

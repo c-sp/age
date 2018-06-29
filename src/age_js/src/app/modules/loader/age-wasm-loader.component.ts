@@ -34,6 +34,7 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
             </age-loader-state>
 
             <age-loader-state [state]="runtimeInitState">
+                <ng-container ageLoaderNoState>WebAssembly: waiting for Javascript</ng-container>
                 <ng-container ageLoaderWorking>initializing WebAssembly ...</ng-container>
                 <ng-container ageLoaderSuccess>WebAssembly initialized</ng-container>
                 <ng-container ageLoaderError>error initializing WebAssembly</ng-container>

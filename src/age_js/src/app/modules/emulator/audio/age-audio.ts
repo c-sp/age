@@ -15,6 +15,9 @@
 //
 
 
+// TODO use AudioWorklet polyfill to support more browsers
+
+
 //
 // Links:
 //  http://blog.mecheye.net/2017/09/i-dont-know-who-the-web-audio-api-is-designed-for/
@@ -25,22 +28,24 @@
 export class AgeAudio {
 
     private readonly _audioCtx = new AudioContext();
-    private _workletNode!: AudioWorkletNode;
+    private _workletNode?: AudioWorkletNode;
 
     constructor() {
         /* tslint:disable no-any */ // at the moment I see no other way ...
         const audioCtx: any = this._audioCtx;
         /* tslint:enable no-any */
 
-        audioCtx.audioWorklet.addModule('assets/age-audio-stream.js').then(() => {
-            this._workletNode = new AudioWorkletNode(this._audioCtx, 'age-audio-stream', {
-                numberOfInputs: 1,
-                numberOfOutputs: 1,
-                outputChannelCount: [2]
-            });
+        if (audioCtx.audioWorklet) {
+            audioCtx.audioWorklet.addModule('assets/age-audio-stream.js').then(() => {
+                this._workletNode = new AudioWorkletNode(this._audioCtx, 'age-audio-stream', {
+                    numberOfInputs: 1,
+                    numberOfOutputs: 1,
+                    outputChannelCount: [2]
+                });
 
-            this._workletNode.connect(this._audioCtx.destination);
-        });
+                this._workletNode.connect(this._audioCtx.destination);
+            });
+        }
     }
 
     close(): void {

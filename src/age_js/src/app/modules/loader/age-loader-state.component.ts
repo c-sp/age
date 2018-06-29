@@ -48,12 +48,20 @@ export enum AgeLoaderState {
                     <ng-content select="[ageLoaderError]"></ng-content>
                 </ng-container>
 
+                <span *ngSwitchDefault>
+                    <ng-content select="[ageLoaderNoState]"></ng-content>
+                </span>
+
             </ng-container>
         </div>
     `,
     styles: [`
         i {
             margin-right: .5em;
+        }
+
+        span {
+            color: #505050;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush

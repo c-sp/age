@@ -21,10 +21,15 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
     selector: 'age-open-rom-url',
     template: `
         <div>
-            <span [class.age-ui-clickable]="!urlHint" (click)="emitValidUrl()">
+            <span [class.age-ui-clickable]="!urlHint"
+                  title="Open the Gameboy rom file at the specified URL.
+This will use a proxy host to circumvent possible Cross Origin Resource Sharing (CORS) issues."
+                  (click)="emitValidUrl()">
+
                 <i class="fa fa-globe-africa age-ui-big-icon"></i>
                 open URL
             </span>
+
             <span *ngIf="urlHint as hint" class="age-ui-error">
                 <ng-container [ngSwitch]="hint">
 
@@ -91,6 +96,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
         }
 
         :nth-child(1) > :nth-child(2) {
+            margin-left: .5em;
             font-size: smaller;
         }
 

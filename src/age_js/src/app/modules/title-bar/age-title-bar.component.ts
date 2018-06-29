@@ -19,8 +19,8 @@ import {AgeEmulationRuntimeInfo} from '../../common';
 
 
 export enum TitleBarButton {
-    OPEN_ROM,
-    INFO
+    OPEN_ROM = 'OPEN_ROM',
+    INFO = 'INFO'
 }
 
 
@@ -29,22 +29,30 @@ export enum TitleBarButton {
     template: `
         <div class="container age-ui">
 
-            <div class="runtime">
-                <ng-container *ngIf="runtimeInfo as info">
+            <div>
+                <!-- inner div for achieving layout symmetry with width:100% -->
+                <div class="runtime">
+                    <ng-container *ngIf="runtimeInfo as info">
 
-                    <span *ngIf="info.emulatedSeconds" title="number of emulated seconds">
-                        {{info.emulatedSeconds | number:'1.0-2'}}s
+                    <span *ngIf="info.emulatedSeconds"
+                          title="Number of emulated seconds">
+                        {{info.emulatedSeconds | number:'1.1-1'}}s
                     </span>
 
-                    <span *ngIf="info.emulationSpeed" title="current emulation speed relative to the Gameboy's speed">
-                        {{percent(info.emulationSpeed) | number:'1.0-2'}}%
+                        <span *ngIf="info.emulationSpeed"
+                              title="Current emulation speed
+(100% being the Gameboy's actual speed)">
+                        {{info.emulationSpeed}}%
                     </span>
 
-                    <span *ngIf="info.emulationMaxSpeed" title="estimated highest possible emulation speed">
-                        {{percent(info.emulationMaxSpeed) | number:'1.0-2'}}%
+                        <span *ngIf="info.emulationMaxSpeed"
+                              title="Estimated highest possible emulation speed achievable on this device
+(100% being the Gameboy's actual speed)">
+                        {{info.emulationMaxSpeed}}%
                     </span>
 
-                </ng-container>
+                    </ng-container>
+                </div>
             </div>
 
             <div class="title">
@@ -52,7 +60,7 @@ export enum TitleBarButton {
                     AGE
                 </div>
                 <div *ngIf="runtimeInfo as info; else noRom"
-                     title="title of the rom currently being emulated">
+                     title="Title of the rom currently being emulated">
                     running {{info.romName}}
                 </div>
                 <ng-template #noRom>
@@ -62,14 +70,17 @@ export enum TitleBarButton {
                 </ng-template>
             </div>
 
-            <div class="buttons">
-                <i class="fa fa-folder-open age-ui-clickable age-ui-big-icon"
-                   title="open Gameboy rom file ..."
-                   (click)="buttonClicked.emit(TitleBarButton.OPEN_ROM)"></i>
+            <div>
+                <!-- inner div for achieving layout symmetry with width:100% -->
+                <div class="buttons">
+                    <i class="fa fa-folder-open age-ui-clickable age-ui-big-icon"
+                       title="Open a Gameboy rom file ..."
+                       (click)="buttonClicked.emit(TitleBarButton.OPEN_ROM)"></i>
 
-                <i class="fa fa-info-circle age-ui-clickable age-ui-big-icon"
-                   title="about AGE ..."
-                   (click)="buttonClicked.emit(TitleBarButton.INFO)"></i>
+                    <i class="fa fa-info-circle age-ui-clickable age-ui-big-icon"
+                       title="About AGE ..."
+                       (click)="buttonClicked.emit(TitleBarButton.INFO)"></i>
+                </div>
             </div>
 
         </div>
@@ -86,28 +97,36 @@ export enum TitleBarButton {
             padding: .5em;
         }
 
-        .container > .runtime {
+        .container > :nth-child(1) {
             flex: 1 1;
+        }
+
+        .container > :nth-child(3) {
+            flex: 1 1;
+        }
+
+        .runtime {
+            width: 100%;
             text-align: right;
         }
 
-        .container > .runtime > span {
+        .runtime > span {
             display: inline-block;
             min-width: 3em;
             margin-left: .5em;
         }
 
-        .container > .title {
+        .title {
             width: 18em;
             text-align: center;
         }
 
-        .container > .buttons {
-            flex: 1 1;
+        .buttons {
+            width: 100%;
             text-align: left;
         }
 
-        .container > .buttons > i {
+        .buttons i {
             margin-right: .25em;
         }
     `],
@@ -117,11 +136,21 @@ export class AgeTitleBarComponent {
 
     readonly TitleBarButton = TitleBarButton;
 
-    @Input() runtimeInfo?: AgeEmulationRuntimeInfo;
-
     @Output() readonly buttonClicked = new EventEmitter<TitleBarButton>();
 
-    percent(value: number): number {
-        return Math.round(value * 100);
+    private _runtimeInfo?: AgeEmulationRuntimeInfo;
+
+    get runtimeInfo(): AgeEmulationRuntimeInfo | undefined {
+        return this._runtimeInfo;
+    }
+
+    @Input()
+    set runtimeInfo(info: AgeEmulationRuntimeInfo | undefined) {
+        this._runtimeInfo = !info ? undefined : {
+            romName: info.romName,
+            emulatedSeconds: info.emulatedSeconds && Math.round(info.emulatedSeconds * 10) / 10,
+            emulationSpeed: info.emulationSpeed && Math.round(info.emulationSpeed * 100),
+            emulationMaxSpeed: info.emulationMaxSpeed && Math.round(info.emulationMaxSpeed * 100)
+        };
     }
 }

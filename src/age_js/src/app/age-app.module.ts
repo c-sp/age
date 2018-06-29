@@ -23,6 +23,7 @@ import {AgeLoaderModule} from './modules/loader/age-loader.module';
 import {AgeTitleBarModule} from './modules/title-bar/age-title-bar.module';
 import {AgeInfoModule} from './modules/info/age-info.module';
 import {AgeOpenRomModule} from './modules/open-rom/age-open-rom.module';
+import {AgeSplashScreenComponent} from './age-splash-screen.component';
 
 
 @NgModule({
@@ -35,7 +36,8 @@ import {AgeOpenRomModule} from './modules/open-rom/age-open-rom.module';
         AgeTitleBarModule
     ],
     declarations: [
-        AgeAppComponent
+        AgeAppComponent,
+        AgeSplashScreenComponent
     ],
     bootstrap: [AgeAppComponent]
 })
