@@ -20,24 +20,19 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} fr
 @Component({
     selector: 'age-splash-screen',
     template: `
-        <!-- inner spans for different font heights to prevent differently sized div margins -->
         <div class="container age-ui">
 
-            <div>
-                <div class="title">
-                    Welcome to
-                    <div>AGE</div>
-                    <span>A</span>nother
-                    <span>G</span>ameboy
-                    <span>E</span>mulator
-                </div>
+            <div class="title">
+                Welcome to
+                <div>AGE</div>
+                <span>A</span>nother
+                <span>G</span>ameboy
+                <span>E</span>mulator
             </div>
 
             <div>
-                <span class="open-rom-hint">
-                    To open a Gameboy rom file<br>
-                    please click the <i class="fa fa-folder-open"></i> icon above.
-                </span>
+                To open a Gameboy rom file<br>
+                please click the <i class="fa fa-folder-open"></i> icon above.
             </div>
 
             <div *ngIf="!audioWorkletAvailable" class="warning age-ui-error">
@@ -85,10 +80,6 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} fr
             color: rgb(230, 200, 170);
             font-size: 4em;
             text-shadow: .07em .07em rgba(180, 150, 120, 0.4);
-        }
-
-        .open-rom-hint {
-            font-size: smaller;
         }
 
         .warning {

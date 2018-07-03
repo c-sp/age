@@ -6,6 +6,8 @@
     <title>AGE - Online Gameboy Emulator</title>
     <base href="/">
 
+    <meta name="Description" content="written by Christoph Sprenger,
+a Gameboy Emulator brought to your Browser using WebAssembly and Angular">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -18,11 +20,29 @@
             background-color: black;
             color: white;
         }
+
+        .loading-screen {
+            margin: 4em;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-<age-app-root></age-app-root>
+<age-app-root>
+    <div class="loading-screen">
+
+        <noscript>
+            <h2>Please activate JavaScript to run AGE.</h2>
+        </noscript>
+
+        <h2 id="loading-headline"></h2>
+        <script>
+            document.getElementById("loading-headline").innerHTML = "Loading AGE ...";
+        </script>
+
+    </div>
+</age-app-root>
 </body>
 
 </html>
