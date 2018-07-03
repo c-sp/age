@@ -23,6 +23,7 @@ import {VERSION_INFO} from '../../../environments/version';
     template: `
         <a href="https://gitlab.com/csprenger/AGE/tree/{{commitHash}}"
            target="_blank"
+           rel="nofollow noreferrer"
            title="Link to the git commit this version of AGE is based on"
            class="age-ui-clickable">
 
