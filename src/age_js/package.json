@@ -4,10 +4,12 @@
     "license": "Apache 2.0",
     "scripts": {
         "ng": "ng",
-        "start": "npm run write-version && ng serve",
-        "build": "npm run write-version && ng build --prod",
+        "start": "npm run generate-files && ng serve",
+        "build": "npm run generate-files && ng build --prod",
         "test": "ng test",
         "lint": "ng lint",
+        "generate-files": "npm run write-favicon && npm run write-version",
+        "write-favicon": "node tools/write-favicon.js",
         "write-version": "node tools/write-version.js",
         "cmake-age-wasm": "node tools/cmake-age-wasm.js"
     },
@@ -40,6 +42,7 @@
         "@types/jszip": "3.1.4",
         "@types/node": "10.5.1",
         "codelyzer": "4.4.2",
+        "icon-gen": "1.2.1",
         "jasmine-core": "3.1.0",
         "jasmine-spec-reporter": "4.2.1",
         "karma": "2.0.4",

@@ -13,6 +13,7 @@ src/age_js/node_modules
 src/age_js/npm-debug.log*
 src/age_js/src/assets/age_wasm*
 src/age_js/src/environments/version.ts
+src/age_js/src/favicon.ico
 
 # miscellaneous files
 Thumbs.db
