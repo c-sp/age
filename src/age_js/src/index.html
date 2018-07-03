@@ -25,13 +25,18 @@ a Gameboy Emulator brought to your Browser using WebAssembly and Angular">
             margin: 4em;
             text-align: center;
         }
+
+        .loading-screen a {
+            color: #98A8E0;
+            text-decoration: none;
+        }
     </style>
 </head>
 
 <body>
 <age-app-root>
-    <div class="loading-screen">
 
+    <div class="loading-screen">
         <noscript>
             <h2>Please activate JavaScript to run AGE.</h2>
         </noscript>
@@ -40,8 +45,14 @@ a Gameboy Emulator brought to your Browser using WebAssembly and Angular">
         <script>
             document.getElementById("loading-headline").innerHTML = "Loading AGE ...";
         </script>
-
     </div>
+
+    <div class="loading-screen">
+        Visit the
+        <a href="https://gitlab.com/csprenger/AGE" target="_blank" rel="noreferrer">AGE Git Repository</a>
+        to find out more about AGE - Another Gameboy Emulator.
+    </div>
+
 </age-app-root>
 </body>
 
