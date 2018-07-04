@@ -22,7 +22,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
     template: `
         <a href="https://gitlab.com/csprenger/AGE"
            target="_blank"
-           rel="nofollow noreferrer"
+           rel="noopener nofollow noreferrer"
            title="Link to the AGE git repository"
            class="age-ui-clickable">
 

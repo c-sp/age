@@ -42,7 +42,7 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} fr
                     this browser does not support
                     <a href="https://webaudio.github.io/web-audio-api/#AudioWorklet"
                        target="_blank"
-                       rel="nofollow noreferrer"
+                       rel="noopener nofollow noreferrer"
                        title="Link to the AudioWorklet specification"
                        class="age-ui-clickable">AudioWorklet</a>.
                 </div>
