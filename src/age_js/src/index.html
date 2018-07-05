@@ -31,14 +31,56 @@ written by Christoph Sprenger">
             color: white;
         }
 
-        .loading-screen {
+        .age-loading-screen {
             margin: 4em;
             text-align: center;
         }
 
-        .loading-screen a {
+        .age-ui-input {
+            background-color: #202020;
+            color: #C8C8C8;
+            padding: .1em;
+            border: double #404040;
+        }
+
+        .age-ui {
+            background-color: #404040;
+            color: #B8B8B8;
+            cursor: default;
+        }
+
+        .age-ui-error {
+            color: #FFA0A0;
+        }
+
+        .age-ui-highlight {
+            color: #C8C8C8;
+        }
+
+        .age-ui-title {
+            font-size: x-large;
+            font-weight: bold;
+            color: #C8C8C8;
+        }
+
+        .age-ui-subtitle {
+            font-size: large;
+            font-weight: bold;
+            color: #C8C8C8;
+        }
+
+        .age-ui-clickable {
+            cursor: pointer;
             color: #98A8E0;
             text-decoration: none;
+        }
+
+        .age-ui-clickable:hover {
+            color: #E0F0FF;
+        }
+
+        .age-ui-big-icon {
+            font-size: xx-large;
         }
     </style>
 </head>
@@ -46,7 +88,7 @@ written by Christoph Sprenger">
 <body>
 <age-app-root>
 
-    <div class="loading-screen">
+    <div class="age-loading-screen">
         <noscript>
             <h2>Please activate JavaScript to run AGE.</h2>
         </noscript>
@@ -57,12 +99,13 @@ written by Christoph Sprenger">
         </script>
     </div>
 
-    <div class="loading-screen">
+    <div class="age-loading-screen">
         Visit the
         <a href="https://gitlab.com/csprenger/AGE"
            target="_blank"
            rel="noopener nofollow noreferrer"
-           title="Link to the AGE git repository">AGE git repository</a>
+           title="Link to the AGE git repository"
+           class="age-ui-clickable">AGE git repository</a>
         to find out more about AGE - Another Gameboy Emulator.
     </div>
 

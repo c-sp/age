@@ -21,7 +21,6 @@
               "src/manifest.json"
             ],
             "styles": [
-              "src/css/age-styles.css"
             ],
             "scripts": []
           },
@@ -76,7 +75,6 @@
               "src/manifest.json"
             ],
             "styles": [
-              "src/css/age-styles.css"
             ]
           }
         },
