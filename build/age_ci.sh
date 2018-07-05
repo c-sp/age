@@ -149,6 +149,13 @@ assemble_pages()
     cp -r "$JS_DIR/"* "$PAGES_DIR"
     cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
     cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
+
+    # gzip everything as GitLab can serve gzipped files:
+    # https://docs.gitlab.com/ee/user/project/pages/introduction.html#serving-compressed-assets
+    #
+    # note that without any regextype the find command expects GNU Emacs regexps:
+    # https://www.gnu.org/software/emacs/manual/html_node/emacs/Regexps.html
+    find "$PAGES_DIR" -type f -iregex '.*\.[a-z0-9]+$' -execdir gzip -f --keep {} \;
 }
 
 run_doxygen()
