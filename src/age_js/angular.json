@@ -43,7 +43,8 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
+              ],
+              "serviceWorker": true
             }
           }
         },
@@ -73,7 +74,8 @@
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
             "assets": [
-              "src/assets"
+              "src/assets",
+              "src/manifest.json"
             ],
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/solid.css",

@@ -16,6 +16,8 @@
 
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import {ServiceWorkerModule} from '@angular/service-worker';
+import {environment} from '../environments/environment';
 
 import {AgeAppComponent} from './age-app.component';
 import {AgeEmulatorModule} from './modules/emulator/age-emulator.module';
@@ -29,6 +31,7 @@ import {AgeSplashScreenComponent} from './age-splash-screen.component';
 @NgModule({
     imports: [
         BrowserModule,
+        ServiceWorkerModule.register('/ngsw-worker.js', {enabled: environment.production}),
         AgeInfoModule,
         AgeEmulatorModule,
         AgeLoaderModule,
