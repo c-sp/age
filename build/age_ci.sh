@@ -155,7 +155,7 @@ assemble_pages()
     #
     # note that without any regextype the find command expects GNU Emacs regexps:
     # https://www.gnu.org/software/emacs/manual/html_node/emacs/Regexps.html
-    find "$PAGES_DIR" -type f -regex '.*\.[A-Za-z0-9]+$' -execdir gzip -f --keep {} \;
+    find "$PAGES_DIR" -type f -regex '.*\.[A-Za-z0-9]+$' -exec gzip -f --keep {} \;
 }
 
 run_doxygen()
