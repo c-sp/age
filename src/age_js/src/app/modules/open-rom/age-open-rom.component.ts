@@ -16,6 +16,7 @@
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
 import {AgeRomFileToLoad} from '../../common';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons/faInfoCircle';
 
 
 @Component({
@@ -29,7 +30,7 @@ import {AgeRomFileToLoad} from '../../common';
             </div>
 
             <div class="info">
-                <i class="fa fa-exclamation-circle"></i>
+                <fa-icon [icon]="faInfoCircle" class="icon"></fa-icon>
                 <div>
                     AGE can load Gameboy rom files <span class="age-ui-highlight">(*.gb)</span>,
                     Gameboy Color rom files <span class="age-ui-highlight">(*.gbc)</span>
@@ -66,7 +67,7 @@ import {AgeRomFileToLoad} from '../../common';
             display: flex;
         }
 
-        .info > i {
+        .info .icon {
             margin-right: .5em;
         }
 
@@ -78,6 +79,8 @@ import {AgeRomFileToLoad} from '../../common';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeOpenRomComponent {
+
+    readonly faInfoCircle = faInfoCircle;
 
     @Output() readonly openRom = new EventEmitter<AgeRomFileToLoad>();
 

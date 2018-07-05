@@ -16,6 +16,8 @@
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {AgeEmulationRuntimeInfo} from '../../common';
+import {faFolderOpen} from '@fortawesome/free-solid-svg-icons/faFolderOpen';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons/faInfoCircle';
 
 
 export enum TitleBarButton {
@@ -73,13 +75,13 @@ export enum TitleBarButton {
             <div>
                 <!-- inner div for achieving layout symmetry with width:100% -->
                 <div class="buttons">
-                    <i class="fa fa-folder-open age-ui-clickable age-ui-big-icon"
-                       title="Open a Gameboy rom file ..."
-                       (click)="buttonClicked.emit(TitleBarButton.OPEN_ROM)"></i>
+                    <fa-icon [icon]="faFolderOpen" class="age-ui-clickable age-ui-big-icon icon"
+                             title="Open a Gameboy rom file ..."
+                             (click)="buttonClicked.emit(TitleBarButton.OPEN_ROM)"></fa-icon>
 
-                    <i class="fa fa-info-circle age-ui-clickable age-ui-big-icon"
-                       title="About AGE ..."
-                       (click)="buttonClicked.emit(TitleBarButton.INFO)"></i>
+                    <fa-icon [icon]="faInfoCircle" class="age-ui-clickable age-ui-big-icon icon"
+                             title="About AGE ..."
+                             (click)="buttonClicked.emit(TitleBarButton.INFO)"></fa-icon>
                 </div>
             </div>
 
@@ -126,7 +128,7 @@ export enum TitleBarButton {
             text-align: left;
         }
 
-        .buttons i {
+        .icon {
             margin-right: .25em;
         }
     `],
@@ -135,6 +137,8 @@ export enum TitleBarButton {
 export class AgeTitleBarComponent {
 
     readonly TitleBarButton = TitleBarButton;
+    readonly faFolderOpen = faFolderOpen;
+    readonly faInfoCircle = faInfoCircle;
 
     @Output() readonly buttonClicked = new EventEmitter<TitleBarButton>();
 

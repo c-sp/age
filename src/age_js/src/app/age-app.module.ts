@@ -19,6 +19,8 @@ import {NgModule} from '@angular/core';
 import {ServiceWorkerModule} from '@angular/service-worker';
 import {environment} from '../environments/environment';
 
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+
 import {AgeAppComponent} from './age-app.component';
 import {AgeEmulatorModule} from './modules/emulator/age-emulator.module';
 import {AgeLoaderModule} from './modules/loader/age-loader.module';
@@ -32,6 +34,7 @@ import {AgeSplashScreenComponent} from './age-splash-screen.component';
     imports: [
         BrowserModule,
         ServiceWorkerModule.register('/ngsw-worker.js', {enabled: environment.production}),
+        FontAwesomeModule,
         AgeInfoModule,
         AgeEmulatorModule,
         AgeLoaderModule,

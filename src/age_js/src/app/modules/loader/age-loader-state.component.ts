@@ -15,6 +15,9 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
+import {faCheck} from '@fortawesome/free-solid-svg-icons/faCheck';
+import {faExclamationCircle} from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
 
 
 export enum AgeLoaderState {
@@ -29,9 +32,20 @@ export enum AgeLoaderState {
     template: `
         <div>
             <ng-container [ngSwitch]="state">
-                <i *ngSwitchCase="AgeLoaderState.WORKING" class="fa fa-cog fa-spin"></i>
-                <i *ngSwitchCase="AgeLoaderState.SUCCESS" class="fa fa-check"></i>
-                <i *ngSwitchCase="AgeLoaderState.ERROR" class="fa fa-times"></i>
+
+                <fa-icon *ngSwitchCase="AgeLoaderState.WORKING"
+                         [icon]="faCog"
+                         [spin]="true"
+                         class="icon"></fa-icon>
+
+                <fa-icon *ngSwitchCase="AgeLoaderState.SUCCESS"
+                         [icon]="faCheck"
+                         class="icon"></fa-icon>
+
+                <fa-icon *ngSwitchCase="AgeLoaderState.ERROR"
+                         [icon]="faExclamationCircle"
+                         class="icon age-ui-error"></fa-icon>
+
             </ng-container>
 
             <ng-container [ngSwitch]="state">
@@ -56,7 +70,7 @@ export enum AgeLoaderState {
         </div>
     `,
     styles: [`
-        i {
+        .icon {
             margin-right: .5em;
         }
 
@@ -69,6 +83,9 @@ export enum AgeLoaderState {
 export class AgeLoaderStateComponent {
 
     readonly AgeLoaderState = AgeLoaderState;
+    readonly faCog = faCog;
+    readonly faCheck = faCheck;
+    readonly faExclamationCircle = faExclamationCircle;
 
     @Input() state?: AgeLoaderState;
 }

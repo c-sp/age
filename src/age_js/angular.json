@@ -21,8 +21,6 @@
               "src/manifest.json"
             ],
             "styles": [
-              "node_modules/@fortawesome/fontawesome-free/css/solid.css",
-              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
               "src/css/age-styles.css"
             ],
             "scripts": []
@@ -78,8 +76,6 @@
               "src/manifest.json"
             ],
             "styles": [
-              "node_modules/@fortawesome/fontawesome-free/css/solid.css",
-              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
               "src/css/age-styles.css"
             ]
           }

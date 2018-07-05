@@ -17,6 +17,7 @@
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
 import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
+import {faTimesCircle} from '@fortawesome/free-solid-svg-icons/faTimesCircle';
 
 
 @Component({
@@ -38,9 +39,9 @@ import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
                     <age-open-rom *ngIf="showDialog === TitleBarButton.OPEN_ROM"
                                   (openRom)="openRom($event)"></age-open-rom>
 
-                    <i class="fa fa-times-circle age-ui-clickable"
-                       title="Close this dialog"
-                       (click)="closeDialogs()"></i>
+                    <fa-icon [icon]="faTimesCircle" class="close-dialog-icon age-ui-clickable"
+                             title="Close this dialog"
+                             (click)="closeDialogs()"></fa-icon>
                 </div>
             </div>
 
@@ -86,7 +87,7 @@ import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
             transform: translateX(-50%) translateY(.5em);
         }
 
-        .dialog > i {
+        .close-dialog-icon {
             position: absolute;
             top: .25em;
             right: .25em;
@@ -97,6 +98,7 @@ import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
 export class AgeAppComponent {
 
     readonly TitleBarButton = TitleBarButton;
+    readonly faTimesCircle = faTimesCircle;
 
     @Input() romFileToLoad?: AgeRomFileToLoad;
     @Input() emulationRuntimeInfo?: AgeEmulationRuntimeInfo;

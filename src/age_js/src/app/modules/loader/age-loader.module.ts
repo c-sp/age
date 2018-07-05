@@ -27,11 +27,13 @@ import {AgeWasmLoaderComponent} from './age-wasm-loader.component';
 import {CommonModule} from '@angular/common';
 import {AgeLoaderComponent} from './age-loader.component';
 import {AgeRomFileExtractorComponent} from './age-rom-file-extractor.component';
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 
 
 @NgModule({
     imports: [
-        CommonModule
+        CommonModule,
+        FontAwesomeModule
     ],
     declarations: [
         AgeLoaderComponent,

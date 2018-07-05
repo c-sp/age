@@ -15,6 +15,8 @@
 //
 
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
+import {faFolderOpen} from '@fortawesome/free-solid-svg-icons/faFolderOpen';
+import {faExclamationCircle} from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
 
 
 @Component({
@@ -32,11 +34,13 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} fr
 
             <div>
                 To open a Gameboy rom file<br>
-                please click the <i class="fa fa-folder-open"></i> icon above.
+                please click the
+                <fa-icon [icon]="faFolderOpen"></fa-icon>
+                icon above.
             </div>
 
             <div *ngIf="!audioWorkletAvailable" class="warning age-ui-error">
-                <i class="fa fa-exclamation-circle age-ui-big-icon"></i>
+                <fa-icon [icon]="faExclamationCircle" class="age-ui-big-icon warning-icon"></fa-icon>
                 <div>
                     AGE will remain silent as the required audio API is not available:
                     this browser does not support
@@ -49,7 +53,7 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} fr
             </div>
 
             <div *ngIf="!preciseTimer" class="warning age-ui-error">
-                <i class="fa fa-exclamation-circle age-ui-big-icon"></i>
+                <fa-icon [icon]="faExclamationCircle" class="age-ui-big-icon warning-icon"></fa-icon>
                 <div>
                     This browser's timer precision may be too low for AGE to run a smooth emulation.
                 </div>
@@ -93,7 +97,7 @@ import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} fr
             align-items: center;
         }
 
-        .warning > i {
+        .warning-icon {
             margin-right: .25em;
         }
     `],
@@ -112,6 +116,9 @@ export class AgeSplashScreenComponent implements AfterViewInit {
         return result;
     }
 
+
+    readonly faFolderOpen = faFolderOpen;
+    readonly faExclamationCircle = faExclamationCircle;
 
     private _audioWorkletAvailable = true;
     private _preciseTimer = true;

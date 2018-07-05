@@ -17,11 +17,13 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {AgeTitleBarComponent} from './age-title-bar.component';
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 
 
 @NgModule({
     imports: [
-        CommonModule
+        CommonModule,
+        FontAwesomeModule
     ],
     declarations: [
         AgeTitleBarComponent

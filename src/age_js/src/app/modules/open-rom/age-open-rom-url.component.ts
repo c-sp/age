@@ -15,6 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
+import {faGlobeAfrica} from '@fortawesome/free-solid-svg-icons/faGlobeAfrica';
 
 
 @Component({
@@ -26,7 +27,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
 This will use a proxy host to circumvent possible Cross Origin Resource Sharing (CORS) issues."
                   (click)="emitValidUrl()">
 
-                <i class="fa fa-globe-africa age-ui-big-icon"></i>
+                <fa-icon [icon]="faGlobeAfrica" class="age-ui-big-icon icon"></fa-icon>
                 open URL
             </span>
 
@@ -91,10 +92,6 @@ This will use a proxy host to circumvent possible Cross Origin Resource Sharing 
             margin-bottom: .1em;
         }
 
-        :nth-child(1) i {
-            margin-right: .25em;
-        }
-
         :nth-child(1) > :nth-child(2) {
             margin-left: .5em;
             font-size: smaller;
@@ -103,10 +100,16 @@ This will use a proxy host to circumvent possible Cross Origin Resource Sharing 
         input {
             width: 100%;
         }
+
+        .icon {
+            margin-right: .25em;
+        }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeOpenRomUrlComponent {
+
+    readonly faGlobeAfrica = faGlobeAfrica;
 
     readonly urlEmpty = 'urlEmpty';
     readonly urlInvalid = 'urlInvalid';

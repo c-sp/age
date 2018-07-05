@@ -15,6 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
+import {faFolderOpen} from '@fortawesome/free-solid-svg-icons/faFolderOpen';
 
 
 @Component({
@@ -27,7 +28,7 @@ import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, Vi
                    title="Open a Gameboy rom file on the local device.
 The rom file is not being uploaded anywhere, it will not leave your device.">
 
-                <i class="fa fa-folder-open age-ui-big-icon"></i>
+                <fa-icon [icon]="faFolderOpen" class="age-ui-big-icon icon"></fa-icon>
                 <span>open local file</span>
 
             </label>
@@ -49,7 +50,7 @@ The rom file is not being uploaded anywhere, it will not leave your device.">
             align-items: center;
         }
 
-        label i {
+        .icon {
             margin-right: .25em;
         }
 
@@ -60,6 +61,8 @@ The rom file is not being uploaded anywhere, it will not leave your device.">
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgeOpenRomLocalComponent {
+
+    readonly faFolderOpen = faFolderOpen;
 
     @Output() readonly openFile = new EventEmitter<File>();
 

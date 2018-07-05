@@ -20,12 +20,14 @@ import {AgeOpenRomLocalComponent} from './age-open-rom-local.component';
 import {AgeOpenRomUrlComponent} from './age-open-rom-url.component';
 import {HttpClientModule} from '@angular/common/http';
 import {AgeOpenRomComponent} from './age-open-rom.component';
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 
 
 @NgModule({
     imports: [
         CommonModule,
-        HttpClientModule
+        HttpClientModule,
+        FontAwesomeModule
     ],
     declarations: [
         AgeOpenRomComponent,
