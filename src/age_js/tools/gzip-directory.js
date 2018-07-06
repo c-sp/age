@@ -21,7 +21,7 @@ const zlib = require('zlib');
 // evaluate parameter, use the Angular CLI dist directory as default
 let dir_path = path.resolve(__dirname, '../dist');
 if (process.argv.length > 2) {
-    path.resolve(process.argv[2]);
+    dir_path = path.resolve(process.argv[2]);
 }
 
 // make sure the directory exists
