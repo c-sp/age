@@ -8,14 +8,14 @@
         "build": "npm run generate-files && ng build --prod",
         "build:analyze": "npm run build -- --stats-json && webpack-bundle-analyzer dist/stats.json",
         "start:dev": "npm run generate-files && ng serve",
-        "start:prod": "npm run build && npm run gzip-dist && npm run http-serve-dist",
+        "start:prod": "npm run build && npm run gzip-directory && npm run http-serve-dist",
         "test": "ng test",
         "lint": "ng lint",
         "generate-files": "npm run write-icons && npm run write-version",
         "write-icons": "node tools/write-icons.js",
         "write-version": "node tools/write-version.js",
         "cmake-age-wasm": "node tools/cmake-age-wasm.js",
-        "gzip-dist": "node tools/gzip-dist.js"
+        "gzip-directory": "node tools/gzip-directory.js"
     },
     "private": true,
     "dependencies": {

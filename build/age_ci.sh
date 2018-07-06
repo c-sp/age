@@ -103,7 +103,7 @@ age_js()
     CMD=$1
     shift
     PARAMS="$@"
-    # --base-href /myUrl/
+
     case ${CMD} in
         ${JS_BUILD}) PARAMS="--prod --output-path $(out_dir js) $PARAMS" ;;
         ${JS_TEST}) PARAMS="--watch=false $PARAMS" ;;
@@ -120,6 +120,15 @@ age_js()
 
     # run the requested NG command
     npm run ${CMD} -- ${PARAMS}
+
+    # in case of a build, gzip all generated files
+    # so that web servers can serve compressed content
+    # (GitLab pages: https://docs.gitlab.com/ee/user/project/pages/introduction.html#serving-compressed-assets)
+    if [ ${CMD} = ${JS_BUILD} ]; then
+        OUT_DIR=$(out_dir js)
+        echo "compressing contents of $OUT_DIR"
+        npm run gzip-directory "$OUT_DIR"
+    fi
 }
 
 assemble_pages()
@@ -149,13 +158,6 @@ assemble_pages()
     cp -r "$JS_DIR/"* "$PAGES_DIR"
     cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
     cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
-
-    # gzip everything as GitLab can serve gzipped files:
-    # https://docs.gitlab.com/ee/user/project/pages/introduction.html#serving-compressed-assets
-    #
-    # note that without any regextype the find command expects GNU Emacs regexps:
-    # https://www.gnu.org/software/emacs/manual/html_node/emacs/Regexps.html
-    find "$PAGES_DIR" -type f -regex '.*\.[A-Za-z0-9]+$' -exec gzip -f --keep {} \;
 }
 
 run_doxygen()

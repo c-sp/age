@@ -18,10 +18,15 @@ const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
 
-// make sure dist exists
-const dist_path = path.resolve(__dirname, '../dist');
-if (!fs.existsSync(dist_path)) {
-    throw new Error(`${dist_path} does not exist`);
+// evaluate parameter, use the Angular CLI dist directory as default
+let dir_path = path.resolve(__dirname, '../dist');
+if (process.argv.length > 2) {
+    path.resolve(process.argv[2]);
+}
+
+// make sure the directory exists
+if (!fs.existsSync(dir_path)) {
+    throw new Error(`${dir_path} does not exist`);
 }
 
 // find all files to gzip
@@ -33,9 +38,7 @@ function findFiles(file) {
             []
         );
 }
-
-const files = findFiles(dist_path);
-files.forEach(file => console.log(file));
+const files = findFiles(dir_path);
 
 // gzip all files
 files.forEach(file => {
