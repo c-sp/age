@@ -93,7 +93,7 @@ void age::test_application::schedule_tests()
             switch(m_type)
             {
                 case test_type::mooneye_test:
-                    method = mooneye_test_method();
+                    method = mooneye_test_method(file);
                     scheduled += schedule_test(file, method);
                     break;
 

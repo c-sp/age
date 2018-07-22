@@ -45,7 +45,7 @@ class gb_emulator_impl : public non_copyable
 {
 public:
 
-    gb_emulator_impl(const uint8_vector &rom, bool force_dmg, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
+    gb_emulator_impl(const uint8_vector &rom, gb_model model, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
 
     bool is_cgb() const;
     gb_test_info get_test_info() const;

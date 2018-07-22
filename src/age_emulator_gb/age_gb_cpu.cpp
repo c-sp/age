@@ -690,14 +690,29 @@ age::gb_cpu::gb_cpu(gb_core &core, gb_bus &bus)
     // reset registers (writing m_regs)
     m_pc = 0x0100;
     m_sp = 0xFFFE;
-    m_a = m_core.is_cgb() ? 0x11 : 0x01;
-    m_b = 0x00;
-    m_c = 0x13;
-    m_d = 0x00;
-    m_e = 0xD8;
-    m_h = 0x01;
-    m_l = 0x4D;
-    LOAD_FLAGS_FROM(0xB0)
+
+    if (m_core.is_cgb())
+    {
+        m_a = 0x11;
+        LOAD_FLAGS_FROM(0x80)
+        m_b = 0x00;
+        m_c = 0x00;
+        m_d = 0x00;
+        m_e = 0x08;
+        m_h = 0x00;
+        m_l = 0x7C;
+    }
+    else
+    {
+        m_a = 0x01;
+        LOAD_FLAGS_FROM(0xB0)
+        m_b = 0x00;
+        m_c = 0x13;
+        m_d = 0x00;
+        m_e = 0xD8;
+        m_h = 0x01;
+        m_l = 0x4D;
+    }
 }
 
 

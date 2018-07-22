@@ -26,6 +26,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
+#include <emulator/age_gb_emulator.hpp>
 
 
 
@@ -79,7 +80,7 @@ public:
     void write_svbk(uint8 value);
     void write_vbk(uint8 value);
 
-    gb_memory(const uint8_vector &cart_rom, bool force_dmg);
+    gb_memory(const uint8_vector &cart_rom, gb_model model);
 
 
 

@@ -883,11 +883,13 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 //
 //---------------------------------------------------------
 
-age::gb_memory::gb_memory(const uint8_vector &cart_rom, bool force_dmg)
+age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_model model)
     : m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
-      m_cgb(!force_dmg && (safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80)),
+      m_cgb((model == gb_model::cgb)
+            || ((model == gb_model::auto_detect) && (safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80))
+            ),
 
       m_mbc_write(get_mbc_write_function(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
 
