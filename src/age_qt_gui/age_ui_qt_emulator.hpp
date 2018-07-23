@@ -28,6 +28,7 @@
 
 #include <age_types.hpp>
 #include <emulator/age_emulator.hpp>
+#include <emulator/age_gb_emulator.hpp> // gb_model
 
 #include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
@@ -41,7 +42,7 @@ class qt_emulator
 {
 public:
 
-    qt_emulator(const QByteArray &rom, bool force_dmg, std::shared_ptr<qt_user_value_store> user_value_store);
+    qt_emulator(const QByteArray &rom, gb_model model, std::shared_ptr<qt_user_value_store> user_value_store);
     ~qt_emulator();
 
     std::shared_ptr<emulator> get_emulator();

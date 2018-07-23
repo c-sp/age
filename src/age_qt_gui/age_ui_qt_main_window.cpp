@@ -64,7 +64,8 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     m_settings = new qt_settings_dialog(m_user_value_store, m_renderer->get_max_texture_size(), this, Qt::WindowTitleHint  | Qt::WindowCloseButtonHint);
 
     m_action_open = new QAction("open file", this);
-    m_action_open_dmg = new QAction("open CGB file as GB", this);
+    m_action_open_dmg = new QAction("open file as GB", this);
+    m_action_open_cgb = new QAction("open file as CGB", this);
     m_action_settings = new QAction("settings", this);
     m_action_fullscreen = new QAction("fullscreen", this);
     m_action_fullscreen->setCheckable(true);
@@ -121,6 +122,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
 
     connect(m_action_open, SIGNAL(triggered()), this, SLOT(menu_emulator_open()));
     connect(m_action_open_dmg, SIGNAL(triggered()), this, SLOT(menu_emulator_open_dmg()));
+    connect(m_action_open_cgb, SIGNAL(triggered()), this, SLOT(menu_emulator_open_cgb()));
     connect(m_action_settings, SIGNAL(triggered()), this, SLOT(menu_emulator_settings()));
     connect(m_action_fullscreen, SIGNAL(triggered()), this, SLOT(menu_emulator_fullscreen()));
     connect(m_action_exit, SIGNAL(triggered()), this, SLOT(menu_emulator_exit()));
@@ -267,6 +269,7 @@ void age::qt_main_window::fill_menu(QMenu *menu)
 {
     menu->addAction(m_action_open);
     menu->addAction(m_action_open_dmg);
+    menu->addAction(m_action_open_cgb);
     menu->addSeparator();
     menu->addAction(m_action_settings);
     menu->addAction(m_action_fullscreen);
@@ -285,7 +288,7 @@ age::qt_key_event age::qt_main_window::get_event_for_key(int key)
 
 
 
-void age::qt_main_window::open_file(bool force_dmg)
+void age::qt_main_window::open_file(gb_model model)
 {
     QString file_name;
     QFileDialog dialog(this, "Open file", m_settings->get_open_file_dialog_directory(), "Gameboy files (*.gb *.gbc)");
@@ -319,7 +322,7 @@ void age::qt_main_window::open_file(bool force_dmg)
 
         if (file_contents.size() > 0)
         {
-            new_emulator = std::allocate_shared<qt_emulator>(std::allocator<qt_emulator>(), file_contents, force_dmg, m_user_value_store);
+            new_emulator = std::allocate_shared<qt_emulator>(std::allocator<qt_emulator>(), file_contents, model, m_user_value_store);
         }
 
         // propagate new emulator
@@ -420,13 +423,19 @@ void age::qt_main_window::update_status()
 
 void age::qt_main_window::menu_emulator_open()
 {
-    open_file(false);
+    open_file();
     m_settings->set_pause_emulator(false);
 }
 
 void age::qt_main_window::menu_emulator_open_dmg()
 {
-    open_file(true);
+    open_file(gb_model::dmg);
+    m_settings->set_pause_emulator(false);
+}
+
+void age::qt_main_window::menu_emulator_open_cgb()
+{
+    open_file(gb_model::cgb);
     m_settings->set_pause_emulator(false);
 }
 

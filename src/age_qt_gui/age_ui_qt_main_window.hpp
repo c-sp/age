@@ -35,6 +35,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
+#include <emulator/age_gb_emulator.hpp> // gb_model
 
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulation_runner.hpp"
@@ -74,12 +75,13 @@ private:
     bool is_fullscreen() const;
     void fill_menu(QMenu *menu);
     qt_key_event get_event_for_key(int key);
-    void open_file(bool force_dmg);
+    void open_file(gb_model model = gb_model::auto_detect);
 
     std::shared_ptr<qt_user_value_store> m_user_value_store = nullptr;
 
     QAction *m_action_open = nullptr;
     QAction *m_action_open_dmg = nullptr;
+    QAction *m_action_open_cgb = nullptr;
     QAction *m_action_settings = nullptr;
     QAction *m_action_fullscreen = nullptr;
     QAction *m_action_exit = nullptr;
@@ -108,6 +110,7 @@ private slots:
     void update_status();
     void menu_emulator_open();
     void menu_emulator_open_dmg();
+    void menu_emulator_open_cgb();
     void menu_emulator_settings();
     void menu_emulator_fullscreen();
     void menu_emulator_exit();
