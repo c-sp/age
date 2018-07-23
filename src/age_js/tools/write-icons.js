@@ -16,8 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
-const svg2png = require('svg2png'); // https://github.com/domenic/svg2png
+const sharp = require('sharp'); // https://github.com/lovell/sharp
 
 
 // icon sizes based on:
@@ -42,7 +41,7 @@ function png_path(size) {
 }
 
 
-// skip icon generation, if files are up to date
+// skip icon generation, if all icons are up to date
 
 const svg_mtime = fs.statSync(svg_path).mtime;
 
@@ -59,19 +58,69 @@ if (up_to_date) {
 
 // generate icons
 
-const write_file = util.promisify(fs.writeFile);
+async function check_metadata(image_path, sharp_instance) {
+    const metadata = await sharp_instance.metadata();
 
-const svg_buffer = fs.readFileSync(svg_path);
+    if (metadata.width !== metadata.height) {
+        throw new Error(`${image_path}: invalid image size: ${metadata.width} x ${metadata.height}`);
+    }
+    return metadata;
+}
 
-Promise.all(
-    icon_sizes.map(async (size) => {
-        const icon_path = png_path(size);
-        console.log(`generating ${icon_path} ...`);
 
-        const icon_buffer = await svg2png(svg_buffer, {width: size, height: size});
-        await write_file(icon_path, icon_buffer);
-    })
-)
+async function main() {
+    const svg_buffer = fs.readFileSync(svg_path);
+    const svg_size = (await check_metadata(svg_path, sharp(svg_buffer))).width;
+
+    const sharp_default_density = 72; // see https://sharp.dimens.io/en/stable/api-constructor/#sharp
+
+    await Promise.all(
+        icon_sizes.map(async (size) => {
+            const png_icon_path = png_path(size);
+            console.log(`generating ${png_icon_path} ...`);
+
+            //
+            // We can adjust the resulting PNG image size only indirectly via non-fractional density parameter,
+            // making it prone to rounding errors.
+            // Thus the resulting PNG image size does not always match the desired size,
+            // e.g. instead of a 32x32 PNG sharp would render a 31x31 PNG.
+            //
+            // Resizing the PNG by +1/-1 pixel produces a less "clean" image than
+            // rendering the SVG to a PNG of the correct size.
+            //
+            // We thus render the SVG twice, once using Math.floor(density) and once using Math.ceil(density)
+            // and use the result matching the desired image size.
+            //
+
+            const density = sharp_default_density * size / svg_size;
+            const density_floor = Math.floor(density);
+            const density_ceil = Math.ceil(density);
+
+            const svg_floor = await sharp(svg_buffer, {density: density_floor});
+            const svg_ceil = await sharp(svg_buffer, {density: density_ceil});
+
+            const width_floor = (await check_metadata(png_icon_path, svg_floor)).width;
+            const width_ceil = (await check_metadata(png_icon_path, svg_ceil)).width;
+
+            // use the matching result
+            let svg;
+            if (width_floor === size) {
+                svg = svg_floor;
+            }
+            if (width_ceil === size) {
+                svg = svg_ceil;
+            }
+            if (!svg) {
+                throw new Error(`${png_icon_path}: conversion failed, size ${size} not available`);
+            }
+
+            // generate PNG
+            await svg.png().toFile(png_icon_path)
+        })
+    );
+}
+
+main()
     .then(() => console.log('done'))
     .catch(err => {
         console.error('ERROR', err);

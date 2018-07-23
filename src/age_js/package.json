@@ -60,7 +60,7 @@
         "karma-jasmine": "1.1.2",
         "karma-jasmine-html-reporter": "1.1.0",
         "rxjs-tslint": "0.1.5",
-        "svg2png": "4.1.1",
+        "sharp": "0.20.5",
         "ts-node": "7.0.0",
         "tslint": "5.10.0",
         "typescript": "2.7.2",
