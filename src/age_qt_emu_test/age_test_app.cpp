@@ -93,7 +93,7 @@ void age::test_application::schedule_tests()
             switch(m_type)
             {
                 case test_type::mooneye_test:
-                    method = mooneye_test_method();
+                    method = mooneye_test_method(file);
                     scheduled += schedule_test(file, method);
                     break;
 
@@ -258,6 +258,12 @@ bool age::test_application::ignore_files(QSet<QString> &files) const
                 // ignore empty lines and lines beginning with a '#'
                 if (!line.isEmpty() && !line.startsWith('#'))
                 {
+                    // trim end-of-line comments
+                    auto idx = line.indexOf('#');
+                    if (idx >= 0) {
+                        line = line.left(idx).trimmed();
+                    }
+
                     files_to_ignore.append(line);
                 }
             }

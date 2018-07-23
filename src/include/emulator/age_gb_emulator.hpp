@@ -63,13 +63,22 @@ struct gb_test_info
 
 
 
+enum class gb_model
+{
+    auto_detect,
+    cgb,
+    dmg
+};
+
+
+
 class gb_emulator_impl; // forward class declaration to decouple the actual implementation
 
 class gb_emulator : public emulator
 {
 public:
 
-    gb_emulator(const uint8_vector &rom, bool force_dmg = false, bool dmg_green = true);
+    gb_emulator(const uint8_vector &rom, gb_model model = gb_model::auto_detect, bool dmg_green = true);
     virtual ~gb_emulator() override;
 
     uint8_vector get_persistent_ram() const override;

@@ -35,7 +35,7 @@ namespace age
 
 test_result create_gb_test_result(const gb_emulator &emulator, const QString &error_message);
 
-test_method mooneye_test_method();
+test_method mooneye_test_method(const QString &file_name);
 
 test_method screenshot_test_png(bool force_dmg, bool dmg_green, uint millis_to_emulate);
 
