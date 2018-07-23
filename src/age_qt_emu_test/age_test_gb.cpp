@@ -50,7 +50,8 @@ age::test_method age::mooneye_test_method(const QString &file_name)
 
         if (file_name.endsWith(".gb", Qt::CaseInsensitive)) {
             QString no_extension = file_name.left(file_name.length() - 3);
-            if (no_extension.endsWith("-cgb", Qt::CaseInsensitive)) {
+
+            if (no_extension.endsWith("-cgb", Qt::CaseInsensitive) || no_extension.endsWith("-c", Qt::CaseInsensitive)) {
                 model = age::gb_model::cgb;
             }
         }
