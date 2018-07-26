@@ -157,10 +157,7 @@ private:
     uint8 m_un6c = 0xFE;
     uint8 m_un72 = 0;
     uint8 m_un73 = 0;
-    uint8 m_un74 = 0;
     uint8 m_un75 = 0x8F;
-    uint8 m_un76 = 0;
-    uint8 m_un77 = 0;
 
     std::vector<gb_event> m_events;
 

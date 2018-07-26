@@ -256,10 +256,9 @@ age::uint8 age::gb_bus::read_byte(uint16 address)
                 case to_integral(gb_io_port::svbk): result = m_memory.read_svbk(); break;
                 case to_integral(gb_io_port::un72): result = m_un72; break;
                 case to_integral(gb_io_port::un73): result = m_un73; break;
-                case to_integral(gb_io_port::un74): result = m_un74; break;
                 case to_integral(gb_io_port::un75): result = m_un75; break;
-                case to_integral(gb_io_port::un76): result = m_un76; break;
-                case to_integral(gb_io_port::un77): result = m_un77; break;
+                case to_integral(gb_io_port::un76): result = 0; break;
+                case to_integral(gb_io_port::un77): result = 0; break;
             }
         }
     }
@@ -392,6 +391,8 @@ void age::gb_bus::write_byte(uint16 address, uint8 byte)
                 case to_integral(gb_io_port::ocpd): m_lcd.write_ocpd(byte); break;
                 case to_integral(gb_io_port::un6c): m_un6c = byte | 0xFE; break;
                 case to_integral(gb_io_port::svbk): m_memory.write_svbk(byte); break;
+                case to_integral(gb_io_port::un72): m_un72 = byte; break;
+                case to_integral(gb_io_port::un73): m_un73 = byte; break;
                 case to_integral(gb_io_port::un75): m_un75 = byte | 0x8F; break;
             }
         }
