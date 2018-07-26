@@ -39,6 +39,7 @@
 #define LOG_PLOT(x)
 #endif
 
+//#define MOONEYE_GBC_TEST
 
 
 // memory dumps,
@@ -590,8 +591,13 @@ void age::gb_lcd_ppu::plot_pixel(gb_lcd_ppu &ppu)
         }
 
         // plot pixel
+#ifndef MOONEYE_GBC_TEST
         AGE_ASSERT(color_index < ppu.m_colors.size());
         *ppu.m_next_pixel = ppu.m_colors[color_index];
+#else
+        color_index <<= 6;
+        *ppu.m_next_pixel = pixel(color_index, color_index, color_index);
+#endif
 
         // next pixel
         ++ppu.m_x_current;
@@ -723,7 +729,11 @@ void age::gb_lcd_ppu::fetch_tile_byte_2()
     index2 <<= 2;
 
     // palette & color priority
+#ifndef MOONEYE_GBC_TEST
     uint8 palette_offset = (m_new_tile_attributes & 0x07) << 2;
+#else
+    uint8 palette_offset = 0;
+#endif
 
     // cache color indexes
     m_new_tile[0] = m_tile_cache[index1 + 0] + palette_offset;
