@@ -173,6 +173,8 @@ window/on_screen/late_wx_ds_2.gbc
 
 ###   mooneye-gb
 
+acceptance/boot_hwio-dmg0.gb  # AGE emulates hardware IO for dmgABC
+acceptance/boot_hwio-S.gb     # SGB not supported by AGE
 acceptance/boot_regs-dmg0.gb  # AGE initializes CPU registers for dmgABC
 acceptance/boot_regs-mgb.gb   # AGE initializes CPU registers for dmgABC
 acceptance/boot_regs-sgb.gb   # SGB not supported by AGE
@@ -189,8 +191,6 @@ misc/boot_regs-A.gb           # GBA not supported by AGE
 
 ###   mooneye-gb
 
-acceptance/boot_hwio-dmg0.gb
-acceptance/boot_hwio-S.gb
 acceptance/interrupts/ie_push.gb
 acceptance/oam_dma/reg_read.gb
 acceptance/oam_dma/sources-dmgABCmgbS.gb
