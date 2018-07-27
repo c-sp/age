@@ -23,7 +23,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
-#include <emulator/age_gb_emulator.hpp>
+#include <emulator/age_gb_types.hpp>
 
 #include "age_gb_bus.hpp"
 #include "age_gb_core.hpp"

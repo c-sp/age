@@ -28,7 +28,7 @@
 
 #include <age_types.hpp>
 #include <emulator/age_emulator.hpp>
-#include <emulator/age_gb_emulator.hpp> // gb_model
+#include <emulator/age_gb_types.hpp>
 
 #include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"

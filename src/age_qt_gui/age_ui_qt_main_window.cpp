@@ -30,7 +30,7 @@
 #include <QTimer>
 
 #include <age_debug.hpp>
-#include <emulator/age_gb_emulator.hpp>
+#include <emulator/age_gb_emulator.hpp> // gb buttons
 
 #include "age_ui_qt_main_window.hpp"
 

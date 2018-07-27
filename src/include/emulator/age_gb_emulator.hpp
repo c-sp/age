@@ -25,6 +25,7 @@
 
 #include <age_types.hpp>
 #include <emulator/age_emulator.hpp>
+#include <emulator/age_gb_types.hpp>
 
 
 
@@ -39,36 +40,6 @@ constexpr uint gb_a = 0x10;
 constexpr uint gb_b = 0x20;
 constexpr uint gb_select = 0x40;
 constexpr uint gb_start = 0x80;
-
-
-
-//!
-//! \brief Struct containing parts of the Gameboy CPU state.
-//!
-//! This struct was implemented for evaluating test rom results.
-//!
-struct gb_test_info
-{
-    bool m_is_cgb;
-    bool m_mooneye_debug_op;
-
-    uint8 m_a = 0;
-    uint8 m_b = 0;
-    uint8 m_c = 0;
-    uint8 m_d = 0;
-    uint8 m_e = 0;
-    uint8 m_h = 0;
-    uint8 m_l = 0;
-};
-
-
-
-enum class gb_model
-{
-    auto_detect,
-    cgb,
-    dmg
-};
 
 
 

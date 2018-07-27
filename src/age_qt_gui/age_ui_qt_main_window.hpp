@@ -35,7 +35,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
-#include <emulator/age_gb_emulator.hpp> // gb_model
+#include <emulator/age_gb_types.hpp>
 
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulation_runner.hpp"
