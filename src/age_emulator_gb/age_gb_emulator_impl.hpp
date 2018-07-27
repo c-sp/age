@@ -47,7 +47,6 @@ public:
 
     gb_emulator_impl(const uint8_vector &rom, gb_model model, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
 
-    bool is_cgb() const;
     gb_test_info get_test_info() const;
 
     uint8_vector get_persistent_ram() const;

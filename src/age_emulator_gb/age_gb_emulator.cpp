@@ -32,11 +32,6 @@ constexpr uint gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycl
 //
 //---------------------------------------------------------
 
-bool age::gb_emulator::is_cgb() const
-{
-    return m_impl->is_cgb();
-}
-
 age::gb_test_info age::gb_emulator::get_test_info() const
 {
     return m_impl->get_test_info();

@@ -18,11 +18,6 @@
 
 
 
-bool age::gb_emulator_impl::is_cgb() const
-{
-    return m_memory.is_cgb();
-}
-
 age::gb_test_info age::gb_emulator_impl::get_test_info() const
 {
     return m_cpu.get_test_info();

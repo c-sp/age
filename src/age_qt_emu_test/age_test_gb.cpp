@@ -28,7 +28,7 @@ age::test_result age::create_gb_test_result(const gb_emulator &emulator, const Q
     age::test_result result;
     result.m_cycles_emulated = emulator.get_emulated_cycles();
     result.m_error_message = error_message;
-    result.m_additional_message = emulator.is_cgb() ? "(CGB)" : "(DMG)";
+    result.m_additional_message = emulator.get_test_info().m_is_cgb ? "(CGB)" : "(DMG)";
     return result;
 }
 

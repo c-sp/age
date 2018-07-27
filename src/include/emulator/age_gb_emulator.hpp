@@ -45,7 +45,7 @@ constexpr uint gb_start = 0x80;
 //!
 //! \brief Struct containing parts of the Gameboy CPU state.
 //!
-//! This struct exists only for evaluating Gameboy test results.
+//! This struct was implemented for evaluating test rom results.
 //!
 struct gb_test_info
 {
@@ -87,10 +87,7 @@ public:
     void set_buttons_down(uint buttons) override;
     void set_buttons_up(uint buttons) override;
 
-    bool is_cgb() const;
     gb_test_info get_test_info() const;
-
-    static std::string extract_rom_name(const uint8_vector &rom);
 
 protected:
 
