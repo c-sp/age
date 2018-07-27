@@ -57,18 +57,18 @@ age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
 
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
-        m_bus.handle_events(); // may change the current gb_mode
-        switch (m_core.get_mode())
+        m_bus.handle_events(); // may change the current gb_state
+        switch (m_core.get_state())
         {
-            case gb_mode::halted:
+            case gb_state::halted:
                 m_core.oscillate_cpu_cycle();
                 break;
 
-            case gb_mode::cpu_active:
+            case gb_state::cpu_active:
                 m_cpu.emulate_instruction();
                 break;
 
-            case gb_mode::dma:
+            case gb_state::dma:
                 AGE_ASSERT(m_core.is_cgb());
                 m_bus.handle_dma();
                 m_core.finish_dma();

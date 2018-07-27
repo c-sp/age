@@ -47,7 +47,7 @@ enum class gb_interrupt : uint8
     vblank = 0x01
 };
 
-enum class gb_mode : uint
+enum class gb_state : uint
 {
     halted = 0,
     cpu_active = 1,
@@ -80,7 +80,7 @@ public:
     uint get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
     bool is_cgb() const;
-    gb_mode get_mode() const;
+    gb_state get_state() const;
 
     void oscillate_cpu_cycle();
     void oscillate_2_cycles();
@@ -137,7 +137,7 @@ private:
     void check_halt_mode();
 
     const bool m_cgb;
-    gb_mode m_mode = gb_mode::cpu_active;
+    gb_state m_state = gb_state::cpu_active;
 
     uint m_oscillation_cycle = 0;
     uint m_machine_cycles_per_cpu_cycle = 4;

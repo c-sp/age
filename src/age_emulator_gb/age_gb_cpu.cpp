@@ -747,8 +747,6 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 
 void age::gb_cpu::emulate_instruction()
 {
-    AGE_ASSERT(m_core.get_mode() == gb_mode::cpu_active);
-
     uint16 interrupt_pc = m_core.get_interrupt_to_service();
     if (interrupt_pc != 0)
     {
