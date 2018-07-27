@@ -28,11 +28,30 @@
 namespace age
 {
 
+//!
+//! \brief Configures the hardware (Gameboy or Gameboy Color) to emulate.
+//!
+//! Setting specific hardware is usually only required for running tests.
+//! The end user should probably let the emulator auto detect the hardware
+//! required by the rom to run.
+//!
 enum class gb_hardware
 {
     auto_detect,
     cgb,
     dmg
+};
+
+
+
+//!
+//! \brief The operating mode defined by configured hardware and rom capabilities.
+//!
+enum class gb_mode
+{
+    dmg,
+    dmg_on_cgb,
+    cgb
 };
 
 

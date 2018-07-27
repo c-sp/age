@@ -33,8 +33,8 @@ constexpr const age::uint8_array<5> gb_interrupt_pc_lookup =
 
 
 
-age::gb_core::gb_core(bool cgb)
-    : m_cgb(cgb)
+age::gb_core::gb_core(gb_mode mode)
+    : m_mode(mode)
 {
     //
     // verified by gambatte tests
@@ -51,7 +51,7 @@ age::gb_core::gb_core(bool cgb)
     //      tima/tc00_start_1_outF0
     //      tima/tc00_start_2_outF1
     //
-    if (m_cgb)
+    if (is_cgb())
     {
         m_oscillation_cycle = 0x1F * 0x100;
         m_oscillation_cycle -= 96;
@@ -81,9 +81,14 @@ bool age::gb_core::is_double_speed() const
     return m_double_speed;
 }
 
+age::gb_mode age::gb_core::get_mode() const
+{
+    return m_mode;
+}
+
 bool age::gb_core::is_cgb() const
 {
-    return m_cgb;
+    return m_mode == gb_mode::cgb;
 }
 
 age::gb_state age::gb_core::get_state() const
@@ -186,7 +191,7 @@ bool age::gb_core::halt()
 void age::gb_core::stop()
 {
     AGE_ASSERT(m_state == gb_state::cpu_active);
-    if (m_cgb && ((m_key1 & 0x01) > 0))
+    if (is_cgb() && ((m_key1 & 0x01) > 0))
     {
         m_key1 ^= 0x81;
     }
@@ -293,7 +298,7 @@ void age::gb_core::check_halt_mode()
         // for CGB, unhalting on interrupt takes an additional 4 cycles
         // (however, some gambatte tests check this indirectly by relying
         // on interrupts during a halt)
-        if (m_cgb)
+        if (is_cgb())
         {
             oscillate_cpu_cycle();
         }

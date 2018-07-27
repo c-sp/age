@@ -98,7 +98,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
                                         pcm_vector &pcm_vec,
                                         screen_buffer &screen_buf)
     : m_memory(rom, hardware),
-      m_core(m_memory.is_cgb()),
+      m_core(m_memory.get_mode()),
       m_sound(m_core, pcm_vec),
       m_lcd(m_core, m_memory, screen_buf, dmg_green),
       m_timer(m_core),

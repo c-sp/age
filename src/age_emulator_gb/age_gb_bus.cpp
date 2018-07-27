@@ -240,7 +240,7 @@ age::uint8 age::gb_bus::read_byte(uint16 address)
             case to_integral(gb_io_port::ie): result = m_core.read_ie(); break;
         }
 
-        if (m_memory.is_cgb())
+        if (m_core.is_cgb())
         {
             switch (address)
             {
@@ -372,8 +372,8 @@ void age::gb_bus::write_byte(uint16 address, uint8 byte)
             case to_integral(gb_io_port::wx): m_lcd.write_wx(byte); break;
         }
 
-        // color Gameboy ports
-        if (m_memory.is_cgb())
+        // CGB ports
+        if (m_core.is_cgb())
         {
             switch (address)
             {
