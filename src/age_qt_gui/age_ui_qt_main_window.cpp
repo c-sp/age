@@ -288,7 +288,7 @@ age::qt_key_event age::qt_main_window::get_event_for_key(int key)
 
 
 
-void age::qt_main_window::open_file(gb_model model)
+void age::qt_main_window::open_file(gb_hardware hardware)
 {
     QString file_name;
     QFileDialog dialog(this, "Open file", m_settings->get_open_file_dialog_directory(), "Gameboy files (*.gb *.gbc)");
@@ -322,7 +322,7 @@ void age::qt_main_window::open_file(gb_model model)
 
         if (file_contents.size() > 0)
         {
-            new_emulator = std::allocate_shared<qt_emulator>(std::allocator<qt_emulator>(), file_contents, model, m_user_value_store);
+            new_emulator = std::allocate_shared<qt_emulator>(std::allocator<qt_emulator>(), file_contents, hardware, m_user_value_store);
         }
 
         // propagate new emulator
@@ -429,13 +429,13 @@ void age::qt_main_window::menu_emulator_open()
 
 void age::qt_main_window::menu_emulator_open_dmg()
 {
-    open_file(gb_model::dmg);
+    open_file(gb_hardware::dmg);
     m_settings->set_pause_emulator(false);
 }
 
 void age::qt_main_window::menu_emulator_open_cgb()
 {
-    open_file(gb_model::cgb);
+    open_file(gb_hardware::cgb);
     m_settings->set_pause_emulator(false);
 }
 

@@ -42,7 +42,7 @@ class qt_emulator
 {
 public:
 
-    qt_emulator(const QByteArray &rom, gb_model model, std::shared_ptr<qt_user_value_store> user_value_store);
+    qt_emulator(const QByteArray &rom, gb_hardware hardware, std::shared_ptr<qt_user_value_store> user_value_store);
     ~qt_emulator();
 
     std::shared_ptr<emulator> get_emulator();

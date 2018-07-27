@@ -75,7 +75,7 @@ private:
     bool is_fullscreen() const;
     void fill_menu(QMenu *menu);
     qt_key_event get_event_for_key(int key);
-    void open_file(gb_model model = gb_model::auto_detect);
+    void open_file(gb_hardware hardware = gb_hardware::auto_detect);
 
     std::shared_ptr<qt_user_value_store> m_user_value_store = nullptr;
 

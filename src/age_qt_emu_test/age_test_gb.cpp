@@ -46,18 +46,18 @@ age::test_method age::mooneye_test_method(const QString &file_name)
     return [=](const uint8_vector &test_rom, const uint8_vector&) {
 
         // CGB mooneye-gb test roms can only be identified by their file name (as far a I know)
-        age::gb_model model = age::gb_model::dmg;
+        age::gb_hardware hardware = age::gb_hardware::dmg;
 
         if (file_name.endsWith(".gb", Qt::CaseInsensitive)) {
             QString no_extension = file_name.left(file_name.length() - 3);
 
             if (no_extension.endsWith("-cgb", Qt::CaseInsensitive) || no_extension.endsWith("-c", Qt::CaseInsensitive)) {
-                model = age::gb_model::cgb;
+                hardware = age::gb_hardware::cgb;
             }
         }
 
         // create emulator
-        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, model);
+        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware);
 
         // run the test
         uint cycles_per_step = emulator->get_cycles_per_second() >> 8;
@@ -102,8 +102,8 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint m
     return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot) {
 
         // create emulator & run test
-        age::gb_model model = force_dmg ? age::gb_model::dmg : age::gb_model::auto_detect;
-        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, model, dmg_green);
+        age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
+        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware, dmg_green);
 
         uint cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
         emulator->emulate(cycles_to_emulate);

@@ -80,7 +80,7 @@ public:
     void write_svbk(uint8 value);
     void write_vbk(uint8 value);
 
-    gb_memory(const uint8_vector &cart_rom, gb_model model);
+    gb_memory(const uint8_vector &cart_rom, gb_hardware hardware);
 
 
 

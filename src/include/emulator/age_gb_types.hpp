@@ -28,7 +28,7 @@
 namespace age
 {
 
-enum class gb_model
+enum class gb_hardware
 {
     auto_detect,
     cgb,

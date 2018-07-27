@@ -93,11 +93,11 @@ std::string age::gb_emulator_impl::inner_get_emulator_title() const
 //---------------------------------------------------------
 
 age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
-                                        gb_model model,
+                                        gb_hardware hardware,
                                         bool dmg_green,
                                         pcm_vector &pcm_vec,
                                         screen_buffer &screen_buf)
-    : m_memory(rom, model),
+    : m_memory(rom, hardware),
       m_core(m_memory.is_cgb()),
       m_sound(m_core, pcm_vec),
       m_lcd(m_core, m_memory, screen_buf, dmg_green),
