@@ -748,15 +748,23 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 
 void age::gb_cpu::emulate_instruction()
 {
-    uint16 interrupt_pc = m_core.get_interrupt_to_service();
-    if (interrupt_pc != 0)
+    //
+    // verified by mooneye-gb tests
+    //
+    // Writing IE during interrupt handling may cancel the interrupt.
+    // IE can be (indirectly) written by setting SP to 0x0000 or 0x0001
+    // before the interrupt is handled.
+    //
+    //      acceptance/interrupts/ie_push.gb
+    //
+    if (m_core.must_service_interrupt())
     {
-        // http://gbdev.gg8.se/wiki/articles/Interrupts
-        INC_CYCLES; // execute two wait states
         INC_CYCLES;
-        PUSH_PC;    // 8 cycles
-        INC_CYCLES; // load new PC
-        m_pc = interrupt_pc;
+        INC_CYCLES;
+        PUSH_BYTE(m_pc >> 8); // if this writes IE, the interrupt may be cancelled
+        m_pc = m_core.get_interrupt_to_service();
+        PUSH_BYTE(m_pc); // writing IE here will not cancel the interrupt
+        INC_CYCLES;
         return;
     }
 

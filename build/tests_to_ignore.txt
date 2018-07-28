@@ -25,7 +25,6 @@ misc/boot_regs-A.gb           # GBA not supported by AGE
 
 ###   failing tests
 
-acceptance/interrupts/ie_push.gb
 acceptance/oam_dma/reg_read.gb
 acceptance/oam_dma/sources-dmgABCmgbS.gb
 acceptance/ppu/hblank_ly_scx_timing-GS.gb

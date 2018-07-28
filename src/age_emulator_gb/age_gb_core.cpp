@@ -206,10 +206,10 @@ void age::gb_core::stop()
     insert_event(0, gb_event::switch_double_speed);
 }
 
-age::uint16 age::gb_core::get_interrupt_to_service()
+bool age::gb_core::must_service_interrupt()
 {
     AGE_ASSERT(m_state == gb_state::cpu_active);
-    uint16 result = 0;
+    bool result = false;
 
     // we assume that m_ime is false, if m_ei is true
     if (m_ei)
@@ -221,20 +221,34 @@ age::uint16 age::gb_core::get_interrupt_to_service()
     else if (m_ime)
     {
         uint8 interrupt = m_ie & m_if & 0x1F;
-        if (interrupt > 0)
+        result = (interrupt > 0);
+
+        if (result)
         {
             AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
-
-            // lower interrupt bits have higher priority
-            interrupt &= ~(interrupt - 1); // get lowest interrupt bit that is set
-            AGE_ASSERT(interrupt <= 0x20);
-
-            m_if &= ~interrupt; // clear interrupt bit
             m_ime = false; // disable interrupts
-
-            result = (interrupt < 8) ? gb_interrupt_pc_lookup[interrupt] : interrupt + 0x50;
-            LOG("noticed interrupt 0x" << std::hex << result << std::dec);
         }
+    }
+
+    return result;
+}
+
+age::uint16 age::gb_core::get_interrupt_to_service()
+{
+    AGE_ASSERT(m_state == gb_state::cpu_active);
+    uint16 result = 0;
+
+    uint8 interrupt = m_ie & m_if & 0x1F;
+    if (interrupt > 0)
+    {
+        // lower interrupt bits have higher priority
+        interrupt &= ~(interrupt - 1); // get lowest interrupt bit that is set
+        AGE_ASSERT(interrupt <= 0x20);
+
+        m_if &= ~interrupt; // clear interrupt bit
+
+        result = (interrupt < 8) ? gb_interrupt_pc_lookup[interrupt] : interrupt + 0x50;
+        LOG("noticed interrupt 0x" << std::hex << result << std::dec);
     }
 
     return result;
