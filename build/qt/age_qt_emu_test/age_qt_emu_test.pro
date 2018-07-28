@@ -6,6 +6,11 @@ TARGET = age_qt_emu_test
 TEMPLATE = app
 CONFIG -= app_bundle
 
+# The dependency order is important for the linker:
+# in order to resolve all age_common symbols (including
+# the ones used in age_emulator_gb),
+# the age_common library must be linked last and thus
+# be the last dependency.
 DEPENDENCIES = age_emulator_gb age_common
 include($$PWD/../age.pri)
 

@@ -33,8 +33,8 @@ constexpr const age::uint8_array<5> gb_interrupt_pc_lookup =
 
 
 
-age::gb_core::gb_core(bool cgb)
-    : m_cgb(cgb)
+age::gb_core::gb_core(gb_mode mode)
+    : m_mode(mode)
 {
     //
     // verified by gambatte tests
@@ -51,7 +51,7 @@ age::gb_core::gb_core(bool cgb)
     //      tima/tc00_start_1_outF0
     //      tima/tc00_start_2_outF1
     //
-    if (m_cgb)
+    if (is_cgb())
     {
         m_oscillation_cycle = 0x1F * 0x100;
         m_oscillation_cycle -= 96;
@@ -83,12 +83,22 @@ bool age::gb_core::is_double_speed() const
 
 bool age::gb_core::is_cgb() const
 {
-    return m_cgb;
+    return m_mode == gb_mode::cgb;
+}
+
+bool age::gb_core::is_cgb_hardware() const
+{
+    return m_mode != gb_mode::dmg;
 }
 
 age::gb_mode age::gb_core::get_mode() const
 {
     return m_mode;
+}
+
+age::gb_state age::gb_core::get_state() const
+{
+    return m_state;
 }
 
 
@@ -127,12 +137,12 @@ age::uint age::gb_core::get_event_cycle(gb_event event) const
 
 void age::gb_core::start_dma()
 {
-    m_mode = gb_mode::dma;
+    m_state = gb_state::dma;
 }
 
 void age::gb_core::finish_dma()
 {
-    m_mode = m_halt ? gb_mode::halted : gb_mode::cpu_active;
+    m_state = m_halt ? gb_state::halted : gb_state::cpu_active;
 }
 
 
@@ -146,14 +156,14 @@ void age::gb_core::request_interrupt(gb_interrupt interrupt)
 
 void age::gb_core::ei_delayed()
 {
-    AGE_ASSERT(m_mode == gb_mode::cpu_active);
+    AGE_ASSERT(m_state == gb_state::cpu_active);
     m_ei = !m_ime;
     LOG("ei " << m_ei << ", ime " << m_ime);
 }
 
 void age::gb_core::ei_now()
 {
-    AGE_ASSERT(m_mode == gb_mode::cpu_active);
+    AGE_ASSERT(m_state == gb_state::cpu_active);
     m_ei = false;
     m_ime = true;
     LOG("ei " << m_ei << ", ime " << m_ime);
@@ -161,7 +171,7 @@ void age::gb_core::ei_now()
 
 void age::gb_core::di()
 {
-    AGE_ASSERT(m_mode == gb_mode::cpu_active);
+    AGE_ASSERT(m_state == gb_state::cpu_active);
     m_ei = false;
     m_ime = false;
     LOG("ei " << m_ei << ", ime " << m_ime);
@@ -175,18 +185,18 @@ bool age::gb_core::halt()
     //   - halt pauses, until interrupt would occur (if & ie > 0)
     //   - however, the interrupt is not serviced because ime = 0
     //  => special halt treatment only for m_ei = 0?
-    AGE_ASSERT(m_mode == gb_mode::cpu_active);
+    AGE_ASSERT(m_state == gb_state::cpu_active);
     LOG("halted");
     m_halt = true;
-    m_mode = gb_mode::halted;
+    m_state = gb_state::halted;
     check_halt_mode();
     return !m_ime && !m_halt;
 }
 
 void age::gb_core::stop()
 {
-    AGE_ASSERT(m_mode == gb_mode::cpu_active);
-    if (m_cgb && ((m_key1 & 0x01) > 0))
+    AGE_ASSERT(m_state == gb_state::cpu_active);
+    if (is_cgb() && ((m_key1 & 0x01) > 0))
     {
         m_key1 ^= 0x81;
     }
@@ -198,7 +208,7 @@ void age::gb_core::stop()
 
 age::uint16 age::gb_core::get_interrupt_to_service()
 {
-    AGE_ASSERT(m_mode == gb_mode::cpu_active);
+    AGE_ASSERT(m_state == gb_state::cpu_active);
     uint16 result = 0;
 
     // we assume that m_ime is false, if m_ei is true
@@ -280,25 +290,25 @@ void age::gb_core::write_ie(uint8 value)
 
 void age::gb_core::check_halt_mode()
 {
-    // terminate halt mode once ie & if > 0, even if ime is cleared
+    // terminate halt state once ie & if > 0, even if ime is cleared
     if (m_halt && ((m_if & m_ie & 0x1F) > 0))
     {
         m_halt = false;
-        if (m_mode == gb_mode::halted)
+        if (m_state == gb_state::halted)
         {
-            m_mode = gb_mode::cpu_active;
+            m_state = gb_state::cpu_active;
         }
 
         // seen in gambatte source code, no other source found on this yet:
         // for CGB, unhalting on interrupt takes an additional 4 cycles
         // (however, some gambatte tests check this indirectly by relying
         // on interrupts during a halt)
-        if (m_cgb)
+        if (is_cgb())
         {
             oscillate_cpu_cycle();
         }
 
-        LOG("halt mode terminated");
+        LOG("halt state terminated");
     }
 }
 

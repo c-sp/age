@@ -26,6 +26,7 @@
 
 #include <age_debug.hpp>
 #include <age_types.hpp>
+#include <emulator/age_gb_types.hpp>
 
 #ifdef AGE_DEBUG
 #define AGE_GB_CYCLE_LOG(x) AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ": " << x)
@@ -47,7 +48,7 @@ enum class gb_interrupt : uint8
     vblank = 0x01
 };
 
-enum class gb_mode : uint
+enum class gb_state : uint
 {
     halted = 0,
     cpu_active = 1,
@@ -79,8 +80,10 @@ public:
     uint get_oscillation_cycle() const;
     uint get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
-    bool is_cgb() const;
+    bool is_cgb() const; //!< get_mode() == gb_mode::cgb
+    bool is_cgb_hardware() const; //!< get_mode() != gb_mode::dmg
     gb_mode get_mode() const;
+    gb_state get_state() const;
 
     void oscillate_cpu_cycle();
     void oscillate_2_cycles();
@@ -108,7 +111,7 @@ public:
     void write_ie(uint8 value);
     void write_if(uint8 value);
 
-    gb_core(bool cgb);
+    gb_core(gb_mode mode);
 
 
 
@@ -136,8 +139,8 @@ private:
 
     void check_halt_mode();
 
-    const bool m_cgb;
-    gb_mode m_mode = gb_mode::cpu_active;
+    const gb_mode m_mode;
+    gb_state m_state = gb_state::cpu_active;
 
     uint m_oscillation_cycle = 0;
     uint m_machine_cycles_per_cpu_cycle = 4;

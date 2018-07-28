@@ -4,7 +4,12 @@ QT += core gui widgets opengl multimedia
 TARGET = age
 TEMPLATE = app
 
-DEPENDENCIES = age_common age_emulator_gb
+# The dependency order is important for the linker:
+# in order to resolve all age_common symbols (including
+# the ones used in age_emulator_gb),
+# the age_common library must be linked last and thus
+# be the last dependency.
+DEPENDENCIES = age_emulator_gb age_common
 include($$PWD/../age.pri)
 
 

@@ -18,11 +18,6 @@
 
 
 
-bool age::gb_emulator_impl::is_cgb() const
-{
-    return m_memory.is_cgb();
-}
-
 age::gb_test_info age::gb_emulator_impl::get_test_info() const
 {
     return m_cpu.get_test_info();
@@ -57,18 +52,18 @@ age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
 
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
-        m_bus.handle_events(); // may change the current gb_mode
-        switch (m_core.get_mode())
+        m_bus.handle_events(); // may change the current gb_state
+        switch (m_core.get_state())
         {
-            case gb_mode::halted:
+            case gb_state::halted:
                 m_core.oscillate_cpu_cycle();
                 break;
 
-            case gb_mode::cpu_active:
+            case gb_state::cpu_active:
                 m_cpu.emulate_instruction();
                 break;
 
-            case gb_mode::dma:
+            case gb_state::dma:
                 AGE_ASSERT(m_core.is_cgb());
                 m_bus.handle_dma();
                 m_core.finish_dma();
@@ -98,12 +93,12 @@ std::string age::gb_emulator_impl::inner_get_emulator_title() const
 //---------------------------------------------------------
 
 age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
-                                        gb_model model,
+                                        gb_hardware hardware,
                                         bool dmg_green,
                                         pcm_vector &pcm_vec,
                                         screen_buffer &screen_buf)
-    : m_memory(rom, model),
-      m_core(m_memory.is_cgb()),
+    : m_memory(rom, hardware),
+      m_core(m_memory.get_mode()),
       m_sound(m_core, pcm_vec),
       m_lcd(m_core, m_memory, screen_buf, dmg_green),
       m_timer(m_core),

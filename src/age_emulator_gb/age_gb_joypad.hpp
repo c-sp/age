@@ -45,7 +45,7 @@ public:
 private:
 
     gb_core &m_core;
-    uint8 m_p1 = 0xCF;
+    uint8 m_p1;
     uint8 m_p14 = 0x0F;
     uint8 m_p15 = 0x0F;
 };

@@ -1,21 +1,64 @@
 
-
 ##################################################################
 ###
-###   non-test roms
-###
-##################################################################
-
 ###   mooneye-gb
+###
+##################################################################
 
-madness/mgb_oam_dma_halt_sprites.gb
-manual-only/sprite_priority.gb
+
+###   non-test roms
+
 utils/dump_boot_hwio.gb
 utils/bootrom_dumper.gb
 
 
+###   not supported by AGE
 
+acceptance/boot_hwio-dmg0.gb  # AGE emulates hardware IO for dmgABC
+acceptance/boot_hwio-S.gb     # SGB not supported by AGE
+acceptance/boot_regs-dmg0.gb  # AGE initializes CPU registers for dmgABC
+acceptance/boot_regs-mgb.gb   # AGE initializes CPU registers for dmgABC
+acceptance/boot_regs-sgb.gb   # SGB not supported by AGE
+acceptance/boot_regs-sgb2.gb  # SGB not supported by AGE
+misc/boot_regs-A.gb           # GBA not supported by AGE
+
+
+###   failing tests
+
+acceptance/interrupts/ie_push.gb
+acceptance/oam_dma/reg_read.gb
+acceptance/oam_dma/sources-dmgABCmgbS.gb
+acceptance/ppu/hblank_ly_scx_timing-GS.gb
+acceptance/ppu/intr_2_0_timing.gb
+acceptance/ppu/intr_2_mode0_timing.gb
+acceptance/ppu/intr_2_mode0_timing_sprites.gb
+acceptance/ppu/intr_2_mode3_timing.gb
+acceptance/ppu/intr_2_oam_ok_timing.gb
+acceptance/ppu/lcdon_timing-dmgABCmgbS.gb
+acceptance/ppu/lcdon_write_timing-GS.gb
+acceptance/ppu/stat_lyc_onoff.gb
+acceptance/ppu/vblank_stat_intr-GS.gb
+acceptance/serial/boot_sclk_align-dmgABCmgb.gb
+emulator-only/mbc1/bits_ram_en.gb
+emulator-only/mbc1/multicart_rom_8Mb.gb
+emulator-only/mbc1/ram_256Kb.gb
+emulator-only/mbc1/ram_64Kb.gb
+emulator-only/mbc1/rom_16Mb.gb
+emulator-only/mbc1/rom_8Mb.gb
+madness/mgb_oam_dma_halt_sprites.gb
+manual-only/sprite_priority.gb
+misc/ppu/vblank_stat_intr-C.gb
+
+
+
+##################################################################
+###
 ###   gambatte
+###
+##################################################################
+
+
+###   non-test roms
 
 cgb_bgp_dumper.gbc
 cgb_objp_dumper.gbc
@@ -48,12 +91,7 @@ vram_dumper.gbc
 wram_dumper.gbc
 
 
-
-##################################################################
-###
-###   gambatte tests with no known result
-###
-##################################################################
+###   tests without known result
 
 bgtiledata/bgtiledata_spx08_ds_1.gbc
 bgtiledata/bgtiledata_spx08_ds_2.gbc
@@ -164,60 +202,7 @@ window/on_screen/late_wx_ds_1.gbc
 window/on_screen/late_wx_ds_2.gbc
 
 
-
-##################################################################
-###
-###   not supported by AGE
-###
-##################################################################
-
-###   mooneye-gb
-
-acceptance/boot_regs-dmg0.gb  # AGE initializes CPU registers for dmgABC
-acceptance/boot_regs-mgb.gb   # AGE initializes CPU registers for dmgABC
-acceptance/boot_regs-sgb.gb   # SGB not supported by AGE
-acceptance/boot_regs-sgb2.gb  # SGB not supported by AGE
-misc/boot_regs-A.gb           # GBA not supported by AGE
-
-
-
-##################################################################
-###
 ###   failing tests
-###
-##################################################################
-
-###   mooneye-gb
-
-acceptance/boot_hwio-dmg0.gb
-acceptance/boot_hwio-S.gb
-acceptance/interrupts/ie_push.gb
-acceptance/oam_dma/reg_read.gb
-acceptance/oam_dma/sources-dmgABCmgbS.gb
-acceptance/ppu/hblank_ly_scx_timing-GS.gb
-acceptance/ppu/intr_2_0_timing.gb
-acceptance/ppu/intr_2_mode0_timing.gb
-acceptance/ppu/intr_2_mode0_timing_sprites.gb
-acceptance/ppu/intr_2_mode3_timing.gb
-acceptance/ppu/intr_2_oam_ok_timing.gb
-acceptance/ppu/lcdon_timing-dmgABCmgbS.gb
-acceptance/ppu/lcdon_write_timing-GS.gb
-acceptance/ppu/stat_lyc_onoff.gb
-acceptance/ppu/vblank_stat_intr-GS.gb
-acceptance/serial/boot_sclk_align-dmgABCmgb.gb
-emulator-only/mbc1/bits_ram_en.gb
-emulator-only/mbc1/multicart_rom_8Mb.gb
-emulator-only/mbc1/ram_256Kb.gb
-emulator-only/mbc1/ram_64Kb.gb
-emulator-only/mbc1/rom_16Mb.gb
-emulator-only/mbc1/rom_8Mb.gb
-misc/bits/unused_hwio-C.gb
-misc/boot_hwio-C.gb
-misc/ppu/vblank_stat_intr-C.gb
-
-
-
-###   gambatte
 
 bgen/bgoff_bgon_sprite_below_window.gbc
 enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc

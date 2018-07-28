@@ -42,9 +42,9 @@
 //
 //---------------------------------------------------------
 
-bool age::gb_memory::is_cgb() const
+age::gb_mode age::gb_memory::get_mode() const
 {
-    return m_cgb;
+    return m_mode;
 }
 
 const age::uint8* age::gb_memory::get_video_ram() const
@@ -200,6 +200,31 @@ bool age::gb_memory::has_battery(const uint8_vector &rom)
     }
 
     return result;
+}
+
+age::gb_mode age::gb_memory::calculate_mode(age::gb_hardware hardware, const age::uint8_vector &cart_rom)
+{
+    bool cgb_flagged = safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80;
+
+    gb_mode mode;
+    switch (hardware)
+    {
+        case gb_hardware::dmg:
+            // running a CGB rom on a DMG wil most likely not work,
+            // but since it was configured like this ...
+            mode = gb_mode::dmg;
+            break;
+
+        case gb_hardware::cgb:
+            mode = cgb_flagged ? gb_mode::cgb : gb_mode::dmg_on_cgb;
+            break;
+
+        default:
+            // auto-detect hardware
+            mode = cgb_flagged ? gb_mode::cgb : gb_mode::dmg;
+            break;
+    }
+    return mode;
 }
 
 age::uint age::gb_memory::get_num_cart_rom_banks(const uint8_vector &cart_rom)

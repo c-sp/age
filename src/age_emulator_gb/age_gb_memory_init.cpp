@@ -883,21 +883,16 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 //
 //---------------------------------------------------------
 
-age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_model model)
+age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     : m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
-      m_cgb((model == gb_model::cgb)
-            || ((model == gb_model::auto_detect) && (safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80))
-            ),
-
+      m_mode(calculate_mode(hardware, cart_rom)),
       m_mbc_write(get_mbc_write_function(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
-
       m_cart_ram_offset(m_num_cart_rom_banks * gb_cart_rom_bank_size),
       m_internal_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
       m_video_ram_offset(m_internal_ram_offset + gb_internal_ram_size)
 {
-    LOG("force_dmg " << force_dmg << ", cgb_flag " << (safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80) << ": cgb " << m_cgb);
     LOG("persistent ram " << m_has_battery);
 
     // 0x0000 - 0x3FFF : rom bank 0
@@ -931,7 +926,8 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_model model)
     {
         m_memory[m_video_ram_offset + 0x10 + i * 2] = gb_sparse_vram_0010_dump[i];
     }
-    if (!m_cgb)
+    bool cgb = m_mode == gb_mode::cgb;
+    if (!cgb)
     {
         m_memory[m_video_ram_offset + 0x1910] = 0x19;
         for (uint8 i = 1; i <= 0x0C; ++i)
@@ -945,7 +941,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_model model)
     // (based on wram_dumper_cgb.bin and wram_dumper_dmg08.bin used by gambatte tests)
     auto base = begin(m_memory) + m_internal_ram_offset;
 
-    if (m_cgb)
+    if (cgb)
     {
         for (uint i = 0; i < 0x800; i += 0x10)
         {

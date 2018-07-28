@@ -26,7 +26,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
-#include <emulator/age_gb_emulator.hpp>
+#include <emulator/age_gb_types.hpp>
 
 
 
@@ -65,7 +65,7 @@ class gb_memory : public non_copyable
 {
 public:
 
-    bool is_cgb() const;
+    gb_mode get_mode() const;
     const uint8* get_video_ram() const;
     std::string get_cartridge_title() const;
 
@@ -80,7 +80,7 @@ public:
     void write_svbk(uint8 value);
     void write_vbk(uint8 value);
 
-    gb_memory(const uint8_vector &cart_rom, gb_model model);
+    gb_memory(const uint8_vector &cart_rom, gb_hardware hardware);
 
 
 
@@ -99,6 +99,7 @@ private:
     } gb_mbc_data;
 
     static bool has_battery(const uint8_vector &cart_rom);
+    static gb_mode calculate_mode(gb_hardware hardware, const uint8_vector &cart_rom);
     static uint get_num_cart_rom_banks(const uint8_vector &cart_rom);
     static uint get_num_cart_ram_banks(const uint8_vector &cart_rom);
     static uint8 safe_get(const uint8_vector &vector, uint offset);
@@ -120,7 +121,7 @@ private:
     const uint m_num_cart_rom_banks;
     const uint m_num_cart_ram_banks;
     const bool m_has_battery;
-    const bool m_cgb;
+    const gb_mode m_mode;
     uint8 m_svbk = 0xF8;
     uint8 m_vbk = 0xF8;
 

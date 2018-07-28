@@ -23,7 +23,7 @@
 
 #include <age_non_copyable.hpp>
 #include <age_types.hpp>
-#include <emulator/age_gb_emulator.hpp>
+#include <emulator/age_gb_types.hpp>
 
 #include "age_gb_bus.hpp"
 #include "age_gb_core.hpp"
@@ -45,9 +45,8 @@ class gb_emulator_impl : public non_copyable
 {
 public:
 
-    gb_emulator_impl(const uint8_vector &rom, gb_model model, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
+    gb_emulator_impl(const uint8_vector &rom, gb_hardware hardware, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
 
-    bool is_cgb() const;
     gb_test_info get_test_info() const;
 
     uint8_vector get_persistent_ram() const;

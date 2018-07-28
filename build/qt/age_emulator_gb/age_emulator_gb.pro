@@ -44,7 +44,8 @@ HEADERS += \
     ../../../src/age_emulator_gb/age_gb_serial.hpp \
     ../../../src/age_emulator_gb/age_gb_sound.hpp \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.hpp \
-    ../../../src/age_emulator_gb/age_gb_timer.hpp
+    ../../../src/age_emulator_gb/age_gb_timer.hpp \
+    ../../../src/include/emulator/age_gb_types.hpp
 
 unix {
     target.path = /usr/lib
