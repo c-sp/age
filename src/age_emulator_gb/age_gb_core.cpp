@@ -81,14 +81,19 @@ bool age::gb_core::is_double_speed() const
     return m_double_speed;
 }
 
-age::gb_mode age::gb_core::get_mode() const
-{
-    return m_mode;
-}
-
 bool age::gb_core::is_cgb() const
 {
     return m_mode == gb_mode::cgb;
+}
+
+bool age::gb_core::is_cgb_hardware() const
+{
+    return m_mode != gb_mode::dmg;
+}
+
+age::gb_mode age::gb_core::get_mode() const
+{
+    return m_mode;
 }
 
 age::gb_state age::gb_core::get_state() const

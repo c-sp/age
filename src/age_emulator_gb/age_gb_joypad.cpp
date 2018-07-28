@@ -99,6 +99,7 @@ void age::gb_joypad::set_buttons_down(uint buttons)
 
 
 age::gb_joypad::gb_joypad(gb_core &core)
-    : m_core(core)
+    : m_core(core),
+      m_p1(m_core.is_cgb_hardware() ? 0xFF : 0xCF)
 {
 }

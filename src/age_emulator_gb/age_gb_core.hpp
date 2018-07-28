@@ -80,7 +80,8 @@ public:
     uint get_oscillation_cycle() const;
     uint get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
-    bool is_cgb() const;
+    bool is_cgb() const; //!< get_mode() == gb_mode::cgb
+    bool is_cgb_hardware() const; //!< get_mode() != gb_mode::dmg
     gb_mode get_mode() const;
     gb_state get_state() const;
 

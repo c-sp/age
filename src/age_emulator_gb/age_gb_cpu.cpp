@@ -691,7 +691,7 @@ age::gb_cpu::gb_cpu(gb_core &core, gb_bus &bus)
     m_pc = 0x0100;
     m_sp = 0xFFFE;
 
-    if (m_core.get_mode() == gb_mode::dmg)
+    if (!m_core.is_cgb_hardware())
     {
         m_a = 0x01;
         LOAD_FLAGS_FROM(0xB0)
