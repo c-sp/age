@@ -15,6 +15,7 @@
 //
 
 #include <algorithm>
+#include <ios> // std::hex
 
 #include <age_debug.hpp>
 
@@ -137,7 +138,7 @@ void age::gb_memory::write_byte(uint16 address, uint8 value)
 
     if (address < 0x8000)
     {
-        m_mbc_write(*this, address, value);
+        m_mbc_writer(*this, address, value);
     }
     else
     {
@@ -232,6 +233,7 @@ age::uint age::gb_memory::get_num_cart_rom_banks(const uint8_vector &cart_rom)
     uint result;
 
     uint8 rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
+    LOG("rom banks byte: 0x" << std::hex << (uint)rom_banks << std::dec);
     switch (rom_banks)
     {
         //case 0x00:
@@ -244,9 +246,6 @@ age::uint age::gb_memory::get_num_cart_rom_banks(const uint8_vector &cart_rom)
         case 0x06: result = 128; break;
         case 0x07: result = 256; break;
         case 0x08: result = 512; break;
-        case 0x52: result = 72; break;
-        case 0x53: result = 80; break;
-        case 0x54: result = 96; break;
     }
 
     LOG("cartridge has " << result << " rom bank(s)");
@@ -258,6 +257,7 @@ age::uint age::gb_memory::get_num_cart_ram_banks(const uint8_vector &cart_rom)
     uint result;
 
     uint8 ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
+    LOG("ram banks byte: 0x" << std::hex << (uint)ram_banks << std::dec);
     switch (ram_banks)
     {
         //case 0x00:
@@ -287,32 +287,33 @@ age::uint age::gb_memory::get_offset(uint16 address) const
     return offset;
 }
 
-void age::gb_memory::set_rom_bank(uint bank_id)
+void age::gb_memory::set_rom_banks(uint low_bank_id, uint high_bank_id)
 {
-    if (bank_id >= m_num_cart_rom_banks)
-    {
-        BANK_LOG("adjusting rom bank id " << bank_id << " to " << (bank_id & (m_num_cart_rom_banks - 1)) << " (max is " << (m_num_cart_rom_banks - 1) << ")");
-        bank_id &= m_num_cart_rom_banks - 1;
-    }
+    low_bank_id &= m_num_cart_rom_banks - 1;
+    high_bank_id &= m_num_cart_rom_banks - 1;
 
-    m_offsets[4] = bank_id * gb_cart_rom_bank_size - 0x4000;
+    m_offsets[0] = low_bank_id * gb_cart_rom_bank_size;
+    m_offsets[1] = m_offsets[0];
+    m_offsets[2] = m_offsets[0];
+    m_offsets[3] = m_offsets[0];
+
+    m_offsets[4] = high_bank_id * gb_cart_rom_bank_size - 0x4000;
     m_offsets[5] = m_offsets[4];
     m_offsets[6] = m_offsets[4];
     m_offsets[7] = m_offsets[4];
-    BANK_LOG("switched to rom bank " << bank_id);
+
+    BANK_LOG("switched to rom banks " << low_bank_id << "," << high_bank_id
+             << " (0x" << std::hex << low_bank_id << ",0x" << high_bank_id << std::dec << ")");
 }
 
 void age::gb_memory::set_ram_bank(uint bank_id)
 {
-    if (bank_id >= m_num_cart_ram_banks)
-    {
-        BANK_LOG("adjusting ram bank id " << bank_id << " to " << (bank_id & (m_num_cart_ram_banks - 1)) << " (max is " << (m_num_cart_ram_banks - 1) << ")");
-        bank_id &= m_num_cart_ram_banks - 1;
-    }
+    bank_id &= m_num_cart_ram_banks - 1;
 
     m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;
     m_offsets[0xB] = m_offsets[0xA];
-    BANK_LOG("switched to ram bank " << bank_id);
+
+    BANK_LOG("switched to ram bank " << bank_id << " (0x" << std::hex << bank_id << std::dec << ")");
 }
 
 
@@ -325,10 +326,11 @@ void age::gb_memory::set_ram_bank(uint bank_id)
 //
 //---------------------------------------------------------
 
-std::function<void(age::gb_memory&, age::uint, age::uint)> age::gb_memory::get_mbc_write_function(gb_mbc_data &mbc, uint8 mbc_type)
+age::gb_memory::mbc_writer age::gb_memory::get_mbc_writer(gb_mbc_data &mbc, const uint8_vector &cart_rom)
 {
-    std::function<void(gb_memory&, uint, uint)> result;
+    mbc_writer result;
 
+    uint8 mbc_type = safe_get(cart_rom, gb_cia_ofs_type);
     switch (mbc_type)
     {
         //case 0x00:
@@ -414,24 +416,29 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
             break;
     }
 
-    // update current rom & ram bank for mode 16/8
-    uint rom_bank_id;
-    uint ram_bank_id;
-    if (memory.m_mbc_data.m_mbc1_mode16_8)
-    {
-        rom_bank_id = (memory.m_mbc_data.m_mbc1_2000 & 0x1F) + ((memory.m_mbc_data.m_mbc1_4000 & 0x03) << 5);
-        ram_bank_id = 0;
-    }
-    // update current rom & ram bank for mode 4/32
-    else
-    {
-        rom_bank_id = memory.m_mbc_data.m_mbc1_2000 & 0x1F;
-        ram_bank_id = memory.m_mbc_data.m_mbc1_4000 & 0x03;
-    }
+    //
+    // verified by mooneye-gb tests
+    //
+    // - The value written to 0x4000 is used for rom bank switching
+    //   even if MBC1 has been switched to mode 4M-Rom/32K-Ram.
+    // - With MBC1 mode 16M-Rom/8K-Ram the value written to 0x4000
+    //   switches the rom bank at 0x0000.
+    //
+    //      emulator-only/mbc1/rom_8Mb
+    //      emulator-only/mbc1/rom_16Mb
+    //
 
-    // set rom & ram bank
-    AGE_ASSERT((rom_bank_id & 0x1F) > 0);
-    memory.set_rom_bank(rom_bank_id);
+    uint mbc_high_bits = memory.m_mbc_data.m_mbc1_4000 & 0x03;
+    uint high_rom_bits = mbc_high_bits << 5;
+
+    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode16_8 ? high_rom_bits : 0;
+    uint high_rom_bank_id = (memory.m_mbc_data.m_mbc1_2000 & 0x1F) + high_rom_bits;
+
+    uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode16_8 ? 0 : mbc_high_bits;
+
+    // set rom & ram banks
+    AGE_ASSERT((high_rom_bank_id & 0x1F) > 0);
+    memory.set_rom_banks(low_rom_bank_id, high_rom_bank_id);
     memory.set_ram_bank(ram_bank_id);
 }
 
@@ -451,7 +458,7 @@ void age::gb_memory::write_to_mbc2(gb_memory &memory, uint offset, uint value)
             {
                 rom_bank_id = 1;
             }
-            memory.set_rom_bank(rom_bank_id);
+            memory.set_rom_banks(0, rom_bank_id);
         }
     }
 }
@@ -476,7 +483,7 @@ void age::gb_memory::write_to_mbc3(gb_memory &memory, uint offset, uint value)
             {
                 rom_bank_id = 1;
             }
-            memory.set_rom_bank(rom_bank_id);
+            memory.set_rom_banks(0, rom_bank_id);
             break;
         }
 
@@ -513,7 +520,7 @@ void age::gb_memory::write_to_mbc5(gb_memory &memory, uint offset, uint value)
             {
                 memory.m_mbc_data.m_mbc5_3000 = value;
             }
-            memory.set_rom_bank((static_cast<uint>(memory.m_mbc_data.m_mbc5_3000 & 0x01) << 8) + memory.m_mbc_data.m_mbc5_2000);
+            memory.set_rom_banks(0, (static_cast<uint>(memory.m_mbc_data.m_mbc5_3000 & 0x01) << 8) + memory.m_mbc_data.m_mbc5_2000);
             break;
 
         case 0x4000:
