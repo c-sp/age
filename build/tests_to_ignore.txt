@@ -38,10 +38,7 @@ acceptance/ppu/lcdon_write_timing-GS.gb
 acceptance/ppu/stat_lyc_onoff.gb
 acceptance/ppu/vblank_stat_intr-GS.gb
 acceptance/serial/boot_sclk_align-dmgABCmgb.gb
-emulator-only/mbc1/bits_ram_en.gb
 emulator-only/mbc1/multicart_rom_8Mb.gb
-emulator-only/mbc1/ram_256Kb.gb
-emulator-only/mbc1/ram_64Kb.gb
 madness/mgb_oam_dma_halt_sprites.gb
 manual-only/sprite_priority.gb
 misc/ppu/vblank_stat_intr-C.gb

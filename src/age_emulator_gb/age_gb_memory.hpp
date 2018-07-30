@@ -92,7 +92,7 @@ private:
         struct {
             uint m_mbc1_2000;
             uint m_mbc1_4000;
-            bool m_mbc1_mode16_8;
+            bool m_mbc1_mode_4m_32k;
         };
         struct {
             uint m_mbc5_2000;
@@ -121,6 +121,7 @@ private:
     void set_ram_bank(uint bank_id);
 
     gb_mbc_data m_mbc_data;
+    bool m_mbc_ram_accessible = false;
     mbc_writer m_mbc_writer;
 
     const uint m_num_cart_rom_banks;

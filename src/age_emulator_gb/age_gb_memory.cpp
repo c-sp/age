@@ -33,6 +33,9 @@
 #define BANK_LOG(x)
 #endif
 
+#define SET_RAM_ACCESSIBLE(value) memory.m_mbc_ram_accessible = ((value & 0x0F) == 0x0A)
+#define IS_MBC_RAM(address) ((address & 0xE000) == 0xA000)
+
 
 
 
@@ -115,8 +118,7 @@ void age::gb_memory::set_persistent_ram(const uint8_vector &source)
 age::uint8 age::gb_memory::read_byte(uint16 address) const
 {
     AGE_ASSERT(address < 0xFE00);
-    uint offset = get_offset(address);
-    uint8 value = m_memory[offset];
+    uint8 value = (!IS_MBC_RAM(address) || m_mbc_ram_accessible) ? m_memory[get_offset(address)] : 0xFF;
     return value;
 }
 
@@ -140,7 +142,7 @@ void age::gb_memory::write_byte(uint16 address, uint8 value)
     {
         m_mbc_writer(*this, address, value);
     }
-    else
+    else if (!IS_MBC_RAM(address) || m_mbc_ram_accessible)
     {
         uint offset = get_offset(address);
         m_memory[offset] = value;
@@ -266,6 +268,7 @@ age::uint age::gb_memory::get_num_cart_ram_banks(const uint8_vector &cart_rom)
         case 0x02: result = 1; break;
         case 0x03: result = 4; break;
         case 0x04: result = 16; break;
+        case 0x05: result = 8; break;
     }
 
     LOG("cartridge has " << result << " ram bank(s)");
@@ -345,7 +348,7 @@ age::gb_memory::mbc_writer age::gb_memory::get_mbc_writer(gb_mbc_data &mbc, cons
         case 0x03:
             mbc.m_mbc1_2000 = 1;
             mbc.m_mbc1_4000 = 0;
-            mbc.m_mbc1_mode16_8 = true;
+            mbc.m_mbc1_mode_4m_32k = false;
             result = &write_to_mbc1;
             break;
 
@@ -397,7 +400,8 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
     switch (offset & 0x6000)
     {
         case 0x0000:
-            // (de)activate current ram bank
+            // (de)activate ram
+            SET_RAM_ACCESSIBLE(value);
             return;
 
         case 0x2000:
@@ -412,7 +416,7 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
 
         case 0x6000:
             // select MBC1 mode
-            memory.m_mbc_data.m_mbc1_mode16_8 = (value & 0x01) > 0;
+            memory.m_mbc_data.m_mbc1_mode_4m_32k = (value & 0x01) > 0;
             break;
     }
 
@@ -431,10 +435,10 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
     uint mbc_high_bits = memory.m_mbc_data.m_mbc1_4000 & 0x03;
     uint high_rom_bits = mbc_high_bits << 5;
 
-    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode16_8 ? high_rom_bits : 0;
+    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode_4m_32k ? high_rom_bits : 0;
     uint high_rom_bank_id = (memory.m_mbc_data.m_mbc1_2000 & 0x1F) + high_rom_bits;
 
-    uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode16_8 ? 0 : mbc_high_bits;
+    uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode_4m_32k ? mbc_high_bits : 0;
 
     // set rom & ram banks
     AGE_ASSERT((high_rom_bank_id & 0x1F) > 0);
@@ -448,17 +452,19 @@ void age::gb_memory::write_to_mbc2(gb_memory &memory, uint offset, uint value)
 {
     AGE_ASSERT(offset < 0x8000);
 
+    // (de)activate ram
+    if (offset < 0xFFF)
+    {
+        SET_RAM_ACCESSIBLE(value);
+    }
+
     // switch rom bank
-    if ((offset & 0x6000) == 0x2000)
+    else if ((offset & 0x6000) == 0x2000)
     {
         if ((offset & 0x0100) > 0)
         {
             uint rom_bank_id = value & 0x0F;
-            if (rom_bank_id == 0)
-            {
-                rom_bank_id = 1;
-            }
-            memory.set_rom_banks(0, rom_bank_id);
+            memory.set_rom_banks(0, (rom_bank_id == 0) ? 1 : rom_bank_id);
         }
     }
 }
@@ -472,7 +478,8 @@ void age::gb_memory::write_to_mbc3(gb_memory &memory, uint offset, uint value)
     switch (offset & 0x6000)
     {
         case 0x0000:
-            // (de)activate current ram bank
+            // (de)activate ram
+            SET_RAM_ACCESSIBLE(value);
             break;
 
         case 0x2000:
@@ -507,7 +514,8 @@ void age::gb_memory::write_to_mbc5(gb_memory &memory, uint offset, uint value)
     switch (offset & 0x6000)
     {
         case 0x0000:
-            // (de)activate current ram bank
+            // (de)activate ram
+            SET_RAM_ACCESSIBLE(value);
             break;
 
         case 0x2000:
