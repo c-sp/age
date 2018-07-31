@@ -105,6 +105,7 @@ private:
     static uint get_num_cart_rom_banks(const uint8_vector &cart_rom);
     static uint get_num_cart_ram_banks(const uint8_vector &cart_rom);
     static uint8 safe_get(const uint8_vector &vector, uint offset);
+    static uint32 crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end);
 
     mbc_writer get_mbc_writer(gb_mbc_data &mbc, const uint8_vector &cart_rom);
     static void write_to_mbc_no_op(gb_memory &memory, uint offset, uint value);
@@ -121,6 +122,7 @@ private:
     void set_ram_bank(uint bank_id);
 
     gb_mbc_data m_mbc_data;
+    bool m_mbc1_multi_cart = false;
     bool m_mbc_ram_accessible = false;
     mbc_writer m_mbc_writer;
 

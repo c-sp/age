@@ -993,4 +993,31 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
             m_memory[m_internal_ram_offset + pair.first] = pair.second;
         }
     }
+
+    //
+    // Check if this might be a multi-cart rom.
+    //
+    // We use the same heuristic as mooneye-gb:
+    // If we find the Nintendo logo at least 3 times (menu + 2 games) at specific locations,
+    // we flag this rom as multi-cart.
+    //
+    // Since only 8 MBit multi-cart roms are known,
+    // we limit the search to roms of this size.
+    //
+    if (m_num_cart_rom_banks == 64)
+    {
+        size_t findings = 0;
+
+        for (size_t offset = 0; offset < cart_rom_size; offset += 0x40000)
+        {
+            uint32 crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
+            if (crc == 0x46195417)
+            {
+                ++findings;
+            }
+        }
+
+        m_mbc1_multi_cart = (findings >= 3);
+        LOG("multi-cart: " << m_mbc1_multi_cart);
+    }
 }

@@ -280,6 +280,22 @@ age::uint8 age::gb_memory::safe_get(const uint8_vector &vector, uint offset)
     return (vector.size() > offset) ? vector[offset] : 0;
 }
 
+age::uint32 age::gb_memory::crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end)
+{
+    uint32 crc = 0xFFFFFFFF;
+
+    std::for_each(begin, end, [&](auto v)
+    {
+        crc ^= v;
+        for (size_t i = 0; i < 8; ++i)
+        {
+            crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+        }
+    });
+
+    return ~crc;
+}
+
 
 
 age::uint age::gb_memory::get_offset(uint16 address) const
@@ -433,15 +449,15 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
     //
 
     uint mbc_high_bits = memory.m_mbc_data.m_mbc1_4000 & 0x03;
-    uint high_rom_bits = mbc_high_bits << 5;
 
+    uint high_rom_bits = mbc_high_bits << (memory.m_mbc1_multi_cart ? 4 : 5);
     uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode_4m_32k ? high_rom_bits : 0;
-    uint high_rom_bank_id = (memory.m_mbc_data.m_mbc1_2000 & 0x1F) + high_rom_bits;
+    uint high_rom_bank_id = high_rom_bits + (memory.m_mbc_data.m_mbc1_2000 & (memory.m_mbc1_multi_cart ? 0x0F : 0x1F));
 
     uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode_4m_32k ? mbc_high_bits : 0;
 
     // set rom & ram banks
-    AGE_ASSERT((high_rom_bank_id & 0x1F) > 0);
+    AGE_ASSERT(memory.m_mbc1_multi_cart || ((high_rom_bank_id & 0x1F) > 0));
     memory.set_rom_banks(low_rom_bank_id, high_rom_bank_id);
     memory.set_ram_bank(ram_bank_id);
 }
