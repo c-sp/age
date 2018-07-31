@@ -90,9 +90,9 @@ private:
 
     typedef union {
         struct {
-            uint m_mbc1_2000;
-            uint m_mbc1_4000;
-            bool m_mbc1_mode_4m_32k;
+            uint m_mbc1_bank1;
+            uint m_mbc1_bank2;
+            bool m_mbc1_mode1;
         };
         struct {
             uint m_mbc5_2000;

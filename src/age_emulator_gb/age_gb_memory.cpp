@@ -362,9 +362,9 @@ age::gb_memory::mbc_writer age::gb_memory::get_mbc_writer(gb_mbc_data &mbc, cons
         case 0x01:
         case 0x02:
         case 0x03:
-            mbc.m_mbc1_2000 = 1;
-            mbc.m_mbc1_4000 = 0;
-            mbc.m_mbc1_mode_4m_32k = false;
+            mbc.m_mbc1_bank1 = 1;
+            mbc.m_mbc1_bank2 = 0;
+            mbc.m_mbc1_mode1 = false;
             result = &write_to_mbc1;
             break;
 
@@ -422,17 +422,19 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
 
         case 0x2000:
             // select rom bank (lower 5 bits)
-            memory.m_mbc_data.m_mbc1_2000 = ((value & 0x1F) == 0) ? value + 1 : value;
+            memory.m_mbc_data.m_mbc1_bank1 = ((value & 0x1F) == 0) ? value + 1 : value;
             break;
 
         case 0x4000:
             // select rom/ram bank
-            memory.m_mbc_data.m_mbc1_4000 = value;
+            memory.m_mbc_data.m_mbc1_bank2 = value;
             break;
 
         case 0x6000:
-            // select MBC1 mode
-            memory.m_mbc_data.m_mbc1_mode_4m_32k = (value & 0x01) > 0;
+            // select MBC1 mode:
+            //  - mode 0: bank2 affects 0x4000-0x7FFF
+            //  - mode 1: bank2 affects 0x0000-0x7FFF, 0xA000-0xBFFF
+            memory.m_mbc_data.m_mbc1_mode1 = (value & 0x01) > 0;
             break;
     }
 
@@ -440,21 +442,21 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
     // verified by mooneye-gb tests
     //
     // - The value written to 0x4000 is used for rom bank switching
-    //   even if MBC1 has been switched to mode 4M-Rom/32K-Ram.
-    // - With MBC1 mode 16M-Rom/8K-Ram the value written to 0x4000
-    //   switches the rom bank at 0x0000.
+    //   independent of the MBC1 mode.
+    // - With MBC1 mode 1 the value written to 0x4000 switches the
+    //   rom bank at 0x0000.
     //
     //      emulator-only/mbc1/rom_8Mb
     //      emulator-only/mbc1/rom_16Mb
     //
 
-    uint mbc_high_bits = memory.m_mbc_data.m_mbc1_4000 & 0x03;
+    uint mbc_high_bits = memory.m_mbc_data.m_mbc1_bank2 & 0x03;
 
     uint high_rom_bits = mbc_high_bits << (memory.m_mbc1_multi_cart ? 4 : 5);
-    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode_4m_32k ? high_rom_bits : 0;
-    uint high_rom_bank_id = high_rom_bits + (memory.m_mbc_data.m_mbc1_2000 & (memory.m_mbc1_multi_cart ? 0x0F : 0x1F));
+    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode1 ? high_rom_bits : 0;
+    uint high_rom_bank_id = high_rom_bits + (memory.m_mbc_data.m_mbc1_bank1 & (memory.m_mbc1_multi_cart ? 0x0F : 0x1F));
 
-    uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode_4m_32k ? mbc_high_bits : 0;
+    uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode1 ? mbc_high_bits : 0;
 
     // set rom & ram banks
     AGE_ASSERT(memory.m_mbc1_multi_cart || ((high_rom_bank_id & 0x1F) > 0));
