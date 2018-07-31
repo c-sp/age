@@ -884,11 +884,11 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 //---------------------------------------------------------
 
 age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
-    : m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
+    : m_mbc_writer(get_mbc_writer(m_mbc_data, cart_rom)),
+      m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
       m_mode(calculate_mode(hardware, cart_rom)),
-      m_mbc_write(get_mbc_write_function(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
       m_cart_ram_offset(m_num_cart_rom_banks * gb_cart_rom_bank_size),
       m_internal_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
       m_video_ram_offset(m_internal_ram_offset + gb_internal_ram_size)
@@ -897,7 +897,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
 
     // 0x0000 - 0x3FFF : rom bank 0
     // 0x4000 - 0x7FFF : switchable rom bank
-    set_rom_bank(1);
+    set_rom_banks(0, 1);
     // 0x8000 - 0x9FFF : video ram
     write_vbk(0);
     // 0xA000 - 0xBFFF : switchable ram bank
@@ -992,5 +992,32 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
         {
             m_memory[m_internal_ram_offset + pair.first] = pair.second;
         }
+    }
+
+    //
+    // Check if this might be a multi-cart rom.
+    //
+    // We use the same heuristic as mooneye-gb:
+    // If we find the Nintendo logo at least 3 times (menu + 2 games) at specific locations,
+    // we flag this rom as multi-cart.
+    //
+    // Since only 8 MBit multi-cart roms are known,
+    // we limit the search to roms of this size.
+    //
+    if (m_num_cart_rom_banks == 64)
+    {
+        size_t findings = 0;
+
+        for (size_t offset = 0; offset < cart_rom_size; offset += 0x40000)
+        {
+            uint32 crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
+            if (crc == 0x46195417)
+            {
+                ++findings;
+            }
+        }
+
+        m_mbc1_multi_cart = (findings >= 3);
+        LOG("multi-cart: " << m_mbc1_multi_cart);
     }
 }

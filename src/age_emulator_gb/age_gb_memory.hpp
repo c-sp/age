@@ -86,11 +86,13 @@ public:
 
 private:
 
+    typedef std::function<void(gb_memory&, uint, uint)> mbc_writer;
+
     typedef union {
         struct {
             uint m_mbc1_2000;
             uint m_mbc1_4000;
-            bool m_mbc1_mode16_8;
+            bool m_mbc1_mode_4m_32k;
         };
         struct {
             uint m_mbc5_2000;
@@ -103,8 +105,9 @@ private:
     static uint get_num_cart_rom_banks(const uint8_vector &cart_rom);
     static uint get_num_cart_ram_banks(const uint8_vector &cart_rom);
     static uint8 safe_get(const uint8_vector &vector, uint offset);
+    static uint32 crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end);
 
-    std::function<void(gb_memory&, uint, uint)> get_mbc_write_function(gb_mbc_data &mbc, uint8 mbc_type);
+    mbc_writer get_mbc_writer(gb_mbc_data &mbc, const uint8_vector &cart_rom);
     static void write_to_mbc_no_op(gb_memory &memory, uint offset, uint value);
     static void write_to_mbc1(gb_memory &memory, uint offset, uint value);
     static void write_to_mbc2(gb_memory &memory, uint offset, uint value);
@@ -115,8 +118,13 @@ private:
 
 
     uint get_offset(uint16 address) const;
-    void set_rom_bank(uint bank_id);
+    void set_rom_banks(uint low_bank_id, uint high_bank_id);
     void set_ram_bank(uint bank_id);
+
+    gb_mbc_data m_mbc_data;
+    bool m_mbc1_multi_cart = false;
+    bool m_mbc_ram_accessible = false;
+    mbc_writer m_mbc_writer;
 
     const uint m_num_cart_rom_banks;
     const uint m_num_cart_ram_banks;
@@ -124,9 +132,6 @@ private:
     const gb_mode m_mode;
     uint8 m_svbk = 0xF8;
     uint8 m_vbk = 0xF8;
-
-    gb_mbc_data m_mbc_data;
-    const std::function<void(gb_memory&, uint, uint)> m_mbc_write;
 
     const uint m_cart_ram_offset;
     const uint m_internal_ram_offset;
