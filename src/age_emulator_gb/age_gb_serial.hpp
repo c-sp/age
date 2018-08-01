@@ -31,16 +31,6 @@
 namespace age
 {
 
-enum class gb_serial_state
-{
-    idle,
-    waiting_for_external,
-    during_transfer_external,
-    during_transfer_internal
-};
-
-
-
 class gb_serial : public non_copyable
 {
 public:
@@ -51,23 +41,15 @@ public:
     void write_sb(uint8 value);
     void write_sc(uint8 value);
 
-    void emulate(uint cycles_elapsed);
-    void switch_double_speed_mode();
+    void finish_transfer();
 
     gb_serial(gb_core &core);
 
 private:
 
-    void finish_transfer();
-
-    gb_serial_state m_state = gb_serial_state::idle;
-    uint m_cycles_left = 0;
     uint8 m_sb = 0;
     uint8 m_sc = 0;
     gb_core &m_core;
-    const bool m_is_cgb;
-    uint8_vector m_send_buffer;
-    uint8_vector m_receive_buffer;
 };
 
 } // namespace age

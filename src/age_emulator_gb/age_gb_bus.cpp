@@ -449,7 +449,6 @@ void age::gb_bus::handle_events()
         {
             case gb_event::switch_double_speed:
                 m_timer.switch_double_speed_mode();
-                m_serial.switch_double_speed_mode();
                 break;
 
             case gb_event::timer_overflow:
@@ -486,6 +485,10 @@ void age::gb_bus::handle_events()
                 //
                 m_oam_dma_address = (m_oam_dma_byte * 0x100) & ((m_oam_dma_byte > 0xDF) ? 0xDF00 : 0xFF00);
                 m_oam_dma_offset = 0;
+                break;
+
+            case gb_event::serial_transfer_finished:
+                m_serial.finish_transfer();
                 break;
 
             default:
