@@ -95,16 +95,11 @@ age::gb_bus::gb_bus(gb_core &core,
       m_lcd(lcd),
       m_timer(timer),
       m_joypad(joypad),
-      m_serial(serial)
+      m_serial(serial),
+      m_oam_dma_byte(m_core.is_cgb() ? 0x00 : 0xFF)
 {
     // clear high ram
     std::fill(begin(m_high_ram), end(m_high_ram), 0);
-
-    // init DMA port value
-    if (!m_core.is_cgb())
-    {
-        m_high_ram[to_integral(gb_io_port::dma) - 0xFE00] = 0xFF;
-    }
 
     // init 0xFF80 - 0xFFFE
     const uint8_array<0x80> &src = m_core.is_cgb() ? cgb_FF80_dump : dmg_FF80_dump;
@@ -230,7 +225,7 @@ age::uint8 age::gb_bus::read_byte(uint16 address)
             case to_integral(gb_io_port::scx): result = m_lcd.read_scx(); break;
             case to_integral(gb_io_port::ly): result = m_lcd.read_ly(); break;
             case to_integral(gb_io_port::lyc): result = m_lcd.read_lyc(); break;
-            case to_integral(gb_io_port::dma): result = m_high_ram[address - 0xFE00]; break;
+            case to_integral(gb_io_port::dma): result = m_oam_dma_byte; break;
             case to_integral(gb_io_port::bgp): result = m_lcd.read_bgp(); break;
             case to_integral(gb_io_port::obp0): result = m_lcd.read_obp0(); break;
             case to_integral(gb_io_port::obp1): result = m_lcd.read_obp1(); break;
@@ -480,7 +475,16 @@ void age::gb_bus::handle_events()
             case gb_event::start_oam_dma:
                 m_oam_dma_last_cycle = m_core.get_oscillation_cycle();
                 m_oam_dma_active = true;
-                m_oam_dma_address = m_oam_dma_byte * 0x100;
+                //
+                // verified by mooneye-gb tests
+                //
+                // Trying to trigger an OAM DMA transfer for a memory address
+                // greater than 0xDFFF will instead trigger an OAM DMA transfer
+                // for the corresponding 0xC000-0xDFFF memory range.
+                //
+                //      acceptance/oam_dma/sources-dmgABCmgbS
+                //
+                m_oam_dma_address = (m_oam_dma_byte * 0x100) & ((m_oam_dma_byte > 0xDF) ? 0xDF00 : 0xFF00);
                 m_oam_dma_offset = 0;
                 break;
 
@@ -590,30 +594,35 @@ void age::gb_bus::handle_dma()
 
 void age::gb_bus::write_dma(uint8 value)
 {
-    // activate OAM DMA only, if value <= 0xDF
-    if (value <= 0xDF)
-    {
-        //
-        // verified by mooneye-gb tests
-        //
-        // OAM DMA starts after the next cpu cycle finishes
-        //
-        //      acceptance/oam_dma_start
-        //
-        // verified by gambatte tests
-        //
-        // there is no delay for CGB, the OAM DMA starts after
-        // the current cpu cycle finishes
-        //
-        //      oamdma/oamdma_src8000_vrambankchange_1_cgb04c_out0
-        //      oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
-        //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
-        //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
-        //
-        m_oam_dma_byte = value;
-        uint factor = m_core.is_cgb() ? 1 : 2;
-        m_core.insert_event(m_core.get_machine_cycles_per_cpu_cycle() * factor, gb_event::start_oam_dma);
-    }
+    //
+    // verified by mooneye-gb tests
+    //
+    // Reading the DMA register will always return the last value
+    // written to it even if it did not trigger any DMA transfer.
+    //
+    //      acceptance/oam_dma/reg_read
+    //
+    m_oam_dma_byte = value;
+
+    //
+    // verified by mooneye-gb tests
+    //
+    // OAM DMA starts after the next cpu cycle finishes
+    //
+    //      acceptance/oam_dma_start
+    //
+    // verified by gambatte tests
+    //
+    // there is no delay for CGB, the OAM DMA starts after
+    // the current cpu cycle finishes
+    //
+    //      oamdma/oamdma_src8000_vrambankchange_1_cgb04c_out0
+    //      oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
+    //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
+    //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
+    //
+    uint factor = m_core.is_cgb() ? 1 : 2;
+    m_core.insert_event(m_core.get_machine_cycles_per_cpu_cycle() * factor, gb_event::start_oam_dma);
 }
 
 void age::gb_bus::write_hdma5(uint8 value)
