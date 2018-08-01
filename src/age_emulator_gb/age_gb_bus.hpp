@@ -161,7 +161,7 @@ private:
 
     std::vector<gb_event> m_events;
 
-    uint8 m_oam_dma_byte = 0xFF;
+    uint8 m_oam_dma_byte;
     bool m_oam_dma_active = false;
     uint m_oam_dma_address = 0;
     uint m_oam_dma_offset = 0;
