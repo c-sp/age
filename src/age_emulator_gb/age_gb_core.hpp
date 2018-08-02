@@ -64,8 +64,9 @@ enum class gb_event : uint
     lcd_late_lyc_interrupt = 4,
     start_hdma = 5,
     start_oam_dma = 6,
+    serial_transfer_finished = 7,
 
-    none = 7 // must always be the last value
+    none = 8 // must always be the last value
 };
 
 constexpr uint gb_no_cycle = uint_max;
