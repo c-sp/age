@@ -21,7 +21,7 @@
 #include "age_gb_core.hpp"
 
 #if 0
-#define LOG(x) if (m_oscillation_cycle < 15000) { AGE_LOG("cycle " << m_oscillation_cycle << ": " << x); }
+#define LOG(x) AGE_LOG("cycle " << m_oscillation_cycle << ": " << x)
 #else
 #define LOG(x)
 #endif
@@ -225,6 +225,7 @@ bool age::gb_core::must_service_interrupt()
 
         if (result)
         {
+            LOG("noticed interrupt 0x" << std::hex << (uint)interrupt << std::dec);
             AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
             m_ime = false; // disable interrupts
         }
@@ -248,7 +249,6 @@ age::uint16 age::gb_core::get_interrupt_to_service()
         m_if &= ~interrupt; // clear interrupt bit
 
         result = (interrupt < 8) ? gb_interrupt_pc_lookup[interrupt] : interrupt + 0x50;
-        LOG("noticed interrupt 0x" << std::hex << result << std::dec);
     }
 
     return result;
@@ -263,7 +263,7 @@ age::uint8 age::gb_core::read_key1() const
 
 age::uint8 age::gb_core::read_if() const
 {
-    LOG((uint)m_if);
+    LOG("0x" << std::hex << (uint)m_if << std::dec);
     return m_if;
 }
 
@@ -276,20 +276,20 @@ age::uint8 age::gb_core::read_ie() const
 
 void age::gb_core::write_key1(uint8 value)
 {
-    LOG((uint)value);
+    LOG("0x" << std::hex << (uint)value << std::dec);
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
 }
 
 void age::gb_core::write_if(uint8 value)
 {
-    LOG((uint)value);
+    LOG("0x" << std::hex << (uint)value << std::dec);
     m_if = value | 0xE0;
     check_halt_mode();
 }
 
 void age::gb_core::write_ie(uint8 value)
 {
-    LOG((uint)value);
+    LOG("0x" << std::hex << (uint)value << std::dec);
     m_ie = value;
     check_halt_mode();
 }

@@ -24,7 +24,11 @@
 
 namespace age {
 
-constexpr uint gb_serial_transfer_cycles_per_bit = gb_machine_cycles_per_second / 8192; // bit transfer with 8192 Hz
+// 256 cycles for "bit in"
+// 256 cycles for "bit out"
+constexpr uint gb_sio_shift_clock_bit = 1 << 8;
+// 512 cycles for fully transferring one bit (8192 Bits/s)
+constexpr uint gb_sio_cycles_per_bit = gb_sio_shift_clock_bit << 1;
 
 constexpr uint8 gb_sc_start_transfer = 0x80;
 constexpr uint8 gb_sc_terminal_selection = 0x01;
@@ -54,6 +58,9 @@ age::uint8 age::gb_serial::read_sc() const
 
 void age::gb_serial::write_sb(uint8 value)
 {
+    LOG("0x" << std::hex << (uint)value << " (cur 0x" << (uint)m_sb << std::dec
+        << ( ((m_sc & gb_sc_start_transfer) == 0) ? ")" : "), transfer in progress!" ));
+
     // SC7 set -> reading and writing prohibited
     if ((m_sc & gb_sc_start_transfer) == 0)
     {
@@ -78,6 +85,7 @@ void age::gb_serial::write_sc(uint8 value)
     // start serial transfer
     if ((m_sc & gb_sc_start_transfer) > 0)
     {
+        // start transfer only when using internal clock
         if ((m_sc & gb_sc_terminal_selection) > 0)
         {
             //
@@ -85,13 +93,30 @@ void age::gb_serial::write_sc(uint8 value)
             //
             // The serial transfer clock is divided from the main clock,
             // thus the transfer does not start immediately.
+            // Side note: when boot_sclk_align-dmgABCmgb starts the transfer
+            //            bit 8 of the cycle counter is not set.
             //
             //      acceptance/serial/boot_sclk_align-dmgABCmgb
             //
-            uint cycles_mod = m_core.get_oscillation_cycle() % gb_serial_transfer_cycles_per_bit;
-            LOG("starting serial transfer, " << cycles_mod << " cycles into serial transfer clock");
+            uint cycles_into_sio_clock = m_core.get_oscillation_cycle() % gb_sio_cycles_per_bit;
 
-            uint transfer_duration_cycles = 8 * gb_serial_transfer_cycles_per_bit - cycles_mod;
+            //
+            // verified by gambatte tests
+            //
+            // Starting the serial transfer while bit 8 of the cycle counter
+            // is set will extend the transfer duration by half the cycles
+            // required to transfer a single bit.
+            //
+            //      serial/nopx1_start_wait_read_if_1_dmg08_cgb04c_outE0
+            //      serial/nopx1_start_wait_read_if_2_dmg08_cgb04c_outE8
+            //      serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0
+            //      serial/nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8
+            //
+            uint extended_cycles = ((m_core.get_oscillation_cycle() & gb_sio_shift_clock_bit) > 0) ? gb_sio_cycles_per_bit / 2 : 0;
+
+            LOG("starting serial transfer, " << cycles_into_sio_clock << " cycles into sio clock, " << extended_cycles << " cycles extended");
+            uint transfer_duration_cycles = 8 * gb_sio_cycles_per_bit - cycles_into_sio_clock + extended_cycles;
+
             m_core.insert_event(transfer_duration_cycles, gb_event::serial_transfer_finished);
         }
     }
@@ -109,6 +134,8 @@ void age::gb_serial::finish_transfer()
 {
     LOG("serial transfer finished");
     m_sc &= ~gb_sc_start_transfer;
+
+    LOG("request serial transfer interrupt");
     m_core.request_interrupt(gb_interrupt::serial); // breaks gator pinball (no joypad reaction any more)
 }
 

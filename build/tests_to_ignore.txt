@@ -249,7 +249,6 @@ oamdma/oamdma_srcFF00_readFE00_dmg08_out1_cgb04c_out0.gbc
 oamdma/oamdma_srcFF00_readFE45_dmg08_out1_cgb04c_out0.gbc
 serial/nopx1_start83_wait_read_if_2_dmg08_outE0_cgb04c_outE8.gbc  # CGB fails
 serial/nopx2_start83_wait_read_if_2_dmg08_outE0_cgb04c_outE8.gbc  # CGB fails
-serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0.gbc
 serial/start_wait_read_sb_1_dmg08_cgb04c_out7F.gbc
 serial/start_wait_read_sb_2_dmg08_cgb04c_outFF.gbc
 serial/start_wait_sc80_read_if_1_dmg08_cgb04c_outE0.gbc
