@@ -26,12 +26,11 @@ namespace age {
 
 // DMG: 256 cycles for "bit in"
 // DMG: 256 cycles for "bit out"
+// DMG: 512 cycles for fully transferring one bit (8192 Bits/s)
 constexpr uint gb_sio_shift_clock_bit = 1 << 8;
 
-// DMG: 512 cycles for fully transferring one bit (8192 Bits/s)
-constexpr uint gb_sio_cycles_per_bit = gb_sio_shift_clock_bit << 1;
-
 constexpr uint8 gb_sc_start_transfer = 0x80;
+constexpr uint8 gb_sc_shift_clock_switch = 0x02;
 constexpr uint8 gb_sc_terminal_selection = 0x01;
 
 }
@@ -98,7 +97,7 @@ void age::gb_serial::write_sc(uint8 value)
         if ((value & gb_sc_terminal_selection) > 0)
         {
             m_sio_state = gb_sio_state::transfer_internal_clock;
-            uint cycles_until_finished = transfer_init();
+            uint cycles_until_finished = transfer_init(value);
             m_core.insert_event(cycles_until_finished, gb_event::serial_transfer_finished);
         }
 
@@ -114,20 +113,6 @@ void age::gb_serial::write_sc(uint8 value)
         else
         {
             m_sio_state = gb_sio_state::transfer_external_clock;
-            m_core.remove_event(gb_event::serial_transfer_finished);
-        }
-
-        //
-        // verified by gambatte tests
-        //
-        // Since we have no external clock any ongoing transfer is essentially
-        // aborted when switching to external clock.
-        //
-        //      serial/start_wait_sc80_read_if_1_dmg08_cgb04c_outE0
-        //      serial/start_wait_sc80_read_if_2_dmg08_cgb04c_outE8
-        //
-        else
-        {
             m_core.remove_event(gb_event::serial_transfer_finished);
         }
     }
@@ -158,7 +143,7 @@ void age::gb_serial::finish_transfer()
     m_sb = 0xFF;
 
     LOG("request serial transfer interrupt");
-    m_core.request_interrupt(gb_interrupt::serial); // breaks gator pinball (no joypad reaction any more)
+    m_core.request_interrupt(gb_interrupt::serial);
 }
 
 
@@ -169,10 +154,14 @@ void age::gb_serial::finish_transfer()
 //
 //---------------------------------------------------------
 
-age::uint age::gb_serial::transfer_init()
+age::uint age::gb_serial::transfer_init(uint8 value)
 {
-    uint cycles_per_bit = gb_sio_cycles_per_bit;
-    uint shift_clock_bit = gb_sio_shift_clock_bit;
+    bool high_frequency = m_core.is_cgb() && ((value & gb_sc_shift_clock_switch) > 0);
+
+    uint shift_clock_bit = high_frequency ? gb_sio_shift_clock_bit >> 5 : gb_sio_shift_clock_bit;
+    shift_clock_bit = m_core.is_double_speed() ? shift_clock_bit >> 1 : shift_clock_bit;
+
+    uint cycles_per_bit = shift_clock_bit << 1;
 
     uint current_cycle = m_core.get_oscillation_cycle();
 
@@ -196,7 +185,7 @@ age::uint age::gb_serial::transfer_init()
     // required to transfer a single bit.
     //
     // My guess: Sending and receiving a single bit is done on different edges
-    //           of the sio clock (cycle counter bit 8 going low/high).
+    //           of the sio clock (DMG: cycle counter bit 8 going low/high).
     //           We must transmit bit 7 before shifting a new bit 0 into the register,
     //           otherwise bit 7 is lost.
     //           If receiving a bit is triggered by cycle counter bit 8 going low,

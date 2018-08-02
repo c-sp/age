@@ -56,7 +56,7 @@ public:
 
 private:
 
-    uint transfer_init();
+    uint transfer_init(uint8 value);
     void transfer_update_sb();
 
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
