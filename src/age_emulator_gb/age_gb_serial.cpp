@@ -70,6 +70,8 @@ void age::gb_serial::write_sb(uint8 value)
 
 void age::gb_serial::write_sc(uint8 value)
 {
+    LOG("0x" << std::hex << (uint)value << std::dec);
+
     // clearing the high bit manually is not possible
     if ((m_sc & gb_sc_start_transfer) > 0)
     {
@@ -85,7 +87,7 @@ void age::gb_serial::write_sc(uint8 value)
     // start serial transfer
     if ((m_sc & gb_sc_start_transfer) > 0)
     {
-        // start transfer only when using internal clock
+        // start transfer only when using the internal clock
         if ((m_sc & gb_sc_terminal_selection) > 0)
         {
             //
@@ -118,6 +120,20 @@ void age::gb_serial::write_sc(uint8 value)
             uint transfer_duration_cycles = 8 * gb_sio_cycles_per_bit - cycles_into_sio_clock + extended_cycles;
 
             m_core.insert_event(transfer_duration_cycles, gb_event::serial_transfer_finished);
+        }
+
+        //
+        // verified by gambatte tests
+        //
+        // Since we have no external clock any ongoing transfer is essentially
+        // aborted when switching to external clock.
+        //
+        //      serial/start_wait_sc80_read_if_1_dmg08_cgb04c_outE0
+        //      serial/start_wait_sc80_read_if_2_dmg08_cgb04c_outE8
+        //
+        else
+        {
+            m_core.remove_event(gb_event::serial_transfer_finished);
         }
     }
 }
