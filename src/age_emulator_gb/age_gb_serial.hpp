@@ -31,11 +31,20 @@
 namespace age
 {
 
+enum class gb_sio_state
+{
+    no_transfer,
+    transfer_external_clock,
+    transfer_internal_clock
+};
+
+
+
 class gb_serial : public non_copyable
 {
 public:
 
-    uint8 read_sb() const;
+    uint8 read_sb();
     uint8 read_sc() const;
 
     void write_sb(uint8 value);
@@ -46,6 +55,13 @@ public:
     gb_serial(gb_core &core);
 
 private:
+
+    uint transfer_init();
+    void transfer_update_sb();
+
+    gb_sio_state m_sio_state = gb_sio_state::no_transfer;
+    uint m_sio_cycles_per_bit = 0;
+    uint m_sio_last_receive_cycle = 0;
 
     uint8 m_sb = 0;
     uint8 m_sc = 0;
