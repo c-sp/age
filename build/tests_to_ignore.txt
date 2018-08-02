@@ -20,7 +20,7 @@ acceptance/boot_regs-dmg0.gb         # AGE initializes CPU registers for dmgABC
 acceptance/boot_regs-mgb.gb          # AGE initializes CPU registers for dmgABC
 acceptance/boot_regs-sgb.gb          # SGB not supported by AGE
 acceptance/boot_regs-sgb2.gb         # SGB not supported by AGE
-madness/mgb_oam_dma_halt_sprites.gb  # AGE emulates either dmgABC or CGB hardware
+madness/mgb_oam_dma_halt_sprites.gb  # AGE emulates only dmgABC and CGB
 misc/boot_regs-A.gb                  # GBA not supported by AGE
 
 
