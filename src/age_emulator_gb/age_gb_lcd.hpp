@@ -72,11 +72,11 @@ constexpr uint8 gb_tile_attribute_priority = 0x80;
 
 
 
-class ly_counter : public non_copyable
+class gb_ly_counter : public non_copyable
 {
 public:
 
-    ly_counter(gb_core &core);
+    gb_ly_counter(gb_core &core);
 
     uint8 get_ly_port(bool lcd_enabled) const;
     uint8 get_ly() const;
@@ -104,11 +104,11 @@ private:
 
 
 
-class lyc_handler : public ly_counter
+class gb_lyc_handler : public gb_ly_counter
 {
 public:
 
-    using ly_counter::ly_counter;
+    using gb_ly_counter::gb_ly_counter;
 
     uint8 get_lyc() const;
     bool is_interruptable_coincidence() const;
@@ -136,22 +136,22 @@ private:
 
 
 
-class lyc_interrupter : private lyc_handler
+class gb_lyc_interrupter : private gb_lyc_handler
 {
 public:
 
-    using lyc_handler::lyc_handler;
+    using gb_lyc_handler::gb_lyc_handler;
 
-    using ly_counter::get_ly_port;
-    using ly_counter::get_ly;
-    using ly_counter::get_scanline;
-    using ly_counter::get_next_scanline_cycle_offset;
-    using ly_counter::next_line;
-    using ly_counter::mode1_ly0;
+    using gb_ly_counter::get_ly_port;
+    using gb_ly_counter::get_ly;
+    using gb_ly_counter::get_scanline;
+    using gb_ly_counter::get_next_scanline_cycle_offset;
+    using gb_ly_counter::next_line;
+    using gb_ly_counter::mode1_ly0;
 
-    using lyc_handler::get_lyc;
-    using lyc_handler::is_interruptable_coincidence;
-    using lyc_handler::get_stat_coincidence;
+    using gb_lyc_handler::get_lyc;
+    using gb_lyc_handler::is_interruptable_coincidence;
+    using gb_lyc_handler::get_stat_coincidence;
 
     void switch_off();
     void switch_on();
@@ -177,7 +177,7 @@ private:
 
 
 
-class gb_lcd_ppu : public lyc_interrupter
+class gb_lcd_ppu : public gb_lyc_interrupter
 {
 public:
 
@@ -389,7 +389,7 @@ public:
     void write_ocps(uint8 value);
     void write_ocpd(uint8 value);
 
-    using lyc_interrupter::lyc_event;
+    using gb_lyc_interrupter::lyc_event;
     using gb_lcd_ppu::get_oam;
 
     bool is_video_ram_accessible() const;

@@ -202,7 +202,7 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
 
 void age::gb_lcd::set_back_cycles(uint offset)
 {
-    lyc_interrupter::set_back_cycles(offset);
+    gb_lyc_interrupter::set_back_cycles(offset);
     AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
 
     // overflow may happen, but that's okay (we use this only for subtraction, never for comparison)

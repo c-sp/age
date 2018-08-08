@@ -69,7 +69,7 @@ constexpr const age::uint8_array<0xA0> dmg_oam_dump =
 //---------------------------------------------------------
 
 age::gb_lcd_ppu::gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_green)
-    : lyc_interrupter(core),
+    : gb_lyc_interrupter(core),
       m_cgb(core.is_cgb()),
       m_dmg_green(dmg_green),
       m_core(core),
