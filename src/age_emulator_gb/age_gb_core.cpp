@@ -26,9 +26,25 @@
 #define LOG(x)
 #endif
 
-constexpr const age::uint8_array<5> gb_interrupt_pc_lookup =
+constexpr const age::uint8_array<17> gb_interrupt_pc_lookup =
 {{
-     0x00, 0x40, 0x48, 0x48, 0x50
+     0,
+     0x40,
+     0x48,
+     0,
+     0x50,
+     0,
+     0,
+     0,
+     0x58,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0x60,
  }};
 
 
@@ -234,24 +250,29 @@ bool age::gb_core::must_service_interrupt()
     return result;
 }
 
-age::uint16 age::gb_core::get_interrupt_to_service()
+age::uint8 age::gb_core::get_interrupt_to_service()
 {
     AGE_ASSERT(m_state == gb_state::cpu_active);
-    uint16 result = 0;
 
     uint8 interrupt = m_ie & m_if & 0x1F;
     if (interrupt > 0)
     {
         // lower interrupt bits have higher priority
         interrupt &= ~(interrupt - 1); // get lowest interrupt bit that is set
-        AGE_ASSERT(interrupt <= 0x20);
-
         m_if &= ~interrupt; // clear interrupt bit
 
-        result = (interrupt < 8) ? gb_interrupt_pc_lookup[interrupt] : interrupt + 0x50;
+        AGE_ASSERT(   (interrupt == 0x01)
+                   || (interrupt == 0x02)
+                   || (interrupt == 0x04)
+                   || (interrupt == 0x08)
+                   || (interrupt == 0x10));
+
+        interrupt = gb_interrupt_pc_lookup[interrupt];
+
+        AGE_ASSERT(interrupt > 0);
     }
 
-    return result;
+    return interrupt;
 }
 
 

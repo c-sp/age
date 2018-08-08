@@ -103,7 +103,7 @@ public:
     bool halt();
     void stop();
     bool must_service_interrupt();
-    uint16 get_interrupt_to_service();
+    uint8 get_interrupt_to_service();
 
     uint8 read_key1() const;
     uint8 read_ie() const;
