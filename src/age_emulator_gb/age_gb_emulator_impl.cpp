@@ -74,6 +74,20 @@ age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
     m_sound.generate_samples();
 
     uint cycles_emulated = m_core.get_oscillation_cycle() - starting_cycle;
+
+    if (m_core.get_oscillation_cycle() > (uint_max / 2))
+    {
+        uint offset = m_core.get_oscillation_cycle() & ~(gb_machine_cycles_per_second - 1);
+        AGE_ASSERT(offset < m_core.get_oscillation_cycle());
+
+        m_core.set_back_cycles(offset);
+        m_sound.set_back_cycles(offset);
+        m_lcd.set_back_cycles(offset);
+        m_timer.set_back_cycles(offset);
+        m_serial.set_back_cycles(offset);
+        m_bus.set_back_cycles(offset);
+    }
+
     return cycles_emulated;
 }
 

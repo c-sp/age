@@ -105,6 +105,7 @@ public:
 
     void frame_sequencer_cycle();
     void generate_samples();
+    void set_back_cycles(uint offset);
 
 
 

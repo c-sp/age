@@ -587,6 +587,13 @@ void age::gb_bus::handle_dma()
 
 
 
+void age::gb_bus::set_back_cycles(uint offset)
+{
+    AGE_GB_SET_BACK_CYCLES(m_oam_dma_last_cycle, offset);
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -707,5 +714,6 @@ void age::gb_bus::handle_oam_dma()
     if (m_oam_dma_offset >= 160)
     {
         m_oam_dma_active = false;
+        m_oam_dma_last_cycle = gb_no_cycle;
     }
 }

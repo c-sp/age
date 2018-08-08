@@ -307,6 +307,14 @@ void age::gb_sound::generate_samples()
 
 
 
+void age::gb_sound::set_back_cycles(uint offset)
+{
+    AGE_GB_SET_BACK_CYCLES(m_last_generate_samples_cycle, offset);
+    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_c3_last_wave_access_cycle, offset);
+}
+
+
+
 
 
 //---------------------------------------------------------

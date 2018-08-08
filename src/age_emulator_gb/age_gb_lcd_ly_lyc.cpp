@@ -205,6 +205,13 @@ void age::ly_counter::mode1_ly0()
 
 
 
+void age::ly_counter::set_back_cycles(uint offset)
+{
+    AGE_GB_SET_BACK_CYCLES(m_next_scanline_cycle, offset);
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -835,6 +842,14 @@ void age::lyc_interrupter::set_lyc(uint8 value, uint mode, bool lcd_enabled)
             m_lyc_int = get_lyc();
         }
     }
+}
+
+
+
+void age::lyc_interrupter::set_back_cycles(uint offset)
+{
+    ly_counter::set_back_cycles(offset);
+    AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
 }
 
 

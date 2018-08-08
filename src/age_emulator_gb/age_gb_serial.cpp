@@ -138,12 +138,18 @@ void age::gb_serial::finish_transfer()
 {
     LOG("serial transfer finished");
     m_sio_state = gb_sio_state::no_transfer;
+    m_sio_last_receive_cycle = gb_no_cycle;
 
     // since there is no counterpart for serial transfer we always receive 0xFF
     m_sb = 0xFF;
 
     LOG("request serial transfer interrupt");
     m_core.request_interrupt(gb_interrupt::serial);
+}
+
+void age::gb_serial::set_back_cycles(uint offset)
+{
+    AGE_GB_SET_BACK_CYCLES(m_sio_last_receive_cycle, offset);
 }
 
 

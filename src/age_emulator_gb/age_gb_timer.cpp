@@ -317,6 +317,11 @@ void age::gb_timer::switch_double_speed_mode()
     }
 }
 
+void age::gb_timer::set_back_cycles(uint offset)
+{
+    m_counter.set_back_cycles(offset);
+}
+
 
 
 //---------------------------------------------------------

@@ -42,6 +42,7 @@ public:
 
     void reset();
     void switch_double_speed_mode();
+    void set_back_cycles(uint offset);
 
 private:
 
@@ -93,6 +94,7 @@ public:
 
     void timer_overflow();
     void switch_double_speed_mode();
+    void set_back_cycles(uint offset);
 
     gb_timer(gb_core &core);
 

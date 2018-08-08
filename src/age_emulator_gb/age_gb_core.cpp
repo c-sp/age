@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+#include <algorithm>
 #include <ios> // std::hex
 
 #include <age_debug.hpp>
@@ -46,7 +47,6 @@ constexpr const age::uint8_array<17> gb_interrupt_pc_lookup =
      0,
      0x60,
  }};
-
 
 
 age::gb_core::gb_core(gb_mode mode)
@@ -131,6 +131,7 @@ void age::gb_core::oscillate_2_cycles()
 
 void age::gb_core::insert_event(uint cycle_offset, gb_event event)
 {
+    AGE_ASSERT(m_oscillation_cycle + cycle_offset >= m_oscillation_cycle); // check for overflow
     m_events.insert_event(m_oscillation_cycle + cycle_offset, event);
 }
 
@@ -147,6 +148,12 @@ age::gb_event age::gb_core::poll_event()
 age::uint age::gb_core::get_event_cycle(gb_event event) const
 {
     return m_events.get_event_cycle(event);
+}
+
+void age::gb_core::set_back_cycles(uint offset)
+{
+    AGE_GB_SET_BACK_CYCLES(m_oscillation_cycle, offset);
+    m_events.set_back_cycles(offset);
 }
 
 
@@ -409,4 +416,23 @@ void age::gb_core::gb_events::insert_event(uint for_cycle, gb_event event)
         m_events.insert(std::pair<uint, gb_event>(for_cycle, event));
     }
     m_event_cycle[event_id] = for_cycle;
+}
+
+void age::gb_core::gb_events::set_back_cycles(uint offset)
+{
+    // find all scheduled events
+    std::vector<gb_event> events_to_adjust;
+    std::for_each(m_events.begin(), m_events.end(), [&](const auto &pair)
+    {
+        events_to_adjust.push_back(pair.second);
+    });
+
+    // re-schedule all found events
+    std::for_each(events_to_adjust.begin(), events_to_adjust.end(), [&](const gb_event &event)
+    {
+        auto idx = to_integral(event);
+        uint event_cycle = m_event_cycle[idx];
+        AGE_GB_SET_BACK_CYCLES(event_cycle, offset);
+        insert_event(event_cycle, event);
+    });
 }

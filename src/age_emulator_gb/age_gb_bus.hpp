@@ -137,6 +137,8 @@ public:
     void handle_events();
     void handle_dma();
 
+    void set_back_cycles(uint offset);
+
 private:
 
     void write_dma(uint8 value);
@@ -165,7 +167,7 @@ private:
     bool m_oam_dma_active = false;
     uint m_oam_dma_address = 0;
     uint m_oam_dma_offset = 0;
-    uint m_oam_dma_last_cycle = 0;
+    uint m_oam_dma_last_cycle = gb_no_cycle;
 
     uint8 m_hdma5 = 0xFF;
     uint m_dma_source = 0;

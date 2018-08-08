@@ -69,8 +69,24 @@ enum class gb_event : uint
     none = 8 // must always be the last value
 };
 
+
+
 constexpr uint gb_no_cycle = uint_max;
 constexpr uint gb_machine_cycles_per_second = 4194304;
+
+#define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) ({ \
+    if (value != gb_no_cycle) { \
+        /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
+        AGE_ASSERT(offset >= gb_machine_cycles_per_second); \
+        AGE_ASSERT(0 == (offset & (gb_machine_cycles_per_second - 1))); \
+        value -= offset; \
+    } \
+})
+
+#define AGE_GB_SET_BACK_CYCLES(value, offset) ({ \
+    AGE_ASSERT((value == gb_no_cycle) || (value >= offset)); \
+    AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset); \
+})
 
 
 
@@ -92,6 +108,7 @@ public:
     void remove_event(gb_event event);
     gb_event poll_event();
     uint get_event_cycle(gb_event event) const;
+    void set_back_cycles(uint offset);
 
     void start_dma();
     void finish_dma();
@@ -129,6 +146,8 @@ private:
 
         gb_event poll_event(uint current_cycle);
         void insert_event(uint for_cycle, gb_event event);
+
+        void set_back_cycles(uint offset);
 
     private:
 

@@ -88,6 +88,8 @@ public:
     void next_line();
     void mode1_ly0();
 
+    void set_back_cycles(uint offset);
+
 protected:
 
     gb_core *const m_core;
@@ -156,6 +158,8 @@ public:
     void set_stat(uint8 value, uint mode, bool lcd_enabled);
     void set_lyc(uint8 value, uint mode, bool lcd_enabled);
     void lyc_event();
+
+    void set_back_cycles(uint offset);
 
 private:
 
@@ -396,6 +400,8 @@ public:
     void emulate();
     void set_hdma_active(bool hdma_active);
 
+    void set_back_cycles(uint offset);
+
 private:
 
     void emulate(uint to_cycle);
@@ -428,8 +434,8 @@ private:
     screen_buffer &m_screen_buffer;
     uint8_array<gb_num_palette_colors * 2> m_palette; // 2 bytes per color
     std::function<void(gb_lcd&)> m_next_event = nullptr;
-    uint m_next_event_cycle = 0;
-    uint m_m3_last_finished = 0;
+    uint m_next_event_cycle = gb_no_cycle;
+    uint m_last_cycle_m3_finished = 0;
     bool m_hdma_active = false;
 
     // precalculated from LCDC and STAT

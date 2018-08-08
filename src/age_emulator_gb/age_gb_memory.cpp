@@ -284,7 +284,7 @@ age::uint32 age::gb_memory::crc32(uint8_vector::const_iterator begin, uint8_vect
 {
     uint32 crc = 0xFFFFFFFF;
 
-    std::for_each(begin, end, [&](auto v)
+    std::for_each(begin, end, [&](const uint8 &v)
     {
         crc ^= v;
         for (size_t i = 0; i < 8; ++i)

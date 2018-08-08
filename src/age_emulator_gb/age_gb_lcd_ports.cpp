@@ -48,6 +48,7 @@ void age::gb_lcd::write_lcdc(uint8 value)
         {
             switch_on();
             m_next_event_cycle = m_core.get_oscillation_cycle();
+            m_last_cycle_m3_finished = 0;
             m_skip_next_mode1_interrupt = false;
 
             mode0_start_lcd_enabled();
@@ -957,7 +958,7 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
         //      cgbpal_m3/cgbpal_m3end_scx5_ds_3_out0
         //      cgbpal_m3/cgbpal_m3end_scx5_ds_4_out1
         //
-        uint m3_cycle_diff = current_cycle - m_m3_last_finished;
+        uint m3_cycle_diff = current_cycle - m_last_cycle_m3_finished;
         uint min_cycle_diff = m_core.get_machine_cycles_per_cpu_cycle();
         allowed &= m3_cycle_diff >= min_cycle_diff;
 
