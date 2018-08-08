@@ -74,19 +74,18 @@ enum class gb_event : uint
 constexpr uint gb_no_cycle = uint_max;
 constexpr uint gb_machine_cycles_per_second = 4194304;
 
-#define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) ({ \
+#define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
     if (value != gb_no_cycle) { \
         /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
         AGE_ASSERT(offset >= gb_machine_cycles_per_second); \
         AGE_ASSERT(0 == (offset & (gb_machine_cycles_per_second - 1))); \
         value -= offset; \
     } \
-})
+    else (void)0 // no-op to force semicolon when using this macro
 
-#define AGE_GB_SET_BACK_CYCLES(value, offset) ({ \
+#define AGE_GB_SET_BACK_CYCLES(value, offset) \
     AGE_ASSERT((value == gb_no_cycle) || (value >= offset)); \
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset); \
-})
+    AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset)
 
 
 

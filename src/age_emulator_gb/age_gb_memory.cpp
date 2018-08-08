@@ -362,9 +362,9 @@ age::gb_memory::mbc_writer age::gb_memory::get_mbc_writer(gb_mbc_data &mbc, cons
         case 0x01:
         case 0x02:
         case 0x03:
-            mbc.m_mbc1_bank1 = 1;
-            mbc.m_mbc1_bank2 = 0;
-            mbc.m_mbc1_mode1 = false;
+            mbc.m_mbc1.m_bank1 = 1;
+            mbc.m_mbc1.m_bank2 = 0;
+            mbc.m_mbc1.m_mode1 = false;
             result = &write_to_mbc1;
             break;
 
@@ -384,16 +384,16 @@ age::gb_memory::mbc_writer age::gb_memory::get_mbc_writer(gb_mbc_data &mbc, cons
         case 0x19:
         case 0x1A:
         case 0x1B:
-            mbc.m_mbc5_2000 = 1;
-            mbc.m_mbc5_3000 = 0;
+            mbc.m_mbc5.m_2000 = 1;
+            mbc.m_mbc5.m_3000 = 0;
             result = &write_to_mbc5;
             break;
 
         case 0x1C:
         case 0x1D:
         case 0x1E:
-            mbc.m_mbc5_2000 = 1;
-            mbc.m_mbc5_3000 = 0;
+            mbc.m_mbc5.m_2000 = 1;
+            mbc.m_mbc5.m_3000 = 0;
             result = &write_to_mbc5_rumble;
             break;
     }
@@ -422,19 +422,19 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
 
         case 0x2000:
             // select rom bank (lower 5 bits)
-            memory.m_mbc_data.m_mbc1_bank1 = ((value & 0x1F) == 0) ? value + 1 : value;
+            memory.m_mbc_data.m_mbc1.m_bank1 = ((value & 0x1F) == 0) ? value + 1 : value;
             break;
 
         case 0x4000:
             // select rom/ram bank
-            memory.m_mbc_data.m_mbc1_bank2 = value;
+            memory.m_mbc_data.m_mbc1.m_bank2 = value;
             break;
 
         case 0x6000:
             // select MBC1 mode:
             //  - mode 0: bank2 affects 0x4000-0x7FFF
             //  - mode 1: bank2 affects 0x0000-0x7FFF, 0xA000-0xBFFF
-            memory.m_mbc_data.m_mbc1_mode1 = (value & 0x01) > 0;
+            memory.m_mbc_data.m_mbc1.m_mode1 = (value & 0x01) > 0;
             break;
     }
 
@@ -450,13 +450,13 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint offset, uint value)
     //      emulator-only/mbc1/rom_16Mb
     //
 
-    uint mbc_high_bits = memory.m_mbc_data.m_mbc1_bank2 & 0x03;
+    uint mbc_high_bits = memory.m_mbc_data.m_mbc1.m_bank2 & 0x03;
 
     uint high_rom_bits = mbc_high_bits << (memory.m_mbc1_multi_cart ? 4 : 5);
-    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1_mode1 ? high_rom_bits : 0;
-    uint high_rom_bank_id = high_rom_bits + (memory.m_mbc_data.m_mbc1_bank1 & (memory.m_mbc1_multi_cart ? 0x0F : 0x1F));
+    uint low_rom_bank_id = memory.m_mbc_data.m_mbc1.m_mode1 ? high_rom_bits : 0;
+    uint high_rom_bank_id = high_rom_bits + (memory.m_mbc_data.m_mbc1.m_bank1 & (memory.m_mbc1_multi_cart ? 0x0F : 0x1F));
 
-    uint ram_bank_id = memory.m_mbc_data.m_mbc1_mode1 ? mbc_high_bits : 0;
+    uint ram_bank_id = memory.m_mbc_data.m_mbc1.m_mode1 ? mbc_high_bits : 0;
 
     // set rom & ram banks
     AGE_ASSERT(memory.m_mbc1_multi_cart || ((high_rom_bank_id & 0x1F) > 0));
@@ -540,13 +540,13 @@ void age::gb_memory::write_to_mbc5(gb_memory &memory, uint offset, uint value)
             // select rom bank (lower 5 bits)
             if ((offset & 0x1000) == 0)
             {
-                memory.m_mbc_data.m_mbc5_2000 = value;
+                memory.m_mbc_data.m_mbc5.m_2000 = value;
             }
             else
             {
-                memory.m_mbc_data.m_mbc5_3000 = value;
+                memory.m_mbc_data.m_mbc5.m_3000 = value;
             }
-            memory.set_rom_banks(0, (static_cast<uint>(memory.m_mbc_data.m_mbc5_3000 & 0x01) << 8) + memory.m_mbc_data.m_mbc5_2000);
+            memory.set_rom_banks(0, (static_cast<uint>(memory.m_mbc_data.m_mbc5.m_3000 & 0x01) << 8) + memory.m_mbc_data.m_mbc5.m_2000);
             break;
 
         case 0x4000:

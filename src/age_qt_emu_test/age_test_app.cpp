@@ -88,7 +88,7 @@ void age::test_application::schedule_tests()
         {
             QString result_file;
             test_method method;
-            uint scheduled = 0;
+            int scheduled = 0;
 
             switch(m_type)
             {

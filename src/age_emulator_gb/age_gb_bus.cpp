@@ -513,10 +513,11 @@ void age::gb_bus::handle_dma()
     // oscillation counter accordingly
 
     // calculate remaining DMA length
-    uint dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
+    uint8 dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
 
     // calculate number of bytes to copy and update remaining DMA length
     uint bytes = m_lcd.is_hdma_active() ? 0x10 : dma_length * 0x10;
+    AGE_ASSERT(bytes <= 0x800);
     AGE_ASSERT((bytes & 0xF) == 0);
     LOG("DMA copying " << bytes << " bytes");
 
@@ -534,6 +535,7 @@ void age::gb_bus::handle_dma()
     {
         bytes = 0x10000 - m_dma_destination;
     }
+    AGE_ASSERT(bytes <= 0x800);
     AGE_ASSERT((bytes & 0xF) == 0);
 
     //
@@ -572,7 +574,7 @@ void age::gb_bus::handle_dma()
     m_core.oscillate_cpu_cycle();
 
     // update HDMA5
-    uint remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
+    uint8 remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
     if (remaining_dma_length == 0x7F)
     {
         LOG("DMA finished");

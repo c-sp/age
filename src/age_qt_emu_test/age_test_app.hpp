@@ -144,7 +144,7 @@ class test_runner : public QObject, public QRunnable
     Q_OBJECT
 public:
 
-    virtual ~test_runner() = default;
+    virtual ~test_runner() override = default;
 
     test_runner(const QString &test_file_name,
                 const QString &result_file_name,

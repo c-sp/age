@@ -78,7 +78,7 @@ class downsampler_linear : public downsampler
 public:
 
     using downsampler::downsampler;
-    virtual ~downsampler_linear() = default;
+    virtual ~downsampler_linear() override = default;
 
     void add_input_samples(const pcm_vector &samples) override;
 
@@ -99,7 +99,7 @@ class downsampler_low_pass : public downsampler
 public:
 
     using downsampler::downsampler;
-    virtual ~downsampler_low_pass() = default;
+    virtual ~downsampler_low_pass() override = default;
 
     void add_input_samples(const pcm_vector &samples) override;
 

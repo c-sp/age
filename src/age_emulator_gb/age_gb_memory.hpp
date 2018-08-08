@@ -90,14 +90,14 @@ private:
 
     typedef union {
         struct {
-            uint m_mbc1_bank1;
-            uint m_mbc1_bank2;
-            bool m_mbc1_mode1;
-        };
+            uint m_bank1;
+            uint m_bank2;
+            bool m_mode1;
+        } m_mbc1;
         struct {
-            uint m_mbc5_2000;
-            uint m_mbc5_3000;
-        };
+            uint m_2000;
+            uint m_3000;
+        } m_mbc5;
     } gb_mbc_data;
 
     static bool has_battery(const uint8_vector &cart_rom);

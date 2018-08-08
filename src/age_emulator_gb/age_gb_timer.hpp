@@ -65,7 +65,7 @@ public:
     uint get_past_tima_counter(uint8 for_tima) const;
 
     void set_tima(uint tima);
-    void set_frequency(uint tac);
+    void set_frequency(uint8 tac);
 
 private:
 

@@ -117,7 +117,7 @@ age::uint8 age::gb_timer::read_tima()
 
 age::uint8 age::gb_timer::read_div() const
 {
-    return m_counter.get_current_value() >> 6;
+    return (m_counter.get_current_value() >> 6) & 0xFF;
 }
 
 

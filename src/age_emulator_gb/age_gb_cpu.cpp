@@ -763,7 +763,7 @@ void age::gb_cpu::emulate_instruction()
         INC_CYCLES;
         PUSH_BYTE(m_pc >> 8); // if this writes IE, the interrupt may be cancelled
         uint16 new_pc = m_core.get_interrupt_to_service();
-        PUSH_BYTE(m_pc); // writing IE here will not cancel the interrupt
+        PUSH_BYTE(m_pc & 0xFF); // writing IE here will not cancel the interrupt
         INC_CYCLES;
         m_pc = new_pc;
         return;

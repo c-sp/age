@@ -38,14 +38,14 @@
 #endif
 
 
-std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler = nullptr;
-age::uint output_sample_rate = 44100;
+static std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler = nullptr;
+static age::uint output_sample_rate = 44100;
 
-std::unique_ptr<age::gb_emulator> gb_emu = nullptr;
-age::uint8_vector gb_rom;
-std::string rom_name;
-age::uint8_vector gb_persistent_ram;
-bool gb_persistent_ram_dirty = false; // true => emulator_exists() == true
+static std::unique_ptr<age::gb_emulator> gb_emu = nullptr;
+static age::uint8_vector gb_rom;
+static std::string rom_name;
+static age::uint8_vector gb_persistent_ram;
+static bool gb_persistent_ram_dirty = false; // true => emulator_exists() == true
 
 void free_memory(age::uint8_vector &vec)
 {

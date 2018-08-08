@@ -121,7 +121,7 @@ bool age::gb_lcd::is_oam_readable() const
     {
         if (get_scanline() < gb_screen_height)
         {
-            int current_cycle = m_core.get_oscillation_cycle();
+            uint current_cycle = m_core.get_oscillation_cycle();
             uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
             result &= next_scanline_offset > 4;
         }
@@ -149,7 +149,7 @@ bool age::gb_lcd::is_oam_writable() const
     {
         if (get_scanline() < gb_screen_height)
         {
-            int current_cycle = m_core.get_oscillation_cycle();
+            uint current_cycle = m_core.get_oscillation_cycle();
             uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
             result &= next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle();
         }

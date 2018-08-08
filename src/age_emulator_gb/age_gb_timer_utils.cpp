@@ -161,7 +161,7 @@ void age::gb_tima_counter::set_tima(uint tima)
 
 
 
-void age::gb_tima_counter::set_frequency(uint tac)
+void age::gb_tima_counter::set_frequency(uint8 tac)
 {
     // preserve the current TIMA value during the frequency change
     uint tima = get_current_value();
