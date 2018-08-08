@@ -20,7 +20,7 @@ acceptance/boot_regs-dmg0.gb         # AGE initializes CPU registers for dmgABC
 acceptance/boot_regs-mgb.gb          # AGE initializes CPU registers for dmgABC
 acceptance/boot_regs-sgb.gb          # SGB not supported by AGE
 acceptance/boot_regs-sgb2.gb         # SGB not supported by AGE
-madness/mgb_oam_dma_halt_sprites.gb  # AGE emulates only dmgABC and CGB
+madness/mgb_oam_dma_halt_sprites.gb  # AGE emulates dmgABC and CGB, no mgb
 misc/boot_regs-A.gb                  # GBA not supported by AGE
 
 
@@ -36,7 +36,6 @@ acceptance/ppu/lcdon_timing-dmgABCmgbS.gb
 acceptance/ppu/lcdon_write_timing-GS.gb
 acceptance/ppu/stat_lyc_onoff.gb
 acceptance/ppu/vblank_stat_intr-GS.gb
-acceptance/serial/boot_sclk_align-dmgABCmgb.gb
 manual-only/sprite_priority.gb
 misc/ppu/vblank_stat_intr-C.gb
 
