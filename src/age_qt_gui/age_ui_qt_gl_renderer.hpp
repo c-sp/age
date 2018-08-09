@@ -53,7 +53,7 @@ class qt_gl_renderer : public QGLWidget, private QGLFunctions, private QThread
 {
 public:
 
-    qt_gl_renderer(QWidget *parent = 0);
+    qt_gl_renderer(QWidget *parent = nullptr);
     virtual ~qt_gl_renderer() override;
 
     void start();

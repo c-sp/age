@@ -111,7 +111,7 @@ class qt_filter_widget : public QFrame
     Q_OBJECT
 public:
 
-    qt_filter_widget(uint widget_index, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    qt_filter_widget(uint widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_filter(qt_filter filter, GLint width, GLint height);
 
@@ -151,7 +151,7 @@ class qt_settings_video : public QWidget, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_emulator_screen_size(GLint width, GLint height);
 
@@ -221,7 +221,7 @@ class qt_settings_audio : public QWidget, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_audio(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    qt_settings_audio(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_active_audio_output(const QAudioDeviceInfo &device, const QAudioFormat &format, int buffer_size, int downsampler_fir_size);
 
@@ -293,7 +293,7 @@ class qt_settings_keys : public QWidget, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_keys(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    qt_settings_keys(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     qt_key_event get_event_for_key(Qt::Key key) const;
 
@@ -360,7 +360,7 @@ class qt_settings_miscellaneous : public QWidget, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_miscellaneous(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    qt_settings_miscellaneous(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     bool show_menu_bar(bool fullscreen) const;
     bool show_status_bar(bool fullscreen) const;
@@ -418,7 +418,7 @@ class qt_settings_dialog : public QDialog, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags = 0);
+    qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags = nullptr);
 
     qt_key_event get_event_for_key(Qt::Key key) const;
     QString get_open_file_dialog_directory() const;

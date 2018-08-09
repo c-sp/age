@@ -53,8 +53,8 @@ class qt_main_window : public QMainWindow, non_copyable
     Q_OBJECT
 public:
 
-    qt_main_window(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-    ~qt_main_window();
+    qt_main_window(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+    ~qt_main_window() override;
 
 signals:
 

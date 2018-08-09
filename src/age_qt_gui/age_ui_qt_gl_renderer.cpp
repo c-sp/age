@@ -66,7 +66,7 @@ age::qt_gl_renderer::qt_gl_renderer(QWidget *parent)
 age::qt_gl_renderer::~qt_gl_renderer()
 {
     LOG("waiting for render thread to finish");
-    std::function<void(void)> tmp = [this] () {};
+    std::function<void(void)> tmp = []() {};
     locked_flag_operation(tmp, qt_renderer_stopped);
     wait();
 }
