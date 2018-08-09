@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#include <QRectF>
+
 #include <age_debug.hpp>
 
 #include "age_ui_qt_renderer.hpp"
@@ -47,6 +49,7 @@ age::qt_renderer::qt_renderer(QWidget *parent)
 
 age::uint age::qt_renderer::get_fps() const
 {
+    //! \todo implement age::qt_renderer::get_fps
     return 0;
 }
 
@@ -61,11 +64,16 @@ age::uint age::qt_renderer::get_fps() const
 void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
 {
     LOG(width << ", " << height);
+    m_emulator_screen = QSize(width, height);
+
+    update_projection(); // calculate new projection matrix
+    update(); // trigger paintGL()
 }
 
 void age::qt_renderer::new_video_frame(pixel_vector new_video_frame)
 {
     LOG("#pixel: " << new_video_frame.size());
+    //! \todo implement age::qt_renderer::new_video_frame
 }
 
 
@@ -73,16 +81,19 @@ void age::qt_renderer::new_video_frame(pixel_vector new_video_frame)
 void age::qt_renderer::set_blend_video_frames(uint num_video_frames_to_blend)
 {
     LOG(num_video_frames_to_blend);
+    //! \todo implement age::qt_renderer::set_blend_video_frames
 }
 
 void age::qt_renderer::set_filter_chain(qt_filter_vector filter_chain)
 {
     LOG("#filters: " << filter_chain.size());
+    //! \todo implement age::qt_renderer::set_filter_chain
 }
 
 void age::qt_renderer::set_bilinear_filter(bool set_bilinear_filter)
 {
     LOG(set_bilinear_filter);
+    //! \todo implement age::qt_renderer::set_bilinear_filter
 }
 
 
@@ -96,17 +107,25 @@ void age::qt_renderer::set_bilinear_filter(bool set_bilinear_filter)
 void age::qt_renderer::initializeGL()
 {
     initializeOpenGLFunctions();
-    LOG("OpenGL functions initialized");
+
+    // clear color
+    glClearColor(0, 0, 0, 1);
 }
 
-void age::qt_renderer::resizeGL(int w, int h)
+
+
+void age::qt_renderer::resizeGL(int width, int height)
 {
-    LOG(w << ", " << h);
+    LOG("viewport size: " << width << " x " << height);
+    m_current_viewport = QSize(width, height);
+
+    update_projection();
 }
+
+
 
 void age::qt_renderer::paintGL()
 {
-    LOG("");
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -117,3 +136,26 @@ void age::qt_renderer::paintGL()
 //   private methods
 //
 //---------------------------------------------------------
+
+void age::qt_renderer::update_projection()
+{
+    double viewport_ratio = 1. * m_current_viewport.width() / m_current_viewport.height();
+    double screen_ratio = 1. * m_emulator_screen.width() / m_emulator_screen.height();
+
+    QRectF proj;
+    if (viewport_ratio > screen_ratio)
+    {
+        double diff = viewport_ratio - screen_ratio;
+        AGE_ASSERT(diff > 0);
+        proj = QRectF(-.5 * diff, 0, 1 + diff, 1); // x, y, width, height
+    }
+    else
+    {
+        double diff = (1 / viewport_ratio) - (1 / screen_ratio);
+        AGE_ASSERT(diff > 0);
+        proj = QRectF(0, -.5 * diff, 1, 1 + diff); // x, y, width, height
+    }
+
+    m_projection.setToIdentity();
+    m_projection.ortho(proj);
+}

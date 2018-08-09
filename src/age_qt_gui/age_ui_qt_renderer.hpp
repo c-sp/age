@@ -20,8 +20,10 @@
 //! \file
 //!
 
+#include <QMatrix4x4>
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
+#include <QSize>
 
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
@@ -53,11 +55,17 @@ public slots:
 
 protected:
 
-    void initializeGL();
-    void resizeGL(int w, int h);
-    void paintGL();
+    void initializeGL() override;
+    void resizeGL(int width, int height) override;
+    void paintGL() override;
 
 private:
+
+    void update_projection();
+
+    QSize m_emulator_screen = {1, 1};
+    QSize m_current_viewport = {1, 1};
+    QMatrix4x4 m_projection;
 };
 
 } // namespace age
