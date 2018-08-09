@@ -15,6 +15,7 @@
 //
 
 #include <QRectF>
+#include <QSurfaceFormat>
 #include <QVector2D>
 #include <QVector3D>
 #include <QVector4D>
@@ -94,13 +95,29 @@ age::qt_renderer::qt_renderer(QWidget *parent)
     : QOpenGLWidget(parent),
       m_indices(QOpenGLBuffer::IndexBuffer)
 {
+    QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
+#ifdef AGE_DEBUG
+    fmt.setOption(QSurfaceFormat::DebugContext);
+#endif
+
+    setFormat(fmt);
+    LOG("format options: " << format().options());
 }
 
 age::qt_renderer::~qt_renderer()
 {
     makeCurrent();
+
     m_vertices.destroy();
     m_indices.destroy();
+
+#ifdef AGE_DEBUG
+    if (m_logger)
+    {
+        m_logger->stopLogging();
+    }
+#endif
+
     doneCurrent();
 }
 
@@ -172,6 +189,11 @@ void age::qt_renderer::set_bilinear_filter(bool set_bilinear_filter)
 void age::qt_renderer::initializeGL()
 {
     initializeOpenGLFunctions();
+
+    // init logger
+#ifdef AGE_DEBUG
+    init_logger();
+#endif
 
     // clear color
     glClearColor(0, 0, 0, 1);
@@ -267,3 +289,40 @@ void age::qt_renderer::update_projection()
     m_projection.setToIdentity();
     m_projection.ortho(proj);
 }
+
+
+
+#ifdef AGE_DEBUG
+
+void age::qt_renderer::init_logger()
+{
+    QOpenGLContext *ctx = context();
+    if (!ctx->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
+    {
+        LOG("GL_KHR_debug extension not available");
+        return;
+    }
+
+    auto options = ctx->format().options();
+    if ((options & QSurfaceFormat::DebugContext) == 0)
+    {
+        LOG("this is no DebugContext (format options: " << options << ")");
+        return;
+    }
+
+    m_logger = std::make_unique<QOpenGLDebugLogger>(this);
+    if (!m_logger->initialize())
+    {
+        LOG("QOpenGLDebugLogger not available");
+        return;
+    }
+    connect(&*m_logger, &QOpenGLDebugLogger::messageLogged, this, &qt_renderer::log_message);
+    m_logger->startLogging();
+}
+
+void age::qt_renderer::log_message(const QOpenGLDebugMessage &debugMessage)
+{
+    qDebug() << debugMessage;
+}
+
+#endif
