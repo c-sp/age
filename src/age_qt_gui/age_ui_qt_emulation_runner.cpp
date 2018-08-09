@@ -34,7 +34,7 @@
 //
 //---------------------------------------------------------
 
-age::qt_emulation_runner::qt_emulation_runner(qt_gl_renderer &renderer, int emulation_interval_milliseconds)
+age::qt_emulation_runner::qt_emulation_runner(qt_renderer &renderer, int emulation_interval_milliseconds)
     : QObject(),
       m_emulation_interval_milliseconds(emulation_interval_milliseconds),
       m_emulation_interval_nanos(static_cast<uint64>(m_emulation_interval_milliseconds * 1000000)),
@@ -291,7 +291,7 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
     // update video & audio
     if (new_frame)
     {
-        m_renderer.add_video_frame(emu->get_screen_front_buffer());
+        m_renderer.new_video_frame(emu->get_screen_front_buffer());
     }
     m_audio_output.buffer_samples(emu->get_audio_buffer());
 

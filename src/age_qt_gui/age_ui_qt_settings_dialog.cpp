@@ -32,7 +32,7 @@ constexpr const char *qt_settings_open_file_directory = "open_file_directory";
 //
 //---------------------------------------------------------
 
-age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, GLint max_texture_size, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags),
       m_user_value_store(user_value_store)
 {
@@ -40,7 +40,7 @@ age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store>
 
     // create tab widget
 
-    m_settings_video = new qt_settings_video(m_user_value_store, max_texture_size);
+    m_settings_video = new qt_settings_video(m_user_value_store);
     m_settings_audio = new qt_settings_audio(m_user_value_store);
     m_settings_keys = new qt_settings_keys(m_user_value_store);
     m_settings_miscellaneous = new qt_settings_miscellaneous(m_user_value_store);

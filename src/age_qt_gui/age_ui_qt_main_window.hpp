@@ -37,6 +37,7 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
+#include "age_ui_qt_renderer.hpp"
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulation_runner.hpp"
 #include "age_ui_qt_emulator.hpp"
@@ -54,8 +55,6 @@ public:
 
     qt_main_window(QWidget *parent = 0, Qt::WindowFlags flags = 0);
     ~qt_main_window();
-
-    void start();
 
 signals:
 
@@ -87,7 +86,7 @@ private:
     QAction *m_action_exit = nullptr;
 
     qt_settings_dialog *m_settings = nullptr;
-    qt_gl_renderer *m_renderer = nullptr;
+    qt_renderer *m_renderer = nullptr;
 
     QLabel *m_emulated_time_label = nullptr;
     QLabel *m_speed_label = nullptr;

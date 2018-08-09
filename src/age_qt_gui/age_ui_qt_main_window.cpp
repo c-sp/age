@@ -58,10 +58,10 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
 
     m_user_value_store = std::allocate_shared<qt_user_value_store>(std::allocator<qt_user_value_store>());
 
-    m_renderer = new qt_gl_renderer(this);
+    m_renderer = new qt_renderer(this);
     setCentralWidget(m_renderer);
 
-    m_settings = new qt_settings_dialog(m_user_value_store, m_renderer->get_max_texture_size(), this, Qt::WindowTitleHint  | Qt::WindowCloseButtonHint);
+    m_settings = new qt_settings_dialog(m_user_value_store, this, Qt::WindowTitleHint  | Qt::WindowCloseButtonHint);
 
     m_action_open = new QAction("open file", this);
     m_action_open_dmg = new QAction("open file as GB", this);
@@ -146,13 +146,6 @@ age::qt_main_window::~qt_main_window()
     m_emulation_runner_thread.wait();
 
     LOG("destructor done");
-}
-
-
-
-void age::qt_main_window::start()
-{
-    m_renderer->start();
 }
 
 

@@ -151,7 +151,7 @@ class qt_settings_video : public QWidget, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, GLint max_texture_size, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+    qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
     void set_emulator_screen_size(GLint width, GLint height);
 
@@ -193,7 +193,6 @@ private:
 
     GLint m_emulator_screen_width = 0;
     GLint m_emulator_screen_height = 0;
-    const GLint m_max_texture_size;
 
     QCheckBox *m_use_filter_chain = nullptr;
     QCheckBox *m_use_bilinear_filter = nullptr;
@@ -419,7 +418,7 @@ class qt_settings_dialog : public QDialog, non_copyable
     Q_OBJECT
 public:
 
-    qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, GLint max_texture_size, QWidget *parent, Qt::WindowFlags flags = 0);
+    qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags = 0);
 
     qt_key_event get_event_for_key(Qt::Key key) const;
     QString get_open_file_dialog_directory() const;

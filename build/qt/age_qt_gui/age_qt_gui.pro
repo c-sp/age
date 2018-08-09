@@ -36,6 +36,7 @@ SOURCES += \
     ../../../src/age_qt_gui/age_ui_qt_gl_texture.cpp \
     ../../../src/age_qt_gui/age_ui_qt_main.cpp \
     ../../../src/age_qt_gui/age_ui_qt_main_window.cpp \
+    ../../../src/age_qt_gui/age_ui_qt_renderer.cpp \
     ../../../src/age_qt_gui/age_ui_qt_settings_audio.cpp \
     ../../../src/age_qt_gui/age_ui_qt_settings_dialog.cpp \
     ../../../src/age_qt_gui/age_ui_qt_settings_keys.cpp \
@@ -50,5 +51,6 @@ HEADERS  += \
     ../../../src/age_qt_gui/age_ui_qt_emulator.hpp \
     ../../../src/age_qt_gui/age_ui_qt_gl_renderer.hpp \
     ../../../src/age_qt_gui/age_ui_qt_main_window.hpp \
+    ../../../src/age_qt_gui/age_ui_qt_renderer.hpp \
     ../../../src/age_qt_gui/age_ui_qt_settings.hpp \
     ../../../src/age_qt_gui/age_ui_qt_user_value_store.hpp

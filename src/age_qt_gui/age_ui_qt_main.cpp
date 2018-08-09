@@ -23,7 +23,7 @@
 #include "age_ui_qt_emulator.hpp"
 #include "age_ui_qt_main_window.hpp"
 
-// allow special types to be used as event parameter
+// allow AGE types to be used as event parameter
 // (e.g. for connecting signals and slots with that parameter across multiple threads)
 Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
 Q_DECLARE_METATYPE(age::uint)
@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
 
     age::qt_main_window w;
     w.show();
-    w.start();
 
     return a.exec();
 }
