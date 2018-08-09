@@ -21,7 +21,9 @@
 //!
 
 #include <QMatrix4x4>
+#include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QSize>
 
@@ -41,6 +43,7 @@ class qt_renderer : public QOpenGLWidget, protected QOpenGLFunctions
 public:
 
     qt_renderer(QWidget *parent = nullptr);
+    ~qt_renderer() override;
 
     uint get_fps() const;
 
@@ -66,6 +69,10 @@ private:
     QSize m_emulator_screen = {1, 1};
     QSize m_current_viewport = {1, 1};
     QMatrix4x4 m_projection;
+
+    QOpenGLShaderProgram m_program;
+    QOpenGLBuffer m_vertices;
+    QOpenGLBuffer m_indices;
 };
 
 } // namespace age

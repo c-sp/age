@@ -15,6 +15,9 @@
 //
 
 #include <QRectF>
+#include <QVector2D>
+#include <QVector3D>
+#include <QVector4D>
 
 #include <age_debug.hpp>
 
@@ -26,6 +29,59 @@
 #define LOG(x)
 #endif
 
+struct VertexData
+{
+    QVector3D position;
+    QVector2D texCoord;
+};
+
+
+
+constexpr const char *vshader =
+        R"(
+        // Set default precision to medium
+        #ifdef GL_ES
+        precision mediump int;
+        precision mediump float;
+        #endif
+
+        uniform mat4 u_projection;
+        uniform vec4 u_color;
+
+        attribute vec4 a_vertex;
+        attribute vec2 a_texcoord;
+
+        varying vec2 v_texcoord;
+        varying vec4 v_color;
+
+        void main()
+        {
+            gl_Position = u_projection * a_vertex;
+            v_texcoord = a_texcoord;
+            v_color = u_color;
+        }
+        )";
+
+constexpr const char *fshader =
+        R"(
+        // Set default precision to medium
+        #ifdef GL_ES
+        precision mediump int;
+        precision mediump float;
+        #endif
+
+        // uniform sampler2D texture;
+
+        varying vec2 v_texcoord;
+        varying vec4 v_color;
+
+        void main()
+        {
+            // gl_FragColor = texture2D(texture, v_texcoord);
+            gl_FragColor = vec4(1, 1, 1, 1); // v_color;
+        }
+        )";
+
 
 
 //---------------------------------------------------------
@@ -35,8 +91,17 @@
 //---------------------------------------------------------
 
 age::qt_renderer::qt_renderer(QWidget *parent)
-    : QOpenGLWidget(parent)
+    : QOpenGLWidget(parent),
+      m_indices(QOpenGLBuffer::IndexBuffer)
 {
+}
+
+age::qt_renderer::~qt_renderer()
+{
+    makeCurrent();
+    m_vertices.destroy();
+    m_indices.destroy();
+    doneCurrent();
 }
 
 
@@ -110,6 +175,32 @@ void age::qt_renderer::initializeGL()
 
     // clear color
     glClearColor(0, 0, 0, 1);
+
+    // shader program (failures are logged by Qt)
+    m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vshader);
+    m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fshader);
+    m_program.link();
+
+    // vertex buffer
+    VertexData vertices[] = {
+        {QVector3D(0, 0, 0), QVector2D(0, 0)},
+        {QVector3D(0, 1, 0), QVector2D(0, 1)},
+        {QVector3D(1, 0, 0), QVector2D(1, 0)},
+        {QVector3D(1, 1, 0), QVector2D(1, 1)},
+    };
+
+    m_vertices.create();
+    m_vertices.bind();
+    m_vertices.allocate(vertices, 4 * sizeof(VertexData));
+
+    // index buffer
+    GLushort indices[] = {0, 1, 2, 3};
+
+    m_indices.create();
+    m_indices.bind();
+    m_indices.allocate(indices, 4 * sizeof(GLushort));
+
+    glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -127,6 +218,23 @@ void age::qt_renderer::resizeGL(int width, int height)
 void age::qt_renderer::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    m_program.bind();
+    m_program.setUniformValue("u_projection", m_projection);
+    m_program.setUniformValue("u_color", QVector4D(.5, .5, .5, 1));
+
+    m_vertices.bind();
+    m_indices.bind();
+
+    int vertexLocation = m_program.attributeLocation("a_vertex");
+    m_program.enableAttributeArray(vertexLocation);
+    m_program.setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
+
+    int texcoordLocation  = m_program.attributeLocation("a_texcoord");
+    m_program.enableAttributeArray(texcoordLocation);
+    m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, 3, 2, sizeof(VertexData));
+
+    glDrawElements(GL_TRIANGLE_STRIP, 2, GL_UNSIGNED_SHORT, nullptr);
 }
 
 
