@@ -114,9 +114,11 @@ age::qt_renderer::~qt_renderer()
 
 
 
+
+
 //---------------------------------------------------------
 //
-//   public methods
+//   public interface
 //
 //---------------------------------------------------------
 
@@ -127,12 +129,6 @@ age::uint age::qt_renderer::get_fps() const
 }
 
 
-
-//---------------------------------------------------------
-//
-//   public slots
-//
-//---------------------------------------------------------
 
 void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
 {
@@ -145,7 +141,7 @@ void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
 
 void age::qt_renderer::new_frame(std::shared_ptr<const age::pixel_vector> new_frame)
 {
-    //! \todo implement age::qt_renderer::new_frame
+    new_frame_slot(new_frame);
 }
 
 
@@ -170,9 +166,11 @@ void age::qt_renderer::set_bilinear_filter(bool set_bilinear_filter)
 
 
 
+
+
 //---------------------------------------------------------
 //
-//   protected methods
+//   OpenGL rendering
 //
 //---------------------------------------------------------
 
@@ -252,11 +250,6 @@ void age::qt_renderer::paintGL()
 
 
 
-//---------------------------------------------------------
-//
-//   private methods
-//
-//---------------------------------------------------------
 
 void age::qt_renderer::update_projection()
 {
@@ -279,4 +272,47 @@ void age::qt_renderer::update_projection()
 
     m_projection.setToIdentity();
     m_projection.ortho(proj);
+}
+
+
+
+
+
+//---------------------------------------------------------
+//
+//   new frame event handling
+//
+//---------------------------------------------------------
+
+void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_frame)
+{
+    if (new_frame == nullptr)
+    {
+        return;
+    }
+
+    // if multiple frame are queued,
+    // we handle only the last one and discard all others
+    // (this should not happen if the machine can handle the load)
+    if (m_new_frame == nullptr)
+    {
+        // call process_new_frame() after all events scheduled so far (with the same priority) have been processed
+        //  -> this requires an event loop
+        QMetaObject::invokeMethod(this, "process_new_frame", Qt::QueuedConnection);
+    }
+    else
+    {
+        ++m_frames_discarded;
+        LOG(m_frames_discarded << " frame(s) discarded (total)");
+    }
+    m_new_frame = new_frame;
+}
+
+
+
+void age::qt_renderer::process_new_frame()
+{
+    //! \todo implement process_new_frame
+
+    m_new_frame = nullptr;
 }
