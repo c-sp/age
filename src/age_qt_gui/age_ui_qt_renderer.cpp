@@ -143,18 +143,17 @@ void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
     update(); // trigger paintGL()
 }
 
-void age::qt_renderer::new_video_frame(pixel_vector new_video_frame)
+void age::qt_renderer::new_frame(std::shared_ptr<const age::pixel_vector> new_frame)
 {
-    LOG("#pixel: " << new_video_frame.size());
-    //! \todo implement age::qt_renderer::new_video_frame
+    //! \todo implement age::qt_renderer::new_frame
 }
 
 
 
-void age::qt_renderer::set_blend_video_frames(uint num_video_frames_to_blend)
+void age::qt_renderer::set_blend_frames(uint num_frames_to_blend)
 {
-    LOG(num_video_frames_to_blend);
-    //! \todo implement age::qt_renderer::set_blend_video_frames
+    LOG(num_frames_to_blend);
+    //! \todo implement age::qt_renderer::set_blend_frames
 }
 
 void age::qt_renderer::set_filter_chain(qt_filter_vector filter_chain)

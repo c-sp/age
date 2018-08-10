@@ -90,7 +90,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(timer, SIGNAL(timeout()), this, SLOT(update_status()));
     timer->start(250);
 
-    m_emulation_runner = new qt_emulation_runner(*m_renderer, 8);
+    m_emulation_runner = new qt_emulation_runner(8);
     m_emulation_runner->moveToThread(&m_emulation_runner_thread);
 
     // connect emulation runner (& thread) signals
@@ -99,12 +99,13 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(&m_emulation_runner_thread, &QThread::finished, m_emulation_runner, &QObject::deleteLater);
 
     connect(m_emulation_runner, SIGNAL(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)), m_settings, SLOT(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)));
+    connect(m_emulation_runner, SIGNAL(emulator_screen_updated(std::shared_ptr<const age::pixel_vector>)), m_renderer, SLOT(new_frame(std::shared_ptr<const age::pixel_vector>)));
 
     // connect settings signals
 
-    connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), this, SLOT(video_use_bilinear_filter_changed(bool)));
-    connect(m_settings, SIGNAL(video_frames_to_blend_changed(uint)), this, SLOT(video_frames_to_blend_changed(uint)));
-    connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), this, SLOT(video_filter_chain_changed(qt_filter_vector)));
+    connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), m_renderer, SLOT(set_bilinear_filter(bool)));
+    connect(m_settings, SIGNAL(video_frames_to_blend_changed(uint)), m_renderer, SLOT(set_blend_frames(uint)));
+    connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), m_renderer, SLOT(set_filter_chain(qt_filter_vector)));
 
     connect(m_settings, SIGNAL(audio_output_changed(QAudioDeviceInfo,QAudioFormat)), m_emulation_runner, SLOT(set_audio_output(QAudioDeviceInfo,QAudioFormat)));
     connect(m_settings, SIGNAL(audio_volume_changed(int)), m_emulation_runner, SLOT(set_audio_volume(int)));
@@ -127,9 +128,11 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(m_action_fullscreen, SIGNAL(triggered()), this, SLOT(menu_emulator_fullscreen()));
     connect(m_action_exit, SIGNAL(triggered()), this, SLOT(menu_emulator_exit()));
 
-    // connect own signals
+    // connect main window signals
 
     connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), m_emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
+    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_renderer, SLOT(set_emulator_screen_size(uint,uint)));
+    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_settings, SLOT(set_emulator_screen_size(uint,uint)));
     connect(this, SIGNAL(emulator_button_down(uint)), m_emulation_runner, SLOT(set_emulator_buttons_down(uint)));
     connect(this, SIGNAL(emulator_button_up(uint)), m_emulation_runner, SLOT(set_emulator_buttons_up(uint)));
 
@@ -324,10 +327,7 @@ void age::qt_main_window::open_file(gb_hardware hardware)
             uint screen_width = new_emulator->get_emulator()->get_screen_width();
             uint screen_height = new_emulator->get_emulator()->get_screen_height();
 
-            m_settings->set_emulator_screen_size(screen_width, screen_height);
-            m_renderer->setMinimumWidth(screen_width);
-            m_renderer->setMinimumHeight(screen_height);
-
+            emit emulator_screen_resize(screen_width, screen_height);
             emit emulator_loaded(new_emulator);
         }
     }
@@ -342,26 +342,6 @@ void age::qt_main_window::open_file(gb_hardware hardware)
 //   private slots
 //
 //---------------------------------------------------------
-
-void age::qt_main_window::video_use_bilinear_filter_changed(bool use)
-{
-    LOG("use bilinear filter " << use);
-    m_renderer->set_bilinear_filter(use);
-}
-
-void age::qt_main_window::video_frames_to_blend_changed(uint frames_to_blend)
-{
-    LOG("blend frames " << frames_to_blend);
-    m_renderer->set_blend_video_frames(frames_to_blend);
-}
-
-void age::qt_main_window::video_filter_chain_changed(qt_filter_vector filter_chain)
-{
-    LOG("filter chain changed, chain size " << filter_chain.size());
-    m_renderer->set_filter_chain(filter_chain);
-}
-
-
 
 void age::qt_main_window::misc_show_menu_bar_changed(bool show_menu_bar)
 {
@@ -413,6 +393,8 @@ void age::qt_main_window::update_status()
     m_speed_label->setText(speed);
     m_fps_label->setText(fps);
 }
+
+
 
 void age::qt_main_window::menu_emulator_open()
 {

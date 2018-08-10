@@ -426,7 +426,6 @@ public:
     bool show_status_bar(bool fullscreen) const;
 
     void set_open_file_dialog_directory(const QString &directory);
-    void set_emulator_screen_size(GLint width, GLint height);
     void set_pause_emulator(bool pause_emulator);
 
     bool trigger_settings_event(qt_key_event event);
@@ -453,6 +452,7 @@ signals:
 public slots:
 
     void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
+    void set_emulator_screen_size(uint width, uint height);
 
 
 

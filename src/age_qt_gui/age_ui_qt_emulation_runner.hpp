@@ -33,7 +33,6 @@
 #include <age_speed_calculator.hpp>
 #include <age_types.hpp>
 
-#include "age_ui_qt_renderer.hpp"
 #include "age_ui_qt_audio.hpp"
 #include "age_ui_qt_emulator.hpp"
 
@@ -53,7 +52,7 @@ class qt_emulation_runner : public QObject, non_copyable
     Q_OBJECT
 public:
 
-    qt_emulation_runner(qt_renderer &renderer, int emulation_interval_milliseconds);
+    qt_emulation_runner(int emulation_interval_milliseconds);
     virtual ~qt_emulation_runner();
 
     uint get_speed_percent() const;
@@ -62,6 +61,7 @@ public:
 signals:
 
     void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
+    void emulator_screen_updated(std::shared_ptr<const age::pixel_vector> screen);
 
 public slots:
 
@@ -106,7 +106,6 @@ private:
     QElapsedTimer m_timer;
     QTimer *m_emulation_event_trigger = nullptr;
 
-    qt_renderer &m_renderer;
     qt_audio_output m_audio_output;
     int m_audio_latency_milliseconds = qt_audio_latency_milliseconds_min;
     bool m_audio_latency_changed = false;

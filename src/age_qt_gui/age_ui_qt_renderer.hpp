@@ -50,9 +50,9 @@ public:
 public slots:
 
     void set_emulator_screen_size(uint width, uint height);
-    void new_video_frame(pixel_vector new_video_frame);
+    void new_frame(std::shared_ptr<const age::pixel_vector> new_frame);
 
-    void set_blend_video_frames(uint num_video_frames_to_blend);
+    void set_blend_frames(uint num_frames_to_blend);
     void set_filter_chain(qt_filter_vector filter_chain);
     void set_bilinear_filter(bool set_bilinear_filter);
 

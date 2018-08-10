@@ -59,6 +59,7 @@ public:
 signals:
 
     void emulator_loaded(std::shared_ptr<age::qt_emulator> new_emulator);
+    void emulator_screen_resize(uint width, uint height);
     void emulator_button_down(uint button);
     void emulator_button_up(uint button);
 
@@ -96,10 +97,6 @@ private:
     QThread m_emulation_runner_thread;
 
 private slots:
-
-    void video_use_bilinear_filter_changed(bool use);
-    void video_frames_to_blend_changed(uint frames_to_blend);
-    void video_filter_chain_changed(qt_filter_vector filter_chain);
 
     void misc_show_menu_bar_changed(bool show_menu_bar);
     void misc_show_status_bar_changed(bool show_status_bar);
