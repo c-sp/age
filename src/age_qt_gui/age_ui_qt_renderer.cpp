@@ -250,7 +250,6 @@ void age::qt_renderer::paintGL()
 
 
 
-
 void age::qt_renderer::update_projection()
 {
     double viewport_ratio = 1. * m_current_viewport.width() / m_current_viewport.height();

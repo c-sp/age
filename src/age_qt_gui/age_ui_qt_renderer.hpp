@@ -20,6 +20,8 @@
 //! \file
 //!
 
+#include <memory> // std::shared_ptr
+
 #include <QMatrix4x4>
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
