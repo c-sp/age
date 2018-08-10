@@ -79,7 +79,7 @@ constexpr const char *fshader =
         void main()
         {
             // gl_FragColor = texture2D(texture, v_texcoord);
-            gl_FragColor = vec4(1, 1, 1, 1); // v_color;
+            gl_FragColor = v_color;
         }
         )";
 
@@ -95,29 +95,20 @@ age::qt_renderer::qt_renderer(QWidget *parent)
     : QOpenGLWidget(parent),
       m_indices(QOpenGLBuffer::IndexBuffer)
 {
-    QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
-#ifdef AGE_DEBUG
-    fmt.setOption(QSurfaceFormat::DebugContext);
-#endif
+    // Which OpenGL Version is being used?
+    // https://stackoverflow.com/questions/41021681/qt-how-to-detect-which-version-of-opengl-is-being-used
+    LOG("OpenGL Module Type: " << QOpenGLContext::openGLModuleType()
+        << " (LibGL " << QOpenGLContext::LibGL << ", LibGLES " << QOpenGLContext::LibGLES << ")");
 
-    setFormat(fmt);
-    LOG("format options: " << format().options());
+    LOG("default format version: " << format().majorVersion() << "." << format().minorVersion());
+    LOG("default format options: " << format().options());
 }
 
 age::qt_renderer::~qt_renderer()
 {
     makeCurrent();
-
     m_vertices.destroy();
     m_indices.destroy();
-
-#ifdef AGE_DEBUG
-    if (m_logger)
-    {
-        m_logger->stopLogging();
-    }
-#endif
-
     doneCurrent();
 }
 
@@ -188,15 +179,18 @@ void age::qt_renderer::set_bilinear_filter(bool set_bilinear_filter)
 
 void age::qt_renderer::initializeGL()
 {
+    LOG("format version: " << format().majorVersion() << "." << format().minorVersion());
+
     initializeOpenGLFunctions();
 
-    // init logger
-#ifdef AGE_DEBUG
-    init_logger();
-#endif
+    // Log OpenGL Version information.
+    // (OpenGL functions must be initialized)
+    LOG("GL_VERSION: " << glGetString(GL_VERSION));
+    LOG("GL_SHADING_LANGUAGE_VERSION: " << glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    // clear color
+    // OpenGL configuration
     glClearColor(0, 0, 0, 1);
+    glEnable(GL_TEXTURE_2D);
 
     // shader program (failures are logged by Qt)
     m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vshader);
@@ -221,8 +215,6 @@ void age::qt_renderer::initializeGL()
     m_indices.create();
     m_indices.bind();
     m_indices.allocate(indices, 4 * sizeof(GLushort));
-
-    glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -254,9 +246,9 @@ void age::qt_renderer::paintGL()
 
     int texcoordLocation  = m_program.attributeLocation("a_texcoord");
     m_program.enableAttributeArray(texcoordLocation);
-    m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, 3, 2, sizeof(VertexData));
+    m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, sizeof(QVector3D), 2, sizeof(VertexData));
 
-    glDrawElements(GL_TRIANGLE_STRIP, 2, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
 }
 
 
@@ -282,47 +274,10 @@ void age::qt_renderer::update_projection()
     else
     {
         double diff = (1 / viewport_ratio) - (1 / screen_ratio);
-        AGE_ASSERT(diff > 0);
+        AGE_ASSERT(diff >= 0);
         proj = QRectF(0, -.5 * diff, 1, 1 + diff); // x, y, width, height
     }
 
     m_projection.setToIdentity();
     m_projection.ortho(proj);
 }
-
-
-
-#ifdef AGE_DEBUG
-
-void age::qt_renderer::init_logger()
-{
-    QOpenGLContext *ctx = context();
-    if (!ctx->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
-    {
-        LOG("GL_KHR_debug extension not available");
-        return;
-    }
-
-    auto options = ctx->format().options();
-    if ((options & QSurfaceFormat::DebugContext) == 0)
-    {
-        LOG("this is no DebugContext (format options: " << options << ")");
-        return;
-    }
-
-    m_logger = std::make_unique<QOpenGLDebugLogger>(this);
-    if (!m_logger->initialize())
-    {
-        LOG("QOpenGLDebugLogger not available");
-        return;
-    }
-    connect(&*m_logger, &QOpenGLDebugLogger::messageLogged, this, &qt_renderer::log_message);
-    m_logger->startLogging();
-}
-
-void age::qt_renderer::log_message(const QOpenGLDebugMessage &debugMessage)
-{
-    qDebug() << debugMessage;
-}
-
-#endif

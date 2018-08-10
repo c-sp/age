@@ -32,10 +32,6 @@
 
 #include "age_ui_qt.hpp"
 
-#ifdef AGE_DEBUG
-#include <QOpenGLDebugLogger>
-#endif
-
 
 
 namespace age
@@ -77,16 +73,6 @@ private:
     QOpenGLShaderProgram m_program;
     QOpenGLBuffer m_vertices;
     QOpenGLBuffer m_indices;
-
-#ifdef AGE_DEBUG
-
-    void init_logger();
-    std::unique_ptr<QOpenGLDebugLogger> m_logger = nullptr;
-
-public slots:
-    void log_message(const QOpenGLDebugMessage &debugMessage);
-
-#endif
 };
 
 } // namespace age
