@@ -47,7 +47,7 @@ constexpr const char *vshader =
         #endif
 
         uniform mat4 u_projection;
-        uniform vec4 u_color;
+        uniform vec4 u_color; // used to blend frames
 
         attribute vec4 a_vertex;
         attribute vec2 a_texcoord;
@@ -71,17 +71,19 @@ constexpr const char *fshader =
         precision mediump float;
         #endif
 
-        // uniform sampler2D texture;
+        uniform sampler2D texture;
 
         varying vec2 v_texcoord;
         varying vec4 v_color;
 
         void main()
         {
-            // gl_FragColor = texture2D(texture, v_texcoord);
-            gl_FragColor = v_color;
+            gl_FragColor = v_color * texture2D(texture, v_texcoord);
         }
         )";
+
+constexpr QOpenGLTexture::PixelFormat tx_pixel_format = QOpenGLTexture::RGBA;
+constexpr QOpenGLTexture::PixelType tx_pixel_type = QOpenGLTexture::UInt8;
 
 
 
@@ -107,8 +109,12 @@ age::qt_renderer::qt_renderer(QWidget *parent)
 age::qt_renderer::~qt_renderer()
 {
     makeCurrent();
+
     m_vertices.destroy();
     m_indices.destroy();
+
+    m_last_frame_texture = nullptr;
+
     doneCurrent();
 }
 
@@ -135,7 +141,16 @@ void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
     LOG(width << ", " << height);
     m_emulator_screen = QSize(width, height);
 
-    update_projection(); // calculate new projection matrix
+    // allocate texture only after initializeGL() has been called
+    if (m_last_frame_texture != nullptr)
+    {
+        makeCurrent();
+        allocate_textures();
+        doneCurrent();
+    }
+
+    update_projection_matrix();
+
     update(); // trigger paintGL()
 }
 
@@ -212,6 +227,9 @@ void age::qt_renderer::initializeGL()
     m_indices.create();
     m_indices.bind();
     m_indices.allocate(indices, 4 * sizeof(GLushort));
+
+    // create textures
+    allocate_textures();
 }
 
 
@@ -221,7 +239,7 @@ void age::qt_renderer::resizeGL(int width, int height)
     LOG("viewport size: " << width << " x " << height);
     m_current_viewport = QSize(width, height);
 
-    update_projection();
+    update_projection_matrix();
 }
 
 
@@ -232,7 +250,7 @@ void age::qt_renderer::paintGL()
 
     m_program.bind();
     m_program.setUniformValue("u_projection", m_projection);
-    m_program.setUniformValue("u_color", QVector4D(.5, .5, .5, 1));
+    m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1));
 
     m_vertices.bind();
     m_indices.bind();
@@ -245,12 +263,13 @@ void age::qt_renderer::paintGL()
     m_program.enableAttributeArray(texcoordLocation);
     m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, sizeof(QVector3D), 2, sizeof(VertexData));
 
+    m_last_frame_texture->bind();
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
 }
 
 
 
-void age::qt_renderer::update_projection()
+void age::qt_renderer::update_projection_matrix()
 {
     double viewport_ratio = 1. * m_current_viewport.width() / m_current_viewport.height();
     double screen_ratio = 1. * m_emulator_screen.width() / m_emulator_screen.height();
@@ -271,6 +290,17 @@ void age::qt_renderer::update_projection()
 
     m_projection.setToIdentity();
     m_projection.ortho(proj);
+}
+
+void age::qt_renderer::allocate_textures()
+{
+    LOG("");
+
+    m_last_frame_texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
+
+    m_last_frame_texture->setFormat(QOpenGLTexture::RGB8_UNorm);
+    m_last_frame_texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
+    m_last_frame_texture->allocateStorage(tx_pixel_format, tx_pixel_type);
 }
 
 
@@ -311,7 +341,11 @@ void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_fr
 
 void age::qt_renderer::process_new_frame()
 {
-    //! \todo implement process_new_frame
+    makeCurrent();
+    m_last_frame_texture->setData(tx_pixel_format, tx_pixel_type, m_new_frame->data());
+    doneCurrent();
 
-    m_new_frame = nullptr;
+    m_new_frame = nullptr; // allow next frame to be processed
+
+    update(); // trigger paintGL
 }

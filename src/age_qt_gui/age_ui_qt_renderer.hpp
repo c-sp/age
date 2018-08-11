@@ -26,6 +26,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
 #include <QOpenGLWidget>
 #include <QSize>
 
@@ -73,7 +74,8 @@ protected:
 
 private:
 
-    void update_projection();
+    void update_projection_matrix();
+    void allocate_textures();
 
     QSize m_emulator_screen = {1, 1};
     QSize m_current_viewport = {1, 1};
@@ -82,6 +84,8 @@ private:
     QOpenGLShaderProgram m_program;
     QOpenGLBuffer m_vertices;
     QOpenGLBuffer m_indices;
+
+    std::unique_ptr<QOpenGLTexture> m_last_frame_texture = nullptr;
 
 
 
