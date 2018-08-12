@@ -60,7 +60,7 @@ public slots:
 
     void set_blend_frames(uint num_frames_to_blend);
     void set_filter_chain(qt_filter_vector filter_chain);
-    void set_bilinear_filter(bool set_bilinear_filter);
+    void set_bilinear_filter(bool bilinear_filter);
 
 
 
@@ -75,7 +75,6 @@ protected:
 private:
 
     void update_projection_matrix();
-    void allocate_textures();
 
     QSize m_emulator_screen = {1, 1};
     QSize m_current_viewport = {1, 1};
@@ -85,19 +84,23 @@ private:
     QOpenGLBuffer m_vertices;
     QOpenGLBuffer m_indices;
 
-    std::unique_ptr<QOpenGLTexture> m_last_frame_texture = nullptr;
 
 
-
-    // new frame event handling
+    // frame event handling
 
 private:
 
     void new_frame_slot(std::shared_ptr<const pixel_vector> new_frame);
     Q_INVOKABLE void process_new_frame();
 
+    void allocate_textures();
+    void set_texture_filter();
+
     std::shared_ptr<const pixel_vector> m_new_frame = nullptr;
     uint m_frames_discarded = 0;
+
+    std::unique_ptr<QOpenGLTexture> m_last_frame_texture = nullptr;
+    bool m_bilinear_filter = false;
 };
 
 } // namespace age

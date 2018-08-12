@@ -173,10 +173,17 @@ void age::qt_renderer::set_filter_chain(qt_filter_vector filter_chain)
     //! \todo implement age::qt_renderer::set_filter_chain
 }
 
-void age::qt_renderer::set_bilinear_filter(bool set_bilinear_filter)
+void age::qt_renderer::set_bilinear_filter(bool bilinear_filter)
 {
-    LOG(set_bilinear_filter);
-    //! \todo implement age::qt_renderer::set_bilinear_filter
+    m_bilinear_filter = bilinear_filter;
+
+    // update textures only after initializeGL() has been called
+    if (m_last_frame_texture != nullptr)
+    {
+        makeCurrent();
+        set_texture_filter();
+        doneCurrent();
+    }
 }
 
 
@@ -292,17 +299,6 @@ void age::qt_renderer::update_projection_matrix()
     m_projection.ortho(proj);
 }
 
-void age::qt_renderer::allocate_textures()
-{
-    LOG("");
-
-    m_last_frame_texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
-
-    m_last_frame_texture->setFormat(QOpenGLTexture::RGB8_UNorm);
-    m_last_frame_texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
-    m_last_frame_texture->allocateStorage(tx_pixel_format, tx_pixel_type);
-}
-
 
 
 
@@ -337,8 +333,6 @@ void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_fr
     m_new_frame = new_frame;
 }
 
-
-
 void age::qt_renderer::process_new_frame()
 {
     makeCurrent();
@@ -348,4 +342,28 @@ void age::qt_renderer::process_new_frame()
     m_new_frame = nullptr; // allow next frame to be processed
 
     update(); // trigger paintGL
+}
+
+
+
+void age::qt_renderer::allocate_textures()
+{
+    LOG("");
+
+    m_last_frame_texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
+
+    m_last_frame_texture->setFormat(QOpenGLTexture::RGB8_UNorm);
+    m_last_frame_texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
+    m_last_frame_texture->allocateStorage(tx_pixel_format, tx_pixel_type);
+
+    set_texture_filter();
+}
+
+void age::qt_renderer::set_texture_filter()
+{
+    LOG(m_bilinear_filter);
+
+    auto mag_filter = m_bilinear_filter ? QOpenGLTexture::Linear : QOpenGLTexture::Nearest;
+    // always use linear filter for rendering downscaled texture
+    m_last_frame_texture->setMinMagFilters(QOpenGLTexture::Linear, mag_filter);
 }
