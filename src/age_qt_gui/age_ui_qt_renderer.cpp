@@ -73,7 +73,8 @@ age::qt_renderer::~qt_renderer()
     m_indices.destroy();
 
     // explicitly delete textures since the OpenGL context is required
-    std::for_each(begin(m_frame_texture), end(m_frame_texture), [](auto &texture) {
+    std::for_each(begin(m_frame_texture), end(m_frame_texture), [](auto &texture)
+    {
         texture = nullptr;
     });
 
@@ -126,7 +127,7 @@ void age::qt_renderer::set_blend_frames(uint num_frames_to_blend)
 {
     LOG(num_frames_to_blend);
 
-    num_frames_to_blend = std::max(num_frames_to_blend, 1u);
+    num_frames_to_blend = std::max(num_frames_to_blend, static_cast<uint>(1));
     num_frames_to_blend = std::min(num_frames_to_blend, m_frame_texture.size());
     m_num_frames_to_blend = num_frames_to_blend;
 
@@ -339,7 +340,8 @@ void age::qt_renderer::allocate_textures()
 {
     LOG("");
 
-    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture) {
+    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture)
+    {
         texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
         texture->setFormat(tx_format);
         texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
@@ -356,7 +358,8 @@ void age::qt_renderer::set_texture_filter()
     auto min_filter = QOpenGLTexture::Linear; // always use linear filter for rendering downscaled texture
     auto mag_filter = m_bilinear_filter ? QOpenGLTexture::Linear : QOpenGLTexture::Nearest;
 
-    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture) {
+    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture)
+    {
         texture->setMinMagFilters(min_filter, mag_filter);
     });
 }
