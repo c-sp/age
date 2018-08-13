@@ -84,6 +84,8 @@ private:
     QOpenGLBuffer m_vertices;
     QOpenGLBuffer m_indices;
 
+    uint m_num_frames_to_blend = 1;
+
 
 
     // frame event handling
@@ -93,13 +95,14 @@ private:
     void new_frame_slot(std::shared_ptr<const pixel_vector> new_frame);
     Q_INVOKABLE void process_new_frame();
 
+    bool textures_initialized() const;
     void allocate_textures();
     void set_texture_filter();
 
     std::shared_ptr<const pixel_vector> m_new_frame = nullptr;
     uint m_frames_discarded = 0;
 
-    std::unique_ptr<QOpenGLTexture> m_last_frame_texture = nullptr;
+    std::array<std::unique_ptr<QOpenGLTexture>, qt_video_frame_history_size> m_frame_texture;
     bool m_bilinear_filter = false;
 };
 

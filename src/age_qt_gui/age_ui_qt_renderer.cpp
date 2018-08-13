@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+#include <algorithm> // std::min, std::max
+#include <utility> // std::move
+
 #include <QRectF>
 #include <QSurfaceFormat>
 #include <QVector2D>
@@ -82,6 +85,9 @@ constexpr const char *fshader =
         }
         )";
 
+
+
+// we don't really use the alpha channel but OpenGL ES would not work without it
 constexpr QOpenGLTexture::TextureFormat tx_format = QOpenGLTexture::RGBAFormat;
 constexpr QOpenGLTexture::PixelFormat tx_pixel_format = QOpenGLTexture::RGBA;
 constexpr QOpenGLTexture::PixelType tx_pixel_type = QOpenGLTexture::UInt8;
@@ -114,7 +120,10 @@ age::qt_renderer::~qt_renderer()
     m_vertices.destroy();
     m_indices.destroy();
 
-    m_last_frame_texture = nullptr;
+    // explicitly delete textures since the OpenGL context is required
+    std::for_each(begin(m_frame_texture), end(m_frame_texture), [](auto &texture) {
+        texture = nullptr;
+    });
 
     doneCurrent();
 }
@@ -143,13 +152,12 @@ void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
     m_emulator_screen = QSize(width, height);
 
     // allocate texture only after initializeGL() has been called
-    if (m_last_frame_texture != nullptr)
+    if (textures_initialized())
     {
         makeCurrent();
         allocate_textures();
         doneCurrent();
     }
-
     update_projection_matrix();
 
     update(); // trigger paintGL()
@@ -165,7 +173,12 @@ void age::qt_renderer::new_frame(std::shared_ptr<const age::pixel_vector> new_fr
 void age::qt_renderer::set_blend_frames(uint num_frames_to_blend)
 {
     LOG(num_frames_to_blend);
-    //! \todo implement age::qt_renderer::set_blend_frames
+
+    num_frames_to_blend = std::max(num_frames_to_blend, 1u);
+    num_frames_to_blend = std::min(num_frames_to_blend, m_frame_texture.size());
+    m_num_frames_to_blend = num_frames_to_blend;
+
+    update(); // trigger paintGL()
 }
 
 void age::qt_renderer::set_filter_chain(qt_filter_vector filter_chain)
@@ -179,11 +192,13 @@ void age::qt_renderer::set_bilinear_filter(bool bilinear_filter)
     m_bilinear_filter = bilinear_filter;
 
     // update textures only after initializeGL() has been called
-    if (m_last_frame_texture != nullptr)
+    if (textures_initialized())
     {
         makeCurrent();
         set_texture_filter();
         doneCurrent();
+
+        update(); // trigger paintGL()
     }
 }
 
@@ -210,6 +225,9 @@ void age::qt_renderer::initializeGL()
 
     // OpenGL configuration
     glClearColor(0, 0, 0, 1);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // shader program (failures are logged by Qt)
     m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vshader);
@@ -257,7 +275,6 @@ void age::qt_renderer::paintGL()
 
     m_program.bind();
     m_program.setUniformValue("u_projection", m_projection);
-    m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1));
 
     m_vertices.bind();
     m_indices.bind();
@@ -270,8 +287,12 @@ void age::qt_renderer::paintGL()
     m_program.enableAttributeArray(texcoordLocation);
     m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, sizeof(QVector3D), 2, sizeof(VertexData));
 
-    m_last_frame_texture->bind();
-    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
+    for (size_t i = 0; i < m_num_frames_to_blend; ++i)
+    {
+        m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1.f / (i + 1)));
+        m_frame_texture[i]->bind();
+        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
+    }
 }
 
 
@@ -336,25 +357,42 @@ void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_fr
 void age::qt_renderer::process_new_frame()
 {
     makeCurrent();
-    m_last_frame_texture->bind();
-    m_last_frame_texture->setData(tx_pixel_format, tx_pixel_type, m_new_frame->data());
+    {
+        // the oldest frame-texture will store the new frame
+        std::unique_ptr<QOpenGLTexture> tmp = std::move(m_frame_texture[m_frame_texture.size() - 1]);
+        tmp->bind();
+        tmp->setData(tx_pixel_format, tx_pixel_type, m_new_frame->data());
+
+        // move all other frames so that the new frame can be placed at the front
+        for (size_t i = m_frame_texture.size() - 1; i > 0; --i)
+        {
+            m_frame_texture[i] = std::move(m_frame_texture[i - 1]);
+        }
+        m_frame_texture[0] = std::move(tmp);
+    }
     doneCurrent();
 
     m_new_frame = nullptr; // allow next frame to be processed
-
     update(); // trigger paintGL
 }
 
 
 
+bool age::qt_renderer::textures_initialized() const
+{
+    return m_frame_texture[0] != nullptr;
+}
+
 void age::qt_renderer::allocate_textures()
 {
     LOG("");
 
-    m_last_frame_texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
-    m_last_frame_texture->setFormat(tx_format);
-    m_last_frame_texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
-    m_last_frame_texture->allocateStorage(tx_pixel_format, tx_pixel_type);
+    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture) {
+        texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
+        texture->setFormat(tx_format);
+        texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
+        texture->allocateStorage(tx_pixel_format, tx_pixel_type);
+    });
 
     set_texture_filter();
 }
@@ -363,7 +401,10 @@ void age::qt_renderer::set_texture_filter()
 {
     LOG(m_bilinear_filter);
 
+    auto min_filter = QOpenGLTexture::Linear; // always use linear filter for rendering downscaled texture
     auto mag_filter = m_bilinear_filter ? QOpenGLTexture::Linear : QOpenGLTexture::Nearest;
-    // always use linear filter for rendering downscaled texture
-    m_last_frame_texture->setMinMagFilters(QOpenGLTexture::Linear, mag_filter);
+
+    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture) {
+        texture->setMinMagFilters(min_filter, mag_filter);
+    });
 }
