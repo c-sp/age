@@ -39,54 +39,6 @@ struct VertexData
     QVector2D texCoord;
 };
 
-
-
-constexpr const char *vshader =
-        R"(
-        // Set default precision to medium
-        #ifdef GL_ES
-        precision mediump int;
-        precision mediump float;
-        #endif
-
-        uniform mat4 u_projection;
-        uniform vec4 u_color; // used to blend frames
-
-        attribute vec4 a_vertex;
-        attribute vec2 a_texcoord;
-
-        varying vec2 v_texcoord;
-        varying vec4 v_color;
-
-        void main()
-        {
-            gl_Position = u_projection * a_vertex;
-            v_texcoord = a_texcoord;
-            v_color = u_color;
-        }
-        )";
-
-constexpr const char *fshader =
-        R"(
-        // Set default precision to medium
-        #ifdef GL_ES
-        precision mediump int;
-        precision mediump float;
-        #endif
-
-        uniform sampler2D texture;
-
-        varying vec2 v_texcoord;
-        varying vec4 v_color;
-
-        void main()
-        {
-            gl_FragColor = v_color * texture2D(texture, v_texcoord);
-        }
-        )";
-
-
-
 // we don't really use the alpha channel but OpenGL ES would not work without it
 constexpr QOpenGLTexture::TextureFormat tx_format = QOpenGLTexture::RGBAFormat;
 constexpr QOpenGLTexture::PixelFormat tx_pixel_format = QOpenGLTexture::RGBA;
@@ -230,8 +182,8 @@ void age::qt_renderer::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // shader program (failures are logged by Qt)
-    m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vshader);
-    m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fshader);
+    m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/age_ui_qt_render_vshader.glsl");
+    m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/age_ui_qt_render_fshader.glsl");
     m_program.link();
 
     // vertex buffer

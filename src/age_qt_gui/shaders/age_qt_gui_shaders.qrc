@@ -1,0 +1,6 @@
+<RCC>
+    <qresource>
+        <file>age_ui_qt_render_fshader.glsl</file>
+        <file>age_ui_qt_render_vshader.glsl</file>
+    </qresource>
+</RCC>

@@ -54,3 +54,6 @@ HEADERS  += \
     ../../../src/age_qt_gui/age_ui_qt_renderer.hpp \
     ../../../src/age_qt_gui/age_ui_qt_settings.hpp \
     ../../../src/age_qt_gui/age_ui_qt_user_value_store.hpp
+
+RESOURCES += \
+    ../../../src/age_qt_gui/shaders/age_qt_gui_shaders.qrc
