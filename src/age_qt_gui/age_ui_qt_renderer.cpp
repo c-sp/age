@@ -82,6 +82,7 @@ constexpr const char *fshader =
         }
         )";
 
+constexpr QOpenGLTexture::TextureFormat tx_format = QOpenGLTexture::RGBAFormat;
 constexpr QOpenGLTexture::PixelFormat tx_pixel_format = QOpenGLTexture::RGBA;
 constexpr QOpenGLTexture::PixelType tx_pixel_type = QOpenGLTexture::UInt8;
 
@@ -209,7 +210,6 @@ void age::qt_renderer::initializeGL()
 
     // OpenGL configuration
     glClearColor(0, 0, 0, 1);
-    glEnable(GL_TEXTURE_2D);
 
     // shader program (failures are logged by Qt)
     m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vshader);
@@ -336,6 +336,7 @@ void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_fr
 void age::qt_renderer::process_new_frame()
 {
     makeCurrent();
+    m_last_frame_texture->bind();
     m_last_frame_texture->setData(tx_pixel_format, tx_pixel_type, m_new_frame->data());
     doneCurrent();
 
@@ -351,8 +352,7 @@ void age::qt_renderer::allocate_textures()
     LOG("");
 
     m_last_frame_texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
-
-    m_last_frame_texture->setFormat(QOpenGLTexture::RGB8_UNorm);
+    m_last_frame_texture->setFormat(tx_format);
     m_last_frame_texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
     m_last_frame_texture->allocateStorage(tx_pixel_format, tx_pixel_type);
 
