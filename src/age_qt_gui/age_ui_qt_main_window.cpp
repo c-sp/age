@@ -58,8 +58,8 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
 
     m_user_value_store = std::allocate_shared<qt_user_value_store>(std::allocator<qt_user_value_store>());
 
-    m_renderer = new qt_renderer(this);
-    setCentralWidget(m_renderer);
+    m_video_output = new qt_video_output(this);
+    setCentralWidget(m_video_output);
 
     m_settings = new qt_settings_dialog(m_user_value_store, this, Qt::WindowTitleHint  | Qt::WindowCloseButtonHint);
 
@@ -99,13 +99,13 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(&m_emulation_runner_thread, &QThread::finished, m_emulation_runner, &QObject::deleteLater);
 
     connect(m_emulation_runner, SIGNAL(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)), m_settings, SLOT(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)));
-    connect(m_emulation_runner, SIGNAL(emulator_screen_updated(std::shared_ptr<const age::pixel_vector>)), m_renderer, SLOT(new_frame(std::shared_ptr<const age::pixel_vector>)));
+    connect(m_emulation_runner, SIGNAL(emulator_screen_updated(std::shared_ptr<const age::pixel_vector>)), m_video_output, SLOT(new_frame(std::shared_ptr<const age::pixel_vector>)));
 
     // connect settings signals
 
-    connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), m_renderer, SLOT(set_bilinear_filter(bool)));
-    connect(m_settings, SIGNAL(video_frames_to_blend_changed(uint)), m_renderer, SLOT(set_blend_frames(uint)));
-    connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), m_renderer, SLOT(set_filter_chain(qt_filter_vector)));
+    connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), m_video_output, SLOT(set_bilinear_filter(bool)));
+    connect(m_settings, SIGNAL(video_frames_to_blend_changed(uint)), m_video_output, SLOT(set_blend_frames(uint)));
+    connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), m_video_output, SLOT(set_filter_chain(qt_filter_vector)));
 
     connect(m_settings, SIGNAL(audio_output_changed(QAudioDeviceInfo,QAudioFormat)), m_emulation_runner, SLOT(set_audio_output(QAudioDeviceInfo,QAudioFormat)));
     connect(m_settings, SIGNAL(audio_volume_changed(int)), m_emulation_runner, SLOT(set_audio_volume(int)));
@@ -131,7 +131,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     // connect main window signals
 
     connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), m_emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
-    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_renderer, SLOT(set_emulator_screen_size(uint,uint)));
+    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_video_output, SLOT(set_emulator_screen_size(uint,uint)));
     connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_settings, SLOT(set_emulator_screen_size(uint,uint)));
     connect(this, SIGNAL(emulator_button_down(uint)), m_emulation_runner, SLOT(set_emulator_buttons_down(uint)));
     connect(this, SIGNAL(emulator_button_up(uint)), m_emulation_runner, SLOT(set_emulator_buttons_up(uint)));
@@ -387,7 +387,7 @@ void age::qt_main_window::update_status()
 
     QString emulated_time = QString::number(millis / 1000) + "." + QString::number((millis % 1000) / 10) + " s";
     QString speed(QString::number(m_emulation_runner->get_speed_percent()).append(" %"));
-    QString fps(QString::number(m_renderer->get_fps()).append(" fps"));
+    QString fps(QString::number(m_video_output->get_fps()).append(" fps"));
 
     m_emulated_time_label->setText(emulated_time);
     m_speed_label->setText(speed);

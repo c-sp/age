@@ -44,7 +44,7 @@ QString load_shader(const QString &file_name);
 
 
 
-class qt_renderer : public QOpenGLWidget, protected QOpenGLFunctions
+class qt_video_output : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 
@@ -52,8 +52,8 @@ class qt_renderer : public QOpenGLWidget, protected QOpenGLFunctions
 
 public:
 
-    qt_renderer(QWidget *parent = nullptr);
-    ~qt_renderer() override;
+    qt_video_output(QWidget *parent = nullptr);
+    ~qt_video_output() override;
 
     uint get_fps() const;
 

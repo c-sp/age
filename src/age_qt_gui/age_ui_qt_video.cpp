@@ -25,7 +25,7 @@
 
 #include <age_debug.hpp>
 
-#include "age_ui_qt_renderer.hpp"
+#include "age_ui_qt_video.hpp"
 
 #if 1
 #define LOG(x) AGE_LOG(x)
@@ -54,7 +54,7 @@ constexpr QOpenGLTexture::PixelType tx_pixel_type = QOpenGLTexture::UInt8;
 //
 //---------------------------------------------------------
 
-age::qt_renderer::qt_renderer(QWidget *parent)
+age::qt_video_output::qt_video_output(QWidget *parent)
     : QOpenGLWidget(parent),
       m_indices(QOpenGLBuffer::IndexBuffer)
 {
@@ -67,7 +67,7 @@ age::qt_renderer::qt_renderer(QWidget *parent)
     LOG("default format options: " << format().options());
 }
 
-age::qt_renderer::~qt_renderer()
+age::qt_video_output::~qt_video_output()
 {
     makeCurrent();
 
@@ -93,7 +93,7 @@ age::qt_renderer::~qt_renderer()
 //
 //---------------------------------------------------------
 
-age::uint age::qt_renderer::get_fps() const
+age::uint age::qt_video_output::get_fps() const
 {
     //! \todo implement age::qt_renderer::get_fps
     return 0;
@@ -101,7 +101,7 @@ age::uint age::qt_renderer::get_fps() const
 
 
 
-void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
+void age::qt_video_output::set_emulator_screen_size(uint width, uint height)
 {
     LOG(width << ", " << height);
     m_emulator_screen = QSize(width, height);
@@ -118,14 +118,14 @@ void age::qt_renderer::set_emulator_screen_size(uint width, uint height)
     update(); // trigger paintGL()
 }
 
-void age::qt_renderer::new_frame(std::shared_ptr<const age::pixel_vector> new_frame)
+void age::qt_video_output::new_frame(std::shared_ptr<const age::pixel_vector> new_frame)
 {
     new_frame_slot(new_frame);
 }
 
 
 
-void age::qt_renderer::set_blend_frames(uint num_frames_to_blend)
+void age::qt_video_output::set_blend_frames(uint num_frames_to_blend)
 {
     LOG(num_frames_to_blend);
 
@@ -136,13 +136,13 @@ void age::qt_renderer::set_blend_frames(uint num_frames_to_blend)
     update(); // trigger paintGL()
 }
 
-void age::qt_renderer::set_filter_chain(qt_filter_vector filter_chain)
+void age::qt_video_output::set_filter_chain(qt_filter_vector filter_chain)
 {
     LOG("#filters: " << filter_chain.size());
     //! \todo implement age::qt_renderer::set_filter_chain
 }
 
-void age::qt_renderer::set_bilinear_filter(bool bilinear_filter)
+void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
 {
     m_bilinear_filter = bilinear_filter;
 
@@ -167,7 +167,7 @@ void age::qt_renderer::set_bilinear_filter(bool bilinear_filter)
 //
 //---------------------------------------------------------
 
-void age::qt_renderer::initializeGL()
+void age::qt_video_output::initializeGL()
 {
     LOG("format version: " << format().majorVersion() << "." << format().minorVersion());
 
@@ -214,7 +214,7 @@ void age::qt_renderer::initializeGL()
 
 
 
-void age::qt_renderer::resizeGL(int width, int height)
+void age::qt_video_output::resizeGL(int width, int height)
 {
     LOG("viewport size: " << width << " x " << height);
     m_current_viewport = QSize(width, height);
@@ -224,7 +224,7 @@ void age::qt_renderer::resizeGL(int width, int height)
 
 
 
-void age::qt_renderer::paintGL()
+void age::qt_video_output::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -252,7 +252,7 @@ void age::qt_renderer::paintGL()
 
 
 
-void age::qt_renderer::update_projection_matrix()
+void age::qt_video_output::update_projection_matrix()
 {
     double viewport_ratio = 1. * m_current_viewport.width() / m_current_viewport.height();
     double screen_ratio = 1. * m_emulator_screen.width() / m_emulator_screen.height();
@@ -285,7 +285,7 @@ void age::qt_renderer::update_projection_matrix()
 //
 //---------------------------------------------------------
 
-void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_frame)
+void age::qt_video_output::new_frame_slot(std::shared_ptr<const pixel_vector> new_frame)
 {
     if (new_frame == nullptr)
     {
@@ -309,7 +309,7 @@ void age::qt_renderer::new_frame_slot(std::shared_ptr<const pixel_vector> new_fr
     m_new_frame = new_frame;
 }
 
-void age::qt_renderer::process_new_frame()
+void age::qt_video_output::process_new_frame()
 {
     makeCurrent();
     {
@@ -333,12 +333,12 @@ void age::qt_renderer::process_new_frame()
 
 
 
-bool age::qt_renderer::textures_initialized() const
+bool age::qt_video_output::textures_initialized() const
 {
     return m_frame_texture[0] != nullptr;
 }
 
-void age::qt_renderer::allocate_textures()
+void age::qt_video_output::allocate_textures()
 {
     LOG("");
 
@@ -353,7 +353,7 @@ void age::qt_renderer::allocate_textures()
     set_texture_filter();
 }
 
-void age::qt_renderer::set_texture_filter()
+void age::qt_video_output::set_texture_filter()
 {
     LOG(m_bilinear_filter);
 
