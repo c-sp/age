@@ -15,8 +15,10 @@
 //
 
 #include <memory>
+#include <cstring> // strncmp
 
 #include <QApplication>
+#include <QCoreApplication>
 
 #include <age_types.hpp>
 
@@ -38,8 +40,41 @@ Q_DECLARE_METATYPE(std::shared_ptr<const age::pixel_vector>)
 
 
 
+static void evaluate_opengl_args(int argc, char *argv[])
+{
+    // Qt dynamic OpenGL implementation loading:
+    // http://blog.qt.io/blog/2014/11/27/qt-weekly-21-dynamic-opengl-implementation-loading-in-qt-5-4/
+
+    bool force_opengl = false;
+    bool force_opengl_es = false;
+
+    for (int i = 0; i < argc; ++i)
+    {
+        force_opengl = force_opengl | (0 == strncmp("--opengl", argv[i], 8));
+        force_opengl_es = force_opengl_es | (0 == strncmp("--opengl-es", argv[i], 11));
+    }
+    if (force_opengl && force_opengl_es)
+    {
+        fprintf(stderr, "--opengl and --opengl-es cannot be used together");
+        ::exit(EXIT_FAILURE);
+    }
+
+    if (force_opengl)
+    {
+        QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    }
+    if (force_opengl_es)
+    {
+        QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
+    }
+}
+
+
+
 int main(int argc, char *argv[])
 {
+    evaluate_opengl_args(argc, argv);
+
     QApplication a(argc, argv);
 
     qRegisterMetaType<std::shared_ptr<age::qt_emulator>>();
