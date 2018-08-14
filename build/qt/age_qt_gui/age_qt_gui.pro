@@ -43,9 +43,10 @@ SOURCES += \
     ../../../src/age_qt_gui/age_ui_qt_settings_video.cpp \
     ../../../src/age_qt_gui/age_ui_qt_user_value_store.cpp \
     ../../../src/age_qt_gui/age_ui_qt_video.cpp \
+    ../../../src/age_qt_gui/age_ui_qt_video_renderer.cpp \
     ../../../src/age_qt_gui/age_ui_qt_video_shader.cpp
 
-HEADERS += \
+HEADERS  += \
     ../../../src/age_qt_gui/age_ui_qt.hpp \
     ../../../src/age_qt_gui/age_ui_qt_audio.hpp \
     ../../../src/age_qt_gui/age_ui_qt_emulation_runner.hpp \

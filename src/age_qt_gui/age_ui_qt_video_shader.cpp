@@ -21,7 +21,7 @@
 
 
 
-QString age::load_shader(const QString &file_name)
+QString age::qt_load_shader(const QString &file_name)
 {
     // we need an OpenGL context for checking the OpenGL version
     bool is_opengl_es;
