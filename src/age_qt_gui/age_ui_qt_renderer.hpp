@@ -40,6 +40,10 @@
 namespace age
 {
 
+QString load_shader(const QString &file_name);
+
+
+
 class qt_renderer : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT

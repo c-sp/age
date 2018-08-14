@@ -37,6 +37,7 @@ SOURCES += \
     ../../../src/age_qt_gui/age_ui_qt_main.cpp \
     ../../../src/age_qt_gui/age_ui_qt_main_window.cpp \
     ../../../src/age_qt_gui/age_ui_qt_renderer.cpp \
+    ../../../src/age_qt_gui/age_ui_qt_renderer_shader.cpp \
     ../../../src/age_qt_gui/age_ui_qt_settings_audio.cpp \
     ../../../src/age_qt_gui/age_ui_qt_settings_dialog.cpp \
     ../../../src/age_qt_gui/age_ui_qt_settings_keys.cpp \

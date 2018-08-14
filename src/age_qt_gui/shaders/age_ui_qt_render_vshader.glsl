@@ -1,9 +1,6 @@
 
-// Set default precision to medium
-#ifdef GL_ES
-precision mediump int;
-precision mediump float;
-#endif
+// version directive and OpenGL ES precision qualifiers
+// are added by the shader loader
 
 uniform mat4 u_projection;
 uniform vec4 u_color; // used to blend frames

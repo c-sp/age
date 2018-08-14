@@ -46,6 +46,8 @@ constexpr QOpenGLTexture::PixelType tx_pixel_type = QOpenGLTexture::UInt8;
 
 
 
+
+
 //---------------------------------------------------------
 //
 //   constructor & destructor
@@ -183,8 +185,8 @@ void age::qt_renderer::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // shader program (failures are logged by Qt)
-    m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/age_ui_qt_render_vshader.glsl");
-    m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/age_ui_qt_render_fshader.glsl");
+    m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, load_shader(":/age_ui_qt_render_vshader.glsl"));
+    m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, load_shader(":/age_ui_qt_render_fshader.glsl"));
     m_program.link();
 
     // vertex buffer

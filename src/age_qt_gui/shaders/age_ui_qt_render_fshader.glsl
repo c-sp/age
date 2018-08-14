@@ -1,9 +1,6 @@
 
-// Set default precision to medium
-#ifdef GL_ES
-precision mediump int;
-precision mediump float;
-#endif
+// version directive and OpenGL ES precision qualifiers
+// are added by the shader loader
 
 uniform sampler2D texture;
 
