@@ -57,7 +57,7 @@ public:
     qt_video_renderer();
     ~qt_video_renderer();
 
-    void set_matrix(const QSize &emulator_screen, const QSize &viewport);
+    void update_matrix(const QSize &emulator_screen, const QSize &viewport);
     void render(const std::vector<std::shared_ptr<QOpenGLTexture>> &textures_to_render);
 
 private:
@@ -70,9 +70,33 @@ private:
 
 
 
+class qt_video_post_processor : private QOpenGLFunctions
+{
+public:
+
+    ~qt_video_post_processor();
+
+    void set_base_texture_size(const QSize &size);
+    void set_texture_filter(bool bilinear_filter);
+    void set_post_processing_filter(const qt_filter_vector &filter);
+
+    void new_frame(const pixel_vector &frame);
+
+    std::vector<std::shared_ptr<QOpenGLTexture>> get_last_frames(uint num_frames);
+
+private:
+
+    std::vector<std::shared_ptr<QOpenGLTexture>> m_frame_textures;
+};
+
+
+
 class qt_video_output : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
+
+    // public interface
+
 public:
 
     qt_video_output(QWidget *parent = nullptr);
@@ -86,10 +110,11 @@ public slots:
     void new_frame(std::shared_ptr<const age::pixel_vector> new_frame);
 
     void set_blend_frames(uint num_frames_to_blend);
-    void set_filter_chain(qt_filter_vector filter_chain);
+    void set_post_processing_filter(qt_filter_vector filter);
     void set_bilinear_filter(bool bilinear_filter);
 
 
+    // OpenGL rendering
 
 protected:
 
@@ -102,10 +127,12 @@ private:
     void update_if_initialized(std::function<void()> update_func);
 
     std::unique_ptr<qt_video_renderer> m_renderer = nullptr;
+    std::unique_ptr<qt_video_post_processor> m_post_processor = nullptr;
 
     QSize m_emulator_screen = {1, 1};
     uint m_num_frames_to_blend = 1;
-
+    bool m_bilinear_filter = false;
+    qt_filter_vector m_post_processing_filter;
 
 
     // frame event handling
@@ -115,14 +142,8 @@ private:
     void new_frame_slot(std::shared_ptr<const pixel_vector> new_frame);
     Q_INVOKABLE void process_new_frame();
 
-    void allocate_textures();
-    void set_texture_filter();
-
     std::shared_ptr<const pixel_vector> m_new_frame = nullptr;
     uint m_frames_discarded = 0;
-
-    std::vector<std::shared_ptr<QOpenGLTexture>> m_frame_texture;
-    bool m_bilinear_filter = false;
 };
 
 } // namespace age

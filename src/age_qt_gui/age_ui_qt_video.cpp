@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#include <algorithm> // std::min, std::max, std::copy
-
+#include <QFile>
+#include <QOpenGLContext>
 #include <QRectF>
 #include <QSurfaceFormat>
 #include <QVector2D>
@@ -32,10 +32,69 @@
 #define LOG(x)
 #endif
 
-// we don't really use the alpha channel but OpenGL ES would not work without it
-constexpr QOpenGLTexture::TextureFormat tx_format = QOpenGLTexture::RGBAFormat;
-constexpr QOpenGLTexture::PixelFormat tx_pixel_format = QOpenGLTexture::RGBA;
-constexpr QOpenGLTexture::PixelType tx_pixel_type = QOpenGLTexture::UInt8;
+
+
+QString age::qt_load_shader(const QString &file_name)
+{
+    // we need an OpenGL context for checking the OpenGL version
+    bool is_opengl_es;
+    {
+        QOpenGLContext *ctx = QOpenGLContext::currentContext();
+        if (nullptr == ctx)
+        {
+            qFatal("no OpenGL context available");
+            return "";
+        }
+        is_opengl_es = ctx->isOpenGLES();
+    }
+
+    // load the shader code
+    QString shader_code;
+    {
+        QFile file(file_name);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            return "";
+        }
+
+        shader_code = QString(file.readAll()); // QString created using fromUtf8()
+        file.close();
+    }
+
+    //
+    // The #version directive is added to the shader depending
+    // on the current OpenGL implementation being used.
+    //
+    // We aim for high OpenGL compatibility by using shaders
+    // requiring OpenGL ES 2.0 (OpenGL 2.1).
+    //
+    // -> https://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions
+    //
+    QString result = is_opengl_es ? "#version 100\n" : "#version 120\n";
+
+    //
+    // Add default precision qualifiers.
+    //
+    // According to the GLSL ES 1.0 spec the only type missing a default
+    // precision qualifier is "float" in fragment shaders.
+    // For simplicity reasons we add the qualifier for all shaders
+    // (vertex and fragment).
+    //
+    // -> https://www.khronos.org/registry/OpenGL/specs/es/2.0/GLSL_ES_Specification_1.00.pdf
+    //
+    if (is_opengl_es) {
+        result.append("precision mediump float;\n");
+    }
+
+    //
+    // QOpenGLShaderProgram already prefixes all shaders
+    // with #defines for "highp", "mediump" and "lowp".
+    //
+    // -> http://doc.qt.io/qt-5/qopenglshaderprogram.html#writing-portable-shaders
+    //
+
+    result.append(shader_code);
+    return result;
+}
 
 
 
@@ -64,12 +123,11 @@ age::qt_video_output::~qt_video_output()
     makeCurrent();
 
     m_renderer = nullptr;
-    m_frame_texture.clear();
+    m_post_processor = nullptr;
 
     doneCurrent();
+    LOG("");
 }
-
-
 
 
 
@@ -94,8 +152,9 @@ void age::qt_video_output::set_emulator_screen_size(uint w, uint h)
 
     update_if_initialized([this]
     {
-        m_renderer->set_matrix(m_emulator_screen, QSize(width(), height()));
-        allocate_textures();
+        m_renderer->update_matrix(m_emulator_screen, QSize(width(), height()));
+        m_post_processor->set_base_texture_size(m_emulator_screen);
+        m_post_processor->set_texture_filter(m_bilinear_filter);
     });
 }
 
@@ -109,18 +168,20 @@ void age::qt_video_output::new_frame(std::shared_ptr<const age::pixel_vector> ne
 void age::qt_video_output::set_blend_frames(uint num_frames_to_blend)
 {
     LOG(num_frames_to_blend);
-
-    num_frames_to_blend = std::max(num_frames_to_blend, static_cast<uint>(1));
-    num_frames_to_blend = std::min(num_frames_to_blend, qt_video_frame_history_size);
     m_num_frames_to_blend = num_frames_to_blend;
 
     update(); // trigger paintGL()
 }
 
-void age::qt_video_output::set_filter_chain(qt_filter_vector filter_chain)
+void age::qt_video_output::set_post_processing_filter(qt_filter_vector filter)
 {
-    LOG("#filters: " << filter_chain.size());
-    //! \todo implement age::qt_renderer::set_filter_chain
+    LOG("#filters: " << filter.size());
+    m_post_processing_filter = filter;
+
+    update_if_initialized([this]
+    {
+        m_post_processor->set_post_processing_filter(m_post_processing_filter);
+    });
 }
 
 void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
@@ -130,11 +191,9 @@ void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
 
     update_if_initialized([this]
     {
-        set_texture_filter();
+        m_post_processor->set_texture_filter(m_bilinear_filter);
     });
 }
-
-
 
 
 
@@ -159,33 +218,34 @@ void age::qt_video_output::initializeGL()
 
     // create renderer
     m_renderer = std::make_unique<qt_video_renderer>();
-    m_renderer->set_matrix(m_emulator_screen, QSize(width(), height()));
+    m_renderer->update_matrix(m_emulator_screen, QSize(width(), height()));
 
-    // create textures
-    allocate_textures();
+    // create post processor
+    m_post_processor = std::make_unique<qt_video_post_processor>();
+    m_post_processor->set_base_texture_size(m_emulator_screen);
+    m_post_processor->set_texture_filter(m_bilinear_filter);
+    m_post_processor->set_post_processing_filter(m_post_processing_filter);
 }
+
+
 
 void age::qt_video_output::resizeGL(int width, int height)
 {
     LOG(width << " x " << height);
-    m_renderer->set_matrix(m_emulator_screen, QSize(width, height));
+    m_renderer->update_matrix(m_emulator_screen, QSize(width, height));
 }
 
 void age::qt_video_output::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-
-    std::vector<std::shared_ptr<QOpenGLTexture>> textures_to_render;
-    std::copy(begin(m_frame_texture), begin(m_frame_texture) + m_num_frames_to_blend, back_inserter(textures_to_render));
-
-    m_renderer->render(textures_to_render);
+    m_renderer->render(m_post_processor->get_last_frames(m_num_frames_to_blend));
 }
 
 
 
 void age::qt_video_output::update_if_initialized(std::function<void()> update_func)
 {
-    if (nullptr != m_renderer)
+    if (nullptr != m_post_processor)
     {
         makeCurrent();
         update_func();
@@ -196,11 +256,9 @@ void age::qt_video_output::update_if_initialized(std::function<void()> update_fu
 
 
 
-
-
 //---------------------------------------------------------
 //
-//   new frame event handling
+//   frame event handling
 //
 //---------------------------------------------------------
 
@@ -232,51 +290,9 @@ void age::qt_video_output::process_new_frame()
 {
     update_if_initialized([this]
     {
-        // the oldest frame-texture will store the new frame
-        std::shared_ptr<QOpenGLTexture> tmp = m_frame_texture[m_frame_texture.size() - 1];
-        tmp->bind();
-        tmp->setData(tx_pixel_format, tx_pixel_type, m_new_frame->data());
-
-        // move all other frames so that the new frame can be placed at the front
-        for (size_t i = m_frame_texture.size() - 1; i > 0; --i)
-        {
-            m_frame_texture[i] = m_frame_texture[i - 1];
-        }
-        m_frame_texture[0] = tmp;
+        AGE_ASSERT(nullptr != m_new_frame);
+        m_post_processor->new_frame(*m_new_frame);
     });
 
     m_new_frame = nullptr; // allow next frame to be processed
-}
-
-
-
-void age::qt_video_output::allocate_textures()
-{
-    LOG("");
-
-    m_frame_texture.clear();
-    for (size_t i = 0; i < qt_video_frame_history_size; ++i)
-    {
-        auto texture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
-        texture->setFormat(tx_format);
-        texture->setSize(m_emulator_screen.width(), m_emulator_screen.height());
-        texture->allocateStorage(tx_pixel_format, tx_pixel_type);
-
-        m_frame_texture.push_back(texture);
-    }
-
-    set_texture_filter();
-}
-
-void age::qt_video_output::set_texture_filter()
-{
-    LOG(m_bilinear_filter);
-
-    auto min_filter = QOpenGLTexture::Linear; // always use linear filter for rendering downscaled texture
-    auto mag_filter = m_bilinear_filter ? QOpenGLTexture::Linear : QOpenGLTexture::Nearest;
-
-    std::for_each(begin(m_frame_texture), end(m_frame_texture), [&](auto &texture)
-    {
-        texture->setMinMagFilters(min_filter, mag_filter);
-    });
 }

@@ -32,6 +32,7 @@
 age::qt_video_renderer::qt_video_renderer()
     : m_indices(QOpenGLBuffer::IndexBuffer)
 {
+    LOG("");
     initializeOpenGLFunctions();
 
     // shader program (failures are logged by Qt)
@@ -63,11 +64,12 @@ age::qt_video_renderer::~qt_video_renderer()
 {
     m_indices.destroy();
     m_vertices.destroy();
+    LOG("");
 }
 
 
 
-void age::qt_video_renderer::set_matrix(const QSize &emulator_screen, const QSize &viewport)
+void age::qt_video_renderer::update_matrix(const QSize &emulator_screen, const QSize &viewport)
 {
     LOG(emulator_screen.width() << " x " << emulator_screen.height() << " on " << viewport.width() << " x " << viewport.height());
 
