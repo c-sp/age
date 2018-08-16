@@ -22,13 +22,18 @@
 
 #include <memory> // std::shared_ptr
 
+#include <QList>
 #include <QMatrix4x4>
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLWidget>
+#include <QSharedPointer>
 #include <QSize>
+#include <QString>
+#include <QVector2D>
+#include <QVector3D>
 
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
@@ -58,7 +63,7 @@ public:
     ~qt_video_renderer();
 
     void update_matrix(const QSize &emulator_screen, const QSize &viewport);
-    void render(const std::vector<std::shared_ptr<QOpenGLTexture>> &textures_to_render);
+    void render(const QList<GLuint> &textures_to_render);
 
 private:
 
@@ -82,11 +87,11 @@ public:
 
     void new_frame(const pixel_vector &frame);
 
-    std::vector<std::shared_ptr<QOpenGLTexture>> get_last_frames(uint num_frames);
+    QList<GLuint> get_last_frames(int num_frames) const;
 
 private:
 
-    std::vector<std::shared_ptr<QOpenGLTexture>> m_frame_textures;
+    QList<QSharedPointer<QOpenGLTexture>> m_frame_textures;
 };
 
 

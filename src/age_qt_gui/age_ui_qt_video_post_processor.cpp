@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm> // std::min, std::copy
-
 #include "age_ui_qt_video.hpp"
 
 #if 1
@@ -48,12 +46,12 @@ void age::qt_video_post_processor::set_base_texture_size(const QSize &size)
     m_frame_textures.clear();
     for (size_t i = 0; i < qt_video_frame_history_size; ++i)
     {
-        auto texture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
+        auto texture = QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target2D);
         texture->setFormat(tx_format);
         texture->setSize(size.width(), size.height());
         texture->allocateStorage(tx_pixel_format, tx_pixel_type);
 
-        m_frame_textures.push_back(texture);
+        m_frame_textures.append(texture);
     }
 }
 
@@ -64,10 +62,10 @@ void age::qt_video_post_processor::set_texture_filter(bool bilinear_filter)
     auto min_filter = QOpenGLTexture::Linear; // always use linear filter for rendering downscaled texture
     auto mag_filter = bilinear_filter ? QOpenGLTexture::Linear : QOpenGLTexture::Nearest;
 
-    std::for_each(begin(m_frame_textures), end(m_frame_textures), [&](auto &texture)
+    for (int i = 0; i < m_frame_textures.size(); ++i)
     {
-        texture->setMinMagFilters(min_filter, mag_filter);
-    });
+        m_frame_textures[i]->setMinMagFilters(min_filter, mag_filter);
+    }
 }
 
 void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_vector &filter)
@@ -81,12 +79,12 @@ void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_ve
 void age::qt_video_post_processor::new_frame(const pixel_vector &frame)
 {
     // the oldest frame-texture will store the new frame
-    std::shared_ptr<QOpenGLTexture> tmp = m_frame_textures[m_frame_textures.size() - 1];
+    QSharedPointer<QOpenGLTexture> tmp = m_frame_textures[m_frame_textures.size() - 1];
     tmp->bind();
     tmp->setData(tx_pixel_format, tx_pixel_type, frame.data());
 
     // move all other frames so that the new frame can be placed at the front
-    for (size_t i = m_frame_textures.size() - 1; i > 0; --i)
+    for (int i = m_frame_textures.size() - 1; i > 0; --i)
     {
         m_frame_textures[i] = m_frame_textures[i - 1];
     }
@@ -95,12 +93,16 @@ void age::qt_video_post_processor::new_frame(const pixel_vector &frame)
 
 
 
-std::vector<std::shared_ptr<QOpenGLTexture>> age::qt_video_post_processor::get_last_frames(uint num_frames)
+QList<GLuint> age::qt_video_post_processor::get_last_frames(int num_frames) const
 {
-    num_frames = std::min((num_frames < 1) ? 1 : num_frames, m_frame_textures.size());
+    num_frames = qMax(num_frames, 1);
+    num_frames = qMin(num_frames, m_frame_textures.size());
 
-    std::vector<std::shared_ptr<QOpenGLTexture>> result;
-    std::copy(begin(m_frame_textures), begin(m_frame_textures) + num_frames, back_inserter(result));
+    QList<GLuint> result;
+    for (int i = 0; i < num_frames; ++i)
+    {
+        result.append(m_frame_textures[i]->textureId());
+    }
 
     return result;
 }

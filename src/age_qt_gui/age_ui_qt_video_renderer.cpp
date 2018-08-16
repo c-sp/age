@@ -96,7 +96,7 @@ void age::qt_video_renderer::update_matrix(const QSize &emulator_screen, const Q
 
 
 
-void age::qt_video_renderer::render(const std::vector<std::shared_ptr<QOpenGLTexture>> &textures_to_render)
+void age::qt_video_renderer::render(const QList<GLuint> &textures_to_render)
 {
     m_program.bind();
     m_program.setUniformValue("u_projection", m_projection);
@@ -112,10 +112,10 @@ void age::qt_video_renderer::render(const std::vector<std::shared_ptr<QOpenGLTex
     m_program.enableAttributeArray(texcoordLocation);
     m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, sizeof(QVector3D), 2, sizeof(qt_vertex_data));
 
-    for (size_t i = 0, end = textures_to_render.size(); i < end; ++i)
+    for (int i = 0; i < textures_to_render.size(); ++i)
     {
         m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1.f / (i + 1)));
-        textures_to_render[i]->bind();
+        glBindTexture(GL_TEXTURE_2D, textures_to_render[i]);
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
     }
 }
