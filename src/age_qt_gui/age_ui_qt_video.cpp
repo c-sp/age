@@ -26,7 +26,7 @@
 
 #include "age_ui_qt_video.hpp"
 
-#if 1
+#if 0
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
@@ -34,7 +34,9 @@
 
 
 
-QString age::qt_load_shader(const QString &file_name)
+namespace {
+
+QString load_shader(const QString &file_name)
 {
     // we need an OpenGL context for checking the OpenGL version
     bool is_opengl_es;
@@ -96,6 +98,16 @@ QString age::qt_load_shader(const QString &file_name)
     return result;
 }
 
+}
+
+void age::qt_init_shader_program(QOpenGLShaderProgram &program, const QString &vertex_shader_file, const QString &fragment_shader_file)
+{
+    // failures are logged by Qt
+    program.addShaderFromSourceCode(QOpenGLShader::Vertex, load_shader(vertex_shader_file));
+    program.addShaderFromSourceCode(QOpenGLShader::Fragment, load_shader(fragment_shader_file));
+    program.link();
+}
+
 
 
 
@@ -150,11 +162,10 @@ void age::qt_video_output::set_emulator_screen_size(uint w, uint h)
     LOG(w << ", " << h);
     m_emulator_screen = QSize(w, h);
 
-    update_if_initialized([this]
+    run_if_initialized([this]
     {
         m_renderer->update_matrix(m_emulator_screen, QSize(width(), height()));
-        m_post_processor->set_base_texture_size(m_emulator_screen);
-        m_post_processor->set_texture_filter(m_bilinear_filter);
+        m_post_processor->set_native_frame_size(m_emulator_screen);
     });
 }
 
@@ -178,7 +189,7 @@ void age::qt_video_output::set_post_processing_filter(qt_filter_vector filter)
     LOG("#filters: " << filter.size());
     m_post_processing_filter = filter;
 
-    update_if_initialized([this]
+    run_if_initialized([this]
     {
         m_post_processor->set_post_processing_filter(m_post_processing_filter);
     });
@@ -189,7 +200,7 @@ void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
     LOG(bilinear_filter);
     m_bilinear_filter = bilinear_filter;
 
-    update_if_initialized([this]
+    run_if_initialized([this]
     {
         m_post_processor->set_texture_filter(m_bilinear_filter);
     });
@@ -222,7 +233,7 @@ void age::qt_video_output::initializeGL()
 
     // create post processor
     m_post_processor = std::make_unique<qt_video_post_processor>();
-    m_post_processor->set_base_texture_size(m_emulator_screen);
+    m_post_processor->set_native_frame_size(m_emulator_screen);
     m_post_processor->set_texture_filter(m_bilinear_filter);
     m_post_processor->set_post_processing_filter(m_post_processing_filter);
 }
@@ -238,17 +249,17 @@ void age::qt_video_output::resizeGL(int width, int height)
 void age::qt_video_output::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    m_renderer->render(m_post_processor->get_last_frames(m_num_frames_to_blend));
+    m_renderer->render(m_post_processor->get_frame_textures(m_num_frames_to_blend));
 }
 
 
 
-void age::qt_video_output::update_if_initialized(std::function<void()> update_func)
+void age::qt_video_output::run_if_initialized(std::function<void()> function_to_run)
 {
     if (nullptr != m_post_processor)
     {
         makeCurrent();
-        update_func();
+        function_to_run();
         doneCurrent();
         update(); // trigger paintGL()
     }
@@ -288,10 +299,10 @@ void age::qt_video_output::new_frame_slot(std::shared_ptr<const pixel_vector> ne
 
 void age::qt_video_output::process_new_frame()
 {
-    update_if_initialized([this]
+    run_if_initialized([this]
     {
         AGE_ASSERT(nullptr != m_new_frame);
-        m_post_processor->new_frame(*m_new_frame);
+        m_post_processor->add_new_frame(*m_new_frame);
     });
 
     m_new_frame = nullptr; // allow next frame to be processed

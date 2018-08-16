@@ -21,7 +21,7 @@
 
 #include "age_ui_qt_video.hpp"
 
-#if 1
+#if 0
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
@@ -35,10 +35,7 @@ age::qt_video_renderer::qt_video_renderer()
     LOG("");
     initializeOpenGLFunctions();
 
-    // shader program (failures are logged by Qt)
-    m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, qt_load_shader(":/age_ui_qt_render_vshader.glsl"));
-    m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, qt_load_shader(":/age_ui_qt_render_fshader.glsl"));
-    m_program.link();
+    qt_init_shader_program(m_program, ":/age_ui_qt_render_vshader.glsl", ":/age_ui_qt_render_fshader.glsl");
 
     // vertex buffer
     qt_vertex_data vertices[] = {

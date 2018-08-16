@@ -25,6 +25,7 @@
 #include <QList>
 #include <QMatrix4x4>
 #include <QOpenGLBuffer>
+#include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
@@ -51,7 +52,7 @@ struct qt_vertex_data
     QVector2D texCoord;
 };
 
-QString qt_load_shader(const QString &file_name);
+void qt_init_shader_program(QOpenGLShaderProgram &program, const QString &vertex_shader_file, const QString &fragment_shader_file);
 
 
 
@@ -79,19 +80,36 @@ class qt_video_post_processor : private QOpenGLFunctions
 {
 public:
 
+    qt_video_post_processor();
     ~qt_video_post_processor();
 
-    void set_base_texture_size(const QSize &size);
+    void set_native_frame_size(const QSize &size);
     void set_texture_filter(bool bilinear_filter);
     void set_post_processing_filter(const qt_filter_vector &filter);
 
-    void new_frame(const pixel_vector &frame);
+    void add_new_frame(const pixel_vector &frame);
 
-    QList<GLuint> get_last_frames(int num_frames) const;
+    QList<GLuint> get_frame_textures(int last_N_frames) const;
 
 private:
 
-    QList<QSharedPointer<QOpenGLTexture>> m_frame_textures;
+    struct video_frame
+    {
+        QSharedPointer<QOpenGLTexture> m_native;
+        QSharedPointer<QOpenGLFramebufferObject> m_post_processed;
+    };
+
+    void set_min_mag_filter(GLuint texture_id);
+    void create_post_processor();
+    bool post_process_frames() const;
+    void post_process_frame(video_frame &frame);
+
+    QSize m_native_frame_size = {1, 1};
+    bool m_bilinear_filter = false;
+    qt_filter_vector m_post_processing_filter;
+
+    int m_new_frame_idx = 0;
+    QList<video_frame> m_frames;
 };
 
 
@@ -129,7 +147,7 @@ protected:
 
 private:
 
-    void update_if_initialized(std::function<void()> update_func);
+    void run_if_initialized(std::function<void()> function_to_run);
 
     std::unique_ptr<qt_video_renderer> m_renderer = nullptr;
     std::unique_ptr<qt_video_post_processor> m_post_processor = nullptr;
