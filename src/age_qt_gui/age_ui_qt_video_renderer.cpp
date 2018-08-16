@@ -35,7 +35,8 @@ age::qt_video_renderer::qt_video_renderer()
     LOG("");
     initializeOpenGLFunctions();
 
-    qt_init_shader_program(m_program, ":/age_ui_qt_render_vshader.glsl", ":/age_ui_qt_render_fshader.glsl");
+    // shader program
+    qt_init_shader_program(m_program, ":/age_ui_qt_render_vsh.glsl", ":/age_ui_qt_render_fsh.glsl");
 
     // vertex buffer
     qt_vertex_data vertices[] = {

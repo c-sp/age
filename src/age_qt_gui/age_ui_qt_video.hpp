@@ -93,23 +93,32 @@ public:
 
 private:
 
-    struct video_frame
+    struct processing_step
     {
-        QSharedPointer<QOpenGLTexture> m_native;
-        QSharedPointer<QOpenGLFramebufferObject> m_post_processed;
+        QOpenGLShaderProgram *m_program = nullptr;
+        QSharedPointer<QOpenGLFramebufferObject> m_buffer;
     };
 
-    void set_min_mag_filter(GLuint texture_id);
+    void set_min_mag_filter(GLuint texture_id, bool bilinear);
     void create_post_processor();
     bool post_process_frames() const;
-    void post_process_frame(video_frame &frame);
+    void post_process_frame(int frame_idx);
+
+    static QList<QSharedPointer<QOpenGLFramebufferObject>> create_frame_buffers(int buffers_to_create, const QSize &buffer_size);
+    static bool add_step(QList<processing_step> &post_processor, QOpenGLShaderProgram *program, const QSize &result_frame_size);
 
     QSize m_native_frame_size = {1, 1};
     bool m_bilinear_filter = false;
     qt_filter_vector m_post_processing_filter;
 
     int m_new_frame_idx = 0;
-    QList<video_frame> m_frames;
+    QList<QSharedPointer<QOpenGLTexture>> m_native_frames;
+
+    QList<QSharedPointer<QOpenGLFramebufferObject>> m_processed_frames;
+    QList<processing_step> m_post_processor;
+    QOpenGLShaderProgram m_program_emboss3x3;
+    QOpenGLBuffer m_vertices;
+    QOpenGLBuffer m_indices;
 };
 
 
