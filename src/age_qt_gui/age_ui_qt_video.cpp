@@ -26,7 +26,7 @@
 
 #include "age_ui_qt_video.hpp"
 
-#if 0
+#if 1
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)

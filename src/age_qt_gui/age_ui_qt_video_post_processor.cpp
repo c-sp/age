@@ -230,12 +230,14 @@ void age::qt_video_post_processor::create_post_processor()
 
             default: //! \todo remove
                 step_added = true;
+                LOG("ignore filter " << to_integral(filter));
                 break;
         }
 
         if (!step_added)
         {
             post_processor.clear(); // indicate failure
+            LOG("post processor could not be created");
             break;
         }
     }
