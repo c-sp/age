@@ -50,8 +50,8 @@ static void evaluate_opengl_args(int argc, char *argv[])
 
     for (int i = 0; i < argc; ++i)
     {
-        force_opengl = force_opengl | (0 == strncmp("--opengl", argv[i], 8));
-        force_opengl_es = force_opengl_es | (0 == strncmp("--opengl-es", argv[i], 11));
+        force_opengl = force_opengl | (0 == strncmp("--opengl", argv[i], 9));
+        force_opengl_es = force_opengl_es | (0 == strncmp("--opengl-es", argv[i], 12));
     }
     if (force_opengl && force_opengl_es)
     {
