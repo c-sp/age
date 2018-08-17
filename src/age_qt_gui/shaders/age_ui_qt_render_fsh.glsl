@@ -4,10 +4,12 @@
 
 uniform sampler2D texture;
 
+uniform vec4 u_color; // used to blend frames
+
 varying vec2 v_texcoord;
-varying vec4 v_color;
+
 
 void main()
 {
-    gl_FragColor = v_color * texture2D(texture, v_texcoord);
+    gl_FragColor = u_color * texture2D(texture, v_texcoord);
 }
