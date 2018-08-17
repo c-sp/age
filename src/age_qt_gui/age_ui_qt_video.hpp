@@ -122,6 +122,8 @@ private:
     QOpenGLShaderProgram m_program_scale2x;
     QOpenGLShaderProgram m_program_gauss3x3_s;
     QOpenGLShaderProgram m_program_gauss3x3_t;
+    QOpenGLShaderProgram m_program_gauss5x5_s;
+    QOpenGLShaderProgram m_program_gauss5x5_t;
     QOpenGLShaderProgram m_program_emboss3x3;
     QOpenGLShaderProgram m_program_emboss5x5;
     QOpenGLBuffer m_vertices;
