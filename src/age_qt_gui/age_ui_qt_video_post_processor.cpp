@@ -48,14 +48,18 @@ age::qt_video_post_processor::qt_video_post_processor()
     set_native_frame_size(m_native_frame_size);
     AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size);
 
-    qt_init_shader_program(m_program_emboss3x3, ":/age_ui_qt_emboss3x3_vsh.glsl", ":/age_ui_qt_emboss3x3_fsh.glsl");
+    qt_init_shader_program(m_program_emboss3x3, ":/age_ui_qt_post_process_vsh.glsl", ":/age_ui_qt_emboss3x3_fsh.glsl");
 
     // vertex buffer
+    // (we can already transform the vertices since the projection matrix is never modified)
+    QMatrix4x4 projection;
+    projection.ortho(QRectF(0, 0, 1, 1));
+
     QVector3D vertices[] = {
-        QVector3D(0, 0, 0),
-        QVector3D(0, 1, 0),
-        QVector3D(1, 0, 0),
-        QVector3D(1, 1, 0),
+        projection.map(QVector3D(0, 0, 0)),
+        projection.map(QVector3D(0, 1, 0)),
+        projection.map(QVector3D(1, 0, 0)),
+        projection.map(QVector3D(1, 1, 0)),
     };
 
     m_vertices.create();
@@ -288,44 +292,40 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     AGE_ASSERT(frame_idx >= 0);
     AGE_ASSERT(frame_idx < m_native_frames.size());
 
-    m_post_processor.last().m_buffer = m_processed_frames[frame_idx];
-    set_min_mag_filter(m_native_frames[frame_idx]->textureId(), false);
-    set_min_mag_filter(m_processed_frames[frame_idx]->texture(), false);
+    // The configured texture magnification filter (GL_NEAREST or GL_LINEAR)
+    // should not influence post processing since the texture is rendered
+    // in it's original size.
+    // There is no magnification happening.
 
     GLuint texture_id = m_native_frames[frame_idx]->textureId();
     QSize texture_size = m_native_frame_size;
 
-    QMatrix4x4 projection;
-    projection.ortho(QRectF(0, 0, 1, 1));
+    m_vertices.bind();
+    m_indices.bind();
+
+    m_post_processor.last().m_buffer = m_processed_frames[frame_idx];
 
     for (int i = 0; i < m_post_processor.size(); ++i)
     {
         processing_step &step = m_post_processor[i];
         step.m_buffer->bind(); // render to this buffer
 
+        // prepare shader program
         step.m_program->bind();
-        step.m_program->setUniformValue("u_projection", projection);
         step.m_program->setUniformValue("u_texture_size", QVector2D(texture_size.width(), texture_size.height()));
+        qt_use_float_attribute_buffer(*step.m_program, "a_vertex", 0, 3);
 
-        m_vertices.bind();
-        m_indices.bind();
-
-        int vertexLocation = step.m_program->attributeLocation("a_vertex");
-        step.m_program->enableAttributeArray(vertexLocation);
-        step.m_program->setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3, sizeof(QVector3D));
-
+        // post-process texture
         glBindTexture(GL_TEXTURE_2D, texture_id);
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
 
-        step.m_buffer->release();
-
+        // use this step's output as input for the next step
         texture_id = step.m_buffer->texture();
         texture_size = step.m_buffer->size();
     }
 
+    m_post_processor.last().m_buffer->release();
     m_post_processor.last().m_buffer = nullptr;
-    set_min_mag_filter(m_native_frames[frame_idx]->textureId(), m_bilinear_filter);
-    set_min_mag_filter(m_processed_frames[frame_idx]->texture(), m_bilinear_filter);
 }
 
 

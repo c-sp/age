@@ -102,13 +102,8 @@ void age::qt_video_renderer::render(const QList<GLuint> &textures_to_render)
     m_vertices.bind();
     m_indices.bind();
 
-    int vertexLocation = m_program.attributeLocation("a_vertex");
-    m_program.enableAttributeArray(vertexLocation);
-    m_program.setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3, sizeof(qt_vertex_data));
-
-    int texcoordLocation  = m_program.attributeLocation("a_texcoord");
-    m_program.enableAttributeArray(texcoordLocation);
-    m_program.setAttributeBuffer(texcoordLocation, GL_FLOAT, sizeof(QVector3D), 2, sizeof(qt_vertex_data));
+    qt_use_float_attribute_buffer(m_program, "a_vertex", 0, 3, sizeof(qt_vertex_data));
+    qt_use_float_attribute_buffer(m_program, "a_texcoord", sizeof(QVector3D), 2, sizeof(qt_vertex_data));
 
     for (int i = 0; i < textures_to_render.size(); ++i)
     {

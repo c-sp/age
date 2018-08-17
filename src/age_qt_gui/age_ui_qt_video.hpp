@@ -53,6 +53,7 @@ struct qt_vertex_data
 };
 
 void qt_init_shader_program(QOpenGLShaderProgram &program, const QString &vertex_shader_file, const QString &fragment_shader_file);
+void qt_use_float_attribute_buffer(QOpenGLShaderProgram &program, const char *attribute_name, int offset, int tuple_size, int stride = 0);
 
 
 

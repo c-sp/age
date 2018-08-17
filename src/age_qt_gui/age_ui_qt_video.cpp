@@ -108,6 +108,13 @@ void age::qt_init_shader_program(QOpenGLShaderProgram &program, const QString &v
     program.link();
 }
 
+void age::qt_use_float_attribute_buffer(QOpenGLShaderProgram &program, const char *attribute_name, int offset, int tuple_size, int stride)
+{
+    int attribute_location = program.attributeLocation(attribute_name);
+    program.enableAttributeArray(attribute_location);
+    program.setAttributeBuffer(attribute_location, GL_FLOAT, offset, tuple_size, stride);
+}
+
 
 
 
