@@ -2,6 +2,8 @@
     <qresource>
         <file>age_ui_qt_pp_emboss3x3_fsh.glsl</file>
         <file>age_ui_qt_pp_emboss5x5_fsh.glsl</file>
+        <file>age_ui_qt_pp_gauss3x3_s_fsh.glsl</file>
+        <file>age_ui_qt_pp_gauss3x3_t_fsh.glsl</file>
         <file>age_ui_qt_pp_scale2x_fsh.glsl</file>
         <file>age_ui_qt_pp_vsh.glsl</file>
         <file>age_ui_qt_render_fsh.glsl</file>

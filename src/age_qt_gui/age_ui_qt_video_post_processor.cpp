@@ -49,6 +49,8 @@ age::qt_video_post_processor::qt_video_post_processor()
     AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size);
 
     qt_init_shader_program(m_program_scale2x, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_scale2x_fsh.glsl");
+    qt_init_shader_program(m_program_gauss3x3_s, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_gauss3x3_s_fsh.glsl");
+    qt_init_shader_program(m_program_gauss3x3_t, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_gauss3x3_t_fsh.glsl");
     qt_init_shader_program(m_program_emboss3x3, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_emboss3x3_fsh.glsl");
     qt_init_shader_program(m_program_emboss5x5, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_emboss5x5_fsh.glsl");
 
@@ -291,6 +293,13 @@ void age::qt_video_post_processor::create_post_processor()
                 result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_scale2x, result_frame_size);
                 LOG("add scale2x: " << step_added);
+                break;
+
+            case qt_filter::gauss3x3:
+                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
+                step_added = add_step(post_processor, &m_program_gauss3x3_s, result_frame_size)
+                        && add_step(post_processor, &m_program_gauss3x3_t, result_frame_size);
+                LOG("add gauss3x3: " << step_added);
                 break;
 
             case qt_filter::emboss3x3:
