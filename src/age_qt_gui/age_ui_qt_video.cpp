@@ -76,23 +76,25 @@ QString load_shader(const QString &file_name)
     //
     // Add default precision qualifiers.
     //
-    // According to the GLSL ES 1.0 spec the only type missing a default
-    // precision qualifier is "float" in fragment shaders.
-    // For simplicity reasons we add the qualifier for all shaders
-    // (vertex and fragment).
+    // According to the GLSL ES 1.0 spec vertex shaders default to
+    // "highp" for float and int and fragment shaders default to
+    // "mediump" for int (they are missing the default precision
+    // qualifier for float).
+    // For simplicity reasons we add the same qualifiers to all
+    // shaders (vertex and fragment).
     //
     // -> https://www.khronos.org/registry/OpenGL/specs/es/2.0/GLSL_ES_Specification_1.00.pdf
     //
-    if (is_opengl_es) {
-        result.append("precision mediump float;\n");
-    }
-
-    //
     // QOpenGLShaderProgram already prefixes all shaders
-    // with #defines for "highp", "mediump" and "lowp".
+    // with #defines for "highp", "mediump" and "lowp",
+    // so we can already use these keywords in our shader code.
     //
     // -> http://doc.qt.io/qt-5/qopenglshaderprogram.html#writing-portable-shaders
     //
+    if (is_opengl_es) {
+        result.append("precision mediump float;\n");
+        result.append("precision mediump int;\n");
+    }
 
     result.append(shader_code);
     return result;
