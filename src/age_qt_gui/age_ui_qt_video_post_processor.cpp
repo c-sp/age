@@ -49,6 +49,7 @@ age::qt_video_post_processor::qt_video_post_processor()
     AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size);
 
     qt_init_shader_program(m_program_emboss3x3, ":/age_ui_qt_post_process_vsh.glsl", ":/age_ui_qt_emboss3x3_fsh.glsl");
+    qt_init_shader_program(m_program_emboss5x5, ":/age_ui_qt_post_process_vsh.glsl", ":/age_ui_qt_emboss5x5_fsh.glsl");
 
     // vertex buffer
     // (we can already transform the vertices since the projection matrix is never modified)
@@ -223,13 +224,18 @@ void age::qt_video_post_processor::create_post_processor()
         qt_filter filter = m_post_processing_filter[i];
 
         bool step_added = false;
-
         switch (filter)
         {
             case qt_filter::emboss3x3:
                 result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_emboss3x3, result_frame_size);
-                LOG("added emboss3x3: " << step_added);
+                LOG("add emboss3x3: " << step_added);
+                break;
+
+            case qt_filter::emboss5x5:
+                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
+                step_added = add_step(post_processor, &m_program_emboss5x5, result_frame_size);
+                LOG("add emboss5x5: " << step_added);
                 break;
 
             default: //! \todo remove

@@ -118,6 +118,7 @@ private:
     QList<QSharedPointer<QOpenGLFramebufferObject>> m_processed_frames;
     QList<processing_step> m_post_processor;
     QOpenGLShaderProgram m_program_emboss3x3;
+    QOpenGLShaderProgram m_program_emboss5x5;
     QOpenGLBuffer m_vertices;
     QOpenGLBuffer m_indices;
 };
