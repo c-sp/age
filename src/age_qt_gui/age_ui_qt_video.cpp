@@ -55,6 +55,7 @@ QString load_shader(const QString &file_name)
     {
         QFile file(file_name);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qWarning() << "could not open file: " << file_name;
             return "";
         }
 
@@ -104,6 +105,8 @@ QString load_shader(const QString &file_name)
 
 void age::qt_init_shader_program(QOpenGLShaderProgram &program, const QString &vertex_shader_file, const QString &fragment_shader_file)
 {
+    LOG("creating shader program from " << vertex_shader_file << " (vert) and " << fragment_shader_file << " (frag)");
+
     // failures are logged by Qt
     program.addShaderFromSourceCode(QOpenGLShader::Vertex, load_shader(vertex_shader_file));
     program.addShaderFromSourceCode(QOpenGLShader::Fragment, load_shader(fragment_shader_file));

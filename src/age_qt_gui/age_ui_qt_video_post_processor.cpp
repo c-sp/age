@@ -48,8 +48,9 @@ age::qt_video_post_processor::qt_video_post_processor()
     set_native_frame_size(m_native_frame_size);
     AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size);
 
-    qt_init_shader_program(m_program_emboss3x3, ":/age_ui_qt_post_process_vsh.glsl", ":/age_ui_qt_emboss3x3_fsh.glsl");
-    qt_init_shader_program(m_program_emboss5x5, ":/age_ui_qt_post_process_vsh.glsl", ":/age_ui_qt_emboss5x5_fsh.glsl");
+    qt_init_shader_program(m_program_scale2x, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_scale2x_fsh.glsl");
+    qt_init_shader_program(m_program_emboss3x3, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_emboss3x3_fsh.glsl");
+    qt_init_shader_program(m_program_emboss5x5, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_emboss5x5_fsh.glsl");
 
     // vertex buffer
     // (we can already transform the vertices since the projection matrix is never modified)
@@ -286,6 +287,12 @@ void age::qt_video_post_processor::create_post_processor()
         bool step_added = false;
         switch (filter)
         {
+            case qt_filter::scale2x:
+                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
+                step_added = add_step(post_processor, &m_program_scale2x, result_frame_size);
+                LOG("add scale2x: " << step_added);
+                break;
+
             case qt_filter::emboss3x3:
                 result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_emboss3x3, result_frame_size);
@@ -373,6 +380,7 @@ bool age::qt_video_post_processor::add_step(QList<processing_step> &post_process
 
     set_wrap_mode(step.m_buffer->texture());
 
+    LOG("create frame buffer object (" << step.m_buffer->width() << " x " << step.m_buffer->height() << ")");
     post_processor.append(step);
     return true;
 }

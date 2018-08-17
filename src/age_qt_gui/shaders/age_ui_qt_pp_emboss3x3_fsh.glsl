@@ -10,11 +10,15 @@ const vec2 c_pixel_center = vec2(0.5, 0.5);
 
 void main()
 {
-    vec2 frag_coord = vec2(gl_FragCoord);// + c_pixel_center;
+    vec2 tex_coord = vec2(gl_FragCoord);// + c_pixel_center;
 
-    vec2 tex_coord1 = (frag_coord + vec2(-1.0, 1.0)) / u_texture_size;
-    vec2 tex_coord2 = frag_coord / u_texture_size;
-    vec2 tex_coord3 = (frag_coord + vec2(1.0, -1.0)) / u_texture_size;
+    vec2 tex_coord1 = tex_coord + vec2(-1.0, 1.0);
+    vec2 tex_coord2 = tex_coord;
+    vec2 tex_coord3 = tex_coord + vec2(1.0, -1.0);
+
+    tex_coord1 /= u_texture_size;
+    tex_coord2 /= u_texture_size;
+    tex_coord3 /= u_texture_size;
 
     vec4 c1 = texture2D(texture, tex_coord1);
     vec4 c2 = texture2D(texture, tex_coord2);
