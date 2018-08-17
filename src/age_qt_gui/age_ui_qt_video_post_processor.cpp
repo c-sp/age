@@ -104,7 +104,9 @@ void age::qt_video_post_processor::set_native_frame_size(const QSize &size)
         frame->setFormat(tx_format);
         frame->setSize(m_native_frame_size.width(), m_native_frame_size.height());
         frame->allocateStorage(tx_pixel_format, tx_pixel_type);
+
         set_min_mag_filter(frame->textureId(), m_bilinear_filter);
+        set_wrap_mode(frame->textureId());
 
         m_native_frames.append(frame);
     }
@@ -205,6 +207,64 @@ void age::qt_video_post_processor::set_min_mag_filter(GLuint texture_id, bool bi
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
 }
 
+void age::qt_video_post_processor::set_wrap_mode(GLuint texture_id)
+{
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+
+
+bool age::qt_video_post_processor::post_process_frames() const
+{
+    AGE_ASSERT(m_post_processor.empty() == m_processed_frames.empty());
+    return !m_post_processor.empty();
+}
+
+void age::qt_video_post_processor::post_process_frame(int frame_idx)
+{
+    AGE_ASSERT(!m_post_processor.empty());
+    AGE_ASSERT(m_native_frames.size() == m_processed_frames.size());
+    AGE_ASSERT(frame_idx >= 0);
+    AGE_ASSERT(frame_idx < m_native_frames.size());
+
+    // The configured texture magnification filter (GL_NEAREST or GL_LINEAR)
+    // should not influence post processing since the texture is rendered
+    // in it's original size.
+    // There is no magnification happening.
+
+    GLuint texture_id = m_native_frames[frame_idx]->textureId();
+    QSize texture_size = m_native_frame_size;
+
+    m_vertices.bind();
+    m_indices.bind();
+
+    m_post_processor.last().m_buffer = m_processed_frames[frame_idx];
+
+    for (int i = 0; i < m_post_processor.size(); ++i)
+    {
+        processing_step &step = m_post_processor[i];
+        step.m_buffer->bind(); // render to this buffer
+
+        // prepare shader program
+        step.m_program->bind();
+        step.m_program->setUniformValue("u_texture_size", QVector2D(texture_size.width(), texture_size.height()));
+        qt_use_float_attribute_buffer(*step.m_program, "a_vertex", 0, 3);
+
+        // post-process texture
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
+
+        // use this step's output as input for the next step
+        texture_id = step.m_buffer->texture();
+        texture_size = step.m_buffer->size();
+    }
+
+    m_post_processor.last().m_buffer->release();
+    m_post_processor.last().m_buffer = nullptr;
+}
+
 
 
 void age::qt_video_post_processor::create_post_processor()
@@ -281,61 +341,6 @@ void age::qt_video_post_processor::create_post_processor()
     }
 }
 
-
-
-bool age::qt_video_post_processor::post_process_frames() const
-{
-    AGE_ASSERT(m_post_processor.empty() == m_processed_frames.empty());
-    return !m_post_processor.empty();
-}
-
-
-
-void age::qt_video_post_processor::post_process_frame(int frame_idx)
-{
-    AGE_ASSERT(!m_post_processor.empty());
-    AGE_ASSERT(m_native_frames.size() == m_processed_frames.size());
-    AGE_ASSERT(frame_idx >= 0);
-    AGE_ASSERT(frame_idx < m_native_frames.size());
-
-    // The configured texture magnification filter (GL_NEAREST or GL_LINEAR)
-    // should not influence post processing since the texture is rendered
-    // in it's original size.
-    // There is no magnification happening.
-
-    GLuint texture_id = m_native_frames[frame_idx]->textureId();
-    QSize texture_size = m_native_frame_size;
-
-    m_vertices.bind();
-    m_indices.bind();
-
-    m_post_processor.last().m_buffer = m_processed_frames[frame_idx];
-
-    for (int i = 0; i < m_post_processor.size(); ++i)
-    {
-        processing_step &step = m_post_processor[i];
-        step.m_buffer->bind(); // render to this buffer
-
-        // prepare shader program
-        step.m_program->bind();
-        step.m_program->setUniformValue("u_texture_size", QVector2D(texture_size.width(), texture_size.height()));
-        qt_use_float_attribute_buffer(*step.m_program, "a_vertex", 0, 3);
-
-        // post-process texture
-        glBindTexture(GL_TEXTURE_2D, texture_id);
-        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
-
-        // use this step's output as input for the next step
-        texture_id = step.m_buffer->texture();
-        texture_size = step.m_buffer->size();
-    }
-
-    m_post_processor.last().m_buffer->release();
-    m_post_processor.last().m_buffer = nullptr;
-}
-
-
-
 QList<QSharedPointer<QOpenGLFramebufferObject>> age::qt_video_post_processor::create_frame_buffers(int buffers_to_create, const QSize &buffer_size)
 {
     QList<QSharedPointer<QOpenGLFramebufferObject>> frame_buffers;
@@ -347,6 +352,7 @@ QList<QSharedPointer<QOpenGLFramebufferObject>> age::qt_video_post_processor::cr
         {
             break;
         }
+        set_wrap_mode(buffer->texture());
         frame_buffers.append(buffer);
     }
 
@@ -364,6 +370,8 @@ bool age::qt_video_post_processor::add_step(QList<processing_step> &post_process
     processing_step step;
     step.m_program = program;
     step.m_buffer = buffer;
+
+    set_wrap_mode(step.m_buffer->texture());
 
     post_processor.append(step);
     return true;

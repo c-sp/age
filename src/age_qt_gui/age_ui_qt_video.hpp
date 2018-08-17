@@ -101,12 +101,14 @@ private:
     };
 
     void set_min_mag_filter(GLuint texture_id, bool bilinear);
-    void create_post_processor();
+    void set_wrap_mode(GLuint texture_id);
+
     bool post_process_frames() const;
     void post_process_frame(int frame_idx);
 
-    static QList<QSharedPointer<QOpenGLFramebufferObject>> create_frame_buffers(int buffers_to_create, const QSize &buffer_size);
-    static bool add_step(QList<processing_step> &post_processor, QOpenGLShaderProgram *program, const QSize &result_frame_size);
+    void create_post_processor();
+    QList<QSharedPointer<QOpenGLFramebufferObject>> create_frame_buffers(int buffers_to_create, const QSize &buffer_size);
+    bool add_step(QList<processing_step> &post_processor, QOpenGLShaderProgram *program, const QSize &result_frame_size);
 
     QSize m_native_frame_size = {1, 1};
     bool m_bilinear_filter = false;
