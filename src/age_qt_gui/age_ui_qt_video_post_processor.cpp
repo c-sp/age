@@ -234,6 +234,11 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     AGE_ASSERT(frame_idx >= 0);
     AGE_ASSERT(frame_idx < m_native_frames.size());
 
+    // store the current viewort as we adjust viewport size
+    // during post processing
+    GLint saved_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, saved_viewport);
+
     GLuint texture_id = m_native_frames[frame_idx]->textureId();
     QSize texture_size = m_native_frame_size;
 
@@ -251,6 +256,9 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     {
         processing_step &step = m_post_processor[i];
         step.m_buffer->bind(); // render to this buffer
+
+        // we have to adjust the viewport to prevent rendering artifacts
+        glViewport(0, 0, step.m_buffer->width(), step.m_buffer->height());
 
         // prepare shader program
         step.m_program->bind();
@@ -270,6 +278,8 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     m_post_processor.last().m_buffer = nullptr;
 
     set_min_mag_filter(texture_id, m_bilinear_filter);
+
+    glViewport(saved_viewport[0], saved_viewport[1], saved_viewport[2], saved_viewport[3]);
 }
 
 
