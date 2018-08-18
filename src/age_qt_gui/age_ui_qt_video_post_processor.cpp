@@ -234,13 +234,13 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     AGE_ASSERT(frame_idx >= 0);
     AGE_ASSERT(frame_idx < m_native_frames.size());
 
-    // The configured texture magnification filter (GL_NEAREST or GL_LINEAR)
-    // should not influence post processing since the texture is rendered
-    // in it's original size.
-    // There is no magnification happening.
-
     GLuint texture_id = m_native_frames[frame_idx]->textureId();
     QSize texture_size = m_native_frame_size;
+
+    // For upscaling shaders we disable bilinear filtering,
+    // otherwise we risk reading interpolated texels in fragment
+    // shaders as we don't use pure integer texture coordinates.
+    set_min_mag_filter(texture_id, false);
 
     m_vertices.bind();
     m_indices.bind();
@@ -268,6 +268,8 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
 
     m_post_processor.last().m_buffer->release();
     m_post_processor.last().m_buffer = nullptr;
+
+    set_min_mag_filter(texture_id, m_bilinear_filter);
 }
 
 
@@ -377,6 +379,7 @@ QList<QSharedPointer<QOpenGLFramebufferObject>> age::qt_video_post_processor::cr
         {
             break;
         }
+        set_min_mag_filter(buffer->texture(), false);
         set_wrap_mode(buffer->texture());
         frame_buffers.append(buffer);
     }
@@ -396,6 +399,7 @@ bool age::qt_video_post_processor::add_step(QList<processing_step> &post_process
     step.m_program = program;
     step.m_buffer = buffer;
 
+    set_min_mag_filter(buffer->texture(), false);
     set_wrap_mode(step.m_buffer->texture());
 
     LOG("create frame buffer object (" << step.m_buffer->width() << " x " << step.m_buffer->height() << ")");
