@@ -72,7 +72,6 @@
 uniform sampler2D texture;
 
 uniform vec2 u_texture_size;
-const vec2 c_pixel_center = vec2(0.5, 0.5);
 const float eq_threshold = 0.001;
 
 

@@ -20,12 +20,11 @@
 uniform sampler2D texture;
 
 uniform vec2 u_texture_size;
-const vec2 c_pixel_center = vec2(0.5, 0.5);
 
 
 void main()
 {
-    vec2 tex_coord = vec2(gl_FragCoord);// + c_pixel_center;
+    vec2 tex_coord = vec2(gl_FragCoord);
 
     vec2 tex_coord1 = tex_coord + vec2(0.0, -2.0);
     vec2 tex_coord2 = tex_coord + vec2(0.0, -1.0);
