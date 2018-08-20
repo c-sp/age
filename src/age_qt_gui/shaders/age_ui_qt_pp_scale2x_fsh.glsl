@@ -71,7 +71,7 @@
 
 uniform sampler2D texture;
 
-uniform vec2 u_texture_size;
+uniform vec2 u_inv_texture_size;
 const float eq_threshold = 0.001;
 
 
@@ -85,11 +85,11 @@ void main()
     vec2 tex_coord_f = tex_coord + vec2( 1.0,  0.0);
     vec2 tex_coord_h = tex_coord + vec2( 0.0, -1.0);
 
-    tex_coord_b /= u_texture_size;
-    tex_coord_d /= u_texture_size;
-    tex_coord_e /= u_texture_size;
-    tex_coord_f /= u_texture_size;
-    tex_coord_h /= u_texture_size;
+    tex_coord_b *= u_inv_texture_size;
+    tex_coord_d *= u_inv_texture_size;
+    tex_coord_e *= u_inv_texture_size;
+    tex_coord_f *= u_inv_texture_size;
+    tex_coord_h *= u_inv_texture_size;
 
     vec4 b = texture2D(texture, tex_coord_b);
     vec4 d = texture2D(texture, tex_coord_d);

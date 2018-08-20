@@ -262,7 +262,7 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
 
         // prepare shader program
         step.m_program->bind();
-        step.m_program->setUniformValue("u_texture_size", QVector2D(texture_size.width(), texture_size.height()));
+        step.m_program->setUniformValue("u_inv_texture_size", QVector2D(1.f / texture_size.width(), 1.f / texture_size.height()));
         qt_use_float_attribute_buffer(*step.m_program, "a_vertex", 0, 3);
 
         // post-process texture

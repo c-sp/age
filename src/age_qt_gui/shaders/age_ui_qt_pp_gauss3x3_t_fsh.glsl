@@ -19,7 +19,7 @@
 
 uniform sampler2D texture;
 
-uniform vec2 u_texture_size;
+uniform vec2 u_inv_texture_size;
 
 
 void main()
@@ -30,9 +30,9 @@ void main()
     vec2 tex_coord2 = tex_coord;
     vec2 tex_coord3 = tex_coord + vec2(0.0,  1.0);
 
-    tex_coord1 /= u_texture_size;
-    tex_coord2 /= u_texture_size;
-    tex_coord3 /= u_texture_size;
+    tex_coord1 *= u_inv_texture_size;
+    tex_coord2 *= u_inv_texture_size;
+    tex_coord3 *= u_inv_texture_size;
 
     vec4 c1 = texture2D(texture, tex_coord1) * 0.27901;
     vec4 c2 = texture2D(texture, tex_coord2) * 0.44198;
