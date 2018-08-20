@@ -100,7 +100,7 @@ private:
         QSharedPointer<QOpenGLFramebufferObject> m_buffer;
     };
 
-    void set_min_mag_filter(GLuint texture_id, bool bilinear);
+    void set_min_mag_filter(GLuint texture_id, bool min_linear, bool mag_linear);
     void set_wrap_mode(GLuint texture_id);
 
     bool post_process_frames() const;

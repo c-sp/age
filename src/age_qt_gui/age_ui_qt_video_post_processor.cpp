@@ -59,7 +59,8 @@ age::qt_video_post_processor::qt_video_post_processor()
     // vertex buffer
     // (we can already transform the vertices since the projection matrix is never modified)
     QMatrix4x4 projection;
-    projection.ortho(QRectF(0, 0, 1, 1));
+    // projection.ortho(QRectF(0, 1, 1, 1));
+    projection.ortho(0, 1, 0, 1, -1, 1);
 
     QVector3D vertices[] = {
         projection.map(QVector3D(0, 0, 0)),
@@ -110,7 +111,7 @@ void age::qt_video_post_processor::set_native_frame_size(const QSize &size)
         frame->setSize(m_native_frame_size.width(), m_native_frame_size.height());
         frame->allocateStorage(tx_pixel_format, tx_pixel_type);
 
-        set_min_mag_filter(frame->textureId(), m_bilinear_filter);
+        set_min_mag_filter(frame->textureId(), true, m_bilinear_filter);
         set_wrap_mode(frame->textureId());
 
         m_native_frames.append(frame);
@@ -127,13 +128,13 @@ void age::qt_video_post_processor::set_texture_filter(bool bilinear_filter)
     // set min/mag filter for native frames
     for (int i = 0; i < m_native_frames.size(); ++i)
     {
-        set_min_mag_filter(m_native_frames[i]->textureId(), m_bilinear_filter);
+        set_min_mag_filter(m_native_frames[i]->textureId(), true, m_bilinear_filter);
     }
 
     // set min/mag filter for post-processed frames
     for (int i = 0; i < m_processed_frames.size(); ++i)
     {
-        set_min_mag_filter(m_processed_frames[i]->texture(), m_bilinear_filter);
+        set_min_mag_filter(m_processed_frames[i]->texture(), true, m_bilinear_filter);
     }
 }
 
@@ -197,15 +198,15 @@ QList<GLuint> age::qt_video_post_processor::get_frame_textures(int last_N_frames
 //
 //---------------------------------------------------------
 
-void age::qt_video_post_processor::set_min_mag_filter(GLuint texture_id, bool bilinear)
+void age::qt_video_post_processor::set_min_mag_filter(GLuint texture_id, bool min_linear, bool mag_linear)
 {
     // This should be the only method for setting min/mag filters on
     // QOpenGLTexture and QOpenGLFramebufferObject instances.
     // However, since QOpenGLFramebufferObject does not expose any methods
     // for setting these filters we use pure OpenGL functions instead.
 
-    auto min_filter = GL_LINEAR; // always use linear filter for rendering downscaled texture
-    auto mag_filter = bilinear ? GL_LINEAR : GL_NEAREST;
+    auto min_filter = min_linear ? GL_LINEAR : GL_NEAREST;
+    auto mag_filter = mag_linear ? GL_LINEAR : GL_NEAREST;
 
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
@@ -245,7 +246,7 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     // For upscaling shaders we disable bilinear filtering,
     // otherwise we risk reading interpolated texels in fragment
     // shaders as we don't use pure integer texture coordinates.
-    set_min_mag_filter(texture_id, false);
+    set_min_mag_filter(texture_id, false, false);
 
     m_vertices.bind();
     m_indices.bind();
@@ -277,7 +278,7 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     m_post_processor.last().m_buffer->release();
     m_post_processor.last().m_buffer = nullptr;
 
-    set_min_mag_filter(texture_id, m_bilinear_filter);
+    set_min_mag_filter(texture_id, true, m_bilinear_filter);
 
     glViewport(saved_viewport[0], saved_viewport[1], saved_viewport[2], saved_viewport[3]);
 }
@@ -389,7 +390,7 @@ QList<QSharedPointer<QOpenGLFramebufferObject>> age::qt_video_post_processor::cr
         {
             break;
         }
-        set_min_mag_filter(buffer->texture(), false);
+        set_min_mag_filter(buffer->texture(), true, m_bilinear_filter);
         set_wrap_mode(buffer->texture());
         frame_buffers.append(buffer);
     }
@@ -409,7 +410,7 @@ bool age::qt_video_post_processor::add_step(QList<processing_step> &post_process
     step.m_program = program;
     step.m_buffer = buffer;
 
-    set_min_mag_filter(buffer->texture(), false);
+    set_min_mag_filter(buffer->texture(), false, false);
     set_wrap_mode(step.m_buffer->texture());
 
     LOG("create frame buffer object (" << step.m_buffer->width() << " x " << step.m_buffer->height() << ")");
