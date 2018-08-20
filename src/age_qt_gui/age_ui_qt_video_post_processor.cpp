@@ -17,7 +17,13 @@
 #include "age_ui_qt_video.hpp"
 
 #if 1
+
 #define LOG(x) AGE_LOG(x)
+#if 1
+#define BENCHMARK_POST_PROCESSING
+#include <QElapsedTimer>
+#endif
+
 #else
 #define LOG(x)
 #endif
@@ -253,6 +259,11 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
 
     m_post_processor.last().m_buffer = m_processed_frames[frame_idx];
 
+#ifdef BENCHMARK_POST_PROCESSING
+    QElapsedTimer timer;
+    timer.start();
+#endif
+
     for (int i = 0; i < m_post_processor.size(); ++i)
     {
         processing_step &step = m_post_processor[i];
@@ -274,6 +285,14 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
         texture_id = step.m_buffer->texture();
         texture_size = step.m_buffer->size();
     }
+
+#ifdef BENCHMARK_POST_PROCESSING
+    static qint64 nsecs_total = 0;
+    static qint64 count = 0;
+    nsecs_total += timer.nsecsElapsed();
+    ++count;
+    LOG("post processing: " << (nsecs_total / count) << " nsecs avg (#" << count << ")");
+#endif
 
     m_post_processor.last().m_buffer->release();
     m_post_processor.last().m_buffer = nullptr;

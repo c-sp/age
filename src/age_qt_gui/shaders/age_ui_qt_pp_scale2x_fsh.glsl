@@ -72,11 +72,52 @@
 uniform sampler2D texture;
 
 uniform vec2 u_inv_texture_size;
-const float eq_threshold = 0.001;
+
+const float eq_threshold = 0.01;
+const float eq_threshold2 = 2.0 * eq_threshold;
+const vec3 eq_threshold_vec3 = vec3(eq_threshold);
 
 
 void main()
 {
+    vec2 tex_coord = vec2(gl_FragCoord) * 0.5;
+    vec2 tex_coord_e = tex_coord * u_inv_texture_size;
+
+    // Calculate a texture coordinate offset for reading
+    // adjacent texels depending on which "part" of the
+    // E texel we currently calculate.
+    // Prevent calling sign(0) by subtracing 0.4 instead of 0.5.
+    vec3 offset = vec3(sign(fract(tex_coord) - vec2(0.4, 0.4)) * u_inv_texture_size, 0.0);
+
+    // read the E texel
+    vec4 e = texture2D(texture, tex_coord_e);
+    // read the to E_n horizontally adjacent texel: either D or F
+    vec4 adj_horz = texture2D(texture, tex_coord_e + offset.xz);
+    // read the to E_n vertically adjacent texel: either H or B
+    vec4 adj_vert = texture2D(texture, tex_coord_e + offset.zy);
+
+    vec3 replace_e_check = vec3(
+                // for E2: D == H
+                eq_threshold2 - distance(adj_horz, adj_vert),
+                // for E2: D != F
+                distance(adj_horz, texture2D(texture, tex_coord_e - offset.xz)),
+                // for E2: H != B
+                distance(adj_vert, texture2D(texture, tex_coord_e - offset.zy))
+                );
+
+    bool replace_e = all(greaterThan(replace_e_check, eq_threshold_vec3));
+
+    vec4 color = replace_e ? mix(adj_horz, adj_vert, 0.5) : e;
+
+    gl_FragColor = color;
+}
+
+
+
+/*
+    old, slightly slower code
+    -------------------------
+
     vec2 tex_coord = vec2(gl_FragCoord) * 0.5;
 
     vec2 tex_coord_b = tex_coord + vec2( 0.0,  1.0);
@@ -109,4 +150,4 @@ void main()
     vec4 color = (df_eq_hb && b_neq_h && d_neq_f) ? mix(df, hb, 0.5) : e;
 
     gl_FragColor = color;
-}
+*/
