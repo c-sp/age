@@ -358,7 +358,7 @@ void age::qt_video_post_processor::create_post_processor()
                 break;
 
             default:
-                assert(false);
+                AGE_ASSERT(false);
                 break;
         }
 
