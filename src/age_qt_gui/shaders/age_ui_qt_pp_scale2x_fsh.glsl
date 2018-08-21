@@ -49,8 +49,8 @@
   +----+----+
 
 
-  Scaling logic
-  ~~~~~~~~~~~~~
+  Scaling algorithm
+  ~~~~~~~~~~~~~~~~~
 
   if (B != H && D != F)
   {

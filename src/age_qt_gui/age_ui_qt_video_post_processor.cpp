@@ -55,6 +55,7 @@ age::qt_video_post_processor::qt_video_post_processor()
     AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size);
 
     qt_init_shader_program(m_program_scale2x, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_scale2x_fsh.glsl");
+    qt_init_shader_program(m_program_scale2x_age, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_scale2x_age_fsh.glsl");
     qt_init_shader_program(m_program_gauss3x3_s, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_gauss3x3_s_fsh.glsl");
     qt_init_shader_program(m_program_gauss3x3_t, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_gauss3x3_t_fsh.glsl");
     qt_init_shader_program(m_program_gauss5x5_s, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_gauss5x5_s_fsh.glsl");
@@ -319,45 +320,45 @@ void age::qt_video_post_processor::create_post_processor()
     for (size_t i = 0; i < m_post_processing_filter.size(); ++i)
     {
         qt_filter filter = m_post_processing_filter[i];
+        result_frame_size *= get_qt_filter_factor(filter);
 
         bool step_added = false;
         switch (filter)
         {
             case qt_filter::scale2x:
-                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_scale2x, result_frame_size);
                 LOG("add scale2x: " << step_added);
                 break;
 
+            case qt_filter::age_scale2x:
+                step_added = add_step(post_processor, &m_program_scale2x_age, result_frame_size);
+                LOG("add scale2x-age: " << step_added);
+                break;
+
             case qt_filter::gauss3x3:
-                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_gauss3x3_s, result_frame_size)
-                        && add_step(post_processor, &m_program_gauss3x3_t, result_frame_size);
+                          && add_step(post_processor, &m_program_gauss3x3_t, result_frame_size);
                 LOG("add gauss3x3: " << step_added);
                 break;
 
             case qt_filter::gauss5x5:
-                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_gauss5x5_s, result_frame_size)
-                        && add_step(post_processor, &m_program_gauss5x5_t, result_frame_size);
+                          && add_step(post_processor, &m_program_gauss5x5_t, result_frame_size);
                 LOG("add gauss5x5: " << step_added);
                 break;
 
             case qt_filter::emboss3x3:
-                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_emboss3x3, result_frame_size);
                 LOG("add emboss3x3: " << step_added);
                 break;
 
             case qt_filter::emboss5x5:
-                result_frame_size *= get_qt_filter_factor(filter); //! \todo move outside of switch
                 step_added = add_step(post_processor, &m_program_emboss5x5, result_frame_size);
                 LOG("add emboss5x5: " << step_added);
                 break;
 
-            default: //! \todo remove
-                step_added = true;
-                LOG("ignore filter " << to_integral(filter));
+            default:
+                assert(false);
                 break;
         }
 

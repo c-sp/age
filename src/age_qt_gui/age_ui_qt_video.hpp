@@ -120,6 +120,7 @@ private:
     QList<QSharedPointer<QOpenGLFramebufferObject>> m_processed_frames;
     QList<processing_step> m_post_processor;
     QOpenGLShaderProgram m_program_scale2x;
+    QOpenGLShaderProgram m_program_scale2x_age;
     QOpenGLShaderProgram m_program_gauss3x3_s;
     QOpenGLShaderProgram m_program_gauss3x3_t;
     QOpenGLShaderProgram m_program_gauss5x5_s;
