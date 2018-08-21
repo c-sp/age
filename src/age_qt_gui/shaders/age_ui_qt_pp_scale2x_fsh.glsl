@@ -31,11 +31,11 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   +---+---+---+
-  |   | B |   |
+  | A | B | C |
   +---+---+---+
   | D | E | F |
   +---+---+---+
-  |   | H |   |
+  | G | H | I |
   +---+---+---+
 
 
@@ -73,6 +73,9 @@ uniform sampler2D texture;
 
 uniform vec2 u_inv_texture_size;
 
+// equality threshold:
+// if the distance between two texels is smaller than this
+// threshold we consider them equal
 const float eq_threshold = 0.01;
 const float eq_threshold2 = 2.0 * eq_threshold;
 const vec3 eq_threshold_vec3 = vec3(eq_threshold);
@@ -83,33 +86,44 @@ void main()
     vec2 tex_coord = vec2(gl_FragCoord) * 0.5;
     vec2 tex_coord_e = tex_coord * u_inv_texture_size;
 
-    // Calculate a texture coordinate offset for reading
-    // adjacent texels depending on which "part" of the
-    // E texel we currently calculate.
-    // Prevent calling sign(0) by subtracing 0.4 instead of 0.5.
-    vec3 offset = vec3(sign(fract(tex_coord) - vec2(0.4, 0.4)) * u_inv_texture_size, 0.0);
+    // Calculate the texture coordinate offset for reading
+    // adjacent texels depending on which "sub-texel" of
+    // E (E0, E1, ...) we are currently processing.
+    vec3 offset = vec3(
+                // subtract 0.4 to prevent sign(0)
+                u_inv_texture_size * sign(fract(tex_coord) - vec2(0.4, 0.4)),
+                0.0
+                );
 
-    // read the E texel
+    // read E
     vec4 e = texture2D(texture, tex_coord_e);
     // read the to E_n horizontally adjacent texel: either D or F
     vec4 adj_horz = texture2D(texture, tex_coord_e + offset.xz);
-    // read the to E_n vertically adjacent texel: either H or B
-    vec4 adj_vert = texture2D(texture, tex_coord_e + offset.zy);
 
-    vec3 replace_e_check = vec3(
-                // for E2: D == H
-                eq_threshold2 - distance(adj_horz, adj_vert),
-                // for E2: D != F
-                distance(adj_horz, texture2D(texture, tex_coord_e - offset.xz)),
-                // for E2: H != B
-                distance(adj_vert, texture2D(texture, tex_coord_e - offset.zy))
-                );
+    // if E matches it's adjacent texel we can skip any
+    // further processing as the result will always be E
+    if (distance(e, adj_horz) > eq_threshold)
+    {
+        // read the to E_n vertically adjacent texel: either H or B
+        vec4 adj_vert = texture2D(texture, tex_coord_e + offset.zy);
 
-    bool replace_e = all(greaterThan(replace_e_check, eq_threshold_vec3));
+        vec3 replace_e_vec = vec3(
+                    // for E2 this would be: D == H
+                    eq_threshold2 - distance(adj_horz, adj_vert),
+                    // D != F (or F != D)
+                    distance(adj_horz, texture2D(texture, tex_coord_e - offset.xz)),
+                    // H != B (or B != H)
+                    distance(adj_vert, texture2D(texture, tex_coord_e - offset.zy))
+                    );
 
-    vec4 color = replace_e ? mix(adj_horz, adj_vert, 0.5) : e;
+        bool replace_e = all(greaterThan(replace_e_vec, eq_threshold_vec3));
+        if (replace_e)
+        {
+            e = mix(adj_horz, adj_vert, 0.5);
+        }
+    }
 
-    gl_FragColor = color;
+    gl_FragColor = e;
 }
 
 
