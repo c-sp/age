@@ -52,7 +52,7 @@ const license_header = `
 /**
  * extensions of the files that should include a license header
  */
-const file_extensions = ['.hpp', '.cpp', '.ts', '.js'];
+const file_extensions = ['.hpp', '.cpp', '.ts', '.js', '.glsl'];
 
 /**
  * names of the files to ignore

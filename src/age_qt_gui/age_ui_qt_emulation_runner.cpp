@@ -34,11 +34,10 @@
 //
 //---------------------------------------------------------
 
-age::qt_emulation_runner::qt_emulation_runner(qt_gl_renderer &renderer, int emulation_interval_milliseconds)
+age::qt_emulation_runner::qt_emulation_runner(int emulation_interval_milliseconds)
     : QObject(),
       m_emulation_interval_milliseconds(emulation_interval_milliseconds),
-      m_emulation_interval_nanos(static_cast<uint64>(m_emulation_interval_milliseconds * 1000000)),
-      m_renderer(renderer)
+      m_emulation_interval_nanos(static_cast<uint64>(m_emulation_interval_milliseconds * 1000000))
 {
     AGE_ASSERT(m_emulation_interval_milliseconds > 0);
 
@@ -111,7 +110,6 @@ void age::qt_emulation_runner::set_emulator(std::shared_ptr<qt_emulator> new_emu
     m_speed_percent = 0;
     m_emulation_timer_cycles = 0;
 
-    m_renderer.set_emulator_screen_size(emu->get_screen_width(), emu->get_screen_height());
     m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
 
     m_last_timer_nanos = m_timer.nsecsElapsed();
@@ -291,7 +289,9 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
     // update video & audio
     if (new_frame)
     {
-        m_renderer.add_video_frame(emu->get_screen_front_buffer());
+        // copy screen buffer since the emulator will overwrite it eventually
+        std::shared_ptr<age::pixel_vector> screen = std::make_shared<pixel_vector>(emu->get_screen_front_buffer());
+        emit emulator_screen_updated(screen);
     }
     m_audio_output.buffer_samples(emu->get_audio_buffer());
 

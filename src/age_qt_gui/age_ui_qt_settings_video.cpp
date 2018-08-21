@@ -72,10 +72,9 @@ constexpr const char *qt_filter_name_emboss5x5 = "strong emboss";
 //
 //---------------------------------------------------------
 
-age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, GLint max_texture_size, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
-      m_user_value_store(user_value_store),
-      m_max_texture_size(max_texture_size)
+      m_user_value_store(user_value_store)
 {
     // frame filtering
 
@@ -108,10 +107,6 @@ age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> u
 
     // filter chain buttons
 
-    QString max_tex_size = QString::number(max_texture_size);
-    QLabel *max_frame_size = new QLabel(QString("maximal frame size:\n") + max_tex_size + " x " + max_tex_size);
-    max_frame_size->setAlignment(Qt::AlignCenter);
-
     QPushButton *add_scale2x = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x));
     QPushButton *add_age_scale2x = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::age_scale2x));
     QPushButton *add_weak_blur = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss3x3));
@@ -135,8 +130,6 @@ age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> u
     filter_chain_buttons_layout->addSpacing(qt_settings_element_spacing);
     filter_chain_buttons_layout->addWidget(add_weak_emboss);
     filter_chain_buttons_layout->addWidget(add_strong_emboss);
-    filter_chain_buttons_layout->addSpacing(qt_settings_element_spacing);
-    filter_chain_buttons_layout->addWidget(max_frame_size);
     filter_chain_buttons_layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
     // filter chain

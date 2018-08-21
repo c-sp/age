@@ -59,7 +59,7 @@ age::qt_emulator::qt_emulator(const QByteArray &rom_contents, gb_hardware hardwa
             std::stringstream ram_id;
             ram_id << gb_emu->get_emulator_title() << "_";
             ram_id << std::hex << hash(rom) << ".ram";
-            m_ram_key = {ram_id.str().c_str()};
+            m_ram_key = ram_id.str().c_str();
         }
         LOG("persistent ram key is " << std::quoted(m_ram_key.toStdString()));
 
@@ -143,8 +143,11 @@ age::uint8_vector age::qt_emulator::to_vector(const QByteArray &byte_array)
     // this looks redundant, but I don't see any other way
     // to convert a QByteArray to an std::vector ...
 
+    int size = byte_array.size();
+    AGE_ASSERT(size >= 0);
+
     uint8_vector result;
-    result.resize(byte_array.size());
+    result.resize(static_cast<size_t>(size));
     std::copy(byte_array.constData(), byte_array.constData() + byte_array.size(), begin(result));
 
     return result;

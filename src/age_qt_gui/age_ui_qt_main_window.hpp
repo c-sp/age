@@ -37,6 +37,7 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
+#include "age_ui_qt_video.hpp"
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulation_runner.hpp"
 #include "age_ui_qt_emulator.hpp"
@@ -52,14 +53,13 @@ class qt_main_window : public QMainWindow, non_copyable
     Q_OBJECT
 public:
 
-    qt_main_window(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-    ~qt_main_window();
-
-    void start();
+    qt_main_window(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+    ~qt_main_window() override;
 
 signals:
 
     void emulator_loaded(std::shared_ptr<age::qt_emulator> new_emulator);
+    void emulator_screen_resize(uint width, uint height);
     void emulator_button_down(uint button);
     void emulator_button_up(uint button);
 
@@ -87,7 +87,7 @@ private:
     QAction *m_action_exit = nullptr;
 
     qt_settings_dialog *m_settings = nullptr;
-    qt_gl_renderer *m_renderer = nullptr;
+    qt_video_output *m_video_output = nullptr;
 
     QLabel *m_emulated_time_label = nullptr;
     QLabel *m_speed_label = nullptr;
@@ -97,10 +97,6 @@ private:
     QThread m_emulation_runner_thread;
 
 private slots:
-
-    void video_use_bilinear_filter_changed(bool use);
-    void video_frames_to_blend_changed(uint frames_to_blend);
-    void video_filter_chain_changed(qt_filter_vector filter_chain);
 
     void misc_show_menu_bar_changed(bool show_menu_bar);
     void misc_show_status_bar_changed(bool show_status_bar);

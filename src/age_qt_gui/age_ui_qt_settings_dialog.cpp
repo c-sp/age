@@ -32,7 +32,7 @@ constexpr const char *qt_settings_open_file_directory = "open_file_directory";
 //
 //---------------------------------------------------------
 
-age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, GLint max_texture_size, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags),
       m_user_value_store(user_value_store)
 {
@@ -40,7 +40,7 @@ age::qt_settings_dialog::qt_settings_dialog(std::shared_ptr<qt_user_value_store>
 
     // create tab widget
 
-    m_settings_video = new qt_settings_video(m_user_value_store, max_texture_size);
+    m_settings_video = new qt_settings_video(m_user_value_store);
     m_settings_audio = new qt_settings_audio(m_user_value_store);
     m_settings_keys = new qt_settings_keys(m_user_value_store);
     m_settings_miscellaneous = new qt_settings_miscellaneous(m_user_value_store);
@@ -113,11 +113,6 @@ bool age::qt_settings_dialog::show_status_bar(bool fullscreen) const
 void age::qt_settings_dialog::set_open_file_dialog_directory(const QString &directory)
 {
     m_user_value_store->set_value(qt_settings_open_file_directory, directory);
-}
-
-void age::qt_settings_dialog::set_emulator_screen_size(GLint width, GLint height)
-{
-    m_settings_video->set_emulator_screen_size(width, height);
 }
 
 void age::qt_settings_dialog::set_pause_emulator(bool pause_emulator)
@@ -193,6 +188,11 @@ void age::qt_settings_dialog::emit_settings_signals()
 void age::qt_settings_dialog::audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size)
 {
     m_settings_audio->set_active_audio_output(device, format, buffer_size, downsampler_fir_size);
+}
+
+void age::qt_settings_dialog::set_emulator_screen_size(uint width, uint height)
+{
+    m_settings_video->set_emulator_screen_size(width, height);
 }
 
 

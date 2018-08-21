@@ -330,7 +330,10 @@ age::uint age::qt_audio_output::write_samples()
             qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_sample);
 
             // calculate the number of samples that were written
-            samples_written = bytes_written / sizeof_pcm_sample;
+            qint64 tmp = bytes_written / sizeof_pcm_sample;
+            AGE_ASSERT((tmp >= 0) && (tmp <= uint_max));
+            samples_written = static_cast<uint>(tmp);
+
             m_buffer.discard_buffered_samples(samples_written);
         }
     }
