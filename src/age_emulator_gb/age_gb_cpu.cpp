@@ -217,7 +217,9 @@ constexpr uint gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     INC_CYCLES; \
     RET \
     } \
+    else { \
     INC_CYCLES; \
+    } \
     }
 
 // JR (12 cycles)
