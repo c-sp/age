@@ -93,7 +93,10 @@ void age::test_application::schedule_tests()
             switch(m_type)
             {
                 case test_type::blargg_test:
-                    // not yet implemented
+                    method = blargg_dmg_test(file, result_file);
+                    scheduled += schedule_test(file, method, result_file);
+                    method = blargg_cgb_test(file, result_file);
+                    scheduled += schedule_test(file, method, result_file);
                     break;
 
                 case test_type::mooneye_test:

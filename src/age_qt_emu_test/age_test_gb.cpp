@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+#include <algorithm> // std::min
 #include <memory> // std::shared_ptr
 
 #include <QImage>
@@ -34,70 +35,28 @@ age::test_result age::create_gb_test_result(const gb_emulator &emulator, const Q
 
 
 
-//---------------------------------------------------------
-//
-//   mooneye test
-//
-//---------------------------------------------------------
-
-age::test_method age::mooneye_test_method(const QString &file_name)
+void age::gb_emulate(gb_emulator &emulator, uint64 cycles_to_emulate)
 {
-    // this method is based on mooneye-gb/src/acceptance_tests/fixture.rs
-    return [=](const uint8_vector &test_rom, const uint8_vector&) {
+    uint64 cycles_per_second = emulator.get_cycles_per_second();
 
-        // CGB mooneye-gb test roms can only be identified by their file name (as far a I know)
-        age::gb_hardware hardware = age::gb_hardware::dmg;
+    while (cycles_to_emulate > 0)
+    {
+        uint64 cycles = std::min(cycles_to_emulate, cycles_per_second);
+        emulator.emulate(cycles);
 
-        if (file_name.endsWith(".gb", Qt::CaseInsensitive)) {
-            QString no_extension = file_name.left(file_name.length() - 3);
-
-            if (no_extension.endsWith("-cgb", Qt::CaseInsensitive) || no_extension.endsWith("-c", Qt::CaseInsensitive)) {
-                hardware = age::gb_hardware::cgb;
-            }
-        }
-
-        // create emulator
-        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware);
-
-        // run the test
-        uint cycles_per_step = emulator->get_cycles_per_second() >> 8;
-        uint max_cycles = emulator->get_cycles_per_second() * 120;
-
-        for (uint cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
-        {
-            emulator->emulate(cycles_per_step);
-            // the test is finished when executing a specific instruction
-            if (emulator->get_test_info().m_mooneye_debug_op)
-            {
-                break;
-            }
-        }
-
-        // evaluate the test result
-        // (a passed test is signalled by a part of the Fibonacci Sequence)
-        gb_test_info info = emulator->get_test_info();
-        bool pass = (3 == info.m_b)
-                && (5 == info.m_c)
-                && (8 == info.m_d)
-                && (13 == info.m_e)
-                && (21 == info.m_h)
-                && (34 == info.m_l)
-                ;
-
-        // return an error message, if the test failed
-        return create_gb_test_result(*emulator, pass ? "" : "failed");
-    };
+        cycles_to_emulate -= cycles;
+    }
 }
 
 
 
 //---------------------------------------------------------
 //
-//   screenshot test
+//   screenshot-based test
 //
 //---------------------------------------------------------
 
-age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint millis_to_emulate)
+age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64 millis_to_emulate)
 {
     return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot) {
 
@@ -105,8 +64,8 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint m
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware, dmg_green);
 
-        uint cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
-        emulator->emulate(cycles_to_emulate);
+        uint64 cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
+        gb_emulate(*emulator, cycles_to_emulate);
 
         // load the screenshot image data
         QString error_message;

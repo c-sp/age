@@ -303,7 +303,7 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, hardware);
-        emulator->emulate(test_cycles(*emulator));
+        gb_emulate(*emulator, test_cycles(*emulator));
 
         // evaluate test result
         bool pass = evaluate_out_string_result(*emulator, out_string);
@@ -363,7 +363,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         // (see gambatte/test/testrunner.cpp)
         uint cycles_per_frame = gb_cycles_per_frame(*emulator);
 
-        emulator->emulate(test_cycles(*emulator));
+        gb_emulate(*emulator, test_cycles(*emulator));
 
         // evaluate test result by checking the first cycles_per_frame
         // pcm samples for equality
