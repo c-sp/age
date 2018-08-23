@@ -92,6 +92,10 @@ void age::test_application::schedule_tests()
 
             switch(m_type)
             {
+                case test_type::blargg_test:
+                    // not yet implemented
+                    break;
+
                 case test_type::mooneye_test:
                     method = mooneye_test_method(file);
                     scheduled += schedule_test(file, method);
@@ -102,10 +106,6 @@ void age::test_application::schedule_tests()
                     scheduled += schedule_test(file, method, result_file);
                     method = gambatte_cgb_test(file, result_file);
                     scheduled += schedule_test(file, method, result_file);
-                    break;
-
-                case test_type::screenshot_test:
-                    // not yet implemented
                     break;
             }
 

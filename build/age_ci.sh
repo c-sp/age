@@ -201,7 +201,7 @@ run_tests()
     fi
 
     # run the tests
-    ${TEST_EXEC} --type $1 --ignore-list "$BUILD_DIR/tests_to_ignore.txt" $2
+    ${TEST_EXEC} --ignore-list "$BUILD_DIR/tests_to_ignore.txt" $@
 }
 
 
