@@ -29,7 +29,22 @@ age::test_result age::create_gb_test_result(const gb_emulator &emulator, const Q
     age::test_result result;
     result.m_cycles_emulated = emulator.get_emulated_cycles();
     result.m_error_message = error_message;
-    result.m_additional_message = emulator.get_test_info().m_is_cgb ? "(CGB)" : "(DMG)";
+
+    switch (emulator.get_test_info().m_mode)
+    {
+        case gb_mode::dmg:
+            result.m_additional_message = "(DMG)";
+            break;
+
+        case gb_mode::dmg_on_cgb:
+            result.m_additional_message = "(DMG on CGB)";
+            break;
+
+        case gb_mode::cgb:
+            result.m_additional_message = "(CGB)";
+            break;
+    }
+
     return result;
 }
 

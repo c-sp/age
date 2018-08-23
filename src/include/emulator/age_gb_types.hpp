@@ -63,7 +63,7 @@ enum class gb_mode
 //!
 struct gb_test_info
 {
-    bool m_is_cgb;
+    gb_mode m_mode;
     bool m_mooneye_debug_op;
 
     uint8 m_a = 0;
