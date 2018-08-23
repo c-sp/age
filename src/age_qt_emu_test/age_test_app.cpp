@@ -344,7 +344,7 @@ void age::test_application::exit_app_on_finish()
         m_no_test_method_found.sort(Qt::CaseInsensitive);
 
         // print a test summary
-        //print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
+        print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
         print_list(number_of_tests_message("failed", m_fail_messages.size(), tests), m_fail_messages);
         print_list(number_of_tests_message("failed with unknown type", m_no_test_method_found.size(), tests), m_no_test_method_found);
 
