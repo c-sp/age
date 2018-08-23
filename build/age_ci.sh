@@ -21,6 +21,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_LINT"
     echo "    $0 $CMD_PAGES <gitlab-pages-subdir>"
     echo "  tests:"
+    echo "    $0 $CMD_TEST $TESTS_BLARGG <path-to-mooneye-tests>"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
     echo "    $0 $CMD_TEST $TESTS_MOONEYE <path-to-mooneye-tests>"
     echo "  miscellaneous:"
@@ -182,6 +183,7 @@ run_doxygen()
 run_tests()
 {
     case $1 in
+        ${TESTS_BLARGG}) ;;
         ${TESTS_GAMBATTE}) ;;
         ${TESTS_MOONEYE}) ;;
         *) print_usage_and_exit ;;
@@ -222,6 +224,7 @@ JS_BUILD=build
 JS_TEST=test
 JS_LINT=lint
 
+TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE=mooneye
 
