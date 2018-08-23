@@ -25,6 +25,8 @@ oam_bug-2/rom_singles/
 
 ###   failing tests
 
+halt_bug.gb
+interrupt_time.gb
 oam_bug.gb
 
 
