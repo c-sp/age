@@ -48,7 +48,7 @@ AGE code sticks to the following rules:
     Unrelated functionality must not be grouped together
     (i.e. in the same file).
 
-#### data types
+#### Data Types
 
 1. **Use `unsigned`** for [bit manipulation](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es101-use-unsigned-types-for-bit-manipulation).
 1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
@@ -60,8 +60,8 @@ AGE code sticks to the following rules:
     though).
 1. **Avoid `std::int_fast##_t`** since AGE is
     [not explicitly tested for that](https://stackoverflow.com/a/36161722).
-    Allocating memory for these types might trigger more memory to be allocated
-    than actually required
+    Additionally, allocating memory for these types might trigger more memory
+    to be allocated than actually required
     (which in turn might cause more processor cache misses).
 1. **Use fixed width integer types (`std::int##_t` and `std::uint##_t`).**
     Don't rely on the width of fundamental types (`int`, `long`, etc.)
@@ -73,7 +73,7 @@ AGE code uses `unsigned` only for:
 * code interacting with STL containers (e.g. `size_t std::vector::size()`
     or using `std::vector::operator[size_t]`)
 
-#### includes
+#### Includes
 
 1. **Use include guards** in every header file.
     Use the file's name converted to "screaming snake case" for it's include
