@@ -63,8 +63,6 @@ struct pixel
     uint32 m_a8b8g8r8;
 };
 
-constexpr uint sizeof_pixel = sizeof(pixel);
-
 typedef std::vector<pixel> pixel_vector;
 
 

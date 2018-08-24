@@ -104,10 +104,10 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
         }
 
         // check the screenshot depth
-        else if ((sizeof_pixel * 8) != image.depth())
+        else if ((sizeof(pixel) * 8) != image.depth())
         {
             QTextStream(&error_message)
-                    << "screen depth (" << (sizeof_pixel * 8)
+                    << "screen depth (" << (sizeof(pixel) * 8)
                     << " bits) does not match screenshot depth ("
                     << image.depth() << " bits)";
         }
