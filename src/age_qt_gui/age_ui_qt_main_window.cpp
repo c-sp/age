@@ -53,7 +53,7 @@
 age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
 {
-    setWindowTitle((std::string(project_name) + " " + project_version).c_str());
+    setWindowTitle(project_name);
     resize(500, 350);
 
     m_user_value_store = std::allocate_shared<qt_user_value_store>(std::allocator<qt_user_value_store>());

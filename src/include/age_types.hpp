@@ -24,7 +24,6 @@
 #include <array>
 #include <cstdint> // std::uint8_t etc.
 #include <limits> // std::numeric_limits
-#include <string>
 #include <type_traits> // std::underlying_type
 #include <vector>
 
@@ -54,16 +53,12 @@ template<uint _size>
 using uint8_array = std::array<uint8, _size>;
 
 typedef std::vector<uint8> uint8_vector;
-typedef std::vector<std::string> string_vector;
 
 
 
 // constants and constant expressions
 
-const uint8_vector empty_uint8_vector = uint8_vector();
-
 constexpr const char *project_name = "AGE";
-constexpr const char *project_version = "1.0";
 
 constexpr uint uint_max = std::numeric_limits<uint>::max();
 

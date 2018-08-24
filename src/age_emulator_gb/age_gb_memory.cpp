@@ -80,7 +80,7 @@ age::uint8_vector age::gb_memory::get_persistent_ram() const
     }
     else
     {
-        result = empty_uint8_vector;
+        result = uint8_vector();
     }
 
     LOG("returning persistent ram of size " << result.size());
