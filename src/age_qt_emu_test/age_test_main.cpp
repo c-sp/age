@@ -56,8 +56,8 @@ age::optional<age::test_type> parse_test_type(const QString &type_string)
 
 void prepare_parser(QCommandLineParser &parser)
 {
-    parser.setApplicationDescription(
-                "The AGE emulator test runner can execute Gameboy test roms"
+    parser.setApplicationDescription(QString("The ") + age::project_name +
+                " test runner can execute Gameboy test roms"
                 " and validate the test result."
                 );
 
@@ -132,7 +132,7 @@ age::test_type validate_arguments(const QCommandLineParser &parser)
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName("AGE emulator test runner");
+    QCoreApplication::setApplicationName(QString(age::project_name) + " test runner");
 
     // parse & validate arguments
     QCommandLineParser parser;
