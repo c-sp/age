@@ -48,6 +48,28 @@ AGE code sticks to the following rules:
     Unrelated functionality must not be grouped together
     (i.e. in the same file).
 
+#### data types
+
+1. **Use `unsigned`** for [bit manipulation](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es101-use-unsigned-types-for-bit-manipulation).
+1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
+1. **Use `signed`** until there is a very specific reason to not do so.
+    Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic)
+    and `signed` integer overflow being undefined
+    [enables several compiler optimizations](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
+    (`unsigned` overflow being well defined may prevent compiler optimizations
+    though).
+1. **Avoid `int_fast##_t`** since AGE is
+    [not explicitly tested for that](https://stackoverflow.com/a/36161722).
+    Allocating memory for these types might trigger more memory to be allocated
+    than actually required
+    (which in turn might cause more processor cache misses).
+
+AGE code uses `unsigned` only for:
+* values representing a piece of emulated hardware (e.g. Gameboy CPU registers
+    or Gameboy memory)
+* code interacting with STL containers (e.g. `size_t std::vector::size()`
+    or using `std::vector::operator[size_t]`)
+
 #### includes
 
 1. **Use include guards** in every header file.
