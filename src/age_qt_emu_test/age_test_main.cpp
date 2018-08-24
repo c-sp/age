@@ -20,8 +20,9 @@
 
 #include "age_test_app.hpp"
 
-constexpr const char *arg_type = "type";
 constexpr const char *arg_ignore_list = "ignore-list";
+constexpr const char *arg_test_type = "test-type";
+constexpr const char *arg_test_file = "test-file";
 
 
 
@@ -35,9 +36,9 @@ age::optional<age::test_type> parse_test_type(const QString &type_string)
 {
     age::optional<age::test_type> result;
 
-    if (type_string.compare("screenshot") == 0)
+    if (type_string.compare("blargg") == 0)
     {
-        result.set(age::test_type::screenshot_test);
+        result.set(age::test_type::blargg_test);
     }
     else if (type_string.compare("mooneye") == 0)
     {
@@ -61,19 +62,18 @@ void prepare_parser(QCommandLineParser &parser)
                 );
 
     parser.addPositionalArgument(
-                "test",
+                arg_test_type,
+                "The type of the specified test(s)."
+                " This must be one of: blargg, mooneye, gambatte."
+                );
+
+    parser.addPositionalArgument(
+                arg_test_file,
                 "The test file to run. This must be a runnable Gameboy rom file"
                 " or a directory to be searched for Gameboy rom files."
                 );
 
     parser.addOptions({{
-                           arg_type,
-                           "The type of the specified test(s)."
-                           " This must be one of: screenshot, mooneye, gambatte."
-                           " If not specified, the type 'screenshot' is used.",
-                           "test_type",
-                           "screenshot"
-                       },{
                            arg_ignore_list,
                            "A file containing names of test files to be ignored.",
                            "file"
@@ -84,28 +84,41 @@ void prepare_parser(QCommandLineParser &parser)
 
 
 
-void validate_arguments(QCommandLineParser &parser)
+void exit_with_failure(const QCommandLineParser &parser, const QString &error_message)
+{
+    fprintf(stderr, qPrintable(error_message));
+    fprintf(stderr, "\n");
+    fprintf(stdout, qPrintable(parser.helpText()));
+    ::exit(EXIT_FAILURE);
+}
+
+
+
+age::test_type validate_arguments(const QCommandLineParser &parser)
 {
     // if there is no positional argument available,
-    // the user did not specify the test(s) to execute
+    // the user did not specify the test-type
     if (parser.positionalArguments().size() < 1)
     {
-        fprintf(stderr, "no test specified\n");
-        ::exit(EXIT_FAILURE);
+        exit_with_failure(parser, QString("no ").append(arg_test_type).append(" specified"));
     }
 
-    // make sure the type (if specified) parameter can be parsed
-    QString type = parser.value(arg_type);
-    if (!type.isEmpty())
+    // parse the test-type
+    QString test_type_string = parser.positionalArguments().at(0);
+    age::optional<age::test_type> test_type = parse_test_type(test_type_string);
+    if (!test_type.is_set())
     {
-        age::optional<age::test_type> parsed_type = parse_test_type(type);
-
-        if (!parsed_type.is_set())
-        {
-            fprintf(stderr, "invalid test type: %s\n", qPrintable(type));
-            ::exit(EXIT_FAILURE);
-        }
+        exit_with_failure(parser, QString("invalid ").append(arg_test_type).append(" '").append(test_type_string).append("'"));
     }
+
+    // if there is only one positional argument available,
+    // the user did not specify the test(s) to execute
+    if (parser.positionalArguments().size() < 2)
+    {
+        exit_with_failure(parser, QString("no ").append(arg_test_file).append(" specified"));
+    }
+
+    return test_type.get(age::test_type::blargg_test); // the default is never used here
 }
 
 
@@ -126,13 +139,13 @@ int main(int argc, char *argv[])
     prepare_parser(parser);
     parser.process(app);
 
-    validate_arguments(parser);
+    age::test_type test_type = validate_arguments(parser);
 
     // create & connect test runner application
     age::test_application test_runner = {
-        parser.positionalArguments().at(0),
+        parser.positionalArguments().at(1),
         parser.value(arg_ignore_list),
-        parse_test_type(parser.value(arg_type)).get(age::test_type::screenshot_test)
+        test_type
     };
     QObject::connect(&app, SIGNAL(aboutToQuit()), &test_runner, SLOT(about_to_quit()));
 

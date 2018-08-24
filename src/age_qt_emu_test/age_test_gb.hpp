@@ -33,11 +33,26 @@
 namespace age
 {
 
-test_result create_gb_test_result(const gb_emulator &emulator, const QString &error_message);
+//!
+//! \brief Create a test_result from the specified gb_emulator and the (optional) error string.
+//!
+test_result create_gb_test_result(const gb_emulator &emulator, const QString &error_message = "");
+
+//!
+//! \brief perform several emulation iterations to not let the emulator's pcm_sample vector get too big
+//!
+void gb_emulate(gb_emulator &emulator, uint64 cycles_to_emulate);
+
+test_method screenshot_test_png(bool force_dmg, bool dmg_green, uint64 millis_to_emulate);
+
 
 test_method mooneye_test_method(const QString &file_name);
 
-test_method screenshot_test_png(bool force_dmg, bool dmg_green, uint millis_to_emulate);
+
+test_method blargg_dmg_test(const QString &file_name, QString &result_file_name);
+
+test_method blargg_cgb_test(const QString &file_name, QString &result_file_name);
+
 
 test_method gambatte_dmg_test(const QString &test_file_name, QString &result_file_name);
 

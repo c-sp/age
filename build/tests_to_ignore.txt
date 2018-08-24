@@ -1,6 +1,38 @@
 
 ##################################################################
 ###
+###   blargg
+###
+##################################################################
+
+
+###   outdated tests
+###   (we run the "-2" test instead)
+
+dmg_sound/
+mem_timing/
+oam_bug/
+
+
+###   single-test roms
+
+cgb_sound/rom_singles/
+cpu_instrs/individual/
+dmg_sound-2/rom_singles/
+mem_timing-2/rom_singles/
+oam_bug-2/rom_singles/
+
+
+###   failing tests
+
+halt_bug.gb
+interrupt_time.gb
+oam_bug.gb
+
+
+
+##################################################################
+###
 ###   mooneye-gb
 ###
 ##################################################################

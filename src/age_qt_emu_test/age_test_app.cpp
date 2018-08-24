@@ -92,6 +92,13 @@ void age::test_application::schedule_tests()
 
             switch(m_type)
             {
+                case test_type::blargg_test:
+                    method = blargg_dmg_test(file, result_file);
+                    scheduled += schedule_test(file, method, result_file);
+                    method = blargg_cgb_test(file, result_file);
+                    scheduled += schedule_test(file, method, result_file);
+                    break;
+
                 case test_type::mooneye_test:
                     method = mooneye_test_method(file);
                     scheduled += schedule_test(file, method);
@@ -102,10 +109,6 @@ void age::test_application::schedule_tests()
                     scheduled += schedule_test(file, method, result_file);
                     method = gambatte_cgb_test(file, result_file);
                     scheduled += schedule_test(file, method, result_file);
-                    break;
-
-                case test_type::screenshot_test:
-                    // not yet implemented
                     break;
             }
 
@@ -341,7 +344,7 @@ void age::test_application::exit_app_on_finish()
         m_no_test_method_found.sort(Qt::CaseInsensitive);
 
         // print a test summary
-        //print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
+        print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
         print_list(number_of_tests_message("failed", m_fail_messages.size(), tests), m_fail_messages);
         print_list(number_of_tests_message("failed with unknown type", m_no_test_method_found.size(), tests), m_no_test_method_found);
 

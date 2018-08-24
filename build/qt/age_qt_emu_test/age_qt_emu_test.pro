@@ -20,7 +20,9 @@ SOURCES += \
     ../../../src/age_qt_emu_test/age_test_app.cpp \
     ../../../src/age_qt_emu_test/age_test_app_utils.cpp \
     ../../../src/age_qt_emu_test/age_test_gb.cpp \
+    ../../../src/age_qt_emu_test/age_test_gb_blargg.cpp \
     ../../../src/age_qt_emu_test/age_test_gb_gambatte.cpp \
+    ../../../src/age_qt_emu_test/age_test_gb_mooneye.cpp \
     ../../../src/age_qt_emu_test/age_test_main.cpp
 
 HEADERS += \

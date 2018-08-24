@@ -217,7 +217,9 @@ constexpr uint gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     INC_CYCLES; \
     RET \
     } \
+    else { \
     INC_CYCLES; \
+    } \
     }
 
 // JR (12 cycles)
@@ -722,7 +724,7 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 {
     gb_test_info result;
 
-    result.m_is_cgb = m_core.is_cgb();
+    result.m_mode = m_core.get_mode();
     result.m_mooneye_debug_op = m_mooneye_debug_op;
 
     result.m_a = m_a;

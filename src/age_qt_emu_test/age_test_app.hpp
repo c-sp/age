@@ -45,7 +45,7 @@ namespace age
 
 enum class test_type : int
 {
-    screenshot_test, // this is the default
+    blargg_test,
     mooneye_test,
     gambatte_test
 };
