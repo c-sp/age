@@ -31,8 +31,7 @@
 
 namespace age {
 
-// typedefs
-
+//! \todo remove these old typedefs
 typedef std::uint8_t  uint8;
 typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
@@ -47,12 +46,30 @@ typedef std::int64_t int64;
 //! Defines an unsigned integer type that matches the architecture's default CPU register
 //! size (32 bits or 64 bits) but is guaranteed to be at least 32 bits wide.
 //!
+//! \todo remove uint
 typedef size_t uint;
 
-template<uint _size>
-using uint8_array = std::array<uint8, _size>;
+//! \todo remove uint_max
+constexpr uint uint_max = std::numeric_limits<uint>::max();
 
-typedef std::vector<uint8> uint8_vector;
+
+
+// typedefs
+// (define the STL integer types as part of the age namespace for less verbose code)
+
+typedef std::uint8_t  uint8_t;
+typedef std::uint16_t uint16_t;
+typedef std::uint32_t uint32_t;
+typedef std::uint64_t uint64_t;
+
+typedef std::int8_t  int8_t;
+typedef std::int16_t int16_t;
+typedef std::int32_t int32_t;
+typedef std::int64_t int64_t;
+
+template<std::size_t _size> using uint8_array = std::array<uint8_t, _size>;
+
+typedef std::vector<uint8_t> uint8_vector;
 
 
 
@@ -60,10 +77,8 @@ typedef std::vector<uint8> uint8_vector;
 
 constexpr const char *project_name = "AGE";
 
-constexpr uint uint_max = std::numeric_limits<uint>::max();
-
 //!
-//! Convert the specified enum value to the corresponding value of the underlying type.
+//! Convert the specified enum value to the associated value of the underlying type.
 //!
 template<typename E>
 constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type
