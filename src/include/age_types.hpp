@@ -67,7 +67,9 @@ typedef std::int16_t int16_t;
 typedef std::int32_t int32_t;
 typedef std::int64_t int64_t;
 
-template<std::size_t _size> using uint8_array = std::array<uint8_t, _size>;
+typedef std::size_t size_t;
+
+template<size_t _size> using uint8_array = std::array<uint8_t, _size>;
 
 typedef std::vector<uint8_t> uint8_vector;
 

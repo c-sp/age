@@ -128,7 +128,7 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
                     QTextStream(&error_message)
                             << "screen and screenshot differ at position ("
                             << x << ',' << y << ')'
-                            << ": expected 0x" << hex << screenshot->m_a8b8g8r8 << ", found 0x" << screen->m_a8b8g8r8;
+                            << ": expected 0x" << hex << screenshot->m_color << ", found 0x" << screen->m_color;
                     break;
                 }
                 ++screen;

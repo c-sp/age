@@ -58,11 +58,14 @@ AGE code sticks to the following rules:
     [enables several compiler optimizations](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
     (`unsigned` overflow being well defined may prevent compiler optimizations
     though).
-1. **Avoid `int_fast##_t`** since AGE is
+1. **Avoid `std::int_fast##_t`** since AGE is
     [not explicitly tested for that](https://stackoverflow.com/a/36161722).
     Allocating memory for these types might trigger more memory to be allocated
     than actually required
     (which in turn might cause more processor cache misses).
+1. **Use fixed width integer types (`std::int##_t` and `std::uint##_t`).**
+    Don't rely on the width of fundamental types (`int`, `long`, etc.)
+    as they [vary depending on the data model](https://en.cppreference.com/w/cpp/language/types).
 
 AGE code uses `unsigned` only for:
 * values representing a piece of emulated hardware (e.g. Gameboy CPU registers

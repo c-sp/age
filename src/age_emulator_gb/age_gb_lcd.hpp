@@ -199,7 +199,7 @@ public:
     uint8* get_oam();
 
     void create_classic_palette(uint index, uint8 colors);
-    void update_color(uint index, uint8 high_byte, uint8 low_byte);
+    void update_color(size_t index, uint8_t high_byte, uint8_t low_byte);
     void white_screen(pixel_vector &screen);
     void write_late_wy();
     void search_sprites();
@@ -408,7 +408,7 @@ private:
     void next_step(uint cycle_offset, std::function<void(gb_lcd&)> next_method);
     void switch_frames();
 
-    void update_color(uint index);
+    void update_color(size_t index);
     bool is_cgb_palette_accessible() const;
 
     // LCD mode emulation

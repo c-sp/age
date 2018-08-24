@@ -904,10 +904,10 @@ void age::gb_lcd::write_ocpd(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_lcd::update_color(uint index)
+void age::gb_lcd::update_color(size_t index)
 {
-    uint16 low_byte = m_palette[index * 2];
-    uint16 high_byte = m_palette[index * 2 + 1];
+    uint8_t low_byte = m_palette[index * 2];
+    uint8_t high_byte = m_palette[index * 2 + 1];
     gb_lcd_ppu::update_color(index, high_byte, low_byte);
 }
 

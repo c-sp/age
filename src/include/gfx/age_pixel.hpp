@@ -38,29 +38,38 @@ struct pixel
         : pixel(0, 0, 0)
     {}
 
-    pixel(uint r, uint g, uint b)
-        : pixel(0xFF000000 + (b << 16) + (g << 8) + r)
+    pixel(int32_t r, int32_t g, int32_t b)
     {
+        AGE_ASSERT(r >= 0);
+        AGE_ASSERT(g >= 0);
+        AGE_ASSERT(b >= 0);
         AGE_ASSERT(r <= 255);
         AGE_ASSERT(g <= 255);
         AGE_ASSERT(b <= 255);
-    }
 
-    pixel(uint32 x8r8g8b8)
-        : m_a8b8g8r8(x8r8g8b8)
-    {}
+        m_rgba[0] = r & 0xFF;
+        m_rgba[1] = g & 0xFF;
+        m_rgba[2] = b & 0xFF;
+        m_rgba[3] = 0xFF;
+    }
 
     bool operator==(const pixel &other) const
     {
-        return m_a8b8g8r8 == other.m_a8b8g8r8;
+        return m_color == other.m_color;
     }
 
     bool operator!=(const pixel &other) const
     {
-        return m_a8b8g8r8 != other.m_a8b8g8r8;
+        return m_color != other.m_color;
     }
 
-    uint32 m_a8b8g8r8;
+    // We use byte-level access to be independent of byte ordering
+    // and 32 bit integer access to speed up operations like comparison.
+    union
+    {
+        uint8_t m_rgba[4];
+        uint32_t m_color;
+    };
 };
 
 typedef std::vector<pixel> pixel_vector;

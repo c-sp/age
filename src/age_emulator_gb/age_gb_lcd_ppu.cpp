@@ -193,23 +193,26 @@ void age::gb_lcd_ppu::create_classic_palette(uint index, uint8 colors)
     }
 }
 
-void age::gb_lcd_ppu::update_color(uint index, uint8 high_byte, uint8 low_byte)
+void age::gb_lcd_ppu::update_color(size_t index, uint8_t high_byte, uint8_t low_byte)
 {
     AGE_ASSERT(m_cgb && (index < 64));
 
-    uint16 gb_color = low_byte + (high_byte << 8);
+    // make sure we have at least 32 bits available,
+    // don't rely on integral promotion to int (high_byte << 8)
+    int32_t gb_color = high_byte;
+    gb_color = (gb_color << 8) + low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9
     //             blue:   bits 10-14
-    uint32 gb_r = gb_color & 0x1F;
-    uint32 gb_g = (gb_color >> 5) & 0x1F;
-    uint32 gb_b = (gb_color >> 10) & 0x1F;
+    int32_t gb_r = gb_color & 0x1F;
+    int32_t gb_g = (gb_color >> 5) & 0x1F;
+    int32_t gb_b = (gb_color >> 10) & 0x1F;
 
     // formula copied from gambatte (video.cpp)
-    uint32 r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
-    uint32 g = (gb_g * 3 + gb_b) << 1;
-    uint32 b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
+    int32_t r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
+    int32_t g = (gb_g * 3 + gb_b) << 1;
+    int32_t b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
 
     m_colors[index] = pixel(r, g, b);
 }
