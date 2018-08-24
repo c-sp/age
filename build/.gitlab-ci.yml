@@ -114,6 +114,10 @@ build-js:
     script:
         - ./build/age_ci.sh test gambatte "${GB_REPO_GAMBATTE}/test/hwtests"
 
+.tests-blargg: &tests-blargg
+    script:
+        - ./build/age_ci.sh test blargg "${GB_REPO_GB_TEST_ROMS}"
+
 
 test-mooneye-release:
     <<: *test-release
@@ -131,6 +135,14 @@ test-gambatte-release:
 #test-gambatte-debug:
 #    <<: *test-debug
 #    <<: *tests-gambatte
+
+test-blargg-release:
+    <<: *test-release
+    <<: *tests-blargg
+
+test-blargg-debug:
+    <<: *test-debug
+    <<: *tests-blargg
 
 
 lint-age-js:
