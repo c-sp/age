@@ -72,6 +72,8 @@ struct pixel
     };
 };
 
+static_assert(sizeof(pixel) == 4, "expected pixel size of 4 bytes (RGBA)");
+
 typedef std::vector<pixel> pixel_vector;
 
 
