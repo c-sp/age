@@ -84,8 +84,7 @@ struct pcm_sample
     };
 };
 
-constexpr uint sizeof_pcm_sample = sizeof(pcm_sample);
-static_assert(4 == sizeof_pcm_sample, "expected pcm_sample size of 4 bytes (16 bit stereo)");
+static_assert(sizeof(pcm_sample) == 4, "expected pcm_sample size of 4 bytes (16 bit stereo)");
 
 typedef std::vector<pcm_sample> pcm_vector;
 

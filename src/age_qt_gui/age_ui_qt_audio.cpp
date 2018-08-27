@@ -32,6 +32,8 @@
 #define LOG_STREAM(x)
 #endif
 
+constexpr int sizeof_pcm_sample = sizeof(age::pcm_sample);
+
 
 
 //---------------------------------------------------------
@@ -153,11 +155,11 @@ void age::qt_audio_output::buffer_silence()
 
         if (bytes_free > 0)
         {
-            uint samples_free = static_cast<uint>(bytes_free / sizeof_pcm_sample);
+            int samples_free = bytes_free / sizeof_pcm_sample;
 
             if (m_buffer.get_buffered_samples() < samples_free)
             {
-                uint samples_to_add = samples_free - m_buffer.get_buffered_samples();
+                int samples_to_add = samples_free - m_buffer.get_buffered_samples();
                 m_buffer.add_samples(m_silence, samples_to_add);
             }
         }
@@ -190,7 +192,7 @@ void age::qt_audio_output::stream_audio_data()
         // (call write_samples twice in case of a ring buffer wrap around)
         if (!m_pause_streaming)
         {
-            uint samples_written = write_samples();
+            int samples_written = write_samples();
             if (samples_written > 0)
             {
                 write_samples();
@@ -228,11 +230,10 @@ void age::qt_audio_output::reset()
 
         // set the audio output buffer size
         int sample_rate = m_output->format().sampleRate();
-        uint output_sampling_rate = static_cast<uint>(sample_rate);
 
         LOG("current latency is " << m_latency_milliseconds);
-        uint buffered_samples = m_latency_milliseconds * output_sampling_rate / 1000;
-        uint buffered_bytes = buffered_samples * sizeof_pcm_sample;
+        int buffered_samples = m_latency_milliseconds * sample_rate / 1000;
+        int buffered_bytes = buffered_samples * sizeof_pcm_sample;
 
         m_output->setBufferSize(buffered_bytes);
 
@@ -256,7 +257,7 @@ void age::qt_audio_output::reset()
         LOG("output.periodSize     " << m_output->periodSize());
 
         // create the silence buffer
-        m_silence = std::vector<pcm_sample>(buffered_samples, pcm_sample());
+        m_silence = pcm_vector(static_cast<uint>(buffered_samples), pcm_sample());
     }
 }
 
@@ -302,37 +303,36 @@ void age::qt_audio_output::create_downsampler()
     }
 }
 
-age::uint age::qt_audio_output::write_samples()
+int age::qt_audio_output::write_samples()
 {
     AGE_ASSERT(m_output != nullptr);
 
-    uint samples_written = 0;
+    int samples_written = 0;
 
     // don't try to write samples, if no audio device has been opened
     // (may happen, if there is no audio device available)
     if (m_device != nullptr)
     {
         // check how many samples we can stream to the audio output device
-        int bytes_free_int = m_output->bytesFree();
-        if (bytes_free_int > 0)
+        int bytes_free = m_output->bytesFree();
+        if (bytes_free > 0)
         {
-            uint bytes_free = static_cast<uint>(bytes_free_int);
-            uint samples_free = bytes_free / sizeof_pcm_sample;
+            int samples_free = bytes_free / sizeof_pcm_sample;
 
             // check how many samples we have available for streaming
-            uint samples_available;
+            int32_t samples_available;
             const pcm_sample* buffer = m_buffer.get_buffered_samples_ptr(samples_available);
 
             // write samples to audio output device
-            uint samples_to_write = std::min(samples_available, samples_free);
+            int samples_to_write = std::min(samples_available, samples_free);
             const char *char_buffer = reinterpret_cast<const char*>(buffer);
 
             qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_sample);
 
             // calculate the number of samples that were written
             qint64 tmp = bytes_written / sizeof_pcm_sample;
-            AGE_ASSERT((tmp >= 0) && (tmp <= uint_max));
-            samples_written = static_cast<uint>(tmp);
+            AGE_ASSERT((tmp >= 0) && (tmp <= samples_to_write));
+            samples_written = static_cast<int>(tmp);
 
             m_buffer.discard_buffered_samples(samples_written);
         }

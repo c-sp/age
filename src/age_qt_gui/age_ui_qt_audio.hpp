@@ -220,7 +220,7 @@ private:
 
     void reset();
     void create_downsampler();
-    uint write_samples();
+    int write_samples();
 
     uint m_input_sampling_rate = 200000; // some (arbitrary) big value
     float m_volume = 1;
@@ -234,7 +234,7 @@ private:
     pcm_ring_buffer m_buffer = {1};
     std::unique_ptr<QAudioOutput> m_output;
     QIODevice *m_device = nullptr;
-    std::vector<pcm_sample> m_silence;
+    pcm_vector m_silence;
     bool m_pause_streaming = false;
 };
 
