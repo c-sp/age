@@ -37,8 +37,8 @@
 namespace age
 {
 
-constexpr uint gb_screen_width = 160;
-constexpr uint gb_screen_height = 144;
+constexpr int16_t gb_screen_width = 160;
+constexpr int16_t gb_screen_height = 144;
 
 constexpr uint gb_cycles_per_scanline = 456;
 constexpr uint gb_cycles_per_frame = 154 * gb_cycles_per_scanline;
@@ -80,7 +80,7 @@ public:
 
     uint8 get_ly_port(bool lcd_enabled) const;
     uint8 get_ly() const;
-    uint get_scanline() const;
+    int16_t get_scanline() const;
     uint get_next_scanline_cycle_offset(uint current_cycle) const;
 
     void switch_off();
@@ -98,7 +98,7 @@ protected:
 private:
 
     uint m_next_scanline_cycle = gb_no_cycle;
-    uint m_scanline = 0;
+    int16_t m_scanline = 0;
     bool m_mode1_ly0 = false;
 };
 

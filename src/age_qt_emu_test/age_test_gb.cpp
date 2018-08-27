@@ -93,8 +93,8 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
         }
 
         // check the screenshot size
-        else if ((emulator->get_screen_width() != static_cast<uint>(image.width()))
-                || (emulator->get_screen_height() != static_cast<uint>(image.height()))) {
+        else if ((emulator->get_screen_width() != image.width())
+                || (emulator->get_screen_height() != image.height())) {
 
             QTextStream(&error_message)
                     << "screen size ("

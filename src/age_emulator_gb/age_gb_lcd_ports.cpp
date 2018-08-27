@@ -153,7 +153,7 @@ void age::gb_lcd::write_stat(uint8 value)
 {
     LOG((uint)value);
 
-    uint scanline = get_scanline();
+    auto scanline = get_scanline();
     uint mode = (scanline >= gb_screen_height)
             ? 1 // the 4-cycle mode 0 at the end of mode 1 is not recognized here
             : (m_stat & gb_stat_modes);
@@ -668,7 +668,7 @@ void age::gb_lcd::write_lyc(uint8 value)
     LOG((uint)value);
     if (value != get_lyc())
     {
-        uint scanline = get_scanline();
+        auto scanline = get_scanline();
         uint mode = (scanline >= gb_screen_height)
                 ? 1 // the 4-cycle mode 0 at the end of mode 1 is not recognized here
                 : (m_stat & gb_stat_modes);

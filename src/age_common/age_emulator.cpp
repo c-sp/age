@@ -20,7 +20,7 @@
 
 
 
-age::emulator::emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second)
+age::emulator::emulator(int16_t screen_width, int16_t screen_height, uint sampling_rate, uint cycles_per_second)
     : m_sampling_rate(sampling_rate),
       m_cycles_per_second(cycles_per_second),
       m_screen_buffer(screen_width, screen_height)
@@ -80,12 +80,12 @@ std::string age::emulator::get_emulator_title() const
 
 
 
-age::uint age::emulator::get_screen_width() const
+age::int16_t age::emulator::get_screen_width() const
 {
     return m_screen_buffer.get_screen_width();
 }
 
-age::uint age::emulator::get_screen_height() const
+age::int16_t age::emulator::get_screen_height() const
 {
     return m_screen_buffer.get_screen_height();
 }
@@ -117,7 +117,7 @@ age::uint64 age::emulator::get_emulated_cycles() const
 
 bool age::emulator::emulate(uint64 min_cycles_to_emulate)
 {
-    uint current_front_buffer = m_screen_buffer.get_front_buffer_index();
+    auto current_front_buffer = m_screen_buffer.get_front_buffer_index();
     m_audio_buffer.clear();
 
     uint64 emulated_cycles = inner_emulate(min_cycles_to_emulate);

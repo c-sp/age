@@ -79,7 +79,7 @@ age::gb_ly_counter::gb_ly_counter(gb_core &core)
 age::uint8 age::gb_ly_counter::get_ly_port(bool lcd_enabled) const
 {
     GB_LY_ASSERT_CONSISTENCY;
-    uint result = m_scanline;
+    auto result = m_scanline;
 
     if (lcd_enabled)
     {
@@ -132,7 +132,7 @@ age::uint8 age::gb_ly_counter::get_ly() const
     return m_mode1_ly0 ? 0 : static_cast<uint8>(m_scanline);
 }
 
-age::uint age::gb_ly_counter::get_scanline() const
+age::int16_t age::gb_ly_counter::get_scanline() const
 {
     GB_LY_ASSERT_CONSISTENCY;
     return m_scanline;
@@ -273,7 +273,7 @@ age::uint8 age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
         //      ly0/lycint152_lyc0flag_ds_2_outC5
         //
 
-        uint scanline = get_scanline();
+        auto scanline = get_scanline();
         uint current_cycle = m_core->get_oscillation_cycle();
 
         // next_scanline_cycles contains the number of cycles left until
@@ -335,7 +335,7 @@ void age::gb_lyc_handler::set_stat(uint8 value, uint mode, bool lcd_enabled)
         //      lycEnable/lyc153_late_ff41_enable_ds_1_oute2
         //      lycEnable/lyc153_late_ff41_enable_ds_2_oute0
         //
-        uint scanline = get_scanline();
+        auto scanline = get_scanline();
         uint8 ly = get_ly();
         if ((scanline == 153) && m_core->is_double_speed() && (next_scanline_offset > gb_cycles_per_scanline - 8))
         {
@@ -450,7 +450,7 @@ void age::gb_lyc_handler::set_lyc(uint8 value, uint mode, bool lcd_enabled)
     {
         uint current_cycle = m_core->get_oscillation_cycle();
         uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
-        uint scanline = get_scanline();
+        auto scanline = get_scanline();
         uint min_scanline_offset = m_cgb && !m_core->is_double_speed() ? 8 : 4;
 
         //

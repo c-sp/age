@@ -64,12 +64,12 @@ public:
     //!
     //! \return The native screen width in pixel of the emulated device. The returned value will be >0.
     //!
-    uint get_screen_width() const;
+    int16_t get_screen_width() const;
 
     //!
     //! \return The native screen height in pixel of the emulated device. The returned value will be >0.
     //!
-    uint get_screen_height() const;
+    int16_t get_screen_height() const;
 
     //!
     //! \return The current front buffer containing the emulated device's screen.
@@ -128,7 +128,7 @@ public:
 
 protected:
 
-    emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second);
+    emulator(int16_t screen_width, int16_t screen_height, uint sampling_rate, uint cycles_per_second);
 
     screen_buffer& get_screen_buffer();
     pcm_vector& get_pcm_vector();
