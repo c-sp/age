@@ -75,6 +75,14 @@ typedef std::vector<uint8_t> uint8_vector;
 
 
 
+// C++ arithmetic operators do not accept types smaller than int
+// (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
+// AGE relies on int being 32 bits or more for arithmetic operations with
+// imlicit integer conversion (integral promotion).
+static_assert(sizeof(int) >= 4, "AGE requires int being 32 bits or more");
+
+
+
 // constants and constant expressions
 
 constexpr const char *project_name = "AGE";
