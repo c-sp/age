@@ -131,8 +131,8 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     // connect main window signals
 
     connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), m_emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
-    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_video_output, SLOT(set_emulator_screen_size(uint,uint)));
-    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_settings, SLOT(set_emulator_screen_size(uint,uint)));
+    connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_video_output, SLOT(set_emulator_screen_size(int16_t,int16_t)));
+    connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_settings, SLOT(set_emulator_screen_size(int16_t,int16_t)));
     connect(this, SIGNAL(emulator_button_down(uint)), m_emulation_runner, SLOT(set_emulator_buttons_down(uint)));
     connect(this, SIGNAL(emulator_button_up(uint)), m_emulation_runner, SLOT(set_emulator_buttons_up(uint)));
 
@@ -324,8 +324,8 @@ void age::qt_main_window::open_file(gb_hardware hardware)
         // propagate new emulator
         if (new_emulator != nullptr)
         {
-            uint screen_width = new_emulator->get_emulator()->get_screen_width();
-            uint screen_height = new_emulator->get_emulator()->get_screen_height();
+            int16_t screen_width = new_emulator->get_emulator()->get_screen_width();
+            int16_t screen_height = new_emulator->get_emulator()->get_screen_height();
 
             emit emulator_screen_resize(screen_width, screen_height);
             emit emulator_loaded(new_emulator);

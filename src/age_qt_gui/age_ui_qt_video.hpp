@@ -148,7 +148,7 @@ public:
 
 public slots:
 
-    void set_emulator_screen_size(uint width, uint height);
+    void set_emulator_screen_size(int16_t width, int16_t height);
     void new_frame(std::shared_ptr<const age::pixel_vector> new_frame);
 
     void set_blend_frames(uint num_frames_to_blend);

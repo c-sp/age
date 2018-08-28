@@ -190,7 +190,7 @@ void age::qt_settings_dialog::audio_output_activated(QAudioDeviceInfo device, QA
     m_settings_audio->set_active_audio_output(device, format, buffer_size, downsampler_fir_size);
 }
 
-void age::qt_settings_dialog::set_emulator_screen_size(uint width, uint height)
+void age::qt_settings_dialog::set_emulator_screen_size(int16_t width, int16_t height)
 {
     m_settings_video->set_emulator_screen_size(width, height);
 }

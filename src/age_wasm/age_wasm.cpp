@@ -185,13 +185,13 @@ void gb_set_buttons_up(age::uint buttons)
 
 
 EMSCRIPTEN_KEEPALIVE
-age::uint gb_get_screen_width()
+age::int16_t gb_get_screen_width()
 {
     return emulator_exists() ? gb_emu->get_screen_width() : 0;
 }
 
 EMSCRIPTEN_KEEPALIVE
-age::uint gb_get_screen_height()
+age::int16_t gb_get_screen_height()
 {
     return emulator_exists() ? gb_emu->get_screen_height() : 0;
 }

@@ -169,7 +169,7 @@ age::uint age::qt_video_output::get_fps() const
 
 
 
-void age::qt_video_output::set_emulator_screen_size(uint w, uint h)
+void age::qt_video_output::set_emulator_screen_size(int16_t w, int16_t h)
 {
     LOG(w << ", " << h);
     m_emulator_screen = QSize(w, h);

@@ -34,9 +34,12 @@
 //  - use fully qualified types when connecting signals and slots
 //
 Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
-Q_DECLARE_METATYPE(age::uint)
+Q_DECLARE_METATYPE(age::int16_t)
 Q_DECLARE_METATYPE(age::qt_downsampler_quality)
 Q_DECLARE_METATYPE(std::shared_ptr<const age::pixel_vector>)
+
+//! \todo remove
+Q_DECLARE_METATYPE(age::uint)
 
 
 

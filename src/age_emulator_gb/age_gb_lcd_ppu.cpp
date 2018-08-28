@@ -197,10 +197,8 @@ void age::gb_lcd_ppu::update_color(size_t index, uint8_t high_byte, uint8_t low_
 {
     AGE_ASSERT(m_cgb && (index < 64));
 
-    // make sure we have at least 32 bits available,
-    // don't rely on integral promotion to int (high_byte << 8)
-    int32_t gb_color = high_byte;
-    gb_color = (gb_color << 8) + low_byte;
+    // we rely on integer promotion to 32 bit int for the following calculation
+    int32_t gb_color = (high_byte << 8) + low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9

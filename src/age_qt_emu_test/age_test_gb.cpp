@@ -16,6 +16,7 @@
 
 #include <algorithm> // std::min
 #include <memory> // std::shared_ptr
+#include <limits>
 
 #include <QImage>
 #include <QTextStream>
@@ -83,8 +84,9 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
         gb_emulate(*emulator, cycles_to_emulate);
 
         // load the screenshot image data
+        AGE_ASSERT(screenshot.size() <= std::numeric_limits<int>::max());
         QString error_message;
-        QImage image = QImage::fromData(screenshot.data(), screenshot.size()).rgbSwapped();
+        QImage image = QImage::fromData(screenshot.data(), static_cast<int>(screenshot.size())).rgbSwapped();
 
         // is the data format supported?
         if (image.isNull())
@@ -118,12 +120,13 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
             const pixel *screenshot = reinterpret_cast<pixel*>(image.bits());
             const pixel *screen = emulator->get_screen_front_buffer().data();
 
-            for (uint i = 0, max = emulator->get_screen_width() * emulator->get_screen_height(); i < max; ++i)
+            // for width * height we rely on integer promotion to 32 bit int
+            for (int32_t i = 0, max = emulator->get_screen_width() * emulator->get_screen_height(); i < max; ++i)
             {
                 if (*screen != *screenshot)
                 {
-                    uint x = i % emulator->get_screen_width();
-                    uint y = emulator->get_screen_height() - 1 - (i / emulator->get_screen_width());
+                    int32_t x = i % emulator->get_screen_width();
+                    int32_t y = emulator->get_screen_height() - 1 - (i / emulator->get_screen_width());
 
                     QTextStream(&error_message)
                             << "screen and screenshot differ at position ("
