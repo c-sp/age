@@ -71,8 +71,8 @@ public slots:
     void initialize();
 
     void set_emulator(std::shared_ptr<age::qt_emulator> new_emulator);
-    void set_emulator_buttons_down(uint buttons);
-    void set_emulator_buttons_up(uint buttons);
+    void set_emulator_buttons_down(int32_t buttons);
+    void set_emulator_buttons_up(int32_t buttons);
 
     void set_emulator_synchronize(bool synchronize);
     void set_emulator_paused(bool paused);
@@ -116,8 +116,8 @@ private:
     speed_calculator<50> m_speed_calculator;
 
     std::shared_ptr<qt_emulator> m_emulator;
-    uint m_buttons_down = 0;
-    uint m_buttons_up = 0;
+    int32_t m_buttons_down = 0;
+    int32_t m_buttons_up = 0;
 };
 
 } // namespace age

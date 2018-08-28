@@ -33,12 +33,12 @@ void age::gb_emulator_impl::set_persistent_ram(const uint8_vector &source)
     m_memory.set_persistent_ram(source);
 }
 
-void age::gb_emulator_impl::set_buttons_down(uint buttons)
+void age::gb_emulator_impl::set_buttons_down(int32_t buttons)
 {
     m_joypad.set_buttons_down(buttons);
 }
 
-void age::gb_emulator_impl::set_buttons_up(uint buttons)
+void age::gb_emulator_impl::set_buttons_up(int32_t buttons)
 {
     m_joypad.set_buttons_up(buttons);
 }

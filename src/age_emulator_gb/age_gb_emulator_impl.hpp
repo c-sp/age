@@ -52,8 +52,8 @@ public:
     uint8_vector get_persistent_ram() const;
     void set_persistent_ram(const uint8_vector &source);
 
-    void set_buttons_down(uint buttons);
-    void set_buttons_up(uint buttons);
+    void set_buttons_down(int32_t buttons);
+    void set_buttons_up(int32_t buttons);
 
     uint64 inner_emulate(uint64 min_cycles_to_emulate);
 

@@ -33,8 +33,9 @@
 //  - register these types using qRegisterMetaType (see below)
 //  - use fully qualified types when connecting signals and slots
 //
-Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
 Q_DECLARE_METATYPE(age::int16_t)
+Q_DECLARE_METATYPE(age::int32_t)
+Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
 Q_DECLARE_METATYPE(age::qt_downsampler_quality)
 Q_DECLARE_METATYPE(std::shared_ptr<const age::pixel_vector>)
 
@@ -82,10 +83,14 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
+    qRegisterMetaType<age::int16_t>("int16_t");
+    qRegisterMetaType<age::int32_t>("int32_t");
     qRegisterMetaType<std::shared_ptr<age::qt_emulator>>();
-    qRegisterMetaType<age::uint>();
     qRegisterMetaType<age::qt_downsampler_quality>();
     qRegisterMetaType<std::shared_ptr<const age::pixel_vector>>();
+
+    //! \todo remove
+    qRegisterMetaType<age::uint>();
 
     age::qt_main_window w;
     w.show();

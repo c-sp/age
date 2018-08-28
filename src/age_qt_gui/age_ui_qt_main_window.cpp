@@ -133,8 +133,8 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), m_emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
     connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_video_output, SLOT(set_emulator_screen_size(int16_t,int16_t)));
     connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_settings, SLOT(set_emulator_screen_size(int16_t,int16_t)));
-    connect(this, SIGNAL(emulator_button_down(uint)), m_emulation_runner, SLOT(set_emulator_buttons_down(uint)));
-    connect(this, SIGNAL(emulator_button_up(uint)), m_emulation_runner, SLOT(set_emulator_buttons_up(uint)));
+    connect(this, SIGNAL(emulator_button_down(int32_t)), m_emulation_runner, SLOT(set_emulator_buttons_down(int32_t)));
+    connect(this, SIGNAL(emulator_button_up(int32_t)), m_emulation_runner, SLOT(set_emulator_buttons_up(int32_t)));
 
     // trigger initial setting signals after slots have been connected & start the emulation runner thread
 
@@ -182,7 +182,7 @@ void age::qt_main_window::keyPressEvent(QKeyEvent *keyEvent)
     qt_key_event event = get_event_for_key(keyEvent->key());
     if (event == qt_key_event::none)
     {
-        QMainWindow::keyReleaseEvent(keyEvent);
+        QMainWindow::keyPressEvent(keyEvent);
     }
 
     // check if this is a settings event
@@ -192,7 +192,7 @@ void age::qt_main_window::keyPressEvent(QKeyEvent *keyEvent)
 
         if (!keyEvent->isAutoRepeat())
         {
-            uint button = get_button(event);
+            int32_t button = get_button(event);
             if (button != 0)
             {
                 emit emulator_button_down(button);
@@ -213,7 +213,7 @@ void age::qt_main_window::keyReleaseEvent(QKeyEvent *keyEvent)
     // notify the emulator
     else if (!keyEvent->isAutoRepeat())
     {
-        uint button = get_button(event);
+        int32_t button = get_button(event);
         if (button != 0)
         {
             emit emulator_button_up(button);
@@ -231,9 +231,9 @@ void age::qt_main_window::keyReleaseEvent(QKeyEvent *keyEvent)
 //
 //---------------------------------------------------------
 
-age::uint age::qt_main_window::get_button(qt_key_event key_event) const
+age::int32_t age::qt_main_window::get_button(qt_key_event key_event) const
 {
-    uint result;
+    int32_t result;
 
     switch(key_event)
     {

@@ -120,13 +120,13 @@ void age::qt_emulation_runner::set_emulator(std::shared_ptr<qt_emulator> new_emu
     m_buttons_up = 0;
 }
 
-void age::qt_emulation_runner::set_emulator_buttons_down(uint buttons)
+void age::qt_emulation_runner::set_emulator_buttons_down(int32_t buttons)
 {
     LOG(buttons);
     m_buttons_down |= buttons;
 }
 
-void age::qt_emulation_runner::set_emulator_buttons_up(uint buttons)
+void age::qt_emulation_runner::set_emulator_buttons_up(int32_t buttons)
 {
     LOG(buttons);
     m_buttons_up |= buttons;

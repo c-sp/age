@@ -37,8 +37,8 @@ public:
 
     uint8 read_p1() const;
     void write_p1(uint8 byte);
-    void set_buttons_down(uint buttons);
-    void set_buttons_up(uint buttons);
+    void set_buttons_down(int32_t buttons);
+    void set_buttons_up(int32_t buttons);
 
     gb_joypad(gb_core &core);
 

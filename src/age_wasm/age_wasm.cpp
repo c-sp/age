@@ -165,7 +165,7 @@ double gb_get_emulated_cycles()
 
 
 EMSCRIPTEN_KEEPALIVE
-void gb_set_buttons_down(age::uint buttons)
+void gb_set_buttons_down(age::int32_t buttons)
 {
     if (emulator_exists())
     {
@@ -174,7 +174,7 @@ void gb_set_buttons_down(age::uint buttons)
 }
 
 EMSCRIPTEN_KEEPALIVE
-void gb_set_buttons_up(age::uint buttons)
+void gb_set_buttons_up(age::int32_t buttons)
 {
     if (emulator_exists())
     {
