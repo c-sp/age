@@ -27,7 +27,7 @@ namespace age {
 // DMG: 256 cycles for "bit in"
 // DMG: 256 cycles for "bit out"
 // DMG: 512 cycles for fully transferring one bit (8192 Bits/s)
-constexpr uint gb_sio_shift_clock_bit = 1 << 8;
+constexpr int32_t gb_sio_shift_clock_bit = 1 << 8;
 
 constexpr uint8 gb_sc_start_transfer = 0x80;
 constexpr uint8 gb_sc_shift_clock_switch = 0x02;
@@ -97,7 +97,7 @@ void age::gb_serial::write_sc(uint8 value)
         if ((value & gb_sc_terminal_selection) > 0)
         {
             m_sio_state = gb_sio_state::transfer_internal_clock;
-            uint cycles_until_finished = transfer_init(value);
+            int32_t cycles_until_finished = transfer_init(value);
             m_core.insert_event(cycles_until_finished, gb_event::serial_transfer_finished);
         }
 
@@ -147,7 +147,7 @@ void age::gb_serial::finish_transfer()
     m_core.request_interrupt(gb_interrupt::serial);
 }
 
-void age::gb_serial::set_back_cycles(uint offset)
+void age::gb_serial::set_back_cycles(int32_t offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_sio_last_receive_cycle, offset);
 }
@@ -160,16 +160,16 @@ void age::gb_serial::set_back_cycles(uint offset)
 //
 //---------------------------------------------------------
 
-age::uint age::gb_serial::transfer_init(uint8 value)
+age::int32_t age::gb_serial::transfer_init(uint8 value)
 {
     bool high_frequency = m_core.is_cgb() && ((value & gb_sc_shift_clock_switch) > 0);
 
-    uint shift_clock_bit = high_frequency ? gb_sio_shift_clock_bit >> 5 : gb_sio_shift_clock_bit;
+    int32_t shift_clock_bit = high_frequency ? gb_sio_shift_clock_bit >> 5 : gb_sio_shift_clock_bit;
     shift_clock_bit = m_core.is_double_speed() ? shift_clock_bit >> 1 : shift_clock_bit;
 
-    uint cycles_per_bit = shift_clock_bit << 1;
+    int32_t cycles_per_bit = shift_clock_bit << 1;
 
-    uint current_cycle = m_core.get_oscillation_cycle();
+    int32_t current_cycle = m_core.get_oscillation_cycle();
 
     //
     // verified by mooneye-gb tests
@@ -181,7 +181,7 @@ age::uint age::gb_serial::transfer_init(uint8 value)
     //
     //      acceptance/serial/boot_sclk_align-dmgABCmgb
     //
-    uint cycles_into_sio_clock = current_cycle % cycles_per_bit;
+    int32_t cycles_into_sio_clock = current_cycle % cycles_per_bit;
 
     //
     // verified by gambatte tests
@@ -205,10 +205,10 @@ age::uint age::gb_serial::transfer_init(uint8 value)
     //      serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0
     //      serial/nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8
     //
-    uint extended_cycles = ((current_cycle & shift_clock_bit) > 0) ? cycles_per_bit / 2 : 0;
+    int32_t extended_cycles = ((current_cycle & shift_clock_bit) > 0) ? cycles_per_bit / 2 : 0;
 
     LOG("starting serial transfer, " << cycles_into_sio_clock << " cycles into sio clock, " << extended_cycles << " cycles extended");
-    uint cycles_until_finished = 8 * cycles_per_bit - cycles_into_sio_clock + extended_cycles;
+    int32_t cycles_until_finished = 8 * cycles_per_bit - cycles_into_sio_clock + extended_cycles;
 
     m_sio_cycles_per_bit = cycles_per_bit;
     m_sio_last_receive_cycle = current_cycle + cycles_until_finished - 8 * cycles_per_bit;
@@ -225,13 +225,13 @@ void age::gb_serial::transfer_update_sb()
     AGE_ASSERT(m_sio_cycles_per_bit > 0);
     AGE_ASSERT(m_sio_last_receive_cycle <= m_core.get_oscillation_cycle());
 
-    uint cycles_elapsed = m_core.get_oscillation_cycle() - m_sio_last_receive_cycle;
-    uint shifts = cycles_elapsed / m_sio_cycles_per_bit;
+    int32_t cycles_elapsed = m_core.get_oscillation_cycle() - m_sio_last_receive_cycle;
+    int32_t shifts = cycles_elapsed / m_sio_cycles_per_bit;
     AGE_ASSERT(shifts < 8);
 
     if (shifts > 0)
     {
-        uint tmp = m_sb * 0x100 + 0xFF;
+        int32_t tmp = m_sb * 0x100 + 0xFF;
         tmp >>= 8 - shifts;
         LOG("transfer in progress: updating SB from 0x" << std::hex << m_sb << " to 0x" << tmp << std::dec << " (" << shifts << " shifts)");
         m_sb = static_cast<uint8>(tmp);

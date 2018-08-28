@@ -51,18 +51,18 @@ public:
     void write_sc(uint8 value);
 
     void finish_transfer();
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int32_t offset);
 
     gb_serial(gb_core &core);
 
 private:
 
-    uint transfer_init(uint8 value);
+    int32_t transfer_init(uint8 value);
     void transfer_update_sb();
 
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
-    uint m_sio_cycles_per_bit = 0;
-    uint m_sio_last_receive_cycle = gb_no_cycle;
+    int32_t m_sio_cycles_per_bit = 0;
+    int32_t m_sio_last_receive_cycle = gb_no_cycle;
 
     uint8 m_sb = 0;
     uint8 m_sc = 0;

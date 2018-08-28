@@ -37,18 +37,18 @@ public:
 
     gb_common_counter(const gb_core &core);
 
-    uint get_current_value() const;
-    uint get_cycle_offset(uint for_counter_offset) const;
+    int32_t get_current_value() const;
+    int32_t get_cycle_offset(int32_t for_counter_offset) const;
 
     void reset();
     void switch_double_speed_mode();
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int32_t offset);
 
 private:
 
     const gb_core &m_core;
-    uint m_counter_origin = 0;
-    uint m_cycle_shift = 2;
+    int32_t m_counter_origin = 0;
+    int8_t m_cycle_shift = 2;
 };
 
 
@@ -59,21 +59,21 @@ public:
 
     gb_tima_counter(gb_common_counter &counter);
 
-    uint get_current_value() const;
-    uint get_cycle_offset(uint for_tima_offset) const;
-    uint get_trigger_bit(uint8 for_tac) const;
-    uint get_past_tima_counter(uint8 for_tima) const;
+    int32_t get_current_value() const;
+    int32_t get_cycle_offset(int32_t for_tima_offset) const;
+    int32_t get_trigger_bit(uint8 for_tac) const;
+    int32_t get_past_tima_counter(uint8 for_tima) const;
 
-    void set_tima(uint tima);
+    void set_tima(int32_t tima);
     void set_frequency(uint8 tac);
 
 private:
 
-    static uint calculate_counter_shift(uint8 for_tac);
+    static int8_t calculate_counter_shift(uint8 for_tac);
 
     const gb_common_counter &m_counter;
-    uint m_tima_origin = 0;
-    uint m_counter_shift = 2;
+    int32_t m_tima_origin = 0;
+    int8_t m_counter_shift = 2;
 };
 
 
@@ -94,13 +94,13 @@ public:
 
     void timer_overflow();
     void switch_double_speed_mode();
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int32_t offset);
 
     gb_timer(gb_core &core);
 
 private:
 
-    uint check_for_early_increment(uint new_increment_bit);
+    int32_t check_for_early_increment(int32_t new_increment_bit);
     void schedule_timer_overflow();
 
     uint8 m_tima = 0;
@@ -111,7 +111,7 @@ private:
     gb_common_counter m_counter = {m_core};
     gb_tima_counter m_tima_counter = {m_counter};
     bool m_tima_running = false;
-    uint m_last_overflow_counter = 0;
+    int32_t m_last_overflow_counter = 0;
 };
 
 } // namespace age
