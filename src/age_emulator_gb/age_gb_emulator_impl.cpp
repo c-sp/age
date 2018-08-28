@@ -77,7 +77,8 @@ age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
 
     if (m_core.get_oscillation_cycle() > (uint_max / 2))
     {
-        uint offset = m_core.get_oscillation_cycle() & ~(gb_machine_cycles_per_second - 1);
+        uint cycles_to_keep = m_core.get_oscillation_cycle() % gb_machine_cycles_per_second;
+        uint offset = m_core.get_oscillation_cycle() - cycles_to_keep;
         AGE_ASSERT(offset < m_core.get_oscillation_cycle());
 
         m_core.set_back_cycles(offset);

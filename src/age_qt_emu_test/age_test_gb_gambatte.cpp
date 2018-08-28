@@ -30,17 +30,17 @@ namespace age {
 //! gambatte tests run for 15 frames
 //! (see gambatte/test/testrunner.cpp)
 //!
-constexpr uint gb_gambatte_test_frames = 15;
-constexpr uint gb_frames_per_second = 59;
+constexpr int32_t gb_gambatte_test_frames = 15;
+constexpr int32_t gb_frames_per_second = 59;
 
-uint gb_cycles_per_frame(const gb_emulator &emulator)
+int32_t gb_cycles_per_frame(const gb_emulator &emulator)
 {
     return emulator.get_cycles_per_second() / gb_frames_per_second;
 }
 
-uint test_cycles(const gb_emulator &emulator)
+int32_t test_cycles(const gb_emulator &emulator)
 {
-    uint cycles_per_frame = gb_cycles_per_frame(emulator);
+    int32_t cycles_per_frame = gb_cycles_per_frame(emulator);
     return cycles_per_frame * gb_gambatte_test_frames;
 }
 
@@ -361,7 +361,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 
         // gambatte tests run for 15 frames
         // (see gambatte/test/testrunner.cpp)
-        uint cycles_per_frame = gb_cycles_per_frame(*emulator);
+        age::int32_t cycles_per_frame = gb_cycles_per_frame(*emulator);
 
         gb_emulate(*emulator, test_cycles(*emulator));
 
@@ -371,7 +371,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         bool all_equal = true;
         const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
 
-        for (age::uint i = 1; i < cycles_per_frame; ++i)
+        for (age::int32_t i = 1; i < cycles_per_frame; ++i)
         {
             if (emulator->get_audio_buffer()[i] != first_sample)
             {

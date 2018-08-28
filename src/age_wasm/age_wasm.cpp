@@ -151,7 +151,7 @@ bool gb_emulate(age::uint min_cycles_to_emulate, age::uint sample_rate)
 }
 
 EMSCRIPTEN_KEEPALIVE
-age::uint gb_get_cycles_per_second()
+age::int32_t gb_get_cycles_per_second()
 {
     return emulator_exists() ? gb_emu->get_cycles_per_second() : 0;
 }

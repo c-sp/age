@@ -72,7 +72,7 @@ enum class gb_event : uint
 
 
 constexpr uint gb_no_cycle = uint_max;
-constexpr uint gb_machine_cycles_per_second = 4194304;
+constexpr int32_t gb_machine_cycles_per_second = 4194304;
 
 #define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
     if (value != gb_no_cycle) { \
