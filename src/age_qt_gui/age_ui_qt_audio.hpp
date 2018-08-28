@@ -125,7 +125,7 @@ public:
     //! This value is expected to be greater than 1. The behaviour for a value lower
     //! than 2 is undefined.
     //!
-    void set_input_sampling_rate(uint sampling_rate);
+    void set_input_sampling_rate(int32_t sampling_rate);
 
     //!
     //! \brief Set the quality of audio data resampling.
@@ -222,7 +222,7 @@ private:
     void create_downsampler();
     int write_samples();
 
-    uint m_input_sampling_rate = 200000; // some (arbitrary) big value
+    int32_t m_input_sampling_rate = 200000; // some (arbitrary) big value
     float m_volume = 1;
     int m_latency_milliseconds = qt_audio_latency_milliseconds_min;
     qt_downsampler_quality m_downsampler_quality = qt_downsampler_quality::low;

@@ -37,7 +37,7 @@ class downsampler : public non_copyable
 {
 public:
 
-    downsampler(uint input_sampling_rate, uint output_sampling_rate);
+    downsampler(int32_t input_sampling_rate, uint output_sampling_rate);
     virtual ~downsampler() = default;
 
     const pcm_vector& get_output_samples() const;
@@ -126,7 +126,7 @@ class downsampler_kaiser_low_pass : public downsampler_low_pass
 {
 public:
 
-    downsampler_kaiser_low_pass(uint input_sampling_rate, uint output_sampling_rate, double ripple);
+    downsampler_kaiser_low_pass(int32_t input_sampling_rate, uint output_sampling_rate, double ripple);
     virtual ~downsampler_kaiser_low_pass() = default;
 
 private:

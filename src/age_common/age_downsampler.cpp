@@ -46,7 +46,7 @@ constexpr double pi = 3.14159265358979323846;
 //
 //---------------------------------------------------------
 
-age::downsampler::downsampler(uint input_sampling_rate, uint output_sampling_rate)
+age::downsampler::downsampler(int32_t input_sampling_rate, uint output_sampling_rate)
     : m_input_output_ratio(calculate_ratio(input_sampling_rate, output_sampling_rate)),
       m_output_input_ratio(calculate_ratio(output_sampling_rate, input_sampling_rate))
 {
@@ -297,7 +297,7 @@ double age::downsampler_low_pass::calculate_sinc(double n, uint filter_order, do
 //    between samples of the FIR stored in a table.
 //
 
-age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(uint input_sampling_rate, uint output_sampling_rate, double ripple)
+age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_sampling_rate, uint output_sampling_rate, double ripple)
     : downsampler_low_pass(input_sampling_rate, output_sampling_rate)
 {
     //

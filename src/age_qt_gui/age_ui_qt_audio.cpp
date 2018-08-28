@@ -97,7 +97,7 @@ void age::qt_audio_output::set_volume(int volume_percent)
     }
 }
 
-void age::qt_audio_output::set_input_sampling_rate(uint sampling_rate)
+void age::qt_audio_output::set_input_sampling_rate(int32_t sampling_rate)
 {
     LOG(sampling_rate);
     AGE_ASSERT(sampling_rate > 1);

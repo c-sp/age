@@ -20,7 +20,7 @@
 
 
 
-age::emulator::emulator(int16_t screen_width, int16_t screen_height, uint sampling_rate, uint cycles_per_second)
+age::emulator::emulator(int16_t screen_width, int16_t screen_height, int32_t sampling_rate, uint cycles_per_second)
     : m_sampling_rate(sampling_rate),
       m_cycles_per_second(cycles_per_second),
       m_screen_buffer(screen_width, screen_height)
@@ -100,7 +100,7 @@ const age::pcm_vector& age::emulator::get_audio_buffer() const
     return m_audio_buffer;
 }
 
-age::uint age::emulator::get_pcm_sampling_rate() const
+age::int32_t age::emulator::get_pcm_sampling_rate() const
 {
     return m_sampling_rate;
 }
