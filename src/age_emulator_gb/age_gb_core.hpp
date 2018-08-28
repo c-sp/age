@@ -39,7 +39,7 @@
 namespace age
 {
 
-enum class gb_interrupt : uint8
+enum class gb_interrupt : uint8_t
 {
     joypad = 0x10,
     serial = 0x08,
@@ -48,14 +48,14 @@ enum class gb_interrupt : uint8
     vblank = 0x01
 };
 
-enum class gb_state : uint
+enum class gb_state
 {
     halted = 0,
     cpu_active = 1,
     dma = 2
 };
 
-enum class gb_event : uint
+enum class gb_event : size_t
 {
     switch_double_speed = 0,
     timer_overflow = 1,
@@ -71,7 +71,7 @@ enum class gb_event : uint
 
 
 
-constexpr uint gb_no_cycle = uint_max;
+constexpr int32_t gb_no_cycle = -1;
 constexpr int32_t gb_machine_cycles_per_second = 4194304;
 
 #define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
@@ -93,8 +93,8 @@ class gb_core
 {
 public:
 
-    uint get_oscillation_cycle() const;
-    uint get_machine_cycles_per_cpu_cycle() const;
+    int32_t get_oscillation_cycle() const;
+    int32_t get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
     bool is_cgb() const; //!< get_mode() == gb_mode::cgb
     bool is_cgb_hardware() const; //!< get_mode() != gb_mode::dmg
@@ -103,11 +103,11 @@ public:
 
     void oscillate_cpu_cycle();
     void oscillate_2_cycles();
-    void insert_event(uint oscillation_cycle_offset, gb_event event);
+    void insert_event(int32_t oscillation_cycle_offset, gb_event event);
     void remove_event(gb_event event);
     gb_event poll_event();
-    uint get_event_cycle(gb_event event) const;
-    void set_back_cycles(uint offset);
+    int32_t get_event_cycle(gb_event event) const;
+    void set_back_cycles(int32_t offset);
 
     void start_dma();
     void finish_dma();
@@ -141,18 +141,18 @@ private:
 
         gb_events();
 
-        uint get_event_cycle(gb_event event) const;
+        int32_t get_event_cycle(gb_event event) const;
 
-        gb_event poll_event(uint current_cycle);
-        void insert_event(uint for_cycle, gb_event event);
+        gb_event poll_event(int32_t current_cycle);
+        void insert_event(int32_t for_cycle, gb_event event);
 
-        void set_back_cycles(uint offset);
+        void set_back_cycles(int32_t offset);
 
     private:
 
         // the following two members should be replaced by some better suited data structure(s)
-        std::multimap<uint, gb_event> m_events;
-        std::array<uint, to_integral(gb_event::none)> m_event_cycle;
+        std::multimap<int32_t, gb_event> m_events;
+        std::array<int32_t, to_integral(gb_event::none)> m_event_cycle;
     };
 
 
@@ -162,8 +162,8 @@ private:
     const gb_mode m_mode;
     gb_state m_state = gb_state::cpu_active;
 
-    uint m_oscillation_cycle = 0;
-    uint m_machine_cycles_per_cpu_cycle = 4;
+    int32_t m_oscillation_cycle = 0;
+    int32_t m_machine_cycles_per_cpu_cycle = 4;
 
     bool m_halt = false;
     bool m_ei = false;

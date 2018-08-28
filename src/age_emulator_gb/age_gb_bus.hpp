@@ -137,7 +137,7 @@ public:
     void handle_events();
     void handle_dma();
 
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int32_t offset);
 
 private:
 
@@ -165,13 +165,13 @@ private:
 
     uint8 m_oam_dma_byte;
     bool m_oam_dma_active = false;
-    uint m_oam_dma_address = 0;
-    uint m_oam_dma_offset = 0;
-    uint m_oam_dma_last_cycle = gb_no_cycle;
+    int32_t m_oam_dma_address = 0;
+    int32_t m_oam_dma_offset = 0;
+    int32_t m_oam_dma_last_cycle = gb_no_cycle;
 
     uint8 m_hdma5 = 0xFF;
-    uint m_dma_source = 0;
-    uint m_dma_destination = 0;
+    int32_t m_dma_source = 0;
+    int32_t m_dma_destination = 0;
 };
 
 } // namespace age

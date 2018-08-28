@@ -516,7 +516,7 @@ void age::gb_bus::handle_dma()
     uint8 dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
 
     // calculate number of bytes to copy and update remaining DMA length
-    uint bytes = m_lcd.is_hdma_active() ? 0x10 : dma_length * 0x10;
+    int32_t bytes = m_lcd.is_hdma_active() ? 0x10 : dma_length * 0x10;
     AGE_ASSERT(bytes <= 0x800);
     AGE_ASSERT((bytes & 0xF) == 0);
     LOG("DMA copying " << bytes << " bytes");
@@ -553,7 +553,7 @@ void age::gb_bus::handle_dma()
     //
 
     // copy bytes
-    for (uint i = 0; i < bytes; ++i)
+    for (int32_t i = 0; i < bytes; ++i)
     {
         uint8 byte = 0xFF;
         uint16 src = m_dma_source & 0xFFFF;
@@ -589,7 +589,7 @@ void age::gb_bus::handle_dma()
 
 
 
-void age::gb_bus::set_back_cycles(uint offset)
+void age::gb_bus::set_back_cycles(int32_t offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_oam_dma_last_cycle, offset);
 }
@@ -633,7 +633,7 @@ void age::gb_bus::write_dma(uint8 value)
     //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
     //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
     //
-    uint factor = m_core.is_cgb() ? 1 : 2;
+    int32_t factor = m_core.is_cgb() ? 1 : 2;
     m_core.insert_event(m_core.get_machine_cycles_per_cpu_cycle() * factor, gb_event::start_oam_dma);
 }
 
@@ -696,16 +696,16 @@ void age::gb_bus::handle_oam_dma()
 {
     AGE_ASSERT(m_oam_dma_active);
 
-    uint oscillation_cycle = m_core.get_oscillation_cycle();
-    uint cycles_elapsed = oscillation_cycle - m_oam_dma_last_cycle;
+    int32_t oscillation_cycle = m_core.get_oscillation_cycle();
+    int32_t cycles_elapsed = oscillation_cycle - m_oam_dma_last_cycle;
     cycles_elapsed &= ~(m_core.get_machine_cycles_per_cpu_cycle() - 1);
     m_oam_dma_last_cycle += cycles_elapsed;
     cycles_elapsed <<= m_core.is_double_speed() ? 1 : 0;
 
     AGE_ASSERT((cycles_elapsed & 3) == 0);
-    uint bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
+    int32_t bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
 
-    for (uint i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
+    for (int32_t i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
     {
         uint8 byte = read_byte(static_cast<uint16>(m_oam_dma_address + i));
         m_lcd.get_oam()[static_cast<uint16>(i)] = byte;
