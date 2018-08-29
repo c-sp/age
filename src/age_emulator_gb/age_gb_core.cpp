@@ -15,6 +15,7 @@
 //
 
 #include <algorithm>
+#include <limits>
 #include <ios> // std::hex
 
 #include <age_debug.hpp>
@@ -87,7 +88,7 @@ age::int32_t age::gb_core::get_oscillation_cycle() const
     return m_oscillation_cycle;
 }
 
-age::int32_t age::gb_core::get_machine_cycles_per_cpu_cycle() const
+age::int8_t age::gb_core::get_machine_cycles_per_cpu_cycle() const
 {
     return m_machine_cycles_per_cpu_cycle;
 }
@@ -131,7 +132,8 @@ void age::gb_core::oscillate_2_cycles()
 
 void age::gb_core::insert_event(int32_t cycle_offset, gb_event event)
 {
-    AGE_ASSERT(m_oscillation_cycle + cycle_offset >= m_oscillation_cycle); // check for overflow
+    AGE_ASSERT(cycle_offset >= 0);
+    AGE_ASSERT(std::numeric_limits<int32_t>::max() - cycle_offset >= m_oscillation_cycle);
     m_events.insert_event(m_oscillation_cycle + cycle_offset, event);
 }
 
@@ -174,7 +176,7 @@ void age::gb_core::request_interrupt(gb_interrupt interrupt)
 {
     m_if |= to_integral(interrupt);
     check_halt_mode();
-    LOG("interrupt requested: " << (uint)to_integral(interrupt));
+    LOG("interrupt requested: " << (int)to_integral(interrupt));
 }
 
 void age::gb_core::ei_delayed()
@@ -243,12 +245,12 @@ bool age::gb_core::must_service_interrupt()
     }
     else if (m_ime)
     {
-        uint8 interrupt = m_ie & m_if & 0x1F;
+        int interrupt = m_ie & m_if & 0x1F;
         result = (interrupt > 0);
 
         if (result)
         {
-            LOG("noticed interrupt 0x" << std::hex << (uint)interrupt << std::dec);
+            LOG("noticed interrupt 0x" << std::hex << (int)interrupt << std::dec);
             AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
             m_ime = false; // disable interrupts
         }
@@ -257,11 +259,11 @@ bool age::gb_core::must_service_interrupt()
     return result;
 }
 
-age::uint8 age::gb_core::get_interrupt_to_service()
+age::uint8_t age::gb_core::get_interrupt_to_service()
 {
     AGE_ASSERT(m_state == gb_state::cpu_active);
 
-    uint8 interrupt = m_ie & m_if & 0x1F;
+    uint8_t interrupt = m_ie & m_if & 0x1F;
     if (interrupt > 0)
     {
         // lower interrupt bits have higher priority
@@ -284,40 +286,40 @@ age::uint8 age::gb_core::get_interrupt_to_service()
 
 
 
-age::uint8 age::gb_core::read_key1() const
+age::uint8_t age::gb_core::read_key1() const
 {
     return m_key1;
 }
 
-age::uint8 age::gb_core::read_if() const
+age::uint8_t age::gb_core::read_if() const
 {
-    LOG("0x" << std::hex << (uint)m_if << std::dec);
+    LOG("0x" << std::hex << (int)m_if << std::dec);
     return m_if;
 }
 
-age::uint8 age::gb_core::read_ie() const
+age::uint8_t age::gb_core::read_ie() const
 {
     return m_ie;
 }
 
 
 
-void age::gb_core::write_key1(uint8 value)
+void age::gb_core::write_key1(uint8_t value)
 {
-    LOG("0x" << std::hex << (uint)value << std::dec);
+    LOG("0x" << std::hex << (int)value << std::dec);
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
 }
 
-void age::gb_core::write_if(uint8 value)
+void age::gb_core::write_if(uint8_t value)
 {
-    LOG("0x" << std::hex << (uint)value << std::dec);
+    LOG("0x" << std::hex << (int)value << std::dec);
     m_if = value | 0xE0;
     check_halt_mode();
 }
 
-void age::gb_core::write_ie(uint8 value)
+void age::gb_core::write_ie(uint8_t value)
 {
-    LOG("0x" << std::hex << (uint)value << std::dec);
+    LOG("0x" << std::hex << (int)value << std::dec);
     m_ie = value;
     check_halt_mode();
 }
@@ -364,7 +366,7 @@ void age::gb_core::check_halt_mode()
 
 age::gb_core::gb_events::gb_events()
 {
-    for (uint i = 0; i < m_event_cycle.size(); ++i)
+    for (size_t i = 0; i < m_event_cycle.size(); ++i)
     {
         m_event_cycle[i] = gb_no_cycle;
     }
@@ -413,7 +415,7 @@ void age::gb_core::gb_events::insert_event(int32_t for_cycle, gb_event event)
 
     if (for_cycle != gb_no_cycle)
     {
-        m_events.insert(std::pair<uint, gb_event>(for_cycle, event));
+        m_events.insert(std::pair<int32_t, gb_event>(for_cycle, event));
     }
     m_event_cycle[event_id] = for_cycle;
 }

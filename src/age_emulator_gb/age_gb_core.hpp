@@ -55,7 +55,7 @@ enum class gb_state
     dma = 2
 };
 
-enum class gb_event : size_t
+enum class gb_event : uint8_t
 {
     switch_double_speed = 0,
     timer_overflow = 1,
@@ -73,6 +73,8 @@ enum class gb_event : size_t
 
 constexpr int32_t gb_no_cycle = -1;
 constexpr int32_t gb_machine_cycles_per_second = 4194304;
+
+
 
 #define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
     if (value != gb_no_cycle) { \
@@ -94,7 +96,7 @@ class gb_core
 public:
 
     int32_t get_oscillation_cycle() const;
-    int32_t get_machine_cycles_per_cpu_cycle() const;
+    int8_t get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
     bool is_cgb() const; //!< get_mode() == gb_mode::cgb
     bool is_cgb_hardware() const; //!< get_mode() != gb_mode::dmg
@@ -119,15 +121,15 @@ public:
     bool halt();
     void stop();
     bool must_service_interrupt();
-    uint8 get_interrupt_to_service();
+    uint8_t get_interrupt_to_service();
 
-    uint8 read_key1() const;
-    uint8 read_ie() const;
-    uint8 read_if() const;
+    uint8_t read_key1() const;
+    uint8_t read_ie() const;
+    uint8_t read_if() const;
 
-    void write_key1(uint8 value);
-    void write_ie(uint8 value);
-    void write_if(uint8 value);
+    void write_key1(uint8_t value);
+    void write_ie(uint8_t value);
+    void write_if(uint8_t value);
 
     gb_core(gb_mode mode);
 
@@ -163,16 +165,16 @@ private:
     gb_state m_state = gb_state::cpu_active;
 
     int32_t m_oscillation_cycle = 0;
-    int32_t m_machine_cycles_per_cpu_cycle = 4;
+    int8_t m_machine_cycles_per_cpu_cycle = 4;
 
     bool m_halt = false;
     bool m_ei = false;
     bool m_ime = false;
     bool m_double_speed = false;
 
-    uint8 m_key1 = 0x7E;
-    uint8 m_if = 0xE0;
-    uint8 m_ie = 0;
+    uint8_t m_key1 = 0x7E;
+    uint8_t m_if = 0xE0;
+    uint8_t m_ie = 0;
 
     gb_events m_events;
 };
