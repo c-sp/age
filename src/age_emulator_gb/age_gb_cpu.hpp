@@ -49,23 +49,23 @@ private:
     gb_core &m_core;
     gb_bus &m_bus;
 
-    uint m_zero_indicator = 0;
-    uint m_carry_indicator = 0;
-    uint m_hcs_flags = 0; //!< first operand and additional flags of the last instruction relevant for subtract- and half-carry-flag
-    uint m_hcs_operand = 0; //!< second operand of the last instruction relevant for subtract- and half-carry-flag
+    int32_t m_zero_indicator = 0;
+    int32_t m_carry_indicator = 0;
+    int32_t m_hcs_flags = 0; //!< first operand and additional flags of the last instruction relevant for subtract- and half-carry-flag
+    int32_t m_hcs_operand = 0; //!< second operand of the last instruction relevant for subtract- and half-carry-flag
 
     bool m_next_byte_twice = false;
     bool m_mooneye_debug_op = false; //!< used to indicate the finishing of a mooneye-gb test
-    uint16 m_pc = 0;
-    uint16 m_sp = 0;
+    uint16_t m_pc = 0;
+    uint16_t m_sp = 0;
 
-    uint8 m_a = 0;
-    uint8 m_b = 0;
-    uint8 m_c = 0;
-    uint8 m_d = 0;
-    uint8 m_e = 0;
-    uint8 m_h = 0;
-    uint8 m_l = 0;
+    uint8_t m_a = 0;
+    uint8_t m_b = 0;
+    uint8_t m_c = 0;
+    uint8_t m_d = 0;
+    uint8_t m_e = 0;
+    uint8_t m_h = 0;
+    uint8_t m_l = 0;
 };
 
 } // namespace age
