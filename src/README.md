@@ -34,46 +34,20 @@ The following _groups_ exist:
     making specific C++ methods callable from JavaScript.
 
 
-## Code Quality
+## C++ Code Quality
 
-AGE code sticks to the following rules:
+Do not violate the **single responsibility principle**.
+    Unrelated functionality must not be grouped together
+    (i.e. in the same file).
 
-### C++
+### Namespaces
 
 1. **Don't put `using namespace` statements in header files.**
     All consumers of this header file would be forced to live with that
     namespace usage as it cannot be undone.
 1. **Avoid `using namespace`** statements in cpp files.
-1. Do not violate the **single responsibility principle**.
-    Unrelated functionality must not be grouped together
-    (i.e. in the same file).
 
-#### Data Types
-
-1. **Use `unsigned`** for [bit manipulation](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es101-use-unsigned-types-for-bit-manipulation).
-1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
-1. **Use `signed`** until there is a very specific reason to not do so.
-    Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic)
-    and `signed` integer overflow being undefined
-    [enables several compiler optimizations](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
-    (`unsigned` overflow being well defined may prevent compiler optimizations
-    though).
-1. **Avoid `std::int_fast##_t`** since AGE is
-    [not explicitly tested for that](https://stackoverflow.com/a/36161722).
-    Additionally, allocating memory for these types might trigger more memory
-    to be allocated than actually required
-    (which in turn might cause more processor cache misses).
-1. **Use fixed width integer types (`std::int##_t` and `std::uint##_t`).**
-    Don't rely on the width of fundamental types (`int`, `long`, etc.)
-    as they [vary depending on the data model](https://en.cppreference.com/w/cpp/language/types).
-
-AGE code uses `unsigned` only for:
-* values representing a piece of emulated hardware (e.g. Gameboy CPU registers
-    or Gameboy memory)
-* code interacting with STL containers (e.g. `size_t std::vector::size()`
-    or using `std::vector::operator[size_t]`)
-
-#### Includes
+### Includes
 
 1. **Use include guards** in every header file.
     Use the file's name converted to "screaming snake case" for it's include
@@ -84,4 +58,40 @@ AGE code uses `unsigned` only for:
 1. **Include everything a file needs.**
     Don't rely on transitive includes or the include order in cpp files.
 
+### Data Types
 
+1. **Use `unsigned`** for [bit manipulation](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es101-use-unsigned-types-for-bit-manipulation).
+1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
+1. **Use `signed`** until there is a very specific reason to not do so.
+    Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic).
+    `signed` integer overflow being undefined
+    [enables several compiler optimizations](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
+    (`unsigned` overflow being well defined may prevent compiler optimizations
+    though).
+
+AGE code uses `unsigned` only for values representing emulated hardware
+(e.g. Gameboy CPU registers, Gameboy memory)
+and when interacting with STL containers
+(e.g. `size_t std::vector::size()` or `std::vector::operator[size_t]`).
+
+**Class data members:**
+
+1. **Avoid `std::int_fast##_t`** since these types might allocate more memory
+    than actually required
+    (which in turn might cause more processor cache misses).
+1. **Use fixed width integer types (`std::int##_t` and `std::uint##_t`).**
+    Don't rely on the width of fundamental types (`int`, `long`, etc.)
+    as they
+    [vary depending on the data model](https://en.cppreference.com/w/cpp/language/types#Properties).
+
+**Arithmetic:**
+
+1. **Assume `int` to be at least 32 bits wide**.
+    While the C++ standard and the (old) LP32 data model requires `int` to be
+    [(at least) 16 bits wide](https://en.cppreference.com/w/cpp/language/types#Properties),
+    all current data models seem to use 32 bits or more for type `int`.
+    AGE static-asserts `int` to be at least 32 bits wide.
+1. **Using `int`** as intermediate data type for arithmetic operations is
+    preferred since for arithmetic operators
+    [integral values will be promoted to `int`](https://en.cppreference.com/w/cpp/language/implicit_conversion#Integral_promotion)
+    anyway.
