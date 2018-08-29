@@ -545,58 +545,70 @@ constexpr int32_t gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 // ----- loads
 
 // LD 8 bit value from memory
-#define LD_IMM8_MEM_HL { \
-    uint _value; \
-    POP_BYTE_AT_PC(_value); \
-    WRITE_BYTE(LOAD_HL, _value); \
-    }
+#define LD_IMM8_MEM_HL \
+    { \
+        int value; \
+        POP_BYTE_AT_PC(value); \
+        WRITE_BYTE(LOAD_HL, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // LD HL, SP + n (12 cycles)
 // flags set according to ADD SP, n
-#define LD_HL_SP_ADD { \
-    uint16 _sp_bak = m_sp; \
-    ADD_SP; \
-    m_h = static_cast<uint8>(m_sp >> 8); \
-    m_l = static_cast<uint8>(m_sp); \
-    m_sp = _sp_bak; \
-    INC_CYCLES; \
-    }
+#define LD_HL_SP_ADD \
+    { \
+        uint16_t sp_bak = m_sp; \
+        ADD_SP; \
+        m_h = (m_sp >> 8) & 0xFF; \
+        m_l = m_sp & 0xFF; \
+        m_sp = sp_bak; \
+        INC_CYCLES; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 
 // ----- bit operations
 
 // bit-test 8 bit value
 // carry = unmodified, subtract = cleared, half = set, zero calculated
-#define BIT(value, opcode) { \
-    m_zero_indicator = value & CB_BIT(opcode); \
-    m_hcs_flags = m_hcs_operand = 0x08; \
-    }
+#define BIT(value, opcode) \
+    { \
+        m_zero_indicator = value & CB_BIT(opcode); \
+        m_hcs_flags = m_hcs_operand = 0x08; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define BIT_MEM_HL(opcode) { \
-    uint8 _value; \
-    READ_BYTE(_value, LOAD_HL); \
-    BIT(_value, opcode) \
-    }
+#define BIT_MEM_HL(opcode) \
+    { \
+        int value; \
+        READ_BYTE(value, LOAD_HL); \
+        BIT(value, opcode); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // reset bit in 8 bit value
 // carry, zero, subtract, half = unmodified
-#define RES_MEM_HL(opcode) { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    _value &= ~CB_BIT(opcode); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define RES_MEM_HL(opcode) \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        value &= ~CB_BIT(opcode); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // set bit in 8 bit value
 // carry, zero, subtract, half = unmodified
-#define SET_MEM_HL(opcode) { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    _value |= CB_BIT(opcode); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define SET_MEM_HL(opcode) \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        value |= CB_BIT(opcode); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 
 
@@ -604,165 +616,203 @@ constexpr int32_t gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // RLC 8 bit value
 // half & subtract = cleared, carry = old bit 7, zero calculated (RLCA: zero = cleared)
-#define RLC(value) { \
-    m_hcs_flags = 0; \
-    m_carry_indicator = value; \
-    m_carry_indicator <<= 1; \
-    m_zero_indicator = m_carry_indicator + (m_carry_indicator >> 8); \
-    value = static_cast<uint8>(m_zero_indicator); \
-    }
+#define RLC(value) \
+    { \
+        m_hcs_flags = 0; \
+        m_carry_indicator = value << 1; \
+        m_zero_indicator = m_carry_indicator + (m_carry_indicator >> 8); \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RLCA { \
-    RLC(m_a) \
-    m_zero_indicator = 1; \
-    }
+#define RLCA \
+    { \
+        RLC(m_a); \
+        m_zero_indicator = 1; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RLC_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    RLC(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define RLC_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        RLC(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // RL 8 bit value
 // half & subtract = cleared, carry = old bit 7, zero calculated (RLA: zero = cleared)
-#define RL(value) { \
-    m_hcs_flags = 0; \
-    uint _old_carry_bit = CARRY_INDICATOR_FLAG >> 8; \
-    m_carry_indicator = value; \
-    m_carry_indicator <<= 1; \
-    m_zero_indicator = m_carry_indicator + _old_carry_bit; \
-    value = static_cast<uint8>(m_zero_indicator); \
-    }
+#define RL(value) \
+    { \
+        m_hcs_flags = 0; \
+        int old_carry_bit = CARRY_INDICATOR_FLAG >> 8; \
+        m_carry_indicator = value << 1; \
+        m_zero_indicator = m_carry_indicator + old_carry_bit; \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RLA { \
-    RL(m_a) \
-    m_zero_indicator = 1; \
-    }
+#define RLA \
+    { \
+        RL(m_a); \
+        m_zero_indicator = 1; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RL_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    RL(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define RL_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        RL(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // RRC 8 bit value
 // half & subtract = cleared, carry = old bit 0, zero calculated
-#define RRC(value) { \
-    m_hcs_flags = 0; \
-    m_zero_indicator = value; \
-    m_carry_indicator = m_zero_indicator << 8; \
-    value = static_cast<uint8>((m_carry_indicator + m_zero_indicator) >> 1); \
-    }
+#define RRC(value) \
+    { \
+        m_hcs_flags = 0; \
+        m_zero_indicator = value; \
+        m_carry_indicator = m_zero_indicator << 8; \
+        value = ((m_carry_indicator + m_zero_indicator) >> 1) & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RRCA { \
-    RRC(m_a) \
-    m_zero_indicator = 1; \
-    }
+#define RRCA \
+    { \
+        RRC(m_a); \
+        m_zero_indicator = 1; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RRC_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    RRC(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define RRC_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        RRC(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // RR 8 bit value
 // half & subtract = cleared, carry = old bit 0, zero calculated
-#define RR(value) { \
-    m_hcs_flags = 0; \
-    m_zero_indicator = value + CARRY_INDICATOR_FLAG; \
-    m_carry_indicator = m_zero_indicator << 8; \
-    m_zero_indicator >>= 1; \
-    value = static_cast<uint8>(m_zero_indicator); \
-    }
+#define RR(value) \
+    { \
+        m_hcs_flags = 0; \
+        m_zero_indicator = value + CARRY_INDICATOR_FLAG; \
+        m_carry_indicator = m_zero_indicator << 8; \
+        m_zero_indicator >>= 1; \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RRA { \
-    RR(m_a) \
-    m_zero_indicator = 1; \
-    }
+#define RRA \
+    { \
+        RR(m_a); \
+        m_zero_indicator = 1; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define RR_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    RR(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define RR_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        RR(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // SLA 8 bit value
 // half & subtract = cleared, carry & zero calculated
-#define SLA(value) { \
-    m_hcs_flags = 0; \
-    m_zero_indicator = value; \
-    m_zero_indicator <<= 1; \
-    m_carry_indicator = m_zero_indicator; \
-    value = static_cast<uint8>(m_zero_indicator); \
-    }
+#define SLA(value) \
+    { \
+        m_hcs_flags = 0; \
+        m_zero_indicator = value << 1; \
+        m_carry_indicator = m_zero_indicator; \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define SLA_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    SLA(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define SLA_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        SLA(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // SRA 8 bit value
 // half & subtract = cleared, carry & zero calculated
-#define SRA(value) { \
-    m_hcs_flags = 0; \
-    m_zero_indicator = value; \
-    m_carry_indicator = m_zero_indicator << 8; \
-    m_zero_indicator >>= 1; \
-    m_zero_indicator += value & 0x80; \
-    value = static_cast<uint8>(m_zero_indicator); \
-    }
+#define SRA(value) \
+    { \
+        m_hcs_flags = 0; \
+        m_zero_indicator = value; \
+        m_carry_indicator = m_zero_indicator << 8; \
+        m_zero_indicator >>= 1; \
+        m_zero_indicator += value & 0x80; \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define SRA_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    SRA(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define SRA_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        SRA(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // SRL 8 bit value
 // half & subtract = cleared, carry & zero calculated
-#define SRL(value) { \
-    m_hcs_flags = 0; \
-    m_zero_indicator = value; \
-    m_carry_indicator = m_zero_indicator << 8; \
-    m_zero_indicator >>= 1; \
-    value = static_cast<uint8>(m_zero_indicator); \
-    }
+#define SRL(value) \
+    { \
+        m_hcs_flags = 0; \
+        m_zero_indicator = value; \
+        m_carry_indicator = m_zero_indicator << 8; \
+        m_zero_indicator >>= 1; \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define SRL_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    SRL(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define SRL_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        SRL(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 // SWAP 8 bit value
 // half & subtract & carry = cleared, zero calculated
-#define SWAP(value) { \
-    m_hcs_flags = m_carry_indicator = 0; \
-    m_zero_indicator = value = (value << 4) + (value >> 4); \
-    }
+#define SWAP(value) \
+    { \
+        m_hcs_flags = m_carry_indicator = 0; \
+        m_zero_indicator = (value << 4) + (value >> 4); \
+        value = m_zero_indicator & 0xFF; \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
-#define SWAP_MEM_HL { \
-    uint8 _value; \
-    uint16 _hl = LOAD_HL; \
-    READ_BYTE(_value, _hl); \
-    SWAP(_value); \
-    WRITE_BYTE(_hl, _value); \
-    }
+#define SWAP_MEM_HL \
+    { \
+        int value; \
+        int hl = LOAD_HL; \
+        READ_BYTE(value, hl); \
+        SWAP(value); \
+        WRITE_BYTE(hl, value); \
+    } \
+    (void)0 // no-op to force semicolon when using this macro
 
 
 
@@ -914,7 +964,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x1E: POP_BYTE_AT_PC(m_e); break; // LD E, x (8 cycles)
         case 0x26: POP_BYTE_AT_PC(m_h); break; // LD H, x (8 cycles)
         case 0x2E: POP_BYTE_AT_PC(m_l); break; // LD L, x (8 cycles)
-        case 0x36: LD_IMM8_MEM_HL break;      // LD [HL], x (12 cycles)
+        case 0x36: LD_IMM8_MEM_HL; break;      // LD [HL], x (12 cycles)
         case 0x3E: POP_BYTE_AT_PC(m_a); break; // LD A, x (8 cycles)
 
         case 0x40: m_mooneye_debug_op = true; break; // LD B, B (4 cycles)
@@ -993,7 +1043,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x12: WRITE_BYTE(LOAD_DE, m_a); break; // LD [DE], A
         case 0x1A: READ_BYTE(m_a, LOAD_DE); break;  // LD A, [DE]
 
-        case 0xF8: LD_HL_SP_ADD break; // LD HL, SP + x
+        case 0xF8: LD_HL_SP_ADD; break; // LD HL, SP + x
         case 0xF9: m_sp = LOAD_HL & 0xFFFF; INC_CYCLES; break; // LD SP, HL (8 cycles)
         case 0x08: { int address; POP_WORD_AT_PC(address); WRITE_WORD(address, m_sp); } break; // LD [xx], SP
 
@@ -1218,77 +1268,77 @@ void age::gb_cpu::emulate_instruction()
             {
                 // rotates & shifts
 
-                case 0x00: RLC(m_b) break;
-                case 0x01: RLC(m_c) break;
-                case 0x02: RLC(m_d) break;
-                case 0x03: RLC(m_e) break;
-                case 0x04: RLC(m_h) break;
-                case 0x05: RLC(m_l) break;
-                case 0x06: RLC_MEM_HL break;
-                case 0x07: RLC(m_a) break;
+                case 0x00: RLC(m_b); break;
+                case 0x01: RLC(m_c); break;
+                case 0x02: RLC(m_d); break;
+                case 0x03: RLC(m_e); break;
+                case 0x04: RLC(m_h); break;
+                case 0x05: RLC(m_l); break;
+                case 0x06: RLC_MEM_HL; break;
+                case 0x07: RLC(m_a); break;
 
-                case 0x08: RRC(m_b) break;
-                case 0x09: RRC(m_c) break;
-                case 0x0A: RRC(m_d) break;
-                case 0x0B: RRC(m_e) break;
-                case 0x0C: RRC(m_h) break;
-                case 0x0D: RRC(m_l) break;
-                case 0x0E: RRC_MEM_HL break;
-                case 0x0F: RRC(m_a) break;
+                case 0x08: RRC(m_b); break;
+                case 0x09: RRC(m_c); break;
+                case 0x0A: RRC(m_d); break;
+                case 0x0B: RRC(m_e); break;
+                case 0x0C: RRC(m_h); break;
+                case 0x0D: RRC(m_l); break;
+                case 0x0E: RRC_MEM_HL; break;
+                case 0x0F: RRC(m_a); break;
 
-                case 0x10: RL(m_b) break;
-                case 0x11: RL(m_c) break;
-                case 0x12: RL(m_d) break;
-                case 0x13: RL(m_e) break;
-                case 0x14: RL(m_h) break;
-                case 0x15: RL(m_l) break;
-                case 0x16: RL_MEM_HL break;
-                case 0x17: RL(m_a) break;
+                case 0x10: RL(m_b); break;
+                case 0x11: RL(m_c); break;
+                case 0x12: RL(m_d); break;
+                case 0x13: RL(m_e); break;
+                case 0x14: RL(m_h); break;
+                case 0x15: RL(m_l); break;
+                case 0x16: RL_MEM_HL; break;
+                case 0x17: RL(m_a); break;
 
-                case 0x18: RR(m_b) break;
-                case 0x19: RR(m_c) break;
-                case 0x1A: RR(m_d) break;
-                case 0x1B: RR(m_e) break;
-                case 0x1C: RR(m_h) break;
-                case 0x1D: RR(m_l) break;
-                case 0x1E: RR_MEM_HL break;
-                case 0x1F: RR(m_a) break;
+                case 0x18: RR(m_b); break;
+                case 0x19: RR(m_c); break;
+                case 0x1A: RR(m_d); break;
+                case 0x1B: RR(m_e); break;
+                case 0x1C: RR(m_h); break;
+                case 0x1D: RR(m_l); break;
+                case 0x1E: RR_MEM_HL; break;
+                case 0x1F: RR(m_a); break;
 
-                case 0x20: SLA(m_b) break;
-                case 0x21: SLA(m_c) break;
-                case 0x22: SLA(m_d) break;
-                case 0x23: SLA(m_e) break;
-                case 0x24: SLA(m_h) break;
-                case 0x25: SLA(m_l) break;
-                case 0x26: SLA_MEM_HL break;
-                case 0x27: SLA(m_a) break;
+                case 0x20: SLA(m_b); break;
+                case 0x21: SLA(m_c); break;
+                case 0x22: SLA(m_d); break;
+                case 0x23: SLA(m_e); break;
+                case 0x24: SLA(m_h); break;
+                case 0x25: SLA(m_l); break;
+                case 0x26: SLA_MEM_HL; break;
+                case 0x27: SLA(m_a); break;
 
-                case 0x28: SRA(m_b) break;
-                case 0x29: SRA(m_c) break;
-                case 0x2A: SRA(m_d) break;
-                case 0x2B: SRA(m_e) break;
-                case 0x2C: SRA(m_h) break;
-                case 0x2D: SRA(m_l) break;
-                case 0x2E: SRA_MEM_HL break;
-                case 0x2F: SRA(m_a) break;
+                case 0x28: SRA(m_b); break;
+                case 0x29: SRA(m_c); break;
+                case 0x2A: SRA(m_d); break;
+                case 0x2B: SRA(m_e); break;
+                case 0x2C: SRA(m_h); break;
+                case 0x2D: SRA(m_l); break;
+                case 0x2E: SRA_MEM_HL; break;
+                case 0x2F: SRA(m_a); break;
 
-                case 0x30: SWAP(m_b) break;
-                case 0x31: SWAP(m_c) break;
-                case 0x32: SWAP(m_d) break;
-                case 0x33: SWAP(m_e) break;
-                case 0x34: SWAP(m_h) break;
-                case 0x35: SWAP(m_l) break;
-                case 0x36: SWAP_MEM_HL break;
-                case 0x37: SWAP(m_a) break;
+                case 0x30: SWAP(m_b); break;
+                case 0x31: SWAP(m_c); break;
+                case 0x32: SWAP(m_d); break;
+                case 0x33: SWAP(m_e); break;
+                case 0x34: SWAP(m_h); break;
+                case 0x35: SWAP(m_l); break;
+                case 0x36: SWAP_MEM_HL; break;
+                case 0x37: SWAP(m_a); break;
 
-                case 0x38: SRL(m_b) break;
-                case 0x39: SRL(m_c) break;
-                case 0x3A: SRL(m_d) break;
-                case 0x3B: SRL(m_e) break;
-                case 0x3C: SRL(m_h) break;
-                case 0x3D: SRL(m_l) break;
-                case 0x3E: SRL_MEM_HL break;
-                case 0x3F: SRL(m_a) break;
+                case 0x38: SRL(m_b); break;
+                case 0x39: SRL(m_c); break;
+                case 0x3A: SRL(m_d); break;
+                case 0x3B: SRL(m_e); break;
+                case 0x3C: SRL(m_h); break;
+                case 0x3D: SRL(m_l); break;
+                case 0x3E: SRL_MEM_HL; break;
+                case 0x3F: SRL(m_a); break;
 
                     // bit test
 
