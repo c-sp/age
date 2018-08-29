@@ -33,9 +33,9 @@
 namespace age
 {
 
-constexpr uint gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
-constexpr uint gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
-constexpr uint gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);
+constexpr int8_t gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
+constexpr int32_t gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
+constexpr int32_t gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);
 
 constexpr uint8 gb_nrX4_length_counter = 0x40;
 constexpr uint8 gb_nrX4_initialize = 0x80;
@@ -47,12 +47,12 @@ class gb_sample_generator
 {
 public:
 
-    uint get_cycles_per_sample() const
+    int32_t get_cycles_per_sample() const
     {
         return m_cycles_per_sample;
     }
 
-    uint get_cycles_next_sample() const
+    int32_t get_cycles_next_sample() const
     {
         return m_cycles_next_sample;
     }
@@ -72,18 +72,18 @@ public:
         calculate_sample();
     }
 
-    uint generate(pcm_vector &buffer, uint buffer_index, uint cycles_elapsed)
+    int32_t generate(pcm_vector &buffer, uint buffer_index, int32_t cycles_elapsed)
     {
         AGE_ASSERT(m_cycles_per_sample != 0);
         AGE_ASSERT((cycles_elapsed % gb_cycles_per_sample) == 0);
 
-        uint last_sample_change = uint_max;
+        int32_t last_sample_change = -1;
 
-        for (uint cycles_remaining = cycles_elapsed; cycles_remaining > 0; )
+        for (int32_t cycles_remaining = cycles_elapsed; cycles_remaining > 0; )
         {
             // write one and the same sample until we have to calculate the next one
-            uint cycles = std::min(cycles_remaining, m_cycles_next_sample) & gb_cycle_sample_mask;
-            uint samples_to_write = cycles >> gb_sample_cycle_shift;
+            int32_t cycles = std::min(cycles_remaining, m_cycles_next_sample) & gb_cycle_sample_mask;
+            int32_t samples_to_write = cycles >> gb_sample_cycle_shift;
             AGE_ASSERT((cycles % gb_cycles_per_sample) == 0);
 
             for (uint max = buffer_index + samples_to_write; buffer_index < max; ++buffer_index)
@@ -109,7 +109,7 @@ public:
 
 protected:
 
-    void set_cycles_per_sample(uint cycles_per_sample)
+    void set_cycles_per_sample(int32_t cycles_per_sample)
     {
         AGE_ASSERT(cycles_per_sample > 0);
         AGE_ASSERT(cycles_per_sample >= gb_cycles_per_sample);
@@ -117,7 +117,7 @@ protected:
         m_cycles_per_sample = cycles_per_sample;
     }
 
-    void set_cycles_next_sample(uint cycles_next_sample)
+    void set_cycles_next_sample(int32_t cycles_next_sample)
     {
         m_cycles_next_sample = cycles_next_sample;
     }
@@ -139,8 +139,8 @@ private:
         m_current_multiplied_sample = value * m_channel_multiplier;
     }
 
-    uint m_cycles_per_sample = 0;
-    uint m_cycles_next_sample = 0;
+    int32_t m_cycles_per_sample = 0;
+    int32_t m_cycles_next_sample = 0;
 
     uint32 m_channel_multiplier = 0;
     uint8 m_volume = 15;

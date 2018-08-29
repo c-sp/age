@@ -152,8 +152,8 @@ void age::gb_noise_generator::write_nrX3(uint8 nrX3)
     m_7steps = (m_nrX3 & 0x08) > 0;
     m_allow_shift = m_nrX3 < 0xE0;
 
-    uint ratio = m_nrX3 & 0x07;
-    uint shift = (m_nrX3 >> 4) + 4;
+    int ratio = m_nrX3 & 0x07;
+    int shift = (m_nrX3 >> 4) + 4;
 
     if (ratio == 0)
     {
@@ -161,7 +161,7 @@ void age::gb_noise_generator::write_nrX3(uint8 nrX3)
         --shift;
     }
 
-    uint cycles = ratio << shift;
+    int cycles = ratio << shift;
     set_cycles_per_sample(cycles);
 }
 
