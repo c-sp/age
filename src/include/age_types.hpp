@@ -23,9 +23,11 @@
 
 #include <array>
 #include <cstdint> // std::uint8_t etc.
-#include <limits> // std::numeric_limits
 #include <type_traits> // std::underlying_type
 #include <vector>
+
+//! \todo remove #include <limits>
+#include <limits> // std::numeric_limits
 
 
 
@@ -77,8 +79,7 @@ typedef std::vector<uint8_t> uint8_vector;
 
 // C++ arithmetic operators do not accept types smaller than int
 // (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
-// AGE relies on int being 32 bits or more for arithmetic operations with
-// imlicit integer conversion (integral promotion).
+// AGE relies on int being 32 bits or more.
 static_assert(sizeof(int) >= 4, "AGE requires int being 32 bits or more");
 
 

@@ -60,6 +60,23 @@ Do not violate the **single responsibility principle**.
 
 ### Data Types
 
+1. **Assume `int` to be at least 32 bits wide**.
+    While the C++ standard requires an `int` to be
+    [at least 16 bits wide](https://en.cppreference.com/w/cpp/language/types#Properties),
+    for current data models `int` width is 32 bits.
+    AGE static-asserts `int` to be at least 32 bits wide.
+1. **Use `int` for arithmetic operations** until you have a specific reason to
+    do otherwise.
+    Arithmetic operators will cause smaller integral values
+    [to be promoted to `int`](https://en.cppreference.com/w/cpp/language/implicit_conversion#Integral_promotion)
+    anyway.
+1. **Allocate memory for fixed width integers**.
+    Allocating non-fixed width integers like `std::int_fast##_t` can cause
+    more memory to be reserved than actually required.
+    This might increase cache misses and thus can decrease performance.
+
+**signed vs. unsigned**
+
 1. **Use `unsigned`** for [bit manipulation](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es101-use-unsigned-types-for-bit-manipulation).
 1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
 1. **Use `signed`** until there is a very specific reason to not do so.
@@ -69,29 +86,7 @@ Do not violate the **single responsibility principle**.
     (`unsigned` overflow being well defined may prevent compiler optimizations
     though).
 
-AGE code uses `unsigned` only for values representing emulated hardware
+AGE code uses `unsigned` only for values representing the emulated hardware
 (e.g. Gameboy CPU registers, Gameboy memory)
 and when interacting with STL containers
 (e.g. `size_t std::vector::size()` or `std::vector::operator[size_t]`).
-
-**Class data members:**
-
-1. **Avoid `std::int_fast##_t`** since these types might allocate more memory
-    than actually required
-    (which in turn might cause more processor cache misses).
-1. **Use fixed width integer types (`std::int##_t` and `std::uint##_t`).**
-    Don't rely on the width of fundamental types (`int`, `long`, etc.)
-    as they
-    [vary depending on the data model](https://en.cppreference.com/w/cpp/language/types#Properties).
-
-**Arithmetic:**
-
-1. **Assume `int` to be at least 32 bits wide**.
-    While the C++ standard and the (old) LP32 data model requires `int` to be
-    [(at least) 16 bits wide](https://en.cppreference.com/w/cpp/language/types#Properties),
-    all current data models seem to use 32 bits or more for type `int`.
-    AGE static-asserts `int` to be at least 32 bits wide.
-1. **Using `int`** as intermediate data type for arithmetic operations is
-    preferred since for arithmetic operators
-    [integral values will be promoted to `int`](https://en.cppreference.com/w/cpp/language/implicit_conversion#Integral_promotion)
-    anyway.
