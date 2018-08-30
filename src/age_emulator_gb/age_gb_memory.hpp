@@ -115,7 +115,7 @@ private:
     const int m_internal_ram_offset;
     const int m_video_ram_offset;
     uint8_vector m_memory;
-    std::array<size_t, 16> m_offsets = {{0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0}};
+    std::array<int, 16> m_offsets = {{0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0}};
 };
 
 } // namespace age

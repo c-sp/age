@@ -33,16 +33,15 @@
 #define BANK_LOG(x)
 #endif
 
-#define SET_RAM_ACCESSIBLE(value) memory.m_mbc_ram_accessible = ((value & 0x0F) == 0x0A)
+#define RAM_ACCESSIBLE(value) ((value & 0x0F) == 0x0A)
 #define IS_MBC_RAM(address) ((address & 0xE000) == 0xA000)
-
-#define MEMORY_OFFSET(value) static_cast<size_t>(value); AGE_ASSERT(value >= 0)
 
 namespace {
 
 constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
 
 }
+
 
 
 
@@ -173,8 +172,8 @@ void age::gb_memory::write_svbk(uint8_t value)
 
     int offset = bank_id * gb_internal_ram_bank_size;
     //! \todo seems odd
-    m_offsets[0xD] = MEMORY_OFFSET(m_internal_ram_offset + offset - 0xD000);
-    m_offsets[0xF] = MEMORY_OFFSET(m_internal_ram_offset + offset - 0xF000);
+    m_offsets[0xD] = m_internal_ram_offset + offset - 0xD000;
+    m_offsets[0xF] = m_internal_ram_offset + offset - 0xF000;
 }
 
 void age::gb_memory::write_vbk(uint8_t value)
@@ -183,7 +182,7 @@ void age::gb_memory::write_vbk(uint8_t value)
     BANK_LOG("svbk bank id " << (uint)(m_vbk & 1));
 
     int offset = (m_vbk & 0x01) * gb_video_ram_bank_size;
-    m_offsets[8] = MEMORY_OFFSET(m_video_ram_offset + offset - 0x8000);
+    m_offsets[8] = m_video_ram_offset + offset - 0x8000;
     m_offsets[9] = m_offsets[8];
 }
 
@@ -201,8 +200,11 @@ age::size_t age::gb_memory::get_offset(uint16_t address) const
 {
     auto offset = m_offsets[address >> 12];
     offset += address;
-    AGE_ASSERT(offset < m_memory.size());
-    return offset;
+
+    AGE_ASSERT(offset >= 0);
+    AGE_ASSERT(static_cast<size_t>(offset) < m_memory.size());
+
+    return static_cast<size_t>(offset);
 }
 
 void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
@@ -214,12 +216,12 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
     low_bank_id &= m_num_cart_rom_banks - 1;
     high_bank_id &= m_num_cart_rom_banks - 1;
 
-    m_offsets[0] = MEMORY_OFFSET(low_bank_id * gb_cart_rom_bank_size);
+    m_offsets[0] = low_bank_id * gb_cart_rom_bank_size;
     m_offsets[1] = m_offsets[0];
     m_offsets[2] = m_offsets[0];
     m_offsets[3] = m_offsets[0];
 
-    m_offsets[4] = MEMORY_OFFSET(high_bank_id * gb_cart_rom_bank_size - 0x4000);
+    m_offsets[4] = high_bank_id * gb_cart_rom_bank_size - 0x4000;
     m_offsets[5] = m_offsets[4];
     m_offsets[6] = m_offsets[4];
     m_offsets[7] = m_offsets[4];
@@ -234,7 +236,7 @@ void age::gb_memory::set_ram_bank(int bank_id)
 
     bank_id &= m_num_cart_ram_banks - 1;
 
-    m_offsets[0xA] = MEMORY_OFFSET(m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000);
+    m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;
     m_offsets[0xB] = m_offsets[0xA];
 
     BANK_LOG("switched to ram bank " << bank_id << " (0x" << std::hex << bank_id << std::dec << ")");
@@ -321,7 +323,7 @@ void age::gb_memory::write_to_mbc1(gb_memory &memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            SET_RAM_ACCESSIBLE(value);
+            memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
             return;
 
         case 0x2000:
@@ -377,7 +379,7 @@ void age::gb_memory::write_to_mbc2(gb_memory &memory, uint16_t offset, uint8_t v
     // (de)activate ram
     if (offset < 0xFFF)
     {
-        SET_RAM_ACCESSIBLE(value);
+        memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
     }
 
     // switch rom bank
@@ -401,7 +403,7 @@ void age::gb_memory::write_to_mbc3(gb_memory &memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            SET_RAM_ACCESSIBLE(value);
+            memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
             break;
 
         case 0x2000:
@@ -437,7 +439,7 @@ void age::gb_memory::write_to_mbc5(gb_memory &memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            SET_RAM_ACCESSIBLE(value);
+            memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
             break;
 
         case 0x2000:

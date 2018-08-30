@@ -881,7 +881,7 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 // cartridge information area
 
 //constexpr age::uint16_t gb_header_size = 0x0150;
-constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
+//constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
 constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
 //constexpr age::uint16_t gb_cia_ofs_licensee_new_low = 0x0144;
 //constexpr age::uint16_t gb_cia_ofs_licensee_new_high = 0x0145;
