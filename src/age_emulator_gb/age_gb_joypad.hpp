@@ -35,8 +35,8 @@ class gb_joypad : public non_copyable
 {
 public:
 
-    uint8 read_p1() const;
-    void write_p1(uint8 byte);
+    uint8_t read_p1() const;
+    void write_p1(uint8_t byte);
     void set_buttons_down(int32_t buttons);
     void set_buttons_up(int32_t buttons);
 
@@ -45,9 +45,9 @@ public:
 private:
 
     gb_core &m_core;
-    uint8 m_p1;
-    uint8 m_p14 = 0x0F;
-    uint8 m_p15 = 0x0F;
+    uint8_t m_p1;
+    uint8_t m_p14 = 0x0F;
+    uint8_t m_p15 = 0x0F;
 };
 
 } // namespace age
