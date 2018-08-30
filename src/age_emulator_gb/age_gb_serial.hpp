@@ -44,11 +44,11 @@ class gb_serial : public non_copyable
 {
 public:
 
-    uint8 read_sb();
-    uint8 read_sc() const;
+    uint8_t read_sb();
+    uint8_t read_sc() const;
 
-    void write_sb(uint8 value);
-    void write_sc(uint8 value);
+    void write_sb(uint8_t value);
+    void write_sc(uint8_t value);
 
     void finish_transfer();
     void set_back_cycles(int32_t offset);
@@ -57,16 +57,16 @@ public:
 
 private:
 
-    int32_t transfer_init(uint8 value);
+    int32_t transfer_init(uint8_t value);
     void transfer_update_sb();
 
+    gb_core &m_core;
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
     int32_t m_sio_cycles_per_bit = 0;
     int32_t m_sio_last_receive_cycle = gb_no_cycle;
 
-    uint8 m_sb = 0;
-    uint8 m_sc = 0;
-    gb_core &m_core;
+    uint8_t m_sb = 0;
+    uint8_t m_sc = 0;
 };
 
 } // namespace age
