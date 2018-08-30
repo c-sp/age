@@ -161,6 +161,8 @@ private:
 
     void check_halt_mode();
 
+    gb_events m_events;
+
     const gb_mode m_mode;
     gb_state m_state = gb_state::cpu_active;
 
@@ -175,8 +177,6 @@ private:
     uint8_t m_key1 = 0x7E;
     uint8_t m_if = 0xE0;
     uint8_t m_ie = 0;
-
-    gb_events m_events;
 };
 
 } // namespace age
