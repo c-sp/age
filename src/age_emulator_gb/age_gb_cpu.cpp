@@ -31,11 +31,11 @@ constexpr uint8_t gb_subtract_flag = 0x40;
 constexpr uint8_t gb_half_carry_flag = 0x20;
 constexpr uint8_t gb_carry_flag = 0x10;
 
-constexpr int8_t gb_hcs_shift = 4;
-constexpr int32_t gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
-constexpr int32_t gb_hcs_subtract = gb_subtract_flag << gb_hcs_shift;
-constexpr int32_t gb_hcs_old_carry = gb_carry_flag << gb_hcs_shift;
-constexpr int32_t gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
+constexpr int gb_hcs_shift = 4;
+constexpr int gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
+constexpr int gb_hcs_subtract = gb_subtract_flag << gb_hcs_shift;
+constexpr int gb_hcs_old_carry = gb_carry_flag << gb_hcs_shift;
+constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 }
 
@@ -914,11 +914,8 @@ void age::gb_cpu::emulate_instruction()
     uint8 opcode = m_bus.read_byte(m_pc);
     INC_CYCLES;
 
-    if (!m_next_byte_twice)
-    {
-        ++m_pc;
-    }
-    m_next_byte_twice = false;
+    m_pc += m_pc_increment;
+    m_pc_increment = 1;
 
     switch (opcode)
     {
@@ -1212,7 +1209,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x2F: m_a = ~m_a; m_hcs_flags = gb_hcs_subtract; m_hcs_operand = 1; break; // CPL
         case 0x37: m_carry_indicator = 0x100; m_hcs_flags = m_hcs_operand = 0; break;   // SCF
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
-        case 0x76: m_next_byte_twice = m_core.halt() && !m_core.is_cgb(); break;        // HALT
+        case 0x76: m_pc_increment = (m_core.halt() && !m_core.is_cgb()) ? 0 : 1; break;        // HALT
         case 0xF3: m_core.di(); break; // DI
         case 0xFB: m_core.ei_delayed(); break; // EI
 
