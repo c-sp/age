@@ -29,6 +29,9 @@
 
 
 
+namespace
+{
+
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
 
@@ -875,6 +878,141 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 
 
 
+// cartridge information area
+
+//constexpr age::uint16_t gb_header_size = 0x0150;
+constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
+constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
+//constexpr age::uint16_t gb_cia_ofs_licensee_new_low = 0x0144;
+//constexpr age::uint16_t gb_cia_ofs_licensee_new_high = 0x0145;
+//constexpr age::uint16_t gb_cia_ofs_sgb = 0x0146;
+constexpr age::uint16_t gb_cia_ofs_type = 0x0147;
+constexpr age::uint16_t gb_cia_ofs_rom_size = 0x0148;
+constexpr age::uint16_t gb_cia_ofs_ram_size = 0x0149;
+//constexpr age::uint16_t gb_cia_ofs_destination = 0x014A;
+//constexpr age::uint16_t gb_cia_ofs_licensee = 0x014B;
+//constexpr age::uint16_t gb_cia_ofs_version = 0x014C;
+//constexpr age::uint16_t gb_cia_ofs_header_checksum = 0x014D;
+//constexpr age::uint16_t gb_cia_ofs_global_checksum_low = 0x014E;
+//constexpr age::uint16_t gb_cia_ofs_global_checksum_high = 0x014F;
+
+age::uint8_t safe_get(const age::uint8_vector &vector, age::uint16_t offset)
+{
+    return (vector.size() > offset) ? vector[offset] : 0;
+}
+
+bool has_battery(const age::uint8_vector &rom)
+{
+    bool result = false;
+
+    auto cart_type = safe_get(rom, gb_cia_ofs_type);
+    switch (cart_type)
+    {
+        case 0x03:
+        case 0x06:
+        case 0x09:
+        case 0x0D:
+        case 0x13:
+        case 0x1B:
+        case 0x1E:
+            result = true;
+    }
+
+    return result;
+}
+
+age::gb_mode calculate_mode(age::gb_hardware hardware, const age::uint8_vector &cart_rom)
+{
+    bool cgb_flagged = safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80;
+
+    age::gb_mode mode;
+    switch (hardware)
+    {
+        case age::gb_hardware::dmg:
+            // running a CGB rom on a DMG wil most likely not work,
+            // but since it was configured like this ...
+            mode = age::gb_mode::dmg;
+            break;
+
+        case age::gb_hardware::cgb:
+            mode = cgb_flagged ? age::gb_mode::cgb : age::gb_mode::dmg_on_cgb;
+            break;
+
+        default:
+            // auto-detect hardware
+            mode = cgb_flagged ? age::gb_mode::cgb : age::gb_mode::dmg;
+            break;
+    }
+    return mode;
+}
+
+age::int16_t get_num_cart_rom_banks(const age::uint8_vector &cart_rom)
+{
+    age::int16_t result;
+
+    auto rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
+    LOG("rom banks byte: 0x" << std::hex << (int)rom_banks << std::dec);
+    switch (rom_banks)
+    {
+        //case 0x00:
+        default:   result = 2; break;
+        case 0x01: result = 4; break;
+        case 0x02: result = 8; break;
+        case 0x03: result = 16; break;
+        case 0x04: result = 32; break;
+        case 0x05: result = 64; break;
+        case 0x06: result = 128; break;
+        case 0x07: result = 256; break;
+        case 0x08: result = 512; break;
+    }
+
+    AGE_ASSERT((result & (result - 1)) == 0); // just one bit must be set
+    LOG("cartridge has " << result << " rom bank(s)");
+    return result;
+}
+
+age::int16_t get_num_cart_ram_banks(const age::uint8_vector &cart_rom)
+{
+    age::int16_t result;
+
+    auto ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
+    LOG("ram banks byte: 0x" << std::hex << (int)ram_banks << std::dec);
+    switch (ram_banks)
+    {
+        //case 0x00:
+        default:   result = 0; break;
+        case 0x01: result = 1; break; // actually only 2048 bytes, but one whole bank is easier to handle
+        case 0x02: result = 1; break;
+        case 0x03: result = 4; break;
+        case 0x04: result = 16; break;
+        case 0x05: result = 8; break;
+    }
+
+    AGE_ASSERT((result & (result - 1)) == 0); // just one bit must be set
+    LOG("cartridge has " << result << " ram bank(s)");
+    return result;
+}
+
+age::uint32_t crc32(age::uint8_vector::const_iterator begin, age::uint8_vector::const_iterator end)
+{
+    age::uint32_t crc = 0xFFFFFFFF;
+
+    std::for_each(begin, end, [&](const uint8_t &v)
+    {
+        crc ^= v;
+        for (int i = 0; i < 8; ++i)
+        {
+            crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+        }
+    });
+
+    return ~crc;
+}
+
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -884,7 +1022,7 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 //---------------------------------------------------------
 
 age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
-    : m_mbc_writer(get_mbc_writer(m_mbc_data, cart_rom)),
+    : m_mbc_writer(get_mbc_writer(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
       m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
@@ -909,15 +1047,15 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     write_svbk(0);
 
     // allocate memory
-    uint cart_rom_size = m_num_cart_rom_banks * gb_cart_rom_bank_size;
-    uint cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
-    uint memory_size = cart_rom_size + cart_ram_size + gb_internal_ram_size + gb_video_ram_size;
+    int cart_rom_size = m_num_cart_rom_banks * gb_cart_rom_bank_size;
+    int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
+    int memory_size = cart_rom_size + cart_ram_size + gb_internal_ram_size + gb_video_ram_size;
 
     LOG("allocating " << memory_size << " bytes as gb_memory");
     m_memory = uint8_vector(memory_size, 0);
 
     // copy rom
-    uint copy_rom_bytes = std::min(cart_rom_size, cart_rom.size());
+    int copy_rom_bytes = std::min(cart_rom_size, static_cast<int>(cart_rom.size()));
     LOG("copying " << copy_rom_bytes << " bytes of cartridge rom (rom size is " << cart_rom.size() << " bytes)");
     std::copy(begin(cart_rom), begin(cart_rom) + copy_rom_bytes, begin(m_memory));
 
@@ -943,13 +1081,13 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
 
     if (cgb)
     {
-        for (uint i = 0; i < 0x800; i += 0x10)
+        for (int i = 0; i < 0x800; i += 0x10)
         {
             auto begin = base + i;
             std::fill(begin, begin + 8, 0xFF);
             std::fill(begin + 0x808, begin + 0x810, 0xFF);
         }
-        for (uint i = 0xE00; i < 0x1000; i += 0x10)
+        for (int i = 0xE00; i < 0x1000; i += 0x10)
         {
             m_memory[m_internal_ram_offset + i + 0x02] = 0xFF;
             m_memory[m_internal_ram_offset + i + 0x0A] = 0x00;
@@ -962,7 +1100,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
         std::copy(base, base + 0x1000, base + 0x6000);
         std::copy(base, base + 0x1000, base + 0x7000);
 
-        for (uint i = 0x2840; i < 0x2880; i += 2)
+        for (int i = 0x2840; i < 0x2880; i += 2)
         {
             m_memory[m_internal_ram_offset + i] = 0xFF;
             m_memory[m_internal_ram_offset + i + 1] = 0x7F;
@@ -977,7 +1115,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     }
     else
     {
-        for (uint i = 0; i < 0x800; i += 0x200)
+        for (int i = 0; i < 0x800; i += 0x200)
         {
             auto begin = base + i;
             std::fill(begin, begin + 0x100, 0x00);
@@ -1006,9 +1144,9 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     //
     if (m_num_cart_rom_banks == 64)
     {
-        size_t findings = 0;
+        int findings = 0;
 
-        for (size_t offset = 0; offset < cart_rom_size; offset += 0x40000)
+        for (int offset = 0; offset < cart_rom_size; offset += 0x40000)
         {
             uint32 crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
             if (crc == 0x46195417)
