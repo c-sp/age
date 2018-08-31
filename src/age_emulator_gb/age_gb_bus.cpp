@@ -587,7 +587,7 @@ void age::gb_bus::handle_dma()
 
 
 
-void age::gb_bus::set_back_cycles(int32_t offset)
+void age::gb_bus::set_back_cycles(int offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_oam_dma_last_cycle, offset);
 }

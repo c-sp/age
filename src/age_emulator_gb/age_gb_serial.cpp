@@ -147,7 +147,7 @@ void age::gb_serial::finish_transfer()
     m_core.request_interrupt(gb_interrupt::serial);
 }
 
-void age::gb_serial::set_back_cycles(int32_t offset)
+void age::gb_serial::set_back_cycles(int offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_sio_last_receive_cycle, offset);
 }
@@ -160,7 +160,7 @@ void age::gb_serial::set_back_cycles(int32_t offset)
 //
 //---------------------------------------------------------
 
-age::int32_t age::gb_serial::transfer_init(uint8_t value)
+int age::gb_serial::transfer_init(uint8_t value)
 {
     bool high_frequency = m_core.is_cgb() && ((value & gb_sc_shift_clock_switch) != 0);
 

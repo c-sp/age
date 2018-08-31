@@ -45,23 +45,23 @@ age::gb_common_counter::gb_common_counter(const gb_core &core)
 {
 }
 
-age::int32_t age::gb_common_counter::get_current_value() const
+int age::gb_common_counter::get_current_value() const
 {
-    int32_t counter = m_core.get_oscillation_cycle() >> m_cycle_shift;
+    int counter = m_core.get_oscillation_cycle() >> m_cycle_shift;
     counter -= m_counter_origin;
     return counter;
 }
 
-age::int32_t age::gb_common_counter::get_cycle_offset(int32_t for_counter_offset) const
+int age::gb_common_counter::get_cycle_offset(int for_counter_offset) const
 {
     AGE_ASSERT(for_counter_offset > 0);
 
-    int32_t cycle = m_core.get_oscillation_cycle();
+    int cycle = m_core.get_oscillation_cycle();
 
-    int32_t counter = cycle >> m_cycle_shift;
+    int counter = cycle >> m_cycle_shift;
     counter += for_counter_offset;
 
-    int32_t offset = (counter << m_cycle_shift) - cycle;
+    int offset = (counter << m_cycle_shift) - cycle;
     return offset;
 }
 
@@ -76,7 +76,7 @@ void age::gb_common_counter::reset()
 void age::gb_common_counter::switch_double_speed_mode()
 {
     // preserve the current counter value during speed change
-    int32_t counter = get_current_value();
+    int counter = get_current_value();
     COUNTER_LOG("switching between speed modes, counter = " << counter << ", new shift = " << counter_cycle_shift);
 
     m_cycle_shift = m_core.is_double_speed() ? 1 : 2;
@@ -86,10 +86,10 @@ void age::gb_common_counter::switch_double_speed_mode()
     COUNTER_LOG("switched between speed modes, counter = " << get_current_value() << ", shift = " << m_cycle_shift);
 }
 
-void age::gb_common_counter::set_back_cycles(int32_t offset)
+void age::gb_common_counter::set_back_cycles(int offset)
 {
     AGE_ASSERT(0 == (offset & (m_cycle_shift - 1)));
-    int32_t counter_offset = offset >> m_cycle_shift;
+    int counter_offset = offset >> m_cycle_shift;
     AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_counter_origin, counter_offset);
 }
 
@@ -106,48 +106,48 @@ age::gb_tima_counter::gb_tima_counter(gb_common_counter &counter)
 {
 }
 
-age::int32_t age::gb_tima_counter::get_current_value() const
+int age::gb_tima_counter::get_current_value() const
 {
-    int32_t tima = m_counter.get_current_value() >> m_counter_shift;
+    int tima = m_counter.get_current_value() >> m_counter_shift;
     tima -= m_tima_origin;
     return tima;
 }
 
-age::int32_t age::gb_tima_counter::get_cycle_offset(int32_t for_tima_offset) const
+int age::gb_tima_counter::get_cycle_offset(int for_tima_offset) const
 {
     AGE_ASSERT(for_tima_offset > 0);
 
-    int32_t counter = m_counter.get_current_value();
-    int32_t tima = counter >> m_counter_shift;
+    int counter = m_counter.get_current_value();
+    int tima = counter >> m_counter_shift;
     tima += for_tima_offset;
-    int32_t counter_offset = (tima << m_counter_shift) - counter;
+    int counter_offset = (tima << m_counter_shift) - counter;
 
-    int32_t cycle_offset = m_counter.get_cycle_offset(counter_offset);
+    int cycle_offset = m_counter.get_cycle_offset(counter_offset);
     return cycle_offset;
 }
 
-age::int32_t age::gb_tima_counter::get_trigger_bit(uint8_t for_tac) const
+int age::gb_tima_counter::get_trigger_bit(uint8_t for_tac) const
 {
-    int32_t counter = m_counter.get_current_value();
-    int32_t shift = calculate_counter_shift(for_tac);
-    int32_t increment_bit = 1 & (counter >> (shift - 1));
+    int counter = m_counter.get_current_value();
+    int shift = calculate_counter_shift(for_tac);
+    int increment_bit = 1 & (counter >> (shift - 1));
 
     return increment_bit;
 }
 
-age::int32_t age::gb_tima_counter::get_past_tima_counter(uint8_t for_tima) const
+int age::gb_tima_counter::get_past_tima_counter(uint8_t for_tima) const
 {
     AGE_ASSERT(for_tima <= get_current_value());
 
-    int32_t tima = m_tima_origin + for_tima;
-    int32_t counter = tima << m_counter_shift;
+    int tima = m_tima_origin + for_tima;
+    int counter = tima << m_counter_shift;
 
     return counter;
 }
 
 
 
-void age::gb_tima_counter::set_tima(int32_t tima)
+void age::gb_tima_counter::set_tima(int tima)
 {
     // by using a "tima origin" instead of a "counter origin" we
     // automatically ignore the lower counter bits
@@ -164,7 +164,7 @@ void age::gb_tima_counter::set_tima(int32_t tima)
 void age::gb_tima_counter::set_frequency(uint8_t tac)
 {
     // preserve the current TIMA value during the frequency change
-    int32_t tima = get_current_value();
+    int tima = get_current_value();
     m_counter_shift = calculate_counter_shift(tac);
     set_tima(tima);
 }
@@ -183,7 +183,7 @@ age::int8_t age::gb_tima_counter::calculate_counter_shift(uint8_t for_tac)
     //  internal counter:  machine_cycle >> 2
     //
     //  (the above numbers are valid only when running at single speed)
-    int32_t counter_shift = ((for_tac - 1) & 0x03) << 1;
+    int counter_shift = ((for_tac - 1) & 0x03) << 1;
     counter_shift += 2;
 
     AGE_ASSERT((counter_shift >= 2) && (counter_shift <= 8));

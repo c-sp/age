@@ -82,7 +82,7 @@ age::gb_core::gb_core(gb_mode mode)
 
 
 
-age::int32_t age::gb_core::get_oscillation_cycle() const
+int age::gb_core::get_oscillation_cycle() const
 {
     AGE_ASSERT(m_oscillation_cycle != gb_no_cycle);
     return m_oscillation_cycle;
@@ -130,10 +130,10 @@ void age::gb_core::oscillate_2_cycles()
     m_oscillation_cycle += 2;
 }
 
-void age::gb_core::insert_event(int32_t cycle_offset, gb_event event)
+void age::gb_core::insert_event(int cycle_offset, gb_event event)
 {
     AGE_ASSERT(cycle_offset >= 0);
-    AGE_ASSERT(std::numeric_limits<int32_t>::max() - cycle_offset >= m_oscillation_cycle);
+    AGE_ASSERT(std::numeric_limits<int>::max() - cycle_offset >= m_oscillation_cycle);
     m_events.insert_event(m_oscillation_cycle + cycle_offset, event);
 }
 
@@ -147,12 +147,12 @@ age::gb_event age::gb_core::poll_event()
     return m_events.poll_event(m_oscillation_cycle);
 }
 
-age::int32_t age::gb_core::get_event_cycle(gb_event event) const
+int age::gb_core::get_event_cycle(gb_event event) const
 {
     return m_events.get_event_cycle(event);
 }
 
-void age::gb_core::set_back_cycles(int32_t offset)
+void age::gb_core::set_back_cycles(int offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_oscillation_cycle, offset);
     m_events.set_back_cycles(offset);
@@ -376,12 +376,12 @@ age::gb_core::gb_events::gb_events()
 //    }
 }
 
-age::int32_t age::gb_core::gb_events::get_event_cycle(gb_event event) const
+int age::gb_core::gb_events::get_event_cycle(gb_event event) const
 {
     return m_event_cycle[to_integral(event)];
 }
 
-age::gb_event age::gb_core::gb_events::poll_event(int32_t current_cycle)
+age::gb_event age::gb_core::gb_events::poll_event(int current_cycle)
 {
     auto result = gb_event::none;
 
@@ -399,7 +399,7 @@ age::gb_event age::gb_core::gb_events::poll_event(int32_t current_cycle)
     return result;
 }
 
-void age::gb_core::gb_events::insert_event(int32_t for_cycle, gb_event event)
+void age::gb_core::gb_events::insert_event(int for_cycle, gb_event event)
 {
     auto event_id = to_integral(event);
 
@@ -419,12 +419,12 @@ void age::gb_core::gb_events::insert_event(int32_t for_cycle, gb_event event)
 
     if (for_cycle != gb_no_cycle)
     {
-        m_events.insert(std::pair<int32_t, gb_event>(for_cycle, event));
+        m_events.insert(std::pair<int, gb_event>(for_cycle, event));
     }
     m_event_cycle[event_id] = for_cycle;
 }
 
-void age::gb_core::gb_events::set_back_cycles(int32_t offset)
+void age::gb_core::gb_events::set_back_cycles(int offset)
 {
     // find all scheduled events
     std::vector<gb_event> events_to_adjust;

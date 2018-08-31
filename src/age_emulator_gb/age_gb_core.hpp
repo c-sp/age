@@ -71,8 +71,8 @@ enum class gb_event : uint8_t
 
 
 
-constexpr int32_t gb_no_cycle = -1;
-constexpr int32_t gb_machine_cycles_per_second = 4194304;
+constexpr int gb_no_cycle = -1;
+constexpr int gb_machine_cycles_per_second = 4194304;
 
 
 
@@ -95,7 +95,7 @@ class gb_core
 {
 public:
 
-    int32_t get_oscillation_cycle() const;
+    int get_oscillation_cycle() const;
     int8_t get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
     bool is_cgb() const; //!< get_mode() == gb_mode::cgb
@@ -105,11 +105,11 @@ public:
 
     void oscillate_cpu_cycle();
     void oscillate_2_cycles();
-    void insert_event(int32_t oscillation_cycle_offset, gb_event event);
+    void insert_event(int oscillation_cycle_offset, gb_event event);
     void remove_event(gb_event event);
     gb_event poll_event();
-    int32_t get_event_cycle(gb_event event) const;
-    void set_back_cycles(int32_t offset);
+    int get_event_cycle(gb_event event) const;
+    void set_back_cycles(int offset);
 
     void start_dma();
     void finish_dma();
@@ -143,18 +143,18 @@ private:
 
         gb_events();
 
-        int32_t get_event_cycle(gb_event event) const;
+        int get_event_cycle(gb_event event) const;
 
-        gb_event poll_event(int32_t current_cycle);
-        void insert_event(int32_t for_cycle, gb_event event);
+        gb_event poll_event(int current_cycle);
+        void insert_event(int for_cycle, gb_event event);
 
-        void set_back_cycles(int32_t offset);
+        void set_back_cycles(int offset);
 
     private:
 
         // the following two members should be replaced by some better suited data structure(s)
-        std::multimap<int32_t, gb_event> m_events;
-        std::array<int32_t, to_integral(gb_event::none)> m_event_cycle;
+        std::multimap<int, gb_event> m_events;
+        std::array<int, to_integral(gb_event::none)> m_event_cycle;
     };
 
 
@@ -166,7 +166,7 @@ private:
     const gb_mode m_mode;
     gb_state m_state = gb_state::cpu_active;
 
-    int32_t m_oscillation_cycle = 0;
+    int m_oscillation_cycle = 0;
     int8_t m_machine_cycles_per_cpu_cycle = 4;
 
     bool m_halt = false;

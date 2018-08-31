@@ -73,7 +73,7 @@ age::uint8_t age::gb_timer::read_tima()
     if (m_tima_running)
     {
         // get the current TIMA value based on the counter
-        int32_t tima = m_tima_counter.get_current_value();
+        int tima = m_tima_counter.get_current_value();
 
         // handle overflow(s)
         if (tima >= 0x100)
@@ -207,7 +207,7 @@ void age::gb_timer::write_tac(uint8_t value)
     //
 
     bool new_tima_running = (value & gb_tac_start_timer) > 0;
-    int32_t tima = m_tima;
+    int tima = m_tima;
 
     if (m_tima_running)
     {
@@ -220,7 +220,7 @@ void age::gb_timer::write_tac(uint8_t value)
         // changing the frequency might trigger a TIME increment
         else
         {
-            int32_t new_increment_bit = m_tima_counter.get_trigger_bit(value);
+            int new_increment_bit = m_tima_counter.get_trigger_bit(value);
             tima = check_for_early_increment(new_increment_bit);
         }
     }
@@ -273,7 +273,7 @@ void age::gb_timer::write_div(uint8_t)
         //      acceptance/timer/tim10_div_trigger
         //      acceptance/timer/tim11_div_trigger
         //
-        int32_t tima = check_for_early_increment(0);
+        int tima = check_for_early_increment(0);
         AGE_ASSERT(tima <= 0x100);
 
         // reset the counter and propagate the reset to m_tima_counter
@@ -317,7 +317,7 @@ void age::gb_timer::switch_double_speed_mode()
     }
 }
 
-void age::gb_timer::set_back_cycles(int32_t offset)
+void age::gb_timer::set_back_cycles(int offset)
 {
     m_counter.set_back_cycles(offset);
 }
@@ -330,16 +330,16 @@ void age::gb_timer::set_back_cycles(int32_t offset)
 //
 //---------------------------------------------------------
 
-age::int32_t age::gb_timer::check_for_early_increment(int32_t new_increment_bit)
+int age::gb_timer::check_for_early_increment(int new_increment_bit)
 {
     AGE_ASSERT(m_tima_running);
 
     // calculate the current TIMA value
-    int32_t tima = read_tima();
+    int tima = read_tima();
 
     // check for early increment
     // (the bit must change from high to low for that)
-    int32_t current_increment_bit = m_tima_counter.get_trigger_bit(m_tac);
+    int current_increment_bit = m_tima_counter.get_trigger_bit(m_tac);
     current_increment_bit &= ~new_increment_bit;
 
     AGE_ASSERT(current_increment_bit <= 1);
@@ -369,11 +369,11 @@ void age::gb_timer::schedule_timer_overflow()
     AGE_ASSERT(m_tima_running);
 
     // calculate the current TIMA value
-    int32_t tima = read_tima();
+    int tima = read_tima();
 
     // calculate the cycle offset
-    int32_t tima_offset = 0x100 - tima;
-    int32_t cycle_offset = m_tima_counter.get_cycle_offset(tima_offset);
+    int tima_offset = 0x100 - tima;
+    int cycle_offset = m_tima_counter.get_cycle_offset(tima_offset);
 
     // verified by gambatte tests:
     //  the interrupt seems to be raised with a delay

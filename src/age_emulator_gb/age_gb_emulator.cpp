@@ -20,7 +20,7 @@
 
 namespace age {
 
-constexpr int32_t gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
+constexpr int gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
 
 }
 
