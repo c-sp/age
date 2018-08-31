@@ -63,16 +63,17 @@ Do not violate the **single responsibility principle**.
 1. **Assume `int` to be at least 32 bits wide**.
     While the C++ standard requires an `int` to be
     [at least 16 bits wide](https://en.cppreference.com/w/cpp/language/types#Properties),
-    for current data models `int` width is 32 bits.
+    for current data models `int` width usually is 32 bits.
     AGE static-asserts `int` to be at least 32 bits wide.
-1. **Use `int` for arithmetic operations** until you have a specific reason to
-    do otherwise.
+1. **Use `int`** until you have a specific reason not to do so.
     Arithmetic operators will cause smaller integral values
     [to be promoted to `int`](https://en.cppreference.com/w/cpp/language/implicit_conversion#Integral_promotion)
-    anyway.
-1. **Allocate memory for fixed width integers**.
-    Allocating non-fixed width integers like `std::int_fast##_t` can cause
-    more memory to be reserved than actually required.
+    anyway,
+    so the result of most operations is an `int` or some even wider type.
+1. **Use fixed width integers when allocating arrays**.
+    Don't allocate more memory than necessary.
+    Allocating non-fixed width integers like `int` or `std::int_fast##_t` can
+    cause more memory to be reserved than actually required.
     This might increase cache misses and thus can decrease performance.
 
 **signed vs. unsigned**
