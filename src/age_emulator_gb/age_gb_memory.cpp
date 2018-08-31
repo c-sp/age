@@ -171,7 +171,6 @@ void age::gb_memory::write_svbk(uint8_t value)
     BANK_LOG("svbk bank id " << bank_id);
 
     int offset = bank_id * gb_internal_ram_bank_size;
-    //! \todo seems odd
     m_offsets[0xD] = m_internal_ram_offset + offset - 0xD000;
     m_offsets[0xF] = m_internal_ram_offset + offset - 0xF000;
 }
