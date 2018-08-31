@@ -26,13 +26,9 @@
 #define LOG(x)
 #endif
 
-namespace age {
+namespace {
 
-constexpr uint8 gb_hdma_start = 0x80;
-
-}
-
-
+constexpr uint8_t gb_hdma_start = 0x80;
 
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
@@ -72,6 +68,8 @@ constexpr const age::uint8_array<0x80> cgb_FF80_dump =
      0x98, 0xD1, 0x71, 0x02, 0x4D, 0x01, 0xC1, 0xFF, 0x0D, 0x00, 0xD3, 0x05, 0xF9, 0x00, 0x0B, 0x00
  }};
 
+}
+
 
 
 
@@ -108,10 +106,10 @@ age::gb_bus::gb_bus(gb_core &core,
     // init 0xFEA0 - 0xFEFF
     if (m_core.is_cgb())
     {
-        for (uint i = 0; i < 3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
-            uint src_ofs = i * 8;
-            uint dst_ofs = 0xA0 + i * 0x20;
+            int src_ofs = i * 8;
+            int dst_ofs = 0xA0 + i * 0x20;
             std::copy(begin(cgb_sparse_FEA0_dump) + src_ofs, begin(cgb_sparse_FEA0_dump) + src_ofs + 8, begin(m_high_ram) + dst_ofs);
             std::copy(begin(cgb_sparse_FEA0_dump) + src_ofs, begin(cgb_sparse_FEA0_dump) + src_ofs + 8, begin(m_high_ram) + dst_ofs + 8);
             std::copy(begin(m_high_ram) + dst_ofs, begin(m_high_ram) + dst_ofs + 0x10, begin(m_high_ram) + dst_ofs + 0x10);
@@ -133,9 +131,9 @@ age::gb_bus::gb_bus(gb_core &core,
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_bus::read_byte(uint16 address)
+age::uint8_t age::gb_bus::read_byte(uint16_t address)
 {
-    uint8 result = 0xFF;
+    uint8_t result = 0xFF;
 
     if ((address & 0xE000) == 0x8000)
     {
@@ -280,7 +278,7 @@ age::uint8 age::gb_bus::read_byte(uint16 address)
 
 
 
-void age::gb_bus::write_byte(uint16 address, uint8 byte)
+void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 {
     if ((address & 0xE000) == 0x8000)
     {
@@ -513,10 +511,10 @@ void age::gb_bus::handle_dma()
     // oscillation counter accordingly
 
     // calculate remaining DMA length
-    uint8 dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
+    uint8_t dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
 
     // calculate number of bytes to copy and update remaining DMA length
-    int32_t bytes = m_lcd.is_hdma_active() ? 0x10 : dma_length * 0x10;
+    int bytes = m_lcd.is_hdma_active() ? 0x10 : dma_length * 0x10;
     AGE_ASSERT(bytes <= 0x800);
     AGE_ASSERT((bytes & 0xF) == 0);
     LOG("DMA copying " << bytes << " bytes");
@@ -553,16 +551,16 @@ void age::gb_bus::handle_dma()
     //
 
     // copy bytes
-    for (int32_t i = 0; i < bytes; ++i)
+    for (int i = 0; i < bytes; ++i)
     {
-        uint8 byte = 0xFF;
-        uint16 src = m_dma_source & 0xFFFF;
+        uint8_t byte = 0xFF;
+        uint16_t src = m_dma_source & 0xFFFF;
         if (((src & 0xE000) != 0x8000) && (src < 0xFE00))
         {
             byte = read_byte(src);
         }
 
-        uint16 dest = 0x8000 + (m_dma_destination & 0x1FFF);
+        uint16_t dest = 0x8000 + (m_dma_destination & 0x1FFF);
         handle_events();
         write_byte(dest, byte);
         m_core.oscillate_2_cycles();
@@ -574,7 +572,7 @@ void age::gb_bus::handle_dma()
     m_core.oscillate_cpu_cycle();
 
     // update HDMA5
-    uint8 remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
+    uint8_t remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
     if (remaining_dma_length == 0x7F)
     {
         LOG("DMA finished");
@@ -604,7 +602,7 @@ void age::gb_bus::set_back_cycles(int32_t offset)
 //
 //---------------------------------------------------------
 
-void age::gb_bus::write_dma(uint8 value)
+void age::gb_bus::write_dma(uint8_t value)
 {
     //
     // verified by mooneye-gb tests
@@ -633,11 +631,11 @@ void age::gb_bus::write_dma(uint8 value)
     //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
     //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
     //
-    int32_t factor = m_core.is_cgb() ? 1 : 2;
+    int factor = m_core.is_cgb() ? 1 : 2;
     m_core.insert_event(m_core.get_machine_cycles_per_cpu_cycle() * factor, gb_event::start_oam_dma);
 }
 
-void age::gb_bus::write_hdma5(uint8 value)
+void age::gb_bus::write_hdma5(uint8_t value)
 {
     m_hdma5 = value & 0x7F; // store DMA data length
 
@@ -687,7 +685,7 @@ void age::gb_bus::write_hdma5(uint8 value)
         }
     }
 
-    LOG("HDMA5 = " << (uint)m_hdma5);
+    LOG("HDMA5 = " << (int)m_hdma5);
 }
 
 
@@ -696,19 +694,19 @@ void age::gb_bus::handle_oam_dma()
 {
     AGE_ASSERT(m_oam_dma_active);
 
-    int32_t oscillation_cycle = m_core.get_oscillation_cycle();
-    int32_t cycles_elapsed = oscillation_cycle - m_oam_dma_last_cycle;
+    int oscillation_cycle = m_core.get_oscillation_cycle();
+    int cycles_elapsed = oscillation_cycle - m_oam_dma_last_cycle;
     cycles_elapsed &= ~(m_core.get_machine_cycles_per_cpu_cycle() - 1);
     m_oam_dma_last_cycle += cycles_elapsed;
     cycles_elapsed <<= m_core.is_double_speed() ? 1 : 0;
 
     AGE_ASSERT((cycles_elapsed & 3) == 0);
-    int32_t bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
+    int bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
 
-    for (int32_t i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
+    for (int i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
     {
-        uint8 byte = read_byte(static_cast<uint16>(m_oam_dma_address + i));
-        m_lcd.get_oam()[static_cast<uint16>(i)] = byte;
+        uint8_t byte = read_byte((m_oam_dma_address + i) & 0xFFFF);
+        m_lcd.get_oam()[i & 0xFFFF] = byte;
     }
 
     m_oam_dma_offset += bytes;

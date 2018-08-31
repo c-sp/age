@@ -38,7 +38,7 @@
 namespace age
 {
 
-enum class gb_io_port : uint16
+enum class gb_io_port : uint16_t
 {
     p1 = 0xFF00,
 
@@ -131,8 +131,8 @@ public:
 
     gb_bus(gb_core &core, gb_memory &memory, gb_sound &sound, gb_lcd &lcd, gb_timer &timer, gb_joypad &joypad, gb_serial &serial);
 
-    uint8 read_byte(uint16 address);
-    void write_byte(uint16 address, uint8 byte);
+    uint8_t read_byte(uint16_t address);
+    void write_byte(uint16_t address, uint8_t byte);
 
     void handle_events();
     void handle_dma();
@@ -141,8 +141,8 @@ public:
 
 private:
 
-    void write_dma(uint8 value);
-    void write_hdma5(uint8 value);
+    void write_dma(uint8_t value);
+    void write_hdma5(uint8_t value);
 
     void handle_oam_dma();
 
@@ -155,23 +155,21 @@ private:
     gb_serial &m_serial;
 
     uint8_array<0x200> m_high_ram;  // 0xFE00 - 0xFFFF (including OAM ram and i/o ports for easier handling)
-    uint8 m_rp = 0x3E;
-    uint8 m_un6c = 0xFE;
-    uint8 m_un72 = 0;
-    uint8 m_un73 = 0;
-    uint8 m_un75 = 0x8F;
+    uint8_t m_rp = 0x3E;
+    uint8_t m_un6c = 0xFE;
+    uint8_t m_un72 = 0;
+    uint8_t m_un73 = 0;
+    uint8_t m_un75 = 0x8F;
 
-    std::vector<gb_event> m_events;
-
-    uint8 m_oam_dma_byte;
+    uint8_t m_oam_dma_byte;
     bool m_oam_dma_active = false;
-    int32_t m_oam_dma_address = 0;
-    int32_t m_oam_dma_offset = 0;
+    int m_oam_dma_address = 0;
+    int m_oam_dma_offset = 0;
     int32_t m_oam_dma_last_cycle = gb_no_cycle;
 
-    uint8 m_hdma5 = 0xFF;
-    int32_t m_dma_source = 0;
-    int32_t m_dma_destination = 0;
+    uint8_t m_hdma5 = 0xFF;
+    int m_dma_source = 0;
+    int m_dma_destination = 0;
 };
 
 } // namespace age
