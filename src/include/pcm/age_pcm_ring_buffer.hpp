@@ -48,7 +48,7 @@ public:
     //! This is the maximal number of {@link pcm_sample}s this ring buffer can store.
     //! Values smaller than 1 are treated as 1.
     //!
-    pcm_ring_buffer(int32_t max_buffered_samples);
+    pcm_ring_buffer(int max_buffered_samples);
 
     //!
     //! \brief Get the ring buffer's capacity.
@@ -57,7 +57,7 @@ public:
     //! This is the maximal number of {@link pcm_sample}s this ring buffer can store.
     //! The capacity is guaranteed to be greater than or equal to 1.
     //!
-    int32_t get_max_buffered_samples() const;
+    int get_max_buffered_samples() const;
 
     //!
     //! \brief Get the actual number of {@link pcm_sample}s currently buffered.
@@ -65,7 +65,7 @@ public:
     //! \return The number of {@link pcm_sample}s currently buffered.
     //! This value is always greater than or equal to 0 (zero).
     //!
-    int32_t get_buffered_samples() const;
+    int get_buffered_samples() const;
 
     //!
     //! \brief Get the number of samples discarded by the last call to add_samples().
@@ -74,7 +74,7 @@ public:
     //! This may be 0 (zero), if the last add_samples() call did not discard any samples.
     //! The value is always greater than or equal to 0 (zero).
     //!
-    int32_t get_last_discarded_samples() const;
+    int get_last_discarded_samples() const;
 
     //!
     //! \brief Get a pointer to the currently buffered {@link pcm_sample}s.
@@ -92,7 +92,7 @@ public:
     //! \return A pointer to the currently buffered {@link pcm_sample}s.
     //! If no samples are buffered, \c nullptr will be returned.
     //!
-    const pcm_sample* get_buffered_samples_ptr(int32_t &available_stereo_samples) const;
+    const pcm_sample* get_buffered_samples_ptr(int &available_stereo_samples) const;
 
 
 
@@ -100,7 +100,7 @@ public:
     //! \brief Add the specified {@link pcm_sample}s to this ring buffer.
     //!
     //! This convenience method simply calls
-    //! add_samples(const pcm_vector &samples_to_add, int32_t num_samples_to_add)
+    //! add_samples(const pcm_vector &samples_to_add, int num_samples_to_add)
     //! with \c num_samples_to_add set to the size of \c samples_to_add.
     //!
     //! \param samples_to_add The {@link pcm_sample}s to be added to this ring buffer.
@@ -123,7 +123,7 @@ public:
     //! \param num_samples_to_add The number of samples to copy from \c samples_to_add into
     //! this ring buffer.
     //!
-    void add_samples(const pcm_vector &samples_to_add, int32_t num_samples_to_add);
+    void add_samples(const pcm_vector &samples_to_add, int num_samples_to_add);
 
     //!
     //! \brief Replace the buffered samples with the specified pcm_sample.
@@ -149,7 +149,7 @@ public:
     //!
     //! \param samples_to_discard The number of buffered {@link pcm_sample}s to discard.
     //!
-    void discard_buffered_samples(int32_t samples_to_discard);
+    void discard_buffered_samples(int samples_to_discard);
 
     //!
     //! \brief Clear the whole ring buffer.
@@ -163,16 +163,16 @@ public:
 
 private:
 
-    int32_t add_samples_with_offset(pcm_vector::const_iterator begin, pcm_vector::const_iterator end);
-    int32_t add_check_wrap_around(int32_t v1, int32_t v2) const;
+    int add_samples_with_offset(pcm_vector::const_iterator begin, pcm_vector::const_iterator end);
+    int add_check_wrap_around(int v1, int v2) const;
 
-    int32_t m_buffer_size;
+    int m_buffer_size;
     pcm_vector m_buffer;
-    int32_t m_last_discarded_samples = 0;
+    int m_last_discarded_samples = 0;
 
-    int32_t m_buffered_samples = 0;
-    int32_t m_first_buffered_sample = 0;
-    int32_t m_first_new_sample = 0;
+    int m_buffered_samples = 0;
+    int m_first_buffered_sample = 0;
+    int m_first_new_sample = 0;
 };
 
 } // namespace age

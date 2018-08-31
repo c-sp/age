@@ -25,7 +25,7 @@ age::screen_buffer::screen_buffer(int16_t screen_width, int16_t screen_height)
       m_screen_height(screen_height)
 {
     // we rely on integral promotion to >=32 bits when multipling width & height
-    auto buffer_size = static_cast<uint>(screen_width * screen_height);
+    auto buffer_size = static_cast<size_t>(screen_width * screen_height);
 
     m_buffers[0] = pixel_vector(buffer_size);
     m_buffers[1] = pixel_vector(buffer_size);

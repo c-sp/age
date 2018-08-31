@@ -20,7 +20,7 @@
 
 
 
-age::emulator::emulator(int16_t screen_width, int16_t screen_height, int32_t sampling_rate, int32_t cycles_per_second)
+age::emulator::emulator(int16_t screen_width, int16_t screen_height, int sampling_rate, int cycles_per_second)
     : m_sampling_rate(sampling_rate),
       m_cycles_per_second(cycles_per_second),
       m_screen_buffer(screen_width, screen_height)
@@ -44,7 +44,6 @@ std::string age::emulator::get_emulator_title() const
 
     std::string inner_title = inner_get_emulator_title();
     std::string result;
-    uint chars = 0;
 
     for (char c : inner_title)
     {
@@ -66,10 +65,9 @@ std::string age::emulator::get_emulator_title() const
 
         // add character to result
         result.append(1, c);
-        ++chars;
 
         // stop if we hit the length limit
-        if (chars >= 32)
+        if (result.length() >= 32)
         {
             break;
         }
@@ -100,12 +98,12 @@ const age::pcm_vector& age::emulator::get_audio_buffer() const
     return m_audio_buffer;
 }
 
-age::int32_t age::emulator::get_pcm_sampling_rate() const
+int age::emulator::get_pcm_sampling_rate() const
 {
     return m_sampling_rate;
 }
 
-age::int32_t age::emulator::get_cycles_per_second() const
+int age::emulator::get_cycles_per_second() const
 {
     return m_cycles_per_second;
 }

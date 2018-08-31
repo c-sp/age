@@ -102,7 +102,7 @@ public:
     //! \return The sampling rate of the PCM data calculated by this emulator.
     //! The returned value will be >0.
     //!
-    int32_t get_pcm_sampling_rate() const;
+    int get_pcm_sampling_rate() const;
 
     //!
     //! \brief Get the number of cycles emulated per seconds.
@@ -112,7 +112,7 @@ public:
     //!
     //! \return The number of cycles emulated per seconds.
     //!
-    int32_t get_cycles_per_second() const;
+    int get_cycles_per_second() const;
 
     uint64 get_emulated_cycles() const;
 
@@ -147,7 +147,7 @@ public:
 
 protected:
 
-    emulator(int16_t screen_width, int16_t screen_height, int32_t sampling_rate, int32_t cycles_per_second);
+    emulator(int16_t screen_width, int16_t screen_height, int sampling_rate, int cycles_per_second);
 
     screen_buffer& get_screen_buffer();
     pcm_vector& get_pcm_vector();
@@ -158,8 +158,8 @@ protected:
 
 private:
 
-    const int32_t m_sampling_rate;
-    const int32_t m_cycles_per_second;
+    const int m_sampling_rate;
+    const int m_cycles_per_second;
 
     screen_buffer m_screen_buffer;
     pcm_vector m_audio_buffer;

@@ -903,7 +903,7 @@ void age::gb_cpu::emulate_instruction()
         INC_CYCLES;
         INC_CYCLES;
         PUSH_BYTE(m_pc >> 8); // if this writes IE, the interrupt may be cancelled
-        uint16 new_pc = m_core.get_interrupt_to_service();
+        uint16_t new_pc = m_core.get_interrupt_to_service();
         PUSH_BYTE(m_pc & 0xFF); // writing IE here will not cancel the interrupt
         INC_CYCLES;
         m_pc = new_pc;
@@ -911,7 +911,7 @@ void age::gb_cpu::emulate_instruction()
     }
 
     // no event handling necessary here, done in emulator's main loop
-    uint8 opcode = m_bus.read_byte(m_pc);
+    uint8_t opcode = m_bus.read_byte(m_pc);
     INC_CYCLES;
 
     m_pc += m_pc_increment;
@@ -1044,8 +1044,8 @@ void age::gb_cpu::emulate_instruction()
         case 0xF9: m_sp = LOAD_HL & 0xFFFF; INC_CYCLES; break; // LD SP, HL (8 cycles)
         case 0x08: { int address; POP_WORD_AT_PC(address); WRITE_WORD(address, m_sp); } break; // LD [xx], SP
 
-        case 0xE0: { uint8 offset; POP_BYTE_AT_PC(offset); WRITE_BYTE(0xFF00 + offset, m_a); } break; // LDH [x], A
-        case 0xF0: { uint8 offset; POP_BYTE_AT_PC(offset); READ_BYTE(m_a, 0xFF00 + offset); } break;  // LDH A, [x]
+        case 0xE0: { uint8_t offset; POP_BYTE_AT_PC(offset); WRITE_BYTE(0xFF00 + offset, m_a); } break; // LDH [x], A
+        case 0xF0: { uint8_t offset; POP_BYTE_AT_PC(offset); READ_BYTE(m_a, 0xFF00 + offset); } break;  // LDH A, [x]
         case 0xE2: WRITE_BYTE(0xFF00 + m_c, m_a); break; // LDH [C], A
         case 0xF2: READ_BYTE(m_a, 0xFF00 + m_c); break;  // LDH A, [C]
         case 0xEA: { int address; POP_WORD_AT_PC(address); WRITE_BYTE(address, m_a); } break; // LD [xx], A
@@ -1058,7 +1058,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x01: POP_BYTE_AT_PC(m_c); POP_BYTE_AT_PC(m_b); break; // LD BC, xx (12 cycles)
         case 0x11: POP_BYTE_AT_PC(m_e); POP_BYTE_AT_PC(m_d); break; // LD DE, xx (12 cycles)
         case 0x21: POP_BYTE_AT_PC(m_l); POP_BYTE_AT_PC(m_h); break; // LD HL, xx (12 cycles)
-        case 0x31: { uint h, l; POP_BYTE_AT_PC(l); POP_BYTE_AT_PC(h); m_sp = static_cast<uint16>(l + (h << 8)); } break; // LD AF, xx (12 cycles)
+        case 0x31: { int h, l; POP_BYTE_AT_PC(l); POP_BYTE_AT_PC(h); m_sp = (l + (h << 8)) & 0xFFFF; } break; // LD AF, xx (12 cycles)
 
             // arithmetic
 
@@ -1190,12 +1190,12 @@ void age::gb_cpu::emulate_instruction()
         case 0xC5: INC_CYCLES; PUSH_BYTE(m_b); PUSH_BYTE(m_c); break; // PUSH BC (16 cycles)
         case 0xD5: INC_CYCLES; PUSH_BYTE(m_d); PUSH_BYTE(m_e); break; // PUSH DE (16 cycles)
         case 0xE5: INC_CYCLES; PUSH_BYTE(m_h); PUSH_BYTE(m_l); break; // PUSH HL (16 cycles)
-        case 0xF5: INC_CYCLES; PUSH_BYTE(m_a); { uint8 f; STORE_FLAGS_TO(f); PUSH_BYTE(f); } break; // PUSH AF (16 cycles)
+        case 0xF5: INC_CYCLES; PUSH_BYTE(m_a); { uint8_t f; STORE_FLAGS_TO(f); PUSH_BYTE(f); } break; // PUSH AF (16 cycles)
 
         case 0xC1: POP_BYTE(m_c); POP_BYTE(m_b); break; // POP BC (12 cycles)
         case 0xD1: POP_BYTE(m_e); POP_BYTE(m_d); break; // POP DE (12 cycles)
         case 0xE1: POP_BYTE(m_l); POP_BYTE(m_h); break; // POP HL (12 cycles)
-        case 0xF1: { uint8 f; POP_BYTE(f); LOAD_FLAGS_FROM(f); } POP_BYTE(m_a); break; // POP AF (12 cycles)
+        case 0xF1: { uint8_t f; POP_BYTE(f); LOAD_FLAGS_FROM(f); } POP_BYTE(m_a); break; // POP AF (12 cycles)
 
             // misc
 
@@ -1215,10 +1215,10 @@ void age::gb_cpu::emulate_instruction()
 
         case 0x27: // DAA
         {
-            uint8 f;
+            uint8_t f;
             STORE_FLAGS_TO(f);
             // calculate correction based on carry flags
-            uint8 correction = ((f & gb_carry_flag) > 0)? 0x60 : 0;
+            uint8_t correction = ((f & gb_carry_flag) > 0)? 0x60 : 0;
             if ((f & gb_half_carry_flag) > 0)
             {
                 correction += 0x06;

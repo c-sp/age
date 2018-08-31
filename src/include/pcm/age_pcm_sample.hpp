@@ -38,7 +38,7 @@ struct pcm_sample
         : pcm_sample(0, 0)
     {}
 
-    pcm_sample(int16 left_sample, int16 right_sample)
+    pcm_sample(int16_t left_sample, int16_t right_sample)
     {
         m_samples[0] = left_sample;
         m_samples[1] = right_sample;
@@ -48,8 +48,8 @@ struct pcm_sample
     {
         AGE_ASSERT(factor <= 1);
         AGE_ASSERT(factor >= 0);
-        m_samples[0] = static_cast<int16>(m_samples[0] * factor);
-        m_samples[1] = static_cast<int16>(m_samples[1] * factor);
+        m_samples[0] = static_cast<int16_t>(m_samples[0] * factor);
+        m_samples[1] = static_cast<int16_t>(m_samples[1] * factor);
         return *this;
     }
 
@@ -79,8 +79,8 @@ struct pcm_sample
 
     union
     {
-        uint32 m_stereo_sample;
-        int16 m_samples[2];
+        uint32_t m_stereo_sample;
+        int16_t m_samples[2];
     };
 };
 

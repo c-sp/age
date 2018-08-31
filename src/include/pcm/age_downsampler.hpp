@@ -37,7 +37,7 @@ class downsampler : public non_copyable
 {
 public:
 
-    downsampler(int32_t input_sampling_rate, uint output_sampling_rate);
+    downsampler(int input_sampling_rate, int output_sampling_rate);
     virtual ~downsampler() = default;
 
     const pcm_vector& get_output_samples() const;
@@ -48,7 +48,7 @@ public:
 
 protected:
 
-    void add_output_sample(int16 left, int16 right);
+    void add_output_sample(int16_t left, int16_t right);
     void add_output_sample(pcm_sample sample);
 
     //!
@@ -56,12 +56,11 @@ protected:
     //! a single output sample. The unsigned integer is treated as fixed
     //! point value with the lower 16 bits treated as fraction.
     //!
-    const uint m_input_output_ratio;
-    const uint m_output_input_ratio;
+    const int m_input_output_ratio;
 
 private:
 
-    static uint calculate_ratio(uint input_sampling_rate, uint output_sampling_rate);
+    static int calculate_ratio(int input_sampling_rate, int output_sampling_rate);
 
     pcm_vector m_output_samples;
     float m_volume = 1;
@@ -86,8 +85,8 @@ private:
 
     void add_output_sample(const pcm_sample &left_sample, const pcm_sample &right_sample);
 
-    uint m_right_sample_index = 1; // 0 = use last sample as left, 1 = use first sample of new samples as left
-    uint m_right_sample_fraction = 0;
+    int m_right_sample_index = 1; // 0 = use last sample as left, 1 = use first sample of new samples as left
+    int m_right_sample_fraction = 0;
 
     pcm_sample m_last_input_sample;
 };
@@ -103,21 +102,21 @@ public:
 
     void add_input_samples(const pcm_vector &samples) override;
 
-    uint get_fir_size() const;
+    size_t get_fir_size() const;
 
 protected:
 
-    void create_windowed_sinc(double transition_frequency, uint filter_order, std::function<double (double, uint)> window_weight);
+    void create_windowed_sinc(double transition_frequency, int filter_order, std::function<double (double, int)> window_weight);
 
 private:
 
-    double calculate_sinc(double n, uint filter_order, double transition_frequency);
+    double calculate_sinc(double n, int filter_order, double transition_frequency);
 
-    std::vector<int32> m_fir_values;
+    std::vector<int32_t> m_fir_values;
     pcm_vector m_prev_samples;
 
-    uint m_next_output_index = 0;
-    uint m_next_output_fraction = 0;
+    int m_next_output_index = 0;
+    int m_next_output_fraction = 0;
 };
 
 
@@ -126,12 +125,12 @@ class downsampler_kaiser_low_pass : public downsampler_low_pass
 {
 public:
 
-    downsampler_kaiser_low_pass(int32_t input_sampling_rate, uint output_sampling_rate, double ripple);
+    downsampler_kaiser_low_pass(int input_sampling_rate, int output_sampling_rate, double ripple);
     virtual ~downsampler_kaiser_low_pass() = default;
 
 private:
 
-    static uint calculate_filter_order(double A, double tw);
+    static int calculate_filter_order(double A, double tw);
     static double calculate_beta(double A);
     static double calculate_bessel(double value);
 };

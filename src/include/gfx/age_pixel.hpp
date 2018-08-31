@@ -38,7 +38,7 @@ struct pixel
         : pixel(0, 0, 0)
     {}
 
-    pixel(int32_t r, int32_t g, int32_t b)
+    pixel(int r, int g, int b)
     {
         AGE_ASSERT(r >= 0);
         AGE_ASSERT(g >= 0);

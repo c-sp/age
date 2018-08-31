@@ -46,12 +46,10 @@ constexpr double pi = 3.14159265358979323846;
 //
 //---------------------------------------------------------
 
-age::downsampler::downsampler(int32_t input_sampling_rate, uint output_sampling_rate)
-    : m_input_output_ratio(calculate_ratio(input_sampling_rate, output_sampling_rate)),
-      m_output_input_ratio(calculate_ratio(output_sampling_rate, input_sampling_rate))
+age::downsampler::downsampler(int input_sampling_rate, int output_sampling_rate)
+    : m_input_output_ratio(calculate_ratio(input_sampling_rate, output_sampling_rate))
 {
     AGE_ASSERT(m_input_output_ratio > 0x10000); // we're downsampling
-    AGE_ASSERT(m_output_input_ratio < 0x10000); // we're downsampling
 }
 
 
@@ -71,7 +69,7 @@ void age::downsampler::set_volume(float volume)
     m_volume = std::min(1.f, std::max(0.f, volume));
 }
 
-void age::downsampler::add_output_sample(int16 left, int16 right)
+void age::downsampler::add_output_sample(int16_t left, int16_t right)
 {
     add_output_sample(pcm_sample(left, right));
 }
@@ -84,14 +82,18 @@ void age::downsampler::add_output_sample(pcm_sample sample)
 
 
 
-age::uint age::downsampler::calculate_ratio(uint value1, uint value2)
+int age::downsampler::calculate_ratio(int value1, int value2)
 {
     AGE_ASSERT(value1 > 0);
     AGE_ASSERT(value2 > 0);
 
     double fp_ratio = value1;
     fp_ratio /= value2;
-    uint ratio = static_cast<uint>(fp_ratio * 0x10000);
+    fp_ratio *= 0x10000;
+
+    AGE_ASSERT(fp_ratio > 0);
+    AGE_ASSERT(fp_ratio < std::numeric_limits<int>::max());
+    int ratio = static_cast<int>(fp_ratio);
 
     LOG(value1 << " / " << value2 << " ratio: " << (ratio >> 16) << " + " << (ratio & 0xFFFF) << "/65536");
     LOG("floating point ratio was: " << fp_ratio << ", diff is " << (fp_ratio - ratio / 65536.0));
@@ -113,25 +115,35 @@ void age::downsampler_linear::add_input_samples(const pcm_vector &samples)
 {
     if (!samples.empty())
     {
+        AGE_ASSERT(samples.size() < std::numeric_limits<int>::max());
+        int samples_size = static_cast<int>(samples.size());
+
+        AGE_ASSERT(m_right_sample_index >= 0);
         AGE_ASSERT(m_right_sample_index < (m_input_output_ratio >> 16) + 0x10000);
         AGE_ASSERT(m_right_sample_fraction < 0x10000);
 
         // next_right_sample_index == 0  ->  based on m_last_input_sample
         while (m_right_sample_index == 0)
         {
-            add_output_sample(m_last_input_sample, samples[m_right_sample_index]);
+            add_output_sample(
+                        m_last_input_sample,
+                        samples[static_cast<size_t>(m_right_sample_index)]
+                        );
         }
 
         // next_right_sample_index >= 1  ->  both samples taken from vector
-        while (m_right_sample_index < samples.size())
+        while (m_right_sample_index < samples_size)
         {
-            add_output_sample(samples[m_right_sample_index - 1], samples[m_right_sample_index]);
+            add_output_sample(
+                        samples[static_cast<size_t>(m_right_sample_index - 1)],
+                        samples[static_cast<size_t>(m_right_sample_index)]
+                        );
         }
 
         // normalize
-        AGE_ASSERT(m_right_sample_index >= samples.size());
+        AGE_ASSERT(m_right_sample_index >= samples_size);
 
-        m_right_sample_index -= samples.size();
+        m_right_sample_index -= samples_size;
         m_last_input_sample = samples[samples.size() - 1];
 
         AGE_ASSERT(m_right_sample_index < (m_input_output_ratio >> 16) + 0x10000);
@@ -143,21 +155,26 @@ void age::downsampler_linear::add_input_samples(const pcm_vector &samples)
 
 void age::downsampler_linear::add_output_sample(const pcm_sample &left_sample, const pcm_sample &right_sample)
 {
-    int32 fraction = static_cast<int32>(m_right_sample_fraction);
-    int32 diff[2], interpolated[2];
+    AGE_ASSERT(m_right_sample_fraction < 0x10000);
+
+    int diff[2], interpolated[2];
 
     diff[0] = right_sample.m_samples[0];
     diff[1] = right_sample.m_samples[1];
     diff[0] -= left_sample.m_samples[0];
     diff[1] -= left_sample.m_samples[1];
 
-    interpolated[0] = left_sample.m_samples[0] + ((diff[0] * fraction) >> 16);
-    interpolated[1] = left_sample.m_samples[1] + ((diff[1] * fraction) >> 16);
+    interpolated[0] = left_sample.m_samples[0] + ((diff[0] * m_right_sample_fraction) >> 16);
+    interpolated[1] = left_sample.m_samples[1] + ((diff[1] * m_right_sample_fraction) >> 16);
 
-    downsampler::add_output_sample(static_cast<int16>(interpolated[0]), static_cast<int16>(interpolated[1]));
+    downsampler::add_output_sample(static_cast<int16_t>(interpolated[0]), static_cast<int16_t>(interpolated[1]));
 
     m_right_sample_fraction += m_input_output_ratio;
+    AGE_ASSERT(m_right_sample_fraction > 0);
+
     m_right_sample_index += m_right_sample_fraction >> 16;
+    AGE_ASSERT(m_right_sample_index >= 0);
+
     m_right_sample_fraction &= 0xFFFF;
 }
 
@@ -173,28 +190,37 @@ void age::downsampler_linear::add_output_sample(const pcm_sample &left_sample, c
 
 void age::downsampler_low_pass::add_input_samples(const pcm_vector &samples)
 {
+    AGE_ASSERT(m_prev_samples.size() < std::numeric_limits<int>::max());
+    AGE_ASSERT(m_fir_values.size() < std::numeric_limits<int>::max());
+
     // inefficient: we copy all samples into a single buffer before filtering
-    uint num_old_samples = m_prev_samples.size();
+    size_t num_old_samples = m_prev_samples.size();
     m_prev_samples.resize(num_old_samples + samples.size());
-    std::copy(std::begin(samples), std::end(samples), std::begin(m_prev_samples) + num_old_samples);
+    std::copy(std::begin(samples), std::end(samples), std::begin(m_prev_samples) + static_cast<int>(num_old_samples));
+
+    int prev_samples_size = static_cast<int>(m_prev_samples.size());
+    int fir_values_size = static_cast<int>(m_fir_values.size());
 
     // resample
-    if (m_prev_samples.size() >= m_fir_values.size())
+    if (prev_samples_size >= fir_values_size)
     {
-        uint max = m_prev_samples.size() - m_fir_values.size();
+        int max = prev_samples_size - fir_values_size;
 
         while (m_next_output_index <= max)
         {
-            int64 result0 = 0, result1 = 0;
+            int64_t result0 = 0, result1 = 0;
 
-            for (uint i = 0; i < m_fir_values.size(); ++i)
+            for (size_t i = 0; i < m_fir_values.size(); ++i)
             {
+                AGE_ASSERT(m_next_output_index >= 0);
+                const pcm_sample &sample = m_prev_samples[static_cast<size_t>(m_next_output_index) + i];
+
                 // this is no accurate downsampling as we ignore the sample index fraction
                 //  => we don't reconstruct the actual data for non-integer downsampling
-                int64 sample0 = m_prev_samples[m_next_output_index + i].m_samples[0];
-                int64 sample1 = m_prev_samples[m_next_output_index + i].m_samples[1];
+                int64_t sample0 = sample.m_samples[0];
+                int64_t sample1 = sample.m_samples[1];
 
-                int32 fir_value = m_fir_values[i];
+                int32_t fir_value = m_fir_values[i];
                 sample0 *= fir_value;
                 sample1 *= fir_value;
 
@@ -204,15 +230,19 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector &samples)
 
             result0 >>= 31;
             result1 >>= 31;
-            add_output_sample(static_cast<int16>(result0), static_cast<int16>(result1));
+            add_output_sample(static_cast<int16_t>(result0), static_cast<int16_t>(result1));
 
             m_next_output_fraction += m_input_output_ratio;
+            AGE_ASSERT(m_next_output_fraction > 0);
+
             m_next_output_index += m_next_output_fraction >> 16;
+            AGE_ASSERT(m_next_output_index >= 0);
+
             m_next_output_fraction &= 0xFFFF;
         }
 
         // discard processed samples
-        size_t samples_to_discard = std::min(m_next_output_index, m_prev_samples.size());
+        int samples_to_discard = std::min(m_next_output_index, prev_samples_size);
 
         auto begin = std::begin(m_prev_samples);
         m_prev_samples.erase(begin, begin + samples_to_discard);
@@ -223,20 +253,20 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector &samples)
 
 
 
-age::uint age::downsampler_low_pass::get_fir_size() const
+age::size_t age::downsampler_low_pass::get_fir_size() const
 {
     return m_fir_values.size();
 }
 
 
 
-void age::downsampler_low_pass::create_windowed_sinc(double transition_frequency, uint filter_order, std::function<double (double, uint)> window_weight)
+void age::downsampler_low_pass::create_windowed_sinc(double transition_frequency, int filter_order, std::function<double (double, int)> window_weight)
 {
     AGE_ASSERT(transition_frequency > 0.0);
     AGE_ASSERT(!(transition_frequency > 0.5));
     AGE_ASSERT(filter_order > 0);
 
-    for (uint n = 0; n <= filter_order; ++n)
+    for (int n = 0; n <= filter_order; ++n)
     {
         double dn = n;
 
@@ -247,19 +277,18 @@ void age::downsampler_low_pass::create_windowed_sinc(double transition_frequency
         AGE_ASSERT(!(windowed > 1.0));
         AGE_ASSERT(!(windowed < -1.0));
 
-        int32 i = static_cast<int32>(windowed * std::numeric_limits<int32>::max());
-        int32 entry = i;
+        int32_t i = static_cast<int32_t>(windowed * std::numeric_limits<int32_t>::max());
 
         LOG_FIR("n " << dn << ":   " << sinc << " * " << weight << " = " << windowed
                 << "   (0x" << std::hex << entry << std::dec << ")");
 
-        m_fir_values.push_back(entry);
+        m_fir_values.push_back(i);
     }
 }
 
 
 
-double age::downsampler_low_pass::calculate_sinc(double n, uint filter_order, double transition_frequency)
+double age::downsampler_low_pass::calculate_sinc(double n, int filter_order, double transition_frequency)
 {
     double result = 2 * transition_frequency;
 
@@ -297,7 +326,7 @@ double age::downsampler_low_pass::calculate_sinc(double n, uint filter_order, do
 //    between samples of the FIR stored in a table.
 //
 
-age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_sampling_rate, uint output_sampling_rate, double ripple)
+age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling_rate, int output_sampling_rate, double ripple)
     : downsampler_low_pass(input_sampling_rate, output_sampling_rate)
 {
     //
@@ -325,17 +354,17 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_samp
     // if the output sampling rate allows it.
     // (According to Wikipedia this should actually be 20000 hz,
     // but we use 15000 hz for a smaller FIR)
-    constexpr uint max_audible_frequency_hz = 15000;
+    constexpr int max_audible_frequency_hz = 15000;
     LOG("using " << max_audible_frequency_hz << " hz as maximal audible frequency");
 
     // calculate the Nyquist Frequency
-    uint nyquist_frequency_hz = output_sampling_rate >> 1;
+    int nyquist_frequency_hz = output_sampling_rate >> 1;
     LOG("output sampling rate " << output_sampling_rate << ", Nyquist Frequency " << nyquist_frequency_hz << " hz");
 
     // calculate the transition width:
     //  - not smaller than 10% of the Nyquist Frequency
     //  - for higher output sampling rates use the range [max_audible;nyquist]
-    uint transition_width_hz = nyquist_frequency_hz / 10;
+    int transition_width_hz = nyquist_frequency_hz / 10;
     if (max_audible_frequency_hz + transition_width_hz < nyquist_frequency_hz)
     {
         transition_width_hz = nyquist_frequency_hz - max_audible_frequency_hz;
@@ -349,7 +378,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_samp
 
     // calculate transition frequency that marks the
     // center of the transition band
-    uint transition_frequency_hz = nyquist_frequency_hz - transition_width_hz / 2;
+    int transition_frequency_hz = nyquist_frequency_hz - transition_width_hz / 2;
     double transition_frequency = transition_frequency_hz;
     transition_frequency /= input_sampling_rate; // we're creating the FIR for the input signal
     AGE_ASSERT(transition_width < 0.5);
@@ -360,7 +389,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_samp
     double A = -20 * std::log10(ripple);
     double tw = 2 * pi * transition_width;
 
-    uint M = calculate_filter_order(A, tw);
+    int M = calculate_filter_order(A, tw);
     M += M & 1; // make even
     double beta = calculate_beta(A);
 
@@ -369,7 +398,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_samp
     // window weight value calculation method
     double beta_bessel = calculate_bessel(beta);
 
-    auto window_weight = [=](double n, uint filter_order)
+    auto window_weight = [=](double n, int filter_order)
     {
         double v = 2 * n / filter_order - 1;
         v *= v;
@@ -389,7 +418,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int32_t input_samp
 
 
 
-age::uint age::downsampler_kaiser_low_pass::calculate_filter_order(double A, double tw)
+int age::downsampler_kaiser_low_pass::calculate_filter_order(double A, double tw)
 {
     double dM;
 
@@ -402,7 +431,8 @@ age::uint age::downsampler_kaiser_low_pass::calculate_filter_order(double A, dou
         dM = 5.79 / tw;
     }
 
-    uint M = static_cast<uint>(dM) + 1;
+    AGE_ASSERT(dM < std::numeric_limits<int>::max());
+    int M = static_cast<int>(dM) + 1;
     return M;
 }
 
@@ -438,7 +468,7 @@ double age::downsampler_kaiser_low_pass::calculate_bessel(double value)
     value /= 2;
     double factorial = 1;
 
-    for (uint i = 1; i <= 10; ++i)
+    for (int i = 1; i <= 10; ++i)
     {
         double v1 = std::pow(value, 2 * i);
         double v2 = factorial * factorial;

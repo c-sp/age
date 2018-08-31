@@ -1162,7 +1162,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
 
         for (int offset = 0; offset < cart_rom_size; offset += 0x40000)
         {
-            uint32 crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
+            uint32_t crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
             if (crc == 0x46195417)
             {
                 ++findings;

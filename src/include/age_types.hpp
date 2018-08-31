@@ -39,10 +39,7 @@ typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
 
-typedef std::int8_t  int8;
 typedef std::int16_t int16;
-typedef std::int32_t int32;
-typedef std::int64_t int64;
 
 //!
 //! Defines an unsigned integer type that matches the architecture's default CPU register
@@ -53,6 +50,14 @@ typedef size_t uint;
 
 //! \todo remove uint_max
 constexpr uint uint_max = std::numeric_limits<uint>::max();
+
+
+
+// C++ arithmetic operators do not accept types smaller than int
+// (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
+// AGE relies on int being 32 bits or more.
+static_assert(sizeof(int) >= 4, "AGE requires int being at least 32 bits wide");
+static_assert(sizeof(std::size_t) >= sizeof(int), "AGE requires std::size_t to be at least as wide as int");
 
 
 
@@ -74,13 +79,6 @@ typedef std::size_t size_t;
 template<size_t _size> using uint8_array = std::array<uint8_t, _size>;
 
 typedef std::vector<uint8_t> uint8_vector;
-
-
-
-// C++ arithmetic operators do not accept types smaller than int
-// (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
-// AGE relies on int being 32 bits or more.
-static_assert(sizeof(int) >= 4, "AGE requires int being 32 bits or more");
 
 
 

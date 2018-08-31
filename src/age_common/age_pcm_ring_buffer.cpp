@@ -26,12 +26,10 @@
 #define LOG(x)
 #endif
 
-static_assert(sizeof(age::size_t) >= sizeof(age::int32_t), "we expect size_t to be at least as wide as int32_t");
-
 #define AGE_ASSERT_BUFFERED_SAMPLES \
     AGE_ASSERT( \
     /* buffer size matches */ \
-    (m_buffer_size == static_cast<int32_t>(m_buffer.size())) && (\
+    (m_buffer_size == static_cast<int>(m_buffer.size())) && (\
     /* buffer completely filled */ \
     ((m_buffered_samples == m_buffer_size) && (m_first_buffered_sample == m_first_new_sample)) \
     /* buffer empty */ \
@@ -50,11 +48,12 @@ static_assert(sizeof(age::size_t) >= sizeof(age::int32_t), "we expect size_t to 
 //
 //---------------------------------------------------------
 
-age::pcm_ring_buffer::pcm_ring_buffer(int32_t max_buffered_samples)
+age::pcm_ring_buffer::pcm_ring_buffer(int max_buffered_samples)
     : m_buffer_size(std::max(1, max_buffered_samples)),
       m_buffer(static_cast<size_t>(m_buffer_size), pcm_sample())
 {
 }
+
 
 
 //---------------------------------------------------------
@@ -63,25 +62,25 @@ age::pcm_ring_buffer::pcm_ring_buffer(int32_t max_buffered_samples)
 //
 //---------------------------------------------------------
 
-age::int32_t age::pcm_ring_buffer::get_max_buffered_samples() const
+int age::pcm_ring_buffer::get_max_buffered_samples() const
 {
     return m_buffer_size;
 }
 
-age::int32_t age::pcm_ring_buffer::get_buffered_samples() const
+int age::pcm_ring_buffer::get_buffered_samples() const
 {
     return m_buffered_samples;
 }
 
-age::int32_t age::pcm_ring_buffer::get_last_discarded_samples() const
+int age::pcm_ring_buffer::get_last_discarded_samples() const
 {
     return m_last_discarded_samples;
 }
 
-const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int32_t &available_stereo_samples) const
+const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int &available_stereo_samples) const
 {
     const pcm_sample *result = nullptr;
-    int32_t available = 0;
+    int available = 0;
 
     if (m_buffered_samples > 0)
     {
@@ -104,18 +103,18 @@ const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int32_t &a
 
 void age::pcm_ring_buffer::add_samples(const pcm_vector &samples_to_add)
 {
-    AGE_ASSERT(samples_to_add.size() <= std::numeric_limits<int32_t>::max());
+    AGE_ASSERT(samples_to_add.size() <= std::numeric_limits<int>::max());
 
-    int32_t num_samples_to_add = static_cast<int32_t>(samples_to_add.size());
+    int num_samples_to_add = static_cast<int>(samples_to_add.size());
     add_samples(samples_to_add, num_samples_to_add);
 }
 
-void age::pcm_ring_buffer::add_samples(const pcm_vector &samples_to_add, int32_t num_samples_to_add)
+void age::pcm_ring_buffer::add_samples(const pcm_vector &samples_to_add, int num_samples_to_add)
 {
     AGE_ASSERT_BUFFERED_SAMPLES;
 
-    AGE_ASSERT(samples_to_add.size() <= std::numeric_limits<int32_t>::max());
-    num_samples_to_add = std::min(num_samples_to_add, static_cast<int32_t>(samples_to_add.size()));
+    AGE_ASSERT(samples_to_add.size() <= std::numeric_limits<int>::max());
+    num_samples_to_add = std::min(num_samples_to_add, static_cast<int>(samples_to_add.size()));
 
     auto first = std::begin(samples_to_add);
     auto last = first + num_samples_to_add;
@@ -124,7 +123,7 @@ void age::pcm_ring_buffer::add_samples(const pcm_vector &samples_to_add, int32_t
     // fill the buffer with the last N samples to add
     if (num_samples_to_add >= m_buffer_size)
     {
-        int32_t sample_offset = num_samples_to_add - m_buffer_size;
+        int sample_offset = num_samples_to_add - m_buffer_size;
 
         m_last_discarded_samples = m_buffered_samples + sample_offset; // set this before changing m_buffered_samples
         m_buffered_samples = m_buffer_size;
@@ -169,7 +168,7 @@ void age::pcm_ring_buffer::set_to(pcm_sample sample)
 
 
 
-void age::pcm_ring_buffer::discard_buffered_samples(int32_t samples_to_discard)
+void age::pcm_ring_buffer::discard_buffered_samples(int samples_to_discard)
 {
     AGE_ASSERT_BUFFERED_SAMPLES;
 
@@ -222,9 +221,9 @@ void age::pcm_ring_buffer::clear()
 //
 //---------------------------------------------------------
 
-age::int32_t age::pcm_ring_buffer::add_samples_with_offset(pcm_vector::const_iterator begin, pcm_vector::const_iterator end)
+int age::pcm_ring_buffer::add_samples_with_offset(pcm_vector::const_iterator begin, pcm_vector::const_iterator end)
 {
-    int32_t samples_added = 0;
+    int samples_added = 0;
 
     std::ptrdiff_t samples_available = end - begin;
     AGE_ASSERT(samples_available < m_buffer_size);
@@ -259,9 +258,9 @@ age::int32_t age::pcm_ring_buffer::add_samples_with_offset(pcm_vector::const_ite
 
 
 
-age::int32_t age::pcm_ring_buffer::add_check_wrap_around(int32_t v1, int32_t v2) const
+int age::pcm_ring_buffer::add_check_wrap_around(int v1, int v2) const
 {
-    int32_t result = v1 + v2;
+    int result = v1 + v2;
 
     if (result >= m_buffer_size)
     {
