@@ -26,7 +26,7 @@
 //
 //---------------------------------------------------------
 
-void age::gb_sound::write_nr10(uint8 value)
+void age::gb_sound::write_nr10(uint8_t value)
 {
     if (m_master_on)
     {
@@ -39,7 +39,7 @@ void age::gb_sound::write_nr10(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr11(uint8 value)
+void age::gb_sound::write_nr11(uint8_t value)
 {
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
@@ -55,7 +55,7 @@ void age::gb_sound::write_nr11(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr12(uint8 value)
+void age::gb_sound::write_nr12(uint8_t value)
 {
     if (m_master_on)
     {
@@ -68,7 +68,7 @@ void age::gb_sound::write_nr12(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr13(uint8 value)
+void age::gb_sound::write_nr13(uint8_t value)
 {
     if (m_master_on)
     {
@@ -77,7 +77,7 @@ void age::gb_sound::write_nr13(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr14(uint8 value)
+void age::gb_sound::write_nr14(uint8_t value)
 {
     if (m_master_on)
     {
@@ -119,7 +119,7 @@ void age::gb_sound::write_nr14(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::write_nr21(uint8 value)
+void age::gb_sound::write_nr21(uint8_t value)
 {
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
@@ -135,7 +135,7 @@ void age::gb_sound::write_nr21(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr22(uint8 value)
+void age::gb_sound::write_nr22(uint8_t value)
 {
     if (m_master_on)
     {
@@ -148,7 +148,7 @@ void age::gb_sound::write_nr22(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr23(uint8 value)
+void age::gb_sound::write_nr23(uint8_t value)
 {
     if (m_master_on)
     {
@@ -157,7 +157,7 @@ void age::gb_sound::write_nr23(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr24(uint8 value)
+void age::gb_sound::write_nr24(uint8_t value)
 {
     if (m_master_on)
     {
@@ -197,7 +197,7 @@ void age::gb_sound::write_nr24(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::write_nr30(uint8 value)
+void age::gb_sound::write_nr30(uint8_t value)
 {
     if (m_master_on)
     {
@@ -210,7 +210,7 @@ void age::gb_sound::write_nr30(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr31(uint8 value)
+void age::gb_sound::write_nr31(uint8_t value)
 {
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
@@ -219,7 +219,7 @@ void age::gb_sound::write_nr31(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr32(uint8 value)
+void age::gb_sound::write_nr32(uint8_t value)
 {
     if (m_master_on)
     {
@@ -235,7 +235,7 @@ void age::gb_sound::write_nr32(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr33(uint8 value)
+void age::gb_sound::write_nr33(uint8_t value)
 {
     if (m_master_on)
     {
@@ -244,7 +244,7 @@ void age::gb_sound::write_nr33(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr34(uint8 value)
+void age::gb_sound::write_nr34(uint8_t value)
 {
     if (m_master_on)
     {
@@ -264,7 +264,7 @@ void age::gb_sound::write_nr34(uint8 value)
             // DMG: if we're about to read a wave sample, wave pattern memory will be "scrambled"
             if (!m_is_cgb && (m_c3.get_cycles_next_sample() == 2))
             {
-                uint index = (m_c3.get_wave_pattern_index() + 1) & 31;
+                size_t index = (m_c3.get_wave_pattern_index() + 1) & 31;
                 index >>= 1;
 
                 if (index < 4)
@@ -273,8 +273,8 @@ void age::gb_sound::write_nr34(uint8 value)
                 }
                 else
                 {
-                    uint offset = index & ~3;
-                    for (uint i = 0; i < 4; ++i)
+                    size_t offset = index & ~3;
+                    for (size_t i = 0; i < 4; ++i)
                     {
                         set_wave_ram_byte(i, m_c3_wave_ram[i + offset]);
                     }
@@ -300,7 +300,7 @@ void age::gb_sound::write_nr34(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::write_nr41(uint8 value)
+void age::gb_sound::write_nr41(uint8_t value)
 {
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
@@ -309,7 +309,7 @@ void age::gb_sound::write_nr41(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr42(uint8 value)
+void age::gb_sound::write_nr42(uint8_t value)
 {
     if (m_master_on)
     {
@@ -322,7 +322,7 @@ void age::gb_sound::write_nr42(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr43(uint8 value)
+void age::gb_sound::write_nr43(uint8_t value)
 {
     if (m_master_on)
     {
@@ -331,7 +331,7 @@ void age::gb_sound::write_nr43(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr44(uint8 value)
+void age::gb_sound::write_nr44(uint8_t value)
 {
     if (m_master_on)
     {

@@ -51,31 +51,31 @@ constexpr const uint8_array<0x10> cgb_wave_ram_dump =
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_sound::read_nr10() const { return m_c1.read_nrX0(); }
-age::uint8 age::gb_sound::read_nr11() const { return m_nr11; }
-age::uint8 age::gb_sound::read_nr12() const { return m_c1.read_nrX2(); }
-age::uint8 age::gb_sound::read_nr13() const { return 0xFF;   }
-age::uint8 age::gb_sound::read_nr14() const { return m_nr14; }
+age::uint8_t age::gb_sound::read_nr10() const { return m_c1.read_nrX0(); }
+age::uint8_t age::gb_sound::read_nr11() const { return m_nr11; }
+age::uint8_t age::gb_sound::read_nr12() const { return m_c1.read_nrX2(); }
+age::uint8_t age::gb_sound::read_nr13() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr14() const { return m_nr14; }
 
-age::uint8 age::gb_sound::read_nr21() const { return m_nr21; }
-age::uint8 age::gb_sound::read_nr22() const { return m_c2.read_nrX2(); }
-age::uint8 age::gb_sound::read_nr23() const { return 0xFF;   }
-age::uint8 age::gb_sound::read_nr24() const { return m_nr24; }
+age::uint8_t age::gb_sound::read_nr21() const { return m_nr21; }
+age::uint8_t age::gb_sound::read_nr22() const { return m_c2.read_nrX2(); }
+age::uint8_t age::gb_sound::read_nr23() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr24() const { return m_nr24; }
 
-age::uint8 age::gb_sound::read_nr30() const { return m_nr30; }
-age::uint8 age::gb_sound::read_nr31() const { return 0xFF;   }
-age::uint8 age::gb_sound::read_nr32() const { return m_nr32; }
-age::uint8 age::gb_sound::read_nr33() const { return 0xFF;   }
-age::uint8 age::gb_sound::read_nr34() const { return m_nr34; }
+age::uint8_t age::gb_sound::read_nr30() const { return m_nr30; }
+age::uint8_t age::gb_sound::read_nr31() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr32() const { return m_nr32; }
+age::uint8_t age::gb_sound::read_nr33() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr34() const { return m_nr34; }
 
-age::uint8 age::gb_sound::read_nr41() const { return 0xFF;   }
-age::uint8 age::gb_sound::read_nr42() const { return m_c4.read_nrX2(); }
-age::uint8 age::gb_sound::read_nr43() const { return m_c4.read_nrX3(); }
-age::uint8 age::gb_sound::read_nr44() const { return m_nr44; }
+age::uint8_t age::gb_sound::read_nr41() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr42() const { return m_c4.read_nrX2(); }
+age::uint8_t age::gb_sound::read_nr43() const { return m_c4.read_nrX3(); }
+age::uint8_t age::gb_sound::read_nr44() const { return m_nr44; }
 
-age::uint8 age::gb_sound::read_nr50() const { return m_nr50; }
-age::uint8 age::gb_sound::read_nr51() const { return m_nr51; }
-age::uint8 age::gb_sound::read_nr52() const { return m_nr52; }
+age::uint8_t age::gb_sound::read_nr50() const { return m_nr50; }
+age::uint8_t age::gb_sound::read_nr51() const { return m_nr51; }
+age::uint8_t age::gb_sound::read_nr52() const { return m_nr52; }
 
 
 
@@ -87,7 +87,7 @@ age::uint8 age::gb_sound::read_nr52() const { return m_nr52; }
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_sound::read_wave_ram(uint offset)
+age::uint8_t age::gb_sound::read_wave_ram(size_t offset)
 {
     AGE_ASSERT(offset < m_c3_wave_ram.size());
 
@@ -104,11 +104,11 @@ age::uint8 age::gb_sound::read_wave_ram(uint offset)
         offset >>= 1;
     }
 
-    uint8 result = m_c3_wave_ram[offset];
+    uint8_t result = m_c3_wave_ram[offset];
     return result;
 }
 
-void age::gb_sound::write_wave_ram(uint offset, uint8 value)
+void age::gb_sound::write_wave_ram(size_t offset, uint8_t value)
 {
     AGE_ASSERT(offset < m_c3_wave_ram.size());
 
@@ -138,7 +138,7 @@ void age::gb_sound::write_wave_ram(uint offset, uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::write_nr50(uint8 value)
+void age::gb_sound::write_nr50(uint8_t value)
 {
     if (m_master_on)
     {
@@ -152,7 +152,7 @@ void age::gb_sound::write_nr50(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr51(uint8 value)
+void age::gb_sound::write_nr51(uint8_t value)
 {
     if (m_master_on)
     {
@@ -166,7 +166,7 @@ void age::gb_sound::write_nr51(uint8 value)
     }
 }
 
-void age::gb_sound::write_nr52(uint8 value)
+void age::gb_sound::write_nr52(uint8_t value)
 {
     generate_samples();
 
@@ -285,7 +285,7 @@ void age::gb_sound::generate_samples()
         int32_t samples_to_generate = cycles_elapsed >> gb_sample_cycle_shift;
         AGE_ASSERT(samples_to_generate > 0);
 
-        uint sample_index = m_samples.size();
+        size_t sample_index = m_samples.size();
         m_samples.resize(sample_index + samples_to_generate);
 
         if (m_master_on)
@@ -323,7 +323,7 @@ void age::gb_sound::set_back_cycles(int32_t offset)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::set_wave_ram_byte(uint offset, uint8 value)
+void age::gb_sound::set_wave_ram_byte(size_t offset, uint8_t value)
 {
     m_c3_wave_ram[offset] = value;
     m_c3.set_wave_pattern_byte(offset, value);

@@ -42,11 +42,7 @@ namespace age {
 
 //! \todo remove these old typedefs
 typedef std::uint8_t  uint8;
-typedef std::uint16_t uint16;
-typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
-
-typedef std::int16_t int16;
 
 //!
 //! Defines an unsigned integer type that matches the architecture's default CPU register
