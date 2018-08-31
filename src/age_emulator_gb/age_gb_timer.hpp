@@ -61,15 +61,15 @@ public:
 
     int32_t get_current_value() const;
     int32_t get_cycle_offset(int32_t for_tima_offset) const;
-    int32_t get_trigger_bit(uint8 for_tac) const;
-    int32_t get_past_tima_counter(uint8 for_tima) const;
+    int32_t get_trigger_bit(uint8_t for_tac) const;
+    int32_t get_past_tima_counter(uint8_t for_tima) const;
 
     void set_tima(int32_t tima);
-    void set_frequency(uint8 tac);
+    void set_frequency(uint8_t tac);
 
 private:
 
-    static int8_t calculate_counter_shift(uint8 for_tac);
+    static int8_t calculate_counter_shift(uint8_t for_tac);
 
     const gb_common_counter &m_counter;
     int32_t m_tima_origin = 0;
@@ -82,15 +82,15 @@ class gb_timer : public non_copyable
 {
 public:
 
-    uint8 read_div() const;
-    uint8 read_tima();
-    uint8 read_tma() const;
-    uint8 read_tac() const;
+    uint8_t read_div() const;
+    uint8_t read_tima();
+    uint8_t read_tma() const;
+    uint8_t read_tac() const;
 
-    void write_div(uint8 value);
-    void write_tima(uint8 value);
-    void write_tma(uint8 value);
-    void write_tac(uint8 value);
+    void write_div(uint8_t value);
+    void write_tima(uint8_t value);
+    void write_tma(uint8_t value);
+    void write_tac(uint8_t value);
 
     void timer_overflow();
     void switch_double_speed_mode();
@@ -103,9 +103,9 @@ private:
     int32_t check_for_early_increment(int32_t new_increment_bit);
     void schedule_timer_overflow();
 
-    uint8 m_tima = 0;
-    uint8 m_tma = 0;
-    uint8 m_tac = 0;
+    uint8_t m_tima = 0;
+    uint8_t m_tma = 0;
+    uint8_t m_tac = 0;
 
     gb_core &m_core;
     gb_common_counter m_counter = {m_core};

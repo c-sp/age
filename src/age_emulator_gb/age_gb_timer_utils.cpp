@@ -126,7 +126,7 @@ age::int32_t age::gb_tima_counter::get_cycle_offset(int32_t for_tima_offset) con
     return cycle_offset;
 }
 
-age::int32_t age::gb_tima_counter::get_trigger_bit(uint8 for_tac) const
+age::int32_t age::gb_tima_counter::get_trigger_bit(uint8_t for_tac) const
 {
     int32_t counter = m_counter.get_current_value();
     int32_t shift = calculate_counter_shift(for_tac);
@@ -135,7 +135,7 @@ age::int32_t age::gb_tima_counter::get_trigger_bit(uint8 for_tac) const
     return increment_bit;
 }
 
-age::int32_t age::gb_tima_counter::get_past_tima_counter(uint8 for_tima) const
+age::int32_t age::gb_tima_counter::get_past_tima_counter(uint8_t for_tima) const
 {
     AGE_ASSERT(for_tima <= get_current_value());
 
@@ -161,7 +161,7 @@ void age::gb_tima_counter::set_tima(int32_t tima)
 
 
 
-void age::gb_tima_counter::set_frequency(uint8 tac)
+void age::gb_tima_counter::set_frequency(uint8_t tac)
 {
     // preserve the current TIMA value during the frequency change
     int32_t tima = get_current_value();
@@ -171,7 +171,7 @@ void age::gb_tima_counter::set_frequency(uint8 tac)
 
 
 
-age::int8_t age::gb_tima_counter::calculate_counter_shift(uint8 for_tac)
+age::int8_t age::gb_tima_counter::calculate_counter_shift(uint8_t for_tac)
 {
     // calculate the number of bits the counter value has to
     // be shifted to get the TIMA value

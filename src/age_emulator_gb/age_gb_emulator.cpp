@@ -20,7 +20,7 @@
 
 namespace age {
 
-constexpr uint gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
+constexpr int32_t gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
 
 }
 
@@ -67,7 +67,7 @@ void age::gb_emulator::set_buttons_up(int buttons)
 
 age::uint64 age::gb_emulator::inner_emulate(uint64 min_cycles_to_emulate)
 {
-    return m_impl->inner_emulate(min_cycles_to_emulate);
+    return (min_cycles_to_emulate > 0) ? m_impl->inner_emulate(min_cycles_to_emulate) : 0;
 }
 
 std::string age::gb_emulator::inner_get_emulator_title() const
