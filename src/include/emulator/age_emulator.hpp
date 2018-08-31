@@ -115,7 +115,7 @@ public:
     //!
     int get_cycles_per_second() const;
 
-    uint64 get_emulated_cycles() const;
+    int64_t get_emulated_cycles() const;
 
     //!
     //! \brief Get a copy of this emulator's persistent ram.
@@ -144,7 +144,7 @@ public:
     virtual void set_buttons_down(int buttons) = 0;
     virtual void set_buttons_up(int buttons) = 0;
 
-    bool emulate(uint64 min_cycles_to_emulate);
+    bool emulate(int cycles_to_emulate);
 
 protected:
 
@@ -153,7 +153,7 @@ protected:
     screen_buffer& get_screen_buffer();
     pcm_vector& get_pcm_vector();
 
-    virtual uint64 inner_emulate(uint64 min_cycles_to_emulate) = 0;
+    virtual int inner_emulate(int cycles_to_emulate) = 0;
 
     virtual std::string inner_get_emulator_title() const = 0;
 
@@ -164,7 +164,7 @@ private:
 
     screen_buffer m_screen_buffer;
     pcm_vector m_audio_buffer;
-    uint64 m_emulated_cycles = 0;
+    int64_t m_emulated_cycles = 0;
 };
 
 

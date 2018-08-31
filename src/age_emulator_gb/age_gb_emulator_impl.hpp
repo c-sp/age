@@ -56,7 +56,7 @@ public:
     void set_buttons_down(int buttons);
     void set_buttons_up(int buttons);
 
-    uint64 inner_emulate(uint64 min_cycles_to_emulate);
+    int inner_emulate(int cycles_to_emulate);
 
     std::string inner_get_emulator_title() const;
 

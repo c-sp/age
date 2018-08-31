@@ -47,14 +47,17 @@ void age::gb_emulator_impl::set_buttons_up(int buttons)
 
 
 
-age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
+int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 {
-    constexpr int cycle_limit = std::numeric_limits<int>::max();
+    // make sure we have some headroom since we usually emulate
+    // a few more cycles than requested
+    constexpr int cycle_limit = std::numeric_limits<int>::max() - gb_machine_cycles_per_second;
 
     int starting_cycle = m_core.get_oscillation_cycle();
-    AGE_ASSERT(min_cycles_to_emulate <= static_cast<uint64>(cycle_limit - starting_cycle));
+    AGE_ASSERT(starting_cycle < cycle_limit);
+    AGE_ASSERT(cycles_to_emulate > 0);
 
-    int cycle_to_go = starting_cycle + static_cast<int>(min_cycles_to_emulate);
+    int cycle_to_go = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
         m_bus.handle_events(); // may change the current gb_state
@@ -98,7 +101,7 @@ age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
         m_bus.set_back_cycles(offset);
     }
 
-    return static_cast<uint64>(cycles_emulated);
+    return cycles_emulated;
 }
 
 

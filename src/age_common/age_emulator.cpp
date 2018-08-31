@@ -108,18 +108,23 @@ int age::emulator::get_cycles_per_second() const
     return m_cycles_per_second;
 }
 
-age::uint64 age::emulator::get_emulated_cycles() const
+age::int64_t age::emulator::get_emulated_cycles() const
 {
     return m_emulated_cycles;
 }
 
-bool age::emulator::emulate(uint64 min_cycles_to_emulate)
+bool age::emulator::emulate(int cycles_to_emulate)
 {
+    if (cycles_to_emulate <= 0)
+    {
+        return false;
+    }
+
     auto current_front_buffer = m_screen_buffer.get_front_buffer_index();
     m_audio_buffer.clear();
 
-    uint64 emulated_cycles = inner_emulate(min_cycles_to_emulate);
-    AGE_ASSERT(emulated_cycles >= min_cycles_to_emulate);
+    int emulated_cycles = inner_emulate(cycles_to_emulate);
+    AGE_ASSERT(emulated_cycles > 0);
     m_emulated_cycles += emulated_cycles;
 
     bool new_frame = m_screen_buffer.get_front_buffer_index() != current_front_buffer;

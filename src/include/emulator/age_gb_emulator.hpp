@@ -62,7 +62,7 @@ public:
 
 protected:
 
-    uint64 inner_emulate(uint64 min_cycles_to_emulate) override;
+    int inner_emulate(int cycles_to_emulate) override;
 
     std::string inner_get_emulator_title() const override;
 
