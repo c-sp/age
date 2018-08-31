@@ -140,8 +140,8 @@ public:
     //!
     virtual void set_persistent_ram(const uint8_vector &source) = 0;
 
-    virtual void set_buttons_down(int32_t buttons) = 0;
-    virtual void set_buttons_up(int32_t buttons) = 0;
+    virtual void set_buttons_down(int buttons) = 0;
+    virtual void set_buttons_up(int buttons) = 0;
 
     bool emulate(uint64 min_cycles_to_emulate);
 

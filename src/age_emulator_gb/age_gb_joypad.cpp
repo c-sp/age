@@ -70,7 +70,7 @@ void age::gb_joypad::write_p1(uint8_t byte)
 
 
 
-void age::gb_joypad::set_buttons_up(int32_t buttons)
+void age::gb_joypad::set_buttons_up(int buttons)
 {
     if (buttons != 0)
     {
@@ -83,7 +83,7 @@ void age::gb_joypad::set_buttons_up(int32_t buttons)
     }
 }
 
-void age::gb_joypad::set_buttons_down(int32_t buttons)
+void age::gb_joypad::set_buttons_down(int buttons)
 {
     if (buttons != 0)
     {
