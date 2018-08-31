@@ -23,7 +23,6 @@
 
 #include <vector>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_gb_memory.hpp"
@@ -124,8 +123,9 @@ enum class gb_io_port : uint16_t
 
 
 
-class gb_bus : public non_copyable
+class gb_bus
 {
+    AGE_DISABLE_COPY(gb_bus);
 
 public:
 

@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
@@ -34,8 +33,10 @@ namespace age
 
 
 
-class gb_cpu : public non_copyable
+class gb_cpu
 {
+    AGE_DISABLE_COPY(gb_cpu);
+
 public:
 
     void emulate_instruction();

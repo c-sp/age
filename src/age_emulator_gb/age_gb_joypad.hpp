@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_gb_core.hpp"
@@ -31,8 +30,10 @@
 namespace age
 {
 
-class gb_joypad : public non_copyable
+class gb_joypad
 {
+    AGE_DISABLE_COPY(gb_joypad);
+
 public:
 
     uint8_t read_p1() const;

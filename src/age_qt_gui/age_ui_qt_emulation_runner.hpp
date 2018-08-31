@@ -29,7 +29,6 @@
 #include <QObject>
 #include <QTimer>
 
-#include <age_non_copyable.hpp>
 #include <age_speed_calculator.hpp>
 #include <age_types.hpp>
 
@@ -47,9 +46,11 @@ namespace age
 //! Can be passed to another thread for async emulation (slots triggered automatically
 //! as events).
 //!
-class qt_emulation_runner : public QObject, non_copyable
+class qt_emulation_runner : public QObject
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_emulation_runner);
+
 public:
 
     qt_emulation_runner(int emulation_interval_milliseconds);

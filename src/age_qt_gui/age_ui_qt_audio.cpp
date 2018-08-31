@@ -38,9 +38,13 @@ constexpr int sizeof_pcm_sample = sizeof(age::pcm_sample);
 
 //---------------------------------------------------------
 //
-//   object destruction
+//   object creation/destruction
 //
 //---------------------------------------------------------
+
+age::qt_audio_output::qt_audio_output()
+{
+}
 
 age::qt_audio_output::~qt_audio_output()
 {
@@ -267,22 +271,21 @@ void age::qt_audio_output::create_downsampler()
 {
     if (m_output != nullptr)
     {
-        int sample_rate = m_output->format().sampleRate();
-        uint output_sampling_rate = static_cast<uint>(sample_rate);
+        int output_sample_rate = m_output->format().sampleRate();
 
         downsampler *d = nullptr;
         switch (m_downsampler_quality)
         {
             case qt_downsampler_quality::low:
                 LOG("creating downsampler_linear");
-                d = new downsampler_linear(m_input_sampling_rate, output_sampling_rate);
+                d = new downsampler_linear(m_input_sampling_rate, output_sample_rate);
                 m_downsampler_fir_size = 0;
                 break;
 
             case qt_downsampler_quality::high:
             {
                 LOG("creating downsampler_kaiser with ripple 0.1");
-                downsampler_kaiser_low_pass *ds = new downsampler_kaiser_low_pass(m_input_sampling_rate, output_sampling_rate, 0.1);
+                downsampler_kaiser_low_pass *ds = new downsampler_kaiser_low_pass(m_input_sampling_rate, output_sample_rate, 0.1);
                 m_downsampler_fir_size = ds->get_fir_size();
                 d = ds;
                 break;
@@ -291,7 +294,7 @@ void age::qt_audio_output::create_downsampler()
             case qt_downsampler_quality::highest:
             {
                 LOG("creating downsampler_kaiser with ripple 0.01");
-                downsampler_kaiser_low_pass *ds = new downsampler_kaiser_low_pass(m_input_sampling_rate, output_sampling_rate, 0.01);
+                downsampler_kaiser_low_pass *ds = new downsampler_kaiser_low_pass(m_input_sampling_rate, output_sample_rate, 0.01);
                 m_downsampler_fir_size = ds->get_fir_size();
                 d = ds;
                 break;

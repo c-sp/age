@@ -94,9 +94,11 @@ private:
 
 
 
-class test_application : public QObject, non_copyable
+class test_application : public QObject
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(test_application);
+
 public:
 
     test_application(const QString &test, const QString &ignore_file, test_type type);

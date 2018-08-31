@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_gb_core.hpp"
@@ -31,8 +30,10 @@
 namespace age
 {
 
-class gb_common_counter : public non_copyable
+class gb_common_counter
 {
+    AGE_DISABLE_COPY(gb_common_counter);
+
 public:
 
     gb_common_counter(const gb_core &core);
@@ -78,8 +79,10 @@ private:
 
 
 
-class gb_timer : public non_copyable
+class gb_timer
 {
+    AGE_DISABLE_COPY(gb_timer);
+
 public:
 
     uint8_t read_div() const;

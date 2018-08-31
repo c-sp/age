@@ -24,7 +24,6 @@
 #include <functional>
 #include <vector>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
@@ -72,8 +71,10 @@ constexpr uint8 gb_tile_attribute_priority = 0x80;
 
 
 
-class gb_ly_counter : public non_copyable
+class gb_ly_counter
 {
+    AGE_DISABLE_COPY(gb_ly_counter);
+
 public:
 
     gb_ly_counter(gb_core &core);

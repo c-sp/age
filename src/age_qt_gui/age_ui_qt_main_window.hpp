@@ -33,7 +33,6 @@
 #include <QThread>
 #include <QWidget>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
@@ -48,9 +47,11 @@
 namespace age
 {
 
-class qt_main_window : public QMainWindow, non_copyable
+class qt_main_window : public QMainWindow
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_main_window);
+
 public:
 
     qt_main_window(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);

@@ -48,7 +48,6 @@
 #include <QString>
 #include <QWidget>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_ui_qt_user_value_store.hpp"
@@ -146,9 +145,11 @@ private:
 
 
 
-class qt_settings_video : public QWidget, non_copyable
+class qt_settings_video : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_video);
+
 public:
 
     qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
@@ -216,9 +217,11 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_audio : public QWidget, non_copyable
+class qt_settings_audio : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_audio);
+
 public:
 
     qt_settings_audio(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
@@ -288,9 +291,11 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_keys : public QWidget, non_copyable
+class qt_settings_keys : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_keys);
+
 public:
 
     qt_settings_keys(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
@@ -355,9 +360,11 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_miscellaneous : public QWidget, non_copyable
+class qt_settings_miscellaneous : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_miscellaneous);
+
 public:
 
     qt_settings_miscellaneous(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
@@ -413,9 +420,11 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_dialog : public QDialog, non_copyable
+class qt_settings_dialog : public QDialog
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_dialog);
+
 public:
 
     qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags = nullptr);

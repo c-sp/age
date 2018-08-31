@@ -24,7 +24,6 @@
 #include <functional>
 #include <string>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
@@ -43,8 +42,10 @@ constexpr int gb_video_ram_size = 2 * gb_video_ram_bank_size;
 
 
 
-class gb_memory : public non_copyable
+class gb_memory
 {
+    AGE_DISABLE_COPY(gb_memory);
+
 public:
 
     gb_mode get_mode() const;

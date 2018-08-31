@@ -24,7 +24,6 @@
 #include <functional>
 #include <vector>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
@@ -33,8 +32,10 @@
 namespace age
 {
 
-class downsampler : public non_copyable
+class downsampler
 {
+    AGE_DISABLE_COPY(downsampler);
+
 public:
 
     downsampler(int input_sampling_rate, int output_sampling_rate);

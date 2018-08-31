@@ -29,7 +29,6 @@
 #include <QAudioOutput>
 #include <QIODevice>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <pcm/age_downsampler.hpp>
 #include <pcm/age_pcm_ring_buffer.hpp>
@@ -68,9 +67,13 @@ namespace age
 //! sometimes did not work at all and at other times caused CPU load spikes and audio
 //! lags. That's why we use our own volume control: downsampler::set_volume().
 //!
-class qt_audio_output : public non_copyable
+class qt_audio_output
 {
+    AGE_DISABLE_COPY(qt_audio_output);
+
 public:
+
+    qt_audio_output();
 
     //!
     //! If an audio device is still in use, close it.

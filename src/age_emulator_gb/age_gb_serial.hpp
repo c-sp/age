@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_gb_core.hpp"
@@ -40,8 +39,10 @@ enum class gb_sio_state
 
 
 
-class gb_serial : public non_copyable
+class gb_serial
 {
+    AGE_DISABLE_COPY(gb_serial);
+
 public:
 
     uint8_t read_sb();

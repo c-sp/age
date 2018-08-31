@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
@@ -38,8 +37,10 @@ namespace age {
 //!
 //! \brief This is the emulator base class. Every emulator derives from it.
 //!
-class emulator : public non_copyable
+class emulator
 {
+    AGE_DISABLE_COPY(emulator);
+
 public:
 
     virtual ~emulator() = default;

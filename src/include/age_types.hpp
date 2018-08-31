@@ -31,6 +31,13 @@
 
 
 
+#define AGE_DISABLE_COPY(Class) \
+    private: \
+    Class(const Class&) = delete; \
+    Class& operator=(const Class&) = delete
+
+
+
 namespace age {
 
 //! \todo remove these old typedefs

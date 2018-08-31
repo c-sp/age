@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
@@ -41,8 +40,10 @@ namespace age {
 
 
 
-class gb_emulator_impl : public non_copyable
+class gb_emulator_impl
 {
+    AGE_DISABLE_COPY(gb_emulator_impl);
+
 public:
 
     gb_emulator_impl(const uint8_vector &rom, gb_hardware hardware, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);

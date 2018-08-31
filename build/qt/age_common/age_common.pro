@@ -18,7 +18,6 @@ SOURCES += \
 
 HEADERS += \
     ../../../src/include/age_debug.hpp \
-    ../../../src/include/age_non_copyable.hpp \
     ../../../src/include/age_speed_calculator.hpp \
     ../../../src/include/age_types.hpp \
     ../../../src/include/emulator/age_emulator.hpp \

@@ -24,7 +24,6 @@
 #include <array>
 
 #include <age_debug.hpp>
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
@@ -50,8 +49,10 @@ constexpr const uint8_array<4> gb_channel_bit =
 
 
 
-class gb_sound : public non_copyable
+class gb_sound
 {
+    AGE_DISABLE_COPY(gb_sound);
+
 public:
 
     gb_sound(gb_core &core, pcm_vector &samples);
