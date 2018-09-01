@@ -68,7 +68,7 @@ class test_performance
 public:
 
     void file_loaded(qint64 duration_nanos);
-    void test_executed(qint64 duration_nanos, uint64 emulated_cycles);
+    void test_executed(qint64 duration_nanos, qint64 emulated_cycles);
 
     bool summary_available() const;
     void print_summary() const;

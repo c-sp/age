@@ -41,9 +41,9 @@ test_result create_gb_test_result(const gb_emulator &emulator, const QString &er
 //!
 //! \brief perform several emulation iterations to not let the emulator's pcm_sample vector get too big
 //!
-void gb_emulate(gb_emulator &emulator, uint64 cycles_to_emulate);
+void gb_emulate(gb_emulator &emulator, qint64 cycles_to_emulate);
 
-test_method screenshot_test_png(bool force_dmg, bool dmg_green, uint64 millis_to_emulate);
+test_method screenshot_test_png(bool force_dmg, bool dmg_green, qint64 millis_to_emulate);
 
 
 test_method mooneye_test_method(const QString &file_name);

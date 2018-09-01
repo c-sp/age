@@ -51,14 +51,16 @@ age::test_result age::create_gb_test_result(const gb_emulator &emulator, const Q
 
 
 
-void age::gb_emulate(gb_emulator &emulator, uint64 cycles_to_emulate)
+void age::gb_emulate(gb_emulator &emulator, qint64 cycles_to_emulate)
 {
-    uint64 cycles_per_second = emulator.get_cycles_per_second();
+    qint64 cycles_per_second = emulator.get_cycles_per_second();
 
     while (cycles_to_emulate > 0)
     {
-        uint64 cycles = std::min(cycles_to_emulate, cycles_per_second);
-        emulator.emulate(cycles);
+        qint64 cycles = std::min(cycles_to_emulate, cycles_per_second);
+        AGE_ASSERT(cycles <= std::numeric_limits<int>::max());
+
+        emulator.emulate(static_cast<int>(cycles));
 
         cycles_to_emulate -= cycles;
     }
@@ -72,7 +74,7 @@ void age::gb_emulate(gb_emulator &emulator, uint64 cycles_to_emulate)
 //
 //---------------------------------------------------------
 
-age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64 millis_to_emulate)
+age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, qint64 millis_to_emulate)
 {
     return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot) {
 
@@ -80,7 +82,7 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware, dmg_green);
 
-        uint64 cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
+        qint64 cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
         gb_emulate(*emulator, cycles_to_emulate);
 
         // load the screenshot image data
@@ -121,12 +123,12 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, uint64
             const pixel *screen = emulator->get_screen_front_buffer().data();
 
             // for width * height we rely on integer promotion to 32 bit int
-            for (int32_t i = 0, max = emulator->get_screen_width() * emulator->get_screen_height(); i < max; ++i)
+            for (int i = 0, max = emulator->get_screen_width() * emulator->get_screen_height(); i < max; ++i)
             {
                 if (*screen != *screenshot)
                 {
-                    int32_t x = i % emulator->get_screen_width();
-                    int32_t y = emulator->get_screen_height() - 1 - (i / emulator->get_screen_width());
+                    int x = i % emulator->get_screen_width();
+                    int y = emulator->get_screen_height() - 1 - (i / emulator->get_screen_width());
 
                     QTextStream(&error_message)
                             << "screen and screenshot differ at position ("

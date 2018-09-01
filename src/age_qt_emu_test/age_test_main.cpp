@@ -84,11 +84,11 @@ void prepare_parser(QCommandLineParser &parser)
 
 
 
-void exit_with_failure(const QCommandLineParser &parser, const QString &error_message)
+[[ noreturn ]] void exit_with_failure(const QCommandLineParser &parser, const QString &error_message)
 {
-    fprintf(stderr, qPrintable(error_message));
+    fprintf(stderr, "%s", qPrintable(error_message));
     fprintf(stderr, "\n");
-    fprintf(stdout, qPrintable(parser.helpText()));
+    fprintf(stdout, "%s", qPrintable(parser.helpText()));
     ::exit(EXIT_FAILURE);
 }
 

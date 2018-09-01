@@ -63,7 +63,7 @@ void age::test_performance::file_loaded(qint64 duration_nanos)
     }
 }
 
-void age::test_performance::test_executed(qint64 duration_nanos, uint64 emulated_cycles)
+void age::test_performance::test_executed(qint64 duration_nanos, qint64 emulated_cycles)
 {
     if (duration_nanos >= 0)
     {
@@ -192,9 +192,11 @@ bool age::test_runner::read_file(const QString &file_name, uint8_vector &destina
     else
     {
         const qint64 bytes_total = file.size();
+        AGE_ASSERT(bytes_total >= 0);
+        AGE_ASSERT(static_cast<quint64>(bytes_total) <= std::numeric_limits<size_t>::max());
         qint64 bytes_read = 0;
 
-        destination.resize(bytes_total, 0);
+        destination.resize(static_cast<size_t>(bytes_total), 0);
         char *buffer = reinterpret_cast<char*>(destination.data());
 
         // read until the buffer is filled

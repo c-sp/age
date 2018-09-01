@@ -63,6 +63,7 @@ age::test_method blargg_test(const QString &test_file_name, QString &result_file
         }
     }
 
+    // result file not found or emulation duration not parseable
     return age::test_method{};
 }
 

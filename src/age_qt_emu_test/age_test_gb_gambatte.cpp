@@ -30,17 +30,17 @@ namespace age {
 //! gambatte tests run for 15 frames
 //! (see gambatte/test/testrunner.cpp)
 //!
-constexpr int32_t gb_gambatte_test_frames = 15;
-constexpr int32_t gb_frames_per_second = 59;
+constexpr int gb_gambatte_test_frames = 15;
+constexpr int gb_frames_per_second = 59;
 
-int32_t gb_cycles_per_frame(const gb_emulator &emulator)
+int gb_cycles_per_frame(const gb_emulator &emulator)
 {
     return emulator.get_cycles_per_second() / gb_frames_per_second;
 }
 
-int32_t test_cycles(const gb_emulator &emulator)
+int test_cycles(const gb_emulator &emulator)
 {
-    int32_t cycles_per_frame = gb_cycles_per_frame(emulator);
+    int cycles_per_frame = gb_cycles_per_frame(emulator);
     return cycles_per_frame * gb_gambatte_test_frames;
 }
 
@@ -240,7 +240,7 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 
             // store the converted value
             AGE_ASSERT((value >= 0) && (value < 0x10));
-            result.push_back(static_cast<age::uint8>(value));
+            result.push_back(static_cast<age::uint8_t>(value));
         }
     }
 
@@ -257,24 +257,25 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uint8_vector &expected_result)
 {
     const age::pixel_vector &screen = emulator.get_screen_front_buffer();
+    age::size_t screen_width = static_cast<age::size_t>(emulator.get_screen_width());
 
     // start with the first line
     // (the emulator screen buffer is filled upside down)
-    age::uint line_offset = 0;
-    age::uint tile_offset = 0;
+    age::size_t line_offset = 0;
+    age::size_t tile_offset = 0;
 
     // the first pixel in the first line is always expected to be "white"
     // (see the tiles stored in tile_data)
     age::pixel white = screen[line_offset];
 
     // examine each pixel
-    for (age::uint line = 0; line < 8; ++line)
+    for (age::size_t line = 0; line < 8; ++line)
     {
-        age::uint pixel_offset = 0;
-        for (age::uint8 tile_index : expected_result)
+        age::size_t pixel_offset = 0;
+        for (age::uint8_t tile_index : expected_result)
         {
-            const age::uint8 *tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
-            for (age::uint tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
+            const age::uint8_t *tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
+            for (age::size_t tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
             {
                 bool found_white = screen[line_offset + pixel_offset] == white;
                 bool expect_white = tile_ptr[tile_pixel] == 0;
@@ -287,7 +288,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
         }
 
         // next line
-        line_offset += emulator.get_screen_width();
+        line_offset += screen_width;
         tile_offset += 8;
     }
 
@@ -361,7 +362,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 
         // gambatte tests run for 15 frames
         // (see gambatte/test/testrunner.cpp)
-        age::int32_t cycles_per_frame = gb_cycles_per_frame(*emulator);
+        age::size_t cycles_per_frame = static_cast<size_t>(gb_cycles_per_frame(*emulator));
 
         gb_emulate(*emulator, test_cycles(*emulator));
 
@@ -371,7 +372,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         bool all_equal = true;
         const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
 
-        for (age::int32_t i = 1; i < cycles_per_frame; ++i)
+        for (age::size_t i = 1; i < cycles_per_frame; ++i)
         {
             if (emulator->get_audio_buffer()[i] != first_sample)
             {

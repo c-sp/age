@@ -67,7 +67,7 @@ private:
 
 struct test_result
 {
-    uint64 m_cycles_emulated = 0;
+    qint64 m_cycles_emulated = 0;
     QString m_error_message;
     QString m_additional_message;
 };
