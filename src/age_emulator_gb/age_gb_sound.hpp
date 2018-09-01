@@ -106,7 +106,7 @@ public:
 
     void frame_sequencer_cycle();
     void generate_samples();
-    void set_back_cycles(int32_t offset);
+    void set_back_cycles(int offset);
 
 
 
@@ -173,7 +173,7 @@ private:
     gb_core &m_core;
     const bool m_is_cgb;
 
-    int32_t m_last_generate_samples_cycle = 0;
+    int m_last_generate_samples_cycle = 0;
     pcm_vector &m_samples;
 
     size_t m_next_frame_sequencer_step = 0;
@@ -198,7 +198,7 @@ private:
 
     uint8_t m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
     uint8_array<16> m_c3_wave_ram;
-    int32_t m_c3_last_wave_access_cycle = 0;
+    int m_c3_last_wave_access_cycle = 0;
     gb_wave_generator m_c3 = {1, 31};
 
     uint8_t m_nr44 = 0;

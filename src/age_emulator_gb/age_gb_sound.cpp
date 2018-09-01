@@ -266,8 +266,8 @@ void age::gb_sound::frame_sequencer_cycle()
 
     m_next_frame_sequencer_step_odd = (m_next_frame_sequencer_step & 1) != 0;
 
-    int32_t current_cycle = m_core.get_oscillation_cycle();
-    int32_t cycle_offset = ((current_cycle >> gb_frame_sequencer_cycle_shift) + 1) << gb_frame_sequencer_cycle_shift;
+    int current_cycle = m_core.get_oscillation_cycle();
+    int cycle_offset = ((current_cycle >> gb_frame_sequencer_cycle_shift) + 1) << gb_frame_sequencer_cycle_shift;
     cycle_offset -= current_cycle;
 
     m_core.insert_event(cycle_offset, gb_event::sound_frame_sequencer);
@@ -277,12 +277,12 @@ void age::gb_sound::frame_sequencer_cycle()
 
 void age::gb_sound::generate_samples()
 {
-    int32_t cycles_elapsed = (m_core.get_oscillation_cycle() - m_last_generate_samples_cycle) & gb_cycle_sample_mask;
+    int cycles_elapsed = (m_core.get_oscillation_cycle() - m_last_generate_samples_cycle) & gb_cycle_sample_mask;
     if (cycles_elapsed > 0)
     {
         m_last_generate_samples_cycle += cycles_elapsed;
 
-        int32_t samples_to_generate = cycles_elapsed >> gb_sample_cycle_shift;
+        int samples_to_generate = cycles_elapsed >> gb_sample_cycle_shift;
         AGE_ASSERT(samples_to_generate > 0);
 
         size_t sample_index = m_samples.size();
@@ -293,7 +293,7 @@ void age::gb_sound::generate_samples()
             m_c1.generate(m_samples, sample_index, cycles_elapsed);
             m_c2.generate(m_samples, sample_index, cycles_elapsed);
 
-            int32_t cycle_offset = m_c3.generate(m_samples, sample_index, cycles_elapsed);
+            int cycle_offset = m_c3.generate(m_samples, sample_index, cycles_elapsed);
             if (cycle_offset != -1)
             {
                 AGE_ASSERT(cycle_offset <= cycles_elapsed);
@@ -307,7 +307,7 @@ void age::gb_sound::generate_samples()
 
 
 
-void age::gb_sound::set_back_cycles(int32_t offset)
+void age::gb_sound::set_back_cycles(int offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_last_generate_samples_cycle, offset);
     AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_c3_last_wave_access_cycle, offset);
