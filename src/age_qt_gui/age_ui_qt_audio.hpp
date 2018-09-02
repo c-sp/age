@@ -111,7 +111,7 @@ public:
     //! \return The current downsampler's FIR size or zero, if the downsampler does not
     //! make use of any FIR.
     //!
-    uint get_downsampler_fir_size() const;
+    size_t get_downsampler_fir_size() const;
 
 
 
@@ -128,7 +128,7 @@ public:
     //! This value is expected to be greater than 1. The behaviour for a value lower
     //! than 2 is undefined.
     //!
-    void set_input_sampling_rate(int32_t sampling_rate);
+    void set_input_sampling_rate(int sampling_rate);
 
     //!
     //! \brief Set the quality of audio data resampling.
@@ -225,7 +225,7 @@ private:
     void create_downsampler();
     int write_samples();
 
-    int32_t m_input_sampling_rate = 200000; // some (arbitrary) big value
+    int m_input_sampling_rate = 200000; // some (arbitrary) big value
     float m_volume = 1;
     int m_latency_milliseconds = qt_audio_latency_milliseconds_min;
     qt_downsampler_quality m_downsampler_quality = qt_downsampler_quality::low;
@@ -233,7 +233,7 @@ private:
     QAudioFormat m_format;
 
     std::unique_ptr<downsampler> m_downsampler;
-    uint m_downsampler_fir_size = 0;
+    size_t m_downsampler_fir_size = 0;
     pcm_ring_buffer m_buffer = {1};
     std::unique_ptr<QAudioOutput> m_output;
     QIODevice *m_device = nullptr;

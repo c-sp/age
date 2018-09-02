@@ -133,8 +133,8 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), m_emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
     connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_video_output, SLOT(set_emulator_screen_size(int16_t,int16_t)));
     connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_settings, SLOT(set_emulator_screen_size(int16_t,int16_t)));
-    connect(this, SIGNAL(emulator_button_down(int32_t)), m_emulation_runner, SLOT(set_emulator_buttons_down(int32_t)));
-    connect(this, SIGNAL(emulator_button_up(int32_t)), m_emulation_runner, SLOT(set_emulator_buttons_up(int32_t)));
+    connect(this, SIGNAL(emulator_button_down(int)), m_emulation_runner, SLOT(set_emulator_buttons_down(int)));
+    connect(this, SIGNAL(emulator_button_up(int)), m_emulation_runner, SLOT(set_emulator_buttons_up(int)));
 
     // trigger initial setting signals after slots have been connected & start the emulation runner thread
 

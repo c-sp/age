@@ -61,8 +61,8 @@ signals:
 
     void emulator_loaded(std::shared_ptr<age::qt_emulator> new_emulator);
     void emulator_screen_resize(int16_t width, int16_t height);
-    void emulator_button_down(int32_t button);
-    void emulator_button_up(int32_t button);
+    void emulator_button_down(int button);
+    void emulator_button_up(int button);
 
 private:
 

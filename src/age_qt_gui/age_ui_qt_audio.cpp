@@ -83,7 +83,7 @@ int age::qt_audio_output::get_latency_milliseconds() const
     return m_latency_milliseconds;
 }
 
-age::uint age::qt_audio_output::get_downsampler_fir_size() const
+age::size_t age::qt_audio_output::get_downsampler_fir_size() const
 {
     return m_downsampler_fir_size;
 }
@@ -101,7 +101,7 @@ void age::qt_audio_output::set_volume(int volume_percent)
     }
 }
 
-void age::qt_audio_output::set_input_sampling_rate(int32_t sampling_rate)
+void age::qt_audio_output::set_input_sampling_rate(int sampling_rate)
 {
     LOG(sampling_rate);
     AGE_ASSERT(sampling_rate > 1);
