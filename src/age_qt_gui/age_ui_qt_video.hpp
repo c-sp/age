@@ -144,7 +144,9 @@ public:
     qt_video_output(QWidget *parent = nullptr);
     ~qt_video_output() override;
 
-    uint get_fps() const;
+signals:
+
+    void fps(int fps);
 
 public slots:
 
@@ -179,6 +181,10 @@ private:
 
     // frame event handling
 
+private slots:
+
+    void update_fps();
+
 private:
 
     void new_frame_slot(std::shared_ptr<const pixel_vector> new_frame);
@@ -186,6 +192,7 @@ private:
 
     std::shared_ptr<const pixel_vector> m_new_frame = nullptr;
     uint m_frames_discarded = 0;
+    int m_frame_counter = 0;
 };
 
 } // namespace age

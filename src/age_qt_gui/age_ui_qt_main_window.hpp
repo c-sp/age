@@ -36,7 +36,6 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#include "age_ui_qt_video.hpp"
 #include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulator.hpp"
 #include "age_ui_qt_user_value_store.hpp"
@@ -87,7 +86,6 @@ private:
     QAction *m_action_exit = nullptr;
 
     qt_settings_dialog *m_settings = nullptr;
-    qt_video_output *m_video_output = nullptr;
 
     QLabel *m_emulated_time_label = nullptr;
     QLabel *m_speed_label = nullptr;
@@ -111,6 +109,7 @@ private slots:
 
     void emulator_speed(int speed_percent);
     void emulator_milliseconds(qint64 emulated_milliseconds);
+    void fps(int fps);
 };
 
 } // namespace age
