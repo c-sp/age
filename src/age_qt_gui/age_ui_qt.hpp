@@ -42,11 +42,9 @@ std::string operator+(const std::string &std_string, const QString &q_string);
 namespace age
 {
 
-//! \todo refactor & remove
-typedef std::atomic_size_t  atomic_uint;
-typedef std::atomic<uint64> atomic_uint64;
-
 bool is_checked(int checked_state);
+
+constexpr int stats_per_second = 4;
 
 
 

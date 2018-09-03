@@ -38,7 +38,6 @@
 
 #include "age_ui_qt_video.hpp"
 #include "age_ui_qt_settings.hpp"
-#include "age_ui_qt_emulation_runner.hpp"
 #include "age_ui_qt_emulator.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
@@ -94,7 +93,6 @@ private:
     QLabel *m_speed_label = nullptr;
     QLabel *m_fps_label = nullptr;
 
-    qt_emulation_runner *m_emulation_runner = nullptr;
     QThread m_emulation_runner_thread;
 
 private slots:
@@ -104,13 +102,15 @@ private slots:
     void misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen);
     void misc_show_status_bar_fullscreen_changed(bool show_status_bar_fullscreen);
 
-    void update_status();
     void menu_emulator_open();
     void menu_emulator_open_dmg();
     void menu_emulator_open_cgb();
     void menu_emulator_settings();
     void menu_emulator_fullscreen();
     void menu_emulator_exit();
+
+    void emulator_speed(int speed_percent);
+    void emulator_milliseconds(qint64 emulated_milliseconds);
 };
 
 } // namespace age
