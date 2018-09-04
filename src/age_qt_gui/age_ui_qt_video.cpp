@@ -179,7 +179,7 @@ void age::qt_video_output::set_emulator_screen_size(int16_t w, int16_t h)
     });
 }
 
-void age::qt_video_output::new_frame(std::shared_ptr<const age::pixel_vector> new_frame)
+void age::qt_video_output::new_frame(QSharedPointer<const age::pixel_vector> new_frame)
 {
     new_frame_slot(new_frame);
 }
@@ -289,7 +289,7 @@ void age::qt_video_output::update_fps()
     m_frame_counter = 0;
 }
 
-void age::qt_video_output::new_frame_slot(std::shared_ptr<const pixel_vector> new_frame)
+void age::qt_video_output::new_frame_slot(QSharedPointer<const pixel_vector> new_frame)
 {
     if (new_frame == nullptr)
     {

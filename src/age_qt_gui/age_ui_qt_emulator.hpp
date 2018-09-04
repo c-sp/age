@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <memory> // std::shared_ptr
-
 #include <QByteArray>
 #include <QString>
 
@@ -44,12 +42,12 @@ public:
     qt_emulator(const QByteArray &rom, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store);
     ~qt_emulator();
 
-    std::shared_ptr<emulator> get_emulator();
+    QSharedPointer<emulator> get_emulator();
 
 private:
 
     QString m_ram_key;
-    std::shared_ptr<emulator> m_emulator;
+    QSharedPointer<emulator> m_emulator;
     QSharedPointer<qt_user_value_store> m_user_value_store;
 };
 

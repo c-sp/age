@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <memory> // std::shared_ptr
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QElapsedTimer>
@@ -57,7 +55,7 @@ public:
 signals:
 
     void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
-    void emulator_screen_update(std::shared_ptr<const age::pixel_vector> screen);
+    void emulator_screen_update(QSharedPointer<const age::pixel_vector> screen);
     void emulator_speed(int speed_percent);
     void emulator_milliseconds(qint64 emulated_milliseconds);
 
@@ -65,7 +63,7 @@ public slots:
 
     void initialize();
 
-    void set_emulator(std::shared_ptr<age::qt_emulator> new_emulator);
+    void set_emulator(QSharedPointer<age::qt_emulator> new_emulator);
     void set_emulator_buttons_down(int buttons);
     void set_emulator_buttons_up(int buttons);
 
@@ -85,7 +83,7 @@ private slots:
 
 private:
 
-    void emulate(std::shared_ptr<emulator> emu);
+    void emulate(QSharedPointer<emulator> emu);
     void set_emulation_timer_interval();
     void emit_audio_output_activated();
 
@@ -102,7 +100,7 @@ private:
     int m_audio_latency_milliseconds = qt_audio_latency_milliseconds_min;
     bool m_audio_latency_changed = false;
 
-    std::shared_ptr<qt_emulator> m_emulator;
+    QSharedPointer<qt_emulator> m_emulator;
     int m_buttons_down = 0;
     int m_buttons_up = 0;
 };

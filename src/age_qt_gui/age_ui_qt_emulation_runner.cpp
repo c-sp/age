@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-#include <cmath> // std::round
 #include <limits>
 
 #include <age_debug.hpp>
@@ -91,12 +89,12 @@ void age::qt_emulation_runner::initialize()
 
 
 
-void age::qt_emulation_runner::set_emulator(std::shared_ptr<qt_emulator> new_emulator)
+void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emulator)
 {
     LOG("");
 
     AGE_ASSERT(new_emulator != nullptr);
-    std::shared_ptr<emulator> emu = new_emulator->get_emulator();
+    QSharedPointer<emulator> emu = new_emulator->get_emulator();
     AGE_ASSERT(emu != nullptr);
 
     m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
@@ -211,7 +209,7 @@ void age::qt_emulation_runner::timer_event()
 
     if (m_emulator != nullptr)
     {
-        std::shared_ptr<emulator> emu = m_emulator->get_emulator();
+        QSharedPointer<emulator> emu = m_emulator->get_emulator();
 
         // handle "button down" events even when paused
         emu->set_buttons_down(m_buttons_down);
@@ -247,7 +245,7 @@ void age::qt_emulation_runner::timer_event()
 //
 //---------------------------------------------------------
 
-void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
+void age::qt_emulation_runner::emulate(QSharedPointer<emulator> emu)
 {
     qint64 current_timer_nanos = m_timer.nsecsElapsed();
     qint64 timer_nanos_elapsed = current_timer_nanos - m_last_emulate_nanos;
@@ -256,7 +254,7 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
     // Limit the nanos to emulate in order to not stall the system if the CPU cannot keep up
     // (allow evening out load spikes though, requiring a limit gerater than emulation_interval_nanos).
     qint64 nanos_to_emulate = m_synchronize ? timer_nanos_elapsed : std::numeric_limits<qint64>::max();
-    nanos_to_emulate = std::min(nanos_to_emulate, emulation_interval_nanos << 1);
+    nanos_to_emulate = qMin(nanos_to_emulate, emulation_interval_nanos << 1);
     LOG("nanos_to_emulate " << nanos_to_emulate);
 
     // convert nanoseconds to emulation cycles
@@ -288,7 +286,7 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
     if (new_frame)
     {
         // copy screen buffer since the emulator will overwrite it eventually
-        std::shared_ptr<age::pixel_vector> screen = std::make_shared<pixel_vector>(emu->get_screen_front_buffer());
+        QSharedPointer<age::pixel_vector> screen = QSharedPointer<pixel_vector>(new pixel_vector(emu->get_screen_front_buffer()));
         emit emulator_screen_update(screen);
     }
     m_audio_output.buffer_samples(emu->get_audio_buffer());
@@ -303,7 +301,7 @@ void age::qt_emulation_runner::emulate(std::shared_ptr<emulator> emu)
 
         double nanos = speed_diff_nanos * emu->get_cycles_per_second();
         double cycles = speed_diff_cycles * 1000000000.0;
-        double speed_percent = std::round(cycles * 100.0 / nanos);
+        double speed_percent = qRound(cycles * 100.0 / nanos);
         emit emulator_speed(static_cast<int>(speed_percent));
 
         double emulated_millis = m_emulated_cycles * 1000.0 / emu->get_cycles_per_second();

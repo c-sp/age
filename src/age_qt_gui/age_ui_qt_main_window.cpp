@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <string>
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QByteArray>
@@ -98,7 +96,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     connect(&m_emulation_runner_thread, &QThread::finished, emulation_runner, &QObject::deleteLater);
 
     connect(emulation_runner, SIGNAL(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)), m_settings, SLOT(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)));
-    connect(emulation_runner, SIGNAL(emulator_screen_update(std::shared_ptr<const age::pixel_vector>)), video_output, SLOT(new_frame(std::shared_ptr<const age::pixel_vector>)));
+    connect(emulation_runner, SIGNAL(emulator_screen_update(QSharedPointer<const age::pixel_vector>)), video_output, SLOT(new_frame(QSharedPointer<const age::pixel_vector>)));
     connect(emulation_runner, SIGNAL(emulator_speed(int)), this, SLOT(emulator_speed(int)));
     connect(emulation_runner, SIGNAL(emulator_milliseconds(qint64)), this, SLOT(emulator_milliseconds(qint64)));
 
@@ -135,7 +133,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
 
     // connect main window signals
 
-    connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
+    connect(this, SIGNAL(emulator_loaded(QSharedPointer<age::qt_emulator>)), emulation_runner, SLOT(set_emulator(QSharedPointer<age::qt_emulator>)));
     connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), video_output, SLOT(set_emulator_screen_size(int16_t,int16_t)));
     connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_settings, SLOT(set_emulator_screen_size(int16_t,int16_t)));
     connect(this, SIGNAL(emulator_button_down(int)), emulation_runner, SLOT(set_emulator_buttons_down(int)));
@@ -197,7 +195,7 @@ void age::qt_main_window::keyPressEvent(QKeyEvent *keyEvent)
 
         if (!keyEvent->isAutoRepeat())
         {
-            int32_t button = get_button(event);
+            int button = get_button(event);
             if (button != 0)
             {
                 emit emulator_button_down(button);
@@ -218,7 +216,7 @@ void age::qt_main_window::keyReleaseEvent(QKeyEvent *keyEvent)
     // notify the emulator
     else if (!keyEvent->isAutoRepeat())
     {
-        int32_t button = get_button(event);
+        int button = get_button(event);
         if (button != 0)
         {
             emit emulator_button_up(button);
@@ -236,9 +234,9 @@ void age::qt_main_window::keyReleaseEvent(QKeyEvent *keyEvent)
 //
 //---------------------------------------------------------
 
-age::int32_t age::qt_main_window::get_button(qt_key_event key_event) const
+int age::qt_main_window::get_button(qt_key_event key_event) const
 {
-    int32_t result;
+    int result;
 
     switch(key_event)
     {
@@ -319,11 +317,11 @@ void age::qt_main_window::open_file(gb_hardware hardware)
         }
 
         // create emulator
-        std::shared_ptr<qt_emulator> new_emulator;
+        QSharedPointer<qt_emulator> new_emulator;
 
         if (file_contents.size() > 0)
         {
-            new_emulator = std::allocate_shared<qt_emulator>(std::allocator<qt_emulator>(), file_contents, hardware, m_user_value_store);
+            new_emulator = QSharedPointer<qt_emulator>(new qt_emulator(file_contents, hardware, m_user_value_store));
         }
 
         // propagate new emulator

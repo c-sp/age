@@ -21,13 +21,11 @@
 //! \file
 //!
 
-#include <memory> // std::unique_ptr
-#include <vector>
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QIODevice>
+#include <QSharedPointer>
 
 #include <age_types.hpp>
 #include <pcm/age_downsampler.hpp>
@@ -232,10 +230,10 @@ private:
     QAudioDeviceInfo m_device_info;
     QAudioFormat m_format;
 
-    std::unique_ptr<downsampler> m_downsampler;
+    QSharedPointer<downsampler> m_downsampler;
     size_t m_downsampler_fir_size = 0;
     pcm_ring_buffer m_buffer = {1};
-    std::unique_ptr<QAudioOutput> m_output;
+    QSharedPointer<QAudioOutput> m_output;
     QIODevice *m_device = nullptr;
     pcm_vector m_silence;
     bool m_pause_streaming = false;

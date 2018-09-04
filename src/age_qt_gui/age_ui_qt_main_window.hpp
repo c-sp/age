@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <memory>
-
 #include <QAction>
 #include <QContextMenuEvent>
 #include <QKeyEvent>
@@ -58,7 +56,7 @@ public:
 
 signals:
 
-    void emulator_loaded(std::shared_ptr<age::qt_emulator> new_emulator);
+    void emulator_loaded(QSharedPointer<age::qt_emulator> new_emulator);
     void emulator_screen_resize(int16_t width, int16_t height);
     void emulator_button_down(int button);
     void emulator_button_up(int button);
@@ -71,7 +69,7 @@ private:
     void keyPressEvent(QKeyEvent *keyEvent) override;
     void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
-    int32_t get_button(qt_key_event key_event) const;
+    int get_button(qt_key_event key_event) const;
     bool is_fullscreen() const;
     void fill_menu(QMenu *menu);
     qt_key_event get_event_for_key(int key);

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-#include <memory>
 #include <cstring> // strncmp
 
 #include <QApplication>
@@ -34,10 +33,9 @@
 //  - use fully qualified types when connecting signals and slots
 //
 Q_DECLARE_METATYPE(age::int16_t)
-Q_DECLARE_METATYPE(age::int32_t)
-Q_DECLARE_METATYPE(std::shared_ptr<age::qt_emulator>)
+Q_DECLARE_METATYPE(QSharedPointer<age::qt_emulator>)
 Q_DECLARE_METATYPE(age::qt_downsampler_quality)
-Q_DECLARE_METATYPE(std::shared_ptr<const age::pixel_vector>)
+Q_DECLARE_METATYPE(QSharedPointer<const age::pixel_vector>)
 
 //! \todo remove
 Q_DECLARE_METATYPE(age::uint)
@@ -84,10 +82,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     qRegisterMetaType<age::int16_t>("int16_t");
-    qRegisterMetaType<age::int32_t>("int32_t");
-    qRegisterMetaType<std::shared_ptr<age::qt_emulator>>();
+    qRegisterMetaType<QSharedPointer<age::qt_emulator>>();
     qRegisterMetaType<age::qt_downsampler_quality>();
-    qRegisterMetaType<std::shared_ptr<const age::pixel_vector>>();
+    qRegisterMetaType<QSharedPointer<const age::pixel_vector>>();
 
     //! \todo remove
     qRegisterMetaType<age::uint>();

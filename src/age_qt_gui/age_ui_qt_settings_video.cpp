@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
 #include <QByteArray>
 #include <QDataStream>
 #include <QDrag>
@@ -94,10 +92,10 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     QVBoxLayout *frame_blend_layout = new QVBoxLayout;
     frame_blend_layout->setAlignment(Qt::AlignCenter);
 
-    for (int i = 0, blend_frames_size = m_blend_frames.size(); i < blend_frames_size; ++i)
+    for (int i = 0; i < qt_video_frame_history_size; ++i)
     {
         QString text = (i == 0) ? "do not blend frames" : QString("blend ") + QString::number(i + 1) + " frames";
-        m_blend_frames[i] = new QRadioButton(text);
+        m_blend_frames.push_back(new QRadioButton(text));
         m_blend_frames[i]->setProperty(qt_settings_property_frames_to_blend, i + 1);
         frame_blend_layout->addWidget(m_blend_frames[i]);
     }
@@ -137,9 +135,9 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     QVBoxLayout *filter_chain_layout = new QVBoxLayout;
     filter_chain_layout->setSpacing(0);
 
-    for (uint i = 0; i < m_filter_widgets.size(); ++i)
+    for (int i = 0; i < 8; ++i)
     {
-        m_filter_widgets[i] = new qt_filter_widget(i);
+        m_filter_widgets.push_back(new qt_filter_widget(i));
         filter_chain_layout->addWidget(m_filter_widgets[i]);
     }
 
@@ -180,7 +178,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     connect(add_weak_emboss, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
     connect(add_strong_emboss, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
 
-    for (uint i = 0; i < m_filter_widgets.size(); ++i)
+    for (int i = 0; i < m_filter_widgets.size(); ++i)
     {
         connect(m_filter_widgets[i], SIGNAL(remove(uint)), this, SLOT(remove(uint)));
         connect(m_filter_widgets[i], SIGNAL(drag_start(uint)), this, SLOT(drag_start(uint)));
@@ -195,7 +193,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     m_use_bilinear_filter->setChecked(m_user_value_store->get_value(qt_settings_video_bilinear_filter, true).toBool());
 
     m_frames_to_blend = m_user_value_store->get_value(qt_settings_video_frames_to_blend, 2).toInt();
-    m_frames_to_blend = std::max(1, std::min(static_cast<int>(m_blend_frames.size()), m_frames_to_blend));
+    m_frames_to_blend = qMax(1, qMin(static_cast<int>(m_blend_frames.size()), m_frames_to_blend));
     m_blend_frames[m_frames_to_blend - 1]->setChecked(true);
 
     QString default_filter_chain =
@@ -356,14 +354,14 @@ void age::qt_settings_video::add_filter_clicked()
 
 
 
-void age::qt_settings_video::remove(uint index)
+void age::qt_settings_video::remove(int index)
 {
     LOG(index);
     m_filter_list.erase(m_filter_list.begin() + index);
     update_filter_chain_controls(false);
 }
 
-void age::qt_settings_video::drag_start(uint drag_index)
+void age::qt_settings_video::drag_start(int drag_index)
 {
     LOG("drag_start " << drag_index);
     m_dnd_original_filter_chain = m_filter_list;
@@ -377,7 +375,7 @@ void age::qt_settings_video::drag_clear()
     update_filter_chain_controls(false);
 }
 
-void age::qt_settings_video::drag_update(uint insert_at_index)
+void age::qt_settings_video::drag_update(int insert_at_index)
 {
     LOG("drag_update " << insert_at_index);
 
@@ -450,7 +448,7 @@ age::qt_filter age::qt_settings_video::get_qt_filter_for_name(const QString &nam
 
 void age::qt_settings_video::update_filter_chain_controls(bool only_controls)
 {
-    uint i = 0;
+    int i = 0;
     QString filter_string;
 
     GLint width = m_emulator_screen_width;
@@ -504,7 +502,7 @@ void age::qt_settings_video::emit_filter_chain_changed()
 //
 //---------------------------------------------------------
 
-age::qt_filter_widget::qt_filter_widget(uint widget_index, QWidget *parent, Qt::WindowFlags flags)
+age::qt_filter_widget::qt_filter_widget(int widget_index, QWidget *parent, Qt::WindowFlags flags)
     : QFrame(parent, flags),
       m_widget_index(widget_index)
 {

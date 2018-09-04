@@ -21,7 +21,6 @@
 //!
 
 #include <functional> // std::function
-#include <memory> // std::shared_ptr
 
 #include <QList>
 #include <QMatrix4x4>
@@ -152,7 +151,7 @@ signals:
 public slots:
 
     void set_emulator_screen_size(int16_t width, int16_t height);
-    void new_frame(std::shared_ptr<const age::pixel_vector> new_frame);
+    void new_frame(QSharedPointer<const age::pixel_vector> new_frame);
 
     void set_blend_frames(int num_frames_to_blend);
     void set_post_processing_filter(qt_filter_list filter_list);
@@ -188,10 +187,10 @@ private slots:
 
 private:
 
-    void new_frame_slot(std::shared_ptr<const pixel_vector> new_frame);
+    void new_frame_slot(QSharedPointer<const pixel_vector> new_frame);
     Q_INVOKABLE void process_new_frame();
 
-    std::shared_ptr<const pixel_vector> m_new_frame = nullptr;
+    QSharedPointer<const pixel_vector> m_new_frame = nullptr;
     int m_frames_discarded = 0;
     int m_frame_counter = 0;
 };

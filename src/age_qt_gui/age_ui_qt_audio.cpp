@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
 #include <age_debug.hpp>
 
 #include "age_ui_qt_audio.hpp"
@@ -121,7 +119,8 @@ void age::qt_audio_output::set_downsampler_quality(qt_downsampler_quality qualit
 void age::qt_audio_output::set_latency(int latency_milliseconds)
 {
     LOG(latency_milliseconds);
-    m_latency_milliseconds = std::min(qt_audio_latency_milliseconds_max, std::max(qt_audio_latency_milliseconds_min, latency_milliseconds));
+    latency_milliseconds = qMax(qt_audio_latency_milliseconds_min, latency_milliseconds);
+    m_latency_milliseconds = qMin(qt_audio_latency_milliseconds_max, latency_milliseconds);
 
     reset(); // during reset() the thread's event loop may be called
 }
@@ -230,7 +229,7 @@ void age::qt_audio_output::reset()
     LOG("device info null: " << m_device_info.isNull() << ", format valid: " << m_format.isValid());
     if (!m_device_info.isNull() && m_format.isValid())
     {
-        m_output = std::unique_ptr<QAudioOutput>(new QAudioOutput(m_device_info, m_format));
+        m_output = QSharedPointer<QAudioOutput>(new QAudioOutput(m_device_info, m_format));
 
         // set the audio output buffer size
         int sample_rate = m_output->format().sampleRate();
@@ -301,7 +300,7 @@ void age::qt_audio_output::create_downsampler()
             }
         }
 
-        m_downsampler = std::unique_ptr<downsampler>(d);
+        m_downsampler = QSharedPointer<downsampler>(d);
         m_downsampler->set_volume(m_volume);
     }
 }
@@ -327,7 +326,7 @@ int age::qt_audio_output::write_samples()
             const pcm_sample* buffer = m_buffer.get_buffered_samples_ptr(samples_available);
 
             // write samples to audio output device
-            int samples_to_write = std::min(samples_available, samples_free);
+            int samples_to_write = qMin(samples_available, samples_free);
             const char *char_buffer = reinterpret_cast<const char*>(buffer);
 
             qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_sample);

@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
 #include <QChar> // QLatin1Char
 #include <QGroupBox>
 #include <QList>
@@ -203,14 +201,14 @@ void age::qt_settings_audio::toggle_mute()
 void age::qt_settings_audio::increase_volume()
 {
     int value = m_slider_volume->value();
-    int delta = std::max(1, value / 20);
+    int delta = qMax(1, value / 20);
     m_slider_volume->setValue(value + delta);
 }
 
 void age::qt_settings_audio::decrease_volume()
 {
     int value = m_slider_volume->value();
-    int delta = std::max(1, value / 20);
+    int delta = qMax(1, value / 20);
     m_slider_volume->setValue(value - delta);
 }
 

@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <array>
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QCheckBox>
@@ -37,6 +35,7 @@
 #include <QtGui/qopengl.h> // GLint
 #include <QKeyEvent>
 #include <QLabel>
+#include <QList>
 #include <QMap>
 #include <QMouseEvent>
 #include <QObject>
@@ -110,16 +109,16 @@ class qt_filter_widget : public QFrame
     Q_OBJECT
 public:
 
-    qt_filter_widget(uint widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+    qt_filter_widget(int widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_filter(qt_filter filter, GLint width, GLint height);
 
 signals:
 
-    void remove(uint index);
-    void drag_start(uint drag_index);
+    void remove(int index);
+    void drag_start(int drag_index);
     void drag_clear();
-    void drag_update(uint insert_at_index);
+    void drag_update(int insert_at_index);
     void drag_finish(bool keep);
 
 protected:
@@ -137,7 +136,7 @@ private:
 
     bool handle_drag_event(QDropEvent *event);
 
-    const uint m_widget_index;
+    const int m_widget_index;
     QLabel *m_text = nullptr;
     QPushButton *m_remove = nullptr;
     bool m_has_content = false;
@@ -167,7 +166,7 @@ public:
 signals:
 
     void use_bilinear_filter_changed(bool use);
-    void frames_to_blend_changed(uint frames_to_blend);
+    void frames_to_blend_changed(int frames_to_blend);
     void filter_chain_changed(qt_filter_list filter_list);
 
 private slots:
@@ -177,10 +176,10 @@ private slots:
     void frames_to_blend_toggled(bool checked);
     void add_filter_clicked();
 
-    void remove(uint index);
-    void drag_start(uint drag_index);
+    void remove(int index);
+    void drag_start(int drag_index);
     void drag_clear();
-    void drag_update(uint insert_at_index);
+    void drag_update(int insert_at_index);
     void drag_finish(bool keep);
 
 private:
@@ -197,14 +196,14 @@ private:
 
     QCheckBox *m_use_filter_chain = nullptr;
     QCheckBox *m_use_bilinear_filter = nullptr;
-    std::array<QRadioButton*, qt_video_frame_history_size> m_blend_frames;
-    std::array<qt_filter_widget*, 8> m_filter_widgets;
+    QList<QRadioButton*> m_blend_frames;
+    QList<qt_filter_widget*> m_filter_widgets;
 
     int m_frames_to_blend = 0;
     qt_filter_list m_filter_list;
 
     qt_filter_list m_dnd_original_filter_chain;
-    uint m_dnd_index = 0;
+    int m_dnd_index = 0;
 };
 
 

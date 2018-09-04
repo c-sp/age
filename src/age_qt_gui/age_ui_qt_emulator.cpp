@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm>
 #include <limits>
 
 #include <QVariant>
@@ -44,7 +43,7 @@ age::qt_emulator::qt_emulator(const QByteArray &rom_contents, gb_hardware hardwa
 {
     // create emulator
     uint8_vector rom(rom_contents.begin(), rom_contents.end());
-    std::shared_ptr<gb_emulator> gb_emu = std::allocate_shared<gb_emulator>(std::allocator<gb_emulator>(), rom, hardware);
+    QSharedPointer<gb_emulator> gb_emu = QSharedPointer<gb_emulator>(new gb_emulator(rom, hardware));
     LOG("emulator created");
 
     // load persistent ram, if supported by this cartridge
@@ -101,7 +100,7 @@ age::qt_emulator::~qt_emulator()
 //
 //---------------------------------------------------------
 
-std::shared_ptr<age::emulator> age::qt_emulator::get_emulator()
+QSharedPointer<age::emulator> age::qt_emulator::get_emulator()
 {
     return m_emulator;
 }
