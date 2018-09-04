@@ -39,7 +39,7 @@ age::test_application::test_application(const QString &test, const QString &igno
       m_ignore_file(ignore_file),
       m_type(type)
 {
-    m_test_performance = std::make_shared<test_performance>();
+    m_test_performance = QSharedPointer<test_performance>(new test_performance());
 }
 
 age::test_application::~test_application()

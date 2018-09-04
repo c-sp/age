@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-#include <memory> // std::shared_ptr
-
 #include <QChar>
 #include <QDir>
 #include <QFileInfo>
+#include <QSharedPointer>
 
 #include "age_test_gb.hpp"
 
@@ -303,7 +302,7 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
 
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
-        std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, hardware);
+        QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
         gb_emulate(*emulator, test_cycles(*emulator));
 
         // evaluate test result
@@ -358,7 +357,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
-        std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, hardware);
+        QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
 
         // gambatte tests run for 15 frames
         // (see gambatte/test/testrunner.cpp)

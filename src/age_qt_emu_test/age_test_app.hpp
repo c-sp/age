@@ -22,13 +22,13 @@
 //!
 
 #include <atomic>
-#include <memory> // std::shared_ptr
 
 #include <QFileInfo>
 #include <QObject>
 #include <QRegExp>
 #include <QRunnable>
 #include <QSet>
+#include <QSharedPointer>
 #include <QString>
 #include <QStringList>
 #include <QThreadPool>
@@ -130,7 +130,7 @@ private:
     const QString m_ignore_file;
     const test_type m_type;
 
-    std::shared_ptr<test_performance> m_test_performance = nullptr;
+    QSharedPointer<test_performance> m_test_performance = nullptr;
     QThreadPool m_thread_pool;
     int m_tests_running = 0;
     QStringList m_pass_messages;
@@ -150,7 +150,7 @@ public:
     test_runner(const QString &test_file_name,
                 const QString &result_file_name,
                 test_method method,
-                std::shared_ptr<test_performance> performance = nullptr);
+                QSharedPointer<test_performance> performance = nullptr);
 
     void run() override;
 
@@ -168,7 +168,7 @@ private:
     uint8_vector m_test_file;
     uint8_vector m_result_file;
 
-    std::shared_ptr<test_performance> m_test_performance = nullptr;
+    QSharedPointer<test_performance> m_test_performance = nullptr;
     test_method m_test_method;
 };
 

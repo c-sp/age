@@ -261,7 +261,7 @@ void age::qt_audio_output::reset()
 
         // create the silence buffer
         AGE_ASSERT(buffered_samples >= 0);
-        m_silence = pcm_vector(static_cast<uint>(buffered_samples), pcm_sample());
+        m_silence = pcm_vector(static_cast<size_t>(buffered_samples), pcm_sample());
     }
 }
 

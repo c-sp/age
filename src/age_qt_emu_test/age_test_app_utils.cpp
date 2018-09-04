@@ -115,7 +115,7 @@ void age::test_performance::print_measurement(const measurement &m, const QStrin
 age::test_runner::test_runner(const QString &test_file_name,
                               const QString &result_file_name,
                               test_method method,
-                              std::shared_ptr<test_performance> performance)
+                              QSharedPointer<test_performance> performance)
 
     : m_test_file_name(test_file_name),
       m_result_file_name(result_file_name),

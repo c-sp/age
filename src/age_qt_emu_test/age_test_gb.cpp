@@ -14,10 +14,8 @@
 // limitations under the License.
 //
 
-#include <algorithm> // std::min
-#include <memory> // std::shared_ptr
-
 #include <QImage>
+#include <QSharedPointer>
 #include <QTextStream>
 
 #include "age_test_gb.hpp"
@@ -56,7 +54,7 @@ void age::gb_emulate(gb_emulator &emulator, qint64 cycles_to_emulate)
 
     while (cycles_to_emulate > 0)
     {
-        qint64 cycles = std::min(cycles_to_emulate, cycles_per_second);
+        qint64 cycles = qMin(cycles_to_emulate, cycles_per_second);
         AGE_ASSERT(cycles <= int_max);
 
         emulator.emulate(static_cast<int>(cycles));
@@ -79,7 +77,7 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, qint64
 
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
-        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware, dmg_green);
+        QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware, dmg_green));
 
         qint64 cycles_to_emulate = millis_to_emulate * emulator->get_cycles_per_second() / 1000;
         gb_emulate(*emulator, cycles_to_emulate);

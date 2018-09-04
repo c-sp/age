@@ -40,7 +40,6 @@ namespace age {
 
 //! \todo remove these old typedefs
 typedef std::uint8_t  uint8;
-typedef std::uint64_t uint64;
 
 //!
 //! Defines an unsigned integer type that matches the architecture's default CPU register
@@ -57,6 +56,7 @@ constexpr uint uint_max = std::numeric_limits<uint>::max();
 // C++ arithmetic operators do not accept types smaller than int
 // (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
 // AGE relies on int being 32 bits or more.
+
 static_assert(sizeof(int) >= 4, "AGE requires int being at least 32 bits wide");
 static_assert(sizeof(std::size_t) >= sizeof(int), "AGE requires std::size_t to be at least as wide as int");
 
@@ -83,7 +83,11 @@ typedef std::vector<uint8_t> uint8_vector;
 
 
 
-// constants and constant expressions
+// constant expressions
+
+constexpr int int_max = std::numeric_limits<int>::max();
+constexpr int16_t int16_max = std::numeric_limits<int16_t>::max();
+constexpr int32_t int32_max = std::numeric_limits<int32_t>::max();
 
 constexpr int int_max = std::numeric_limits<int>::max();
 constexpr int16_t int16_max = std::numeric_limits<int16_t>::max();

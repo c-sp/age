@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include <memory> // std::shared_ptr
+#include <QSharedPointer>
 
 #include "age_test_gb.hpp"
 
@@ -37,7 +37,7 @@ age::test_method age::mooneye_test_method(const QString &file_name)
         }
 
         // create emulator
-        std::shared_ptr<gb_emulator> emulator = std::make_shared<gb_emulator>(test_rom, hardware);
+        QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
 
         // run the test
         int cycles_per_step = emulator->get_cycles_per_second() >> 8;
