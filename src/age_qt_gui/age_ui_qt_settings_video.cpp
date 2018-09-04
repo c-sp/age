@@ -54,7 +54,7 @@ constexpr const char *qt_settings_video_filter_chain = "video/filter_chain";
 
 constexpr const char *qt_filter_name_none = "none";
 constexpr const char *qt_filter_name_scale2x = "scale2x";
-constexpr const char *qt_filter_name_age_scale2x = "age-scale2x";
+constexpr const char *qt_filter_name_scale2x_age = "scale2x-age";
 constexpr const char *qt_filter_name_gauss3x3 = "weak blur";
 constexpr const char *qt_filter_name_gauss5x5 = "strong blur";
 constexpr const char *qt_filter_name_emboss3x3 = "weak emboss";
@@ -106,14 +106,14 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     // filter chain buttons
 
     QPushButton *add_scale2x = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x));
-    QPushButton *add_age_scale2x = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::age_scale2x));
+    QPushButton *add_scale2x_age = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x_age));
     QPushButton *add_weak_blur = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss3x3));
     QPushButton *add_strong_blur = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss5x5));
     QPushButton *add_weak_emboss = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::emboss3x3));
     QPushButton *add_strong_emboss = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::emboss5x5));
 
     add_scale2x->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::scale2x));
-    add_age_scale2x->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::age_scale2x));
+    add_scale2x_age->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::scale2x_age));
     add_weak_blur->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::gauss3x3));
     add_strong_blur->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::gauss5x5));
     add_weak_emboss->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::emboss3x3));
@@ -121,7 +121,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
 
     QVBoxLayout *filter_chain_buttons_layout = new QVBoxLayout;
     filter_chain_buttons_layout->addWidget(add_scale2x);
-    filter_chain_buttons_layout->addWidget(add_age_scale2x);
+    filter_chain_buttons_layout->addWidget(add_scale2x_age);
     filter_chain_buttons_layout->addSpacing(qt_settings_element_spacing);
     filter_chain_buttons_layout->addWidget(add_weak_blur);
     filter_chain_buttons_layout->addWidget(add_strong_blur);
@@ -172,7 +172,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     }
 
     connect(add_scale2x, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
-    connect(add_age_scale2x, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
+    connect(add_scale2x_age, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
     connect(add_weak_blur, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
     connect(add_strong_blur, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
     connect(add_weak_emboss, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
@@ -197,13 +197,13 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     m_blend_frames[m_frames_to_blend - 1]->setChecked(true);
 
     QString default_filter_chain =
-            get_name_for_qt_filter(qt_filter::age_scale2x)
+            get_name_for_qt_filter(qt_filter::scale2x_age)
             + ","
-            + get_name_for_qt_filter(qt_filter::age_scale2x)
+            + get_name_for_qt_filter(qt_filter::scale2x_age)
             + ","
-            + get_name_for_qt_filter(qt_filter::age_scale2x)
+            + get_name_for_qt_filter(qt_filter::scale2x_age)
             + ","
-            + get_name_for_qt_filter(qt_filter::age_scale2x)
+            + get_name_for_qt_filter(qt_filter::scale2x_age)
             + ","
             + get_name_for_qt_filter(qt_filter::gauss5x5)
             ;
@@ -280,7 +280,7 @@ QString age::qt_settings_video::get_name_for_qt_filter(qt_filter filter)
     switch (filter)
     {
     case qt_filter::scale2x: result = qt_filter_name_scale2x; break;
-    case qt_filter::age_scale2x: result = qt_filter_name_age_scale2x; break;
+    case qt_filter::scale2x_age: result = qt_filter_name_scale2x_age; break;
     case qt_filter::gauss3x3: result = qt_filter_name_gauss3x3; break;
     case qt_filter::gauss5x5: result = qt_filter_name_gauss5x5; break;
     case qt_filter::emboss3x3: result = qt_filter_name_emboss3x3; break;
@@ -416,9 +416,9 @@ age::qt_filter age::qt_settings_video::get_qt_filter_for_name(const QString &nam
     {
         result = qt_filter::scale2x;
     }
-    else if (0 == name.compare(qt_filter_name_age_scale2x, Qt::CaseInsensitive))
+    else if (0 == name.compare(qt_filter_name_scale2x_age, Qt::CaseInsensitive))
     {
-        result = qt_filter::age_scale2x;
+        result = qt_filter::scale2x_age;
     }
     else if (0 == name.compare(qt_filter_name_gauss3x3, Qt::CaseInsensitive))
     {

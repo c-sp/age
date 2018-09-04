@@ -116,7 +116,7 @@ enum class qt_filter : int
     none = 0,
 
     scale2x = 1,
-    age_scale2x = 2,
+    scale2x_age = 2,
 
     gauss3x3 = 3,
     gauss5x5 = 4,

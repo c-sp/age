@@ -330,7 +330,7 @@ void age::qt_video_post_processor::create_post_processor()
                 LOG("add scale2x: " << step_added);
                 break;
 
-            case qt_filter::age_scale2x:
+            case qt_filter::scale2x_age:
                 step_added = add_step(post_processor, &m_program_scale2x_age, result_frame_size);
                 LOG("add scale2x-age: " << step_added);
                 break;

@@ -112,7 +112,7 @@ GLint age::get_qt_filter_factor(qt_filter filter)
     switch(filter)
     {
     case qt_filter::scale2x:
-    case qt_filter::age_scale2x:
+    case qt_filter::scale2x_age:
         result = 2;
         break;
 
