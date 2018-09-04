@@ -18,6 +18,7 @@
 #include <array>
 
 #include <age_debug.hpp>
+#include <age_utilities.hpp>
 
 #include "age_gb_memory.hpp"
 
@@ -998,22 +999,6 @@ age::int16_t get_num_cart_ram_banks(const age::uint8_vector &cart_rom)
     AGE_ASSERT((result & (result - 1)) == 0); // just one bit must be set
     LOG("cartridge has " << result << " ram bank(s)");
     return result;
-}
-
-age::uint32_t crc32(age::uint8_vector::const_iterator begin, age::uint8_vector::const_iterator end)
-{
-    age::uint32_t crc = 0xFFFFFFFF;
-
-    std::for_each(begin, end, [&](const uint8_t &v)
-    {
-        crc ^= v;
-        for (int i = 0; i < 8; ++i)
-        {
-            crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
-        }
-    });
-
-    return ~crc;
 }
 
 }

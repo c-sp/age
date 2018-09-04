@@ -30,7 +30,6 @@
 #include <emulator/age_emulator.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
 
@@ -48,9 +47,6 @@ public:
     std::shared_ptr<emulator> get_emulator();
 
 private:
-
-    static uint64 hash(const uint8_vector &vector);
-    static uint8_vector to_vector(const QByteArray &byte_array);
 
     QString m_ram_key;
     std::shared_ptr<emulator> m_emulator;

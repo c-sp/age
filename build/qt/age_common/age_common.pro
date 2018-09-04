@@ -14,11 +14,13 @@ SOURCES += \
     ../../../src/age_common/age_downsampler.cpp \
     ../../../src/age_common/age_emulator.cpp \
     ../../../src/age_common/age_pcm_ring_buffer.cpp \
-    ../../../src/age_common/age_screen_buffer.cpp
+    ../../../src/age_common/age_screen_buffer.cpp \
+    ../../../src/age_common/age_utilities.cpp
 
 HEADERS += \
     ../../../src/include/age_debug.hpp \
     ../../../src/include/age_types.hpp \
+    ../../../src/include/age_utilities.hpp \
     ../../../src/include/emulator/age_emulator.hpp \
     ../../../src/include/gfx/age_pixel.hpp \
     ../../../src/include/gfx/age_screen_buffer.hpp \
