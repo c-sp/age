@@ -21,8 +21,7 @@
 //! \file
 //!
 
-#include <memory> // std::shared_ptr
-
+#include <QSharedPointer>
 #include <QSettings>
 #include <QString>
 #include <QVariant>
@@ -85,7 +84,7 @@ private:
     void make_user_directory();
 
     const QString m_user_value_directory;
-    std::shared_ptr<QSettings> m_settings = nullptr;
+    QSharedPointer<QSettings> m_settings = nullptr;
 };
 
 } // namespace age

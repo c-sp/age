@@ -186,7 +186,7 @@ void age::qt_video_output::new_frame(std::shared_ptr<const age::pixel_vector> ne
 
 
 
-void age::qt_video_output::set_blend_frames(uint num_frames_to_blend)
+void age::qt_video_output::set_blend_frames(int num_frames_to_blend)
 {
     LOG(num_frames_to_blend);
     m_num_frames_to_blend = num_frames_to_blend;
@@ -238,11 +238,11 @@ void age::qt_video_output::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // create renderer
-    m_renderer = std::make_unique<qt_video_renderer>();
+    m_renderer = QSharedPointer<qt_video_renderer>(new qt_video_renderer());
     m_renderer->update_matrix(m_emulator_screen, QSize(width(), height()));
 
     // create post processor
-    m_post_processor = std::make_unique<qt_video_post_processor>();
+    m_post_processor = QSharedPointer<qt_video_post_processor>(new qt_video_post_processor());
     m_post_processor->set_native_frame_size(m_emulator_screen);
     m_post_processor->set_texture_filter(m_bilinear_filter);
     m_post_processor->set_post_processing_filter(m_post_processing_filter);

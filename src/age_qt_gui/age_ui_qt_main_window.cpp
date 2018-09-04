@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-#include <iomanip> // std::quoted
 #include <string>
 
 #include <QAudioDeviceInfo>
@@ -110,7 +109,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     // connect settings signals
 
     connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), video_output, SLOT(set_bilinear_filter(bool)));
-    connect(m_settings, SIGNAL(video_frames_to_blend_changed(uint)), video_output, SLOT(set_blend_frames(uint)));
+    connect(m_settings, SIGNAL(video_frames_to_blend_changed(int)), video_output, SLOT(set_blend_frames(int)));
     connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), video_output, SLOT(set_post_processing_filter(qt_filter_vector)));
 
     connect(m_settings, SIGNAL(audio_output_changed(QAudioDeviceInfo,QAudioFormat)), emulation_runner, SLOT(set_audio_output(QAudioDeviceInfo,QAudioFormat)));

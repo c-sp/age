@@ -37,6 +37,7 @@
 //! \cond
 
 #include <cassert>
+#include <iomanip> // std::quoted
 #include <string>
 #include <sstream> // std::stringstream
 

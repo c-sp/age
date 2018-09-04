@@ -20,6 +20,7 @@
 //! \file
 //!
 
+#include <functional> // std::function
 #include <memory> // std::shared_ptr
 
 #include <QList>
@@ -153,7 +154,7 @@ public slots:
     void set_emulator_screen_size(int16_t width, int16_t height);
     void new_frame(std::shared_ptr<const age::pixel_vector> new_frame);
 
-    void set_blend_frames(uint num_frames_to_blend);
+    void set_blend_frames(int num_frames_to_blend);
     void set_post_processing_filter(qt_filter_vector filter);
     void set_bilinear_filter(bool bilinear_filter);
 
@@ -170,11 +171,11 @@ private:
 
     void run_if_initialized(std::function<void()> function_to_run);
 
-    std::unique_ptr<qt_video_renderer> m_renderer = nullptr;
-    std::unique_ptr<qt_video_post_processor> m_post_processor = nullptr;
+    QSharedPointer<qt_video_renderer> m_renderer = nullptr;
+    QSharedPointer<qt_video_post_processor> m_post_processor = nullptr;
 
     QSize m_emulator_screen = {1, 1};
-    uint m_num_frames_to_blend = 1;
+    int m_num_frames_to_blend = 1;
     bool m_bilinear_filter = false;
     qt_filter_vector m_post_processing_filter;
 
@@ -191,7 +192,7 @@ private:
     Q_INVOKABLE void process_new_frame();
 
     std::shared_ptr<const pixel_vector> m_new_frame = nullptr;
-    uint m_frames_discarded = 0;
+    int m_frames_discarded = 0;
     int m_frame_counter = 0;
 };
 

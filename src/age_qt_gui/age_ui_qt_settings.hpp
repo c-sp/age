@@ -443,7 +443,7 @@ public:
 signals:
 
     void video_use_bilinear_filter_changed(bool use);
-    void video_frames_to_blend_changed(uint frames_to_blend);
+    void video_frames_to_blend_changed(int frames_to_blend);
     void video_filter_chain_changed(qt_filter_vector filter_chain);
 
     void audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);

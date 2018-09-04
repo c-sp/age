@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <iomanip> // std::quoted
-
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
@@ -25,7 +23,7 @@
 
 #include "age_ui_qt_user_value_store.hpp"
 
-#if 0
+#if 1
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
@@ -50,7 +48,7 @@ age::qt_user_value_store::qt_user_value_store()
     QString settings_file = m_user_value_directory + "settings.ini";
     LOG("using settings file " << std::quoted(settings_file.toStdString()));
 
-    m_settings = std::allocate_shared<QSettings>(std::allocator<QSettings>(), settings_file, QSettings::IniFormat);
+    m_settings = QSharedPointer<QSettings>(new QSettings(settings_file, QSettings::IniFormat));
 }
 
 
