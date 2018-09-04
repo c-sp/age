@@ -21,11 +21,11 @@
 //! \file
 //!
 
-#include <atomic>
 #include <ostream>
 #include <string>
 #include <vector>
 
+#include <QList>
 #include <QString>
 #include <QtGui/qopengl.h> // GLint
 
@@ -124,7 +124,7 @@ enum class qt_filter : int
     emboss5x5 = 6
 };
 
-typedef std::vector<qt_filter> qt_filter_vector;
+typedef QList<qt_filter> qt_filter_list;
 
 GLint get_qt_filter_factor(qt_filter filter);
 

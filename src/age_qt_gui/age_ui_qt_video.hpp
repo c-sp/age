@@ -87,7 +87,7 @@ public:
 
     void set_native_frame_size(const QSize &size);
     void set_texture_filter(bool bilinear_filter);
-    void set_post_processing_filter(const qt_filter_vector &filter);
+    void set_post_processing_filter(const qt_filter_list &filter_list);
 
     void add_new_frame(const pixel_vector &frame);
 
@@ -113,7 +113,7 @@ private:
 
     QSize m_native_frame_size = {1, 1};
     bool m_bilinear_filter = false;
-    qt_filter_vector m_post_processing_filter;
+    qt_filter_list m_filter_list;
 
     int m_new_frame_idx = 0;
     QList<QSharedPointer<QOpenGLTexture>> m_native_frames;
@@ -155,7 +155,7 @@ public slots:
     void new_frame(std::shared_ptr<const age::pixel_vector> new_frame);
 
     void set_blend_frames(int num_frames_to_blend);
-    void set_post_processing_filter(qt_filter_vector filter);
+    void set_post_processing_filter(qt_filter_list filter_list);
     void set_bilinear_filter(bool bilinear_filter);
 
 
@@ -177,7 +177,7 @@ private:
     QSize m_emulator_screen = {1, 1};
     int m_num_frames_to_blend = 1;
     bool m_bilinear_filter = false;
-    qt_filter_vector m_post_processing_filter;
+    qt_filter_list m_filter_list;
 
 
     // frame event handling

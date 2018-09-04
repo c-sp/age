@@ -44,7 +44,7 @@ constexpr const char *qt_settings_misc_status_bar_fullscreen = "miscellaneous/st
 //
 //---------------------------------------------------------
 
-age::qt_settings_miscellaneous::qt_settings_miscellaneous(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_miscellaneous::qt_settings_miscellaneous(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
       m_user_value_store(user_value_store)
 {

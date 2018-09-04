@@ -124,7 +124,7 @@ void age::qt_video_post_processor::set_native_frame_size(const QSize &size)
         m_native_frames.append(frame);
     }
 
-    set_post_processing_filter(m_post_processing_filter);
+    set_post_processing_filter(m_filter_list);
 }
 
 void age::qt_video_post_processor::set_texture_filter(bool bilinear_filter)
@@ -145,10 +145,10 @@ void age::qt_video_post_processor::set_texture_filter(bool bilinear_filter)
     }
 }
 
-void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_vector &filter)
+void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_list &filter_list)
 {
-    LOG("#filters: " << filter.size());
-    m_post_processing_filter = filter;
+    LOG("#filters: " << filter_list.size());
+    m_filter_list = filter_list;
 
     create_post_processor();
 }
@@ -317,9 +317,9 @@ void age::qt_video_post_processor::create_post_processor()
     QList<processing_step> post_processor;
     QSize result_frame_size = m_native_frame_size;
 
-    for (size_t i = 0; i < m_post_processing_filter.size(); ++i)
+    for (size_t i = 0; i < m_filter_list.size(); ++i)
     {
-        qt_filter filter = m_post_processing_filter[i];
+        qt_filter filter = m_filter_list[i];
         result_frame_size *= get_qt_filter_factor(filter);
 
         bool step_added = false;

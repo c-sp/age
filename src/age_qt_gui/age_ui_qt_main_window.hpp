@@ -30,6 +30,7 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QSharedPointer>
 #include <QThread>
 #include <QWidget>
 
@@ -76,7 +77,7 @@ private:
     qt_key_event get_event_for_key(int key);
     void open_file(gb_hardware hardware = gb_hardware::auto_detect);
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store = nullptr;
+    QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
 
     QAction *m_action_open = nullptr;
     QAction *m_action_open_dmg = nullptr;

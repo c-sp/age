@@ -56,7 +56,7 @@ constexpr const char *qt_settings_keys_misc_toggle_synchronize_emulator = "keys/
 //
 //---------------------------------------------------------
 
-age::qt_settings_keys::qt_settings_keys(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
       m_user_value_store(user_value_store),
 

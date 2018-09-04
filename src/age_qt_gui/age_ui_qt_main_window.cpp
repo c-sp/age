@@ -56,7 +56,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     setWindowTitle(project_name);
     resize(500, 350);
 
-    m_user_value_store = std::allocate_shared<qt_user_value_store>(std::allocator<qt_user_value_store>());
+    m_user_value_store = QSharedPointer<qt_user_value_store>(new qt_user_value_store());
 
     qt_video_output *video_output = new qt_video_output(this);
     setCentralWidget(video_output);
@@ -110,7 +110,7 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
 
     connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), video_output, SLOT(set_bilinear_filter(bool)));
     connect(m_settings, SIGNAL(video_frames_to_blend_changed(int)), video_output, SLOT(set_blend_frames(int)));
-    connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), video_output, SLOT(set_post_processing_filter(qt_filter_vector)));
+    connect(m_settings, SIGNAL(video_post_processing_filter_changed(qt_filter_list)), video_output, SLOT(set_post_processing_filter(qt_filter_list)));
 
     connect(m_settings, SIGNAL(audio_output_changed(QAudioDeviceInfo,QAudioFormat)), emulation_runner, SLOT(set_audio_output(QAudioDeviceInfo,QAudioFormat)));
     connect(m_settings, SIGNAL(audio_volume_changed(int)), emulation_runner, SLOT(set_audio_volume(int)));

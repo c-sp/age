@@ -39,7 +39,7 @@
 //
 //---------------------------------------------------------
 
-age::qt_emulator::qt_emulator(const QByteArray &rom_contents, gb_hardware hardware, std::shared_ptr<qt_user_value_store> user_value_store)
+age::qt_emulator::qt_emulator(const QByteArray &rom_contents, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store)
     : m_user_value_store(user_value_store)
 {
     // create emulator

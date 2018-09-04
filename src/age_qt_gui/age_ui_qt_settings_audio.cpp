@@ -54,7 +54,7 @@ constexpr int qt_audio_volume_percent_max = 100;
 //
 //---------------------------------------------------------
 
-age::qt_settings_audio::qt_settings_audio(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
       m_user_value_store(user_value_store)
 {

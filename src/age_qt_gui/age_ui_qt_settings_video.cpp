@@ -72,7 +72,7 @@ constexpr const char *qt_filter_name_emboss5x5 = "strong emboss";
 //
 //---------------------------------------------------------
 
-age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
       m_user_value_store(user_value_store)
 {
@@ -212,14 +212,14 @@ age::qt_settings_video::qt_settings_video(std::shared_ptr<qt_user_value_store> u
     QString filter_chain = m_user_value_store->get_value(qt_settings_video_filter_chain, default_filter_chain).toString();
     QStringList filters = filter_chain.split(",");
 
-    for (int i = 0; (i < filters.size()) && (m_filter_chain.size() < m_filter_widgets.size()); ++i)
+    for (int i = 0; (i < filters.size()) && (m_filter_list.size() < m_filter_widgets.size()); ++i)
     {
         QString filter_name = filters.at(i).trimmed();
         qt_filter filter = get_qt_filter_for_name(filter_name);
 
         if (filter != qt_filter::none)
         {
-            m_filter_chain.push_back(filter);
+            m_filter_list.push_back(filter);
         }
     }
 
@@ -337,7 +337,7 @@ void age::qt_settings_video::frames_to_blend_toggled(bool checked)
 
 void age::qt_settings_video::add_filter_clicked()
 {
-    if (m_filter_chain.size() < m_filter_widgets.size())
+    if (m_filter_list.size() < m_filter_widgets.size())
     {
         QObject *obj = sender();
         QVariant filter_name_var = obj->property(qt_settings_property_filter);
@@ -348,7 +348,7 @@ void age::qt_settings_video::add_filter_clicked()
 
         if (filter != qt_filter::none)
         {
-            m_filter_chain.push_back(filter);
+            m_filter_list.push_back(filter);
             update_filter_chain_controls(false);
         }
     }
@@ -359,21 +359,21 @@ void age::qt_settings_video::add_filter_clicked()
 void age::qt_settings_video::remove(uint index)
 {
     LOG(index);
-    m_filter_chain.erase(m_filter_chain.begin() + index);
+    m_filter_list.erase(m_filter_list.begin() + index);
     update_filter_chain_controls(false);
 }
 
 void age::qt_settings_video::drag_start(uint drag_index)
 {
     LOG("drag_start " << drag_index);
-    m_dnd_original_filter_chain = m_filter_chain;
+    m_dnd_original_filter_chain = m_filter_list;
     m_dnd_index = drag_index;
 }
 
 void age::qt_settings_video::drag_clear()
 {
     LOG("drag_clear");
-    m_filter_chain = m_dnd_original_filter_chain;
+    m_filter_list = m_dnd_original_filter_chain;
     update_filter_chain_controls(false);
 }
 
@@ -381,10 +381,10 @@ void age::qt_settings_video::drag_update(uint insert_at_index)
 {
     LOG("drag_update " << insert_at_index);
 
-    m_filter_chain = m_dnd_original_filter_chain;
-    qt_filter filter = m_filter_chain[m_dnd_index];
-    m_filter_chain.erase(m_filter_chain.begin() + m_dnd_index);
-    m_filter_chain.insert(m_filter_chain.begin() + insert_at_index, filter);
+    m_filter_list = m_dnd_original_filter_chain;
+    qt_filter filter = m_filter_list[m_dnd_index];
+    m_filter_list.erase(m_filter_list.begin() + m_dnd_index);
+    m_filter_list.insert(m_filter_list.begin() + insert_at_index, filter);
 
     update_filter_chain_controls(false);
 }
@@ -395,7 +395,7 @@ void age::qt_settings_video::drag_finish(bool keep)
 
     if (!keep)
     {
-        m_filter_chain = m_dnd_original_filter_chain;
+        m_filter_list = m_dnd_original_filter_chain;
         update_filter_chain_controls(false);
     }
 }
@@ -457,7 +457,7 @@ void age::qt_settings_video::update_filter_chain_controls(bool only_controls)
     GLint height = m_emulator_screen_height;
 
     // adjust filter chain widgets & create settings value
-    for (qt_filter filter : m_filter_chain)
+    for (qt_filter filter : m_filter_list)
     {
         if (i > 0)
         {
@@ -491,7 +491,7 @@ void age::qt_settings_video::update_filter_chain_controls(bool only_controls)
 
 void age::qt_settings_video::emit_filter_chain_changed()
 {
-    emit filter_chain_changed(m_use_filter_chain->isChecked() ? m_filter_chain : qt_filter_vector());
+    emit filter_chain_changed(m_use_filter_chain->isChecked() ? m_filter_list : qt_filter_list());
 }
 
 
