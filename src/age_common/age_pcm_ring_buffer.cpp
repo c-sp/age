@@ -15,7 +15,6 @@
 //
 
 #include <algorithm>
-#include <limits>
 
 #include <age_debug.hpp>
 #include <pcm/age_pcm_ring_buffer.hpp>
@@ -103,7 +102,7 @@ const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int &avail
 
 void age::pcm_ring_buffer::add_samples(const pcm_vector &samples_to_add)
 {
-    AGE_ASSERT(samples_to_add.size() <= std::numeric_limits<int>::max());
+    AGE_ASSERT(samples_to_add.size() <= int_max);
 
     int num_samples_to_add = static_cast<int>(samples_to_add.size());
     add_samples(samples_to_add, num_samples_to_add);
@@ -113,7 +112,7 @@ void age::pcm_ring_buffer::add_samples(const pcm_vector &samples_to_add, int num
 {
     AGE_ASSERT_BUFFERED_SAMPLES;
 
-    AGE_ASSERT(samples_to_add.size() <= std::numeric_limits<int>::max());
+    AGE_ASSERT(samples_to_add.size() <= int_max);
     num_samples_to_add = std::min(num_samples_to_add, static_cast<int>(samples_to_add.size()));
 
     auto first = std::begin(samples_to_add);

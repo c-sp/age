@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <limits>
-
 #include "age_gb_emulator_impl.hpp"
 
 
@@ -51,7 +49,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 {
     // make sure we have some headroom since we usually emulate
     // a few more cycles than requested
-    constexpr int cycle_limit = std::numeric_limits<int>::max() - gb_machine_cycles_per_second;
+    constexpr int cycle_limit = int_max - gb_machine_cycles_per_second;
 
     int starting_cycle = m_core.get_oscillation_cycle();
     AGE_ASSERT(starting_cycle < cycle_limit);

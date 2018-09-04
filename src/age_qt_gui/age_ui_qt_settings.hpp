@@ -472,7 +472,7 @@ protected:
 private slots:
 
     void emit_video_use_bilinear_filter_changed(bool use);
-    void emit_video_frames_to_blend_changed(uint frames_to_blend);
+    void emit_video_frames_to_blend_changed(int frames_to_blend);
     void emit_video_post_processing_filter_changed(qt_filter_list filter_list);
 
     void emit_audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);

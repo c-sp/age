@@ -180,10 +180,10 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
 
     for (int i = 0; i < m_filter_widgets.size(); ++i)
     {
-        connect(m_filter_widgets[i], SIGNAL(remove(uint)), this, SLOT(remove(uint)));
-        connect(m_filter_widgets[i], SIGNAL(drag_start(uint)), this, SLOT(drag_start(uint)));
+        connect(m_filter_widgets[i], SIGNAL(remove(int)), this, SLOT(remove(int)));
+        connect(m_filter_widgets[i], SIGNAL(drag_start(int)), this, SLOT(drag_start(int)));
         connect(m_filter_widgets[i], SIGNAL(drag_clear()), this, SLOT(drag_clear()));
-        connect(m_filter_widgets[i], SIGNAL(drag_update(uint)), this, SLOT(drag_update(uint)));
+        connect(m_filter_widgets[i], SIGNAL(drag_update(int)), this, SLOT(drag_update(int)));
         connect(m_filter_widgets[i], SIGNAL(drag_finish(bool)), this, SLOT(drag_finish(bool)));
     }
 
@@ -193,7 +193,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     m_use_bilinear_filter->setChecked(m_user_value_store->get_value(qt_settings_video_bilinear_filter, true).toBool());
 
     m_frames_to_blend = m_user_value_store->get_value(qt_settings_video_frames_to_blend, 2).toInt();
-    m_frames_to_blend = qMax(1, qMin(static_cast<int>(m_blend_frames.size()), m_frames_to_blend));
+    m_frames_to_blend = qMax(1, qMin(m_blend_frames.size(), m_frames_to_blend));
     m_blend_frames[m_frames_to_blend - 1]->setChecked(true);
 
     QString default_filter_chain =

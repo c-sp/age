@@ -22,7 +22,6 @@
 //!
 
 #include <algorithm> // std::min
-#include <limits>
 
 #include <age_debug.hpp>
 #include <age_types.hpp>
@@ -134,7 +133,7 @@ private:
         //   / 32  ->  4 channels, s0x volume up to 8
         //   / 60  ->  combining volume 1-15 (channels 1,2,4) and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        int value = (2 * m_current_sample - 15) * std::numeric_limits<int16_t>::max() * m_volume;
+        int value = (2 * m_current_sample - 15) * int16_max * m_volume;
         value /= 15 * 32 * 60;
         m_current_multiplied_sample = value * m_channel_multiplier;
     }

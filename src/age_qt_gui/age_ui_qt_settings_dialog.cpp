@@ -60,7 +60,7 @@ age::qt_settings_dialog::qt_settings_dialog(QSharedPointer<qt_user_value_store> 
     // connect signals
 
     connect(m_settings_video, SIGNAL(use_bilinear_filter_changed(bool)), this, SLOT(emit_video_use_bilinear_filter_changed(bool)));
-    connect(m_settings_video, SIGNAL(frames_to_blend_changed(uint)), this, SLOT(emit_video_frames_to_blend_changed(uint)));
+    connect(m_settings_video, SIGNAL(frames_to_blend_changed(int)), this, SLOT(emit_video_frames_to_blend_changed(int)));
     connect(m_settings_video, SIGNAL(filter_chain_changed(qt_filter_list)), this, SLOT(emit_video_post_processing_filter_changed(qt_filter_list)));
 
     connect(m_settings_audio, SIGNAL(output_changed(QAudioDeviceInfo,QAudioFormat)), this, SLOT(emit_audio_output_changed(QAudioDeviceInfo,QAudioFormat)));
@@ -242,7 +242,7 @@ void age::qt_settings_dialog::emit_video_use_bilinear_filter_changed(bool use)
     emit video_use_bilinear_filter_changed(use);
 }
 
-void age::qt_settings_dialog::emit_video_frames_to_blend_changed(uint frames_to_blend)
+void age::qt_settings_dialog::emit_video_frames_to_blend_changed(int frames_to_blend)
 {
     emit video_frames_to_blend_changed(frames_to_blend);
 }

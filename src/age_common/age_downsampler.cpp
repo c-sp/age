@@ -15,9 +15,8 @@
 //
 
 #include <algorithm>
-#include <cmath>
+#include <cmath> // std::pow, std::log10, ...
 #include <ios> // std::hex
-#include <limits>
 
 #include <age_debug.hpp>
 #include <pcm/age_downsampler.hpp>
@@ -92,7 +91,7 @@ int age::downsampler::calculate_ratio(int value1, int value2)
     fp_ratio *= 0x10000;
 
     AGE_ASSERT(fp_ratio > 0);
-    AGE_ASSERT(fp_ratio < std::numeric_limits<int>::max());
+    AGE_ASSERT(fp_ratio < int_max);
     int ratio = static_cast<int>(fp_ratio);
 
     LOG(value1 << " / " << value2 << " ratio: " << (ratio >> 16) << " + " << (ratio & 0xFFFF) << "/65536");
@@ -115,7 +114,7 @@ void age::downsampler_linear::add_input_samples(const pcm_vector &samples)
 {
     if (!samples.empty())
     {
-        AGE_ASSERT(samples.size() < std::numeric_limits<int>::max());
+        AGE_ASSERT(samples.size() < int_max);
         int samples_size = static_cast<int>(samples.size());
 
         AGE_ASSERT(m_right_sample_index >= 0);
@@ -190,8 +189,8 @@ void age::downsampler_linear::add_output_sample(const pcm_sample &left_sample, c
 
 void age::downsampler_low_pass::add_input_samples(const pcm_vector &samples)
 {
-    AGE_ASSERT(m_prev_samples.size() < std::numeric_limits<int>::max());
-    AGE_ASSERT(m_fir_values.size() < std::numeric_limits<int>::max());
+    AGE_ASSERT(m_prev_samples.size() < int_max);
+    AGE_ASSERT(m_fir_values.size() < int_max);
 
     // inefficient: we copy all samples into a single buffer before filtering
     size_t num_old_samples = m_prev_samples.size();
@@ -277,7 +276,7 @@ void age::downsampler_low_pass::create_windowed_sinc(double transition_frequency
         AGE_ASSERT(!(windowed > 1.0));
         AGE_ASSERT(!(windowed < -1.0));
 
-        int32_t i = static_cast<int32_t>(windowed * std::numeric_limits<int32_t>::max());
+        int32_t i = static_cast<int32_t>(windowed * int32_max);
 
         LOG_FIR("n " << dn << ":   " << sinc << " * " << weight << " = " << windowed
                 << "   (0x" << std::hex << entry << std::dec << ")");
@@ -431,7 +430,7 @@ int age::downsampler_kaiser_low_pass::calculate_filter_order(double A, double tw
         dM = 5.79 / tw;
     }
 
-    AGE_ASSERT(dM < std::numeric_limits<int>::max());
+    AGE_ASSERT(dM < int_max);
     int M = static_cast<int>(dM) + 1;
     return M;
 }

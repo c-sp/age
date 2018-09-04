@@ -317,7 +317,7 @@ void age::qt_video_post_processor::create_post_processor()
     QList<processing_step> post_processor;
     QSize result_frame_size = m_native_frame_size;
 
-    for (size_t i = 0; i < m_filter_list.size(); ++i)
+    for (int i = 0; i < m_filter_list.size(); ++i)
     {
         qt_filter filter = m_filter_list[i];
         result_frame_size *= get_qt_filter_factor(filter);

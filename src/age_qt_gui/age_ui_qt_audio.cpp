@@ -90,7 +90,7 @@ age::size_t age::qt_audio_output::get_downsampler_fir_size() const
 
 void age::qt_audio_output::set_volume(int volume_percent)
 {
-    m_volume = static_cast<float>(volume_percent / 100.0);
+    m_volume = volume_percent / 100.f;
     LOG(volume_percent << " (" << m_volume << ")");
 
     if (m_downsampler != nullptr)
@@ -260,6 +260,7 @@ void age::qt_audio_output::reset()
         LOG("output.periodSize     " << m_output->periodSize());
 
         // create the silence buffer
+        AGE_ASSERT(buffered_samples >= 0);
         m_silence = pcm_vector(static_cast<uint>(buffered_samples), pcm_sample());
     }
 }

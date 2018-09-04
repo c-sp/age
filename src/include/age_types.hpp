@@ -23,11 +23,9 @@
 
 #include <array>
 #include <cstdint> // std::uint8_t etc.
+#include <limits>
 #include <type_traits> // std::underlying_type
 #include <vector>
-
-//! \todo remove #include <limits>
-#include <limits> // std::numeric_limits
 
 
 
@@ -86,6 +84,10 @@ typedef std::vector<uint8_t> uint8_vector;
 
 
 // constants and constant expressions
+
+constexpr int int_max = std::numeric_limits<int>::max();
+constexpr int16_t int16_max = std::numeric_limits<int16_t>::max();
+constexpr int32_t int32_max = std::numeric_limits<int32_t>::max();
 
 constexpr const char *project_name = "AGE";
 

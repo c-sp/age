@@ -22,7 +22,6 @@
 //!
 
 #include <atomic>
-#include <limits>
 #include <memory> // std::shared_ptr
 
 #include <QFileInfo>

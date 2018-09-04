@@ -99,7 +99,7 @@ void age::gb_memory::set_persistent_ram(const uint8_vector &source)
 {
     if (m_has_battery)
     {
-        AGE_ASSERT(source.size() <= std::numeric_limits<int>::max());
+        AGE_ASSERT(source.size() <= int_max);
         int source_size = static_cast<int>(source.size());
         int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
 

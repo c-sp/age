@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <vector>
-
 #include <age_types.hpp>
 
 #include "age_gb_memory.hpp"

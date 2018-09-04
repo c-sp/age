@@ -45,6 +45,8 @@ bool is_checked(int checked_state);
 
 constexpr int stats_per_second = 4;
 
+constexpr qint64 qint64_max = std::numeric_limits<qint64>::max();
+
 
 
 //---------------------------------------------------------

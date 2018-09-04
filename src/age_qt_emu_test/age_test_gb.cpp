@@ -16,7 +16,6 @@
 
 #include <algorithm> // std::min
 #include <memory> // std::shared_ptr
-#include <limits>
 
 #include <QImage>
 #include <QTextStream>
@@ -58,7 +57,7 @@ void age::gb_emulate(gb_emulator &emulator, qint64 cycles_to_emulate)
     while (cycles_to_emulate > 0)
     {
         qint64 cycles = std::min(cycles_to_emulate, cycles_per_second);
-        AGE_ASSERT(cycles <= std::numeric_limits<int>::max());
+        AGE_ASSERT(cycles <= int_max);
 
         emulator.emulate(static_cast<int>(cycles));
 
@@ -86,7 +85,7 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, qint64
         gb_emulate(*emulator, cycles_to_emulate);
 
         // load the screenshot image data
-        AGE_ASSERT(screenshot.size() <= std::numeric_limits<int>::max());
+        AGE_ASSERT(screenshot.size() <= int_max);
         QString error_message;
         QImage image = QImage::fromData(screenshot.data(), static_cast<int>(screenshot.size())).rgbSwapped();
 

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include <cmath>
+#include <cmath> // std::log10
 
 #include <QCoreApplication>
 #include <QDir>

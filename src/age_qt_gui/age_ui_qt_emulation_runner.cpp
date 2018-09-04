@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <limits>
-
 #include <age_debug.hpp>
 
 #include "age_ui_qt_emulation_runner.hpp"
@@ -253,12 +251,12 @@ void age::qt_emulation_runner::emulate(QSharedPointer<emulator> emu)
     // Calculate the number of nanoseconds to emulate based on elapsed time.
     // Limit the nanos to emulate in order to not stall the system if the CPU cannot keep up
     // (allow evening out load spikes though, requiring a limit gerater than emulation_interval_nanos).
-    qint64 nanos_to_emulate = m_synchronize ? timer_nanos_elapsed : std::numeric_limits<qint64>::max();
+    qint64 nanos_to_emulate = m_synchronize ? timer_nanos_elapsed : qint64_max;
     nanos_to_emulate = qMin(nanos_to_emulate, emulation_interval_nanos << 1);
     LOG("nanos_to_emulate " << nanos_to_emulate);
 
     // convert nanoseconds to emulation cycles
-    AGE_ASSERT(std::numeric_limits<qint64>::max() / nanos_to_emulate > emu->get_cycles_per_second());
+    AGE_ASSERT(qint64_max / nanos_to_emulate > emu->get_cycles_per_second());
     qint64 cycles_to_emulate = nanos_to_emulate * emu->get_cycles_per_second() / 1000000000;
 
     // save the nanoseconds that make up just a fraction of an emulation cycle
@@ -278,7 +276,7 @@ void age::qt_emulation_runner::emulate(QSharedPointer<emulator> emu)
         return;
     }
 
-    AGE_ASSERT(cycles_left <= std::numeric_limits<int>::max());
+    AGE_ASSERT(cycles_left <= int_max);
     bool new_frame = emu->emulate(static_cast<int>(cycles_left));
     AGE_ASSERT(emu->get_emulated_cycles() >= m_emulated_cycles);
 

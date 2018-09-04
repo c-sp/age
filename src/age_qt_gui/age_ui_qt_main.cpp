@@ -37,9 +37,6 @@ Q_DECLARE_METATYPE(QSharedPointer<age::qt_emulator>)
 Q_DECLARE_METATYPE(age::qt_downsampler_quality)
 Q_DECLARE_METATYPE(QSharedPointer<const age::pixel_vector>)
 
-//! \todo remove
-Q_DECLARE_METATYPE(age::uint)
-
 
 
 static void evaluate_opengl_args(int argc, char *argv[])
@@ -85,9 +82,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<QSharedPointer<age::qt_emulator>>();
     qRegisterMetaType<age::qt_downsampler_quality>();
     qRegisterMetaType<QSharedPointer<const age::pixel_vector>>();
-
-    //! \todo remove
-    qRegisterMetaType<age::uint>();
 
     age::qt_main_window w;
     w.show();

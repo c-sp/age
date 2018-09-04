@@ -15,7 +15,6 @@
 //
 
 #include <algorithm>
-#include <limits>
 #include <ios> // std::hex
 
 #include <age_debug.hpp>
@@ -133,7 +132,7 @@ void age::gb_core::oscillate_2_cycles()
 void age::gb_core::insert_event(int cycle_offset, gb_event event)
 {
     AGE_ASSERT(cycle_offset >= 0);
-    AGE_ASSERT(std::numeric_limits<int>::max() - cycle_offset >= m_oscillation_cycle);
+    AGE_ASSERT(int_max - cycle_offset >= m_oscillation_cycle);
     m_events.insert_event(m_oscillation_cycle + cycle_offset, event);
 }
 
