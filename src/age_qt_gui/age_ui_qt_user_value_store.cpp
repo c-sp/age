@@ -23,7 +23,7 @@
 
 #include "age_ui_qt_user_value_store.hpp"
 
-#if 1
+#if 0
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
