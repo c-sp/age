@@ -46,7 +46,7 @@ age::qt_user_value_store::qt_user_value_store()
 {
     // open settings.ini file within user value directory
     QString settings_file = m_user_value_directory + "settings.ini";
-    LOG("using settings file " << std::quoted(settings_file.toStdString()));
+    LOG("using settings file " << AGE_LOG_QUOTED(settings_file.toStdString()));
 
     m_settings = QSharedPointer<QSettings>(new QSettings(settings_file, QSettings::IniFormat));
 }
@@ -79,7 +79,7 @@ QVariant age::qt_user_value_store::get_value(const QString &key, const QVariant 
     // check the settings file for the specified key
     if (m_settings != nullptr)
     {
-        LOG("looking in settings for key " << std::quoted(key.toStdString()));
+        LOG("looking in settings for key " << AGE_LOG_QUOTED(key.toStdString()));
         result = m_settings->value(key);
     }
 
@@ -87,7 +87,7 @@ QVariant age::qt_user_value_store::get_value(const QString &key, const QVariant 
     if (!result.isValid())
     {
         QString file_path = m_user_value_directory + key;
-        LOG("looking for user value file " << std::quoted(file_path.toStdString()));
+        LOG("looking for user value file " << AGE_LOG_QUOTED(file_path.toStdString()));
 
         QFile file = {file_path};
         if (file.open(QIODevice::ReadOnly))
@@ -98,14 +98,14 @@ QVariant age::qt_user_value_store::get_value(const QString &key, const QVariant 
 
             if (file_size <= max_file_bytes)
             {
-                LOG("about to load user value file " << std::quoted(file.fileName().toStdString()));
+                LOG("about to load user value file " << AGE_LOG_QUOTED(file.fileName().toStdString()));
                 result = file.readAll();
             }
         }
     }
 
     // return what we found
-    LOG((result.isValid() ? "" : "NO ") << "user value loaded for key " << std::quoted(key.toStdString()));
+    LOG((result.isValid() ? "" : "NO ") << "user value loaded for key " << AGE_LOG_QUOTED(key.toStdString()));
     return result.isValid() ? result : default_value;
 }
 
@@ -121,19 +121,19 @@ bool age::qt_user_value_store::set_value(const QString &key, const QVariant &val
         make_user_directory(); // make sure the user value directory exists
 
         QString file_path = m_user_value_directory + key;
-        LOG("will try to write user value file " << std::quoted(file_path.toStdString()));
+        LOG("will try to write user value file " << AGE_LOG_QUOTED(file_path.toStdString()));
 
         QFile file = {file_path};
         if (file.open(QIODevice::WriteOnly))
         {
-            LOG("writing user value file " << std::quoted(file_path.toStdString()));
+            LOG("writing user value file " << AGE_LOG_QUOTED(file_path.toStdString()));
 
             QByteArray bytes = value.toByteArray();
             file.write(bytes.data(), bytes.size());
-            LOG("wrote " << bytes.size() << " bytes to " << std::quoted(file_path.toStdString()));
+            LOG("wrote " << bytes.size() << " bytes to " << AGE_LOG_QUOTED(file_path.toStdString()));
 
             // remove the key from the settings file to prevent any confusion
-            LOG("removing key from settings file: " << std::quoted(key.toStdString()));
+            LOG("removing key from settings file: " << AGE_LOG_QUOTED(key.toStdString()));
             m_settings->remove(key);
             saved = true;
         }
@@ -142,13 +142,13 @@ bool age::qt_user_value_store::set_value(const QString &key, const QVariant &val
     // store the value to the settings file, if it is valid
     else if (value.isValid())
     {
-        LOG("writing user value to settings file, key " << std::quoted(key.toStdString()));
+        LOG("writing user value to settings file, key " << AGE_LOG_QUOTED(key.toStdString()));
         m_settings->setValue(key, value);
         saved = true;
     }
 
     // return success indicator
-    LOG((saved ? "" : "NOT ") << "saved user value for key " << std::quoted(key.toStdString()));
+    LOG((saved ? "" : "NOT ") << "saved user value for key " << AGE_LOG_QUOTED(key.toStdString()));
     return saved;
 }
 
@@ -177,7 +177,7 @@ void age::qt_user_value_store::make_user_directory()
 
     if (!home.exists(user_value_directory))
     {
-        LOG("making path " << std::quoted(m_user_value_directory.toStdString()));
+        LOG("making path " << AGE_LOG_QUOTED(m_user_value_directory.toStdString()));
         home.mkpath(user_value_directory);
     }
 }

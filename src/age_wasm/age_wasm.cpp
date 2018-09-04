@@ -31,13 +31,6 @@
 #endif
 
 
-#if 1
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
-
 static std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler = nullptr;
 static int output_sample_rate = 44100;
 

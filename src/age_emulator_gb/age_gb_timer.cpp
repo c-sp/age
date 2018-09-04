@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <ios> // std::hex
-
 #include <age_debug.hpp>
 
 #include "age_gb_timer.hpp"
@@ -111,7 +109,7 @@ age::uint8_t age::gb_timer::read_tima()
     }
 
     // return the current TIMA value
-    LOG("reading tima 0x" << std::hex << (int)m_tima);
+    LOG("reading tima " << AGE_LOG_HEX(m_tima));
     return m_tima;
 }
 
@@ -149,7 +147,7 @@ void age::gb_timer::write_tma(uint8_t value)
     }
 
     m_tma = value;
-    LOG("tma set to 0x" << std::hex << (int)m_tma);
+    LOG("tma set to " << AGE_LOG_HEX(m_tma));
 }
 
 void age::gb_timer::write_tima(uint8_t value)
@@ -169,7 +167,7 @@ void age::gb_timer::write_tima(uint8_t value)
         {
             m_tima_counter.set_tima(value);
             schedule_timer_overflow();
-            LOG("tima set to 0x" << std::hex << (int)value);
+            LOG("tima set to " << AGE_LOG_HEX(value));
         }
     }
 
@@ -177,7 +175,7 @@ void age::gb_timer::write_tima(uint8_t value)
     else
     {
         m_tima = value;
-        LOG("tima set to 0x" << std::hex << (int)m_tima);
+        LOG("tima set to " << AGE_LOG_HEX(m_tima));
     }
 }
 
@@ -227,7 +225,7 @@ void age::gb_timer::write_tac(uint8_t value)
 
     // update timer configuration
     m_tac = value | 0xF8;
-    LOG("tac set to 0x" << std::hex << (int)m_tac);
+    LOG("tac set to " << AGE_LOG_HEX(m_tac));
 
     m_tima_counter.set_frequency(m_tac);
     m_tima_running = new_tima_running;

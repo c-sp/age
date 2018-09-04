@@ -19,7 +19,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) { if ((m_core.get_oscillation_cycle() - 0 < 15000) && (get_ly() <= 2)) { AGE_GB_CYCLE_LOG("ly " << (uint)get_ly() << ", " << x); }}
+#define LOG(x) AGE_GB_CYCLE_LOG("ly " << AGE_LOG_DEC(get_ly()) << ", " << x)
 #else
 #define LOG(x)
 #endif
@@ -36,7 +36,7 @@
 
 void age::gb_lcd::write_lcdc(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     uint8 old_lcdc = read_lcdc();
 
     // LCD switched on or off
@@ -145,13 +145,13 @@ void age::gb_lcd::write_lcdc(uint8 value)
 age::uint8 age::gb_lcd::read_stat() const
 {
     uint8 result = m_stat | get_stat_coincidence(m_lcd_enabled) | 0x80;
-    LOG((uint)result);
+    LOG(AGE_LOG_HEX(result));
     return result;
 }
 
 void age::gb_lcd::write_stat(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
 
     auto scanline = get_scanline();
     uint mode = (scanline >= gb_screen_height)
@@ -188,7 +188,7 @@ void age::gb_lcd::write_stat(uint8 value)
     {
         uint8 bits_cleared = old_stat & ~value;
         uint8 bits_set = ~old_stat & value;
-        LOG("cleared bits " << (uint)bits_cleared << ", set bits " << (uint)bits_set);
+        LOG("cleared bits " << AGE_LOG_HEX(bits_cleared) << ", set bits " << AGE_LOG_HEX(bits_set));
 
         uint current_cycle = m_core.get_oscillation_cycle();
         uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
@@ -244,7 +244,7 @@ void age::gb_lcd::write_stat(uint8 value)
         uint mode0_interrupt_offset = get_mode0_interrupt_cycle_offset();
         LOG("mode0_interrupt_offset " << mode0_interrupt_offset);
 
-        LOG("mode " << (uint)mode);
+        LOG("mode " << AGE_LOG_HEX(mode));
         switch (mode)
         {
             case 0:
@@ -617,7 +617,7 @@ void age::gb_lcd::write_wx(uint8 value)
     //      window/late_wx_ds_1_out0
     //      window/late_wx_ds_2_out3
     //
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     emulate(m_core.get_oscillation_cycle() + 1);
     gb_lcd_ppu::write_wx(value);
 }
@@ -634,7 +634,7 @@ void age::gb_lcd::write_wy(uint8 value)
     //      window/late_wy_ffto2_ly2_scx3_1_dmg08_cgb_out3
     //      window/late_wy_ffto2_ly2_scx5_1_dmg08_cgb_out3
     //
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     emulate(m_core.get_oscillation_cycle() + 1);
     gb_lcd_ppu::write_wy(value);
     write_late_wy();
@@ -665,7 +665,7 @@ age::uint8 age::gb_lcd::read_lyc() const
 
 void age::gb_lcd::write_lyc(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     if (value != get_lyc())
     {
         auto scanline = get_scanline();
@@ -799,7 +799,7 @@ age::uint8 age::gb_lcd::read_obp1() const
 
 void age::gb_lcd::write_bgp(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_bgp = value;
     create_classic_palette(gb_palette_bgp, m_bgp);
 }

@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
-#include <algorithm>
+#include <algorithm> // std::min, ...
 #include <cmath> // std::pow, std::log10, ...
-#include <ios> // std::hex
 
 #include <age_debug.hpp>
 #include <pcm/age_downsampler.hpp>
@@ -279,7 +278,7 @@ void age::downsampler_low_pass::create_windowed_sinc(double transition_frequency
         int32_t i = static_cast<int32_t>(windowed * int32_max);
 
         LOG_FIR("n " << dn << ":   " << sinc << " * " << weight << " = " << windowed
-                << "   (0x" << std::hex << entry << std::dec << ")");
+                << "   (" << AGE_LOG_HEX(i) << ")");
 
         m_fir_values.push_back(i);
     }

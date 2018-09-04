@@ -21,20 +21,19 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) { if ((m_core.get_oscillation_cycle() < 13000) && ((uint)get_ly() < 2)) \
-{ AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ", x_current " << m_x_current << ", " << m_tile_offset << ", ly " << (uint)get_ly() << ": " << x); }}
+#define LOG(x) AGE_GB_CYCLE_LOG("x_current " << m_x_current << ", " << m_tile_offset << ", ly " << AGE_LOG_DEC(get_ly()) << ": " << x)
 #else
 #define LOG(x)
 #endif
 
 #if 0
-#define LOG_FETCH(x) LOG(x)
+#define LOG_FETCH(x) AGE_LOG(x)
 #else
 #define LOG_FETCH(x)
 #endif
 
 #if 0
-#define LOG_PLOT(x) LOG(x)
+#define LOG_PLOT(x) AGE_LOG(x)
 #else
 #define LOG_PLOT(x)
 #endif
@@ -108,7 +107,7 @@ age::uint8 age::gb_lcd_ppu::read_wy() const { return m_wy; }
 
 void age::gb_lcd_ppu::write_lcdc(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_lcdc = value;
     m_obj_enabled = (m_lcdc & gb_lcdc_obj_enable) > 0;
     m_obj_size_16 = (m_lcdc & gb_lcdc_obj_size) > 0;
@@ -121,25 +120,25 @@ void age::gb_lcd_ppu::write_lcdc(uint8 value)
 
 void age::gb_lcd_ppu::write_scx(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_scx = value;
 }
 
 void age::gb_lcd_ppu::write_scy(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_scy = value;
 }
 
 void age::gb_lcd_ppu::write_wx(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_wx = value;
 }
 
 void age::gb_lcd_ppu::write_wy(uint8 value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_wy = value;
 }
 
@@ -198,19 +197,19 @@ void age::gb_lcd_ppu::update_color(size_t index, uint8_t high_byte, uint8_t low_
     AGE_ASSERT(m_cgb && (index < 64));
 
     // we rely on integer promotion to 32 bit int for the following calculation
-    int32_t gb_color = (high_byte << 8) + low_byte;
+    int gb_color = (high_byte << 8) + low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9
     //             blue:   bits 10-14
-    int32_t gb_r = gb_color & 0x1F;
-    int32_t gb_g = (gb_color >> 5) & 0x1F;
-    int32_t gb_b = (gb_color >> 10) & 0x1F;
+    int gb_r = gb_color & 0x1F;
+    int gb_g = (gb_color >> 5) & 0x1F;
+    int gb_b = (gb_color >> 10) & 0x1F;
 
     // formula copied from gambatte (video.cpp)
-    int32_t r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
-    int32_t g = (gb_g * 3 + gb_b) << 1;
-    int32_t b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
+    int r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
+    int g = (gb_g * 3 + gb_b) << 1;
+    int b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
 
     m_colors[index] = pixel(r, g, b);
 }
@@ -383,7 +382,7 @@ void age::gb_lcd_ppu::plot_await_scx_match(gb_lcd_ppu &ppu)
     // SCX matches -> wait for tile data
     if ((ppu.m_x_scx & 7) == (ppu.m_scx & 7))
     {
-        LOG("SCX match, switching to plotting method");
+        LOG_PLOT("SCX match, switching to plotting method");
         ppu.m_current_sprite = 0; // allow sprite data fetching
         ppu.update_pause_plotting();
         AGE_ASSERT(!ppu.m_plotting_window);
@@ -457,7 +456,7 @@ void age::gb_lcd_ppu::plot_await_data(gb_lcd_ppu &ppu)
         if (ppu.m_x_current == 8)
         {
             AGE_ASSERT(ppu.m_tile_map_offset <= 1);
-            LOG("starting pixel plotting (next cycle)");
+            LOG_PLOT("starting pixel plotting (next cycle)");
 
             //
             // verified by gambatte tests
@@ -643,7 +642,7 @@ void age::gb_lcd_ppu::update_pause_plotting()
 
     if (((m_wx + 1u) == m_x_current) && (get_scanline() >= m_late_wy) && m_win_enabled && !m_window_started)
     {
-        LOG("initializing window data fetching for next cycle, wx " << (uint)m_wx);
+        LOG_PLOT("initializing window data fetching for next cycle, wx " << AGE_LOG_DEC(m_wx));
         m_pause_plotting = true;
         m_next_fetch_step = &window_step_0;
 

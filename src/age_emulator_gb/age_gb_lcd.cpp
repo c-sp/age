@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) if ((m_next_event_cycle - 0 < 15000)) { AGE_LOG("cycle " << m_next_event_cycle << ": " << x); }
+#define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
 #endif

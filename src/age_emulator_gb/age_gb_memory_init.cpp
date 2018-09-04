@@ -959,7 +959,7 @@ age::int16_t get_num_cart_rom_banks(const age::uint8_vector &cart_rom)
     age::int16_t result;
 
     auto rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
-    LOG("rom banks byte: 0x" << std::hex << (int)rom_banks << std::dec);
+    LOG("rom banks byte: " << AGE_LOG_HEX(rom_banks));
     switch (rom_banks)
     {
         //case 0x00:
@@ -984,7 +984,7 @@ age::int16_t get_num_cart_ram_banks(const age::uint8_vector &cart_rom)
     age::int16_t result;
 
     auto ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
-    LOG("ram banks byte: 0x" << std::hex << (int)ram_banks << std::dec);
+    LOG("ram banks byte: " << AGE_LOG_HEX(ram_banks));
     switch (ram_banks)
     {
         //case 0x00:

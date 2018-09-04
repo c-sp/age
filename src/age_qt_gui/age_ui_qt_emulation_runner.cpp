@@ -105,13 +105,13 @@ void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emul
     m_buttons_up = 0;
 }
 
-void age::qt_emulation_runner::set_emulator_buttons_down(int32_t buttons)
+void age::qt_emulation_runner::set_emulator_buttons_down(int buttons)
 {
     LOG(buttons);
     m_buttons_down |= buttons;
 }
 
-void age::qt_emulation_runner::set_emulator_buttons_up(int32_t buttons)
+void age::qt_emulation_runner::set_emulator_buttons_up(int buttons)
 {
     LOG(buttons);
     m_buttons_up |= buttons;

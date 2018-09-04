@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) if (m_core->get_oscillation_cycle() < 45000) { AGE_LOG("cycle " << m_core->get_oscillation_cycle() << ": " << x); }
+#define LOG(x) AGE_LOG("cycle " << m_core->get_oscillation_cycle() << ": " << x)
 #else
 #define LOG(x)
 #endif
@@ -294,7 +294,7 @@ age::uint8 age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
 
         coincidence = next_ly_cycles > (m_core->is_double_speed() ? 0 : 4);
         coincidence &= (scanline == m_lyc);
-        //LOG("LY " << scanline << ", LYC " << (uint)m_lyc << " -> " << coincidence << ", next_ly_cycles " << next_ly_cycles);
+        //LOG("LY " << scanline << ", LYC " << AGE_LOG_DEC(m_lyc) << " -> " << coincidence << ", next_ly_cycles " << next_ly_cycles);
     }
 
     //
@@ -443,7 +443,7 @@ void age::gb_lyc_handler::set_stat(uint8 value, uint mode, bool lcd_enabled)
 
 void age::gb_lyc_handler::set_lyc(uint8 value, uint mode, bool lcd_enabled)
 {
-    LOG((uint)value << ", current LY is " << (uint)get_ly());
+    LOG(AGE_LOG_DEC(value) << ", current LY is " << AGE_LOG_DEC(get_ly()));
     m_lyc = value;
 
     if (lcd_enabled && m_stat_coincidence_interrupt)

@@ -323,7 +323,7 @@ int age::qt_audio_output::write_samples()
             int samples_free = bytes_free / sizeof_pcm_sample;
 
             // check how many samples we have available for streaming
-            int32_t samples_available;
+            int samples_available;
             const pcm_sample* buffer = m_buffer.get_buffered_samples_ptr(samples_available);
 
             // write samples to audio output device

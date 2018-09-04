@@ -15,7 +15,6 @@
 //
 
 #include <algorithm>
-#include <ios> // std::hex
 
 #include <age_debug.hpp>
 
@@ -175,7 +174,7 @@ void age::gb_core::request_interrupt(gb_interrupt interrupt)
 {
     m_if |= to_integral(interrupt);
     check_halt_mode();
-    LOG("interrupt requested: " << (int)to_integral(interrupt));
+    LOG("interrupt requested: " << AGE_LOG_DEC(to_integral(interrupt)));
 }
 
 void age::gb_core::ei_delayed()
@@ -249,7 +248,7 @@ bool age::gb_core::must_service_interrupt()
 
         if (result)
         {
-            LOG("noticed interrupt 0x" << std::hex << (int)interrupt << std::dec);
+            LOG("noticed interrupt " << AGE_LOG_HEX(interrupt));
             AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
             m_ime = false; // disable interrupts
         }
@@ -292,7 +291,7 @@ age::uint8_t age::gb_core::read_key1() const
 
 age::uint8_t age::gb_core::read_if() const
 {
-    LOG("0x" << std::hex << (int)m_if << std::dec);
+    LOG(AGE_LOG_HEX(m_if));
     return m_if;
 }
 
@@ -305,20 +304,20 @@ age::uint8_t age::gb_core::read_ie() const
 
 void age::gb_core::write_key1(uint8_t value)
 {
-    LOG("0x" << std::hex << (int)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
 }
 
 void age::gb_core::write_if(uint8_t value)
 {
-    LOG("0x" << std::hex << (int)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_if = value | 0xE0;
     check_halt_mode();
 }
 
 void age::gb_core::write_ie(uint8_t value)
 {
-    LOG("0x" << std::hex << (int)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_ie = value;
     check_halt_mode();
 }
@@ -365,7 +364,7 @@ void age::gb_core::check_halt_mode()
 
 age::gb_core::gb_events::gb_events()
 {
-    std::for_each(m_event_cycle.begin(), m_event_cycle.end(), [&](auto &elem)
+    std::for_each(begin(m_event_cycle), end(m_event_cycle), [&](auto &elem)
     {
         elem = gb_no_cycle;
     });
@@ -427,13 +426,13 @@ void age::gb_core::gb_events::set_back_cycles(int offset)
 {
     // find all scheduled events
     std::vector<gb_event> events_to_adjust;
-    std::for_each(m_events.begin(), m_events.end(), [&](const auto &pair)
+    std::for_each(begin(m_events), end(m_events), [&](const auto &pair)
     {
         events_to_adjust.push_back(pair.second);
     });
 
     // re-schedule all found events
-    std::for_each(events_to_adjust.begin(), events_to_adjust.end(), [&](const gb_event &event)
+    std::for_each(begin(events_to_adjust), end(events_to_adjust), [&](const gb_event &event)
     {
         auto idx = to_integral(event);
         auto event_cycle = m_event_cycle[idx];

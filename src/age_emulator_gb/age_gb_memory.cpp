@@ -15,7 +15,6 @@
 //
 
 #include <algorithm>
-#include <ios> // std::hex
 
 #include <age_debug.hpp>
 
@@ -178,7 +177,7 @@ void age::gb_memory::write_svbk(uint8_t value)
 void age::gb_memory::write_vbk(uint8_t value)
 {
     m_vbk = value | 0xFE;
-    BANK_LOG("svbk bank id " << (uint)(m_vbk & 1));
+    BANK_LOG("svbk bank id " << AGE_LOG_DEC(m_vbk & 1));
 
     int offset = (m_vbk & 0x01) * gb_video_ram_bank_size;
     m_offsets[8] = m_video_ram_offset + offset - 0x8000;
@@ -225,8 +224,7 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
     m_offsets[6] = m_offsets[4];
     m_offsets[7] = m_offsets[4];
 
-    BANK_LOG("switched to rom banks " << low_bank_id << "," << high_bank_id
-             << " (0x" << std::hex << low_bank_id << ",0x" << high_bank_id << std::dec << ")");
+    BANK_LOG("switched to rom banks " << AGE_LOG_HEX(low_bank_id) << ", " << AGE_LOG_HEX(high_bank_id));
 }
 
 void age::gb_memory::set_ram_bank(int bank_id)
@@ -238,7 +236,7 @@ void age::gb_memory::set_ram_bank(int bank_id)
     m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;
     m_offsets[0xB] = m_offsets[0xA];
 
-    BANK_LOG("switched to ram bank " << bank_id << " (0x" << std::hex << bank_id << std::dec << ")");
+    BANK_LOG("switched to ram bank " << AGE_LOG_HEX(bank_id));
 }
 
 

@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <ios> // std::hex
-
 #include <age_debug.hpp>
 
 #include "age_gb_timer.hpp"
@@ -77,7 +75,7 @@ void age::gb_common_counter::switch_double_speed_mode()
 {
     // preserve the current counter value during speed change
     int counter = get_current_value();
-    COUNTER_LOG("switching between speed modes, counter = " << counter << ", new shift = " << counter_cycle_shift);
+    COUNTER_LOG("switching between speed modes, counter = " << counter << ", shift = " << m_cycle_shift);
 
     m_cycle_shift = m_core.is_double_speed() ? 1 : 2;
     reset();
@@ -156,7 +154,7 @@ void age::gb_tima_counter::set_tima(int tima)
     m_tima_origin = m_counter.get_current_value() >> m_counter_shift;
     m_tima_origin -= tima;
 
-    TIMA_LOG("tima origin set to 0x" << std::hex << m_tima_origin);
+    TIMA_LOG("tima origin set to " << AGE_LOG_HEX(m_tima_origin));
 }
 
 

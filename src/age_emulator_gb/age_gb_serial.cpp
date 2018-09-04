@@ -57,7 +57,7 @@ age::uint8_t age::gb_serial::read_sb()
     {
         transfer_update_sb();
     }
-    LOG("0x" << std::hex << (int)m_sb << std::dec);
+    LOG(AGE_LOG_HEX(m_sb));
     return m_sb;
 }
 
@@ -71,7 +71,7 @@ age::uint8_t age::gb_serial::read_sc() const
     // serial transfer currently in progress?
     result |= (m_sio_state == gb_sio_state::no_transfer) ? 0 : gb_sc_start_transfer;
 
-    LOG("0x" << std::hex << (int)result << std::dec);
+    LOG(AGE_LOG_HEX(result));
     return result;
 }
 
@@ -79,7 +79,7 @@ age::uint8_t age::gb_serial::read_sc() const
 
 void age::gb_serial::write_sb(uint8_t value)
 {
-    LOG("0x" << std::hex << (int)value << " (cur 0x" << (int)m_sb << std::dec
+    LOG(AGE_LOG_HEX(value) << " (current " << AGE_LOG_HEX(m_sb)
         << ((m_sio_state == gb_sio_state::no_transfer) ? ")" : "), ignored: transfer in progress!"));
 
     // serial transfer in progress -> writing prohibited
@@ -88,7 +88,7 @@ void age::gb_serial::write_sb(uint8_t value)
 
 void age::gb_serial::write_sc(uint8_t value)
 {
-    LOG("0x" << std::hex << (int)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_sc = value;
 
     // start serial transfer
@@ -233,7 +233,7 @@ void age::gb_serial::transfer_update_sb()
     {
         int tmp = m_sb * 0x100 + 0xFF;
         tmp >>= 8 - shifts;
-        LOG("transfer in progress: updating SB from 0x" << std::hex << (int)m_sb << " to 0x" << tmp << std::dec << " (" << shifts << " shifts)");
+        LOG("transfer in progress: updating SB from " << AGE_LOG_HEX(m_sb) << " to " << AGE_LOG_HEX(tmp) << " (" << shifts << " shifts)");
         m_sb = tmp & 0xFF;
 
         m_sio_last_receive_cycle += shifts * m_sio_cycles_per_bit;

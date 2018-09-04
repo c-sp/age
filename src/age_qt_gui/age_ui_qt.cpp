@@ -18,12 +18,6 @@
 
 #include "age_ui_qt.hpp"
 
-#if 1
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 
 
 

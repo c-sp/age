@@ -685,7 +685,7 @@ void age::gb_bus::write_hdma5(uint8_t value)
         }
     }
 
-    LOG("HDMA5 = " << (int)m_hdma5);
+    LOG("HDMA5 = " << AGE_LOG_DEC(m_hdma5));
 }
 
 

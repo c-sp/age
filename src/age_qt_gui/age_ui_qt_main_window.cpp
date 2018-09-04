@@ -303,7 +303,7 @@ void age::qt_main_window::open_file(gb_hardware hardware)
         }
     }
 
-    LOG("open-file-dialog selected " << std::quoted(file_name.toStdString()));
+    LOG("open-file-dialog selected " << AGE_LOG_QUOTED(file_name.toStdString()));
     if (file_name.length() > 0)
     {
         // load file
