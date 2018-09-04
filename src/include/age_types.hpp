@@ -89,10 +89,6 @@ constexpr int int_max = std::numeric_limits<int>::max();
 constexpr int16_t int16_max = std::numeric_limits<int16_t>::max();
 constexpr int32_t int32_max = std::numeric_limits<int32_t>::max();
 
-constexpr int int_max = std::numeric_limits<int>::max();
-constexpr int16_t int16_max = std::numeric_limits<int16_t>::max();
-constexpr int32_t int32_max = std::numeric_limits<int32_t>::max();
-
 constexpr const char *project_name = "AGE";
 
 //!
