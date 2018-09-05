@@ -22,7 +22,8 @@
 
 
 
-namespace age {
+namespace age
+{
 
 constexpr int8_t gb_frame_sequencer_cycle_shift = 13;
 

@@ -23,7 +23,8 @@
 
 
 
-namespace age {
+namespace age
+{
 
 //!
 //! gambatte tests run for 15 frames
@@ -298,8 +299,8 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
 
 age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, bool force_dmg)
 {
-    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&) {
-
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&)
+    {
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
@@ -353,8 +354,8 @@ age::optional<bool> parse_outaudio_flag(const QString &string, const QString &pr
 
 age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg)
 {
-    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&) {
-
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&)
+    {
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));

@@ -28,7 +28,8 @@
 #define LOG(x)
 #endif
 
-namespace {
+namespace
+{
 
 // we don't really use the alpha channel but OpenGL ES would not work without it
 constexpr QOpenGLTexture::TextureFormat tx_format = QOpenGLTexture::RGBAFormat;

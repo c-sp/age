@@ -263,7 +263,8 @@ bool age::test_application::ignore_files(QSet<QString> &files) const
                 {
                     // trim end-of-line comments
                     auto idx = line.indexOf('#');
-                    if (idx >= 0) {
+                    if (idx >= 0)
+                    {
                         line = line.left(idx).trimmed();
                     }
 

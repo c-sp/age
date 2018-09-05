@@ -26,7 +26,8 @@
 #define LOG(x)
 #endif
 
-namespace {
+namespace
+{
 
 constexpr age::uint8_t gb_hdma_start = 0x80;
 

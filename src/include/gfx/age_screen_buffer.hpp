@@ -28,9 +28,8 @@
 
 
 
-namespace age {
-
-
+namespace age
+{
 
 class screen_buffer
 {

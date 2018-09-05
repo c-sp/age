@@ -52,7 +52,8 @@ bool emulator_exists()
 
 
 
-extern "C" { // prevent function name mangling
+extern "C" // prevent function name mangling
+{
 
 
 

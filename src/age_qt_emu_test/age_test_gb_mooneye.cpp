@@ -23,15 +23,17 @@
 age::test_method age::mooneye_test_method(const QString &file_name)
 {
     // this method is based on mooneye-gb/src/acceptance_tests/fixture.rs
-    return [=](const uint8_vector &test_rom, const uint8_vector&) {
-
+    return [=](const uint8_vector &test_rom, const uint8_vector&)
+    {
         // CGB mooneye-gb test roms can only be identified by their file name (as far a I know)
         age::gb_hardware hardware = age::gb_hardware::dmg;
 
-        if (file_name.endsWith(".gb", Qt::CaseInsensitive)) {
+        if (file_name.endsWith(".gb", Qt::CaseInsensitive))
+        {
             QString no_extension = file_name.left(file_name.length() - 3);
 
-            if (no_extension.endsWith("-cgb", Qt::CaseInsensitive) || no_extension.endsWith("-c", Qt::CaseInsensitive)) {
+            if (no_extension.endsWith("-cgb", Qt::CaseInsensitive) || no_extension.endsWith("-c", Qt::CaseInsensitive))
+            {
                 hardware = age::gb_hardware::cgb;
             }
         }

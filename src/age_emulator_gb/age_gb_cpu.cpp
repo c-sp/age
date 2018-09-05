@@ -20,7 +20,8 @@
 
 
 
-namespace age {
+namespace age
+{
 
 constexpr uint8_t gb_zero_flag = 0x80;
 constexpr uint8_t gb_subtract_flag = 0x40;
@@ -197,7 +198,8 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // JP <cond> (16 cycles if jumped, 12 cycles if not)
 #define JP_IF(condition) \
-    if (condition) { \
+    if (condition) \
+    { \
         JP; \
     } \
     else \
@@ -220,7 +222,8 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // CALL <cond> (24 cycles if jumped, 12 cycles if not)
 #define CALL_IF(condition) \
-    if (condition) { \
+    if (condition) \
+    { \
         CALL; \
     } \
     else \
@@ -246,7 +249,8 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 #define RET_IF(condition) \
     { \
         INC_CYCLES; \
-        if (condition) { \
+        if (condition) \
+        { \
             RET; \
         } \
     } \
@@ -264,7 +268,8 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // JR <cond> (12 cycles if jumped, 8 cycles if not)
 #define JR_IF(condition) \
-    if (condition) { \
+    if (condition) \
+    { \
         JR; \
     } \
     else \

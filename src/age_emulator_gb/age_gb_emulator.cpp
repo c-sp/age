@@ -18,7 +18,8 @@
 
 #include "age_gb_emulator_impl.hpp"
 
-namespace age {
+namespace age
+{
 
 constexpr int gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
 

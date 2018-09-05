@@ -77,7 +77,8 @@ constexpr int gb_machine_cycles_per_second = 4194304;
 
 
 #define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
-    if (value != gb_no_cycle) { \
+    if (value != gb_no_cycle) \
+    { \
         /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
         AGE_ASSERT(offset >= gb_machine_cycles_per_second); \
         AGE_ASSERT(0 == (offset & (gb_machine_cycles_per_second - 1))); \

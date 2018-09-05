@@ -28,9 +28,8 @@
 
 
 
-namespace age {
-
-
+namespace age
+{
 
 struct pcm_sample
 {

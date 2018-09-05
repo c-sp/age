@@ -24,7 +24,8 @@
 #define LOG(x)
 #endif
 
-namespace age {
+namespace age
+{
 
 constexpr uint8_t gb_p14 = 0x10;
 constexpr uint8_t gb_p15 = 0x20;

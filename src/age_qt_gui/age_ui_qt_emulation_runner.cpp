@@ -24,7 +24,8 @@
 #define LOG(x)
 #endif
 
-namespace {
+namespace
+{
 
 constexpr int emulation_interval_millis = 8;
 constexpr qint64 emulation_interval_nanos = emulation_interval_millis * 1000000;

@@ -22,7 +22,8 @@
 #define LOG(x)
 #endif
 
-namespace age {
+namespace age
+{
 
 // DMG: 256 cycles for "bit in"
 // DMG: 256 cycles for "bit out"

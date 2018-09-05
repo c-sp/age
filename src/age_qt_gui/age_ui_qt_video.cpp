@@ -35,7 +35,8 @@
 
 
 
-namespace {
+namespace
+{
 
 QString load_shader(const QString &file_name)
 {
@@ -54,7 +55,8 @@ QString load_shader(const QString &file_name)
     QString shader_code;
     {
         QFile file(file_name);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
             qWarning() << "could not open file: " << file_name;
             return "";
         }
@@ -92,7 +94,8 @@ QString load_shader(const QString &file_name)
     //
     // -> http://doc.qt.io/qt-5/qopenglshaderprogram.html#writing-portable-shaders
     //
-    if (is_opengl_es) {
+    if (is_opengl_es)
+    {
         result.append("precision mediump float;\n");
         result.append("precision mediump int;\n");
     }

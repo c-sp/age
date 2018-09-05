@@ -35,7 +35,8 @@
 #define RAM_ACCESSIBLE(value) ((value & 0x0F) == 0x0A)
 #define IS_MBC_RAM(address) ((address & 0xE000) == 0xA000)
 
-namespace {
+namespace
+{
 
 constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
 

@@ -24,7 +24,8 @@
 #define LOG(x)
 #endif
 
-namespace age {
+namespace age
+{
 
 constexpr uint8_t gb_tac_start_timer = 0x04;
 

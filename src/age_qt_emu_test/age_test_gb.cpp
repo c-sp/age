@@ -73,8 +73,8 @@ void age::gb_emulate(gb_emulator &emulator, qint64 cycles_to_emulate)
 
 age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, qint64 millis_to_emulate)
 {
-    return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot) {
-
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector &screenshot)
+    {
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware, dmg_green));
@@ -95,8 +95,8 @@ age::test_method age::screenshot_test_png(bool force_dmg, bool dmg_green, qint64
 
         // check the screenshot size
         else if ((emulator->get_screen_width() != image.width())
-                || (emulator->get_screen_height() != image.height())) {
-
+                || (emulator->get_screen_height() != image.height()))
+        {
             QTextStream(&error_message)
                     << "screen size ("
                     << emulator->get_screen_width() << "x" << emulator->get_screen_height()
