@@ -36,28 +36,15 @@
 
 
 
-namespace age {
-
-//! \todo remove these old typedefs
-typedef std::uint8_t  uint8;
-
-//!
-//! Defines an unsigned integer type that matches the architecture's default CPU register
-//! size (32 bits or 64 bits) but is guaranteed to be at least 32 bits wide.
-//!
-//! \todo remove uint
-typedef size_t uint;
-
-//! \todo remove uint_max
-constexpr uint uint_max = std::numeric_limits<uint>::max();
-
-
+namespace age
+{
 
 // C++ arithmetic operators do not accept types smaller than int
 // (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
 // AGE relies on int being 32 bits or more.
 
 static_assert(sizeof(int) >= 4, "AGE requires int being at least 32 bits wide");
+static_assert(sizeof(unsigned) >= 4, "AGE requires unsigned int being at least 32 bits wide");
 static_assert(sizeof(std::size_t) >= sizeof(int), "AGE requires std::size_t to be at least as wide as int");
 
 

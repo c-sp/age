@@ -39,35 +39,32 @@ namespace age
 constexpr int16_t gb_screen_width = 160;
 constexpr int16_t gb_screen_height = 144;
 
-constexpr uint gb_cycles_per_scanline = 456;
-constexpr uint gb_cycles_per_frame = 154 * gb_cycles_per_scanline;
-constexpr uint gb_cycles_ly153 = 4;
-constexpr uint gb_cycles_mode2 = 80;
+constexpr int gb_cycles_per_scanline = 456;
+constexpr int gb_cycles_per_frame = 154 * gb_cycles_per_scanline;
+constexpr int gb_cycles_ly153 = 4;
+constexpr int gb_cycles_mode2 = 80;
 
-constexpr uint8 gb_lcdc_enable = 0x80;
-constexpr uint8 gb_lcdc_win_map = 0x40;
-constexpr uint8 gb_lcdc_win_enable = 0x20;
-constexpr uint8 gb_lcdc_bg_win_data = 0x10;
-constexpr uint8 gb_lcdc_bg_map = 0x08;
-constexpr uint8 gb_lcdc_obj_size = 0x04;
-constexpr uint8 gb_lcdc_obj_enable = 0x02;
-constexpr uint8 gb_lcdc_bg_enable = 0x01;
+constexpr uint8_t gb_lcdc_enable = 0x80;
+constexpr uint8_t gb_lcdc_win_map = 0x40;
+constexpr uint8_t gb_lcdc_win_enable = 0x20;
+constexpr uint8_t gb_lcdc_bg_win_data = 0x10;
+constexpr uint8_t gb_lcdc_bg_map = 0x08;
+constexpr uint8_t gb_lcdc_obj_size = 0x04;
+constexpr uint8_t gb_lcdc_obj_enable = 0x02;
+constexpr uint8_t gb_lcdc_bg_enable = 0x01;
 
-constexpr uint8 gb_stat_interrupt_coincidence = 0x40;
-constexpr uint8 gb_stat_interrupt_mode2 = 0x20;
-constexpr uint8 gb_stat_interrupt_mode1 = 0x10;
-constexpr uint8 gb_stat_interrupt_mode0 = 0x08;
-constexpr uint8 gb_stat_coincidence = 0x04;
-constexpr uint8 gb_stat_modes = 0x03;
+constexpr uint8_t gb_stat_interrupt_coincidence = 0x40;
+constexpr uint8_t gb_stat_interrupt_mode2 = 0x20;
+constexpr uint8_t gb_stat_interrupt_mode1 = 0x10;
+constexpr uint8_t gb_stat_interrupt_mode0 = 0x08;
+constexpr uint8_t gb_stat_coincidence = 0x04;
+constexpr uint8_t gb_stat_modes = 0x03;
 
-constexpr uint gb_num_palette_colors = 16 * 4;
-constexpr uint gb_palette_bgp = 0x00;
-constexpr uint gb_palette_obp0 = 0x20;
-constexpr uint gb_palette_obp1 = 0x30;
+constexpr size_t gb_num_palette_colors = 16 * 4;
 
-constexpr uint8 gb_tile_attribute_x_flip = 0x20;
-constexpr uint8 gb_tile_attribute_y_flip = 0x40;
-constexpr uint8 gb_tile_attribute_priority = 0x80;
+constexpr uint8_t gb_tile_attribute_x_flip = 0x20;
+constexpr uint8_t gb_tile_attribute_y_flip = 0x40;
+constexpr uint8_t gb_tile_attribute_priority = 0x80;
 
 
 
@@ -79,17 +76,17 @@ public:
 
     gb_ly_counter(gb_core &core);
 
-    uint8 get_ly_port(bool lcd_enabled) const;
-    uint8 get_ly() const;
-    int16_t get_scanline() const;
-    uint get_next_scanline_cycle_offset(uint current_cycle) const;
+    uint8_t get_ly_port(bool lcd_enabled) const;
+    uint8_t get_ly() const;
+    uint8_t get_scanline() const;
+    int get_next_scanline_cycle_offset(int current_cycle) const;
 
     void switch_off();
     void switch_on();
     void next_line();
     void mode1_ly0();
 
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int offset);
 
 protected:
 
@@ -98,8 +95,8 @@ protected:
 
 private:
 
-    uint m_next_scanline_cycle = gb_no_cycle;
-    int16_t m_scanline = 0;
+    int m_next_scanline_cycle = gb_no_cycle;
+    uint8_t m_scanline = 0;
     bool m_mode1_ly0 = false;
 };
 
@@ -111,13 +108,13 @@ public:
 
     using gb_ly_counter::gb_ly_counter;
 
-    uint8 get_lyc() const;
+    uint8_t get_lyc() const;
     bool is_interruptable_coincidence() const;
-    uint8 get_stat_coincidence(bool lcd_enabled) const;
+    uint8_t get_stat_coincidence(bool lcd_enabled) const;
 
     void switch_off();
-    void set_stat(uint8 value, uint mode, bool lcd_enabled);
-    void set_lyc(uint8 value, uint mode, bool lcd_enabled);
+    void set_stat(uint8_t value, int mode, bool lcd_enabled);
+    void set_lyc(uint8_t value, int mode, bool lcd_enabled);
 
 protected:
 
@@ -132,7 +129,7 @@ private:
     bool m_stat_mode0_interrupt = false;
     bool m_stat_mode1_interrupt = false;
     bool m_stat_mode2_interrupt = false;
-    uint8 m_lyc = 0;
+    uint8_t m_lyc = 0;
 };
 
 
@@ -156,22 +153,22 @@ public:
 
     void switch_off();
     void switch_on();
-    void set_stat(uint8 value, uint mode, bool lcd_enabled);
-    void set_lyc(uint8 value, uint mode, bool lcd_enabled);
+    void set_stat(uint8_t value, int mode, bool lcd_enabled);
+    void set_lyc(uint8_t value, int mode, bool lcd_enabled);
     void lyc_event();
 
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int offset);
 
 private:
 
-    uint calculate_next_event_cycle(bool stat_coincidence_interrupt, uint8 for_lyc);
-    void schedule_next_event();
+    int calculate_next_event_cycle(bool stat_coincidence_interrupt, uint8_t for_lyc);
+    void schedule_next_event(int next_event_cycle);
 
     bool m_stat_coincidence_interrupt_int = false;
     bool m_stat_mode1_interrupt_int = false;
     bool m_stat_mode2_interrupt_int = false;
-    uint8 m_lyc_int = 0;
-    uint m_next_event_cycle = gb_no_cycle;
+    uint8_t m_lyc_int = 0;
+    int m_next_event_cycle = int_max;
 };
 
 
@@ -184,23 +181,23 @@ public:
 
     gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_green);
 
-    uint8 read_lcdc() const;
-    uint8 read_scx() const;
-    uint8 read_scy() const;
-    uint8 read_wx() const;
-    uint8 read_wy() const;
+    uint8_t read_lcdc() const;
+    uint8_t read_scx() const;
+    uint8_t read_scy() const;
+    uint8_t read_wx() const;
+    uint8_t read_wy() const;
 
-    void write_lcdc(uint8 value);
-    void write_scx(uint8 value);
-    void write_scy(uint8 value);
-    void write_wx(uint8 value);
-    void write_wy(uint8 value);
+    void write_lcdc(uint8_t value);
+    void write_scx(uint8_t value);
+    void write_scy(uint8_t value);
+    void write_wx(uint8_t value);
+    void write_wy(uint8_t value);
 
-    uint get_mode0_interrupt_cycle_offset() const;
-    uint8* get_oam();
+    int get_mode0_interrupt_cycle_offset() const;
+    uint8_t* get_oam();
 
-    void create_classic_palette(uint index, uint8 colors);
-    void update_color(size_t index, uint8_t high_byte, uint8_t low_byte);
+    void create_classic_palette(unsigned index, uint8_t colors);
+    void update_color(unsigned index, uint8_t high_byte, uint8_t low_byte);
     void white_screen(pixel_vector &screen);
     void write_late_wy();
     void search_sprites();
@@ -219,31 +216,31 @@ private:
     public:
 
         gb_sprite();
-        gb_sprite(const uint8* oam, uint line);
+        gb_sprite(const uint8_t* oam, int16_t line);
 
         void fetch_tile_byte1(const gb_lcd_ppu &ppu);
         void fetch_tile_byte2(const gb_lcd_ppu &ppu);
         void create_tile(const gb_lcd_ppu &ppu);
 
-        uint8 get_priority() const;
-        uint8 get_color_index(uint offset) const;
-        uint get_x() const;
+        uint8_t get_priority() const;
+        uint8_t get_color_index(int offset) const;
+        int16_t get_x() const;
 
         bool operator<(const gb_sprite &right) const;
 
     private:
 
-        uint get_tile_data_offset(const gb_lcd_ppu &ppu) const;
+        int get_tile_data_offset(const gb_lcd_ppu &ppu) const;
 
-        uint m_x = 255;
-        uint m_line = 0;
-        uint8 m_tile_name = 0;
-        uint8 m_tile_attributes = 0;
-        uint8 m_tile_byte1 = 0;
-        uint8 m_tile_byte2 = 0;
+        int16_t m_x = 255;
+        int16_t m_line = 0;
+        uint8_t m_tile_name = 0;
+        uint8_t m_tile_attributes = 0;
+        uint8_t m_tile_byte1 = 0;
+        uint8_t m_tile_byte2 = 0;
 
         uint8_array<8> m_tile;
-        uint8 m_priority = 0;
+        uint8_t m_priority = 0;
     };
 
     static void calculate_xflip(uint8_array<256> &xflip);
@@ -252,13 +249,13 @@ private:
     static void plot_await_scx_match(gb_lcd_ppu &ppu);
     static void plot_await_data(gb_lcd_ppu &ppu);
     static void plot_pixel(gb_lcd_ppu &ppu);
-    static uint8 get_sprite_pixel(const gb_lcd_ppu &ppu, uint8 bg_color_index);
+    static uint8_t get_sprite_pixel(const gb_lcd_ppu &ppu, uint8_t bg_color_index);
     void update_pause_plotting();
 
     void fetch_tile_name();
     void fetch_tile_byte_1();
     void fetch_tile_byte_2();
-    uint get_tile_data_offset() const;
+    int get_tile_data_offset() const;
 
     static void tile_step_0(gb_lcd_ppu &ppu);
     static void tile_step_1(gb_lcd_ppu &ppu);
@@ -303,47 +300,47 @@ private:
     bool m_obj_enabled = false;
     bool m_obj_size_16 = false;
     bool m_win_enabled = false;
-    uint m_b_tile_name_offset = 0;
-    uint m_bw_tile_name_add = 0;
-    uint m_w_tile_name_offset = 0;
-    uint m_bw_tile_data_offset = 0;
+    int16_t m_b_tile_name_offset = 0;
+    int16_t m_bw_tile_name_add = 0;
+    int16_t m_w_tile_name_offset = 0;
+    int16_t m_bw_tile_data_offset = 0;
 
     // ports
-    uint8 m_lcdc = gb_lcdc_enable;
-    uint8 m_scy = 0;
-    uint8 m_scx = 0;
-    uint8 m_wy = 0;
-    uint8 m_wx = 0;
+    uint8_t m_lcdc = gb_lcdc_enable;
+    uint8_t m_scy = 0;
+    uint8_t m_scx = 0;
+    uint8_t m_wy = 0;
+    uint8_t m_wx = 0;
 
     // rendering
-    uint m_x_scx = 0;
-    uint m_x_current = 0;
-    uint m_x_m0 = 168;
-    uint m_x_m0_int = 168;
+    int8_t m_x_scx = 0;
+    int16_t m_x_current = 0;
+    int16_t m_x_m0 = 168;
+    int16_t m_x_m0_int = 168;
     pixel *m_next_pixel = nullptr;
     bool m_pause_plotting = false;
 
     bool m_window_started = false;
     bool m_plotting_window = false;
-    uint m_window_map_offset = 0;
-    uint8 m_late_wy = 0;
+    int16_t m_window_map_offset = 0;
+    uint8_t m_late_wy = 0;
 
     std::vector<gb_sprite> m_sprites;
-    uint m_current_sprite = 0;
-    uint m_sprite_to_plot = 0;
+    uint8_t m_current_sprite = 0;
+    uint8_t m_sprite_to_plot = 0;
     bool m_sprite_at_167 = false;
-    uint m_sprite_tile_offset = 0;
+    int8_t m_sprite_tile_offset = 0;
 
     uint8_array<8> m_tile;
-    uint m_tile_offset = 0;
-    uint8 m_tile_priority = 0;
+    uint8_t m_tile_offset = 0;
+    uint8_t m_tile_priority = 0;
 
     uint8_array<8> m_new_tile;
-    uint m_tile_map_offset = 0;
-    uint8 m_new_tile_name = 0;
-    uint8 m_new_tile_attributes = 0;
-    uint8 m_new_tile_byte1 = 0;
-    uint8 m_new_tile_byte2 = 0;
+    uint8_t m_tile_map_offset = 0;
+    uint8_t m_new_tile_name = 0;
+    uint8_t m_new_tile_attributes = 0;
+    uint8_t m_new_tile_byte1 = 0;
+    uint8_t m_new_tile_byte2 = 0;
 };
 
 
@@ -362,33 +359,33 @@ public:
     using gb_lcd_ppu::read_wx;
     using gb_lcd_ppu::read_wy;
 
-    uint8 read_stat() const;
-    uint8 read_ly() const;
-    uint8 read_lyc() const;
-    uint8 read_bgp() const;
-    uint8 read_obp0() const;
-    uint8 read_obp1() const;
+    uint8_t read_stat() const;
+    uint8_t read_ly() const;
+    uint8_t read_lyc() const;
+    uint8_t read_bgp() const;
+    uint8_t read_obp0() const;
+    uint8_t read_obp1() const;
 
-    uint8 read_bcps() const;
-    uint8 read_bcpd() const;
-    uint8 read_ocps() const;
-    uint8 read_ocpd() const;
+    uint8_t read_bcps() const;
+    uint8_t read_bcpd() const;
+    uint8_t read_ocps() const;
+    uint8_t read_ocpd() const;
 
-    void write_lcdc(uint8 value);
-    void write_stat(uint8 value);
-    void write_scx(uint8 value);
-    void write_scy(uint8 value);
-    void write_lyc(uint8 value);
-    void write_bgp(uint8 value);
-    void write_obp0(uint8 value);
-    void write_obp1(uint8 value);
-    void write_wx(uint8 value);
-    void write_wy(uint8 value);
+    void write_lcdc(uint8_t value);
+    void write_stat(uint8_t value);
+    void write_scx(uint8_t value);
+    void write_scy(uint8_t value);
+    void write_lyc(uint8_t value);
+    void write_bgp(uint8_t value);
+    void write_obp0(uint8_t value);
+    void write_obp1(uint8_t value);
+    void write_wx(uint8_t value);
+    void write_wy(uint8_t value);
 
-    void write_bcps(uint8 value);
-    void write_bcpd(uint8 value);
-    void write_ocps(uint8 value);
-    void write_ocpd(uint8 value);
+    void write_bcps(uint8_t value);
+    void write_bcpd(uint8_t value);
+    void write_ocps(uint8_t value);
+    void write_ocpd(uint8_t value);
 
     using gb_lyc_interrupter::lyc_event;
     using gb_lcd_ppu::get_oam;
@@ -401,15 +398,15 @@ public:
     void emulate();
     void set_hdma_active(bool hdma_active);
 
-    void set_back_cycles(uint offset);
+    void set_back_cycles(int offset);
 
 private:
 
-    void emulate(uint to_cycle);
-    void next_step(uint cycle_offset, std::function<void(gb_lcd&)> next_method);
+    void emulate(int to_cycle);
+    void next_step(int cycle_offset, std::function<void(gb_lcd&)> next_method);
     void switch_frames();
 
-    void update_color(size_t index);
+    void update_color(unsigned index);
     bool is_cgb_palette_accessible() const;
 
     // LCD mode emulation
@@ -435,13 +432,13 @@ private:
     screen_buffer &m_screen_buffer;
     uint8_array<gb_num_palette_colors * 2> m_palette; // 2 bytes per color
     std::function<void(gb_lcd&)> m_next_event = nullptr;
-    uint m_next_event_cycle = gb_no_cycle;
-    uint m_last_cycle_m3_finished = 0;
+    int m_next_event_cycle = gb_no_cycle;
+    int m_last_cycle_m3_finished = 0;
     bool m_hdma_active = false;
 
     // precalculated from LCDC and STAT
-    uint8 m_stat_mode0_int = false;
-    uint8 m_lyc_mode0_int = 0;
+    uint8_t m_stat_mode0_int = false;
+    uint8_t m_lyc_mode0_int = 0;
     bool m_skip_next_mode1_interrupt = false;
     bool m_allow_mode1_interrupt = false;
     bool m_allow_mode2_interrupt = false;
@@ -450,12 +447,12 @@ private:
     bool m_lcd_enabled = true;
 
     // ports
-    uint8 m_stat = 1;
-    uint8 m_bgp = 0;
-    uint8 m_obp0 = 0;
-    uint8 m_obp1 = 0;
-    uint8 m_bcps = 0xC0;
-    uint8 m_ocps = 0xC1;
+    uint8_t m_stat = 1;
+    uint8_t m_bgp = 0;
+    uint8_t m_obp0 = 0;
+    uint8_t m_obp1 = 0;
+    uint8_t m_bcps = 0xC0;
+    uint8_t m_ocps = 0xC1;
 };
 
 } // namespace age
