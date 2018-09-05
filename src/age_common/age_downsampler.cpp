@@ -275,7 +275,7 @@ void age::downsampler_low_pass::create_windowed_sinc(double transition_frequency
         AGE_ASSERT(!(windowed > 1.0));
         AGE_ASSERT(!(windowed < -1.0));
 
-        int32_t i = static_cast<int32_t>(windowed * int32_max);
+        int32_t i = static_cast<int32_t>(windowed * int32_t_max);
 
         LOG_FIR("n " << dn << ":   " << sinc << " * " << weight << " = " << windowed
                 << "   (" << AGE_LOG_HEX(i) << ")");
