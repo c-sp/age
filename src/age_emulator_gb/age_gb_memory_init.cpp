@@ -905,8 +905,8 @@ age::uint8_t safe_get(const age::uint8_vector &vector, age::uint16_t offset)
 void set_memory(age::uint8_vector &memory, int offset, age::uint8_t value)
 {
     AGE_ASSERT(offset >= 0);
-    AGE_ASSERT(static_cast<size_t>(offset) < memory.size());
-    memory[static_cast<size_t>(offset)] = value;
+    AGE_ASSERT(static_cast<unsigned>(offset) < memory.size());
+    memory[static_cast<unsigned>(offset)] = value;
 }
 
 bool has_battery(const age::uint8_vector &rom)
@@ -1051,7 +1051,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     AGE_ASSERT(memory_size > 0);
 
     LOG("allocating " << memory_size << " bytes as gb_memory");
-    m_memory = uint8_vector(static_cast<size_t>(memory_size), 0);
+    m_memory = uint8_vector(static_cast<unsigned>(memory_size), 0);
 
     // copy rom
     int copy_rom_bytes = std::min(cart_rom_size, static_cast<int>(cart_rom.size()));

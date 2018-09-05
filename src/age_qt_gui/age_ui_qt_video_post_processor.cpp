@@ -111,7 +111,7 @@ void age::qt_video_post_processor::set_native_frame_size(const QSize &size)
     m_new_frame_idx = 0;
     m_native_frames.clear();
 
-    for (size_t i = 0; i < qt_video_frame_history_size; ++i)
+    for (int i = 0; i < qt_video_frame_history_size; ++i)
     {
         QSharedPointer<QOpenGLTexture> frame = QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target2D);
         frame->setFormat(tx_format);

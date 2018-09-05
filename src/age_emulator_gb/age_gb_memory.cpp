@@ -79,7 +79,7 @@ age::uint8_vector age::gb_memory::get_persistent_ram() const
         int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
 
         AGE_ASSERT(cart_ram_size > 0);
-        result.resize(static_cast<size_t>(cart_ram_size));
+        result.resize(static_cast<unsigned>(cart_ram_size));
 
         std::copy(begin(m_memory) + m_cart_ram_offset,
                   begin(m_memory) + m_cart_ram_offset + cart_ram_size,
@@ -153,7 +153,7 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
     }
     else if (!IS_MBC_RAM(address) || m_mbc_ram_accessible)
     {
-        size_t offset = get_offset(address);
+        unsigned offset = get_offset(address);
         m_memory[offset] = value;
     }
 }
@@ -194,15 +194,15 @@ void age::gb_memory::write_vbk(uint8_t value)
 //
 //---------------------------------------------------------
 
-age::size_t age::gb_memory::get_offset(uint16_t address) const
+unsigned age::gb_memory::get_offset(uint16_t address) const
 {
     auto offset = m_offsets[address >> 12];
     offset += address;
 
     AGE_ASSERT(offset >= 0);
-    AGE_ASSERT(static_cast<size_t>(offset) < m_memory.size());
+    AGE_ASSERT(static_cast<unsigned>(offset) < m_memory.size());
 
-    return static_cast<size_t>(offset);
+    return static_cast<unsigned>(offset);
 }
 
 void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)

@@ -125,7 +125,7 @@ void age::downsampler_linear::add_input_samples(const pcm_vector &samples)
         {
             add_output_sample(
                         m_last_input_sample,
-                        samples[static_cast<size_t>(m_right_sample_index)]
+                        samples[static_cast<unsigned>(m_right_sample_index)]
                         );
         }
 
@@ -133,8 +133,8 @@ void age::downsampler_linear::add_input_samples(const pcm_vector &samples)
         while (m_right_sample_index < samples_size)
         {
             add_output_sample(
-                        samples[static_cast<size_t>(m_right_sample_index - 1)],
-                        samples[static_cast<size_t>(m_right_sample_index)]
+                        samples[static_cast<unsigned>(m_right_sample_index) - 1],
+                        samples[static_cast<unsigned>(m_right_sample_index)]
                         );
         }
 
@@ -211,7 +211,7 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector &samples)
             for (size_t i = 0; i < m_fir_values.size(); ++i)
             {
                 AGE_ASSERT(m_next_output_index >= 0);
-                const pcm_sample &sample = m_prev_samples[static_cast<size_t>(m_next_output_index) + i];
+                const pcm_sample &sample = m_prev_samples[static_cast<unsigned>(m_next_output_index) + i];
 
                 // this is no accurate downsampling as we ignore the sample index fraction
                 //  => we don't reconstruct the actual data for non-integer downsampling

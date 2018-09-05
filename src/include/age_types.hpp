@@ -44,7 +44,7 @@ namespace age
 // AGE relies on int being 32 bits or more.
 
 static_assert(sizeof(int) >= 4, "AGE requires int being at least 32 bits wide");
-static_assert(sizeof(unsigned) >= 4, "AGE requires unsigned int being at least 32 bits wide");
+static_assert(sizeof(unsigned) == sizeof(int), "AGE requires unsigned int being exactly as wide as int");
 static_assert(sizeof(std::size_t) >= sizeof(int), "AGE requires std::size_t to be at least as wide as int");
 
 

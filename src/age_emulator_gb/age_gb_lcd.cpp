@@ -62,7 +62,7 @@ age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame
     write_bgp(0xFC);
     if (m_cgb)
     {
-        for (unsigned i = 0; i < m_palette.size() / 2; ++i)
+        for (unsigned i = 0; i < gb_num_palette_colors; ++i)
         {
             update_color(i);
         }

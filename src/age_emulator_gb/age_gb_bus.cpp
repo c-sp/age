@@ -28,7 +28,7 @@
 
 namespace {
 
-constexpr uint8_t gb_hdma_start = 0x80;
+constexpr age::uint8_t gb_hdma_start = 0x80;
 
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)

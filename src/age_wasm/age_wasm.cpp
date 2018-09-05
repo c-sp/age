@@ -57,7 +57,7 @@ extern "C" { // prevent function name mangling
 
 
 EMSCRIPTEN_KEEPALIVE
-age::uint8_t* gb_allocate_rom_buffer(age::size_t rom_size)
+age::uint8_t* gb_allocate_rom_buffer(unsigned rom_size)
 {
     free_memory(gb_rom);
     gb_rom.resize(rom_size);

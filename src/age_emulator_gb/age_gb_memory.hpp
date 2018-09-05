@@ -96,7 +96,7 @@ private:
 
 
 
-    size_t get_offset(uint16_t address) const;
+    unsigned get_offset(uint16_t address) const;
     void set_rom_banks(int low_bank_id, int high_bank_id);
     void set_ram_bank(int bank_id);
 

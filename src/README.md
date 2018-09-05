@@ -65,20 +65,22 @@ Do not violate the **single responsibility principle**.
     [at least 16 bits wide](https://en.cppreference.com/w/cpp/language/types#Properties),
     for current data models `int` width usually is 32 bits.
     AGE static-asserts `int` to be at least 32 bits wide.
-1. **Use `int`** until you have a specific reason not to do so.
+1. **Use `int` for arithmetic** until you have a specific reason not to do so.
     Arithmetic operators will cause smaller integral values
     [to be promoted to `int`](https://en.cppreference.com/w/cpp/language/implicit_conversion#Integral_promotion)
     anyway,
-    so the result of most operations is an `int` or some even wider type.
-1. **Use fixed width integers when allocating arrays**.
+    so the result of most operations is an `int`.
+1. **Allocate fixed width integers**.
     Don't allocate more memory than necessary.
     Allocating non-fixed width integers like `int` or `std::int_fast##_t` can
     cause more memory to be reserved than actually required.
     This might increase cache misses and thus can decrease performance.
+1. **Minimize the size of class data members** while avoiding casts.
+    E.g. if `int8_t` is sufficient and does not require additional casts,
+    use it in favor of `int`.
 
 **signed vs. unsigned**
 
-1. **Use `unsigned`** for [bit manipulation](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es101-use-unsigned-types-for-bit-manipulation).
 1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
 1. **Use `signed`** until there is a very specific reason to not do so.
     Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic).

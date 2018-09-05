@@ -60,7 +60,7 @@ constexpr uint8_t gb_stat_interrupt_mode0 = 0x08;
 constexpr uint8_t gb_stat_coincidence = 0x04;
 constexpr uint8_t gb_stat_modes = 0x03;
 
-constexpr size_t gb_num_palette_colors = 16 * 4;
+constexpr unsigned gb_num_palette_colors = 16 * 4;
 
 constexpr uint8_t gb_tile_attribute_x_flip = 0x20;
 constexpr uint8_t gb_tile_attribute_y_flip = 0x40;

@@ -368,10 +368,6 @@ age::gb_core::gb_events::gb_events()
     {
         elem = gb_no_cycle;
     });
-//    for (size_t i = 0; i < m_event_cycle.size(); ++i)
-//    {
-//        m_event_cycle[i] = gb_no_cycle;
-//    }
 }
 
 int age::gb_core::gb_events::get_event_cycle(gb_event event) const

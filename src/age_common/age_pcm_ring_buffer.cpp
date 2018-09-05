@@ -49,7 +49,7 @@
 
 age::pcm_ring_buffer::pcm_ring_buffer(int max_buffered_samples)
     : m_buffer_size(std::max(1, max_buffered_samples)),
-      m_buffer(static_cast<size_t>(m_buffer_size), pcm_sample())
+      m_buffer(static_cast<unsigned>(m_buffer_size), pcm_sample())
 {
 }
 
@@ -91,7 +91,7 @@ const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int &avail
                 ? m_buffer_size - m_first_buffered_sample
                 : m_buffered_samples;
 
-        result = &m_buffer[static_cast<size_t>(m_first_buffered_sample)];
+        result = &m_buffer[static_cast<unsigned>(m_first_buffered_sample)];
     }
 
     available_stereo_samples = available;

@@ -35,10 +35,10 @@
 namespace age
 {
 
-constexpr size_t gb_channel_1 = 0;
-constexpr size_t gb_channel_2 = 1;
-constexpr size_t gb_channel_3 = 2;
-constexpr size_t gb_channel_4 = 3;
+constexpr unsigned gb_channel_1 = 0;
+constexpr unsigned gb_channel_2 = 1;
+constexpr unsigned gb_channel_3 = 2;
+constexpr unsigned gb_channel_4 = 3;
 
 constexpr uint8_t gb_master_switch = 0x80;
 
@@ -101,8 +101,8 @@ public:
     void write_nr51(uint8_t value);
     void write_nr52(uint8_t value);
 
-    uint8_t read_wave_ram(size_t offset);
-    void write_wave_ram(size_t offset, uint8_t value);
+    uint8_t read_wave_ram(unsigned offset);
+    void write_wave_ram(unsigned offset, uint8_t value);
 
     void frame_sequencer_cycle();
     void generate_samples();
@@ -112,7 +112,7 @@ public:
 
 private:
 
-    template<size_t channel>
+    template<unsigned channel>
     void activate_channel()
     {
         uint8_t channel_bit = gb_channel_bit[channel];
@@ -120,7 +120,7 @@ private:
         calculate_channel_multiplier<channel>();
     }
 
-    template<size_t channel>
+    template<unsigned channel>
     void deactivate_channel()
     {
         uint8_t channel_bit = gb_channel_bit[channel];
@@ -128,7 +128,7 @@ private:
         calculate_channel_multiplier<channel>();
     }
 
-    template<size_t channel>
+    template<unsigned channel>
     void cycle_length_counter()
     {
         if (m_length_counter[channel].cycle())
@@ -138,7 +138,7 @@ private:
         }
     }
 
-    template<size_t channel>
+    template<unsigned channel>
     void calculate_channel_multiplier()
     {
         // calculate channel multiplier
@@ -159,12 +159,12 @@ private:
         set_channel_multiplier<channel>(channel_multiplier.m_stereo_sample);
     }
 
-    template<size_t channel> void set_channel_multiplier(uint32_t)
+    template<unsigned channel> void set_channel_multiplier(uint32_t)
     {
         AGE_ASSERT(false); // see implementations below this class
     }
 
-    void set_wave_ram_byte(size_t offset, uint8_t value);
+    void set_wave_ram_byte(unsigned offset, uint8_t value);
 
 
 
@@ -176,7 +176,7 @@ private:
     int m_last_generate_samples_cycle = 0;
     pcm_vector &m_samples;
 
-    size_t m_next_frame_sequencer_step = 0;
+    int8_t m_next_frame_sequencer_step = 0;
     bool m_next_frame_sequencer_step_odd = false;
 
     // channel control

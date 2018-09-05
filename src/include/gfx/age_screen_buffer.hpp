@@ -38,7 +38,7 @@ public:
 
     screen_buffer(int16_t screen_width, int16_t screen_height);
 
-    size_t get_front_buffer_index() const;
+    uint8_t get_front_buffer_index() const;
     int16_t get_screen_width() const;
     int16_t get_screen_height() const;
 
@@ -55,7 +55,7 @@ private:
     const int16_t m_screen_height;
 
     std::array<pixel_vector, 2> m_buffers;
-    size_t m_current_front_buffer = 0;
+    uint8_t m_current_front_buffer = 0;
 };
 
 

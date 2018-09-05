@@ -256,25 +256,25 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uint8_vector &expected_result)
 {
     const age::pixel_vector &screen = emulator.get_screen_front_buffer();
-    age::size_t screen_width = static_cast<age::size_t>(emulator.get_screen_width());
+    unsigned screen_width = static_cast<unsigned>(emulator.get_screen_width());
 
     // start with the first line
     // (the emulator screen buffer is filled upside down)
-    age::size_t line_offset = 0;
-    age::size_t tile_offset = 0;
+    unsigned line_offset = 0;
+    unsigned tile_offset = 0;
 
     // the first pixel in the first line is always expected to be "white"
     // (see the tiles stored in tile_data)
     age::pixel white = screen[line_offset];
 
     // examine each pixel
-    for (age::size_t line = 0; line < 8; ++line)
+    for (unsigned line = 0; line < 8; ++line)
     {
-        age::size_t pixel_offset = 0;
+        unsigned pixel_offset = 0;
         for (age::uint8_t tile_index : expected_result)
         {
             const age::uint8_t *tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
-            for (age::size_t tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
+            for (unsigned tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
             {
                 bool found_white = screen[line_offset + pixel_offset] == white;
                 bool expect_white = tile_ptr[tile_pixel] == 0;
@@ -361,7 +361,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 
         // gambatte tests run for 15 frames
         // (see gambatte/test/testrunner.cpp)
-        age::size_t cycles_per_frame = static_cast<size_t>(gb_cycles_per_frame(*emulator));
+        unsigned cycles_per_frame = static_cast<unsigned>(gb_cycles_per_frame(*emulator));
 
         gb_emulate(*emulator, test_cycles(*emulator));
 
@@ -371,7 +371,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         bool all_equal = true;
         const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
 
-        for (age::size_t i = 1; i < cycles_per_frame; ++i)
+        for (unsigned i = 1; i < cycles_per_frame; ++i)
         {
             if (emulator->get_audio_buffer()[i] != first_sample)
             {
