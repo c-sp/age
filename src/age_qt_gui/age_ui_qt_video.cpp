@@ -18,6 +18,7 @@
 #include <QOpenGLContext>
 #include <QRectF>
 #include <QSurfaceFormat>
+#include <QTimer>
 #include <QVector2D>
 #include <QVector3D>
 #include <QVector4D>
@@ -45,7 +46,6 @@ QString load_shader(const QString &file_name)
         if (nullptr == ctx)
         {
             qFatal("no OpenGL context available");
-            return "";
         }
         is_opengl_es = ctx->isOpenGLES();
     }
@@ -140,6 +140,12 @@ age::qt_video_output::qt_video_output(QWidget *parent)
 
     LOG("format version: " << format().majorVersion() << "." << format().minorVersion());
     LOG("format options: " << format().options());
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update_fps()));
+
+    timer->setTimerType(Qt::PreciseTimer); // if possible, use millisecond accuracy
+    timer->start(1000 / stats_per_second);
 }
 
 age::qt_video_output::~qt_video_output()
@@ -161,15 +167,7 @@ age::qt_video_output::~qt_video_output()
 //
 //---------------------------------------------------------
 
-age::uint age::qt_video_output::get_fps() const
-{
-    //! \todo implement age::qt_renderer::get_fps
-    return 0;
-}
-
-
-
-void age::qt_video_output::set_emulator_screen_size(uint w, uint h)
+void age::qt_video_output::set_emulator_screen_size(int16_t w, int16_t h)
 {
     LOG(w << ", " << h);
     m_emulator_screen = QSize(w, h);
@@ -181,14 +179,14 @@ void age::qt_video_output::set_emulator_screen_size(uint w, uint h)
     });
 }
 
-void age::qt_video_output::new_frame(std::shared_ptr<const age::pixel_vector> new_frame)
+void age::qt_video_output::new_frame(QSharedPointer<const age::pixel_vector> new_frame)
 {
     new_frame_slot(new_frame);
 }
 
 
 
-void age::qt_video_output::set_blend_frames(uint num_frames_to_blend)
+void age::qt_video_output::set_blend_frames(int num_frames_to_blend)
 {
     LOG(num_frames_to_blend);
     m_num_frames_to_blend = num_frames_to_blend;
@@ -196,14 +194,14 @@ void age::qt_video_output::set_blend_frames(uint num_frames_to_blend)
     update(); // trigger paintGL()
 }
 
-void age::qt_video_output::set_post_processing_filter(qt_filter_vector filter)
+void age::qt_video_output::set_post_processing_filter(qt_filter_list filter_list)
 {
-    LOG("#filters: " << filter.size());
-    m_post_processing_filter = filter;
+    LOG("#filters: " << filter_list.size());
+    m_filter_list = filter_list;
 
     run_if_initialized([this]
     {
-        m_post_processor->set_post_processing_filter(m_post_processing_filter);
+        m_post_processor->set_post_processing_filter(m_filter_list);
     });
 }
 
@@ -240,14 +238,14 @@ void age::qt_video_output::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // create renderer
-    m_renderer = std::make_unique<qt_video_renderer>();
+    m_renderer = QSharedPointer<qt_video_renderer>(new qt_video_renderer());
     m_renderer->update_matrix(m_emulator_screen, QSize(width(), height()));
 
     // create post processor
-    m_post_processor = std::make_unique<qt_video_post_processor>();
+    m_post_processor = QSharedPointer<qt_video_post_processor>(new qt_video_post_processor());
     m_post_processor->set_native_frame_size(m_emulator_screen);
     m_post_processor->set_texture_filter(m_bilinear_filter);
-    m_post_processor->set_post_processing_filter(m_post_processing_filter);
+    m_post_processor->set_post_processing_filter(m_filter_list);
 }
 
 
@@ -285,7 +283,13 @@ void age::qt_video_output::run_if_initialized(std::function<void()> function_to_
 //
 //---------------------------------------------------------
 
-void age::qt_video_output::new_frame_slot(std::shared_ptr<const pixel_vector> new_frame)
+void age::qt_video_output::update_fps()
+{
+    emit fps(m_frame_counter * stats_per_second);
+    m_frame_counter = 0;
+}
+
+void age::qt_video_output::new_frame_slot(QSharedPointer<const pixel_vector> new_frame)
 {
     if (new_frame == nullptr)
     {
@@ -315,6 +319,7 @@ void age::qt_video_output::process_new_frame()
     {
         AGE_ASSERT(nullptr != m_new_frame);
         m_post_processor->add_new_frame(*m_new_frame);
+        ++m_frame_counter;
     });
 
     m_new_frame = nullptr; // allow next frame to be processed

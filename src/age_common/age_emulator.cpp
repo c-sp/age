@@ -20,7 +20,7 @@
 
 
 
-age::emulator::emulator(uint screen_width, uint screen_height, uint sampling_rate, uint cycles_per_second)
+age::emulator::emulator(int16_t screen_width, int16_t screen_height, int sampling_rate, int cycles_per_second)
     : m_sampling_rate(sampling_rate),
       m_cycles_per_second(cycles_per_second),
       m_screen_buffer(screen_width, screen_height)
@@ -44,7 +44,6 @@ std::string age::emulator::get_emulator_title() const
 
     std::string inner_title = inner_get_emulator_title();
     std::string result;
-    uint chars = 0;
 
     for (char c : inner_title)
     {
@@ -66,10 +65,9 @@ std::string age::emulator::get_emulator_title() const
 
         // add character to result
         result.append(1, c);
-        ++chars;
 
         // stop if we hit the length limit
-        if (chars >= 32)
+        if (result.length() >= 32)
         {
             break;
         }
@@ -80,12 +78,12 @@ std::string age::emulator::get_emulator_title() const
 
 
 
-age::uint age::emulator::get_screen_width() const
+age::int16_t age::emulator::get_screen_width() const
 {
     return m_screen_buffer.get_screen_width();
 }
 
-age::uint age::emulator::get_screen_height() const
+age::int16_t age::emulator::get_screen_height() const
 {
     return m_screen_buffer.get_screen_height();
 }
@@ -100,28 +98,33 @@ const age::pcm_vector& age::emulator::get_audio_buffer() const
     return m_audio_buffer;
 }
 
-age::uint age::emulator::get_pcm_sampling_rate() const
+int age::emulator::get_pcm_sampling_rate() const
 {
     return m_sampling_rate;
 }
 
-age::uint age::emulator::get_cycles_per_second() const
+int age::emulator::get_cycles_per_second() const
 {
     return m_cycles_per_second;
 }
 
-age::uint64 age::emulator::get_emulated_cycles() const
+age::int64_t age::emulator::get_emulated_cycles() const
 {
     return m_emulated_cycles;
 }
 
-bool age::emulator::emulate(uint64 min_cycles_to_emulate)
+bool age::emulator::emulate(int cycles_to_emulate)
 {
-    uint current_front_buffer = m_screen_buffer.get_front_buffer_index();
+    if (cycles_to_emulate <= 0)
+    {
+        return false;
+    }
+
+    auto current_front_buffer = m_screen_buffer.get_front_buffer_index();
     m_audio_buffer.clear();
 
-    uint64 emulated_cycles = inner_emulate(min_cycles_to_emulate);
-    AGE_ASSERT(emulated_cycles >= min_cycles_to_emulate);
+    int emulated_cycles = inner_emulate(cycles_to_emulate);
+    AGE_ASSERT(emulated_cycles > 0);
     m_emulated_cycles += emulated_cycles;
 
     bool new_frame = m_screen_buffer.get_front_buffer_index() != current_front_buffer;

@@ -23,52 +23,63 @@
 
 #include <array>
 #include <cstdint> // std::uint8_t etc.
-#include <limits> // std::numeric_limits
-#include <string>
+#include <limits>
 #include <type_traits> // std::underlying_type
 #include <vector>
 
 
 
-namespace age {
+#define AGE_DISABLE_COPY(Class) \
+    private: \
+    Class(const Class&) = delete; \
+    Class& operator=(const Class&) = delete
+
+
+
+namespace age
+{
+
+// C++ arithmetic operators do not accept types smaller than int
+// (see https://en.cppreference.com/w/cpp/language/implicit_conversion).
+// AGE relies on int being 32 bits or more.
+
+static_assert(sizeof(int) >= 4, "AGE requires int being at least 32 bits wide");
+static_assert(sizeof(unsigned) == sizeof(int), "AGE requires unsigned int being exactly as wide as int");
+static_assert(sizeof(std::size_t) >= sizeof(int), "AGE requires std::size_t to be at least as wide as int");
+
+
 
 // typedefs
+// (define the STL integer types as part of the age namespace for less verbose code)
 
-typedef std::uint8_t  uint8;
-typedef std::uint16_t uint16;
-typedef std::uint32_t uint32;
-typedef std::uint64_t uint64;
+typedef std::uint8_t  uint8_t;
+typedef std::uint16_t uint16_t;
+typedef std::uint32_t uint32_t;
+typedef std::uint64_t uint64_t;
 
-typedef std::int8_t  int8;
-typedef std::int16_t int16;
-typedef std::int32_t int32;
-typedef std::int64_t int64;
+typedef std::int8_t  int8_t;
+typedef std::int16_t int16_t;
+typedef std::int32_t int32_t;
+typedef std::int64_t int64_t;
 
-//!
-//! Defines an unsigned integer type that matches the architecture's default CPU register
-//! size (32 bits or 64 bits) but is guaranteed to be at least 32 bits wide.
-//!
-typedef size_t uint;
+typedef std::size_t size_t;
 
-template<uint _size>
-using uint8_array = std::array<uint8, _size>;
+template<size_t _size> using uint8_array = std::array<uint8_t, _size>;
 
-typedef std::vector<uint8> uint8_vector;
-typedef std::vector<std::string> string_vector;
+typedef std::vector<uint8_t> uint8_vector;
 
 
 
-// constants and constant expressions
+// constant expressions
 
-const uint8_vector empty_uint8_vector = uint8_vector();
+constexpr int int_max = std::numeric_limits<int>::max();
+constexpr int16_t int16_t_max = std::numeric_limits<int16_t>::max();
+constexpr int32_t int32_t_max = std::numeric_limits<int32_t>::max();
 
 constexpr const char *project_name = "AGE";
-constexpr const char *project_version = "1.0";
-
-constexpr uint uint_max = std::numeric_limits<uint>::max();
 
 //!
-//! Convert the specified enum value to the corresponding value of the underlying type.
+//! Convert the specified enum value to the associated value of the underlying type.
 //!
 template<typename E>
 constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type

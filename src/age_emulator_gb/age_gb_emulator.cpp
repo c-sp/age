@@ -20,7 +20,7 @@
 
 namespace age {
 
-constexpr uint gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
+constexpr int gb_sampling_rate = gb_machine_cycles_per_second >> gb_sample_cycle_shift;
 
 }
 
@@ -47,12 +47,12 @@ void age::gb_emulator::set_persistent_ram(const uint8_vector &source)
     m_impl->set_persistent_ram(source);
 }
 
-void age::gb_emulator::set_buttons_down(uint buttons)
+void age::gb_emulator::set_buttons_down(int buttons)
 {
     m_impl->set_buttons_down(buttons);
 }
 
-void age::gb_emulator::set_buttons_up(uint buttons)
+void age::gb_emulator::set_buttons_up(int buttons)
 {
     m_impl->set_buttons_up(buttons);
 }
@@ -65,9 +65,9 @@ void age::gb_emulator::set_buttons_up(uint buttons)
 //
 //---------------------------------------------------------
 
-age::uint64 age::gb_emulator::inner_emulate(uint64 min_cycles_to_emulate)
+int age::gb_emulator::inner_emulate(int cycles_to_emulate)
 {
-    return m_impl->inner_emulate(min_cycles_to_emulate);
+    return m_impl->inner_emulate(cycles_to_emulate);
 }
 
 std::string age::gb_emulator::inner_get_emulator_title() const

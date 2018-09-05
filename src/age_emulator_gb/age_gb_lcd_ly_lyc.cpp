@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) if (m_core->get_oscillation_cycle() < 45000) { AGE_LOG("cycle " << m_core->get_oscillation_cycle() << ": " << x); }
+#define LOG(x) AGE_LOG("cycle " << m_core->get_oscillation_cycle() << ": " << x)
 #else
 #define LOG(x)
 #endif
@@ -76,10 +76,10 @@ age::gb_ly_counter::gb_ly_counter(gb_core &core)
 
 
 
-age::uint8 age::gb_ly_counter::get_ly_port(bool lcd_enabled) const
+age::uint8_t age::gb_ly_counter::get_ly_port(bool lcd_enabled) const
 {
     GB_LY_ASSERT_CONSISTENCY;
-    uint result = m_scanline;
+    auto result = m_scanline;
 
     if (lcd_enabled)
     {
@@ -106,8 +106,8 @@ age::uint8 age::gb_ly_counter::get_ly_port(bool lcd_enabled) const
         //      ly0/lycint152_ly153_ds_4_out99
         //      ly0/lycint152_ly153_ds_5_out00
         //
-        uint current_cycle = m_core->get_oscillation_cycle();
-        uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+        int current_cycle = m_core->get_oscillation_cycle();
+        int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
         bool double_speed = m_core->is_double_speed();
 
         if (result == 153)
@@ -123,28 +123,30 @@ age::uint8 age::gb_ly_counter::get_ly_port(bool lcd_enabled) const
         }
     }
 
-    return static_cast<uint8>(result);
+    return static_cast<uint8_t>(result);
 }
 
-age::uint8 age::gb_ly_counter::get_ly() const
+age::uint8_t age::gb_ly_counter::get_ly() const
 {
     GB_LY_ASSERT_CONSISTENCY;
-    return m_mode1_ly0 ? 0 : static_cast<uint8>(m_scanline);
+    return m_mode1_ly0 ? 0 : m_scanline;
 }
 
-age::uint age::gb_ly_counter::get_scanline() const
+age::uint8_t age::gb_ly_counter::get_scanline() const
 {
     GB_LY_ASSERT_CONSISTENCY;
     return m_scanline;
 }
 
-age::uint age::gb_ly_counter::get_next_scanline_cycle_offset(uint current_cycle) const
+int age::gb_ly_counter::get_next_scanline_cycle_offset(int current_cycle) const
 {
     GB_ASSERT_LCD_ON;
     GB_LY_ASSERT_CONSISTENCY;
     AGE_ASSERT(current_cycle <= m_next_scanline_cycle);
 
-    uint cycle_offset = m_next_scanline_cycle - current_cycle;
+    int cycle_offset = m_next_scanline_cycle - current_cycle;
+    AGE_ASSERT(cycle_offset >= 0);
+
     return cycle_offset;
 }
 
@@ -205,10 +207,15 @@ void age::gb_ly_counter::mode1_ly0()
 
 
 
-void age::gb_ly_counter::set_back_cycles(uint offset)
+void age::gb_ly_counter::set_back_cycles(int offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_next_scanline_cycle, offset);
 }
+
+
+
+#undef GB_LY_ASSERT_CONSISTENCY
+#undef GB_ASSERT_LCD_ON
 
 
 
@@ -227,7 +234,7 @@ void age::gb_ly_counter::set_back_cycles(uint offset)
 
 
 
-age::uint8 age::gb_lyc_handler::get_lyc() const
+age::uint8_t age::gb_lyc_handler::get_lyc() const
 {
     return m_lyc;
 }
@@ -242,7 +249,7 @@ bool age::gb_lyc_handler::get_stat_coincidence_interrupt() const
     return m_stat_coincidence_interrupt;
 }
 
-age::uint8 age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
+age::uint8_t age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
 {
     bool coincidence;
 
@@ -273,12 +280,12 @@ age::uint8 age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
         //      ly0/lycint152_lyc0flag_ds_2_outC5
         //
 
-        uint scanline = get_scanline();
-        uint current_cycle = m_core->get_oscillation_cycle();
+        auto scanline = get_scanline();
+        int current_cycle = m_core->get_oscillation_cycle();
 
         // next_scanline_cycles contains the number of cycles left until
         // the next LY switch
-        uint next_ly_cycles = get_next_scanline_cycle_offset(current_cycle);
+        int next_ly_cycles = get_next_scanline_cycle_offset(current_cycle);
         if (get_scanline() == 153)
         {
             if (next_ly_cycles <= gb_cycles_per_scanline - 8)
@@ -294,7 +301,7 @@ age::uint8 age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
 
         coincidence = next_ly_cycles > (m_core->is_double_speed() ? 0 : 4);
         coincidence &= (scanline == m_lyc);
-        //LOG("LY " << scanline << ", LYC " << (uint)m_lyc << " -> " << coincidence << ", next_ly_cycles " << next_ly_cycles);
+        //LOG("LY " << scanline << ", LYC " << AGE_LOG_DEC(m_lyc) << " -> " << coincidence << ", next_ly_cycles " << next_ly_cycles);
     }
 
     //
@@ -321,13 +328,13 @@ void age::gb_lyc_handler::switch_off()
     gb_ly_counter::switch_off();
 }
 
-void age::gb_lyc_handler::set_stat(uint8 value, uint mode, bool lcd_enabled)
+void age::gb_lyc_handler::set_stat(uint8_t value, int mode, bool lcd_enabled)
 {
     if (lcd_enabled)
     {
         GB_LYC_ASSERT_LY_OFFSET;
-        uint current_cycle = m_core->get_oscillation_cycle();
-        uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+        int current_cycle = m_core->get_oscillation_cycle();
+        int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
 
         //
         // verified by gambatte tests
@@ -335,8 +342,8 @@ void age::gb_lyc_handler::set_stat(uint8 value, uint mode, bool lcd_enabled)
         //      lycEnable/lyc153_late_ff41_enable_ds_1_oute2
         //      lycEnable/lyc153_late_ff41_enable_ds_2_oute0
         //
-        uint scanline = get_scanline();
-        uint8 ly = get_ly();
+        auto scanline = get_scanline();
+        uint8_t ly = get_ly();
         if ((scanline == 153) && m_core->is_double_speed() && (next_scanline_offset > gb_cycles_per_scanline - 8))
         {
             ly = 153;
@@ -441,17 +448,17 @@ void age::gb_lyc_handler::set_stat(uint8 value, uint mode, bool lcd_enabled)
     m_stat_mode2_interrupt = (value & gb_stat_interrupt_mode2) > 0;
 }
 
-void age::gb_lyc_handler::set_lyc(uint8 value, uint mode, bool lcd_enabled)
+void age::gb_lyc_handler::set_lyc(uint8_t value, int mode, bool lcd_enabled)
 {
-    LOG((uint)value << ", current LY is " << (uint)get_ly());
+    LOG(AGE_LOG_DEC(value) << ", current LY is " << AGE_LOG_DEC(get_ly()));
     m_lyc = value;
 
     if (lcd_enabled && m_stat_coincidence_interrupt)
     {
-        uint current_cycle = m_core->get_oscillation_cycle();
-        uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
-        uint scanline = get_scanline();
-        uint min_scanline_offset = m_cgb && !m_core->is_double_speed() ? 8 : 4;
+        int current_cycle = m_core->get_oscillation_cycle();
+        int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+        auto scanline = get_scanline();
+        int min_scanline_offset = m_cgb && !m_core->is_double_speed() ? 8 : 4;
 
         //
         // verified by gambatte tests
@@ -569,6 +576,10 @@ bool age::gb_lyc_handler::get_stat_mode1_interrupt() const
 
 
 
+#undef GB_LYC_ASSERT_LY_OFFSET
+
+
+
 
 
 //---------------------------------------------------------
@@ -598,8 +609,8 @@ void age::gb_lyc_interrupter::lyc_event()
 
     // check conditions for interrupt, since this event can be executed
     // any time, sometimes just to set a new m_lyc_int value
-    uint8 ly = get_ly();
-    uint8 int_lyc = ly - 1; // ly == 0 -> ly = 255   ly == 144 -> ly = 143   => use vblank flag for ly == 0
+    uint8_t ly = get_ly();
+    uint8_t int_lyc = ly - 1; // ly == 0 -> ly = 255   ly == 144 -> ly = 143   => use vblank flag for ly == 0
     //
     // There is no delay for enabling the STAT coincidence
     // interrupt.
@@ -628,15 +639,14 @@ void age::gb_lyc_interrupter::lyc_event()
     m_lyc_int = get_lyc();
 
     // schedule next event, if required
-    m_next_event_cycle = calculate_next_event_cycle(m_stat_coincidence_interrupt_int, m_lyc_int);
-    schedule_next_event();
+    int next_event_cycle = calculate_next_event_cycle(m_stat_coincidence_interrupt_int, m_lyc_int);
+    schedule_next_event(next_event_cycle);
 }
 
 void age::gb_lyc_interrupter::switch_off()
 {
     gb_lyc_handler::switch_off();
-    m_core->remove_event(gb_event::lcd_lyc_check);
-    m_next_event_cycle = gb_no_cycle;
+    schedule_next_event(int_max);
 }
 
 void age::gb_lyc_interrupter::switch_on()
@@ -655,13 +665,12 @@ void age::gb_lyc_interrupter::switch_on()
     m_stat_mode2_interrupt_int = get_stat_mode2_interrupt();
     m_stat_mode1_interrupt_int = get_stat_mode1_interrupt();
     m_lyc_int = get_lyc();
-    m_next_event_cycle = m_core->get_oscillation_cycle();
-    lyc_event();
+    lyc_event(); // sets m_next_event_cycle
 }
 
 
 
-void age::gb_lyc_interrupter::set_stat(uint8 value, uint mode, bool lcd_enabled)
+void age::gb_lyc_interrupter::set_stat(uint8_t value, int mode, bool lcd_enabled)
 {
 //    bool old_stat_coincidence_interrupt = get_stat_coincidence_interrupt();
     gb_lyc_handler::set_stat(value, mode, lcd_enabled);
@@ -680,13 +689,14 @@ void age::gb_lyc_interrupter::set_stat(uint8 value, uint mode, bool lcd_enabled)
         GB_LYC_INT_ASSERT_LCD_ON;
 
         // next_event_cycle != m_next_event_cycle, if the LYC interrupt was disabled
-        uint next_event_cycle = calculate_next_event_cycle(get_stat_coincidence_interrupt(), m_lyc_int);
-        m_next_event_cycle = std::min(next_event_cycle, m_next_event_cycle);
+        int next_event_cycle = calculate_next_event_cycle(get_stat_coincidence_interrupt(), m_lyc_int);
+        int new_next_event_cycle = std::min(next_event_cycle, m_next_event_cycle);
 
         // we need that event at least to copy the new value
-        schedule_next_event();
-        uint current_cycle = m_core->get_oscillation_cycle();
-        uint next_event_offset = m_next_event_cycle - current_cycle;
+        schedule_next_event(new_next_event_cycle);
+
+        int current_cycle = m_core->get_oscillation_cycle();
+        int next_event_offset = m_next_event_cycle - current_cycle;
         AGE_ASSERT(m_next_event_cycle > current_cycle);
         AGE_ASSERT(next_event_offset > 0);
 
@@ -756,9 +766,9 @@ void age::gb_lyc_interrupter::set_stat(uint8 value, uint mode, bool lcd_enabled)
     }
 }
 
-void age::gb_lyc_interrupter::set_lyc(uint8 value, uint mode, bool lcd_enabled)
+void age::gb_lyc_interrupter::set_lyc(uint8_t value, int mode, bool lcd_enabled)
 {
-    uint8 old_lyc = get_lyc();
+    uint8_t old_lyc = get_lyc();
     gb_lyc_handler::set_lyc(value, mode, lcd_enabled);
 
     // LCD inactive -> just copy the new value
@@ -777,13 +787,14 @@ void age::gb_lyc_interrupter::set_lyc(uint8 value, uint mode, bool lcd_enabled)
         //  - the LYC interrupt was disabled
         //  - new-LYC > LYC > LY
         //
-        uint next_event_cycle = calculate_next_event_cycle(m_stat_coincidence_interrupt_int, get_lyc());
-        m_next_event_cycle = std::min(next_event_cycle, m_next_event_cycle);
+        int next_event_cycle = calculate_next_event_cycle(m_stat_coincidence_interrupt_int, get_lyc());
+        int new_next_event_cycle = std::min(next_event_cycle, m_next_event_cycle);
 
         // we need that event at least to copy the new value
-        schedule_next_event();
-        uint current_cycle = m_core->get_oscillation_cycle();
-        uint next_event_offset = m_next_event_cycle - current_cycle;
+        schedule_next_event(new_next_event_cycle);
+
+        int current_cycle = m_core->get_oscillation_cycle();
+        int next_event_offset = m_next_event_cycle - current_cycle;
         AGE_ASSERT(m_next_event_cycle > current_cycle);
         AGE_ASSERT(next_event_offset > 0);
 
@@ -832,7 +843,7 @@ void age::gb_lyc_interrupter::set_lyc(uint8 value, uint mode, bool lcd_enabled)
         //
         else if ((value != 0) && (old_lyc == get_ly()))
         {
-            uint offset = (m_cgb && !m_core->is_double_speed()) ? 8 : 4;
+            int offset = (m_cgb && !m_core->is_double_speed()) ? 8 : 4;
             delayed = (next_event_offset <= offset) && (next_event_offset > offset - 4);
         }
 
@@ -846,24 +857,27 @@ void age::gb_lyc_interrupter::set_lyc(uint8 value, uint mode, bool lcd_enabled)
 
 
 
-void age::gb_lyc_interrupter::set_back_cycles(uint offset)
+void age::gb_lyc_interrupter::set_back_cycles(int offset)
 {
     gb_ly_counter::set_back_cycles(offset);
-    AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
+    if (m_next_event_cycle != int_max)
+    {
+        AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
+    }
 }
 
 
 
-age::uint age::gb_lyc_interrupter::calculate_next_event_cycle(bool stat_coincidence_interrupt, uint8 for_lyc)
+int age::gb_lyc_interrupter::calculate_next_event_cycle(bool stat_coincidence_interrupt, uint8_t for_lyc)
 {
-    uint result = gb_no_cycle;
+    int result = int_max;
 
     if (stat_coincidence_interrupt && (for_lyc < 154))
     {
-        uint current_cycle = m_core->get_oscillation_cycle();
-        uint next_scanline_cycle_offset = get_next_scanline_cycle_offset(current_cycle);
-        uint remaining_lines = (154 - 1 - get_scanline()) * gb_cycles_per_scanline;
-        uint next_frame = current_cycle + next_scanline_cycle_offset + remaining_lines;
+        int current_cycle = m_core->get_oscillation_cycle();
+        int next_scanline_cycle_offset = get_next_scanline_cycle_offset(current_cycle);
+        int remaining_lines = (154 - 1 - get_scanline()) * gb_cycles_per_scanline;
+        int next_frame = current_cycle + next_scanline_cycle_offset + remaining_lines;
 
         //
         // verified by gambatte tests
@@ -874,7 +888,7 @@ age::uint age::gb_lyc_interrupter::calculate_next_event_cycle(bool stat_coincide
         //      ly0/lycint152_lyc0irq_1_dmg08_cgb_outE0
         //      ly0/lycint152_lyc0irq_2_dmg08_cgb_outE2
         //
-        uint lyc_offset = (for_lyc == 0) ? 153 * gb_cycles_per_scanline + 8 : for_lyc * gb_cycles_per_scanline;
+        int lyc_offset = (for_lyc == 0) ? 153 * gb_cycles_per_scanline + 8 : for_lyc * gb_cycles_per_scanline;
         result = next_frame + lyc_offset;
 
         if (result > current_cycle + gb_cycles_per_frame)
@@ -886,13 +900,15 @@ age::uint age::gb_lyc_interrupter::calculate_next_event_cycle(bool stat_coincide
     return result;
 }
 
-void age::gb_lyc_interrupter::schedule_next_event()
+void age::gb_lyc_interrupter::schedule_next_event(int next_event_cycle)
 {
-    if (m_next_event_cycle != gb_no_cycle)
+    m_next_event_cycle = next_event_cycle;
+
+    if (m_next_event_cycle != int_max)
     {
-        uint current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_core->get_oscillation_cycle();
         AGE_ASSERT(current_cycle < m_next_event_cycle);
-        uint cycle_offset = m_next_event_cycle - current_cycle;
+        int cycle_offset = m_next_event_cycle - current_cycle;
         m_core->insert_event(cycle_offset, gb_event::lcd_lyc_check);
     }
     else
@@ -900,3 +916,7 @@ void age::gb_lyc_interrupter::schedule_next_event()
         m_core->remove_event(gb_event::lcd_lyc_check);
     }
 }
+
+
+
+#undef GB_LYC_INT_ASSERT_LCD_ON

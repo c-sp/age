@@ -19,11 +19,21 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) { if ((m_core.get_oscillation_cycle() - 0 < 15000) && (get_ly() <= 2)) { AGE_GB_CYCLE_LOG("ly " << (uint)get_ly() << ", " << x); }}
+#define LOG(x) AGE_GB_CYCLE_LOG("ly " << AGE_LOG_DEC(get_ly()) << ", " << x)
 #else
 #define LOG(x)
 #endif
 
+
+
+namespace
+{
+
+constexpr unsigned gb_palette_bgp = 0x00;
+constexpr unsigned gb_palette_obp0 = 0x20;
+constexpr unsigned gb_palette_obp1 = 0x30;
+
+}
 
 
 
@@ -34,10 +44,10 @@
 //
 //---------------------------------------------------------
 
-void age::gb_lcd::write_lcdc(uint8 value)
+void age::gb_lcd::write_lcdc(uint8_t value)
 {
-    LOG((uint)value);
-    uint8 old_lcdc = read_lcdc();
+    LOG(AGE_LOG_HEX(value));
+    uint8_t old_lcdc = read_lcdc();
 
     // LCD switched on or off
     if (((value ^ old_lcdc) & gb_lcdc_enable) > 0)
@@ -121,8 +131,8 @@ void age::gb_lcd::write_lcdc(uint8 value)
         //
         if (m_cgb)
         {
-            constexpr uint8 not_delayed_bits = gb_lcdc_bg_win_data | gb_lcdc_win_enable;
-            uint8 not_delayed = (old_lcdc & ~not_delayed_bits) | (value & not_delayed_bits);
+            constexpr uint8_t not_delayed_bits = gb_lcdc_bg_win_data | gb_lcdc_win_enable;
+            uint8_t not_delayed = (old_lcdc & ~not_delayed_bits) | (value & not_delayed_bits);
             gb_lcd_ppu::write_lcdc(not_delayed);
 
             emulate(m_core.get_oscillation_cycle() + 1);
@@ -142,24 +152,24 @@ void age::gb_lcd::write_lcdc(uint8 value)
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_lcd::read_stat() const
+age::uint8_t age::gb_lcd::read_stat() const
 {
-    uint8 result = m_stat | get_stat_coincidence(m_lcd_enabled) | 0x80;
-    LOG((uint)result);
+    uint8_t result = m_stat | get_stat_coincidence(m_lcd_enabled) | 0x80;
+    LOG(AGE_LOG_HEX(result));
     return result;
 }
 
-void age::gb_lcd::write_stat(uint8 value)
+void age::gb_lcd::write_stat(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
 
-    uint scanline = get_scanline();
-    uint mode = (scanline >= gb_screen_height)
+    auto scanline = get_scanline();
+    int mode = (scanline >= gb_screen_height)
             ? 1 // the 4-cycle mode 0 at the end of mode 1 is not recognized here
             : (m_stat & gb_stat_modes);
 
     // store new STAT value
-    uint8 old_stat = m_stat;
+    uint8_t old_stat = m_stat;
     m_stat &= gb_stat_modes;
     m_stat |= value & ~(gb_stat_coincidence | gb_stat_modes);
 
@@ -186,12 +196,12 @@ void age::gb_lcd::write_stat(uint8 value)
 
     if (m_lcd_enabled)
     {
-        uint8 bits_cleared = old_stat & ~value;
-        uint8 bits_set = ~old_stat & value;
-        LOG("cleared bits " << (uint)bits_cleared << ", set bits " << (uint)bits_set);
+        uint8_t bits_cleared = old_stat & ~value;
+        uint8_t bits_set = ~old_stat & value;
+        LOG("cleared bits " << AGE_LOG_HEX(bits_cleared) << ", set bits " << AGE_LOG_HEX(bits_set));
 
-        uint current_cycle = m_core.get_oscillation_cycle();
-        uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+        int current_cycle = m_core.get_oscillation_cycle();
+        int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
 
         //
         // verified by gambatte tests
@@ -241,10 +251,10 @@ void age::gb_lcd::write_stat(uint8 value)
         bool lyc = is_interruptable_coincidence();
         bool raise_lcd_interrupt = false;
 
-        uint mode0_interrupt_offset = get_mode0_interrupt_cycle_offset();
+        int mode0_interrupt_offset = get_mode0_interrupt_cycle_offset();
         LOG("mode0_interrupt_offset " << mode0_interrupt_offset);
 
-        LOG("mode " << (uint)mode);
+        LOG("mode " << AGE_LOG_HEX(mode));
         switch (mode)
         {
             case 0:
@@ -319,7 +329,7 @@ void age::gb_lcd::write_stat(uint8 value)
                 //
                 //      miscmstatirq/m0statwirq_scx3_1_dmg08_out0
                 //
-                raise_lcd_interrupt &= mode0_interrupt_offset - 1 > 0;
+                raise_lcd_interrupt &= mode0_interrupt_offset != 1;
                 LOG((raise_lcd_interrupt ? "" : "NOT ") << "raising " << (m_cgb ? "CGB" : "DMG") << " LCD interrupt for mode 0");
 
                 //
@@ -538,7 +548,7 @@ void age::gb_lcd::write_stat(uint8 value)
         // If the interrupt just happened (mode0_interrupt_offset == 0),
         // it does of course not make any sense to delay any change.
         //
-        if (m_cgb && (mode0_interrupt_offset - 1 < (m_core.is_double_speed() ? 1 : 2))) // -1 for wrap-around at 0
+        if (m_cgb && (mode0_interrupt_offset > 0) && (mode0_interrupt_offset <= (m_core.is_double_speed() ? 1 : 2)))
         {
             LOG("delaying mode 0 stat change");
             m_stat_mode0_int = old_stat | bits_set;
@@ -557,7 +567,7 @@ void age::gb_lcd::write_stat(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_lcd::write_scx(uint8 value)
+void age::gb_lcd::write_scx(uint8_t value)
 {
     //
     // verified by gambatte tests
@@ -575,7 +585,7 @@ void age::gb_lcd::write_scx(uint8 value)
     gb_lcd_ppu::write_scx(value);
 }
 
-void age::gb_lcd::write_scy(uint8 value)
+void age::gb_lcd::write_scy(uint8_t value)
 {
     //
     // verified by gambatte tests
@@ -603,7 +613,7 @@ void age::gb_lcd::write_scy(uint8 value)
 
 
 
-void age::gb_lcd::write_wx(uint8 value)
+void age::gb_lcd::write_wx(uint8_t value)
 {
     //
     // verified by gambatte tests
@@ -617,12 +627,12 @@ void age::gb_lcd::write_wx(uint8 value)
     //      window/late_wx_ds_1_out0
     //      window/late_wx_ds_2_out3
     //
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     emulate(m_core.get_oscillation_cycle() + 1);
     gb_lcd_ppu::write_wx(value);
 }
 
-void age::gb_lcd::write_wy(uint8 value)
+void age::gb_lcd::write_wy(uint8_t value)
 {
     //
     // verified by gambatte tests
@@ -634,7 +644,7 @@ void age::gb_lcd::write_wy(uint8 value)
     //      window/late_wy_ffto2_ly2_scx3_1_dmg08_cgb_out3
     //      window/late_wy_ffto2_ly2_scx5_1_dmg08_cgb_out3
     //
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     emulate(m_core.get_oscillation_cycle() + 1);
     gb_lcd_ppu::write_wy(value);
     write_late_wy();
@@ -653,27 +663,27 @@ void age::gb_lcd::write_wy(uint8 value)
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_lcd::read_ly() const
+age::uint8_t age::gb_lcd::read_ly() const
 {
     return get_ly_port(m_lcd_enabled);
 }
 
-age::uint8 age::gb_lcd::read_lyc() const
+age::uint8_t age::gb_lcd::read_lyc() const
 {
     return get_lyc();
 }
 
-void age::gb_lcd::write_lyc(uint8 value)
+void age::gb_lcd::write_lyc(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     if (value != get_lyc())
     {
-        uint scanline = get_scanline();
-        uint mode = (scanline >= gb_screen_height)
+        auto scanline = get_scanline();
+        int mode = (scanline >= gb_screen_height)
                 ? 1 // the 4-cycle mode 0 at the end of mode 1 is not recognized here
                 : (m_stat & gb_stat_modes);
 
-        uint8 old_lyc = get_lyc();
+        uint8_t old_lyc = get_lyc();
         set_lyc(value, mode, m_lcd_enabled);
 
         //
@@ -752,13 +762,13 @@ void age::gb_lcd::write_lyc(uint8 value)
         //         12945  mode 0 interrupt
         //         12984  IF 0
         //
-        uint mode0_interrupt_offset = get_mode0_interrupt_cycle_offset();
+        int mode0_interrupt_offset = get_mode0_interrupt_cycle_offset();
         LOG("mode0_interrupt_offset " << mode0_interrupt_offset);
 
-        uint min_offset = m_cgb ? (m_core.is_double_speed() ? 2 : 6) : 1;
+        int min_offset = m_cgb ? (m_core.is_double_speed() ? 2 : 6) : 1;
         LOG("min_offset " << min_offset);
 
-        if (mode0_interrupt_offset - 1 < min_offset) // -1 for wrap-around at 0
+        if ((mode0_interrupt_offset > 0) && (mode0_interrupt_offset <= min_offset))
         {
             LOG("delaying LYC change");
             m_lyc_mode0_int = old_lyc;
@@ -780,37 +790,37 @@ void age::gb_lcd::write_lyc(uint8 value)
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_lcd::read_bgp() const
+age::uint8_t age::gb_lcd::read_bgp() const
 {
     return m_bgp;
 }
 
-age::uint8 age::gb_lcd::read_obp0() const
+age::uint8_t age::gb_lcd::read_obp0() const
 {
     return m_obp0;
 }
 
-age::uint8 age::gb_lcd::read_obp1() const
+age::uint8_t age::gb_lcd::read_obp1() const
 {
     return m_obp1;
 }
 
 
 
-void age::gb_lcd::write_bgp(uint8 value)
+void age::gb_lcd::write_bgp(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_bgp = value;
     create_classic_palette(gb_palette_bgp, m_bgp);
 }
 
-void age::gb_lcd::write_obp0(uint8 value)
+void age::gb_lcd::write_obp0(uint8_t value)
 {
     m_obp0 = value;
     create_classic_palette(gb_palette_obp0, m_obp0);
 }
 
-void age::gb_lcd::write_obp1(uint8 value)
+void age::gb_lcd::write_obp1(uint8_t value)
 {
     m_obp1 = value;
     create_classic_palette(gb_palette_obp1, m_obp1);
@@ -818,41 +828,41 @@ void age::gb_lcd::write_obp1(uint8 value)
 
 
 
-age::uint8 age::gb_lcd::read_bcps() const
+age::uint8_t age::gb_lcd::read_bcps() const
 {
     AGE_ASSERT(m_cgb);
     return m_bcps;
 }
 
-age::uint8 age::gb_lcd::read_bcpd() const
+age::uint8_t age::gb_lcd::read_bcpd() const
 {
     AGE_ASSERT(m_cgb);
-    uint8 result = is_cgb_palette_accessible() ? m_palette[m_bcps & 0x3F] : 0xFF;
+    uint8_t result = is_cgb_palette_accessible() ? m_palette[m_bcps & 0x3F] : 0xFF;
     return result;
 }
 
-age::uint8 age::gb_lcd::read_ocps() const
+age::uint8_t age::gb_lcd::read_ocps() const
 {
     AGE_ASSERT(m_cgb);
     return m_ocps;
 }
 
-age::uint8 age::gb_lcd::read_ocpd() const
+age::uint8_t age::gb_lcd::read_ocpd() const
 {
     AGE_ASSERT(m_cgb);
-    uint8 result = is_cgb_palette_accessible() ? m_palette[0x40 + (m_ocps & 0x3F)] : 0xFF;
+    uint8_t result = is_cgb_palette_accessible() ? m_palette[0x40 + (m_ocps & 0x3F)] : 0xFF;
     return result;
 }
 
 
 
-void age::gb_lcd::write_bcps(uint8 value)
+void age::gb_lcd::write_bcps(uint8_t value)
 {
     AGE_ASSERT(m_cgb);
     m_bcps = value | 0x40;
 }
 
-void age::gb_lcd::write_bcpd(uint8 value)
+void age::gb_lcd::write_bcpd(uint8_t value)
 {
     AGE_ASSERT(m_cgb);
     if (is_cgb_palette_accessible())
@@ -863,20 +873,20 @@ void age::gb_lcd::write_bcpd(uint8 value)
         // increment index
         if ((m_bcps & 0x80) > 0)
         {
-            uint8 index = (m_bcps + 1) & 0x3F;
+            uint8_t index = (m_bcps + 1) & 0x3F;
             m_bcps &= 0xC0;
             m_bcps |= index;
         }
     }
 }
 
-void age::gb_lcd::write_ocps(uint8 value)
+void age::gb_lcd::write_ocps(uint8_t value)
 {
     AGE_ASSERT(m_cgb);
     m_ocps = value | 0x40;
 }
 
-void age::gb_lcd::write_ocpd(uint8 value)
+void age::gb_lcd::write_ocpd(uint8_t value)
 {
     AGE_ASSERT(m_cgb);
     if (is_cgb_palette_accessible())
@@ -887,7 +897,7 @@ void age::gb_lcd::write_ocpd(uint8 value)
         // increment index
         if ((m_ocps & 0x80) > 0)
         {
-            uint8 index = (m_ocps + 1) & 0x3F;
+            uint8_t index = (m_ocps + 1) & 0x3F;
             m_ocps &= 0xC0;
             m_ocps |= index;
         }
@@ -904,10 +914,10 @@ void age::gb_lcd::write_ocpd(uint8 value)
 //
 //---------------------------------------------------------
 
-void age::gb_lcd::update_color(uint index)
+void age::gb_lcd::update_color(unsigned index)
 {
-    uint16 low_byte = m_palette[index * 2];
-    uint16 high_byte = m_palette[index * 2 + 1];
+    uint8_t low_byte = m_palette[index * 2];
+    uint8_t high_byte = m_palette[index * 2 + 1];
     gb_lcd_ppu::update_color(index, high_byte, low_byte);
 }
 
@@ -917,9 +927,9 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
     if (m_lcd_enabled)
     {
         bool double_speed = m_core.is_double_speed();
-        uint current_cycle = m_core.get_oscillation_cycle();
+        int current_cycle = m_core.get_oscillation_cycle();
 
-        uint mode = m_stat & gb_stat_modes;
+        int mode = m_stat & gb_stat_modes;
         allowed = mode != 3;
 
         //
@@ -958,8 +968,10 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
         //      cgbpal_m3/cgbpal_m3end_scx5_ds_3_out0
         //      cgbpal_m3/cgbpal_m3end_scx5_ds_4_out1
         //
-        uint m3_cycle_diff = current_cycle - m_last_cycle_m3_finished;
-        uint min_cycle_diff = m_core.get_machine_cycles_per_cpu_cycle();
+        AGE_ASSERT(m_last_cycle_m3_finished >= 0);
+        AGE_ASSERT(m_last_cycle_m3_finished <= current_cycle);
+        int m3_cycle_diff = current_cycle - m_last_cycle_m3_finished;
+        int min_cycle_diff = m_core.get_machine_cycles_per_cpu_cycle();
         allowed &= m3_cycle_diff >= min_cycle_diff;
 
         //
@@ -975,7 +987,7 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
         //
         if (double_speed)
         {
-            uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+            int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
             allowed |= next_scanline_offset >= gb_cycles_per_scanline - gb_cycles_mode2;
         }
     }

@@ -32,14 +32,14 @@
 namespace age
 {
 
-constexpr uint gb_right = 0x01;
-constexpr uint gb_left = 0x02;
-constexpr uint gb_up = 0x04;
-constexpr uint gb_down = 0x08;
-constexpr uint gb_a = 0x10;
-constexpr uint gb_b = 0x20;
-constexpr uint gb_select = 0x40;
-constexpr uint gb_start = 0x80;
+constexpr int gb_right = 0x01;
+constexpr int gb_left = 0x02;
+constexpr int gb_up = 0x04;
+constexpr int gb_down = 0x08;
+constexpr int gb_a = 0x10;
+constexpr int gb_b = 0x20;
+constexpr int gb_select = 0x40;
+constexpr int gb_start = 0x80;
 
 
 
@@ -55,14 +55,14 @@ public:
     uint8_vector get_persistent_ram() const override;
     void set_persistent_ram(const uint8_vector &source) override;
 
-    void set_buttons_down(uint buttons) override;
-    void set_buttons_up(uint buttons) override;
+    void set_buttons_down(int buttons) override;
+    void set_buttons_up(int buttons) override;
 
     gb_test_info get_test_info() const;
 
 protected:
 
-    uint64 inner_emulate(uint64 min_cycles_to_emulate) override;
+    int inner_emulate(int cycles_to_emulate) override;
 
     std::string inner_get_emulator_title() const override;
 

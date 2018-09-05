@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-#include <memory> // std::shared_ptr
-
 #include <QChar>
 #include <QDir>
 #include <QFileInfo>
+#include <QSharedPointer>
 
 #include "age_test_gb.hpp"
 
@@ -30,17 +29,17 @@ namespace age {
 //! gambatte tests run for 15 frames
 //! (see gambatte/test/testrunner.cpp)
 //!
-constexpr uint gb_gambatte_test_frames = 15;
-constexpr uint gb_frames_per_second = 59;
+constexpr int gb_gambatte_test_frames = 15;
+constexpr int gb_frames_per_second = 59;
 
-uint gb_cycles_per_frame(const gb_emulator &emulator)
+int gb_cycles_per_frame(const gb_emulator &emulator)
 {
     return emulator.get_cycles_per_second() / gb_frames_per_second;
 }
 
-uint test_cycles(const gb_emulator &emulator)
+int test_cycles(const gb_emulator &emulator)
 {
-    uint cycles_per_frame = gb_cycles_per_frame(emulator);
+    int cycles_per_frame = gb_cycles_per_frame(emulator);
     return cycles_per_frame * gb_gambatte_test_frames;
 }
 
@@ -240,7 +239,7 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 
             // store the converted value
             AGE_ASSERT((value >= 0) && (value < 0x10));
-            result.push_back(static_cast<age::uint8>(value));
+            result.push_back(static_cast<age::uint8_t>(value));
         }
     }
 
@@ -257,24 +256,25 @@ age::uint8_vector parse_out_string(const QString &string, const QString &prefix)
 bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uint8_vector &expected_result)
 {
     const age::pixel_vector &screen = emulator.get_screen_front_buffer();
+    unsigned screen_width = static_cast<unsigned>(emulator.get_screen_width());
 
     // start with the first line
     // (the emulator screen buffer is filled upside down)
-    age::uint line_offset = 0;
-    age::uint tile_offset = 0;
+    unsigned line_offset = 0;
+    unsigned tile_offset = 0;
 
     // the first pixel in the first line is always expected to be "white"
     // (see the tiles stored in tile_data)
     age::pixel white = screen[line_offset];
 
     // examine each pixel
-    for (age::uint line = 0; line < 8; ++line)
+    for (unsigned line = 0; line < 8; ++line)
     {
-        age::uint pixel_offset = 0;
-        for (age::uint8 tile_index : expected_result)
+        unsigned pixel_offset = 0;
+        for (age::uint8_t tile_index : expected_result)
         {
-            const age::uint8 *tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
-            for (age::uint tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
+            const age::uint8_t *tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
+            for (unsigned tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
             {
                 bool found_white = screen[line_offset + pixel_offset] == white;
                 bool expect_white = tile_ptr[tile_pixel] == 0;
@@ -287,7 +287,7 @@ bool evaluate_out_string_result(const age::gb_emulator &emulator, const age::uin
         }
 
         // next line
-        line_offset += emulator.get_screen_width();
+        line_offset += screen_width;
         tile_offset += 8;
     }
 
@@ -302,7 +302,7 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
 
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
-        std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, hardware);
+        QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
         gb_emulate(*emulator, test_cycles(*emulator));
 
         // evaluate test result
@@ -357,11 +357,11 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
 
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
-        std::shared_ptr<age::gb_emulator> emulator = std::make_shared<age::gb_emulator>(test_rom, hardware);
+        QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
 
         // gambatte tests run for 15 frames
         // (see gambatte/test/testrunner.cpp)
-        uint cycles_per_frame = gb_cycles_per_frame(*emulator);
+        unsigned cycles_per_frame = static_cast<unsigned>(gb_cycles_per_frame(*emulator));
 
         gb_emulate(*emulator, test_cycles(*emulator));
 
@@ -371,7 +371,7 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         bool all_equal = true;
         const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
 
-        for (age::uint i = 1; i < cycles_per_frame; ++i)
+        for (unsigned i = 1; i < cycles_per_frame; ++i)
         {
             if (emulator->get_audio_buffer()[i] != first_sample)
             {

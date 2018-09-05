@@ -14,45 +14,29 @@
 // limitations under the License.
 //
 
-#ifndef AGE_GB_JOYPAD_HPP
-#define AGE_GB_JOYPAD_HPP
+#include <algorithm> // std::for_each
 
-//!
-//! \file
-//!
-
-#include <age_types.hpp>
-
-#include "age_gb_core.hpp"
+#include <age_utilities.hpp>
 
 
 
-namespace age
+age::uint32_t age::crc32(const uint8_vector &data)
 {
+    return crc32(begin(data), end(data));
+}
 
-class gb_joypad
+age::uint32_t age::crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end)
 {
-    AGE_DISABLE_COPY(gb_joypad);
+    age::uint32_t crc = 0xFFFFFFFF;
 
-public:
+    std::for_each(begin, end, [&](const uint8_t &v)
+    {
+        crc ^= v;
+        for (int i = 0; i < 8; ++i)
+        {
+            crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+        }
+    });
 
-    uint8_t read_p1() const;
-    void write_p1(uint8_t byte);
-    void set_buttons_down(int buttons);
-    void set_buttons_up(int buttons);
-
-    gb_joypad(gb_core &core);
-
-private:
-
-    gb_core &m_core;
-    uint8_t m_p1;
-    uint8_t m_p14 = 0x0F;
-    uint8_t m_p15 = 0x0F;
-};
-
-} // namespace age
-
-
-
-#endif // AGE_GB_JOYPAD_HPP
+    return ~crc;
+}

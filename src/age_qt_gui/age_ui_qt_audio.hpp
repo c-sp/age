@@ -21,15 +21,12 @@
 //! \file
 //!
 
-#include <memory> // std::unique_ptr
-#include <vector>
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QIODevice>
+#include <QSharedPointer>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <pcm/age_downsampler.hpp>
 #include <pcm/age_pcm_ring_buffer.hpp>
@@ -68,9 +65,13 @@ namespace age
 //! sometimes did not work at all and at other times caused CPU load spikes and audio
 //! lags. That's why we use our own volume control: downsampler::set_volume().
 //!
-class qt_audio_output : public non_copyable
+class qt_audio_output
 {
+    AGE_DISABLE_COPY(qt_audio_output);
+
 public:
+
+    qt_audio_output();
 
     //!
     //! If an audio device is still in use, close it.
@@ -108,7 +109,7 @@ public:
     //! \return The current downsampler's FIR size or zero, if the downsampler does not
     //! make use of any FIR.
     //!
-    uint get_downsampler_fir_size() const;
+    size_t get_downsampler_fir_size() const;
 
 
 
@@ -125,7 +126,7 @@ public:
     //! This value is expected to be greater than 1. The behaviour for a value lower
     //! than 2 is undefined.
     //!
-    void set_input_sampling_rate(uint sampling_rate);
+    void set_input_sampling_rate(int sampling_rate);
 
     //!
     //! \brief Set the quality of audio data resampling.
@@ -220,21 +221,21 @@ private:
 
     void reset();
     void create_downsampler();
-    uint write_samples();
+    int write_samples();
 
-    uint m_input_sampling_rate = 200000; // some (arbitrary) big value
+    int m_input_sampling_rate = 200000; // some (arbitrary) big value
     float m_volume = 1;
     int m_latency_milliseconds = qt_audio_latency_milliseconds_min;
     qt_downsampler_quality m_downsampler_quality = qt_downsampler_quality::low;
     QAudioDeviceInfo m_device_info;
     QAudioFormat m_format;
 
-    std::unique_ptr<downsampler> m_downsampler;
-    uint m_downsampler_fir_size = 0;
+    QSharedPointer<downsampler> m_downsampler;
+    size_t m_downsampler_fir_size = 0;
     pcm_ring_buffer m_buffer = {1};
-    std::unique_ptr<QAudioOutput> m_output;
+    QSharedPointer<QAudioOutput> m_output;
     QIODevice *m_device = nullptr;
-    std::vector<pcm_sample> m_silence;
+    pcm_vector m_silence;
     bool m_pause_streaming = false;
 };
 

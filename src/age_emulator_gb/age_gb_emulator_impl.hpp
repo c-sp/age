@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
@@ -41,8 +40,10 @@ namespace age {
 
 
 
-class gb_emulator_impl : public non_copyable
+class gb_emulator_impl
 {
+    AGE_DISABLE_COPY(gb_emulator_impl);
+
 public:
 
     gb_emulator_impl(const uint8_vector &rom, gb_hardware hardware, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
@@ -52,10 +53,10 @@ public:
     uint8_vector get_persistent_ram() const;
     void set_persistent_ram(const uint8_vector &source);
 
-    void set_buttons_down(uint buttons);
-    void set_buttons_up(uint buttons);
+    void set_buttons_down(int buttons);
+    void set_buttons_up(int buttons);
 
-    uint64 inner_emulate(uint64 min_cycles_to_emulate);
+    int inner_emulate(int cycles_to_emulate);
 
     std::string inner_get_emulator_title() const;
 

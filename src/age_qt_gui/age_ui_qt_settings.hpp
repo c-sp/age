@@ -21,9 +21,6 @@
 //! \file
 //!
 
-#include <array>
-#include <memory>
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QCheckBox>
@@ -38,17 +35,18 @@
 #include <QtGui/qopengl.h> // GLint
 #include <QKeyEvent>
 #include <QLabel>
+#include <QList>
 #include <QMap>
 #include <QMouseEvent>
 #include <QObject>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSet>
+#include <QSharedPointer>
 #include <QSlider>
 #include <QString>
 #include <QWidget>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 
 #include "age_ui_qt_user_value_store.hpp"
@@ -111,16 +109,16 @@ class qt_filter_widget : public QFrame
     Q_OBJECT
 public:
 
-    qt_filter_widget(uint widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+    qt_filter_widget(int widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_filter(qt_filter filter, GLint width, GLint height);
 
 signals:
 
-    void remove(uint index);
-    void drag_start(uint drag_index);
+    void remove(int index);
+    void drag_start(int drag_index);
     void drag_clear();
-    void drag_update(uint insert_at_index);
+    void drag_update(int insert_at_index);
     void drag_finish(bool keep);
 
 protected:
@@ -138,7 +136,7 @@ private:
 
     bool handle_drag_event(QDropEvent *event);
 
-    const uint m_widget_index;
+    const int m_widget_index;
     QLabel *m_text = nullptr;
     QPushButton *m_remove = nullptr;
     bool m_has_content = false;
@@ -146,12 +144,14 @@ private:
 
 
 
-class qt_settings_video : public QWidget, non_copyable
+class qt_settings_video : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_video);
+
 public:
 
-    qt_settings_video(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+    qt_settings_video(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_emulator_screen_size(GLint width, GLint height);
 
@@ -166,8 +166,8 @@ public:
 signals:
 
     void use_bilinear_filter_changed(bool use);
-    void frames_to_blend_changed(uint frames_to_blend);
-    void filter_chain_changed(qt_filter_vector filter_chain);
+    void frames_to_blend_changed(int frames_to_blend);
+    void filter_chain_changed(qt_filter_list filter_list);
 
 private slots:
 
@@ -176,10 +176,10 @@ private slots:
     void frames_to_blend_toggled(bool checked);
     void add_filter_clicked();
 
-    void remove(uint index);
-    void drag_start(uint drag_index);
+    void remove(int index);
+    void drag_start(int drag_index);
     void drag_clear();
-    void drag_update(uint insert_at_index);
+    void drag_update(int insert_at_index);
     void drag_finish(bool keep);
 
 private:
@@ -189,21 +189,21 @@ private:
     void update_filter_chain_controls(bool only_controls);
     void emit_filter_chain_changed();
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store;
+    QSharedPointer<qt_user_value_store> m_user_value_store;
 
     GLint m_emulator_screen_width = 0;
     GLint m_emulator_screen_height = 0;
 
     QCheckBox *m_use_filter_chain = nullptr;
     QCheckBox *m_use_bilinear_filter = nullptr;
-    std::array<QRadioButton*, qt_video_frame_history_size> m_blend_frames;
-    std::array<qt_filter_widget*, 8> m_filter_widgets;
+    QList<QRadioButton*> m_blend_frames;
+    QList<qt_filter_widget*> m_filter_widgets;
 
     int m_frames_to_blend = 0;
-    qt_filter_vector m_filter_chain;
+    qt_filter_list m_filter_list;
 
-    qt_filter_vector m_dnd_original_filter_chain;
-    uint m_dnd_index = 0;
+    qt_filter_list m_dnd_original_filter_chain;
+    int m_dnd_index = 0;
 };
 
 
@@ -216,12 +216,14 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_audio : public QWidget, non_copyable
+class qt_settings_audio : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_audio);
+
 public:
 
-    qt_settings_audio(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+    qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     void set_active_audio_output(const QAudioDeviceInfo &device, const QAudioFormat &format, int buffer_size, int downsampler_fir_size);
 
@@ -254,7 +256,7 @@ private:
     QAudioDeviceInfo get_device_info(const QString &device_name) const;
     static QAudioFormat find_suitable_format(const QAudioDeviceInfo &device_info);
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store;
+    QSharedPointer<qt_user_value_store> m_user_value_store;
 
     QComboBox *m_combo_devices = nullptr;
     QLabel *m_label_device = nullptr;
@@ -288,12 +290,14 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_keys : public QWidget, non_copyable
+class qt_settings_keys : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_keys);
+
 public:
 
-    qt_settings_keys(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+    qt_settings_keys(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     qt_key_event get_event_for_key(Qt::Key key) const;
 
@@ -310,7 +314,7 @@ private:
     void set_key_binding(qt_key_event event, Qt::Key key, bool update_settings);
     void save_key_binding(qt_key_event event);
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store;
+    QSharedPointer<qt_user_value_store> m_user_value_store;
 
     const QMap<qt_key_event, const char*> m_category_strings;
     const QMap<qt_key_event, const char*> m_event_strings;
@@ -355,12 +359,14 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_miscellaneous : public QWidget, non_copyable
+class qt_settings_miscellaneous : public QWidget
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_miscellaneous);
+
 public:
 
-    qt_settings_miscellaneous(std::shared_ptr<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+    qt_settings_miscellaneous(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
     bool show_menu_bar(bool fullscreen) const;
     bool show_status_bar(bool fullscreen) const;
@@ -392,7 +398,7 @@ private slots:
 
 private:
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store;
+    QSharedPointer<qt_user_value_store> m_user_value_store;
 
     QCheckBox *m_pause_emulator = nullptr;
     QCheckBox *m_synchronize_emulator = nullptr;
@@ -413,12 +419,14 @@ private:
 //
 //---------------------------------------------------------
 
-class qt_settings_dialog : public QDialog, non_copyable
+class qt_settings_dialog : public QDialog
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_settings_dialog);
+
 public:
 
-    qt_settings_dialog(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags = nullptr);
+    qt_settings_dialog(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags = nullptr);
 
     qt_key_event get_event_for_key(Qt::Key key) const;
     QString get_open_file_dialog_directory() const;
@@ -434,8 +442,8 @@ public:
 signals:
 
     void video_use_bilinear_filter_changed(bool use);
-    void video_frames_to_blend_changed(uint frames_to_blend);
-    void video_filter_chain_changed(qt_filter_vector filter_chain);
+    void video_frames_to_blend_changed(int frames_to_blend);
+    void video_post_processing_filter_changed(qt_filter_list filter_list);
 
     void audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
     void audio_volume_changed(int volume_percent);
@@ -452,7 +460,7 @@ signals:
 public slots:
 
     void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
-    void set_emulator_screen_size(uint width, uint height);
+    void set_emulator_screen_size(int16_t width, int16_t height);
 
 
 
@@ -464,8 +472,8 @@ protected:
 private slots:
 
     void emit_video_use_bilinear_filter_changed(bool use);
-    void emit_video_frames_to_blend_changed(uint frames_to_blend);
-    void emit_video_filter_chain_changed(qt_filter_vector filter_chain);
+    void emit_video_frames_to_blend_changed(int frames_to_blend);
+    void emit_video_post_processing_filter_changed(qt_filter_list filter_list);
 
     void emit_audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
     void emit_audio_volume_changed(int volume_percent);
@@ -486,7 +494,7 @@ private:
     qt_settings_keys *m_settings_keys = nullptr;
     qt_settings_miscellaneous *m_settings_miscellaneous = nullptr;
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store = nullptr;
+    QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
 };
 
 } // namespace age

@@ -34,21 +34,20 @@ The following _groups_ exist:
     making specific C++ methods callable from JavaScript.
 
 
-## Code Quality
+## C++ Code Quality
 
-AGE code sticks to the following rules:
+Do not violate the **single responsibility principle**.
+    Unrelated functionality must not be grouped together
+    (i.e. in the same file).
 
-### C++
+### Namespaces
 
 1. **Don't put `using namespace` statements in header files.**
     All consumers of this header file would be forced to live with that
     namespace usage as it cannot be undone.
 1. **Avoid `using namespace`** statements in cpp files.
-1. Do not violate the **single responsibility principle**.
-    Unrelated functionality must not be grouped together
-    (i.e. in the same file).
 
-#### includes
+### Includes
 
 1. **Use include guards** in every header file.
     Use the file's name converted to "screaming snake case" for it's include
@@ -59,4 +58,38 @@ AGE code sticks to the following rules:
 1. **Include everything a file needs.**
     Don't rely on transitive includes or the include order in cpp files.
 
+### Data Types
 
+1. **Assume `int` to be at least 32 bits wide**.
+    While the C++ standard requires an `int` to be
+    [at least 16 bits wide](https://en.cppreference.com/w/cpp/language/types#Properties),
+    for current data models `int` width usually is 32 bits.
+    AGE static-asserts `int` to be at least 32 bits wide.
+1. **Use `int` for arithmetic** until you have a specific reason not to do so.
+    Arithmetic operators will cause smaller integral values
+    [to be promoted to `int`](https://en.cppreference.com/w/cpp/language/implicit_conversion#Integral_promotion)
+    anyway,
+    so the result of most operations is an `int`.
+1. **Allocate fixed width integers**.
+    Don't allocate more memory than necessary.
+    Allocating non-fixed width integers like `int` or `std::int_fast##_t` can
+    cause more memory to be reserved than actually required.
+    This might increase cache misses and thus can decrease performance.
+1. **Minimize the size of class data members** while avoiding casts.
+    E.g. if `int8_t` is sufficient and does not require additional casts,
+    use it in favor of `int`.
+
+**signed vs. unsigned**
+
+1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
+1. **Use `signed`** until there is a very specific reason to not do so.
+    Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic).
+    `signed` integer overflow being undefined
+    [enables several compiler optimizations](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
+    (`unsigned` overflow being well defined may prevent compiler optimizations
+    though).
+
+AGE code uses `unsigned` only for values representing the emulated hardware
+(e.g. Gameboy CPU registers, Gameboy memory)
+and when interacting with STL containers
+(e.g. `size_t std::vector::size()` or `std::vector::operator[size_t]`).

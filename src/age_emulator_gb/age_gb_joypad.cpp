@@ -26,19 +26,19 @@
 
 namespace age {
 
-constexpr uint8 gb_p14 = 0x10;
-constexpr uint8 gb_p15 = 0x20;
+constexpr uint8_t gb_p14 = 0x10;
+constexpr uint8_t gb_p15 = 0x20;
 
 }
 
 
 
-age::uint8 age::gb_joypad::read_p1() const
+age::uint8_t age::gb_joypad::read_p1() const
 {
     return m_p1;
 }
 
-void age::gb_joypad::write_p1(uint8 byte)
+void age::gb_joypad::write_p1(uint8_t byte)
 {
     AGE_ASSERT(m_p14 <= 0x0F);
     AGE_ASSERT(m_p15 <= 0x0F);
@@ -58,7 +58,7 @@ void age::gb_joypad::write_p1(uint8 byte)
 
     // interrupt: p10-p13 changed from high to low
     // (raise int for low-to-high too, since it happens on the Gameboy - apparently due to oscillation)
-    uint raise_interrupt = (m_p1 ^ byte) & 0x0F;
+    int raise_interrupt = (m_p1 ^ byte) & 0x0F;
     if (raise_interrupt > 0)
     {
         m_core.request_interrupt(gb_interrupt::joypad);
@@ -70,26 +70,26 @@ void age::gb_joypad::write_p1(uint8 byte)
 
 
 
-void age::gb_joypad::set_buttons_up(uint buttons)
+void age::gb_joypad::set_buttons_up(int buttons)
 {
     if (buttons != 0)
     {
         LOG(buttons);
-        uint8 p14 = static_cast<uint8>(buttons & 0x0F);
-        uint8 p15 = static_cast<uint8>((buttons >> 4) & 0x0F);
+        uint8_t p14 = buttons & 0x0F;
+        uint8_t p15 = (buttons >> 4) & 0x0F;
         m_p14 |= p14;
         m_p15 |= p15;
         write_p1(m_p1);
     }
 }
 
-void age::gb_joypad::set_buttons_down(uint buttons)
+void age::gb_joypad::set_buttons_down(int buttons)
 {
     if (buttons != 0)
     {
         LOG(buttons);
-        uint8 p14 = static_cast<uint8>(buttons & 0x0F);
-        uint8 p15 = static_cast<uint8>((buttons >> 4) & 0x0F);
+        uint8_t p14 = buttons & 0x0F;
+        uint8_t p15 = (buttons >> 4) & 0x0F;
         m_p14 &= ~p14;
         m_p15 &= ~p15;
         write_p1(m_p1);

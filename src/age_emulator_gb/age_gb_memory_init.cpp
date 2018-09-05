@@ -18,6 +18,7 @@
 #include <array>
 
 #include <age_debug.hpp>
+#include <age_utilities.hpp>
 
 #include "age_gb_memory.hpp"
 
@@ -28,6 +29,9 @@
 #endif
 
 
+
+namespace
+{
 
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
@@ -138,7 +142,7 @@ constexpr const age::uint8_array<0x300> cgb_internal_ram_2A00_dump =
 
 
 
-constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1008 > dmg_internal_ram_init =
+constexpr const std::array<std::pair<age::uint16_t, age::uint8_t >, 1008 > dmg_internal_ram_init =
 {{
      { 0x0000, 0x08 }, { 0x0004, 0x08 }, { 0x0008, 0x4D }, { 0x000A, 0x80 },
      { 0x0010, 0x02 }, { 0x0018, 0x04 }, { 0x0020, 0x10 }, { 0x0028, 0x05 },
@@ -396,7 +400,7 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1008 > dmg_inter
 
 
 
-constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_internal_ram_init =
+constexpr const std::array<std::pair<age::uint16_t, age::uint8_t >, 1892 > cgb_internal_ram_init =
 {{
      { 0x0083, 0x7F }, { 0x008B, 0x10 }, { 0x00C0, 0x7F }, { 0x00E1, 0x7F },
      { 0x00E2, 0x7F }, { 0x00EA, 0x10 }, { 0x010A, 0x40 }, { 0x0179, 0x01 },
@@ -875,6 +879,132 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 
 
 
+// cartridge information area
+
+//constexpr age::uint16_t gb_header_size = 0x0150;
+//constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
+constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
+//constexpr age::uint16_t gb_cia_ofs_licensee_new_low = 0x0144;
+//constexpr age::uint16_t gb_cia_ofs_licensee_new_high = 0x0145;
+//constexpr age::uint16_t gb_cia_ofs_sgb = 0x0146;
+constexpr age::uint16_t gb_cia_ofs_type = 0x0147;
+constexpr age::uint16_t gb_cia_ofs_rom_size = 0x0148;
+constexpr age::uint16_t gb_cia_ofs_ram_size = 0x0149;
+//constexpr age::uint16_t gb_cia_ofs_destination = 0x014A;
+//constexpr age::uint16_t gb_cia_ofs_licensee = 0x014B;
+//constexpr age::uint16_t gb_cia_ofs_version = 0x014C;
+//constexpr age::uint16_t gb_cia_ofs_header_checksum = 0x014D;
+//constexpr age::uint16_t gb_cia_ofs_global_checksum_low = 0x014E;
+//constexpr age::uint16_t gb_cia_ofs_global_checksum_high = 0x014F;
+
+age::uint8_t safe_get(const age::uint8_vector &vector, age::uint16_t offset)
+{
+    return (vector.size() > offset) ? vector[offset] : 0;
+}
+
+void set_memory(age::uint8_vector &memory, int offset, age::uint8_t value)
+{
+    AGE_ASSERT(offset >= 0);
+    AGE_ASSERT(static_cast<unsigned>(offset) < memory.size());
+    memory[static_cast<unsigned>(offset)] = value;
+}
+
+bool has_battery(const age::uint8_vector &rom)
+{
+    bool result = false;
+
+    auto cart_type = safe_get(rom, gb_cia_ofs_type);
+    switch (cart_type)
+    {
+        case 0x03:
+        case 0x06:
+        case 0x09:
+        case 0x0D:
+        case 0x13:
+        case 0x1B:
+        case 0x1E:
+            result = true;
+    }
+
+    return result;
+}
+
+age::gb_mode calculate_mode(age::gb_hardware hardware, const age::uint8_vector &cart_rom)
+{
+    bool cgb_flagged = safe_get(cart_rom, gb_cia_ofs_cgb) >= 0x80;
+
+    age::gb_mode mode;
+    switch (hardware)
+    {
+        case age::gb_hardware::dmg:
+            // running a CGB rom on a DMG wil most likely not work,
+            // but since it was configured like this ...
+            mode = age::gb_mode::dmg;
+            break;
+
+        case age::gb_hardware::cgb:
+            mode = cgb_flagged ? age::gb_mode::cgb : age::gb_mode::dmg_on_cgb;
+            break;
+
+        default:
+            // auto-detect hardware
+            mode = cgb_flagged ? age::gb_mode::cgb : age::gb_mode::dmg;
+            break;
+    }
+    return mode;
+}
+
+age::int16_t get_num_cart_rom_banks(const age::uint8_vector &cart_rom)
+{
+    age::int16_t result;
+
+    auto rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
+    LOG("rom banks byte: " << AGE_LOG_HEX(rom_banks));
+    switch (rom_banks)
+    {
+        //case 0x00:
+        default:   result = 2; break;
+        case 0x01: result = 4; break;
+        case 0x02: result = 8; break;
+        case 0x03: result = 16; break;
+        case 0x04: result = 32; break;
+        case 0x05: result = 64; break;
+        case 0x06: result = 128; break;
+        case 0x07: result = 256; break;
+        case 0x08: result = 512; break;
+    }
+
+    AGE_ASSERT((result & (result - 1)) == 0); // just one bit must be set
+    LOG("cartridge has " << result << " rom bank(s)");
+    return result;
+}
+
+age::int16_t get_num_cart_ram_banks(const age::uint8_vector &cart_rom)
+{
+    age::int16_t result;
+
+    auto ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
+    LOG("ram banks byte: " << AGE_LOG_HEX(ram_banks));
+    switch (ram_banks)
+    {
+        //case 0x00:
+        default:   result = 0; break;
+        case 0x01: result = 1; break; // actually only 2048 bytes, but one whole bank is easier to handle
+        case 0x02: result = 1; break;
+        case 0x03: result = 4; break;
+        case 0x04: result = 16; break;
+        case 0x05: result = 8; break;
+    }
+
+    AGE_ASSERT((result & (result - 1)) == 0); // just one bit must be set
+    LOG("cartridge has " << result << " ram bank(s)");
+    return result;
+}
+
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -884,7 +1014,7 @@ constexpr const std::array<std::pair<age::uint16, age::uint8 >, 1892 > cgb_inter
 //---------------------------------------------------------
 
 age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
-    : m_mbc_writer(get_mbc_writer(m_mbc_data, cart_rom)),
+    : m_mbc_writer(get_mbc_writer(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
       m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
@@ -893,6 +1023,12 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
       m_internal_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
       m_video_ram_offset(m_internal_ram_offset + gb_internal_ram_size)
 {
+    AGE_ASSERT(m_num_cart_rom_banks > 0);
+    AGE_ASSERT(m_num_cart_ram_banks >= 0);
+    AGE_ASSERT(m_cart_ram_offset > 0);
+    AGE_ASSERT(m_internal_ram_offset >= m_cart_ram_offset);
+    AGE_ASSERT(m_video_ram_offset > m_internal_ram_offset);
+
     LOG("persistent ram " << m_has_battery);
 
     // 0x0000 - 0x3FFF : rom bank 0
@@ -909,31 +1045,32 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     write_svbk(0);
 
     // allocate memory
-    uint cart_rom_size = m_num_cart_rom_banks * gb_cart_rom_bank_size;
-    uint cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
-    uint memory_size = cart_rom_size + cart_ram_size + gb_internal_ram_size + gb_video_ram_size;
+    int cart_rom_size = m_num_cart_rom_banks * gb_cart_rom_bank_size;
+    int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
+    int memory_size = cart_rom_size + cart_ram_size + gb_internal_ram_size + gb_video_ram_size;
+    AGE_ASSERT(memory_size > 0);
 
     LOG("allocating " << memory_size << " bytes as gb_memory");
-    m_memory = uint8_vector(memory_size, 0);
+    m_memory = uint8_vector(static_cast<unsigned>(memory_size), 0);
 
     // copy rom
-    uint copy_rom_bytes = std::min(cart_rom_size, cart_rom.size());
+    int copy_rom_bytes = std::min(cart_rom_size, static_cast<int>(cart_rom.size()));
     LOG("copying " << copy_rom_bytes << " bytes of cartridge rom (rom size is " << cart_rom.size() << " bytes)");
     std::copy(begin(cart_rom), begin(cart_rom) + copy_rom_bytes, begin(m_memory));
 
     // init video ram
-    for (uint i = 0; i < gb_sparse_vram_0010_dump.size(); ++i)
+    for (uint16_t i = 0, end = gb_sparse_vram_0010_dump.size(); i < end; ++i)
     {
-        m_memory[m_video_ram_offset + 0x10 + i * 2] = gb_sparse_vram_0010_dump[i];
+        set_memory(m_memory, m_video_ram_offset + 0x10 + i * 2, gb_sparse_vram_0010_dump[i]);
     }
     bool cgb = m_mode == gb_mode::cgb;
     if (!cgb)
     {
-        m_memory[m_video_ram_offset + 0x1910] = 0x19;
-        for (uint8 i = 1; i <= 0x0C; ++i)
+        set_memory(m_memory, m_video_ram_offset + 0x1910, 0x19);
+        for (uint8_t i = 1; i <= 0x0C; ++i)
         {
-            m_memory[m_video_ram_offset + 0x1903 + i] = i;
-            m_memory[m_video_ram_offset + 0x1923 + i] = i + 0x0C;
+            set_memory(m_memory, m_video_ram_offset + 0x1903 + i, i);
+            set_memory(m_memory, m_video_ram_offset + 0x1923 + i, i + 0x0C);
         }
     }
 
@@ -943,16 +1080,16 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
 
     if (cgb)
     {
-        for (uint i = 0; i < 0x800; i += 0x10)
+        for (int i = 0; i < 0x800; i += 0x10)
         {
             auto begin = base + i;
             std::fill(begin, begin + 8, 0xFF);
             std::fill(begin + 0x808, begin + 0x810, 0xFF);
         }
-        for (uint i = 0xE00; i < 0x1000; i += 0x10)
+        for (int i = 0xE00; i < 0x1000; i += 0x10)
         {
-            m_memory[m_internal_ram_offset + i + 0x02] = 0xFF;
-            m_memory[m_internal_ram_offset + i + 0x0A] = 0x00;
+            set_memory(m_memory, m_internal_ram_offset + i + 0x02, 0xFF);
+            set_memory(m_memory, m_internal_ram_offset + i + 0x0A, 0x00);
         }
 
         std::copy(base, base + 0x1000, base + 0x1000);
@@ -962,22 +1099,22 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
         std::copy(base, base + 0x1000, base + 0x6000);
         std::copy(base, base + 0x1000, base + 0x7000);
 
-        for (uint i = 0x2840; i < 0x2880; i += 2)
+        for (int i = 0x2840; i < 0x2880; i += 2)
         {
-            m_memory[m_internal_ram_offset + i] = 0xFF;
-            m_memory[m_internal_ram_offset + i + 1] = 0x7F;
+            set_memory(m_memory, m_internal_ram_offset + i, 0xFF);
+            set_memory(m_memory, m_internal_ram_offset + i + 1, 0x7F);
         }
         std::copy(begin(cgb_internal_ram_2900_dump), end(cgb_internal_ram_2900_dump), base + 0x2900);
         std::copy(begin(cgb_internal_ram_2A00_dump), end(cgb_internal_ram_2A00_dump), base + 0x2A00);
 
         for (auto pair : cgb_internal_ram_init)
         {
-            m_memory[m_internal_ram_offset + pair.first] = pair.second;
+            set_memory(m_memory, m_internal_ram_offset + pair.first, pair.second);
         }
     }
     else
     {
-        for (uint i = 0; i < 0x800; i += 0x200)
+        for (int i = 0; i < 0x800; i += 0x200)
         {
             auto begin = base + i;
             std::fill(begin, begin + 0x100, 0x00);
@@ -990,7 +1127,7 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
 
         for (auto pair : dmg_internal_ram_init)
         {
-            m_memory[m_internal_ram_offset + pair.first] = pair.second;
+            set_memory(m_memory, m_internal_ram_offset + pair.first, pair.second);
         }
     }
 
@@ -1006,11 +1143,11 @@ age::gb_memory::gb_memory(const uint8_vector &cart_rom, gb_hardware hardware)
     //
     if (m_num_cart_rom_banks == 64)
     {
-        size_t findings = 0;
+        int findings = 0;
 
-        for (size_t offset = 0; offset < cart_rom_size; offset += 0x40000)
+        for (int offset = 0; offset < cart_rom_size; offset += 0x40000)
         {
-            uint32 crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
+            uint32_t crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
             if (crc == 0x46195417)
             {
                 ++findings;

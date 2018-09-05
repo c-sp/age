@@ -39,7 +39,7 @@
 namespace age
 {
 
-enum class gb_interrupt : uint8
+enum class gb_interrupt : uint8_t
 {
     joypad = 0x10,
     serial = 0x08,
@@ -48,14 +48,14 @@ enum class gb_interrupt : uint8
     vblank = 0x01
 };
 
-enum class gb_state : uint
+enum class gb_state
 {
     halted = 0,
     cpu_active = 1,
     dma = 2
 };
 
-enum class gb_event : uint
+enum class gb_event : uint8_t
 {
     switch_double_speed = 0,
     timer_overflow = 1,
@@ -71,8 +71,10 @@ enum class gb_event : uint
 
 
 
-constexpr uint gb_no_cycle = uint_max;
-constexpr uint gb_machine_cycles_per_second = 4194304;
+constexpr int gb_no_cycle = -1;
+constexpr int gb_machine_cycles_per_second = 4194304;
+
+
 
 #define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
     if (value != gb_no_cycle) { \
@@ -93,8 +95,8 @@ class gb_core
 {
 public:
 
-    uint get_oscillation_cycle() const;
-    uint get_machine_cycles_per_cpu_cycle() const;
+    int get_oscillation_cycle() const;
+    int8_t get_machine_cycles_per_cpu_cycle() const;
     bool is_double_speed() const;
     bool is_cgb() const; //!< get_mode() == gb_mode::cgb
     bool is_cgb_hardware() const; //!< get_mode() != gb_mode::dmg
@@ -103,11 +105,11 @@ public:
 
     void oscillate_cpu_cycle();
     void oscillate_2_cycles();
-    void insert_event(uint oscillation_cycle_offset, gb_event event);
+    void insert_event(int oscillation_cycle_offset, gb_event event);
     void remove_event(gb_event event);
     gb_event poll_event();
-    uint get_event_cycle(gb_event event) const;
-    void set_back_cycles(uint offset);
+    int get_event_cycle(gb_event event) const;
+    void set_back_cycles(int offset);
 
     void start_dma();
     void finish_dma();
@@ -119,15 +121,15 @@ public:
     bool halt();
     void stop();
     bool must_service_interrupt();
-    uint8 get_interrupt_to_service();
+    uint8_t get_interrupt_to_service();
 
-    uint8 read_key1() const;
-    uint8 read_ie() const;
-    uint8 read_if() const;
+    uint8_t read_key1() const;
+    uint8_t read_ie() const;
+    uint8_t read_if() const;
 
-    void write_key1(uint8 value);
-    void write_ie(uint8 value);
-    void write_if(uint8 value);
+    void write_key1(uint8_t value);
+    void write_ie(uint8_t value);
+    void write_if(uint8_t value);
 
     gb_core(gb_mode mode);
 
@@ -141,40 +143,40 @@ private:
 
         gb_events();
 
-        uint get_event_cycle(gb_event event) const;
+        int get_event_cycle(gb_event event) const;
 
-        gb_event poll_event(uint current_cycle);
-        void insert_event(uint for_cycle, gb_event event);
+        gb_event poll_event(int current_cycle);
+        void insert_event(int for_cycle, gb_event event);
 
-        void set_back_cycles(uint offset);
+        void set_back_cycles(int offset);
 
     private:
 
         // the following two members should be replaced by some better suited data structure(s)
-        std::multimap<uint, gb_event> m_events;
-        std::array<uint, to_integral(gb_event::none)> m_event_cycle;
+        std::multimap<int, gb_event> m_events;
+        std::array<int, to_integral(gb_event::none)> m_event_cycle;
     };
 
 
 
     void check_halt_mode();
 
+    gb_events m_events;
+
     const gb_mode m_mode;
     gb_state m_state = gb_state::cpu_active;
 
-    uint m_oscillation_cycle = 0;
-    uint m_machine_cycles_per_cpu_cycle = 4;
+    int m_oscillation_cycle = 0;
+    int8_t m_machine_cycles_per_cpu_cycle = 4;
 
     bool m_halt = false;
     bool m_ei = false;
     bool m_ime = false;
     bool m_double_speed = false;
 
-    uint8 m_key1 = 0x7E;
-    uint8 m_if = 0xE0;
-    uint8 m_ie = 0;
-
-    gb_events m_events;
+    uint8_t m_key1 = 0x7E;
+    uint8_t m_if = 0xE0;
+    uint8_t m_ie = 0;
 };
 
 } // namespace age

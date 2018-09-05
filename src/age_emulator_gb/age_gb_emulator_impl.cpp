@@ -33,23 +33,29 @@ void age::gb_emulator_impl::set_persistent_ram(const uint8_vector &source)
     m_memory.set_persistent_ram(source);
 }
 
-void age::gb_emulator_impl::set_buttons_down(uint buttons)
+void age::gb_emulator_impl::set_buttons_down(int buttons)
 {
     m_joypad.set_buttons_down(buttons);
 }
 
-void age::gb_emulator_impl::set_buttons_up(uint buttons)
+void age::gb_emulator_impl::set_buttons_up(int buttons)
 {
     m_joypad.set_buttons_up(buttons);
 }
 
 
 
-age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
+int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 {
-    uint starting_cycle = m_core.get_oscillation_cycle();
-    uint cycle_to_go = starting_cycle + min_cycles_to_emulate;
+    // make sure we have some headroom since we usually emulate
+    // a few more cycles than requested
+    constexpr int cycle_limit = int_max - gb_machine_cycles_per_second;
 
+    int starting_cycle = m_core.get_oscillation_cycle();
+    AGE_ASSERT(starting_cycle < cycle_limit);
+    AGE_ASSERT(cycles_to_emulate > 0);
+
+    int cycle_to_go = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
         m_bus.handle_events(); // may change the current gb_state
@@ -71,13 +77,18 @@ age::uint64 age::gb_emulator_impl::inner_emulate(uint64 min_cycles_to_emulate)
         }
     }
 
+    // make sure audio output is complete
     m_sound.generate_samples();
 
-    uint cycles_emulated = m_core.get_oscillation_cycle() - starting_cycle;
+    int cycles_emulated = m_core.get_oscillation_cycle() - starting_cycle;
+    AGE_ASSERT(cycles_emulated >= 0);
 
-    if (m_core.get_oscillation_cycle() > (uint_max / 2))
+    if (m_core.get_oscillation_cycle() > (cycle_limit / 2))
     {
-        uint offset = m_core.get_oscillation_cycle() & ~(gb_machine_cycles_per_second - 1);
+        int cycles_to_keep = m_core.get_oscillation_cycle() % gb_machine_cycles_per_second;
+        int offset = m_core.get_oscillation_cycle() - cycles_to_keep;
+
+        AGE_ASSERT(offset > 0);
         AGE_ASSERT(offset < m_core.get_oscillation_cycle());
 
         m_core.set_back_cycles(offset);

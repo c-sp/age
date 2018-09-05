@@ -15,7 +15,6 @@
 //
 
 #include <algorithm>
-#include <ios> // std::hex
 
 #include <age_debug.hpp>
 
@@ -81,13 +80,13 @@ age::gb_core::gb_core(gb_mode mode)
 
 
 
-age::uint age::gb_core::get_oscillation_cycle() const
+int age::gb_core::get_oscillation_cycle() const
 {
     AGE_ASSERT(m_oscillation_cycle != gb_no_cycle);
     return m_oscillation_cycle;
 }
 
-age::uint age::gb_core::get_machine_cycles_per_cpu_cycle() const
+age::int8_t age::gb_core::get_machine_cycles_per_cpu_cycle() const
 {
     return m_machine_cycles_per_cpu_cycle;
 }
@@ -129,9 +128,10 @@ void age::gb_core::oscillate_2_cycles()
     m_oscillation_cycle += 2;
 }
 
-void age::gb_core::insert_event(uint cycle_offset, gb_event event)
+void age::gb_core::insert_event(int cycle_offset, gb_event event)
 {
-    AGE_ASSERT(m_oscillation_cycle + cycle_offset >= m_oscillation_cycle); // check for overflow
+    AGE_ASSERT(cycle_offset >= 0);
+    AGE_ASSERT(int_max - cycle_offset >= m_oscillation_cycle);
     m_events.insert_event(m_oscillation_cycle + cycle_offset, event);
 }
 
@@ -145,12 +145,12 @@ age::gb_event age::gb_core::poll_event()
     return m_events.poll_event(m_oscillation_cycle);
 }
 
-age::uint age::gb_core::get_event_cycle(gb_event event) const
+int age::gb_core::get_event_cycle(gb_event event) const
 {
     return m_events.get_event_cycle(event);
 }
 
-void age::gb_core::set_back_cycles(uint offset)
+void age::gb_core::set_back_cycles(int offset)
 {
     AGE_GB_SET_BACK_CYCLES(m_oscillation_cycle, offset);
     m_events.set_back_cycles(offset);
@@ -174,7 +174,7 @@ void age::gb_core::request_interrupt(gb_interrupt interrupt)
 {
     m_if |= to_integral(interrupt);
     check_halt_mode();
-    LOG("interrupt requested: " << (uint)to_integral(interrupt));
+    LOG("interrupt requested: " << AGE_LOG_DEC(to_integral(interrupt)));
 }
 
 void age::gb_core::ei_delayed()
@@ -243,12 +243,12 @@ bool age::gb_core::must_service_interrupt()
     }
     else if (m_ime)
     {
-        uint8 interrupt = m_ie & m_if & 0x1F;
+        int interrupt = m_ie & m_if & 0x1F;
         result = (interrupt > 0);
 
         if (result)
         {
-            LOG("noticed interrupt 0x" << std::hex << (uint)interrupt << std::dec);
+            LOG("noticed interrupt " << AGE_LOG_HEX(interrupt));
             AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
             m_ime = false; // disable interrupts
         }
@@ -257,11 +257,11 @@ bool age::gb_core::must_service_interrupt()
     return result;
 }
 
-age::uint8 age::gb_core::get_interrupt_to_service()
+age::uint8_t age::gb_core::get_interrupt_to_service()
 {
     AGE_ASSERT(m_state == gb_state::cpu_active);
 
-    uint8 interrupt = m_ie & m_if & 0x1F;
+    uint8_t interrupt = m_ie & m_if & 0x1F;
     if (interrupt > 0)
     {
         // lower interrupt bits have higher priority
@@ -284,40 +284,40 @@ age::uint8 age::gb_core::get_interrupt_to_service()
 
 
 
-age::uint8 age::gb_core::read_key1() const
+age::uint8_t age::gb_core::read_key1() const
 {
     return m_key1;
 }
 
-age::uint8 age::gb_core::read_if() const
+age::uint8_t age::gb_core::read_if() const
 {
-    LOG("0x" << std::hex << (uint)m_if << std::dec);
+    LOG(AGE_LOG_HEX(m_if));
     return m_if;
 }
 
-age::uint8 age::gb_core::read_ie() const
+age::uint8_t age::gb_core::read_ie() const
 {
     return m_ie;
 }
 
 
 
-void age::gb_core::write_key1(uint8 value)
+void age::gb_core::write_key1(uint8_t value)
 {
-    LOG("0x" << std::hex << (uint)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
 }
 
-void age::gb_core::write_if(uint8 value)
+void age::gb_core::write_if(uint8_t value)
 {
-    LOG("0x" << std::hex << (uint)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_if = value | 0xE0;
     check_halt_mode();
 }
 
-void age::gb_core::write_ie(uint8 value)
+void age::gb_core::write_ie(uint8_t value)
 {
-    LOG("0x" << std::hex << (uint)value << std::dec);
+    LOG(AGE_LOG_HEX(value));
     m_ie = value;
     check_halt_mode();
 }
@@ -364,20 +364,20 @@ void age::gb_core::check_halt_mode()
 
 age::gb_core::gb_events::gb_events()
 {
-    for (uint i = 0; i < m_event_cycle.size(); ++i)
+    std::for_each(begin(m_event_cycle), end(m_event_cycle), [&](auto &elem)
     {
-        m_event_cycle[i] = gb_no_cycle;
-    }
+        elem = gb_no_cycle;
+    });
 }
 
-age::uint age::gb_core::gb_events::get_event_cycle(gb_event event) const
+int age::gb_core::gb_events::get_event_cycle(gb_event event) const
 {
     return m_event_cycle[to_integral(event)];
 }
 
-age::gb_event age::gb_core::gb_events::poll_event(uint current_cycle)
+age::gb_event age::gb_core::gb_events::poll_event(int current_cycle)
 {
-    gb_event result = gb_event::none;
+    auto result = gb_event::none;
 
     auto itr = begin(m_events);
     if (itr != end(m_events))
@@ -393,11 +393,11 @@ age::gb_event age::gb_core::gb_events::poll_event(uint current_cycle)
     return result;
 }
 
-void age::gb_core::gb_events::insert_event(uint for_cycle, gb_event event)
+void age::gb_core::gb_events::insert_event(int for_cycle, gb_event event)
 {
-    uint event_id = to_integral(event);
+    auto event_id = to_integral(event);
 
-    uint old_cycle = m_event_cycle[event_id];
+    auto old_cycle = m_event_cycle[event_id];
     if (old_cycle != gb_no_cycle)
     {
         auto range = m_events.equal_range(old_cycle);
@@ -413,25 +413,25 @@ void age::gb_core::gb_events::insert_event(uint for_cycle, gb_event event)
 
     if (for_cycle != gb_no_cycle)
     {
-        m_events.insert(std::pair<uint, gb_event>(for_cycle, event));
+        m_events.insert(std::pair<int, gb_event>(for_cycle, event));
     }
     m_event_cycle[event_id] = for_cycle;
 }
 
-void age::gb_core::gb_events::set_back_cycles(uint offset)
+void age::gb_core::gb_events::set_back_cycles(int offset)
 {
     // find all scheduled events
     std::vector<gb_event> events_to_adjust;
-    std::for_each(m_events.begin(), m_events.end(), [&](const auto &pair)
+    std::for_each(begin(m_events), end(m_events), [&](const auto &pair)
     {
         events_to_adjust.push_back(pair.second);
     });
 
     // re-schedule all found events
-    std::for_each(events_to_adjust.begin(), events_to_adjust.end(), [&](const gb_event &event)
+    std::for_each(begin(events_to_adjust), end(events_to_adjust), [&](const gb_event &event)
     {
         auto idx = to_integral(event);
-        uint event_cycle = m_event_cycle[idx];
+        auto event_cycle = m_event_cycle[idx];
         AGE_GB_SET_BACK_CYCLES(event_cycle, offset);
         insert_event(event_cycle, event);
     });

@@ -45,7 +45,7 @@ age::gb_wave_generator::gb_wave_generator()
 {
 }
 
-age::gb_wave_generator::gb_wave_generator(uint frequency_counter_shift, uint index_mask)
+age::gb_wave_generator::gb_wave_generator(size_t frequency_counter_shift, size_t index_mask)
     : m_frequency_counter_shift(frequency_counter_shift),
       m_index_mask(index_mask)
 {
@@ -54,35 +54,35 @@ age::gb_wave_generator::gb_wave_generator(uint frequency_counter_shift, uint ind
 
 
 
-age::uint age::gb_wave_generator::get_frequency_bits() const
+age::size_t age::gb_wave_generator::get_frequency_bits() const
 {
     return m_frequency_bits;
 }
 
-age::uint age::gb_wave_generator::get_wave_pattern_index() const
+age::size_t age::gb_wave_generator::get_wave_pattern_index() const
 {
     return m_index;
 }
 
 
 
-void age::gb_wave_generator::set_frequency_bits(uint frequency_bits)
+void age::gb_wave_generator::set_frequency_bits(size_t frequency_bits)
 {
     AGE_ASSERT(frequency_bits < 2048);
     m_frequency_bits = frequency_bits;
-    uint cycles_per_wave_pattern_sample = (2048 - m_frequency_bits) << m_frequency_counter_shift;
+    size_t cycles_per_wave_pattern_sample = (2048 - m_frequency_bits) << m_frequency_counter_shift;
     set_cycles_per_sample(cycles_per_wave_pattern_sample);
 }
 
-void age::gb_wave_generator::set_low_frequency_bits(uint8 nrX3)
+void age::gb_wave_generator::set_low_frequency_bits(uint8_t nrX3)
 {
-    uint frequency_bits = (m_frequency_bits & ~0xFF) + nrX3;
+    size_t frequency_bits = (m_frequency_bits & ~0xFF) + nrX3;
     set_frequency_bits(frequency_bits);
 }
 
-void age::gb_wave_generator::set_high_frequency_bits(uint8 nrX4)
+void age::gb_wave_generator::set_high_frequency_bits(uint8_t nrX4)
 {
-    uint frequency_bits = (m_frequency_bits & 0xFF) + ((nrX4 & 7) << 8);
+    size_t frequency_bits = (m_frequency_bits & 0xFF) + ((nrX4 & 7) << 8);
     set_frequency_bits(frequency_bits);
 }
 
@@ -98,33 +98,33 @@ void age::gb_wave_generator::reset_wave_pattern_index()
     set_cycles_next_sample(get_cycles_per_sample() + 6);
 }
 
-void age::gb_wave_generator::set_wave_pattern_byte(uint offset, uint8 value)
+void age::gb_wave_generator::set_wave_pattern_byte(size_t offset, uint8_t value)
 {
     AGE_ASSERT(m_index_mask == 31); // only for channel 3
     AGE_ASSERT(offset < 16);
-    uint8 first_sample = value >> 4;
-    uint8 second_sample = value & 0x0F;
+    uint8_t first_sample = value >> 4;
+    uint8_t second_sample = value & 0x0F;
 
     offset <<= 1;
     m_wave_pattern[offset] = first_sample;
     m_wave_pattern[offset + 1] = second_sample;
 }
 
-void age::gb_wave_generator::set_wave_pattern_duty(uint8 nrX1)
+void age::gb_wave_generator::set_wave_pattern_duty(uint8_t nrX1)
 {
     AGE_ASSERT(m_index_mask == 7); // only for channels 1 & 2
-    uint duty = nrX1 >> 6;
+    size_t duty = nrX1 >> 6;
     m_wave_pattern = gb_wave_pattern_duty[duty];
 }
 
 
 
-age::uint8 age::gb_wave_generator::next_sample()
+age::uint8_t age::gb_wave_generator::next_sample()
 {
     ++m_index;
     m_index &= m_index_mask;
 
-    uint8 sample = m_wave_pattern[m_index];
+    uint8_t sample = m_wave_pattern[m_index];
     return sample;
 }
 
@@ -138,22 +138,22 @@ age::uint8 age::gb_wave_generator::next_sample()
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_noise_generator::read_nrX3() const
+age::uint8_t age::gb_noise_generator::read_nrX3() const
 {
     return m_nrX3;
 }
 
 
 
-void age::gb_noise_generator::write_nrX3(uint8 nrX3)
+void age::gb_noise_generator::write_nrX3(uint8_t nrX3)
 {
     m_nrX3 = nrX3;
 
     m_7steps = (m_nrX3 & 0x08) > 0;
     m_allow_shift = m_nrX3 < 0xE0;
 
-    uint ratio = m_nrX3 & 0x07;
-    uint shift = (m_nrX3 >> 4) + 4;
+    int ratio = m_nrX3 & 0x07;
+    int shift = (m_nrX3 >> 4) + 4;
 
     if (ratio == 0)
     {
@@ -161,7 +161,7 @@ void age::gb_noise_generator::write_nrX3(uint8 nrX3)
         --shift;
     }
 
-    uint cycles = ratio << shift;
+    int cycles = ratio << shift;
     set_cycles_per_sample(cycles);
 }
 
@@ -172,12 +172,12 @@ void age::gb_noise_generator::init_generator()
 
 
 
-age::uint8 age::gb_noise_generator::next_sample()
+age::uint8_t age::gb_noise_generator::next_sample()
 {
     if (m_allow_shift)
     {
-        uint16 shifted = m_lfsr >> 1;
-        uint16 xor_bit = (shifted ^ m_lfsr) & 0x0001;
+        uint16_t shifted = m_lfsr >> 1;
+        uint16_t xor_bit = (shifted ^ m_lfsr) & 0x0001;
 
         m_lfsr = shifted + (xor_bit << 14);
 
@@ -188,7 +188,7 @@ age::uint8 age::gb_noise_generator::next_sample()
         }
     }
 
-    uint8 sample = static_cast<uint8>(~m_lfsr & 1) * 15;
+    uint8_t sample = static_cast<uint8_t>(~m_lfsr & 1) * 15;
     return sample;
 }
 
@@ -202,7 +202,7 @@ age::uint8 age::gb_noise_generator::next_sample()
 //
 //---------------------------------------------------------
 
-age::gb_length_counter::gb_length_counter(uint counter_mask)
+age::gb_length_counter::gb_length_counter(size_t counter_mask)
     : m_counter_mask(counter_mask)
 {
     AGE_ASSERT(m_counter_mask > 0);
@@ -211,19 +211,19 @@ age::gb_length_counter::gb_length_counter(uint counter_mask)
 
 
 
-void age::gb_length_counter::write_nrX1(uint8 nrX1)
+void age::gb_length_counter::write_nrX1(uint8_t nrX1)
 {
     m_counter = (~nrX1 & m_counter_mask) + 1;
 }
 
-bool age::gb_length_counter::write_nrX4(uint8 nrX4, bool next_frame_sequencer_step_odd)
+bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd)
 {
     bool disable = false;
 
     // the length counter will immediately be decremented, if it is
     // enabled during the first half of a length period and the
     // counter did not already reach zero
-    uint decrement = 0;
+    size_t decrement = 0;
 
     bool new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
     if (new_counter_enabled)

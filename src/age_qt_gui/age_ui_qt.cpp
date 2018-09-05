@@ -18,12 +18,6 @@
 
 #include "age_ui_qt.hpp"
 
-#if 1
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 
 
 
@@ -118,7 +112,7 @@ GLint age::get_qt_filter_factor(qt_filter filter)
     switch(filter)
     {
     case qt_filter::scale2x:
-    case qt_filter::age_scale2x:
+    case qt_filter::scale2x_age:
         result = 2;
         break;
 

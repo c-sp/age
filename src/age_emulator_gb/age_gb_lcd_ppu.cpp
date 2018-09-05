@@ -21,20 +21,19 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) { if ((m_core.get_oscillation_cycle() < 13000) && ((uint)get_ly() < 2)) \
-{ AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ", x_current " << m_x_current << ", " << m_tile_offset << ", ly " << (uint)get_ly() << ": " << x); }}
+#define LOG(x) AGE_GB_CYCLE_LOG("x_current " << m_x_current << ", " << m_tile_offset << ", ly " << AGE_LOG_DEC(get_ly()) << ": " << x)
 #else
 #define LOG(x)
 #endif
 
 #if 0
-#define LOG_FETCH(x) LOG(x)
+#define LOG_FETCH(x) AGE_LOG(x)
 #else
 #define LOG_FETCH(x)
 #endif
 
 #if 0
-#define LOG_PLOT(x) LOG(x)
+#define LOG_PLOT(x) AGE_LOG(x)
 #else
 #define LOG_PLOT(x)
 #endif
@@ -100,15 +99,15 @@ age::gb_lcd_ppu::gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_gre
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_lcd_ppu::read_lcdc() const { return m_lcdc; }
-age::uint8 age::gb_lcd_ppu::read_scx() const { return m_scx; }
-age::uint8 age::gb_lcd_ppu::read_scy() const { return m_scy; }
-age::uint8 age::gb_lcd_ppu::read_wx() const { return m_wx; }
-age::uint8 age::gb_lcd_ppu::read_wy() const { return m_wy; }
+age::uint8_t age::gb_lcd_ppu::read_lcdc() const { return m_lcdc; }
+age::uint8_t age::gb_lcd_ppu::read_scx() const { return m_scx; }
+age::uint8_t age::gb_lcd_ppu::read_scy() const { return m_scy; }
+age::uint8_t age::gb_lcd_ppu::read_wx() const { return m_wx; }
+age::uint8_t age::gb_lcd_ppu::read_wy() const { return m_wy; }
 
-void age::gb_lcd_ppu::write_lcdc(uint8 value)
+void age::gb_lcd_ppu::write_lcdc(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_lcdc = value;
     m_obj_enabled = (m_lcdc & gb_lcdc_obj_enable) > 0;
     m_obj_size_16 = (m_lcdc & gb_lcdc_obj_size) > 0;
@@ -119,57 +118,59 @@ void age::gb_lcd_ppu::write_lcdc(uint8 value)
     m_bw_tile_data_offset = ((m_lcdc & gb_lcdc_bg_win_data) > 0) ? 0x0000 : 0x0800; // video ram offset
 }
 
-void age::gb_lcd_ppu::write_scx(uint8 value)
+void age::gb_lcd_ppu::write_scx(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_scx = value;
 }
 
-void age::gb_lcd_ppu::write_scy(uint8 value)
+void age::gb_lcd_ppu::write_scy(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_scy = value;
 }
 
-void age::gb_lcd_ppu::write_wx(uint8 value)
+void age::gb_lcd_ppu::write_wx(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_wx = value;
 }
 
-void age::gb_lcd_ppu::write_wy(uint8 value)
+void age::gb_lcd_ppu::write_wy(uint8_t value)
 {
-    LOG((uint)value);
+    LOG(AGE_LOG_HEX(value));
     m_wy = value;
 }
 
 
 
-age::uint age::gb_lcd_ppu::get_mode0_interrupt_cycle_offset() const
+int age::gb_lcd_ppu::get_mode0_interrupt_cycle_offset() const
 {
     // if the cycle offset to the upcoming mode 0 interrupt is
     // irrelevant (basically if it's more than a handful of
-    // cycles away), we just return some really big number
-    uint result = (get_scanline() >= gb_screen_height) ? uint_max : m_x_m0_int - m_x_current;
+    // cycles away), we just return some negative number
+    int result = (get_scanline() >= gb_screen_height) ? gb_no_cycle : m_x_m0_int - m_x_current;
     return result;
 }
 
-age::uint8* age::gb_lcd_ppu::get_oam()
+age::uint8_t* age::gb_lcd_ppu::get_oam()
 {
     return &m_oam[0];
 }
 
 
 
-void age::gb_lcd_ppu::create_classic_palette(uint index, uint8 colors)
+void age::gb_lcd_ppu::create_classic_palette(unsigned index, uint8_t colors)
 {
+    AGE_ASSERT(index < m_colors.size() - 4);
+
     if (!m_cgb)
     {
-        for (uint max = index + 4; index < max; ++index)
+        for (unsigned max = index + 4; index < max; ++index)
         {
-            // greenish Gameboy colors (taken from some googled gameboy photo) for regular build,
             if (m_dmg_green)
             {
+                // greenish Gameboy colors (taken from some googled gameboy photo)
                 switch (colors & 0x03)
                 {
                     case 0x00: m_colors[index] = pixel(152, 192, 15); break;
@@ -180,6 +181,7 @@ void age::gb_lcd_ppu::create_classic_palette(uint index, uint8 colors)
             }
             else
             {
+                // grayish Gameboy colors, used by test runner
                 switch (colors & 0x03)
                 {
                     case 0x00: m_colors[index] = pixel(255, 255, 255); break;
@@ -193,23 +195,24 @@ void age::gb_lcd_ppu::create_classic_palette(uint index, uint8 colors)
     }
 }
 
-void age::gb_lcd_ppu::update_color(uint index, uint8 high_byte, uint8 low_byte)
+void age::gb_lcd_ppu::update_color(unsigned index, uint8_t high_byte, uint8_t low_byte)
 {
     AGE_ASSERT(m_cgb && (index < 64));
 
-    uint16 gb_color = low_byte + (high_byte << 8);
+    // we rely on integer promotion to 32 bit int for the following calculation
+    int gb_color = (high_byte << 8) + low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9
     //             blue:   bits 10-14
-    uint32 gb_r = gb_color & 0x1F;
-    uint32 gb_g = (gb_color >> 5) & 0x1F;
-    uint32 gb_b = (gb_color >> 10) & 0x1F;
+    int gb_r = gb_color & 0x1F;
+    int gb_g = (gb_color >> 5) & 0x1F;
+    int gb_b = (gb_color >> 10) & 0x1F;
 
     // formula copied from gambatte (video.cpp)
-    uint32 r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
-    uint32 g = (gb_g * 3 + gb_b) << 1;
-    uint32 b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
+    int r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
+    int g = (gb_g * 3 + gb_b) << 1;
+    int b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
 
     m_colors[index] = pixel(r, g, b);
 }
@@ -235,13 +238,13 @@ void age::gb_lcd_ppu::search_sprites()
     if (m_obj_enabled)
     {
         // sprite size
-        uint8 sprite_size = m_obj_size_16 ? 16 : 8;
+        int sprite_size = m_obj_size_16 ? 16 : 8;
 
         // search sprites intersected by current scanline
-        for (uint8 *sprite = &m_oam[39 * 4], *min = &m_oam[0]; sprite >= min; sprite -= 4) // highest sprite priority last
+        for (uint8_t *sprite = &m_oam[39 * 4], *min = &m_oam[0]; sprite >= min; sprite -= 4) // highest sprite priority last
         {
-            uint sprite_line = get_scanline() + 16 - *sprite;
-            if (sprite_line < sprite_size)
+            int16_t sprite_line = get_scanline() + 16 - *sprite;
+            if ((sprite_line >= 0) && (sprite_line < sprite_size))
             {
                 m_sprite_at_167 |= *(sprite + 1) == 167;
                 m_sprites.push_back(gb_sprite(sprite, sprite_line));
@@ -281,8 +284,9 @@ void age::gb_lcd_ppu::scanline_init(pixel *first_scanline_pixel)
     m_plotting_window = false;
     m_window_map_offset = 0;
 
+    AGE_ASSERT(m_sprites.size() <= 40);
     m_sprites.push_back(gb_sprite()); // add sprite "terminator"
-    m_current_sprite = m_sprites.size() - 1; // prevent sprite data fetching until SCX match
+    m_current_sprite = (m_sprites.size() - 1) & 0x3F; // prevent sprite data fetching until SCX match
     m_sprite_tile_offset = 8;
 
     m_tile_offset = 0;
@@ -335,10 +339,11 @@ bool age::gb_lcd_ppu::scanline_mode0_interrupt() const
 
 void age::gb_lcd_ppu::calculate_xflip(uint8_array<256> &xflip)
 {
-    for (uint byte = 0; byte < 256; ++byte)
+    for (unsigned byte = 0; byte < 256; ++byte)
     {
-        uint8 flip_byte = 0;
-        for (uint bit = 0x01, flip_bit = 0x80;
+        uint8_t flip_byte = 0;
+
+        for (unsigned bit = 0x01, flip_bit = 0x80;
              bit < 0x100;
              bit += bit, flip_bit >>= 1)
         {
@@ -347,20 +352,23 @@ void age::gb_lcd_ppu::calculate_xflip(uint8_array<256> &xflip)
                 flip_byte |= flip_bit;
             }
         }
+
         xflip[byte] = flip_byte;
     }
 }
 
 void age::gb_lcd_ppu::create_tile_cache(uint8_array<1024> &cache)
 {
-    uint i = 0;
-    for (uint tile = 0; tile < 256; ++tile)
+    unsigned i = 0;
+    for (int tile = 0; tile < 256; ++tile)
     {
-        for (uint index = tile, pixel = 0; pixel < 4; ++pixel)
+        for (int index = tile, pixel = 0; pixel < 4; ++pixel)
         {
-            uint color_index = ((index & 0x80) >> 7) + ((index & 0x08) >> 2);
-            AGE_ASSERT(color_index < 4);
-            cache[i] = static_cast<uint8>(color_index);
+            int color_index = ((index & 0x80) >> 7) + ((index & 0x08) >> 2);
+            AGE_ASSERT((color_index >= 0) && (color_index < 4));
+
+            cache[i] = color_index & 0x03;
+
             index += index;
             ++i;
         }
@@ -382,7 +390,7 @@ void age::gb_lcd_ppu::plot_await_scx_match(gb_lcd_ppu &ppu)
     // SCX matches -> wait for tile data
     if ((ppu.m_x_scx & 7) == (ppu.m_scx & 7))
     {
-        LOG("SCX match, switching to plotting method");
+        LOG_PLOT("SCX match, switching to plotting method");
         ppu.m_current_sprite = 0; // allow sprite data fetching
         ppu.update_pause_plotting();
         AGE_ASSERT(!ppu.m_plotting_window);
@@ -456,7 +464,7 @@ void age::gb_lcd_ppu::plot_await_data(gb_lcd_ppu &ppu)
         if (ppu.m_x_current == 8)
         {
             AGE_ASSERT(ppu.m_tile_map_offset <= 1);
-            LOG("starting pixel plotting (next cycle)");
+            LOG_PLOT("starting pixel plotting (next cycle)");
 
             //
             // verified by gambatte tests
@@ -532,6 +540,8 @@ void age::gb_lcd_ppu::plot_await_data(gb_lcd_ppu &ppu)
             //
             ppu.m_x_m0 = ppu.m_sprite_at_167 ? (ppu.m_core.is_double_speed() ? 167 : 167 + 1 - ppu.m_tile_map_offset)
                                              : (ppu.m_core.is_double_speed() ? 167 : 166 + 1 - ppu.m_tile_map_offset);
+            AGE_ASSERT((ppu.m_x_m0 >= 166)
+                       && (ppu.m_x_m0 <= 168));
             //
             // The mode 0 interrupt is triggered 1 cycle after
             // mode 0 has been flagged (not when running at
@@ -548,6 +558,8 @@ void age::gb_lcd_ppu::plot_await_data(gb_lcd_ppu &ppu)
             //
             ppu.m_x_m0_int = ppu.m_sprite_at_167 ? 167
                                                  : (ppu.m_core.is_double_speed() ? 167 : ppu.m_x_m0 + 1);
+            AGE_ASSERT((ppu.m_x_m0_int >= 167)
+                       && (ppu.m_x_m0_int <= 169));
             //
             // On a DMG the first pixel is plotted 12 cycles after
             // mode 3 was started (92 cycles after the mode 2
@@ -576,7 +588,7 @@ void age::gb_lcd_ppu::plot_pixel(gb_lcd_ppu &ppu)
     if (!ppu.m_pause_plotting)
     {
         LOG_PLOT("plotting");
-        uint8 color_index = ppu.m_tile[ppu.m_tile_offset];
+        uint8_t color_index = ppu.m_tile[ppu.m_tile_offset];
 
         // plot sprite pixel?
         if (ppu.m_sprite_tile_offset < 8)
@@ -602,10 +614,10 @@ void age::gb_lcd_ppu::plot_pixel(gb_lcd_ppu &ppu)
     }
 }
 
-age::uint8 age::gb_lcd_ppu::get_sprite_pixel(const gb_lcd_ppu &ppu, uint8 bg_color_index)
+age::uint8_t age::gb_lcd_ppu::get_sprite_pixel(const gb_lcd_ppu &ppu, uint8_t bg_color_index)
 {
     AGE_ASSERT((ppu.m_x_current - ppu.m_sprites[ppu.m_sprite_to_plot].get_x()) == ppu.m_sprite_tile_offset);
-    uint8 result = bg_color_index;
+    uint8_t result = bg_color_index;
 
     for (auto it = ppu.m_sprites.rend() - ppu.m_sprite_to_plot - 1; it != ppu.m_sprites.rend(); ++it)
     {
@@ -613,7 +625,7 @@ age::uint8 age::gb_lcd_ppu::get_sprite_pixel(const gb_lcd_ppu &ppu, uint8 bg_col
         AGE_ASSERT(current_sprite.get_x() <= ppu.m_x_current);
 
         // if this sprite is out of range, stop
-        uint tile_offset = ppu.m_x_current - current_sprite.get_x();
+        int tile_offset = ppu.m_x_current - current_sprite.get_x();
         if (tile_offset >= 8)
         {
             break;
@@ -622,7 +634,7 @@ age::uint8 age::gb_lcd_ppu::get_sprite_pixel(const gb_lcd_ppu &ppu, uint8 bg_col
         // check, if this sprite's pixel is visible
         if ((current_sprite.get_priority() + (bg_color_index & 0x03)) <= 0x40)
         {
-            uint8 sprite_color = current_sprite.get_color_index(tile_offset);
+            uint8_t sprite_color = current_sprite.get_color_index(tile_offset);
             if ((sprite_color & 0x03) != 0)
             {
                 result = sprite_color;
@@ -640,9 +652,9 @@ void age::gb_lcd_ppu::update_pause_plotting()
 {
     m_pause_plotting = m_sprites[m_current_sprite].get_x() == m_x_current;
 
-    if (((m_wx + 1u) == m_x_current) && (get_scanline() >= m_late_wy) && m_win_enabled && !m_window_started)
+    if (((m_wx + 1) == m_x_current) && (get_scanline() >= m_late_wy) && m_win_enabled && !m_window_started)
     {
-        LOG("initializing window data fetching for next cycle, wx " << (uint)m_wx);
+        LOG_PLOT("initializing window data fetching for next cycle, wx " << AGE_LOG_DEC(m_wx));
         m_pause_plotting = true;
         m_next_fetch_step = &window_step_0;
 
@@ -677,7 +689,7 @@ void age::gb_lcd_ppu::fetch_tile_name()
     //      scx_during_m3/scx_0063c0/scx_during_m3_1
     //      scx_during_m3/scx_0063c0/scx_during_m3_2
     //
-    uint tile_map_offset;
+    int tile_map_offset;
     if (m_plotting_window)
     {
         tile_map_offset = m_w_tile_name_offset;
@@ -693,20 +705,20 @@ void age::gb_lcd_ppu::fetch_tile_name()
 
     // get the tile's name and attributes
     m_new_tile_name = m_memory.get_video_ram()[tile_map_offset];
-    m_new_tile_attributes = m_memory.get_video_ram()[0x2000 + tile_map_offset]; // for DMG attributes are always zero
+    m_new_tile_attributes = m_memory.get_video_ram()[0x2000 + tile_map_offset]; // attributes are always zero for DMG
 }
 
 
 
 void age::gb_lcd_ppu::fetch_tile_byte_1()
 {
-    uint tile_data_offset = get_tile_data_offset();
+    int tile_data_offset = get_tile_data_offset();
     m_new_tile_byte1 = m_memory.get_video_ram()[tile_data_offset];
 }
 
 void age::gb_lcd_ppu::fetch_tile_byte_2()
 {
-    uint tile_data_offset = get_tile_data_offset() + 1;
+    int tile_data_offset = get_tile_data_offset() + 1;
     m_new_tile_byte2 = m_memory.get_video_ram()[tile_data_offset];
 
     // flip horizontally, if requested
@@ -717,13 +729,13 @@ void age::gb_lcd_ppu::fetch_tile_byte_2()
     }
 
     // calculate tile cache index
-    uint index1 = (m_new_tile_byte1 & 0xF0) + (m_new_tile_byte2 >> 4);
-    uint index2 = ((m_new_tile_byte1 & 0x0F) << 4) + (m_new_tile_byte2 & 0x0F);
+    unsigned index1 = (m_new_tile_byte1 & 0xF0) + (m_new_tile_byte2 >> 4);
+    unsigned index2 = ((m_new_tile_byte1 << 4) + (m_new_tile_byte2 & 0x0F)) & 0xFF;
     index1 <<= 2;
     index2 <<= 2;
 
     // palette & color priority
-    uint8 palette_offset = (m_new_tile_attributes & 0x07) << 2;
+    uint8_t palette_offset = (m_new_tile_attributes << 2) & (0x07 << 2);
 
     // cache color indexes
     m_new_tile[0] = m_tile_cache[index1 + 0] + palette_offset;
@@ -747,11 +759,11 @@ void age::gb_lcd_ppu::fetch_tile_byte_2()
 
 
 
-age::uint age::gb_lcd_ppu::get_tile_data_offset() const
+int age::gb_lcd_ppu::get_tile_data_offset() const
 {
     // calculate the y-offset within the tile
-    uint y = m_plotting_window ? (get_scanline() - m_wy) : (m_scy + get_scanline());
-    uint tile_data_offset = (y & 7) << 1;
+    int y = m_plotting_window ? (get_scanline() - m_wy) : (m_scy + get_scanline());
+    int tile_data_offset = (y & 7) << 1;
 
     // flip vertically, if requested
     if ((m_new_tile_attributes & gb_tile_attribute_y_flip) > 0)
@@ -767,6 +779,7 @@ age::uint age::gb_lcd_ppu::get_tile_data_offset() const
     tile_data_offset += ((m_bw_tile_name_add + m_new_tile_name) & 0xFF) << 4;
 
     // done
+    AGE_ASSERT(tile_data_offset >= 0);
     return tile_data_offset;
 }
 
@@ -842,7 +855,7 @@ void age::gb_lcd_ppu::tile_step_5(gb_lcd_ppu &ppu)
         {
             ++ppu.m_current_sprite;
         }
-        AGE_ASSERT(!ppu.m_window_started || ((ppu.m_wx + 1u) != ppu.m_x_current));
+        AGE_ASSERT(!ppu.m_window_started || ((ppu.m_wx + 1) != ppu.m_x_current));
         ppu.m_pause_plotting = false;
     }
 
@@ -1170,7 +1183,7 @@ age::gb_lcd_ppu::gb_sprite::gb_sprite()
 {
 }
 
-age::gb_lcd_ppu::gb_sprite::gb_sprite(const uint8 *oam, uint line)
+age::gb_lcd_ppu::gb_sprite::gb_sprite(const uint8_t *oam, int16_t line)
     : m_x(oam[1]),
       m_line(line),
       m_tile_name(oam[2]),
@@ -1187,19 +1200,20 @@ age::gb_lcd_ppu::gb_sprite::gb_sprite(const uint8 *oam, uint line)
 
 void age::gb_lcd_ppu::gb_sprite::fetch_tile_byte1(const gb_lcd_ppu &ppu)
 {
-    uint index = get_tile_data_offset(ppu);
+    int index = get_tile_data_offset(ppu);
     m_tile_byte1 = ppu.m_memory.get_video_ram()[index];
 }
 
 void age::gb_lcd_ppu::gb_sprite::fetch_tile_byte2(const gb_lcd_ppu &ppu)
 {
-    uint index = get_tile_data_offset(ppu);
+    int index = get_tile_data_offset(ppu);
     m_tile_byte2 = ppu.m_memory.get_video_ram()[index + 1];
 }
 
 void age::gb_lcd_ppu::gb_sprite::create_tile(const gb_lcd_ppu &ppu)
 {
-    uint8 palette_offset = 0x20 + (ppu.m_cgb ? ((m_tile_attributes & 0x07) << 2) : (m_tile_attributes & 0x10));
+    uint8_t palette_offset = 0x20 + (ppu.m_cgb ? ((m_tile_attributes << 2) & (0x07 << 2))
+                                               : (m_tile_attributes & 0x10));
 
     // flip horizontally, if requested
     if ((m_tile_attributes & gb_tile_attribute_x_flip) > 0) // attribute: horizontal flip
@@ -1209,8 +1223,8 @@ void age::gb_lcd_ppu::gb_sprite::create_tile(const gb_lcd_ppu &ppu)
     }
 
     // calculate tile cache index
-    uint index1 = (m_tile_byte1 & 0xF0) + (m_tile_byte2 >> 4);
-    uint index2 = ((m_tile_byte1 & 0x0F) << 4) + (m_tile_byte2 & 0x0F);
+    unsigned index1 = (m_tile_byte1 & 0xF0) + (m_tile_byte2 >> 4);
+    unsigned index2 = ((m_tile_byte1 << 4) + (m_tile_byte2 & 0x0F)) & 0xFF;
     index1 <<= 2;
     index2 <<= 2;
 
@@ -1223,19 +1237,29 @@ void age::gb_lcd_ppu::gb_sprite::create_tile(const gb_lcd_ppu &ppu)
     m_tile[5] = ppu.m_tile_cache[index2 + 1] + palette_offset;
     m_tile[6] = ppu.m_tile_cache[index2 + 2] + palette_offset;
     m_tile[7] = ppu.m_tile_cache[index2 + 3] + palette_offset;
+
+    AGE_ASSERT(m_tile[0] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[1] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[2] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[3] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[4] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[5] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[6] < gb_num_palette_colors);
+    AGE_ASSERT(m_tile[7] < gb_num_palette_colors);
 }
 
-age::uint8 age::gb_lcd_ppu::gb_sprite::get_priority() const
+age::uint8_t age::gb_lcd_ppu::gb_sprite::get_priority() const
 {
     return m_priority;
 }
 
-age::uint8 age::gb_lcd_ppu::gb_sprite::get_color_index(uint offset) const
+age::uint8_t age::gb_lcd_ppu::gb_sprite::get_color_index(int offset) const
 {
-    return m_tile[offset];
+    AGE_ASSERT((offset >= 0) && (static_cast<unsigned>(offset) < m_tile.size()));
+    return m_tile[static_cast<unsigned>(offset)];
 }
 
-age::uint age::gb_lcd_ppu::gb_sprite::get_x() const
+age::int16_t age::gb_lcd_ppu::gb_sprite::get_x() const
 {
     return m_x;
 }
@@ -1247,9 +1271,9 @@ bool age::gb_lcd_ppu::gb_sprite::operator<(const gb_sprite &right) const
 
 
 
-age::uint age::gb_lcd_ppu::gb_sprite::get_tile_data_offset(const gb_lcd_ppu &ppu) const
+int age::gb_lcd_ppu::gb_sprite::get_tile_data_offset(const gb_lcd_ppu &ppu) const
 {
-    uint tile_data_offset = m_line << 1;
+    int tile_data_offset = m_line << 1;
 
     // flip vertically, if requested
     if ((m_tile_attributes & gb_tile_attribute_y_flip) > 0)
@@ -1272,5 +1296,6 @@ age::uint age::gb_lcd_ppu::gb_sprite::get_tile_data_offset(const gb_lcd_ppu &ppu
     tile_data_offset += (m_tile_attributes & 0x08) << 10;
 
     // done
+    AGE_ASSERT(tile_data_offset >= 0);
     return tile_data_offset;
 }

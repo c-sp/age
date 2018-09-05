@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <memory>
-
 #include <QAction>
 #include <QContextMenuEvent>
 #include <QKeyEvent>
@@ -30,16 +28,14 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QSharedPointer>
 #include <QThread>
 #include <QWidget>
 
-#include <age_non_copyable.hpp>
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#include "age_ui_qt_video.hpp"
 #include "age_ui_qt_settings.hpp"
-#include "age_ui_qt_emulation_runner.hpp"
 #include "age_ui_qt_emulator.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
@@ -48,9 +44,11 @@
 namespace age
 {
 
-class qt_main_window : public QMainWindow, non_copyable
+class qt_main_window : public QMainWindow
 {
     Q_OBJECT
+    AGE_DISABLE_COPY(qt_main_window);
+
 public:
 
     qt_main_window(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
@@ -58,10 +56,10 @@ public:
 
 signals:
 
-    void emulator_loaded(std::shared_ptr<age::qt_emulator> new_emulator);
-    void emulator_screen_resize(uint width, uint height);
-    void emulator_button_down(uint button);
-    void emulator_button_up(uint button);
+    void emulator_loaded(QSharedPointer<age::qt_emulator> new_emulator);
+    void emulator_screen_resize(int16_t width, int16_t height);
+    void emulator_button_down(int button);
+    void emulator_button_up(int button);
 
 private:
 
@@ -71,13 +69,13 @@ private:
     void keyPressEvent(QKeyEvent *keyEvent) override;
     void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
-    uint get_button(qt_key_event key_event) const;
+    int get_button(qt_key_event key_event) const;
     bool is_fullscreen() const;
     void fill_menu(QMenu *menu);
     qt_key_event get_event_for_key(int key);
     void open_file(gb_hardware hardware = gb_hardware::auto_detect);
 
-    std::shared_ptr<qt_user_value_store> m_user_value_store = nullptr;
+    QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
 
     QAction *m_action_open = nullptr;
     QAction *m_action_open_dmg = nullptr;
@@ -87,13 +85,11 @@ private:
     QAction *m_action_exit = nullptr;
 
     qt_settings_dialog *m_settings = nullptr;
-    qt_video_output *m_video_output = nullptr;
 
     QLabel *m_emulated_time_label = nullptr;
     QLabel *m_speed_label = nullptr;
     QLabel *m_fps_label = nullptr;
 
-    qt_emulation_runner *m_emulation_runner = nullptr;
     QThread m_emulation_runner_thread;
 
 private slots:
@@ -103,13 +99,16 @@ private slots:
     void misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen);
     void misc_show_status_bar_fullscreen_changed(bool show_status_bar_fullscreen);
 
-    void update_status();
     void menu_emulator_open();
     void menu_emulator_open_dmg();
     void menu_emulator_open_cgb();
     void menu_emulator_settings();
     void menu_emulator_fullscreen();
     void menu_emulator_exit();
+
+    void emulator_speed(int speed_percent);
+    void emulator_milliseconds(qint64 emulated_milliseconds);
+    void fps(int fps);
 };
 
 } // namespace age

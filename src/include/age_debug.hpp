@@ -37,6 +37,8 @@
 //! \cond
 
 #include <cassert>
+#include <iomanip> // std::quoted
+#include <ios> // std::hex
 #include <string>
 #include <sstream> // std::stringstream
 
@@ -94,11 +96,17 @@ private:
 
 #define AGE_ASSERT(x) assert(x)
 #define AGE_LOG(x) (age::concurrent_cout() << age::age_log_time() << " thread " << std::this_thread::get_id() << " " << __func__ << "  -  " << x).log_line()
+#define AGE_LOG_DEC(x) static_cast<int64_t>(x)
+#define AGE_LOG_HEX(x) "0x" << std::hex << static_cast<uint64_t>(x) << std::dec << " (" << AGE_LOG_DEC(x) << ")"
+#define AGE_LOG_QUOTED(x) std::quoted(x)
 
 #else // #ifdef AGE_DEBUG
 
 #define AGE_ASSERT(x)
 #define AGE_LOG(x)
+#define AGE_LOG_DEC(x)
+#define AGE_LOG_HEX(x)
+#define AGE_LOG_QUOTED(x)
 
 #endif // #ifdef AGE_DEBUG
 

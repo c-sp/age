@@ -21,8 +21,6 @@
 //! \file
 //!
 
-#include <memory> // std::shared_ptr
-
 #include <QByteArray>
 #include <QString>
 
@@ -30,7 +28,6 @@
 #include <emulator/age_emulator.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
 
@@ -42,19 +39,16 @@ class qt_emulator
 {
 public:
 
-    qt_emulator(const QByteArray &rom, gb_hardware hardware, std::shared_ptr<qt_user_value_store> user_value_store);
+    qt_emulator(const QByteArray &rom, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store);
     ~qt_emulator();
 
-    std::shared_ptr<emulator> get_emulator();
+    QSharedPointer<emulator> get_emulator();
 
 private:
 
-    static uint64 hash(const uint8_vector &vector);
-    static uint8_vector to_vector(const QByteArray &byte_array);
-
     QString m_ram_key;
-    std::shared_ptr<emulator> m_emulator;
-    std::shared_ptr<qt_user_value_store> m_user_value_store;
+    QSharedPointer<emulator> m_emulator;
+    QSharedPointer<qt_user_value_store> m_user_value_store;
 };
 
 } // namespace age

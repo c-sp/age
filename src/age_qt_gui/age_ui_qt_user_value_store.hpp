@@ -21,13 +21,10 @@
 //! \file
 //!
 
-#include <memory> // std::shared_ptr
-
+#include <QSharedPointer>
 #include <QSettings>
 #include <QString>
 #include <QVariant>
-
-#include <age_non_copyable.hpp>
 
 #include "age_ui_qt.hpp"
 
@@ -43,8 +40,10 @@ namespace age
 //! The values are stored separately for each user.
 //! To not lose all values when the program exists, a persistent value store is used.
 //!
-class qt_user_value_store : public non_copyable
+class qt_user_value_store
 {
+    AGE_DISABLE_COPY(qt_user_value_store);
+
 public:
 
     qt_user_value_store();
@@ -85,7 +84,7 @@ private:
     void make_user_directory();
 
     const QString m_user_value_directory;
-    std::shared_ptr<QSettings> m_settings = nullptr;
+    QSharedPointer<QSettings> m_settings = nullptr;
 };
 
 } // namespace age

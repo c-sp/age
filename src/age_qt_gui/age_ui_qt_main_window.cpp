@@ -14,9 +14,6 @@
 // limitations under the License.
 //
 
-#include <iomanip> // std::quoted
-#include <string>
-
 #include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QByteArray>
@@ -27,12 +24,13 @@
 #include <QStatusBar>
 #include <QString>
 #include <QStringList>
-#include <QTimer>
 
 #include <age_debug.hpp>
 #include <emulator/age_gb_emulator.hpp> // gb buttons
 
+#include "age_ui_qt_emulation_runner.hpp"
 #include "age_ui_qt_main_window.hpp"
+#include "age_ui_qt_video.hpp"
 
 #if 0
 #define LOG(x) AGE_LOG(x)
@@ -53,13 +51,13 @@
 age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
 {
-    setWindowTitle((std::string(project_name) + " " + project_version).c_str());
+    setWindowTitle(project_name);
     resize(500, 350);
 
-    m_user_value_store = std::allocate_shared<qt_user_value_store>(std::allocator<qt_user_value_store>());
+    m_user_value_store = QSharedPointer<qt_user_value_store>(new qt_user_value_store());
 
-    m_video_output = new qt_video_output(this);
-    setCentralWidget(m_video_output);
+    qt_video_output *video_output = new qt_video_output(this);
+    setCentralWidget(video_output);
 
     m_settings = new qt_settings_dialog(m_user_value_store, this, Qt::WindowTitleHint  | Qt::WindowCloseButtonHint);
 
@@ -85,35 +83,40 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
     status_bar->addPermanentWidget(m_emulated_time_label);
     status_bar->addPermanentWidget(m_speed_label);
     status_bar->addPermanentWidget(m_fps_label);
+    emulator_speed(0);
+    emulator_milliseconds(0);
+    fps(0);
 
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(update_status()));
-    timer->start(250);
-
-    m_emulation_runner = new qt_emulation_runner(8);
-    m_emulation_runner->moveToThread(&m_emulation_runner_thread);
+    qt_emulation_runner *emulation_runner = new qt_emulation_runner();
+    emulation_runner->moveToThread(&m_emulation_runner_thread);
 
     // connect emulation runner (& thread) signals
 
-    connect(&m_emulation_runner_thread, &QThread::started, m_emulation_runner, &qt_emulation_runner::initialize);
-    connect(&m_emulation_runner_thread, &QThread::finished, m_emulation_runner, &QObject::deleteLater);
+    connect(&m_emulation_runner_thread, &QThread::started, emulation_runner, &qt_emulation_runner::initialize);
+    connect(&m_emulation_runner_thread, &QThread::finished, emulation_runner, &QObject::deleteLater);
 
-    connect(m_emulation_runner, SIGNAL(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)), m_settings, SLOT(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)));
-    connect(m_emulation_runner, SIGNAL(emulator_screen_updated(std::shared_ptr<const age::pixel_vector>)), m_video_output, SLOT(new_frame(std::shared_ptr<const age::pixel_vector>)));
+    connect(emulation_runner, SIGNAL(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)), m_settings, SLOT(audio_output_activated(QAudioDeviceInfo,QAudioFormat,int,int)));
+    connect(emulation_runner, SIGNAL(emulator_screen_update(QSharedPointer<const age::pixel_vector>)), video_output, SLOT(new_frame(QSharedPointer<const age::pixel_vector>)));
+    connect(emulation_runner, SIGNAL(emulator_speed(int)), this, SLOT(emulator_speed(int)));
+    connect(emulation_runner, SIGNAL(emulator_milliseconds(qint64)), this, SLOT(emulator_milliseconds(qint64)));
+
+    // connect video output signals
+
+    connect(video_output, SIGNAL(fps(int)), this, SLOT(fps(int)));
 
     // connect settings signals
 
-    connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), m_video_output, SLOT(set_bilinear_filter(bool)));
-    connect(m_settings, SIGNAL(video_frames_to_blend_changed(uint)), m_video_output, SLOT(set_blend_frames(uint)));
-    connect(m_settings, SIGNAL(video_filter_chain_changed(qt_filter_vector)), m_video_output, SLOT(set_post_processing_filter(qt_filter_vector)));
+    connect(m_settings, SIGNAL(video_use_bilinear_filter_changed(bool)), video_output, SLOT(set_bilinear_filter(bool)));
+    connect(m_settings, SIGNAL(video_frames_to_blend_changed(int)), video_output, SLOT(set_blend_frames(int)));
+    connect(m_settings, SIGNAL(video_post_processing_filter_changed(qt_filter_list)), video_output, SLOT(set_post_processing_filter(qt_filter_list)));
 
-    connect(m_settings, SIGNAL(audio_output_changed(QAudioDeviceInfo,QAudioFormat)), m_emulation_runner, SLOT(set_audio_output(QAudioDeviceInfo,QAudioFormat)));
-    connect(m_settings, SIGNAL(audio_volume_changed(int)), m_emulation_runner, SLOT(set_audio_volume(int)));
-    connect(m_settings, SIGNAL(audio_latency_changed(int)), m_emulation_runner, SLOT(set_audio_latency(int)));
-    connect(m_settings, SIGNAL(audio_downsampler_quality_changed(age::qt_downsampler_quality)), m_emulation_runner, SLOT(set_audio_downsampler_quality(age::qt_downsampler_quality)));
+    connect(m_settings, SIGNAL(audio_output_changed(QAudioDeviceInfo,QAudioFormat)), emulation_runner, SLOT(set_audio_output(QAudioDeviceInfo,QAudioFormat)));
+    connect(m_settings, SIGNAL(audio_volume_changed(int)), emulation_runner, SLOT(set_audio_volume(int)));
+    connect(m_settings, SIGNAL(audio_latency_changed(int)), emulation_runner, SLOT(set_audio_latency(int)));
+    connect(m_settings, SIGNAL(audio_downsampler_quality_changed(age::qt_downsampler_quality)), emulation_runner, SLOT(set_audio_downsampler_quality(age::qt_downsampler_quality)));
 
-    connect(m_settings, SIGNAL(misc_pause_emulator_changed(bool)), m_emulation_runner, SLOT(set_emulator_paused(bool)));
-    connect(m_settings, SIGNAL(misc_synchronize_emulator_changed(bool)), m_emulation_runner, SLOT(set_emulator_synchronize(bool)));
+    connect(m_settings, SIGNAL(misc_pause_emulator_changed(bool)), emulation_runner, SLOT(set_emulator_paused(bool)));
+    connect(m_settings, SIGNAL(misc_synchronize_emulator_changed(bool)), emulation_runner, SLOT(set_emulator_synchronize(bool)));
     connect(m_settings, SIGNAL(misc_show_menu_bar_changed(bool)), this, SLOT(misc_show_menu_bar_changed(bool)));
     connect(m_settings, SIGNAL(misc_show_status_bar_changed(bool)), this, SLOT(misc_show_status_bar_changed(bool)));
     connect(m_settings, SIGNAL(misc_show_menu_bar_fullscreen_changed(bool)), this, SLOT(misc_show_menu_bar_fullscreen_changed(bool)));
@@ -130,11 +133,11 @@ age::qt_main_window::qt_main_window(QWidget *parent, Qt::WindowFlags flags)
 
     // connect main window signals
 
-    connect(this, SIGNAL(emulator_loaded(std::shared_ptr<age::qt_emulator>)), m_emulation_runner, SLOT(set_emulator(std::shared_ptr<age::qt_emulator>)));
-    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_video_output, SLOT(set_emulator_screen_size(uint,uint)));
-    connect(this, SIGNAL(emulator_screen_resize(uint,uint)), m_settings, SLOT(set_emulator_screen_size(uint,uint)));
-    connect(this, SIGNAL(emulator_button_down(uint)), m_emulation_runner, SLOT(set_emulator_buttons_down(uint)));
-    connect(this, SIGNAL(emulator_button_up(uint)), m_emulation_runner, SLOT(set_emulator_buttons_up(uint)));
+    connect(this, SIGNAL(emulator_loaded(QSharedPointer<age::qt_emulator>)), emulation_runner, SLOT(set_emulator(QSharedPointer<age::qt_emulator>)));
+    connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), video_output, SLOT(set_emulator_screen_size(int16_t,int16_t)));
+    connect(this, SIGNAL(emulator_screen_resize(int16_t,int16_t)), m_settings, SLOT(set_emulator_screen_size(int16_t,int16_t)));
+    connect(this, SIGNAL(emulator_button_down(int)), emulation_runner, SLOT(set_emulator_buttons_down(int)));
+    connect(this, SIGNAL(emulator_button_up(int)), emulation_runner, SLOT(set_emulator_buttons_up(int)));
 
     // trigger initial setting signals after slots have been connected & start the emulation runner thread
 
@@ -182,7 +185,7 @@ void age::qt_main_window::keyPressEvent(QKeyEvent *keyEvent)
     qt_key_event event = get_event_for_key(keyEvent->key());
     if (event == qt_key_event::none)
     {
-        QMainWindow::keyReleaseEvent(keyEvent);
+        QMainWindow::keyPressEvent(keyEvent);
     }
 
     // check if this is a settings event
@@ -192,7 +195,7 @@ void age::qt_main_window::keyPressEvent(QKeyEvent *keyEvent)
 
         if (!keyEvent->isAutoRepeat())
         {
-            uint button = get_button(event);
+            int button = get_button(event);
             if (button != 0)
             {
                 emit emulator_button_down(button);
@@ -213,7 +216,7 @@ void age::qt_main_window::keyReleaseEvent(QKeyEvent *keyEvent)
     // notify the emulator
     else if (!keyEvent->isAutoRepeat())
     {
-        uint button = get_button(event);
+        int button = get_button(event);
         if (button != 0)
         {
             emit emulator_button_up(button);
@@ -231,9 +234,9 @@ void age::qt_main_window::keyReleaseEvent(QKeyEvent *keyEvent)
 //
 //---------------------------------------------------------
 
-age::uint age::qt_main_window::get_button(qt_key_event key_event) const
+int age::qt_main_window::get_button(qt_key_event key_event) const
 {
-    uint result;
+    int result;
 
     switch(key_event)
     {
@@ -300,7 +303,7 @@ void age::qt_main_window::open_file(gb_hardware hardware)
         }
     }
 
-    LOG("open-file-dialog selected " << std::quoted(file_name.toStdString()));
+    LOG("open-file-dialog selected " << AGE_LOG_QUOTED(file_name.toStdString()));
     if (file_name.length() > 0)
     {
         // load file
@@ -314,18 +317,18 @@ void age::qt_main_window::open_file(gb_hardware hardware)
         }
 
         // create emulator
-        std::shared_ptr<qt_emulator> new_emulator;
+        QSharedPointer<qt_emulator> new_emulator;
 
         if (file_contents.size() > 0)
         {
-            new_emulator = std::allocate_shared<qt_emulator>(std::allocator<qt_emulator>(), file_contents, hardware, m_user_value_store);
+            new_emulator = QSharedPointer<qt_emulator>(new qt_emulator(file_contents, hardware, m_user_value_store));
         }
 
         // propagate new emulator
         if (new_emulator != nullptr)
         {
-            uint screen_width = new_emulator->get_emulator()->get_screen_width();
-            uint screen_height = new_emulator->get_emulator()->get_screen_height();
+            int16_t screen_width = new_emulator->get_emulator()->get_screen_width();
+            int16_t screen_height = new_emulator->get_emulator()->get_screen_height();
 
             emit emulator_screen_resize(screen_width, screen_height);
             emit emulator_loaded(new_emulator);
@@ -381,21 +384,6 @@ void age::qt_main_window::misc_show_status_bar_fullscreen_changed(bool show_stat
 
 
 
-void age::qt_main_window::update_status()
-{
-    uint64 millis = m_emulation_runner->get_emulated_milliseconds();
-
-    QString emulated_time = QString::number(millis / 1000) + "." + QString::number((millis % 1000) / 10) + " s";
-    QString speed(QString::number(m_emulation_runner->get_speed_percent()).append(" %"));
-    QString fps(QString::number(m_video_output->get_fps()).append(" fps"));
-
-    m_emulated_time_label->setText(emulated_time);
-    m_speed_label->setText(speed);
-    m_fps_label->setText(fps);
-}
-
-
-
 void age::qt_main_window::menu_emulator_open()
 {
     open_file();
@@ -439,4 +427,24 @@ void age::qt_main_window::menu_emulator_fullscreen()
 void age::qt_main_window::menu_emulator_exit()
 {
     close();
+}
+
+
+
+void age::qt_main_window::emulator_speed(int speed_percent)
+{
+    QString speed(QString::number(speed_percent).append(" %"));
+    m_speed_label->setText(speed);
+}
+
+void age::qt_main_window::emulator_milliseconds(qint64 emulated_milliseconds)
+{
+    QString emulated_time = QString::number(emulated_milliseconds / 1000) + "." + QString::number((emulated_milliseconds % 1000) / 10) + " s";
+    m_emulated_time_label->setText(emulated_time);
+}
+
+void age::qt_main_window::fps(int fps)
+{
+    QString speed(QString::number(fps).append(" fps"));
+    m_fps_label->setText(speed);
 }

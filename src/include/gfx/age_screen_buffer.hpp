@@ -36,26 +36,26 @@ class screen_buffer
 {
 public:
 
-    screen_buffer(uint screen_width, uint screen_height);
+    screen_buffer(int16_t screen_width, int16_t screen_height);
 
-    uint get_front_buffer_index() const;
-    uint get_screen_width() const;
-    uint get_screen_height() const;
+    uint8_t get_front_buffer_index() const;
+    int16_t get_screen_width() const;
+    int16_t get_screen_height() const;
 
     const pixel_vector& get_front_buffer() const;
     const pixel_vector& get_back_buffer() const;
 
     pixel_vector& get_back_buffer();
-    pixel* get_first_scanline_pixel(uint scanline);
+    pixel* get_first_scanline_pixel(int16_t scanline);
     void switch_buffers();
 
 private:
 
-    const uint m_screen_width;
-    const uint m_screen_height;
+    const int16_t m_screen_width;
+    const int16_t m_screen_height;
 
     std::array<pixel_vector, 2> m_buffers;
-    uint m_current_front_buffer = 0;
+    uint8_t m_current_front_buffer = 0;
 };
 
 

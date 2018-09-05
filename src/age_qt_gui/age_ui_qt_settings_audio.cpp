@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
 #include <QChar> // QLatin1Char
 #include <QGroupBox>
 #include <QList>
@@ -54,7 +52,7 @@ constexpr int qt_audio_volume_percent_max = 100;
 //
 //---------------------------------------------------------
 
-age::qt_settings_audio::qt_settings_audio(std::shared_ptr<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
       m_user_value_store(user_value_store)
 {
@@ -184,7 +182,8 @@ void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo &dev
 
     m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
 
-    int samples = buffer_size / sizeof_pcm_sample;
+    AGE_ASSERT(sizeof(pcm_sample) <= int_max);
+    int samples = buffer_size / static_cast<int>(sizeof(pcm_sample));
     int millis = samples * 1000 / format.sampleRate();
     m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
                             + QString::number(samples) + " samples, "
@@ -203,14 +202,14 @@ void age::qt_settings_audio::toggle_mute()
 void age::qt_settings_audio::increase_volume()
 {
     int value = m_slider_volume->value();
-    int delta = std::max(1, value / 20);
+    int delta = qMax(1, value / 20);
     m_slider_volume->setValue(value + delta);
 }
 
 void age::qt_settings_audio::decrease_volume()
 {
     int value = m_slider_volume->value();
-    int delta = std::max(1, value / 20);
+    int delta = qMax(1, value / 20);
     m_slider_volume->setValue(value - delta);
 }
 

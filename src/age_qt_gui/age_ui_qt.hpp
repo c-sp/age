@@ -21,11 +21,10 @@
 //! \file
 //!
 
-#include <atomic>
 #include <ostream>
 #include <string>
-#include <vector>
 
+#include <QList>
 #include <QString>
 #include <QtGui/qopengl.h> // GLint
 
@@ -42,14 +41,11 @@ std::string operator+(const std::string &std_string, const QString &q_string);
 namespace age
 {
 
-typedef std::atomic_size_t  atomic_uint;
-typedef std::atomic<uint64> atomic_uint64;
-
-
-
 bool is_checked(int checked_state);
 
+constexpr int stats_per_second = 4;
 
+constexpr qint64 qint64_max = std::numeric_limits<qint64>::max();
 
 
 
@@ -64,10 +60,8 @@ bool is_checked(int checked_state);
 //!
 //! While in theory we could handle bigger files, it does not make sense for our use cases.
 //! There are no cartridge or RAM files bigger than this.
-//! In fact it could even lower performance and stability to try loading such big files
-//! (think of a RAM file of several gigabytes being loaded into memory).
 //!
-constexpr qint64 max_file_bytes = 32 * 1024 * 1024;
+constexpr int max_file_bytes = 32 * 1024 * 1024;
 
 
 
@@ -113,9 +107,7 @@ qt_downsampler_quality get_qt_downsampler_quality_for_name(const QString &qualit
 //
 //---------------------------------------------------------
 
-constexpr uint qt_video_frame_history_size = 4;
-
-
+constexpr int qt_video_frame_history_size = 4;
 
 // post processing filter
 
@@ -124,7 +116,7 @@ enum class qt_filter : int
     none = 0,
 
     scale2x = 1,
-    age_scale2x = 2,
+    scale2x_age = 2,
 
     gauss3x3 = 3,
     gauss5x5 = 4,
@@ -133,7 +125,7 @@ enum class qt_filter : int
     emboss5x5 = 6
 };
 
-typedef std::vector<qt_filter> qt_filter_vector;
+typedef QList<qt_filter> qt_filter_list;
 
 GLint get_qt_filter_factor(qt_filter filter);
 

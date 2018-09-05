@@ -66,13 +66,13 @@ struct gb_test_info
     gb_mode m_mode;
     bool m_mooneye_debug_op;
 
-    uint8 m_a = 0;
-    uint8 m_b = 0;
-    uint8 m_c = 0;
-    uint8 m_d = 0;
-    uint8 m_e = 0;
-    uint8 m_h = 0;
-    uint8 m_l = 0;
+    uint8_t m_a = 0;
+    uint8_t m_b = 0;
+    uint8_t m_c = 0;
+    uint8_t m_d = 0;
+    uint8_t m_e = 0;
+    uint8_t m_h = 0;
+    uint8_t m_l = 0;
 };
 
 } // namespace age

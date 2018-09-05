@@ -14,34 +14,24 @@
 // limitations under the License.
 //
 
-#ifndef AGE_NON_COPYABLE_HPP
-#define AGE_NON_COPYABLE_HPP
+#ifndef AGE_UTILITIES_HPP
+#define AGE_UTILITIES_HPP
 
 //!
 //! \file
 //!
 
+#include <age_types.hpp>
+
 
 
 namespace age {
 
-//!
-//! \brief Base class for non-copyable instances.
-//!
-class non_copyable
-{
-public:
+uint32_t crc32(const uint8_vector &data);
+uint32_t crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end);
 
-    non_copyable() {}
-
-    non_copyable(const non_copyable&) = delete;
-    non_copyable(non_copyable&&) = delete;
-    non_copyable& operator=(const non_copyable&) = delete;
-    non_copyable& operator=(non_copyable&&) = delete;
-};
-
-} // namespace age
+}
 
 
 
-#endif // AGE_NON_COPYABLE_HPP
+#endif // AGE_UTILITIES_HPP

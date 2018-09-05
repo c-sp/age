@@ -20,32 +20,33 @@
 
 
 
-age::screen_buffer::screen_buffer(uint screen_width, uint screen_height)
+age::screen_buffer::screen_buffer(int16_t screen_width, int16_t screen_height)
     : m_screen_width(screen_width),
       m_screen_height(screen_height)
 {
-    AGE_ASSERT(m_screen_width <= uint_max / m_screen_height);
-    AGE_ASSERT(m_screen_height <= uint_max / m_screen_width);
     AGE_ASSERT(m_screen_width > 0);
     AGE_ASSERT(m_screen_height > 0);
 
-    m_buffers[0] = pixel_vector(m_screen_width * m_screen_height);
-    m_buffers[1] = pixel_vector(m_screen_width * m_screen_height);
+    // we rely on integral promotion to >=32 bits when multipling width & height
+    auto buffer_size = static_cast<unsigned>(m_screen_width * m_screen_height);
+
+    m_buffers[0] = pixel_vector(buffer_size);
+    m_buffers[1] = pixel_vector(buffer_size);
 }
 
 
 
-age::uint age::screen_buffer::get_front_buffer_index() const
+age::uint8_t age::screen_buffer::get_front_buffer_index() const
 {
     return m_current_front_buffer;
 }
 
-age::uint age::screen_buffer::get_screen_width() const
+age::int16_t age::screen_buffer::get_screen_width() const
 {
     return m_screen_width;
 }
 
-age::uint age::screen_buffer::get_screen_height() const
+age::int16_t age::screen_buffer::get_screen_height() const
 {
     return m_screen_height;
 }
@@ -67,7 +68,7 @@ age::pixel_vector& age::screen_buffer::get_back_buffer()
     return m_buffers[1 - m_current_front_buffer];
 }
 
-age::pixel* age::screen_buffer::get_first_scanline_pixel(uint scanline)
+age::pixel* age::screen_buffer::get_first_scanline_pixel(int16_t scanline)
 {
     AGE_ASSERT(scanline < m_screen_height);
     pixel *result = get_back_buffer().data() + scanline * m_screen_width;

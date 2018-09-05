@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) if ((m_next_event_cycle - 0 < 15000)) { AGE_LOG("cycle " << m_next_event_cycle << ": " << x); }
+#define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -62,7 +62,7 @@ age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame
     write_bgp(0xFC);
     if (m_cgb)
     {
-        for (uint i = 0; i < m_palette.size() / 2; ++i)
+        for (unsigned i = 0; i < gb_num_palette_colors; ++i)
         {
             update_color(i);
         }
@@ -121,8 +121,8 @@ bool age::gb_lcd::is_oam_readable() const
     {
         if (get_scanline() < gb_screen_height)
         {
-            uint current_cycle = m_core.get_oscillation_cycle();
-            uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+            int current_cycle = m_core.get_oscillation_cycle();
+            int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
             result &= next_scanline_offset > 4;
         }
     }
@@ -149,8 +149,8 @@ bool age::gb_lcd::is_oam_writable() const
     {
         if (get_scanline() < gb_screen_height)
         {
-            uint current_cycle = m_core.get_oscillation_cycle();
-            uint next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
+            int current_cycle = m_core.get_oscillation_cycle();
+            int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
             result &= next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle();
         }
     }
@@ -166,7 +166,7 @@ bool age::gb_lcd::is_hdma_active() const
 
 void age::gb_lcd::emulate()
 {
-    uint current_cycle = m_core.get_oscillation_cycle();
+    int current_cycle = m_core.get_oscillation_cycle();
     emulate(current_cycle);
 }
 
@@ -187,8 +187,10 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
     //
     if (!m_hdma_active && hdma_active)
     {
-        uint8 mode = m_stat & gb_stat_modes;
-        uint next_scanline_offset = m_lcd_enabled ? get_next_scanline_cycle_offset(m_core.get_oscillation_cycle()) : gb_no_cycle;
+        int mode = m_stat & gb_stat_modes;
+        int next_scanline_offset = m_lcd_enabled ? get_next_scanline_cycle_offset(m_core.get_oscillation_cycle()) : int_max;
+        AGE_ASSERT(next_scanline_offset >= 0);
+
         if ((mode == 0) && (next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle()))
         {
             m_core.insert_event(0, gb_event::start_hdma);
@@ -200,7 +202,7 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
 
 
 
-void age::gb_lcd::set_back_cycles(uint offset)
+void age::gb_lcd::set_back_cycles(int offset)
 {
     gb_lyc_interrupter::set_back_cycles(offset);
     AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
@@ -219,19 +221,23 @@ void age::gb_lcd::set_back_cycles(uint offset)
 //
 //---------------------------------------------------------
 
-void age::gb_lcd::emulate(uint to_cycle)
+void age::gb_lcd::emulate(int to_cycle)
 {
-    while (to_cycle >= m_next_event_cycle)
+    while ((m_next_event_cycle != gb_no_cycle) && (to_cycle >= m_next_event_cycle))
     {
         AGE_ASSERT(m_next_event != nullptr);
         m_next_event(*this);
     }
 }
 
-void age::gb_lcd::next_step(uint cycle_offset, std::function<void(gb_lcd&)> step)
+void age::gb_lcd::next_step(int cycle_offset, std::function<void(gb_lcd&)> step)
 {
+    AGE_ASSERT(m_next_event_cycle != gb_no_cycle);
+    AGE_ASSERT(cycle_offset >= 0);
+
     m_next_event_cycle += cycle_offset;
     m_next_event = step;
+
     AGE_ASSERT(get_next_scanline_cycle_offset(m_next_event_cycle) < gb_cycles_per_scanline);
 }
 
@@ -329,7 +335,7 @@ void age::gb_lcd::mode0_next_event()
     //
     else
     {
-        uint offset = get_next_scanline_cycle_offset(m_next_event_cycle) - m_core.get_machine_cycles_per_cpu_cycle();
+        int offset = get_next_scanline_cycle_offset(m_next_event_cycle) - m_core.get_machine_cycles_per_cpu_cycle();
         next_step(offset, &mode2_early_interrupt);
     }
 }
@@ -552,7 +558,7 @@ void age::gb_lcd::mode3_start(gb_lcd &lcd)
     lcd.scanline_init(first_scanline_pixel);
 
     // next step
-    uint offset = lcd.m_core.is_double_speed() ? 6 : 3;
+    int offset = lcd.m_core.is_double_speed() ? 6 : 3;
     lcd.next_step(offset, &mode3_render);
 }
 
@@ -579,10 +585,9 @@ void age::gb_lcd::mode3_render(gb_lcd &lcd)
 
             if (lcd.m_hdma_active)
             {
-                uint cycle = lcd.m_core.get_oscillation_cycle();
-                uint offset = lcd.m_core.is_double_speed() ? 1 : 2;
-                offset += lcd.m_next_event_cycle;
-                offset = (offset > cycle) ? offset - cycle : 0;
+                int cycle = lcd.m_core.get_oscillation_cycle();
+                int offset = lcd.m_next_event_cycle + (lcd.m_core.is_double_speed() ? 1 : 2);
+                offset = std::max(offset - cycle, 0);
                 LOG("scheduling HDMA event, offset " << offset);
                 lcd.m_core.insert_event(offset, gb_event::start_hdma);
             }

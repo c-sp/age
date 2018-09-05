@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <ios> // std::hex
-
 #include <age_debug.hpp>
 
 #include "age_gb_timer.hpp"
@@ -28,7 +26,7 @@
 
 namespace age {
 
-constexpr uint8 gb_tac_start_timer = 0x04;
+constexpr uint8_t gb_tac_start_timer = 0x04;
 
 }
 
@@ -57,23 +55,23 @@ age::gb_timer::gb_timer(gb_core &core)
 //
 //---------------------------------------------------------
 
-age::uint8 age::gb_timer::read_tma() const
+age::uint8_t age::gb_timer::read_tma() const
 {
     return m_tma;
 }
 
-age::uint8 age::gb_timer::read_tac() const
+age::uint8_t age::gb_timer::read_tac() const
 {
     return m_tac;
 }
 
-age::uint8 age::gb_timer::read_tima()
+age::uint8_t age::gb_timer::read_tima()
 {
     // if the timer is running we have to calculate the current TIMA value
     if (m_tima_running)
     {
         // get the current TIMA value based on the counter
-        uint tima = m_tima_counter.get_current_value();
+        int tima = m_tima_counter.get_current_value();
 
         // handle overflow(s)
         if (tima >= 0x100)
@@ -107,15 +105,15 @@ age::uint8 age::gb_timer::read_tima()
 
         // save the current TIMA value
         AGE_ASSERT(tima < 0x100);
-        m_tima = static_cast<uint8>(tima);
+        m_tima = tima & 0xFF;
     }
 
     // return the current TIMA value
-    LOG("reading tima 0x" << std::hex << (uint)m_tima);
+    LOG("reading tima " << AGE_LOG_HEX(m_tima));
     return m_tima;
 }
 
-age::uint8 age::gb_timer::read_div() const
+age::uint8_t age::gb_timer::read_div() const
 {
     return (m_counter.get_current_value() >> 6) & 0xFF;
 }
@@ -128,7 +126,7 @@ age::uint8 age::gb_timer::read_div() const
 //
 //---------------------------------------------------------
 
-void age::gb_timer::write_tma(uint8 value)
+void age::gb_timer::write_tma(uint8_t value)
 {
     if (m_tima_running)
     {
@@ -149,10 +147,10 @@ void age::gb_timer::write_tma(uint8 value)
     }
 
     m_tma = value;
-    LOG("tma set to 0x" << std::hex << (uint)m_tma);
+    LOG("tma set to " << AGE_LOG_HEX(m_tma));
 }
 
-void age::gb_timer::write_tima(uint8 value)
+void age::gb_timer::write_tima(uint8_t value)
 {
     if (m_tima_running)
     {
@@ -169,7 +167,7 @@ void age::gb_timer::write_tima(uint8 value)
         {
             m_tima_counter.set_tima(value);
             schedule_timer_overflow();
-            LOG("tima set to 0x" << std::hex << (uint)value);
+            LOG("tima set to " << AGE_LOG_HEX(value));
         }
     }
 
@@ -177,11 +175,11 @@ void age::gb_timer::write_tima(uint8 value)
     else
     {
         m_tima = value;
-        LOG("tima set to 0x" << std::hex << (uint)m_tima);
+        LOG("tima set to " << AGE_LOG_HEX(m_tima));
     }
 }
 
-void age::gb_timer::write_tac(uint8 value)
+void age::gb_timer::write_tac(uint8_t value)
 {
     // verified by mooneye-gb & gambatte tests:
     //  A TIMA increment occurs when bit X of the counter goes low.
@@ -207,7 +205,7 @@ void age::gb_timer::write_tac(uint8 value)
     //
 
     bool new_tima_running = (value & gb_tac_start_timer) > 0;
-    uint tima = m_tima;
+    int tima = m_tima;
 
     if (m_tima_running)
     {
@@ -220,14 +218,14 @@ void age::gb_timer::write_tac(uint8 value)
         // changing the frequency might trigger a TIME increment
         else
         {
-            uint new_increment_bit = m_tima_counter.get_trigger_bit(value);
+            int new_increment_bit = m_tima_counter.get_trigger_bit(value);
             tima = check_for_early_increment(new_increment_bit);
         }
     }
 
     // update timer configuration
     m_tac = value | 0xF8;
-    LOG("tac set to 0x" << std::hex << (uint)m_tac);
+    LOG("tac set to " << AGE_LOG_HEX(m_tac));
 
     m_tima_counter.set_frequency(m_tac);
     m_tima_running = new_tima_running;
@@ -248,7 +246,7 @@ void age::gb_timer::write_tac(uint8 value)
     }
 }
 
-void age::gb_timer::write_div(uint8)
+void age::gb_timer::write_div(uint8_t)
 {
     // verified by mooneye-gb tests:
     //  writing to DIV resets the internal counter that is used
@@ -273,7 +271,7 @@ void age::gb_timer::write_div(uint8)
         //      acceptance/timer/tim10_div_trigger
         //      acceptance/timer/tim11_div_trigger
         //
-        uint tima = check_for_early_increment(0);
+        int tima = check_for_early_increment(0);
         AGE_ASSERT(tima <= 0x100);
 
         // reset the counter and propagate the reset to m_tima_counter
@@ -317,7 +315,7 @@ void age::gb_timer::switch_double_speed_mode()
     }
 }
 
-void age::gb_timer::set_back_cycles(uint offset)
+void age::gb_timer::set_back_cycles(int offset)
 {
     m_counter.set_back_cycles(offset);
 }
@@ -330,16 +328,16 @@ void age::gb_timer::set_back_cycles(uint offset)
 //
 //---------------------------------------------------------
 
-age::uint age::gb_timer::check_for_early_increment(uint new_increment_bit)
+int age::gb_timer::check_for_early_increment(int new_increment_bit)
 {
     AGE_ASSERT(m_tima_running);
 
     // calculate the current TIMA value
-    uint tima = read_tima();
+    int tima = read_tima();
 
     // check for early increment
     // (the bit must change from high to low for that)
-    uint current_increment_bit = m_tima_counter.get_trigger_bit(m_tac);
+    int current_increment_bit = m_tima_counter.get_trigger_bit(m_tac);
     current_increment_bit &= ~new_increment_bit;
 
     AGE_ASSERT(current_increment_bit <= 1);
@@ -369,11 +367,11 @@ void age::gb_timer::schedule_timer_overflow()
     AGE_ASSERT(m_tima_running);
 
     // calculate the current TIMA value
-    uint tima = read_tima();
+    int tima = read_tima();
 
     // calculate the cycle offset
-    uint tima_offset = 0x100 - tima;
-    uint cycle_offset = m_tima_counter.get_cycle_offset(tima_offset);
+    int tima_offset = 0x100 - tima;
+    int cycle_offset = m_tima_counter.get_cycle_offset(tima_offset);
 
     // verified by gambatte tests:
     //  the interrupt seems to be raised with a delay
