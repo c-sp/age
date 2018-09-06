@@ -130,9 +130,9 @@ private:
     }
 
     template<unsigned channel>
-    void cycle_length_counter()
+    void tick_length_counter()
     {
-        if (m_length_counter[channel].cycle())
+        if (m_length_counter[channel].tick())
         {
             deactivate_channel<channel>();
         }

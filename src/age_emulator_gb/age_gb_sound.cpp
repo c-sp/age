@@ -158,10 +158,10 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
         case 4:
             generate_samples(at_cycle);
             LOG("length counter tick for cycle " << at_cycle);
-            cycle_length_counter<gb_channel_1>();
-            cycle_length_counter<gb_channel_2>();
-            cycle_length_counter<gb_channel_3>();
-            cycle_length_counter<gb_channel_4>();
+            tick_length_counter<gb_channel_1>();
+            tick_length_counter<gb_channel_2>();
+            tick_length_counter<gb_channel_3>();
+            tick_length_counter<gb_channel_4>();
             // fall through
         case 1:
         case 3:

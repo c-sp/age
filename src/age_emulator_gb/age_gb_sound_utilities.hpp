@@ -449,7 +449,7 @@ public:
 
     void write_nrX1(uint8_t nrX1);
     bool write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd);
-    bool cycle();
+    bool tick();
 
 private:
 
