@@ -78,7 +78,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     }
 
     // make sure audio output is complete
-    m_sound.generate_samples();
+    m_sound.update_state();
 
     int cycles_emulated = m_core.get_oscillation_cycle() - starting_cycle;
     AGE_ASSERT(cycles_emulated >= 0);
@@ -89,7 +89,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
         int offset = m_core.get_oscillation_cycle() - cycles_to_keep;
 
         AGE_ASSERT(offset > 0);
-        AGE_ASSERT(offset < m_core.get_oscillation_cycle());
+        AGE_ASSERT(offset <= m_core.get_oscillation_cycle());
 
         m_core.set_back_cycles(offset);
         m_sound.set_back_cycles(offset);

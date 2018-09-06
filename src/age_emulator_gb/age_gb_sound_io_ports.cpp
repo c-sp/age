@@ -16,6 +16,12 @@
 
 #include "age_gb_sound.hpp"
 
+#if 0
+#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#else
+#define LOG(x)
+#endif
+
 namespace
 {
 
@@ -57,7 +63,7 @@ age::uint8_t age::gb_sound::read_nr44() const { return m_nr44; }
 
 age::uint8_t age::gb_sound::read_nr50() const { return m_nr50; }
 age::uint8_t age::gb_sound::read_nr51() const { return m_nr51; }
-age::uint8_t age::gb_sound::read_nr52() const { return m_nr52; }
+age::uint8_t age::gb_sound::read_nr52()       { update_state(); return m_nr52; }
 
 
 
@@ -73,8 +79,8 @@ void age::gb_sound::write_nr50(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
-        m_nr50 = value;
+        update_state();
+        m_nr50 = value; // S01 S02 volume
 
         calculate_channel_multiplier<gb_channel_1>();
         calculate_channel_multiplier<gb_channel_2>();
@@ -87,8 +93,8 @@ void age::gb_sound::write_nr51(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
-        m_nr51 = value;
+        update_state();
+        m_nr51 = value; // C1..4 to S01 S02 "routing"
 
         calculate_channel_multiplier<gb_channel_1>();
         calculate_channel_multiplier<gb_channel_2>();
@@ -99,7 +105,7 @@ void age::gb_sound::write_nr51(uint8_t value)
 
 void age::gb_sound::write_nr52(uint8_t value)
 {
-    generate_samples();
+    update_state();
 
     m_nr52 &= ~gb_master_switch;
     m_nr52 |= value & gb_master_switch;
@@ -163,7 +169,7 @@ void age::gb_sound::write_nr10(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_nr10 = value | 0x80;
         bool deactivate = m_c1.write_nrX0(value);
         if (deactivate)
@@ -175,17 +181,20 @@ void age::gb_sound::write_nr10(uint8_t value)
 
 void age::gb_sound::write_nr11(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
     {
+        update_state();
         m_length_counter[gb_channel_1].write_nrX1(value);
-    }
-    // wave pattern duty only changeable, if switched on
-    if (m_master_on)
-    {
-        generate_samples();
-        m_c1.set_wave_pattern_duty(value);
-        m_nr11 = value | 0x3F;
+
+        // wave pattern duty only changeable, if switched on
+        if (m_master_on)
+        {
+            m_c1.set_wave_pattern_duty(value);
+            m_nr11 = value | 0x3F;
+        }
     }
 }
 
@@ -193,7 +202,7 @@ void age::gb_sound::write_nr12(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         bool deactivate = m_c1.write_nrX2(value);
         if (deactivate)
         {
@@ -206,16 +215,17 @@ void age::gb_sound::write_nr13(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c1.set_low_frequency_bits(value);
     }
 }
 
 void age::gb_sound::write_nr14(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c1.set_high_frequency_bits(value);
 
         bool counter_deactivate = m_length_counter[gb_channel_1].write_nrX4(value, m_next_frame_sequencer_step_odd);
@@ -255,17 +265,20 @@ void age::gb_sound::write_nr14(uint8_t value)
 
 void age::gb_sound::write_nr21(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
     {
+        update_state();
         m_length_counter[gb_channel_2].write_nrX1(value);
-    }
-    // wave pattern duty only changeable, if switched on
-    if (m_master_on)
-    {
-        generate_samples();
-        m_c2.set_wave_pattern_duty(value);
-        m_nr21 = value | 0x3F;
+
+        // wave pattern duty only changeable, if switched on
+        if (m_master_on)
+        {
+            m_c2.set_wave_pattern_duty(value);
+            m_nr21 = value | 0x3F;
+        }
     }
 }
 
@@ -273,7 +286,7 @@ void age::gb_sound::write_nr22(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         bool deactivate = m_c2.write_nrX2(value);
         if (deactivate)
         {
@@ -286,16 +299,17 @@ void age::gb_sound::write_nr23(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c2.set_low_frequency_bits(value);
     }
 }
 
 void age::gb_sound::write_nr24(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c2.set_high_frequency_bits(value);
 
         bool counter_deactivate = m_length_counter[gb_channel_2].write_nrX4(value, m_next_frame_sequencer_step_odd);
@@ -338,7 +352,7 @@ void age::gb_sound::write_nr30(uint8_t value)
         m_nr30 = value | 0x7F;
         if ((m_nr30 & gb_master_switch) == 0)
         {
-            generate_samples();
+            update_state();
             deactivate_channel<gb_channel_3>();
         }
     }
@@ -346,9 +360,11 @@ void age::gb_sound::write_nr30(uint8_t value)
 
 void age::gb_sound::write_nr31(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
     {
+        update_state();
         m_length_counter[gb_channel_3].write_nrX1(value);
     }
 }
@@ -357,7 +373,7 @@ void age::gb_sound::write_nr32(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_nr32 = value | 0x9F;
         switch (m_nr32 & 0x60)
         {
@@ -373,16 +389,17 @@ void age::gb_sound::write_nr33(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c3.set_low_frequency_bits(value);
     }
 }
 
 void age::gb_sound::write_nr34(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c3.set_high_frequency_bits(value);
 
         bool counter_deactivate = m_length_counter[gb_channel_3].write_nrX4(value, m_next_frame_sequencer_step_odd);
@@ -436,9 +453,11 @@ void age::gb_sound::write_nr34(uint8_t value)
 
 void age::gb_sound::write_nr41(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     // length counter always writable for DMG
     if (m_master_on || !m_is_cgb)
     {
+        update_state();
         m_length_counter[gb_channel_4].write_nrX1(value);
     }
 }
@@ -447,7 +466,7 @@ void age::gb_sound::write_nr42(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         bool deactivate = m_c4.write_nrX2(value);
         if (deactivate)
         {
@@ -460,16 +479,17 @@ void age::gb_sound::write_nr43(uint8_t value)
 {
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
         m_c4.write_nrX3(value);
     }
 }
 
 void age::gb_sound::write_nr44(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
-        generate_samples();
+        update_state();
 
         bool counter_deactivate = m_length_counter[gb_channel_4].write_nrX4(value, m_next_frame_sequencer_step_odd);
         if (counter_deactivate)

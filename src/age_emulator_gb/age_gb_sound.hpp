@@ -75,7 +75,7 @@ public:
     uint8_t read_nr44() const;
     uint8_t read_nr50() const;
     uint8_t read_nr51() const;
-    uint8_t read_nr52() const;
+    uint8_t read_nr52();
 
     void write_nr10(uint8_t value);
     void write_nr11(uint8_t value);
@@ -102,13 +102,16 @@ public:
     uint8_t read_wave_ram(unsigned offset);
     void write_wave_ram(unsigned offset, uint8_t value);
 
-    void frame_sequencer_cycle();
-    void generate_samples();
+    void update_state();
     void set_back_cycles(int offset);
 
 
 
 private:
+
+    void frame_sequencer_step(int at_cycle);
+    void generate_samples(int until_cycle);
+    void set_wave_ram_byte(unsigned offset, uint8_t value);
 
     template<unsigned channel>
     void activate_channel()
@@ -131,7 +134,6 @@ private:
     {
         if (m_length_counter[channel].cycle())
         {
-            generate_samples();
             deactivate_channel<channel>();
         }
     }
@@ -162,8 +164,6 @@ private:
         AGE_ASSERT(false); // see implementations below this class
     }
 
-    void set_wave_ram_byte(unsigned offset, uint8_t value);
-
 
 
     // common members
@@ -174,6 +174,7 @@ private:
     int m_last_generate_samples_cycle = 0;
     pcm_vector &m_samples;
 
+    int m_next_frame_sequencer_cycle = 0;
     int8_t m_next_frame_sequencer_step = 0;
     bool m_next_frame_sequencer_step_odd = false;
 

@@ -22,6 +22,11 @@
 
 
 
+namespace
+{
+
+constexpr age::uint8_t gb_nrX4_length_counter = 0x40;
+
 constexpr const std::array<age::uint8_array<32>, 4> gb_wave_pattern_duty =
 {{
      {{  0, 0, 0, 0,  15, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
@@ -29,6 +34,8 @@ constexpr const std::array<age::uint8_array<32>, 4> gb_wave_pattern_duty =
      {{  0, 0,15,15,  15,15, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
      {{ 15,15,15,15,   0, 0,15,15,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
  }};
+
+}
 
 
 

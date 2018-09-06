@@ -20,22 +20,29 @@
 
 #include "age_gb_sound.hpp"
 
+#if 0
+#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#else
+#define LOG(x)
+#endif
 
 
-namespace age
+
+namespace
 {
 
-constexpr int8_t gb_frame_sequencer_cycle_shift = 13;
+constexpr int gb_frame_sequencer_cycle_shift = 13;
+constexpr int gb_frame_sequencer_step_cycles = 1 << gb_frame_sequencer_cycle_shift;
 
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
 
-constexpr const uint8_array<0x10> dmg_wave_ram_dump =
+constexpr const age::uint8_array<0x10> dmg_wave_ram_dump =
 {{
      0x71, 0x72, 0xD5, 0x91, 0x58, 0xBB, 0x2A, 0xFA, 0xCF, 0x3C, 0x54, 0x75, 0x48, 0xCF, 0x8F, 0xD9
  }};
 
-constexpr const uint8_array<0x10> cgb_wave_ram_dump =
+constexpr const age::uint8_array<0x10> cgb_wave_ram_dump =
 {{
      0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF
  }};
@@ -48,7 +55,7 @@ constexpr const uint8_array<0x10> cgb_wave_ram_dump =
 
 //---------------------------------------------------------
 //
-//   Access wave pattern ram
+//   public interface
 //
 //---------------------------------------------------------
 
@@ -60,7 +67,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
     // wave sample (DMG: only if within clock range)
     if ((m_nr52 & gb_channel_bit[gb_channel_3]) > 0)
     {
-        generate_samples();
+        update_state();
         if (!m_is_cgb && (m_core.get_oscillation_cycle() != m_c3_last_wave_access_cycle))
         {
             return 0xFF;
@@ -81,7 +88,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
     // wave sample (DMG: only if within clock range)
     if ((m_nr52 & gb_channel_bit[gb_channel_3]) > 0)
     {
-        generate_samples();
+        update_state();
         if (!m_is_cgb && (m_core.get_oscillation_cycle() != m_c3_last_wave_access_cycle))
         {
             return;
@@ -95,17 +102,47 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
 
 
 
-
-
-//---------------------------------------------------------
-//
-//   other public methods
-//
-//---------------------------------------------------------
-
-void age::gb_sound::frame_sequencer_cycle()
+void age::gb_sound::update_state()
 {
-    // see http://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Frame_Sequencer
+    // see https://gist.github.com/drhelius/3652407
+
+    int current_cycle = m_core.get_oscillation_cycle();
+
+    while (current_cycle >= m_next_frame_sequencer_cycle)
+    {
+        frame_sequencer_step(m_next_frame_sequencer_cycle);
+        m_next_frame_sequencer_cycle += gb_frame_sequencer_step_cycles;
+    }
+
+    generate_samples(current_cycle);
+}
+
+
+
+void age::gb_sound::set_back_cycles(int offset)
+{
+    // update_state() must have been called to make sure cycle values
+    // are within range and no integer underflow is happening
+    AGE_ASSERT(m_core.get_oscillation_cycle() - m_last_generate_samples_cycle < gb_cycles_per_sample);
+
+    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_last_generate_samples_cycle, offset);
+    AGE_GB_SET_BACK_CYCLES(m_next_frame_sequencer_cycle, offset);
+    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_c3_last_wave_access_cycle, offset);
+}
+
+
+
+
+
+//---------------------------------------------------------
+//
+//   private methods
+//
+//---------------------------------------------------------
+
+void age::gb_sound::frame_sequencer_step(int at_cycle)
+{
+    AGE_ASSERT((m_next_frame_sequencer_step >= 0) && (m_next_frame_sequencer_step <= 7));
 
     switch (m_next_frame_sequencer_step)
     {
@@ -113,12 +150,14 @@ void age::gb_sound::frame_sequencer_cycle()
         case 6:
             if (m_c1.sweep_frequency())
             {
-                generate_samples();
+                generate_samples(at_cycle);
                 deactivate_channel<gb_channel_1>();
             }
             // fall through
         case 0:
         case 4:
+            generate_samples(at_cycle);
+            LOG("length counter tick for cycle " << at_cycle);
             cycle_length_counter<gb_channel_1>();
             cycle_length_counter<gb_channel_2>();
             cycle_length_counter<gb_channel_3>();
@@ -131,7 +170,7 @@ void age::gb_sound::frame_sequencer_cycle()
             break;
 
         case 7:
-            generate_samples();
+            generate_samples(at_cycle);
             m_c1.sweep_volume();
             m_c2.sweep_volume();
             m_c4.sweep_volume();
@@ -140,19 +179,13 @@ void age::gb_sound::frame_sequencer_cycle()
     }
 
     m_next_frame_sequencer_step_odd = (m_next_frame_sequencer_step & 1) != 0;
-
-    int current_cycle = m_core.get_oscillation_cycle();
-    int cycle_offset = ((current_cycle >> gb_frame_sequencer_cycle_shift) + 1) << gb_frame_sequencer_cycle_shift;
-    cycle_offset -= current_cycle;
-
-    m_core.insert_event(cycle_offset, gb_event::sound_frame_sequencer);
 }
 
 
 
-void age::gb_sound::generate_samples()
+void age::gb_sound::generate_samples(int until_cycle)
 {
-    int cycles_elapsed = (m_core.get_oscillation_cycle() - m_last_generate_samples_cycle) & gb_cycle_sample_mask;
+    int cycles_elapsed = (until_cycle - m_last_generate_samples_cycle) & gb_cycle_sample_mask;
     if (cycles_elapsed > 0)
     {
         m_last_generate_samples_cycle += cycles_elapsed;
@@ -182,22 +215,6 @@ void age::gb_sound::generate_samples()
 
 
 
-void age::gb_sound::set_back_cycles(int offset)
-{
-    AGE_GB_SET_BACK_CYCLES(m_last_generate_samples_cycle, offset);
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_c3_last_wave_access_cycle, offset);
-}
-
-
-
-
-
-//---------------------------------------------------------
-//
-//   private methods
-//
-//---------------------------------------------------------
-
 void age::gb_sound::set_wave_ram_byte(unsigned offset, uint8_t value)
 {
     m_c3_wave_ram[offset] = value;
@@ -220,6 +237,9 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
       m_last_generate_samples_cycle(m_core.get_oscillation_cycle()),
       m_samples(samples)
 {
+    // no pcm samples are generated by this initialization due to
+    // m_last_generate_samples_cycle being set to the current cycle
+
     // initialize wave ram
     const uint8_array<0x10> &src = m_core.is_cgb() ? cgb_wave_ram_dump : dmg_wave_ram_dump;
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
@@ -235,7 +255,4 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     write_nr50(0x77);
     write_nr51(0xF3);
     m_nr52 |= gb_channel_bit[gb_channel_1];
-
-    // schedule inital events
-    m_core.insert_event(4, gb_event::sound_frame_sequencer);
 }

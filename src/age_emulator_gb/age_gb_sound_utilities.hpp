@@ -36,7 +36,6 @@ constexpr int8_t gb_sample_cycle_shift = 1; // 2097152 samples per second for ea
 constexpr int gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
 constexpr int gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);
 
-constexpr uint8_t gb_nrX4_length_counter = 0x40;
 constexpr uint8_t gb_nrX4_initialize = 0x80;
 
 

@@ -59,14 +59,13 @@ enum class gb_event : uint8_t
 {
     switch_double_speed = 0,
     timer_overflow = 1,
-    sound_frame_sequencer = 2,
-    lcd_lyc_check = 3,
-    lcd_late_lyc_interrupt = 4,
-    start_hdma = 5,
-    start_oam_dma = 6,
-    serial_transfer_finished = 7,
+    lcd_lyc_check = 2,
+    lcd_late_lyc_interrupt = 3,
+    start_hdma = 4,
+    start_oam_dma = 5,
+    serial_transfer_finished = 6,
 
-    none = 8 // must always be the last value
+    none = 7 // must always be the last value
 };
 
 
