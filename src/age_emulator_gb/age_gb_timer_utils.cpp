@@ -88,7 +88,7 @@ void age::gb_common_counter::set_back_cycles(int offset)
 {
     AGE_ASSERT(0 == (offset & (m_cycle_shift - 1)));
     int counter_offset = offset >> m_cycle_shift;
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_counter_origin, counter_offset);
+    m_counter_origin -= counter_offset;
 }
 
 
