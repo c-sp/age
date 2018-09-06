@@ -183,10 +183,10 @@ age::uint8_t age::gb_noise_generator::next_sample()
 {
     if (m_allow_shift)
     {
-        uint16_t shifted = m_lfsr >> 1;
-        uint16_t xor_bit = (shifted ^ m_lfsr) & 0x0001;
+        int shifted = m_lfsr >> 1;
+        int xor_bit = (shifted ^ m_lfsr) & 0x0001;
 
-        m_lfsr = shifted + (xor_bit << 14);
+        m_lfsr = (shifted + (xor_bit << 14)) & 0xFFFF;
 
         if (m_7steps)
         {
@@ -209,7 +209,7 @@ age::uint8_t age::gb_noise_generator::next_sample()
 //
 //---------------------------------------------------------
 
-age::gb_length_counter::gb_length_counter(size_t counter_mask)
+age::gb_length_counter::gb_length_counter(int16_t counter_mask)
     : m_counter_mask(counter_mask)
 {
     AGE_ASSERT(m_counter_mask > 0);
@@ -225,12 +225,12 @@ void age::gb_length_counter::write_nrX1(uint8_t nrX1)
 
 bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd)
 {
-    bool disable = false;
+    bool disable_channel = false;
 
     // the length counter will immediately be decremented, if it is
     // enabled during the first half of a length period and the
     // counter did not already reach zero
-    size_t decrement = 0;
+    int8_t decrement = 0;
 
     bool new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
     if (new_counter_enabled)
@@ -240,7 +240,7 @@ bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool next_frame_sequencer_
         if (!m_counter_enabled && (m_counter > 0))
         {
             m_counter -= decrement;
-            disable = m_counter == 0;
+            disable_channel = m_counter == 0;
         }
     }
     m_counter_enabled = new_counter_enabled;
@@ -251,7 +251,7 @@ bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool next_frame_sequencer_
         m_counter = m_counter_mask + 1 - decrement;
     }
 
-    return disable;
+    return disable_channel;
 }
 
 bool age::gb_length_counter::tick()

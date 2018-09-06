@@ -445,7 +445,7 @@ class gb_length_counter
 {
 public:
 
-    gb_length_counter(size_t counter_mask);
+    gb_length_counter(int16_t counter_mask);
 
     void write_nrX1(uint8_t nrX1);
     bool write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd);
@@ -453,10 +453,10 @@ public:
 
 private:
 
-    const size_t m_counter_mask;
+    const int16_t m_counter_mask;
 
+    int16_t m_counter = 0;
     bool m_counter_enabled = false;
-    size_t m_counter = 0;
 };
 
 } // namespace age
