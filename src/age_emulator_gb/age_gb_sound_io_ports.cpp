@@ -144,7 +144,6 @@ void age::gb_sound::write_nr52(uint8_t value)
     else if (!m_master_on && new_master_on)
     {
         m_next_frame_sequencer_step = 0;
-        m_next_frame_sequencer_step_odd = false;
 
         m_c1.reset_volume_sweep();
         m_c2.reset_volume_sweep();
@@ -228,7 +227,7 @@ void age::gb_sound::write_nr14(uint8_t value)
         update_state();
         m_c1.set_high_frequency_bits(value);
 
-        bool counter_deactivate = m_length_counter[gb_channel_1].write_nrX4(value, m_next_frame_sequencer_step_odd);
+        bool counter_deactivate = m_length_counter[gb_channel_1].write_nrX4(value, m_next_frame_sequencer_step & 1);
         if (counter_deactivate)
         {
             deactivate_channel<gb_channel_1>();
@@ -312,7 +311,7 @@ void age::gb_sound::write_nr24(uint8_t value)
         update_state();
         m_c2.set_high_frequency_bits(value);
 
-        bool counter_deactivate = m_length_counter[gb_channel_2].write_nrX4(value, m_next_frame_sequencer_step_odd);
+        bool counter_deactivate = m_length_counter[gb_channel_2].write_nrX4(value, m_next_frame_sequencer_step & 1);
         if (counter_deactivate)
         {
             deactivate_channel<gb_channel_2>();
@@ -402,7 +401,7 @@ void age::gb_sound::write_nr34(uint8_t value)
         update_state();
         m_c3.set_high_frequency_bits(value);
 
-        bool counter_deactivate = m_length_counter[gb_channel_3].write_nrX4(value, m_next_frame_sequencer_step_odd);
+        bool counter_deactivate = m_length_counter[gb_channel_3].write_nrX4(value, m_next_frame_sequencer_step & 1);
         if (counter_deactivate)
         {
             deactivate_channel<gb_channel_3>();
@@ -491,7 +490,7 @@ void age::gb_sound::write_nr44(uint8_t value)
     {
         update_state();
 
-        bool counter_deactivate = m_length_counter[gb_channel_4].write_nrX4(value, m_next_frame_sequencer_step_odd);
+        bool counter_deactivate = m_length_counter[gb_channel_4].write_nrX4(value, m_next_frame_sequencer_step & 1);
         if (counter_deactivate)
         {
             deactivate_channel<gb_channel_4>();

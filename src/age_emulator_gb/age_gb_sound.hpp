@@ -176,7 +176,6 @@ private:
 
     int m_next_frame_sequencer_cycle = 0;
     int8_t m_next_frame_sequencer_step = 0;
-    bool m_next_frame_sequencer_step_odd = false;
 
     // channel control
 

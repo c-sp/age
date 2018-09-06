@@ -177,8 +177,6 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
             m_next_frame_sequencer_step = 0;
             break;
     }
-
-    m_next_frame_sequencer_step_odd = (m_next_frame_sequencer_step & 1) != 0;
 }
 
 
