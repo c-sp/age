@@ -26,7 +26,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_memory_init.cpp \
     ../../../src/age_emulator_gb/age_gb_serial.cpp \
     ../../../src/age_emulator_gb/age_gb_sound.cpp \
-    ../../../src/age_emulator_gb/age_gb_sound_channels.cpp \
+    ../../../src/age_emulator_gb/age_gb_sound_io_ports.cpp \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.cpp \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
     ../../../src/age_emulator_gb/age_gb_timer_utils.cpp

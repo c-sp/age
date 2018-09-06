@@ -40,8 +40,6 @@ constexpr unsigned gb_channel_2 = 1;
 constexpr unsigned gb_channel_3 = 2;
 constexpr unsigned gb_channel_4 = 3;
 
-constexpr uint8_t gb_master_switch = 0x80;
-
 constexpr const uint8_array<4> gb_channel_bit =
 {{
      0x01, 0x02, 0x04, 0x08
@@ -190,7 +188,7 @@ private:
 
     std::array<gb_length_counter, 4> m_length_counter = {{ {0x3F}, {0x3F}, {0xFF}, {0x3F} }};
 
-    uint8_t m_nr11 = 0, m_nr14 = 0;
+    uint8_t m_nr10 = 0, m_nr11 = 0, m_nr14 = 0;
     gb_frequency_sweep<gb_volume_sweep<gb_wave_generator>> m_c1;
 
     uint8_t m_nr21 = 0, m_nr24 = 0;

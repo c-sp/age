@@ -276,15 +276,8 @@ class gb_frequency_sweep : public TYPE
 {
 public:
 
-    uint8_t read_nrX0() const
-    {
-        return m_nrX0;
-    }
-
     bool write_nrX0(uint8_t nrX0)
     {
-        m_nrX0 = nrX0 | 0x80;
-
         m_period = (nrX0 >> 4) & 7;
         m_shift = nrX0 & 7;
         m_sweep_up = (nrX0 & 8) == 0;
@@ -376,8 +369,6 @@ private:
     {
         m_period_counter = (m_period == 0) ? 8 : m_period;
     }
-
-    uint8_t m_nrX0 = 0;
 
     size_t m_frequency_bits = 0;
     size_t m_period = 0;

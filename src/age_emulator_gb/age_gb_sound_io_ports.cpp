@@ -16,13 +16,146 @@
 
 #include "age_gb_sound.hpp"
 
+namespace
+{
+
+constexpr age::uint8_t gb_master_switch = 0x80;
+
+}
+
 
 
 
 
 //---------------------------------------------------------
 //
-//   Channel 1
+//   Read ports
+//
+//---------------------------------------------------------
+
+age::uint8_t age::gb_sound::read_nr10() const { return m_nr10; }
+age::uint8_t age::gb_sound::read_nr11() const { return m_nr11; }
+age::uint8_t age::gb_sound::read_nr12() const { return m_c1.read_nrX2(); }
+age::uint8_t age::gb_sound::read_nr13() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr14() const { return m_nr14; }
+
+age::uint8_t age::gb_sound::read_nr21() const { return m_nr21; }
+age::uint8_t age::gb_sound::read_nr22() const { return m_c2.read_nrX2(); }
+age::uint8_t age::gb_sound::read_nr23() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr24() const { return m_nr24; }
+
+age::uint8_t age::gb_sound::read_nr30() const { return m_nr30; }
+age::uint8_t age::gb_sound::read_nr31() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr32() const { return m_nr32; }
+age::uint8_t age::gb_sound::read_nr33() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr34() const { return m_nr34; }
+
+age::uint8_t age::gb_sound::read_nr41() const { return 0xFF;   }
+age::uint8_t age::gb_sound::read_nr42() const { return m_c4.read_nrX2(); }
+age::uint8_t age::gb_sound::read_nr43() const { return m_c4.read_nrX3(); }
+age::uint8_t age::gb_sound::read_nr44() const { return m_nr44; }
+
+age::uint8_t age::gb_sound::read_nr50() const { return m_nr50; }
+age::uint8_t age::gb_sound::read_nr51() const { return m_nr51; }
+age::uint8_t age::gb_sound::read_nr52() const { return m_nr52; }
+
+
+
+
+
+//---------------------------------------------------------
+//
+//   Write control ports
+//
+//---------------------------------------------------------
+
+void age::gb_sound::write_nr50(uint8_t value)
+{
+    if (m_master_on)
+    {
+        generate_samples();
+        m_nr50 = value;
+
+        calculate_channel_multiplier<gb_channel_1>();
+        calculate_channel_multiplier<gb_channel_2>();
+        calculate_channel_multiplier<gb_channel_3>();
+        calculate_channel_multiplier<gb_channel_4>();
+    }
+}
+
+void age::gb_sound::write_nr51(uint8_t value)
+{
+    if (m_master_on)
+    {
+        generate_samples();
+        m_nr51 = value;
+
+        calculate_channel_multiplier<gb_channel_1>();
+        calculate_channel_multiplier<gb_channel_2>();
+        calculate_channel_multiplier<gb_channel_3>();
+        calculate_channel_multiplier<gb_channel_4>();
+    }
+}
+
+void age::gb_sound::write_nr52(uint8_t value)
+{
+    generate_samples();
+
+    m_nr52 &= ~gb_master_switch;
+    m_nr52 |= value & gb_master_switch;
+
+    // sound switched off: reset all sound i/o ports
+    bool new_master_on = m_nr52 >= gb_master_switch;
+    if (m_master_on && !new_master_on)
+    {
+        write_nr10(0);
+        write_nr11(0);
+        write_nr12(0);
+        write_nr13(0);
+        write_nr14(0);
+
+        write_nr21(0);
+        write_nr22(0);
+        write_nr23(0);
+        write_nr24(0);
+
+        write_nr30(0);
+        write_nr31(0);
+        write_nr32(0);
+        write_nr33(0);
+        write_nr34(0);
+
+        write_nr41(0);
+        write_nr42(0);
+        write_nr43(0);
+        write_nr44(0);
+
+        write_nr50(0);
+        write_nr51(0);
+    }
+
+    // sound switched on: reset frame sequencer
+    else if (!m_master_on && new_master_on)
+    {
+        m_next_frame_sequencer_step = 0;
+        m_next_frame_sequencer_step_odd = false;
+
+        m_c1.reset_volume_sweep();
+        m_c2.reset_volume_sweep();
+        m_c4.reset_volume_sweep();
+    }
+
+    // set this after (!) ports were reset
+    m_master_on = new_master_on;
+}
+
+
+
+
+
+//---------------------------------------------------------
+//
+//   Write channel 1 ports
 //
 //---------------------------------------------------------
 
@@ -31,6 +164,7 @@ void age::gb_sound::write_nr10(uint8_t value)
     if (m_master_on)
     {
         generate_samples();
+        m_nr10 = value | 0x80;
         bool deactivate = m_c1.write_nrX0(value);
         if (deactivate)
         {
@@ -115,7 +249,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   Channel 2
+//   Write channel 2 ports
 //
 //---------------------------------------------------------
 
@@ -193,7 +327,7 @@ void age::gb_sound::write_nr24(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   Channel 3
+//   Write channel 3 ports
 //
 //---------------------------------------------------------
 
@@ -296,7 +430,7 @@ void age::gb_sound::write_nr34(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   Channel 4
+//   Write channel 4 ports
 //
 //---------------------------------------------------------
 
