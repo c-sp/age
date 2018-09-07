@@ -183,6 +183,8 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
 
 void age::gb_sound::generate_samples(int until_cycle)
 {
+    AGE_ASSERT(until_cycle >= m_last_generate_samples_cycle);
+
     int cycles_elapsed = (until_cycle - m_last_generate_samples_cycle) & gb_cycle_sample_mask;
     if (cycles_elapsed > 0)
     {

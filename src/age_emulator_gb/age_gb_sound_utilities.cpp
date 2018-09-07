@@ -52,7 +52,7 @@ age::gb_wave_generator::gb_wave_generator()
 {
 }
 
-age::gb_wave_generator::gb_wave_generator(size_t frequency_counter_shift, size_t index_mask)
+age::gb_wave_generator::gb_wave_generator(size_t frequency_counter_shift, uint8_t index_mask)
     : m_frequency_counter_shift(frequency_counter_shift),
       m_index_mask(index_mask)
 {
@@ -66,7 +66,7 @@ age::size_t age::gb_wave_generator::get_frequency_bits() const
     return m_frequency_bits;
 }
 
-age::size_t age::gb_wave_generator::get_wave_pattern_index() const
+age::uint8_t age::gb_wave_generator::get_wave_pattern_index() const
 {
     return m_index;
 }
@@ -105,7 +105,7 @@ void age::gb_wave_generator::reset_wave_pattern_index()
     set_cycles_next_sample(get_cycles_per_sample() + 6);
 }
 
-void age::gb_wave_generator::set_wave_pattern_byte(size_t offset, uint8_t value)
+void age::gb_wave_generator::set_wave_pattern_byte(unsigned offset, uint8_t value)
 {
     AGE_ASSERT(m_index_mask == 31); // only for channel 3
     AGE_ASSERT(offset < 16);

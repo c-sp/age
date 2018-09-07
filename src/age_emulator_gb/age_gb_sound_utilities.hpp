@@ -45,11 +45,6 @@ class gb_sample_generator
 {
 public:
 
-    int get_cycles_per_sample() const
-    {
-        return m_cycles_per_sample;
-    }
-
     int get_cycles_next_sample() const
     {
         return m_cycles_next_sample;
@@ -107,9 +102,13 @@ public:
 
 protected:
 
+    int get_cycles_per_sample() const
+    {
+        return m_cycles_per_sample;
+    }
+
     void set_cycles_per_sample(int cycles_per_sample)
     {
-        AGE_ASSERT(cycles_per_sample > 0);
         AGE_ASSERT(cycles_per_sample >= gb_cycles_per_sample);
         AGE_ASSERT((cycles_per_sample % gb_cycles_per_sample) == 0);
         m_cycles_per_sample = cycles_per_sample;
@@ -388,17 +387,17 @@ class gb_wave_generator : public gb_sample_generator<gb_wave_generator>
 public:
 
     gb_wave_generator();
-    gb_wave_generator(size_t frequency_counter_shift, size_t wave_pattern_index_mask);
+    gb_wave_generator(size_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
 
     size_t get_frequency_bits() const;
-    size_t get_wave_pattern_index() const;
+    uint8_t get_wave_pattern_index() const;
 
     void set_frequency_bits(size_t frequency_bits);
     void set_low_frequency_bits(uint8_t nrX3);
     void set_high_frequency_bits(uint8_t nrX4);
 
     void reset_wave_pattern_index();
-    void set_wave_pattern_byte(size_t offset, uint8_t value);
+    void set_wave_pattern_byte(unsigned offset, uint8_t value);
     void set_wave_pattern_duty(uint8_t nrX1);
 
     uint8_t next_sample();
@@ -406,10 +405,10 @@ public:
 private:
 
     const size_t m_frequency_counter_shift;
-    const size_t m_index_mask;
-
     size_t m_frequency_bits = 0;
-    size_t m_index = 0;
+
+    const uint8_t m_index_mask;
+    uint8_t m_index = 0;
 
     uint8_array<32> m_wave_pattern;
 };
