@@ -68,7 +68,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
     if ((m_nr52 & gb_channel_bit[gb_channel_3]) > 0)
     {
         update_state();
-        if (!m_is_cgb && (m_core.get_oscillation_cycle() != m_c3_last_wave_access_cycle))
+        if (!m_is_cgb && !m_c3.get_last_sample_new_item())
         {
             return 0xFF;
         }
@@ -89,7 +89,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
     if ((m_nr52 & gb_channel_bit[gb_channel_3]) > 0)
     {
         update_state();
-        if (!m_is_cgb && (m_core.get_oscillation_cycle() != m_c3_last_wave_access_cycle))
+        if (!m_is_cgb && !m_c3.get_last_sample_new_item())
         {
             return;
         }
@@ -127,7 +127,6 @@ void age::gb_sound::set_back_cycles(int offset)
 
     AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_last_generate_samples_cycle, offset);
     AGE_GB_SET_BACK_CYCLES(m_next_frame_sequencer_cycle, offset);
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_c3_last_wave_access_cycle, offset);
 }
 
 
@@ -154,6 +153,7 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
                 deactivate_channel<gb_channel_1>();
             }
             // fall through
+            [[clang::fallthrough]];
         case 0:
         case 4:
             generate_samples(at_cycle);
@@ -163,6 +163,7 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
             tick_length_counter<gb_channel_3>();
             tick_length_counter<gb_channel_4>();
             // fall through
+            [[clang::fallthrough]];
         case 1:
         case 3:
         case 5:
@@ -210,15 +211,7 @@ void age::gb_sound::generate_samples(int until_cycle)
     {
         m_c1.generate_samples(m_samples, sample_index, samples_to_generate);
         m_c2.generate_samples(m_samples, sample_index, samples_to_generate);
-
-        int sample_offset = m_c3.generate_samples(m_samples, sample_index, samples_to_generate);
-        if (sample_offset >= 0)
-        {
-            AGE_ASSERT(sample_offset <= samples_to_generate);
-            int cycle_offset = sample_offset << gb_sample_cycle_shift;
-            m_c3_last_wave_access_cycle = m_last_generate_samples_cycle - cycle_offset;
-        }
-
+        m_c3.generate_samples(m_samples, sample_index, samples_to_generate);
         m_c4.generate_samples(m_samples, sample_index, samples_to_generate);
     }
 }

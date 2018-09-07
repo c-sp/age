@@ -195,7 +195,6 @@ private:
 
     uint8_t m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
     uint8_array<16> m_c3_wave_ram;
-    int m_c3_last_wave_access_cycle = 0;
     gb_wave_generator m_c3 = {0, 31};
 
     uint8_t m_nr44 = 0;

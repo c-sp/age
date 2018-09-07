@@ -50,6 +50,11 @@ public:
         return m_samples_next_item;
     }
 
+    bool get_last_sample_new_item()
+    {
+        return m_last_sample_new_item;
+    }
+
     void set_channel_multiplier(uint32_t channel_multiplier)
     {
         AGE_ASSERT((channel_multiplier & 0xFFFF) <= 8);
@@ -65,14 +70,15 @@ public:
         calculate_sample();
     }
 
-    int generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate)
+    void generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate)
     {
-        AGE_ASSERT((buffer_index >= 0) && (samples_to_generate >= 0));
+        AGE_ASSERT((buffer_index >= 0) && (samples_to_generate > 0));
         AGE_ASSERT(int_max - samples_to_generate >= buffer_index);
         AGE_ASSERT(m_samples_per_item > 0);
         AGE_ASSERT(m_samples_next_item >= 0); //! \todo zero only for the very first sample
 
-        int last_sample_change = -1;
+        // we assume to generate at least one sample
+        m_last_sample_new_item = false;
 
         for (int samples_remaining = samples_to_generate; samples_remaining > 0; )
         {
@@ -90,14 +96,14 @@ public:
             // check for next wave pattern item
             if (m_samples_next_item == 0)
             {
-                m_samples_next_item += m_samples_per_item;
-                last_sample_change = samples_remaining;
+                m_last_sample_new_item = true;
+                m_samples_next_item = m_samples_per_item;
                 m_current_item = static_cast<TYPE*>(this)->next_item();
                 calculate_sample();
             }
         }
 
-        return last_sample_change;
+        m_last_sample_new_item &= m_samples_next_item == m_samples_per_item;
     }
 
 protected:
@@ -133,6 +139,7 @@ private:
 
     int m_samples_per_item = 0;
     int m_samples_next_item = 0;
+    bool m_last_sample_new_item = false;
 
     uint32_t m_channel_multiplier = 0;
     uint8_t m_volume = 15;

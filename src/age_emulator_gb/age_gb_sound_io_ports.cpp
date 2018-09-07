@@ -433,8 +433,6 @@ void age::gb_sound::write_nr34(uint8_t value)
 
             // reset wave pattern index (restart wave playback)
             m_c3.reset_wave_pattern_index();
-            int cycles = m_c3.get_samples_next_item() << gb_sample_cycle_shift;
-            m_c3_last_wave_access_cycle = m_core.get_oscillation_cycle() + cycles;
         }
 
         m_nr34 = value | 0xBF;
