@@ -148,9 +148,10 @@ private:
         //     - channel active flag
         //     - channel to s0x routing
         uint8_t channel_bit = gb_channel_bit[channel];
+        bool channel_active = (m_nr52 & channel_bit) != 0;
 
-        int16_t channel_s01 = ((m_nr52 & channel_bit) > 0) ? (m_nr50 & 7) + 1 : 0;
-        int16_t channel_s02 = ((m_nr52 & channel_bit) > 0) ? ((m_nr50 >> 4) & 7) + 1 : 0;
+        int16_t channel_s01 = channel_active ? (m_nr50 & 7) + 1 : 0;
+        int16_t channel_s02 = channel_active ? ((m_nr50 >> 4) & 7) + 1 : 0;
 
         channel_s01 = ((m_nr51 & channel_bit) > 0) ? channel_s01 : 0;
         channel_s02 = (((m_nr51 >> 4) & channel_bit) > 0) ? channel_s02 : 0;
@@ -172,7 +173,7 @@ private:
     const bool m_is_cgb;
 
     pcm_vector &m_samples;
-    int m_last_generate_samples_cycle = 0;
+    int m_last_sample_cycle = 0;
     int m_next_frame_sequencer_cycle = 0;
     int8_t m_next_frame_sequencer_step = 0;
 

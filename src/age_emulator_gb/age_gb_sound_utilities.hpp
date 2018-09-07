@@ -75,7 +75,7 @@ public:
         AGE_ASSERT((buffer_index >= 0) && (samples_to_generate > 0));
         AGE_ASSERT(int_max - samples_to_generate >= buffer_index);
         AGE_ASSERT(m_samples_per_item > 0);
-        AGE_ASSERT(m_samples_next_item >= 0); //! \todo zero only for the very first sample
+        AGE_ASSERT(m_samples_next_item >= 0);
 
         // we assume to generate at least one sample
         m_last_sample_new_item = false;
@@ -130,7 +130,8 @@ private:
         //
         //   / 15  ->  max amplitude
         //   / 32  ->  4 channels, s0x volume up to 8
-        //   / 60  ->  combining volume 1-15 (channels 1,2,4) and volume 0, 1, 0.5, 0.25 (channel 3)
+        //   / 60  ->  combining volume 1-15 (channels 1,2,4)
+        //             and volume 0, 1, 0.5, 0.25 (channel 3)
         //
         int value = (2 * m_current_item - 15) * int16_t_max * m_volume;
         value /= 15 * 32 * 60;
@@ -211,7 +212,7 @@ public:
                     {
                         m_period_counter = m_period;
                     }
-                    // else m_period_counter remains unchanged (= 0) -> stop sweeping
+                    // else m_period_counter unchanged (= 0) -> stop sweeping
                 }
                 // if we cannot sweep at the moment, retry later
                 else
