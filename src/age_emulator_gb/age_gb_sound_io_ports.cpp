@@ -412,7 +412,7 @@ void age::gb_sound::write_nr34(uint8_t value)
             activate_channel<gb_channel_3>();
 
             // DMG: if we're about to read a wave sample, wave pattern memory will be "scrambled"
-            if (!m_is_cgb && (m_c3.get_cycles_next_sample() == 2))
+            if (!m_is_cgb && (m_c3.get_samples_next_item() == 1))
             {
                 size_t index = (m_c3.get_wave_pattern_index() + 1) & 31;
                 index >>= 1;
@@ -433,7 +433,8 @@ void age::gb_sound::write_nr34(uint8_t value)
 
             // reset wave pattern index (restart wave playback)
             m_c3.reset_wave_pattern_index();
-            m_c3_last_wave_access_cycle = m_core.get_oscillation_cycle() + m_c3.get_cycles_next_sample();
+            int cycles = m_c3.get_samples_next_item() << gb_sample_cycle_shift;
+            m_c3_last_wave_access_cycle = m_core.get_oscillation_cycle() + cycles;
         }
 
         m_nr34 = value | 0xBF;

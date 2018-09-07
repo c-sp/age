@@ -45,9 +45,9 @@ class gb_sample_generator
 {
 public:
 
-    int get_cycles_next_sample() const
+    int get_samples_next_item() const
     {
-        return m_cycles_next_sample;
+        return m_samples_next_item;
     }
 
     void set_channel_multiplier(uint32_t channel_multiplier)
@@ -65,34 +65,34 @@ public:
         calculate_sample();
     }
 
-    int generate(pcm_vector &buffer, size_t buffer_index, int cycles_elapsed)
+    int generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate)
     {
-        AGE_ASSERT(m_cycles_per_sample != 0);
-        AGE_ASSERT((cycles_elapsed % gb_cycles_per_sample) == 0);
+        AGE_ASSERT((buffer_index >= 0) && (samples_to_generate >= 0));
+        AGE_ASSERT(int_max - samples_to_generate >= buffer_index);
+        AGE_ASSERT(m_samples_per_item > 0);
+        AGE_ASSERT(m_samples_next_item >= 0); //! \todo zero only for the very first sample
 
         int last_sample_change = -1;
 
-        for (int cycles_remaining = cycles_elapsed; cycles_remaining > 0; )
+        for (int samples_remaining = samples_to_generate; samples_remaining > 0; )
         {
-            // write one and the same sample until we have to calculate the next one
-            int cycles = std::min(cycles_remaining, m_cycles_next_sample) & gb_cycle_sample_mask;
-            int samples_to_write = cycles >> gb_sample_cycle_shift;
-            AGE_ASSERT((cycles % gb_cycles_per_sample) == 0);
+            // write the sample until we have to calculate the next item
+            int samples = std::min(samples_remaining, m_samples_next_item);
 
-            for (size_t max = buffer_index + samples_to_write; buffer_index < max; ++buffer_index)
+            for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
             {
-                buffer[buffer_index].m_stereo_sample += m_current_multiplied_sample;
+                buffer[buffer_index].m_stereo_sample += m_current_sample;
             }
 
-            cycles_remaining -= cycles;
-            m_cycles_next_sample -= cycles;
+            samples_remaining -= samples;
+            m_samples_next_item -= samples;
 
-            // check for next wave pattern sample
-            if (m_cycles_next_sample < gb_cycles_per_sample)
+            // check for next wave pattern item
+            if (m_samples_next_item == 0)
             {
-                m_cycles_next_sample += m_cycles_per_sample;
-                last_sample_change = cycles_remaining;
-                m_current_sample = static_cast<TYPE*>(this)->next_sample();
+                m_samples_next_item += m_samples_per_item;
+                last_sample_change = samples_remaining;
+                m_current_item = static_cast<TYPE*>(this)->next_item();
                 calculate_sample();
             }
         }
@@ -102,28 +102,23 @@ public:
 
 protected:
 
-    int get_cycles_per_sample() const
+    void set_samples_per_item(int samples_per_item)
     {
-        return m_cycles_per_sample;
+        AGE_ASSERT(samples_per_item > 0);
+        m_samples_per_item = samples_per_item;
     }
 
-    void set_cycles_per_sample(int cycles_per_sample)
+    void offset_item(int sample_offset)
     {
-        AGE_ASSERT(cycles_per_sample >= gb_cycles_per_sample);
-        AGE_ASSERT((cycles_per_sample % gb_cycles_per_sample) == 0);
-        m_cycles_per_sample = cycles_per_sample;
-    }
-
-    void set_cycles_next_sample(int cycles_next_sample)
-    {
-        m_cycles_next_sample = cycles_next_sample;
+        m_samples_next_item = m_samples_per_item + sample_offset;
     }
 
 private:
 
     void calculate_sample()
     {
-        AGE_ASSERT(m_current_sample <= 15);
+        AGE_ASSERT(m_current_item <= 15);
+        AGE_ASSERT(m_volume <= 60);
         //
         // divider:
         //
@@ -131,19 +126,19 @@ private:
         //   / 32  ->  4 channels, s0x volume up to 8
         //   / 60  ->  combining volume 1-15 (channels 1,2,4) and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        int value = (2 * m_current_sample - 15) * int16_t_max * m_volume;
+        int value = (2 * m_current_item - 15) * int16_t_max * m_volume;
         value /= 15 * 32 * 60;
-        m_current_multiplied_sample = value * m_channel_multiplier;
+        m_current_sample = value * m_channel_multiplier;
     }
 
-    int m_cycles_per_sample = 0;
-    int m_cycles_next_sample = 0;
+    int m_samples_per_item = 0;
+    int m_samples_next_item = 0;
 
     uint32_t m_channel_multiplier = 0;
     uint8_t m_volume = 15;
 
-    uint8_t m_current_sample = 0;
-    uint32_t m_current_multiplied_sample = 0;
+    uint8_t m_current_item = 0;
+    uint32_t m_current_sample = 0;
 };
 
 
@@ -400,7 +395,7 @@ public:
     void set_wave_pattern_byte(unsigned offset, uint8_t value);
     void set_wave_pattern_duty(uint8_t nrX1);
 
-    uint8_t next_sample();
+    uint8_t next_item();
 
 private:
 
@@ -426,7 +421,7 @@ public:
     void write_nrX3(uint8_t nrX3);
     void init_generator();
 
-    uint8_t next_sample();
+    uint8_t next_item();
 
 private:
 

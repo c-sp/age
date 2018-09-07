@@ -48,7 +48,7 @@ constexpr const std::array<age::uint8_array<32>, 4> gb_wave_pattern_duty =
 //---------------------------------------------------------
 
 age::gb_wave_generator::gb_wave_generator()
-    : gb_wave_generator(2, 7)
+    : gb_wave_generator(1, 7)
 {
 }
 
@@ -56,6 +56,12 @@ age::gb_wave_generator::gb_wave_generator(size_t frequency_counter_shift, uint8_
     : m_frequency_counter_shift(frequency_counter_shift),
       m_index_mask(index_mask)
 {
+    AGE_ASSERT( // channel 1, 2, 4
+                ((m_frequency_counter_shift == 1) && (m_index_mask == 7))
+                // channel 3
+                || ((m_frequency_counter_shift == 0) && (m_index_mask == 31))
+                );
+
     std::fill(begin(m_wave_pattern), end(m_wave_pattern), 0);
 }
 
@@ -77,8 +83,8 @@ void age::gb_wave_generator::set_frequency_bits(size_t frequency_bits)
 {
     AGE_ASSERT(frequency_bits < 2048);
     m_frequency_bits = frequency_bits;
-    size_t cycles_per_wave_pattern_sample = (2048 - m_frequency_bits) << m_frequency_counter_shift;
-    set_cycles_per_sample(cycles_per_wave_pattern_sample);
+    size_t samples_per_item = (2048 - m_frequency_bits) << m_frequency_counter_shift;
+    set_samples_per_item(samples_per_item);
 }
 
 void age::gb_wave_generator::set_low_frequency_bits(uint8_t nrX3)
@@ -102,7 +108,7 @@ void age::gb_wave_generator::reset_wave_pattern_index()
     // I don't know exactly why, but apparently the first wave pattern access
     // for channel 3 is delayed after init by 6 cycles
     // (found in gambatte source code)
-    set_cycles_next_sample(get_cycles_per_sample() + 6);
+    offset_item(3);
 }
 
 void age::gb_wave_generator::set_wave_pattern_byte(unsigned offset, uint8_t value)
@@ -126,7 +132,7 @@ void age::gb_wave_generator::set_wave_pattern_duty(uint8_t nrX1)
 
 
 
-age::uint8_t age::gb_wave_generator::next_sample()
+age::uint8_t age::gb_wave_generator::next_item()
 {
     ++m_index;
     m_index &= m_index_mask;
@@ -168,8 +174,8 @@ void age::gb_noise_generator::write_nrX3(uint8_t nrX3)
         --shift;
     }
 
-    int cycles = ratio << shift;
-    set_cycles_per_sample(cycles);
+    int samples = ratio << (shift - 1);
+    set_samples_per_item(samples);
 }
 
 void age::gb_noise_generator::init_generator()
@@ -179,7 +185,7 @@ void age::gb_noise_generator::init_generator()
 
 
 
-age::uint8_t age::gb_noise_generator::next_sample()
+age::uint8_t age::gb_noise_generator::next_item()
 {
     if (m_allow_shift)
     {
