@@ -180,7 +180,7 @@ bool age::test_application::find_files(QSet<QString> &files) const
     QFileInfo file_info(m_test);
     if (file_info.isFile())
     {
-        files.insert(m_test);
+        files.insert(file_info.absoluteFilePath());
     }
 
     // if a directory was specified, search it for test files
