@@ -31,20 +31,22 @@
 namespace
 {
 
-constexpr int gb_frame_sequencer_cycle_shift = 13;
-constexpr int gb_frame_sequencer_step_cycles = 1 << gb_frame_sequencer_cycle_shift;
+constexpr int gb_frame_sequencer_step_cycles = 1 << 13;
 
 // memory dumps,
-// based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
+// based on *.bin files used by gambatte tests and gambatte source code
+// (initstate.cpp)
 
-constexpr const age::uint8_array<0x10> dmg_wave_ram_dump =
+constexpr const age::uint8_array<0x10> dmg_wave_ram =
 {{
-     0x71, 0x72, 0xD5, 0x91, 0x58, 0xBB, 0x2A, 0xFA, 0xCF, 0x3C, 0x54, 0x75, 0x48, 0xCF, 0x8F, 0xD9
+     0x71, 0x72, 0xD5, 0x91, 0x58, 0xBB, 0x2A, 0xFA,
+     0xCF, 0x3C, 0x54, 0x75, 0x48, 0xCF, 0x8F, 0xD9
  }};
 
-constexpr const age::uint8_array<0x10> cgb_wave_ram_dump =
+constexpr const age::uint8_array<0x10> cgb_wave_ram =
 {{
-     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF
+     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF
  }};
 
 }
@@ -65,7 +67,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
 
     // if channel 3 is currently active, we can only read the last accessed
     // wave sample (DMG: only if within clock range)
-    if ((m_nr52 & gb_channel_bit[gb_channel_3]) > 0)
+    if ((m_nr52 & gb_channel_bit(gb_channel_3)) > 0)
     {
         update_state();
         if (!m_is_cgb && !m_c3.get_last_sample_new_item())
@@ -76,7 +78,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
         offset >>= 1;
     }
 
-    uint8_t result = m_c3_wave_ram[offset];
+    auto result = m_c3_wave_ram[offset];
     return result;
 }
 
@@ -86,7 +88,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
 
     // if channel 3 is currently active, we can only write the last accessed
     // wave sample (DMG: only if within clock range)
-    if ((m_nr52 & gb_channel_bit[gb_channel_3]) > 0)
+    if ((m_nr52 & gb_channel_bit(gb_channel_3)) > 0)
     {
         update_state();
         if (!m_is_cgb && !m_c3.get_last_sample_new_item())
@@ -141,7 +143,8 @@ void age::gb_sound::set_back_cycles(int offset)
 
 void age::gb_sound::frame_sequencer_step(int at_cycle)
 {
-    AGE_ASSERT((m_next_frame_sequencer_step >= 0) && (m_next_frame_sequencer_step <= 7));
+    AGE_ASSERT((m_next_frame_sequencer_step >= 0)
+               && (m_next_frame_sequencer_step <= 7));
 
     switch (m_next_frame_sequencer_step)
     {
@@ -158,10 +161,10 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
         case 4:
             generate_samples(at_cycle);
             LOG("length counter tick for cycle " << at_cycle);
-            tick_length_counter<gb_channel_1>();
-            tick_length_counter<gb_channel_2>();
-            tick_length_counter<gb_channel_3>();
-            tick_length_counter<gb_channel_4>();
+            length_counter_tick<gb_channel_1>();
+            length_counter_tick<gb_channel_2>();
+            length_counter_tick<gb_channel_3>();
+            length_counter_tick<gb_channel_4>();
             // fall through
             [[clang::fallthrough]];
         case 1:
@@ -244,7 +247,7 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     // m_last_sample_cycle being set to the current cycle
 
     // initialize wave ram
-    const uint8_array<0x10> &src = m_core.is_cgb() ? cgb_wave_ram_dump : dmg_wave_ram_dump;
+    const uint8_array<0x10> &src = m_is_cgb ? cgb_wave_ram : dmg_wave_ram;
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
     write_wave_ram(0, m_c3_wave_ram[0]);
 
@@ -257,5 +260,5 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     write_nr12(0xF3);
     write_nr50(0x77);
     write_nr51(0xF3);
-    m_nr52 |= gb_channel_bit[gb_channel_1];
+    m_nr52 |= gb_channel_bit(gb_channel_1);
 }

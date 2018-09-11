@@ -52,7 +52,7 @@ age::gb_wave_generator::gb_wave_generator()
 {
 }
 
-age::gb_wave_generator::gb_wave_generator(size_t frequency_counter_shift, uint8_t index_mask)
+age::gb_wave_generator::gb_wave_generator(int8_t frequency_counter_shift, uint8_t index_mask)
     : m_frequency_counter_shift(frequency_counter_shift),
       m_index_mask(index_mask)
 {
@@ -67,7 +67,7 @@ age::gb_wave_generator::gb_wave_generator(size_t frequency_counter_shift, uint8_
 
 
 
-age::size_t age::gb_wave_generator::get_frequency_bits() const
+age::int16_t age::gb_wave_generator::get_frequency_bits() const
 {
     return m_frequency_bits;
 }
@@ -79,23 +79,23 @@ age::uint8_t age::gb_wave_generator::get_wave_pattern_index() const
 
 
 
-void age::gb_wave_generator::set_frequency_bits(size_t frequency_bits)
+void age::gb_wave_generator::set_frequency_bits(int16_t frequency_bits)
 {
-    AGE_ASSERT(frequency_bits < 2048);
+    AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048));
     m_frequency_bits = frequency_bits;
-    size_t samples_per_item = (2048 - m_frequency_bits) << m_frequency_counter_shift;
+    int samples_per_item = (2048 - m_frequency_bits) << m_frequency_counter_shift;
     set_samples_per_item(samples_per_item);
 }
 
 void age::gb_wave_generator::set_low_frequency_bits(uint8_t nrX3)
 {
-    size_t frequency_bits = (m_frequency_bits & ~0xFF) + nrX3;
+    int16_t frequency_bits = (m_frequency_bits & ~0xFF) + nrX3;
     set_frequency_bits(frequency_bits);
 }
 
 void age::gb_wave_generator::set_high_frequency_bits(uint8_t nrX4)
 {
-    size_t frequency_bits = (m_frequency_bits & 0xFF) + ((nrX4 & 7) << 8);
+    int16_t frequency_bits = (m_frequency_bits & 0xFF) + ((nrX4 << 8) & 0x700);
     set_frequency_bits(frequency_bits);
 }
 
@@ -126,7 +126,7 @@ void age::gb_wave_generator::set_wave_pattern_byte(unsigned offset, uint8_t valu
 void age::gb_wave_generator::set_wave_pattern_duty(uint8_t nrX1)
 {
     AGE_ASSERT(m_index_mask == 7); // only for channels 1 & 2
-    size_t duty = nrX1 >> 6;
+    unsigned duty = nrX1 >> 6;
     m_wave_pattern = gb_wave_pattern_duty[duty];
 }
 
@@ -215,11 +215,10 @@ age::uint8_t age::gb_noise_generator::next_item()
 //
 //---------------------------------------------------------
 
-age::gb_length_counter::gb_length_counter(int16_t counter_mask)
+age::gb_length_counter::gb_length_counter(uint8_t counter_mask)
     : m_counter_mask(counter_mask)
 {
     AGE_ASSERT(m_counter_mask > 0);
-    AGE_ASSERT(m_counter_mask < 256);
 }
 
 
@@ -229,7 +228,7 @@ void age::gb_length_counter::write_nrX1(uint8_t nrX1)
     m_counter = (~nrX1 & m_counter_mask) + 1;
 }
 
-bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd)
+bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool last_fs_step_ticked_lc)
 {
     bool disable_channel = false;
 
@@ -241,7 +240,7 @@ bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool next_frame_sequencer_
     bool new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
     if (new_counter_enabled)
     {
-        decrement = next_frame_sequencer_step_odd ? 1 : 0;
+        decrement = last_fs_step_ticked_lc ? 1 : 0;
 
         if (!m_counter_enabled && (m_counter > 0))
         {

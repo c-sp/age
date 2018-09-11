@@ -40,10 +40,10 @@ constexpr unsigned gb_channel_2 = 1;
 constexpr unsigned gb_channel_3 = 2;
 constexpr unsigned gb_channel_4 = 3;
 
-constexpr const uint8_array<4> gb_channel_bit =
-{{
-     0x01, 0x02, 0x04, 0x08
- }};
+constexpr uint8_t gb_channel_bit(unsigned channel)
+{
+    return static_cast<uint8_t>(0x01 << channel);
+}
 
 
 
@@ -109,64 +109,6 @@ public:
 
 private:
 
-    void frame_sequencer_step(int at_cycle);
-    void generate_samples(int until_cycle);
-    void set_wave_ram_byte(unsigned offset, uint8_t value);
-
-    template<unsigned channel>
-    void activate_channel()
-    {
-        uint8_t channel_bit = gb_channel_bit[channel];
-        m_nr52 |= channel_bit;
-        calculate_channel_multiplier<channel>();
-    }
-
-    template<unsigned channel>
-    void deactivate_channel()
-    {
-        uint8_t channel_bit = gb_channel_bit[channel];
-        m_nr52 &= ~channel_bit;
-        calculate_channel_multiplier<channel>();
-    }
-
-    template<unsigned channel>
-    void tick_length_counter()
-    {
-        if (m_length_counter[channel].tick())
-        {
-            deactivate_channel<channel>();
-        }
-    }
-
-    template<unsigned channel>
-    void calculate_channel_multiplier()
-    {
-        // calculate channel multiplier
-        // (s01 is the right channel, s02 is the left channel)
-        // this value includes:
-        //     - s0x volume
-        //     - channel active flag
-        //     - channel to s0x routing
-        uint8_t channel_bit = gb_channel_bit[channel];
-        bool channel_active = (m_nr52 & channel_bit) != 0;
-
-        int16_t channel_s01 = channel_active ? (m_nr50 & 7) + 1 : 0;
-        int16_t channel_s02 = channel_active ? ((m_nr50 >> 4) & 7) + 1 : 0;
-
-        channel_s01 = ((m_nr51 & channel_bit) > 0) ? channel_s01 : 0;
-        channel_s02 = (((m_nr51 >> 4) & channel_bit) > 0) ? channel_s02 : 0;
-
-        pcm_sample channel_multiplier = {channel_s02, channel_s01};
-        set_channel_multiplier<channel>(channel_multiplier.m_stereo_sample);
-    }
-
-    template<unsigned channel> void set_channel_multiplier(uint32_t)
-    {
-        AGE_ASSERT(false); // see implementations below this class
-    }
-
-
-
     // common members
 
     gb_core &m_core;
@@ -181,8 +123,6 @@ private:
 
     uint8_t m_nr50 = 0, m_nr51 = 0, m_nr52 = 0xF0;
     bool m_master_on = true;
-    int16_t m_s01_volume = 0;
-    int16_t m_s02_volume = 0;
 
     // channels
 
@@ -200,26 +140,109 @@ private:
 
     uint8_t m_nr44 = 0;
     gb_volume_sweep<gb_noise_generator> m_c4;
+
+
+
+    // channel template methods
+
+    void frame_sequencer_step(int at_cycle);
+    void generate_samples(int until_cycle);
+    void set_wave_ram_byte(unsigned offset, uint8_t value);
+
+    template<unsigned channel>
+    inline void activate_channel()
+    {
+        uint8_t channel_bit = gb_channel_bit(channel);
+        m_nr52 |= channel_bit;
+        calculate_channel_multiplier<channel>();
+    }
+
+    template<unsigned channel>
+    inline void deactivate_channel()
+    {
+        uint8_t channel_bit = gb_channel_bit(channel);
+        m_nr52 &= ~channel_bit;
+        calculate_channel_multiplier<channel>();
+    }
+
+    template<unsigned channel>
+    inline void length_counter_tick()
+    {
+        if (m_length_counter[channel].tick())
+        {
+            deactivate_channel<channel>();
+        }
+    }
+
+    template<unsigned channel>
+    inline void length_counter_write_nrX4(uint8_t value)
+    {
+        gb_length_counter &lc = m_length_counter[channel];
+        bool last_step_ticked_lc = m_next_frame_sequencer_step & 1;
+
+        bool deactivate = lc.write_nrX4(value, last_step_ticked_lc);
+        if (deactivate)
+        {
+            deactivate_channel<channel>();
+        }
+    }
+
+    template<unsigned channel>
+    inline void length_counter_write_nrX1(uint8_t value)
+    {
+        // length counter always writable for DMG
+        if (m_master_on || !m_is_cgb)
+        {
+            update_state();
+            m_length_counter[channel].write_nrX1(value);
+        }
+    }
+
+    template<unsigned channel>
+    inline void calculate_channel_multiplier()
+    {
+        // calculate channel multiplier
+        // (s01 is the right channel, s02 is the left channel)
+        // this value includes:
+        //     - s0x volume
+        //     - channel active flag
+        //     - channel to s0x routing
+        int channel_bit = gb_channel_bit(channel);
+        bool channel_active = (m_nr52 & channel_bit) != 0;
+
+        int16_t volume_s01 = channel_active ? (m_nr50 & 7) + 1 : 0;
+        int16_t volume_s02 = channel_active ? ((m_nr50 >> 4) & 7) + 1 : 0;
+
+        volume_s01 = ((m_nr51 & channel_bit) > 0) ? volume_s01 : 0;
+        volume_s02 = (((m_nr51 >> 4) & channel_bit) > 0) ? volume_s02 : 0;
+
+        pcm_sample channel_multiplier = {volume_s02, volume_s01};
+        set_channel_multiplier<channel>(channel_multiplier.m_stereo_sample);
+    }
+
+    template<unsigned>
+    inline void set_channel_multiplier(uint32_t)
+    {
+        AGE_ASSERT(false); // implementation for each channel see below
+    }
 };
 
-
-
-template<> inline void gb_sound::set_channel_multiplier<0>(uint32_t multiplier)
+template<> inline void gb_sound::set_channel_multiplier<gb_channel_1>(uint32_t multiplier)
 {
     m_c1.set_channel_multiplier(multiplier);
 }
 
-template<> inline void gb_sound::set_channel_multiplier<1>(uint32_t multiplier)
+template<> inline void gb_sound::set_channel_multiplier<gb_channel_2>(uint32_t multiplier)
 {
     m_c2.set_channel_multiplier(multiplier);
 }
 
-template<> inline void gb_sound::set_channel_multiplier<2>(uint32_t multiplier)
+template<> inline void gb_sound::set_channel_multiplier<gb_channel_3>(uint32_t multiplier)
 {
     m_c3.set_channel_multiplier(multiplier);
 }
 
-template<> inline void gb_sound::set_channel_multiplier<3>(uint32_t multiplier)
+template<> inline void gb_sound::set_channel_multiplier<gb_channel_4>(uint32_t multiplier)
 {
     m_c4.set_channel_multiplier(multiplier);
 }

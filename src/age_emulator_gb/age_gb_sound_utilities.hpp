@@ -34,7 +34,6 @@ namespace age
 
 constexpr int8_t gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
 constexpr int gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
-constexpr int gb_cycle_sample_mask = ~(gb_cycles_per_sample - 1);
 
 constexpr uint8_t gb_nrX4_initialize = 0x80;
 
@@ -50,7 +49,7 @@ public:
         return m_samples_next_item;
     }
 
-    bool get_last_sample_new_item()
+    bool get_last_sample_new_item() const
     {
         return m_last_sample_new_item;
     }
@@ -166,7 +165,7 @@ public:
     bool write_nrX2(uint8_t nrX2)
     {
         // "zombie" update
-        size_t volume = m_volume;
+        int volume = m_volume;
         if ((m_period == 0) && (m_period_counter > 0))
         {
             ++volume;
@@ -182,7 +181,7 @@ public:
         }
 
         volume &= 0x0F;
-        switch_volume(volume);
+        update_volume(volume);
 
         // store new value
         m_nrX2 = nrX2;
@@ -195,7 +194,7 @@ public:
     bool init_volume_sweep()
     {
         m_period_counter = (m_period == 0) ? 8 : m_period;
-        switch_volume(m_nrX2 >> 4);
+        update_volume(m_nrX2 >> 4);
         return channel_off();
     }
 
@@ -237,9 +236,9 @@ private:
         return result;
     }
 
-    void switch_volume(size_t new_volume)
+    void update_volume(int new_volume)
     {
-        AGE_ASSERT(new_volume < 0x10);
+        AGE_ASSERT((new_volume >= 0) && (new_volume < 0x10));
         if (m_volume != new_volume)
         {
             m_volume = new_volume;
@@ -249,12 +248,12 @@ private:
 
     bool sweep()
     {
-        size_t volume = m_sweep_up ? m_volume + 1 : m_volume - 1;
+        int volume = m_sweep_up ? m_volume + 1 : m_volume - 1;
 
-        bool adjust_volume = volume < 0x10;
+        bool adjust_volume = (volume >= 0) && (volume < 0x10);
         if (adjust_volume)
         {
-            switch_volume(volume);
+            update_volume(volume);
         }
 
         return adjust_volume;
@@ -263,9 +262,9 @@ private:
     uint8_t m_nrX2 = 0;
 
     bool m_sweep_up = false;
-    size_t m_period = 0;
-    size_t m_period_counter = 0;
-    size_t m_volume = 0;
+    int8_t m_period = 0;
+    int8_t m_period_counter = 0;
+    int8_t m_volume = 0;
 };
 
 
@@ -292,7 +291,7 @@ public:
         m_swept_down = false;
         m_frequency_bits = TYPE::get_frequency_bits();
 
-        // schedule event, if period or shift are set
+        // enable sweep if period or shift are set
         m_sweep_enabled = (m_period + m_shift) > 0;
         if (m_sweep_enabled)
         {
@@ -300,13 +299,7 @@ public:
         }
 
         // check for channel deactivation only, if shift is not zero
-        bool deactivate = false;
-        if (m_shift > 0)
-        {
-            size_t frequency_bits = sweep_frequency_bits();
-            deactivate = invalid_frequency_bits(frequency_bits);
-        }
-
+        bool deactivate = (m_shift > 0) && next_sweep_invalid();
         return deactivate;
     }
 
@@ -322,16 +315,14 @@ public:
             {
                 if (m_period > 0)
                 {
-                    size_t frequency_bits = sweep_frequency_bits();
-                    deactivate = invalid_frequency_bits(frequency_bits);
+                    auto frequency_bits = sweep_frequency_bits();
+                    deactivate = invalid_frequency(frequency_bits);
 
                     if (!deactivate && (m_shift > 0))
                     {
                         m_frequency_bits = frequency_bits;
-                        TYPE::set_frequency_bits(m_frequency_bits);
-
-                        size_t frequency_bits = sweep_frequency_bits();
-                        deactivate = invalid_frequency_bits(frequency_bits);
+                        TYPE::set_frequency_bits(frequency_bits);
+                        deactivate = next_sweep_invalid();
                     }
                 }
                 set_period_counter();
@@ -343,27 +334,26 @@ public:
 
 private:
 
-    bool invalid_frequency_bits(size_t frequency_bits) const
+    bool next_sweep_invalid()
     {
-        return frequency_bits > 2047;
+        return invalid_frequency(sweep_frequency_bits());
     }
 
-    size_t sweep_frequency_bits()
+    bool invalid_frequency(int frequency_bits) const
     {
-        size_t shifted = m_frequency_bits >> m_shift;
-        size_t result = m_frequency_bits;
+        return (frequency_bits < 0) || (frequency_bits > 2047);
+    }
 
-        if (m_sweep_up)
-        {
-            result += shifted;
-        }
-        else
-        {
-            result -= shifted;
-            m_swept_down = true;
-        }
+    int16_t sweep_frequency_bits()
+    {
+        m_swept_down = !m_sweep_up;
 
-        return result;
+        AGE_ASSERT(!invalid_frequency(m_frequency_bits));
+        int shifted = m_frequency_bits >> m_shift;
+        int sweeped = m_frequency_bits + (m_sweep_up ? shifted : -shifted);
+
+        AGE_ASSERT((sweeped >= int16_t_min) && (sweeped <= int16_t_max));
+        return static_cast<int16_t>(sweeped);
     }
 
     void set_period_counter()
@@ -371,14 +361,14 @@ private:
         m_period_counter = (m_period == 0) ? 8 : m_period;
     }
 
-    size_t m_frequency_bits = 0;
-    size_t m_period = 0;
-    size_t m_shift = 0;
+    int16_t m_frequency_bits = 0;
+    int8_t m_period = 0;
+    int8_t m_shift = 0;
     bool m_sweep_up = false;
 
     bool m_sweep_enabled = false;
     bool m_swept_down = false;
-    size_t m_period_counter = 0;
+    int8_t m_period_counter = 0;
 };
 
 
@@ -390,12 +380,12 @@ class gb_wave_generator : public gb_sample_generator<gb_wave_generator>
 public:
 
     gb_wave_generator();
-    gb_wave_generator(size_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
+    gb_wave_generator(int8_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
 
-    size_t get_frequency_bits() const;
+    int16_t get_frequency_bits() const;
     uint8_t get_wave_pattern_index() const;
 
-    void set_frequency_bits(size_t frequency_bits);
+    void set_frequency_bits(int16_t frequency_bits);
     void set_low_frequency_bits(uint8_t nrX3);
     void set_high_frequency_bits(uint8_t nrX4);
 
@@ -407,8 +397,8 @@ public:
 
 private:
 
-    const size_t m_frequency_counter_shift;
-    size_t m_frequency_bits = 0;
+    const int8_t m_frequency_counter_shift;
+    int16_t m_frequency_bits = 0;
 
     const uint8_t m_index_mask;
     uint8_t m_index = 0;
@@ -447,7 +437,7 @@ class gb_length_counter
 {
 public:
 
-    gb_length_counter(int16_t counter_mask);
+    gb_length_counter(uint8_t counter_mask);
 
     void write_nrX1(uint8_t nrX1);
     bool write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd);
@@ -455,7 +445,7 @@ public:
 
 private:
 
-    const int16_t m_counter_mask;
+    const uint8_t m_counter_mask;
 
     int16_t m_counter = 0;
     bool m_counter_enabled = false;

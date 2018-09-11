@@ -63,7 +63,12 @@ age::uint8_t age::gb_sound::read_nr44() const { return m_nr44; }
 
 age::uint8_t age::gb_sound::read_nr50() const { return m_nr50; }
 age::uint8_t age::gb_sound::read_nr51() const { return m_nr51; }
-age::uint8_t age::gb_sound::read_nr52()       { update_state(); return m_nr52; }
+age::uint8_t age::gb_sound::read_nr52()
+{
+    update_state();
+    LOG(AGE_LOG_HEX(m_nr52));
+    return m_nr52;
+}
 
 
 
@@ -181,19 +186,13 @@ void age::gb_sound::write_nr10(uint8_t value)
 void age::gb_sound::write_nr11(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    length_counter_write_nrX1<gb_channel_1>(value);
 
-    // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
+    // wave pattern duty only changeable, if switched on
+    if (m_master_on)
     {
-        update_state();
-        m_length_counter[gb_channel_1].write_nrX1(value);
-
-        // wave pattern duty only changeable, if switched on
-        if (m_master_on)
-        {
-            m_c1.set_wave_pattern_duty(value);
-            m_nr11 = value | 0x3F;
-        }
+        m_c1.set_wave_pattern_duty(value);
+        m_nr11 = value | 0x3F;
     }
 }
 
@@ -226,12 +225,7 @@ void age::gb_sound::write_nr14(uint8_t value)
     {
         update_state();
         m_c1.set_high_frequency_bits(value);
-
-        bool counter_deactivate = m_length_counter[gb_channel_1].write_nrX4(value, m_next_frame_sequencer_step & 1);
-        if (counter_deactivate)
-        {
-            deactivate_channel<gb_channel_1>();
-        }
+        length_counter_write_nrX4<gb_channel_1>(value);
 
         if ((value & gb_nrX4_initialize) > 0)
         {
@@ -265,19 +259,13 @@ void age::gb_sound::write_nr14(uint8_t value)
 void age::gb_sound::write_nr21(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    length_counter_write_nrX1<gb_channel_2>(value);
 
-    // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
+    // wave pattern duty only changeable, if switched on
+    if (m_master_on)
     {
-        update_state();
-        m_length_counter[gb_channel_2].write_nrX1(value);
-
-        // wave pattern duty only changeable, if switched on
-        if (m_master_on)
-        {
-            m_c2.set_wave_pattern_duty(value);
-            m_nr21 = value | 0x3F;
-        }
+        m_c2.set_wave_pattern_duty(value);
+        m_nr21 = value | 0x3F;
     }
 }
 
@@ -310,12 +298,7 @@ void age::gb_sound::write_nr24(uint8_t value)
     {
         update_state();
         m_c2.set_high_frequency_bits(value);
-
-        bool counter_deactivate = m_length_counter[gb_channel_2].write_nrX4(value, m_next_frame_sequencer_step & 1);
-        if (counter_deactivate)
-        {
-            deactivate_channel<gb_channel_2>();
-        }
+        length_counter_write_nrX4<gb_channel_2>(value);
 
         if ((value & gb_nrX4_initialize) > 0)
         {
@@ -360,12 +343,7 @@ void age::gb_sound::write_nr30(uint8_t value)
 void age::gb_sound::write_nr31(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
-    // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
-    {
-        update_state();
-        m_length_counter[gb_channel_3].write_nrX1(value);
-    }
+    length_counter_write_nrX1<gb_channel_3>(value);
 }
 
 void age::gb_sound::write_nr32(uint8_t value)
@@ -400,21 +378,17 @@ void age::gb_sound::write_nr34(uint8_t value)
     {
         update_state();
         m_c3.set_high_frequency_bits(value);
-
-        bool counter_deactivate = m_length_counter[gb_channel_3].write_nrX4(value, m_next_frame_sequencer_step & 1);
-        if (counter_deactivate)
-        {
-            deactivate_channel<gb_channel_3>();
-        }
+        length_counter_write_nrX4<gb_channel_3>(value);
 
         if ((value & m_nr30 & gb_nrX4_initialize) > 0)
         {
             activate_channel<gb_channel_3>();
 
-            // DMG: if we're about to read a wave sample, wave pattern memory will be "scrambled"
+            // DMG: if we're about to read a wave sample,
+            // wave pattern memory will be "scrambled"
             if (!m_is_cgb && (m_c3.get_samples_next_item() == 1))
             {
-                size_t index = (m_c3.get_wave_pattern_index() + 1) & 31;
+                unsigned index = (m_c3.get_wave_pattern_index() + 1) & 31;
                 index >>= 1;
 
                 if (index < 4)
@@ -423,8 +397,8 @@ void age::gb_sound::write_nr34(uint8_t value)
                 }
                 else
                 {
-                    size_t offset = index & ~3;
-                    for (size_t i = 0; i < 4; ++i)
+                    unsigned offset = index & ~3u;
+                    for (unsigned i = 0; i < 4; ++i)
                     {
                         set_wave_ram_byte(i, m_c3_wave_ram[i + offset]);
                     }
@@ -452,12 +426,7 @@ void age::gb_sound::write_nr34(uint8_t value)
 void age::gb_sound::write_nr41(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
-    // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
-    {
-        update_state();
-        m_length_counter[gb_channel_4].write_nrX1(value);
-    }
+    length_counter_write_nrX1<gb_channel_4>(value);
 }
 
 void age::gb_sound::write_nr42(uint8_t value)
@@ -488,12 +457,7 @@ void age::gb_sound::write_nr44(uint8_t value)
     if (m_master_on)
     {
         update_state();
-
-        bool counter_deactivate = m_length_counter[gb_channel_4].write_nrX4(value, m_next_frame_sequencer_step & 1);
-        if (counter_deactivate)
-        {
-            deactivate_channel<gb_channel_4>();
-        }
+        length_counter_write_nrX4<gb_channel_4>(value);
 
         if ((value & gb_nrX4_initialize) > 0)
         {
