@@ -100,7 +100,7 @@ class test_application : public QObject
 
 public:
 
-    test_application(const QString &test, const QString &ignore_file, test_type type);
+    test_application(const QString &test, const QString &ignore_file, test_type type, int num_threads);
     ~test_application() override;
 
 public slots:

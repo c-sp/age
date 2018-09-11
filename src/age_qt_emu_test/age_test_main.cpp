@@ -21,6 +21,7 @@
 #include "age_test_app.hpp"
 
 constexpr const char *arg_ignore_list = "ignore-list";
+constexpr const char *arg_threads = "threads";
 constexpr const char *arg_test_type = "test-type";
 constexpr const char *arg_test_file = "test-file";
 
@@ -69,14 +70,24 @@ void prepare_parser(QCommandLineParser &parser)
 
     parser.addPositionalArgument(
                 arg_test_file,
-                "The test file to run. This must be a runnable Gameboy rom file"
-                " or a directory to be searched for Gameboy rom files."
+                "The test file to run."
+                " This must be a runnable Gameboy rom file or a directory to"
+                " be searched for Gameboy rom files."
                 );
 
     parser.addOptions({{
                            arg_ignore_list,
-                           "A file containing names of test files to be ignored.",
+                           "A file containing names of test files to be"
+                           " ignored.",
                            "file"
+                       }});
+
+    parser.addOptions({{
+                           arg_threads,
+                           "The number of threads to use for running tests."
+                           " If this is not specified the number of processor"
+                           " cores will be used.",
+                           "threads"
                        }});
 
     parser.addHelpOption();
@@ -84,7 +95,8 @@ void prepare_parser(QCommandLineParser &parser)
 
 
 
-[[ noreturn ]] void exit_with_failure(const QCommandLineParser &parser, const QString &error_message)
+[[ noreturn ]] void exit_with_failure(const QCommandLineParser &parser,
+                                      const QString &error_message)
 {
     fprintf(stderr, "%s", qPrintable(error_message));
     fprintf(stderr, "\n");
@@ -94,31 +106,55 @@ void prepare_parser(QCommandLineParser &parser)
 
 
 
-age::test_type validate_arguments(const QCommandLineParser &parser)
+void validate_arguments(const QCommandLineParser &parser,
+                        age::test_type &test_type,
+                        int &num_threads)
 {
     // if there is no positional argument available,
     // the user did not specify the test-type
     if (parser.positionalArguments().size() < 1)
     {
-        exit_with_failure(parser, QString("no ").append(arg_test_type).append(" specified"));
+        auto msg = QString("no ").append(arg_test_type).append(" specified");
+        exit_with_failure(parser, msg);
     }
 
     // parse the test-type
     QString test_type_string = parser.positionalArguments().at(0);
-    age::optional<age::test_type> test_type = parse_test_type(test_type_string);
-    if (!test_type.is_set())
+    age::optional<age::test_type> type = parse_test_type(test_type_string);
+    if (!type.is_set())
     {
-        exit_with_failure(parser, QString("invalid ").append(arg_test_type).append(" '").append(test_type_string).append("'"));
+        auto msg = QString("invalid ").append(arg_test_type)
+                .append(" '").append(test_type_string).append("'");
+        exit_with_failure(parser, msg);
     }
 
     // if there is only one positional argument available,
     // the user did not specify the test(s) to execute
     if (parser.positionalArguments().size() < 2)
     {
-        exit_with_failure(parser, QString("no ").append(arg_test_file).append(" specified"));
+        auto msg = QString("no ").append(arg_test_file).append(" specified");
+        exit_with_failure(parser, msg);
     }
 
-    return test_type.get(age::test_type::blargg_test); // the default is never used here
+    // parse the number of threads, if specified
+    int threads = 0;
+    QString threads_string = parser.value(arg_threads);
+    if (threads_string.length() > 0)
+    {
+        bool parsed = false;
+        threads = threads_string.toInt(&parsed, 10);
+
+        if (!parsed)
+        {
+            auto msg = QString("invalid: --threads ").append(threads_string);
+            exit_with_failure(parser, msg);
+            threads = 0;
+        }
+    }
+
+    // the default value is never used as the test_type argument is mandatory
+    test_type = type.get(age::test_type::blargg_test);
+    num_threads = threads;
 }
 
 
@@ -139,15 +175,21 @@ int main(int argc, char *argv[])
     prepare_parser(parser);
     parser.process(app);
 
-    age::test_type test_type = validate_arguments(parser);
+    age::test_type test_type;
+    int num_threads;
+    validate_arguments(parser, test_type, num_threads);
 
     // create & connect test runner application
     age::test_application test_runner = {
         parser.positionalArguments().at(1),
         parser.value(arg_ignore_list),
-        test_type
+        test_type,
+        num_threads
     };
-    QObject::connect(&app, SIGNAL(aboutToQuit()), &test_runner, SLOT(about_to_quit()));
+    QObject::connect(
+                &app, SIGNAL(aboutToQuit()),
+                &test_runner, SLOT(about_to_quit())
+                );
 
     // "jump start" test runner application with a timer event
     QTimer::singleShot(1, &test_runner, SLOT(schedule_tests()));

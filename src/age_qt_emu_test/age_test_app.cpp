@@ -33,13 +33,18 @@
 //
 //---------------------------------------------------------
 
-age::test_application::test_application(const QString &test, const QString &ignore_file, test_type type)
+age::test_application::test_application(const QString &test, const QString &ignore_file, test_type type, int num_threads)
     : m_test_file_pattern(".*\\.gb[c]?", Qt::CaseInsensitive),
       m_test(test),
       m_ignore_file(ignore_file),
       m_type(type)
 {
     m_test_performance = QSharedPointer<test_performance>(new test_performance());
+
+    if (num_threads > 0)
+    {
+        m_thread_pool.setMaxThreadCount(num_threads);
+    }
 }
 
 age::test_application::~test_application()
