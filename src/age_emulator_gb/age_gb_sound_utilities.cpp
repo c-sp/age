@@ -63,6 +63,7 @@ age::gb_wave_generator::gb_wave_generator(int8_t frequency_counter_shift, uint8_
                 );
 
     std::fill(begin(m_wave_pattern), end(m_wave_pattern), 0);
+    set_frequency_bits(0);
 }
 
 
@@ -150,6 +151,13 @@ age::uint8_t age::gb_wave_generator::next_item()
 //   noise generator
 //
 //---------------------------------------------------------
+
+age::gb_noise_generator::gb_noise_generator()
+{
+    write_nrX3(0);
+}
+
+
 
 age::uint8_t age::gb_noise_generator::read_nrX3() const
 {

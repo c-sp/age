@@ -109,8 +109,6 @@ public:
 
 private:
 
-    // common members
-
     gb_core &m_core;
     const bool m_is_cgb;
 
@@ -121,14 +119,14 @@ private:
 
     // channel control
 
-    uint8_t m_nr50 = 0, m_nr51 = 0, m_nr52 = 0xF0;
-    bool m_master_on = true;
+    uint8_t m_nr50 = 0x77, m_nr51 = 0xF3, m_nr52 = 0x81;
+    bool m_master_on = false;
 
     // channels
 
     std::array<gb_length_counter, 4> m_length_counter = {{ {0x3F}, {0x3F}, {0xFF}, {0x3F} }};
 
-    uint8_t m_nr10 = 0, m_nr11 = 0, m_nr14 = 0;
+    uint8_t m_nr10 = 0, m_nr11 = 0x80, m_nr14 = 0;
     gb_frequency_sweep<gb_volume_sweep<gb_wave_generator>> m_c1;
 
     uint8_t m_nr21 = 0, m_nr24 = 0;
@@ -150,7 +148,7 @@ private:
     void set_wave_ram_byte(unsigned offset, uint8_t value);
 
     template<unsigned channel>
-    inline void activate_channel()
+    inline void init_channel()
     {
         uint8_t channel_bit = gb_channel_bit(channel);
         m_nr52 |= channel_bit;

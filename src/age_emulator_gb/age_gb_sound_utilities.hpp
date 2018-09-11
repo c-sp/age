@@ -33,8 +33,6 @@ namespace age
 {
 
 constexpr int8_t gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
-constexpr int gb_cycles_per_sample = 1 << gb_sample_cycle_shift;
-
 constexpr uint8_t gb_nrX4_initialize = 0x80;
 
 
@@ -143,8 +141,8 @@ private:
 
     uint32_t m_channel_multiplier = 0;
     uint8_t m_volume = 15;
-
     uint8_t m_current_item = 0;
+
     uint32_t m_current_sample = 0;
 };
 
@@ -364,7 +362,7 @@ private:
     int16_t m_frequency_bits = 0;
     int8_t m_period = 0;
     int8_t m_shift = 0;
-    bool m_sweep_up = false;
+    bool m_sweep_up = true;
 
     bool m_sweep_enabled = false;
     bool m_swept_down = false;
@@ -382,10 +380,8 @@ public:
     gb_wave_generator();
     gb_wave_generator(int8_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
 
-    int16_t get_frequency_bits() const;
     uint8_t get_wave_pattern_index() const;
 
-    void set_frequency_bits(int16_t frequency_bits);
     void set_low_frequency_bits(uint8_t nrX3);
     void set_high_frequency_bits(uint8_t nrX4);
 
@@ -395,12 +391,18 @@ public:
 
     uint8_t next_item();
 
+protected:
+
+    int16_t get_frequency_bits() const;
+
+    void set_frequency_bits(int16_t frequency_bits);
+
 private:
 
-    const int8_t m_frequency_counter_shift;
+    int8_t m_frequency_counter_shift;
     int16_t m_frequency_bits = 0;
 
-    const uint8_t m_index_mask;
+    uint8_t m_index_mask;
     uint8_t m_index = 0;
 
     uint8_array<32> m_wave_pattern;
@@ -413,6 +415,8 @@ private:
 class gb_noise_generator : public gb_sample_generator<gb_noise_generator>
 {
 public:
+
+    gb_noise_generator();
 
     uint8_t read_nrX3() const;
 
