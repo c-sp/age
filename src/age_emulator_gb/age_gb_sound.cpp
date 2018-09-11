@@ -146,6 +146,11 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
     AGE_ASSERT((m_next_frame_sequencer_step >= 0)
                && (m_next_frame_sequencer_step <= 7));
 
+    if (!m_master_on)
+    {
+        return;
+    }
+
     switch (m_next_frame_sequencer_step)
     {
         case 2:
