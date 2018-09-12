@@ -444,7 +444,7 @@ public:
     gb_length_counter(uint8_t counter_mask);
 
     void write_nrX1(uint8_t nrX1);
-    bool write_nrX4(uint8_t nrX4, bool next_frame_sequencer_step_odd);
+    bool write_nrX4(uint8_t nrX4, bool last_fs_step_ticked_lc);
     bool tick();
 
 private:

@@ -125,7 +125,8 @@ void age::gb_sound::set_back_cycles(int offset)
 {
     // update_state() must have been called to make sure cycle values
     // are within range and no integer underflow is happening
-    AGE_ASSERT((m_core.get_oscillation_cycle() >> gb_sample_cycle_shift) >= m_last_sample_cycle);
+    AGE_ASSERT((m_core.get_oscillation_cycle() >> gb_sample_cycle_shift)
+               >= m_last_sample_cycle);
 
     AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_last_sample_cycle, offset);
     AGE_GB_SET_BACK_CYCLES(m_next_frame_sequencer_cycle, offset);
@@ -148,9 +149,11 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
 
     if (!m_master_on)
     {
+        LOG("ignored at cycle " << at_cycle);
         return;
     }
-    LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step) << " at cycle " << at_cycle);
+    LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
+        << " at cycle " << at_cycle);
 
     switch (m_next_frame_sequencer_step)
     {
@@ -166,7 +169,6 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
         case 0:
         case 4:
             generate_samples(at_cycle);
-            LOG("length counter tick for cycle " << at_cycle);
             length_counter_tick<gb_channel_1>();
             length_counter_tick<gb_channel_2>();
             length_counter_tick<gb_channel_3>();
@@ -247,18 +249,18 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     : m_core(core),
       m_is_cgb(m_core.is_cgb()),
       m_samples(samples),
-      // no pcm samples are generated for the first N cycles
       m_last_sample_cycle(m_core.get_oscillation_cycle())
 {
     // initialize wave ram
     const uint8_array<0x10> &src = m_is_cgb ? cgb_wave_ram : dmg_wave_ram;
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
 
-    // fast-forward the first N frame sequencer steps
-    update_state();
-    m_master_on = true;
-
     // initialize channel 1
     m_c1.write_nrX2(0xF3);
     m_c1.set_wave_pattern_duty(0x80);
+
+    // fast-forward the first N frame sequencer steps
+    // (no pcm samples will be generated since we set
+    // m_last_sample_cycle to the current cycle)
+    update_state();
 }

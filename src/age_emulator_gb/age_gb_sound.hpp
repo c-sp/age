@@ -120,7 +120,7 @@ private:
     // channel control
 
     uint8_t m_nr50 = 0x77, m_nr51 = 0xF3, m_nr52 = 0x81;
-    bool m_master_on = false;
+    bool m_master_on = true;
 
     // channels
 
@@ -176,9 +176,9 @@ private:
     inline void length_counter_write_nrX4(uint8_t value)
     {
         gb_length_counter &lc = m_length_counter[channel];
-        bool last_step_ticked_lc = m_next_frame_sequencer_step & 1;
+        bool last_fs_step_ticked_lc = m_next_frame_sequencer_step & 1;
 
-        bool deactivate = lc.write_nrX4(value, last_step_ticked_lc);
+        bool deactivate = lc.write_nrX4(value, last_fs_step_ticked_lc);
         if (deactivate)
         {
             deactivate_channel<channel>();

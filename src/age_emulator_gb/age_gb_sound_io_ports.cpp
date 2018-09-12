@@ -141,8 +141,6 @@ void age::gb_sound::write_nr52(uint8_t value)
     {
         update_state();
         m_nr52 = gb_sound_master_switch;
-
-        m_next_frame_sequencer_step = 0;
     }
 
     m_master_on = new_master_on;
