@@ -15,7 +15,7 @@ The following _groups_ exist:
     like for example AGE-specific data types.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp).
-* **[`age_emulator_gb`](/age_emulator_gb)** contains the actual gameboy
+* **[`age_emulator_gb`](/src/age_emulator_gb)** contains the actual gameboy
     emulation code.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp).
