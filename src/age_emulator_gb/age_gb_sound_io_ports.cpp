@@ -158,6 +158,7 @@ void age::gb_sound::write_nr52(uint8_t value)
 
 void age::gb_sound::write_nr10(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
         update_state();
@@ -185,6 +186,7 @@ void age::gb_sound::write_nr11(uint8_t value)
 
 void age::gb_sound::write_nr12(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
         update_state();

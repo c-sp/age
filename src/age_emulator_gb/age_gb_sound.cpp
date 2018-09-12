@@ -31,7 +31,8 @@
 namespace
 {
 
-constexpr int gb_frame_sequencer_step_cycles = 1 << 13;
+constexpr int gb_apu_event_cycles = 1 << 13;
+constexpr int gb_frequency_sweep_check_delay = 4;
 
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code
@@ -110,10 +111,10 @@ void age::gb_sound::update_state()
 
     int current_cycle = m_core.get_oscillation_cycle();
 
-    while (current_cycle >= m_next_frame_sequencer_cycle)
+    while (current_cycle >= m_next_apu_event_cycle)
     {
-        frame_sequencer_step(m_next_frame_sequencer_cycle);
-        m_next_frame_sequencer_cycle += gb_frame_sequencer_step_cycles;
+        int cycles = apu_event(m_next_apu_event_cycle);
+        m_next_apu_event_cycle += cycles;
     }
 
     generate_samples(current_cycle);
@@ -129,7 +130,7 @@ void age::gb_sound::set_back_cycles(int offset)
                >= m_last_sample_cycle);
 
     AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_last_sample_cycle, offset);
-    AGE_GB_SET_BACK_CYCLES(m_next_frame_sequencer_cycle, offset);
+    AGE_GB_SET_BACK_CYCLES(m_next_apu_event_cycle, offset);
 }
 
 
@@ -142,32 +143,48 @@ void age::gb_sound::set_back_cycles(int offset)
 //
 //---------------------------------------------------------
 
-void age::gb_sound::frame_sequencer_step(int at_cycle)
+int age::gb_sound::apu_event(int at_cycle)
 {
     AGE_ASSERT((m_next_frame_sequencer_step >= 0)
                && (m_next_frame_sequencer_step <= 7));
 
+    // no frame sequencer activity if the APU is switched off
     if (!m_master_on)
     {
         LOG("ignored at cycle " << at_cycle);
-        return;
+        m_delayed_disable_c1 = false;
+        return gb_apu_event_cycles;
     }
     LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
-        << " at cycle " << at_cycle);
+        << " at cycle " << at_cycle
+        << " (disable c1: " << m_delayed_disable_c1 << ")");
+
+    // delayed disabling of channel 1 due to frequency sweep overflow
+    if (m_delayed_disable_c1)
+    {
+        generate_samples(at_cycle);
+        deactivate_channel<gb_channel_1>();
+        m_delayed_disable_c1 = false;
+        return gb_apu_event_cycles - gb_frequency_sweep_check_delay;
+    }
+
+    // perform next frame sequencer step
+    int cycles = gb_apu_event_cycles;
 
     switch (m_next_frame_sequencer_step)
     {
-        case 2:
-        case 6:
+        case 0:
+        case 4:
+            generate_samples(at_cycle);
             if (m_c1.sweep_frequency())
             {
-                generate_samples(at_cycle);
-                deactivate_channel<gb_channel_1>();
+                m_delayed_disable_c1 = true;
+                cycles = gb_frequency_sweep_check_delay;
             }
             // fall through
             [[clang::fallthrough]];
-        case 0:
-        case 4:
+        case 2:
+        case 6:
             generate_samples(at_cycle);
             length_counter_tick<gb_channel_1>();
             length_counter_tick<gb_channel_2>();
@@ -189,6 +206,8 @@ void age::gb_sound::frame_sequencer_step(int at_cycle)
             m_next_frame_sequencer_step = 0;
             break;
     }
+
+    return cycles;
 }
 
 

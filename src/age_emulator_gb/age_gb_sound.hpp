@@ -114,8 +114,9 @@ private:
 
     pcm_vector &m_samples;
     int m_last_sample_cycle = 0;
-    int m_next_frame_sequencer_cycle = 0;
+    int m_next_apu_event_cycle = 0;
     int8_t m_next_frame_sequencer_step = 0;
+    bool m_delayed_disable_c1 = false;
 
     // channel control
 
@@ -143,7 +144,7 @@ private:
 
     // channel template methods
 
-    void frame_sequencer_step(int at_cycle);
+    int apu_event(int at_cycle);
     void generate_samples(int until_cycle);
     void set_wave_ram_byte(unsigned offset, uint8_t value);
 
@@ -158,6 +159,7 @@ private:
     template<unsigned channel>
     inline void deactivate_channel()
     {
+        // AGE_GB_CYCLE_LOG("deactivate channel " << (channel + 1));
         uint8_t channel_bit = gb_channel_bit(channel);
         m_nr52 &= ~channel_bit;
         calculate_channel_multiplier<channel>();
