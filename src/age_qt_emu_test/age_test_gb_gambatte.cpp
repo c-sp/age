@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#include <algorithm> // std::count
+
 #include <QChar>
 #include <QDir>
 #include <QFileInfo>
@@ -23,7 +25,7 @@
 
 
 
-namespace age
+namespace
 {
 
 //!
@@ -31,18 +33,13 @@ namespace age
 //! (see gambatte/test/testrunner.cpp)
 //!
 constexpr int gb_gambatte_test_frames = 15;
-constexpr int gb_frames_per_second = 59;
 
-int gb_cycles_per_frame(const gb_emulator &emulator)
-{
-    return emulator.get_cycles_per_second() / gb_frames_per_second;
-}
-
-int test_cycles(const gb_emulator &emulator)
-{
-    int cycles_per_frame = gb_cycles_per_frame(emulator);
-    return cycles_per_frame * gb_gambatte_test_frames;
-}
+//!
+//! important for gambatte "outaudio" tests:
+//! these tests run until 15 * 35112 samples have been produced,
+//! the last 35112 samples are then checked
+//!
+constexpr int gb_samples_per_frame = 35112;
 
 }
 
@@ -304,7 +301,10 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
         // create emulator & run test
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
-        gb_emulate(*emulator, test_cycles(*emulator));
+
+        AGE_ASSERT(emulator->get_pcm_sampling_rate() == emulator->get_cycles_per_second() / 2);
+        int test_cycles = gb_gambatte_test_frames * gb_samples_per_frame * 2;
+        gb_emulate(*emulator, test_cycles);
 
         // evaluate test result
         bool pass = evaluate_out_string_result(*emulator, out_string);
@@ -343,7 +343,7 @@ age::optional<bool> parse_outaudio_flag(const QString &string, const QString &pr
         // 1 -> audio output expected
         else if (string.at(index) == '1')
         {
-            result.set(false);
+            result.set(true);
         }
     }
 
@@ -360,30 +360,41 @@ age::test_method gambatte_outaudio_test(bool expect_audio_output, bool force_dmg
         age::gb_hardware hardware = force_dmg ? age::gb_hardware::dmg : age::gb_hardware::auto_detect;
         QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
 
-        // gambatte tests run for 15 frames
+        // gambatte audio tests run for 15 * 35112 samples
         // (see gambatte/test/testrunner.cpp)
-        unsigned cycles_per_frame = static_cast<unsigned>(gb_cycles_per_frame(*emulator));
+        AGE_ASSERT(emulator->get_pcm_sampling_rate() == emulator->get_cycles_per_second() / 2);
 
-        gb_emulate(*emulator, test_cycles(*emulator));
-
-        // evaluate test result by checking the first cycles_per_frame
-        // pcm samples for equality
-        // (similar to gambatte/test/testrunner.cpp)
-        bool all_equal = true;
-        const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
-
-        for (unsigned i = 1; i < cycles_per_frame; ++i)
+        for (int i = gb_gambatte_test_frames; i >= 0; --i)
         {
-            if (emulator->get_audio_buffer()[i] != first_sample)
-            {
-                all_equal = false;
-                break;
-            }
+            gb_emulate(*emulator, gb_samples_per_frame * 2);
         }
 
+        // evaluate test result by checking the first gb_samples_per_frame
+        // pcm samples of the last test emulation iteration for equality
+        // (similar to gambatte/test/testrunner.cpp)
+        const age::pcm_vector &audio_buffer = emulator->get_audio_buffer();
+        AGE_ASSERT(audio_buffer.size() >= gb_samples_per_frame);
+
+        const age::pcm_sample first_sample = emulator->get_audio_buffer()[0];
+        qint64 count = std::count(begin(audio_buffer),
+                                  begin(audio_buffer) + gb_samples_per_frame,
+                                  first_sample);
+
         // return an error message, if the test failed
-        bool pass = all_equal == expect_audio_output;
-        return create_gb_test_result(*emulator, pass ? "" : "failed");
+        QString error;
+
+        if (expect_audio_output && (count == gb_samples_per_frame))
+        {
+            error = "fail: expected audio output";
+        }
+        else if (!expect_audio_output && (count != gb_samples_per_frame))
+        {
+            error = QString("fail: found ")
+                    .append(QString::number(count, 10))
+                    .append(" non-silent audio samples");
+        }
+
+        return create_gb_test_result(*emulator, error);
     };
 }
 
@@ -453,7 +464,8 @@ age::test_method gambatte_test(const QString &test_file_name, QString &result_fi
     }
     if (!result_file_name.isEmpty())
     {
-        return age::screenshot_test_png(for_dmg, false, age::gb_gambatte_test_frames * 1000 / age::gb_frames_per_second);
+        int millis = gb_gambatte_test_frames * 1000 / 59; // 59 fps
+        return age::screenshot_test_png(for_dmg, false, millis);
     }
 
     // return an empty method as we don't know the gambatte test type
