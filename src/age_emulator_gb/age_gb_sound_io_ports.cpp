@@ -82,6 +82,7 @@ age::uint8_t age::gb_sound::read_nr52()
 
 void age::gb_sound::write_nr50(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
         update_state();
@@ -96,6 +97,7 @@ void age::gb_sound::write_nr50(uint8_t value)
 
 void age::gb_sound::write_nr51(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
     if (m_master_on)
     {
         update_state();
@@ -111,7 +113,7 @@ void age::gb_sound::write_nr51(uint8_t value)
 void age::gb_sound::write_nr52(uint8_t value)
 {
     bool new_master_on = (value & gb_sound_master_switch) != 0;
-    LOG(AGE_LOG_HEX(value) << ", " << m_master_on << " -> " << new_master_on);
+    LOG(AGE_LOG_HEX(value) << ", master " << m_master_on << " -> " << new_master_on);
 
     // sound switched off
     if (m_master_on && !new_master_on)
@@ -173,7 +175,11 @@ void age::gb_sound::write_nr10(uint8_t value)
 
 void age::gb_sound::write_nr11(uint8_t value)
 {
-    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    LOG(AGE_LOG_HEX(value)
+        << ", lc " << AGE_LOG_DEC((~value & 0x3F) + 1)
+        << ", duty " << AGE_LOG_DEC(value >> 6)
+        << ", master " << m_master_on);
+
     length_counter_write_nrX1<gb_channel_1>(value);
 
     // wave pattern duty only changeable, if switched on
@@ -186,7 +192,12 @@ void age::gb_sound::write_nr11(uint8_t value)
 
 void age::gb_sound::write_nr12(uint8_t value)
 {
-    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    LOG(AGE_LOG_HEX(value)
+        << ", period " << AGE_LOG_DEC(value & 7)
+        << ", sweep up " << ((value & 8) != 0)
+        << ", volume " << AGE_LOG_DEC(value >> 4)
+        << ", master " << m_master_on);
+
     if (m_master_on)
     {
         update_state();
@@ -200,6 +211,7 @@ void age::gb_sound::write_nr12(uint8_t value)
 
 void age::gb_sound::write_nr13(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", master " << m_master_on);
     if (m_master_on)
     {
         update_state();
@@ -209,7 +221,12 @@ void age::gb_sound::write_nr13(uint8_t value)
 
 void age::gb_sound::write_nr14(uint8_t value)
 {
-    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    LOG(AGE_LOG_HEX(value)
+        << ", high freq " << AGE_LOG_DEC(value & 7)
+        << ", lc " << ((value & 0x40) > 0)
+        << ", init " << ((value & gb_nrX4_initialize) > 0)
+        << ", master " << m_master_on);
+
     if (m_master_on)
     {
         update_state();
@@ -247,7 +264,11 @@ void age::gb_sound::write_nr14(uint8_t value)
 
 void age::gb_sound::write_nr21(uint8_t value)
 {
-    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    LOG(AGE_LOG_HEX(value)
+        << ", lc " << AGE_LOG_DEC((~value & 0x3F) + 1)
+        << ", duty " << AGE_LOG_DEC(value >> 6)
+        << ", master " << m_master_on);
+
     length_counter_write_nrX1<gb_channel_2>(value);
 
     // wave pattern duty only changeable, if switched on
@@ -260,6 +281,12 @@ void age::gb_sound::write_nr21(uint8_t value)
 
 void age::gb_sound::write_nr22(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value)
+        << ", period " << AGE_LOG_DEC(value & 7)
+        << ", sweep up " << ((value & 8) != 0)
+        << ", volume " << AGE_LOG_DEC(value >> 4)
+        << ", master " << m_master_on);
+
     if (m_master_on)
     {
         update_state();
@@ -273,6 +300,7 @@ void age::gb_sound::write_nr22(uint8_t value)
 
 void age::gb_sound::write_nr23(uint8_t value)
 {
+    LOG(AGE_LOG_HEX(value) << ", master " << m_master_on);
     if (m_master_on)
     {
         update_state();
@@ -282,7 +310,12 @@ void age::gb_sound::write_nr23(uint8_t value)
 
 void age::gb_sound::write_nr24(uint8_t value)
 {
-    LOG(AGE_LOG_HEX(value) << ", " << m_master_on);
+    LOG(AGE_LOG_HEX(value)
+        << ", high freq " << AGE_LOG_DEC(value & 7)
+        << ", lc " << ((value & 0x40) > 0)
+        << ", init " << ((value & gb_nrX4_initialize) > 0)
+        << ", master " << m_master_on);
+
     if (m_master_on)
     {
         update_state();
