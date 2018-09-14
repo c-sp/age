@@ -235,6 +235,8 @@ void age::gb_sound::write_nr14(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
+            m_c1.reset_duty_counter();
+
             bool sweep_deactivate = m_c1.init_frequency_sweep();
             bool volume_deactivate = m_c1.init_volume_sweep();
 
@@ -324,6 +326,8 @@ void age::gb_sound::write_nr24(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
+            m_c2.reset_duty_counter();
+
             bool volume_deactivated = m_c2.init_volume_sweep();
             if (volume_deactivated)
             {

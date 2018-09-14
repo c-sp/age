@@ -84,6 +84,7 @@ public:
 
             for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
             {
+                //! \todo result distorted by overflow from one sample into the other
                 buffer[buffer_index].m_stereo_sample += m_current_sample;
             }
 
@@ -111,7 +112,7 @@ protected:
         m_samples_per_item = samples_per_item;
     }
 
-    void offset_item(int sample_offset)
+    void reset_item_samples(int sample_offset)
     {
         m_samples_next_item = m_samples_per_item + sample_offset;
     }
@@ -130,8 +131,10 @@ private:
         //   / 60  ->  combining volume 1-15 (channels 1,2,4)
         //             and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        int value = (2 * m_current_item - 15) * int16_t_max * m_volume;
+        int value = (2 * m_current_item * m_volume - 15 * 60) * int16_t_max;
+        // int value = (2 * m_current_item - 15) * int16_t_max * m_volume;
         value /= 15 * 32 * 60;
+        //! \todo result distorted by overflow from one sample into the other
         m_current_sample = value * m_channel_multiplier;
     }
 
@@ -140,7 +143,7 @@ private:
     bool m_last_sample_new_item = false;
 
     uint32_t m_channel_multiplier = 0;
-    uint8_t m_volume = 15;
+    uint8_t m_volume = 0;
     uint8_t m_current_item = 0;
 
     uint32_t m_current_sample = 0;
@@ -387,6 +390,7 @@ public:
 
     void reset_wave_pattern_index();
     void set_wave_pattern_byte(unsigned offset, uint8_t value);
+    void reset_duty_counter();
     void set_wave_pattern_duty(uint8_t nrX1);
 
     uint8_t next_item();
