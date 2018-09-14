@@ -239,10 +239,22 @@ void age::gb_sound::generate_samples(int until_cycle)
     // fill the silence, if audio is enabled
     if (m_master_on)
     {
-        m_c1.generate_samples(m_samples, sample_index, samples_to_generate);
-        m_c2.generate_samples(m_samples, sample_index, samples_to_generate);
-        m_c3.generate_samples(m_samples, sample_index, samples_to_generate);
-        m_c4.generate_samples(m_samples, sample_index, samples_to_generate);
+        if ((m_nr52 & gb_channel_bit(gb_channel_1)) != 0)
+        {
+            m_c1.generate_samples(m_samples, sample_index, samples_to_generate);
+        }
+        if ((m_nr52 & gb_channel_bit(gb_channel_2)) != 0)
+        {
+            m_c2.generate_samples(m_samples, sample_index, samples_to_generate);
+        }
+        if ((m_nr52 & gb_channel_bit(gb_channel_3)) != 0)
+        {
+            m_c3.generate_samples(m_samples, sample_index, samples_to_generate);
+        }
+        if ((m_nr52 & gb_channel_bit(gb_channel_4)) != 0)
+        {
+            m_c4.generate_samples(m_samples, sample_index, samples_to_generate);
+        }
     }
 }
 
