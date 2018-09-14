@@ -112,11 +112,9 @@ protected:
         m_samples_per_item = samples_per_item;
     }
 
-    void reset(uint8_t current_item, int sample_offset)
+    void reset_sample_counter(int sample_offset)
     {
         m_samples_next_item = m_samples_per_item + sample_offset;
-        m_current_item = current_item;
-        calculate_sample();
     }
 
 private:

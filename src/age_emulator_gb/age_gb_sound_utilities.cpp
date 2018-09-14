@@ -29,10 +29,10 @@ constexpr age::uint8_t gb_nrX4_length_counter = 0x40;
 
 constexpr const std::array<age::uint8_array<32>, 4> gb_wave_pattern_duty =
 {{
-     {{  0, 0, 0, 0,  15, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
-     {{  0, 0, 0, 0,  15,15, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
-     {{  0, 0,15,15,  15,15, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
-     {{ 15,15,15,15,   0, 0,15,15,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
+     {{  0, 0, 0, 0,   0, 0, 0,15,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
+     {{ 15, 0, 0, 0,   0, 0, 0,15,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
+     {{ 15, 0, 0, 0,   0,15,15,15,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
+     {{  0,15,15,15,  15,15,15, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0 }},
  }};
 
 }
@@ -109,7 +109,7 @@ void age::gb_wave_generator::reset_wave_pattern_index()
     // I don't know exactly why, but apparently the first wave pattern access
     // for channel 3 is delayed after init by 6 cycles
     // (found in gambatte source code)
-    reset(m_wave_pattern[m_index], 3);
+    reset_sample_counter(3);
 }
 
 void age::gb_wave_generator::set_wave_pattern_byte(unsigned offset, uint8_t value)
@@ -127,7 +127,7 @@ void age::gb_wave_generator::set_wave_pattern_byte(unsigned offset, uint8_t valu
 void age::gb_wave_generator::reset_duty_counter()
 {
     AGE_ASSERT(m_index_mask == 7); // only for channels 1 & 2
-    reset(m_wave_pattern[m_index], 0);
+    reset_sample_counter(0);
 }
 
 void age::gb_wave_generator::set_wave_pattern_duty(uint8_t nrX1)
