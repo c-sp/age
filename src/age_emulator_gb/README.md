@@ -34,10 +34,63 @@ TODO cycle init using DIV test roms
 ## Sound
 
 Frequency sweep, volume sweep and length counters are controlled by the frame
-sequencer.
-
-The frame sequencer has been
+sequencer which has been
 [described by Shay Green (blargg)](https://gist.github.com/drhelius/3652407).
+
+
+
+### Gambatte tests: custom modulation
+
+Several Gambatte sound tests produce audio output as test result:
+a test either finishes with audible output or with silence.
+
+To achieve this, test roms apply a custom modulation to the duty waveform of
+channel 1 or 2.
+The modulation is applied by repeatedly changing the channel volume.
+Additionally the respective channel is continuously initialised which each time
+restarts the frequency timer and thus prevents any further duty waveform
+progression.
+The resulting audio output is based on one and the same duty waveform
+output being modulated.
+
+Example for `outaudio0` test (the modulation has no effect on a duty waveform
+output of 0):
+```
+Duty Waveform 2  -----+                       +-----+-----+-----
+                      |                       |
+                      |                       |
+                      +-----+-----+-----+-----+
+                                          .
+Modulation                                +--+  +--+  +--+  +---
+                                          .  |  |  |  |  |  |
+                                          .  +--+  +--+  +--+
+Result           -----+                   .
+                      |                   .
+                      |                   .
+                      +-----+-----+-----+-+--+--+--+--+--+--+---
+                                          .
+     Duty Waveform progression stops here ^
+```
+
+Example for `outaudio1` test (the modulation takes effect on a duty waveform
+output of 1):
+```
+Duty Waveform 2  -----+                       +-----+-----+-----
+                      |                       |  .
+                      |                       |  .
+                      +-----+-----+-----+-----+  .
+                                                 .
+Modulation                                       +--+  +--+  +--
+                                                 .  |  |  |  |
+                                                 .  +--+  +--+
+                                                 .
+Result           -----+                          +--+  +--+  +--
+                      |                          |  |  |  |  |
+                      |                          |  +--+  +--+
+                      +-----+-----+-----+-----+--+
+                                                 .
+            Duty Waveform progression stops here ^
+```
 
 
 
