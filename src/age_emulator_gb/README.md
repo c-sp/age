@@ -6,11 +6,7 @@ To make the results more accessible,
 from now on I will document my test rom findings in this readme.*
 
 
-# Gameboy test rom analysis
-
-TODO add glossary
-
-
+# Gameboy Test Rom Analysis
 
 ## Emulator Initialization
 
@@ -39,7 +35,7 @@ sequencer which has been
 
 
 
-### Gambatte tests: custom modulation
+### Gambatte Tests: Custom Modulation
 
 Several Gambatte sound tests produce audio output as test result:
 a test either finishes with audible output or with silence.
@@ -47,14 +43,13 @@ a test either finishes with audible output or with silence.
 To achieve this, test roms apply a custom modulation to the duty waveform of
 channel 1 or 2.
 The modulation is applied by repeatedly changing the channel volume.
-Additionally the respective channel is continuously initialised which each time
-restarts the frequency timer and thus prevents any further duty waveform
-progression.
+Additionally the channel is continuously initialized which each time restarts
+the frequency timer and thus prevents any further duty waveform progression.
 The resulting audio output is based on one and the same duty waveform
-output being modulated.
+step being modulated in an infinite loop.
 
-Example for `outaudio0` test (the modulation has no effect on a duty waveform
-output of 0):
+Example for `outaudio0` test (the modulation has no effect on a waveform input
+of 0):
 ```
 Duty Waveform 2  -----+                       +-----+-----+-----
                       |                       |
@@ -69,11 +64,10 @@ Result           -----+                   .
                       |                   .
                       +-----+-----+-----+-+--+--+--+--+--+--+---
                                           .
-     Duty Waveform progression stops here ^
+     duty waveform progression stops here ^
 ```
 
-Example for `outaudio1` test (the modulation takes effect on a duty waveform
-output of 1):
+Example for `outaudio1` test:
 ```
 Duty Waveform 2  -----+                       +-----+-----+-----
                       |                       |  .
@@ -84,13 +78,65 @@ Modulation                                       +--+  +--+  +--
                                                  .  |  |  |  |
                                                  .  +--+  +--+
                                                  .
-Result           -----+                          +--+  +--+  +--
-                      |                          |  |  |  |  |
-                      |                          |  +--+  +--+
-                      +-----+-----+-----+-----+--+
+Result           -----+                       +--+--+  +--+  +--
+                      |                       |  .  |  |  |  |
+                      |                       |  .  +--+  +--+
+                      +-----+-----+-----+-----+  .
                                                  .
-            Duty Waveform progression stops here ^
+            duty waveform progression stops here ^
 ```
+
+
+
+### Initial Frequency Timer Delay
+
+The channel 1 and 2 frequency timer for the first duty waveform step is
+delayed by 8 cycles (4 output samples) on channel initialization.
+
+**Gambatte test roms**
+
+1. ch1_duty0_pos6_to_pos7_timing_1_dmg08_cgb04c_outaudio0
+1. ch1_duty0_pos6_to_pos7_timing_2_dmg08_cgb04c_outaudio1
+1. ch1_duty0_pos6_to_pos7_timing_ds_1_cgb04c_outaudio0
+1. ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
+
+**Logs**
+
+*Test roms 1, 2 (DMG - cycles differ for CGB)*
+
+```yaml
+    cycle 44008   NR52 = 0x00  # APU off
+    cycle 44028   NR52 = 0x80  # APU on, duty waveforms reset to position 0
+    cycle 44048   NR50 = 0x77  # SO1 volume = SO2 volume = 8
+    cycle 44068   NR51 = 0x11  # Channel 1 enabled on SO1 and SO2
+    cycle 44088   NR11 = 0x00  # Channel 1 duty 0 (waveform: 10000001)
+    cycle 44108   NR12 = 0x80  # Channel 1 volume 8
+    cycle 44128   NR13 = 0xC0  # Channel 1 lower frequency bits
+    cycle 44148   NR14 = 0x87  # Channel 1 init, 256 cycles per waveform step
+    cycle 44148   <waveform position 0>
+    cycle 44412   <waveform position 1>  # 256 + 8 cycles after position 0
+    cycle 44668   <waveform position 2>  # 256 cycles after position 1
+    cycle 44924   <waveform position 3>  # 256 cycles after position 2
+    cycle 45180   <waveform position 4>  # 256 cycles after position 3
+    cycle 45436   <waveform position 5>  # 256 cycles after position 4
+    cycle 45692   <waveform position 6>  # 256 cycles after position 5
+
+Test rom 1:
+
+    cycle 45920   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 45944   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+                  <repeated modulation of waveform position 6>  # outaudio0
+
+Test rom 2:
+
+    cycle 45924   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 45948   <waveform position 7>
+    cycle 45948   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+                  <repeated modulation of waveform position 7>  # outaudio1
+```
+
+*TODO add logs for test roms 3, 4 after emulation of CGB speed switching is
+complete (until then cycle numbers are not accurate)*
 
 
 

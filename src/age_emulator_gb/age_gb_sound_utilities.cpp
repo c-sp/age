@@ -129,7 +129,7 @@ void age::gb_wave_generator::set_wave_pattern_byte(unsigned offset, uint8_t valu
 void age::gb_wave_generator::reset_duty_counter()
 {
     AGE_ASSERT(m_index_mask == 7); // only for channels 1 & 2
-    reset_frequency_timer();
+    reset_frequency_timer(4);
 }
 
 void age::gb_wave_generator::set_wave_pattern_duty(uint8_t nrX1)

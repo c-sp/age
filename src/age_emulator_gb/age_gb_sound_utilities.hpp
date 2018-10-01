@@ -72,7 +72,7 @@ public:
         AGE_ASSERT((buffer_index >= 0) && (samples_to_generate > 0));
         AGE_ASSERT(int_max - samples_to_generate >= buffer_index);
         AGE_ASSERT(m_frequency_timer_period > 0);
-        AGE_ASSERT(m_frequency_timer >= 0);
+        AGE_ASSERT(m_frequency_timer >= 0); // > 0 for channel 1 & 2
 
         // we assume to generate at least one sample
         m_frequency_timer_just_reloaded = false;
@@ -103,6 +103,8 @@ public:
 
         bool just_reloaded = m_frequency_timer == m_frequency_timer_period;
         m_frequency_timer_just_reloaded &= just_reloaded;
+
+        AGE_ASSERT(m_frequency_timer > 0);
     }
 
 protected:
@@ -113,7 +115,7 @@ protected:
         m_frequency_timer_period = number_of_samples;
     }
 
-    void reset_frequency_timer(int sample_offset = 0)
+    void reset_frequency_timer(int sample_offset)
     {
         m_frequency_timer = m_frequency_timer_period + sample_offset;
     }
