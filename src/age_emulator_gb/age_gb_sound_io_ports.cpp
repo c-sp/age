@@ -412,7 +412,7 @@ void age::gb_sound::write_nr34(uint8_t value)
 
             // DMG: if we're about to read a wave sample,
             // wave pattern memory will be "scrambled"
-            if (!m_is_cgb && (m_c3.get_samples_next_item() == 1))
+            if (!m_is_cgb && (m_c3.get_frequency_timer() == 1))
             {
                 unsigned index = (m_c3.get_wave_pattern_index() + 1) & 31;
                 index >>= 1;

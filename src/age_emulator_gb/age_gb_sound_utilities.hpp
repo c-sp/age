@@ -42,14 +42,14 @@ class gb_sample_generator
 {
 public:
 
-    int get_samples_next_item() const
+    int get_frequency_timer() const
     {
-        return m_samples_next_item;
+        return m_frequency_timer;
     }
 
-    bool get_last_sample_new_item() const
+    bool timer_reload_on_last_sample() const
     {
-        return m_last_sample_new_item;
+        return m_frequency_timer_just_reloaded;
     }
 
     void set_channel_multiplier(uint32_t channel_multiplier)
@@ -57,71 +57,72 @@ public:
         AGE_ASSERT((channel_multiplier & 0xFFFF) <= 8);
         AGE_ASSERT((channel_multiplier >> 16) <= 8);
         m_channel_multiplier = channel_multiplier;
-        calculate_sample();
+        calculate_output_sample();
     }
 
     void set_volume(uint8_t volume)
     {
         AGE_ASSERT(volume <= 60);
         m_volume = volume;
-        calculate_sample();
+        calculate_output_sample();
     }
 
     void generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate)
     {
         AGE_ASSERT((buffer_index >= 0) && (samples_to_generate > 0));
         AGE_ASSERT(int_max - samples_to_generate >= buffer_index);
-        AGE_ASSERT(m_samples_per_item > 0);
-        AGE_ASSERT(m_samples_next_item >= 0);
+        AGE_ASSERT(m_frequency_timer_period > 0);
+        AGE_ASSERT(m_frequency_timer >= 0);
 
         // we assume to generate at least one sample
-        m_last_sample_new_item = false;
+        m_frequency_timer_just_reloaded = false;
 
         for (int samples_remaining = samples_to_generate; samples_remaining > 0; )
         {
-            // write the sample until we have to calculate the next item
-            int samples = std::min(samples_remaining, m_samples_next_item);
+            // write output samples until we have to retrieve the next wave sample
+            int samples = std::min(samples_remaining, m_frequency_timer);
 
             for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
             {
                 //! \todo result distorted by overflow from one sample into the other
-                buffer[buffer_index].m_stereo_sample += m_current_sample;
+                buffer[buffer_index].m_stereo_sample += m_output_sample;
             }
 
             samples_remaining -= samples;
-            m_samples_next_item -= samples;
+            m_frequency_timer -= samples;
 
-            // check for next wave pattern item
-            if (m_samples_next_item == 0)
+            // check for next wave input
+            if (m_frequency_timer == 0)
             {
-                m_last_sample_new_item = true;
-                m_samples_next_item = m_samples_per_item;
-                m_current_item = static_cast<TYPE*>(this)->next_item();
-                calculate_sample();
+                m_frequency_timer_just_reloaded = true;
+                m_frequency_timer = m_frequency_timer_period;
+                m_wave_sample = static_cast<TYPE*>(this)->next_wave_sample();
+                calculate_output_sample();
             }
         }
 
-        m_last_sample_new_item &= m_samples_next_item == m_samples_per_item;
+        bool just_reloaded = m_frequency_timer == m_frequency_timer_period;
+        m_frequency_timer_just_reloaded &= just_reloaded;
     }
 
 protected:
 
-    void set_samples_per_item(int samples_per_item)
+    void set_frequency_timer_period(int number_of_samples)
     {
-        AGE_ASSERT(samples_per_item > 0);
-        m_samples_per_item = samples_per_item;
+        AGE_ASSERT(number_of_samples > 0);
+        m_frequency_timer_period = number_of_samples;
     }
 
-    void reset_sample_counter(int sample_offset)
+    void reset_frequency_timer(int sample_offset = 0)
     {
-        m_samples_next_item = m_samples_per_item + sample_offset;
+        m_frequency_timer = m_frequency_timer_period + sample_offset;
     }
 
 private:
 
-    void calculate_sample()
+    void calculate_output_sample()
     {
-        AGE_ASSERT(m_current_item <= 15);
+        AGE_ASSERT(m_wave_sample <= 15);
         AGE_ASSERT(m_volume <= 60);
         //
         // divider:
@@ -131,22 +132,26 @@ private:
         //   / 60  ->  combining volume 1-15 (channels 1,2,4)
         //             and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        int value = (2 * m_current_item * m_volume - 15 * 60) * int16_t_max;
-        // int value = (2 * m_current_item - 15) * int16_t_max * m_volume;
+        int value = (2 * m_wave_sample * m_volume - 15 * 60) * int16_t_max;
+        // int value = (2 * m_wave_sample - 15) * int16_t_max * m_volume;
         value /= 15 * 32 * 60;
         //! \todo result distorted by overflow from one sample into the other
-        m_current_sample = value * m_channel_multiplier;
+        m_output_sample = value * m_channel_multiplier;
     }
 
-    int m_samples_per_item = 0;
-    int m_samples_next_item = 0;
-    bool m_last_sample_new_item = false;
+    int m_frequency_timer_period = 0;
+    int m_frequency_timer = 0;
+    bool m_frequency_timer_just_reloaded = false;
 
+    //!
+    //! \brief the current wave sample
+    //! (taken from duty waveform, wave ram or noise LFSR)
+    //!
+    uint8_t m_wave_sample = 0;
     uint32_t m_channel_multiplier = 0;
     uint8_t m_volume = 0;
-    uint8_t m_current_item = 0;
 
-    uint32_t m_current_sample = 0;
+    uint32_t m_output_sample = 0;
 };
 
 
@@ -393,7 +398,7 @@ public:
     void reset_duty_counter();
     void set_wave_pattern_duty(uint8_t nrX1);
 
-    uint8_t next_item();
+    uint8_t next_wave_sample();
 
 protected:
 
@@ -427,7 +432,7 @@ public:
     void write_nrX3(uint8_t nrX3);
     void init_generator();
 
-    uint8_t next_item();
+    uint8_t next_wave_sample();
 
 private:
 

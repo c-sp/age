@@ -71,7 +71,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
     if ((m_nr52 & gb_channel_bit(gb_channel_3)) > 0)
     {
         update_state();
-        if (!m_is_cgb && !m_c3.get_last_sample_new_item())
+        if (!m_is_cgb && !m_c3.timer_reload_on_last_sample())
         {
             return 0xFF;
         }
@@ -92,7 +92,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
     if ((m_nr52 & gb_channel_bit(gb_channel_3)) > 0)
     {
         update_state();
-        if (!m_is_cgb && !m_c3.get_last_sample_new_item())
+        if (!m_is_cgb && !m_c3.timer_reload_on_last_sample())
         {
             return;
         }
