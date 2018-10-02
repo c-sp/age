@@ -149,7 +149,7 @@ bool age::gb_sound::inc_period() const
     return
             // frame sequncer step is next
             (m_next_frame_sequencer_step == 7)
-            // frame sequencer step 7 is at most 4 cycles away
+            // frame sequencer step 6 is at most 4 cycles away
             || ((m_next_frame_sequencer_step == 6)
                 && !m_delayed_disable_c1
                 && (m_next_apu_event_cycle - m_core.get_oscillation_cycle() <= 4)
