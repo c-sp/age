@@ -140,42 +140,17 @@ complete (until then cycle numbers are not accurate)*
 
 
 
-### Volume Sweep Timing
+### Volume Envelope Timing
 
-Volume sweep happens only once in all eight frame sequencer steps.
-To be able to align the frame sequencer during
-[emulator initialization](TODO Link)
-one has to know when a volume sweep occurs.
+Volume updates by envelope happen only once in all eight frame sequencer steps.
+This makes volume envelope test roms perfect for determining the correct frame
+sequencer "alignment" during [emulator initialization](TODO Link).
 
 **Gambatte test roms**
 
-1. sound/ch2_init_reset_env_counter_timing_1_dmg08_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_2_dmg08_outaudio1_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_3_dmg08_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_4_dmg08_outaudio0_cgb04c_outaudio1
-
-1. sound/ch2_init_reset_env_counter_timing_5_dmg08_outaudio0_cgb04c_outaudio1
-1. sound/ch2_init_reset_env_counter_timing_6_dmg08_cgb04c_outaudio1
-1. sound/ch2_init_reset_env_counter_timing_7_dmg08_outaudio1_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_7_dmg08_outaudio1_cgb04c_outaudio0
-
-1. sound/ch2_init_reset_env_counter_timing_8_dmg08_cgb04c_outaudio1
-1. sound/ch2_init_reset_env_counter_timing_9_dmg08_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_10_dmg08_outaudio1_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_11_dmg08_outaudio0_cgb04c_outaudio1
-
-1. sound/ch2_init_reset_env_counter_timing_12_dmg08_cgb04c_outaudio1
-1. sound/ch2_init_reset_env_counter_timing_13_dmg08_cgb04c_outaudio0
-1. sound/ch2_init_reset_env_counter_timing_14_dmg08_outaudio0_cgb04c_outaudio1
-1. sound/ch2_init_reset_env_counter_timing_15_dmg08_outaudio1_cgb04c_outaudio0
-
-TODO describe test rom details
-
-**Logs**
-
 TODO finish
 
-**Conclusion**
+**Logs**
 
 TODO finish
 

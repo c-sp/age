@@ -161,7 +161,7 @@ private:
 
 
 template<typename TYPE>
-class gb_volume_sweep : public TYPE
+class gb_volume_envelope : public TYPE
 {
 public:
 
@@ -178,12 +178,12 @@ public:
         {
             ++volume;
         }
-        else if (!m_sweep_up)
+        else if (!m_increase_volume)
         {
             volume += 2;
         }
 
-        if (m_sweep_up != ((nrX2 & 0x08) > 0))
+        if (m_increase_volume != ((nrX2 & 0x08) > 0))
         {
             volume = 16 - volume;
         }
@@ -194,19 +194,19 @@ public:
         // store new value
         m_nrX2 = nrX2;
         m_period = m_nrX2 & 0x07;
-        m_sweep_up = (m_nrX2 & 0x08) > 0;
+        m_increase_volume = (m_nrX2 & 0x08) > 0;
 
         return channel_off();
     }
 
-    bool init_volume_sweep()
+    bool init_volume_envelope()
     {
         m_period_counter = (m_period == 0) ? 8 : m_period;
         update_volume(m_nrX2 >> 4);
         return channel_off();
     }
 
-    void sweep_volume()
+    void volume_envelope()
     {
         if (m_period_counter > 0)
         {
@@ -215,25 +215,19 @@ public:
             {
                 if (m_period > 0)
                 {
-                    if (sweep())
+                    if (adjust_volume())
                     {
                         m_period_counter = m_period;
                     }
-                    // else m_period_counter unchanged (= 0) -> stop sweeping
+                    // else m_period_counter unchanged (= 0) -> stop
                 }
-                // if we cannot sweep at the moment, retry later
+                // cannot adjust volume at the moment -> retry later
                 else
                 {
                     m_period_counter = 8;
                 }
             }
         }
-    }
-
-    void reset_volume_sweep()
-    {
-        // terminate any ongoing sweep
-        m_period_counter = 0;
     }
 
 private:
@@ -254,9 +248,9 @@ private:
         }
     }
 
-    bool sweep()
+    bool adjust_volume()
     {
-        int volume = m_sweep_up ? m_volume + 1 : m_volume - 1;
+        int volume = m_increase_volume ? m_volume + 1 : m_volume - 1;
 
         bool adjust_volume = (volume >= 0) && (volume < 0x10);
         if (adjust_volume)
@@ -269,7 +263,7 @@ private:
 
     uint8_t m_nrX2 = 0;
 
-    bool m_sweep_up = false;
+    bool m_increase_volume = false;
     int8_t m_period = 0;
     int8_t m_period_counter = 0;
     int8_t m_volume = 0;

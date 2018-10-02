@@ -126,10 +126,10 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_nr44 = 0;
         m_nr50 = m_nr51 = m_nr52 = 0;
 
-        m_c1 = gb_frequency_sweep<gb_volume_sweep<gb_wave_generator>>();
-        m_c2 = gb_volume_sweep<gb_wave_generator>();
+        m_c1 = gb_frequency_sweep<gb_volume_envelope<gb_wave_generator>>();
+        m_c2 = gb_volume_envelope<gb_wave_generator>();
         m_c3 = gb_wave_generator(0, 31);
-        m_c4 = gb_volume_sweep<gb_noise_generator>();
+        m_c4 = gb_volume_envelope<gb_noise_generator>();
 
         std::for_each(begin(m_length_counter), end(m_length_counter), [&](auto &elem)
         {
@@ -194,7 +194,7 @@ void age::gb_sound::write_nr12(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value)
         << ", period " << AGE_LOG_DEC(value & 7)
-        << ", sweep up " << ((value & 8) != 0)
+        << ", inc vol " << ((value & 8) != 0)
         << ", volume " << AGE_LOG_DEC(value >> 4)
         << ", master " << m_master_on);
 
@@ -238,7 +238,7 @@ void age::gb_sound::write_nr14(uint8_t value)
             m_c1.reset_duty_counter();
 
             bool sweep_deactivate = m_c1.init_frequency_sweep();
-            bool volume_deactivate = m_c1.init_volume_sweep();
+            bool volume_deactivate = m_c1.init_volume_envelope();
 
             if (sweep_deactivate || volume_deactivate)
             {
@@ -285,7 +285,7 @@ void age::gb_sound::write_nr22(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value)
         << ", period " << AGE_LOG_DEC(value & 7)
-        << ", sweep up " << ((value & 8) != 0)
+        << ", inc vol " << ((value & 8) != 0)
         << ", volume " << AGE_LOG_DEC(value >> 4)
         << ", master " << m_master_on);
 
@@ -328,7 +328,7 @@ void age::gb_sound::write_nr24(uint8_t value)
         {
             m_c2.reset_duty_counter();
 
-            bool volume_deactivated = m_c2.init_volume_sweep();
+            bool volume_deactivated = m_c2.init_volume_envelope();
             if (volume_deactivated)
             {
                 deactivate_channel<gb_channel_2>();
@@ -487,7 +487,7 @@ void age::gb_sound::write_nr44(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            bool volume_deactivated = m_c4.init_volume_sweep();
+            bool volume_deactivated = m_c4.init_volume_envelope();
             if (volume_deactivated)
             {
                 deactivate_channel<gb_channel_4>();

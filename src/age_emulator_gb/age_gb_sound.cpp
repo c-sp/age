@@ -200,9 +200,9 @@ int age::gb_sound::apu_event(int at_cycle)
 
         case 7:
             generate_samples(at_cycle);
-            m_c1.sweep_volume();
-            m_c2.sweep_volume();
-            m_c4.sweep_volume();
+            m_c1.volume_envelope();
+            m_c2.volume_envelope();
+            m_c4.volume_envelope();
             m_next_frame_sequencer_step = 0;
             break;
     }
