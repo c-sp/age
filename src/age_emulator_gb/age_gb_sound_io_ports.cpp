@@ -126,10 +126,10 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_nr44 = 0;
         m_nr50 = m_nr51 = m_nr52 = 0;
 
-        m_c1 = gb_frequency_sweep<gb_volume_envelope<gb_wave_generator>>();
-        m_c2 = gb_volume_envelope<gb_wave_generator>();
-        m_c3 = gb_wave_generator(0, 31);
-        m_c4 = gb_volume_envelope<gb_noise_generator>();
+        m_c1 = gb_sound_channel1();
+        m_c2 = gb_sound_channel2();
+        m_c3 = gb_sound_channel3(0, 31);
+        m_c4 = gb_sound_channel4();
 
         std::for_each(begin(m_length_counter), end(m_length_counter), [&](auto &elem)
         {

@@ -35,6 +35,13 @@
 namespace age
 {
 
+typedef gb_frequency_sweep<gb_volume_envelope<gb_wave_generator>> gb_sound_channel1;
+typedef gb_volume_envelope<gb_wave_generator> gb_sound_channel2;
+typedef gb_wave_generator gb_sound_channel3;
+typedef gb_volume_envelope<gb_noise_generator> gb_sound_channel4;
+
+
+
 constexpr unsigned gb_channel_1 = 0;
 constexpr unsigned gb_channel_2 = 1;
 constexpr unsigned gb_channel_3 = 2;
@@ -128,17 +135,17 @@ private:
     std::array<gb_length_counter, 4> m_length_counter = {{ {0x3F}, {0x3F}, {0xFF}, {0x3F} }};
 
     uint8_t m_nr10 = 0, m_nr11 = 0x80, m_nr14 = 0;
-    gb_frequency_sweep<gb_volume_envelope<gb_wave_generator>> m_c1;
+    gb_sound_channel1 m_c1;
 
     uint8_t m_nr21 = 0, m_nr24 = 0;
-    gb_volume_envelope<gb_wave_generator> m_c2;
+    gb_sound_channel2 m_c2;
 
     uint8_t m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
     uint8_array<16> m_c3_wave_ram;
-    gb_wave_generator m_c3 = {0, 31};
+    gb_sound_channel3 m_c3 = {0, 31};
 
     uint8_t m_nr44 = 0;
-    gb_volume_envelope<gb_noise_generator> m_c4;
+    gb_sound_channel4 m_c4;
 
 
 
