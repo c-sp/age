@@ -42,6 +42,8 @@ typedef gb_volume_envelope<gb_noise_generator> gb_sound_channel4;
 
 
 
+constexpr int gb_apu_event_cycles = 1 << 13;
+
 constexpr unsigned gb_channel_1 = 0;
 constexpr unsigned gb_channel_2 = 1;
 constexpr unsigned gb_channel_3 = 2;

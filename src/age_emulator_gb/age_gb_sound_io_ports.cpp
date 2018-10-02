@@ -143,6 +143,14 @@ void age::gb_sound::write_nr52(uint8_t value)
     {
         update_state();
         m_nr52 = gb_sound_master_switch;
+
+        if ((m_core.get_oscillation_cycle() + 4) & 0x1000)
+        {
+            LOG("skipping one APU event");
+            m_next_apu_event_cycle += gb_apu_event_cycles;
+        }
+        m_next_frame_sequencer_step = 0;
+        m_delayed_disable_c1 = false;
     }
 
     m_master_on = new_master_on;

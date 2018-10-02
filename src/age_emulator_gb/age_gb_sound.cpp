@@ -31,7 +31,6 @@
 namespace
 {
 
-constexpr int gb_apu_event_cycles = 1 << 13;
 constexpr int gb_frequency_sweep_check_delay = 4;
 
 // memory dumps,
@@ -151,17 +150,14 @@ int age::gb_sound::apu_event(int at_cycle)
     // no frame sequencer activity if the APU is switched off
     if (!m_master_on)
     {
-        LOG("ignored at cycle " << at_cycle);
-        m_delayed_disable_c1 = false;
+        LOG("ignored at cycle " << at_cycle << ": APU off");
         return gb_apu_event_cycles;
     }
-    LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
-        << " at cycle " << at_cycle
-        << " (disable c1: " << m_delayed_disable_c1 << ")");
 
     // delayed disabling of channel 1 due to frequency sweep overflow
     if (m_delayed_disable_c1)
     {
+        LOG("delayed disable c1 at cycle " << at_cycle);
         generate_samples(at_cycle);
         deactivate_channel<gb_channel_1>();
         m_delayed_disable_c1 = false;
@@ -169,12 +165,15 @@ int age::gb_sound::apu_event(int at_cycle)
     }
 
     // perform next frame sequencer step
-    int cycles = gb_apu_event_cycles;
+    LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
+        << " at cycle " << at_cycle
+        << " (disable c1: " << m_delayed_disable_c1 << ")");
 
+    int cycles = gb_apu_event_cycles;
     switch (m_next_frame_sequencer_step)
     {
-        case 0:
-        case 4:
+        case 2:
+        case 6:
             generate_samples(at_cycle);
             if (m_c1.sweep_frequency())
             {
@@ -183,8 +182,8 @@ int age::gb_sound::apu_event(int at_cycle)
             }
             // fall through
             [[clang::fallthrough]];
-        case 2:
-        case 6:
+        case 0:
+        case 4:
             generate_samples(at_cycle);
             length_counter_tick<gb_channel_1>();
             length_counter_tick<gb_channel_2>();

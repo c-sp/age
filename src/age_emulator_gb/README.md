@@ -35,7 +35,7 @@ sequencer which has been
 
 
 
-### Gambatte Tests: Custom Modulation
+### Gambatte Test Roms: Custom Modulation
 
 Several Gambatte sound tests produce audio output as test result:
 a test either finishes with audible output or with silence.
@@ -56,10 +56,10 @@ Duty Waveform 2  -----+                       +-----+-----+-----
                       |                       |
                       +-----+-----+-----+-----+
                                           .
-Modulation                                +--+  +--+  +--+  +---
+     Modulation                           +--+  +--+  +--+  +---
                                           .  |  |  |  |  |  |
                                           .  +--+  +--+  +--+
-Result           -----+                   .
+         Result  -----+                   .
                       |                   .
                       |                   .
                       +-----+-----+-----+-+--+--+--+--+--+--+---
@@ -74,11 +74,11 @@ Duty Waveform 2  -----+                       +-----+-----+-----
                       |                       |  .
                       +-----+-----+-----+-----+  .
                                                  .
-Modulation                                       +--+  +--+  +--
+     Modulation                                  +--+  +--+  +--
                                                  .  |  |  |  |
                                                  .  +--+  +--+
                                                  .
-Result           -----+                       +--+--+  +--+  +--
+         Result  -----+                       +--+--+  +--+  +--
                       |                       |  .  |  |  |  |
                       |                       |  .  +--+  +--+
                       +-----+-----+-----+-----+  .
@@ -102,7 +102,7 @@ delayed by 8 cycles (4 output samples) on channel initialization.
 
 **Logs**
 
-*Test roms 1, 2 (DMG - cycles differ for CGB)*
+*Test roms 1, 2 (DMG)*
 
 ```yaml
     cycle 44008   NR52 = 0x00  # APU off
@@ -125,14 +125,15 @@ Test rom 1:
 
     cycle 45920   NR12 = 0xC0  # Channel 1, set volume 12
     cycle 45944   NR14 = 0x80  # Channel 1 init, frequency timer restarted
-                  <repeated modulation of waveform position 6>  # outaudio0
+                               # (4 cycles before waveform position 7)
+    <...>         <custom modulation of waveform position 6>  # outaudio0
 
 Test rom 2:
 
     cycle 45924   NR12 = 0xC0  # Channel 1, set volume 12
     cycle 45948   <waveform position 7>
     cycle 45948   NR14 = 0x80  # Channel 1 init, frequency timer restarted
-                  <repeated modulation of waveform position 7>  # outaudio1
+    <...>         <custom modulation of waveform position 7>  # outaudio1
 ```
 
 *TODO add logs for test roms 3, 4 after emulation of CGB speed switching is
@@ -153,6 +154,48 @@ TODO finish
 **Logs**
 
 TODO finish
+
+
+
+### Frame Sequencer Step Skipping
+
+When switching on the APU while cycle bit 14 is set the next frame sequencer
+step is skipped.
+
+**Gambatte test roms**
+
+```
+test      | type  | steps | cycle APU on        | cycle channel init
+----------+-------+-------+---------------------+----------------------
+          |       |       |                     |
+timing_1  | DMG-0 | 7     | 1010'1111'1111'1000 |   1011'0000'0111'0000
+timing_2  | DMG-1 | 8     | 1010'1111'1111'1000 |   1011'0000'0111'0000
+          |       |       |                     |
+timing_5  | DMG-0 | 8     | 1010'1111'1111'1100 |   1011'0000'0111'0100
+timing_6  | DMG-1 | 9     | 1010'1111'1111'1100 |   1011'0000'0111'0100
+          |       |       |                     |
+timing_9  | DMG-0 | 6+1   | 1010'1011'1111'1100 | 1'0111'1111'1111'1000
+timing_10 | DMG-1 | 6+2   | 1010'1011'1111'1100 | 1'0111'1111'1111'1000
+          |       |       |                     |
+timing_11 | DMG-0 | 6+9   | 1010'1011'1111'1100 | 1'0111'1111'1111'1100
+timing_12 | DMG-1 | 6+10  | 1010'1011'1111'1100 | 1'0111'1111'1111'1100
+          |       |       |                     |
+----------+-------+-------+---------------------+----------------------
+          |       |       |                     |
+timing_3  | CGB-0 | 7     | 0010'1111'1111'1000 |   0011'0000'0111'0000
+timing_4  | CGB-1 | 8     | 0010'1111'1111'1000 |   0011'0000'0111'0000
+          |       |       |                     |
+timing_7  | CGB-0 | 8     | 0010'1111'1111'1100 |   0011'0000'0111'0100
+timing_8  | CGB-1 | 9     | 0010'1111'1111'1100 |   0011'0000'0111'0100
+          |       |       |                     |
+timing_13 | CGB-0 | 7+1   | 0001'1110'1101'0000 |   1111'1111'1111'1000
+timing_14 | CGB-1 | 7+2   | 0001'1110'1101'0000 |   1111'1111'1111'1000
+          |       |       |                     |
+timing_15 | CGB-0 | 7+9   | 0001'1110'1101'0000 |   1111'1111'1111'1100
+timing_16 | CGB-1 | 7+10  | 0001'1110'1101'0000 |   1111'1111'1111'1100
+          |       |       |                     |
+----------+-------+-------+---------------------+----------------------
+```
 
 
 
