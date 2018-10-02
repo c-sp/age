@@ -199,9 +199,10 @@ public:
         return channel_off();
     }
 
-    bool init_volume_envelope()
+    bool init_volume_envelope(bool inc_period)
     {
         m_period_counter = (m_period == 0) ? 8 : m_period;
+        m_period_counter += inc_period ? 1 : 0;
         update_volume(m_nrX2 >> 4);
         return channel_off();
     }

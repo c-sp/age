@@ -142,6 +142,22 @@ void age::gb_sound::set_back_cycles(int offset)
 //
 //---------------------------------------------------------
 
+bool age::gb_sound::inc_period() const
+{
+    // the initial volume envelope period is increased by one,
+    // if the next frame sequencer step 7 is near
+    return
+            // frame sequncer step is next
+            (m_next_frame_sequencer_step == 7)
+            // frame sequencer step 7 is at most 4 cycles away
+            || ((m_next_frame_sequencer_step == 6)
+                && !m_delayed_disable_c1
+                && (m_next_apu_event_cycle - m_core.get_oscillation_cycle() <= 4)
+                );
+}
+
+
+
 int age::gb_sound::apu_event(int at_cycle)
 {
     AGE_ASSERT((m_next_frame_sequencer_step >= 0)

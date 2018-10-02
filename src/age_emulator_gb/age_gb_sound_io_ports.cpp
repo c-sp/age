@@ -246,7 +246,7 @@ void age::gb_sound::write_nr14(uint8_t value)
             m_c1.reset_duty_counter();
 
             bool sweep_deactivate = m_c1.init_frequency_sweep();
-            bool volume_deactivate = m_c1.init_volume_envelope();
+            bool volume_deactivate = m_c1.init_volume_envelope(inc_period());
 
             if (sweep_deactivate || volume_deactivate)
             {
@@ -336,7 +336,7 @@ void age::gb_sound::write_nr24(uint8_t value)
         {
             m_c2.reset_duty_counter();
 
-            bool volume_deactivated = m_c2.init_volume_envelope();
+            bool volume_deactivated = m_c2.init_volume_envelope(inc_period());
             if (volume_deactivated)
             {
                 deactivate_channel<gb_channel_2>();
@@ -495,7 +495,7 @@ void age::gb_sound::write_nr44(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            bool volume_deactivated = m_c4.init_volume_envelope();
+            bool volume_deactivated = m_c4.init_volume_envelope(inc_period());
             if (volume_deactivated)
             {
                 deactivate_channel<gb_channel_4>();

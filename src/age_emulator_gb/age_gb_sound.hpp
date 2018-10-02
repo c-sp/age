@@ -153,6 +153,7 @@ private:
 
     // channel template methods
 
+    bool inc_period() const;
     int apu_event(int at_cycle);
     void generate_samples(int until_cycle);
     void set_wave_ram_byte(unsigned offset, uint8_t value);
