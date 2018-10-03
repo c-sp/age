@@ -295,7 +295,8 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     : m_core(core),
       m_is_cgb(m_core.is_cgb()),
       m_samples(samples),
-      m_last_sample_cycle(m_core.get_oscillation_cycle())
+      m_last_sample_cycle(m_core.get_oscillation_cycle()),
+      m_next_frame_sequencer_step(m_is_cgb ? 7 : 3)
 {
     // initialize wave ram
     const uint8_array<0x10> &src = m_is_cgb ? cgb_wave_ram : dmg_wave_ram;

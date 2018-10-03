@@ -100,6 +100,8 @@ delayed by 8 cycles (4 output samples) on channel initialization.
 1. ch1_duty0_pos6_to_pos7_timing_ds_1_cgb04c_outaudio0
 1. ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
 
+TODO description
+
 **Logs**
 
 *Test roms 1, 2 (DMG)*
@@ -141,7 +143,7 @@ complete (until then cycle numbers are not accurate)*
 
 
 
-### Volume Envelope Timing
+### Frame Sequencer Initialization
 
 Volume updates by envelope happen only once in all eight frame sequencer steps.
 This makes volume envelope test roms perfect for determining the correct frame
@@ -150,7 +152,12 @@ sequencer "alignment" during
 
 **Gambatte test roms**
 
-TODO finish
+1. ch2_init_env_counter_timing_1_dmg08_cgb04c_outaudio0
+1. ch2_init_env_counter_timing_2_dmg08_outaudio1_cgb04c_outaudio0
+1. ch2_init_env_counter_timing_3_dmg08_outaudio1_cgb04c_outaudio0
+1. ch2_init_env_counter_timing_4_dmg08_cgb04c_outaudio1
+
+TODO description
 
 **Logs**
 
@@ -165,7 +172,16 @@ step is skipped.
 
 **Gambatte test roms**
 
-TODO finish
+1. ch2_init_reset_env_counter_timing_1_dmg08_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_2_dmg08_outaudio1_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_3_dmg08_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_4_dmg08_outaudio0_cgb04c_outaudio1
+1. ch2_init_reset_env_counter_timing_5_dmg08_outaudio0_cgb04c_outaudio1
+1. ch2_init_reset_env_counter_timing_6_dmg08_cgb04c_outaudio1
+1. ch2_init_reset_env_counter_timing_7_dmg08_outaudio1_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_8_dmg08_cgb04c_outaudio1
+
+TODO description
 
 **Logs**
 
@@ -203,6 +219,30 @@ timing_16 | CGB-1 | 7+10  | 0001'1110'1101'0000 |   1111'1111'1111'1100
           |       |       |                     |
 ----------+-------+-------+---------------------+----------------------
 ```
+
+
+
+### Volume Envelope Period Increase
+
+The initial volume envelope period is increased by one if the next frame
+sequencer step 7 is at most 8196 cycles (4098 output samples) away.
+
+**Gambatte test roms**
+
+1. ch2_init_reset_env_counter_timing_9_dmg08_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_10_dmg08_outaudio1_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_11_dmg08_outaudio0_cgb04c_outaudio1
+1. ch2_init_reset_env_counter_timing_12_dmg08_cgb04c_outaudio1
+1. ch2_init_reset_env_counter_timing_13_dmg08_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_14_dmg08_outaudio0_cgb04c_outaudio1
+1. ch2_init_reset_env_counter_timing_15_dmg08_outaudio1_cgb04c_outaudio0
+1. ch2_init_reset_env_counter_timing_16_dmg08_cgb04c_outaudio1
+
+TODO description
+
+**Logs**
+
+TODO finish
 
 
 
