@@ -145,7 +145,8 @@ complete (until then cycle numbers are not accurate)*
 
 Volume updates by envelope happen only once in all eight frame sequencer steps.
 This makes volume envelope test roms perfect for determining the correct frame
-sequencer "alignment" during [emulator initialization](TODO Link).
+sequencer "alignment" during
+[emulator initialization](#emulator-initialization).
 
 **Gambatte test roms**
 
@@ -163,6 +164,12 @@ When switching on the APU while cycle bit 14 is set the next frame sequencer
 step is skipped.
 
 **Gambatte test roms**
+
+TODO finish
+
+**Logs**
+
+TODO finish
 
 ```
 test      | type  | steps | cycle APU on        | cycle channel init
@@ -201,9 +208,6 @@ timing_16 | CGB-1 | 7+10  | 0001'1110'1101'0000 |   1111'1111'1111'1100
 
 ### Length Counter Timing
 
-TODO align frame sequencer steps
-TODO split logs into DMG and CGB
-
 **Gambatte test roms**
 
 1. sound/ch2_init_reset_length_counter_timing_nr52_1_dmg08_out2_cgb04c_out0
@@ -213,10 +217,13 @@ TODO split logs into DMG and CGB
 
 Sound channel 2 is initialized to automatically deactivate when it's length
 counter reaches zero.
-NR52 is checked for channel 2 activity around the time the frame sequencer is
-expected to decrement length counters.
+NR52 is checked for channel 2 activity around the time length counters are
+expected to be decremented.
 
 **Logs**
+
+TODO align frame sequencer steps
+TODO split logs into DMG and CGB
 
 This is a combination of all four test logs.
 The tests basically do the same thing,
