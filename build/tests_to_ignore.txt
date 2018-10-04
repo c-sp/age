@@ -23,7 +23,6 @@ oam_bug/rom_singles/
 
 ###   failing tests
 
-dmg_sound.gb
 halt_bug.gb
 interrupt_time.gb
 oam_bug.gb
