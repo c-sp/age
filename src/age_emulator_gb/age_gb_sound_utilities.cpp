@@ -108,9 +108,6 @@ void age::gb_wave_generator::reset_wave_pattern_index()
 {
     AGE_ASSERT(m_index_mask == 31); // only for channel 3
     m_index = 0;
-    // I don't know exactly why, but apparently the first wave pattern access
-    // for channel 3 is delayed after init by 6 cycles
-    // (found in gambatte source code)
     reset_frequency_timer(3);
 }
 
@@ -244,19 +241,15 @@ void age::gb_length_counter::write_nrX1(uint8_t nrX1)
     m_counter = (~nrX1 & m_counter_mask) + 1;
 }
 
-bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool last_fs_step_ticked_lc)
+bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool immediate_decrement)
 {
     bool disable_channel = false;
 
-    // the length counter will immediately be decremented, if it is
-    // enabled during the first half of a length period and the
-    // counter did not already reach zero
     int8_t decrement = 0;
-
     bool new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
     if (new_counter_enabled)
     {
-        decrement = last_fs_step_ticked_lc ? 1 : 0;
+        decrement = immediate_decrement ? 1 : 0;
 
         if (!m_counter_enabled && (m_counter > 0))
         {

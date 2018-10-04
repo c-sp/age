@@ -427,6 +427,15 @@ and a skipped frame sequencer step right after switching on the APU.*
 
 ### Length Counter Timing
 
+If a channel is initialized with length counter,
+it is deactivated once the length counter is decremented to zero.
+
+When a frame sequencer step is skipped as a result of switching on the APU at
+specific cycles,
+the length counter is immediately decremented by one on channel initialization.
+This is additional to the immediate length counter decrement described by
+[Shay Green (blargg)](https://gist.github.com/drhelius/3652407).
+
 **Gambatte test roms**
 
 1. sound/ch2_init_reset_length_counter_timing_nr52_1_dmg08_out2_cgb04c_out0
@@ -441,63 +450,59 @@ expected to be decremented.
 
 **Logs**
 
-TODO align frame sequencer steps
-TODO split logs into DMG and CGB
-
-This is a combination of all four test logs.
-The tests basically do the same thing,
-they just read NR52 at different times.
-
+*Test roms 1, 2 (DMG)*
 ```yaml
-    cycle 7892    NR52 = 0x00  # APU off
-    cycle 7912    NR52 = 0x80  # APU on (cycle 0001'1110'1110'1000)
-    cycle 7932    NR21 = 0x3d  # Channel 2 length counter = 3
-    cycle 7992    NR24 = 0xc7  # Channel 2 init with length counter
-    cycle 32764   NR52 == 0x82 # Channel 2 active
-    cycle 32768   NR52 == 0x80 # Channel 2 inactive
-
+    cycle 44008   NR50 = 0x00
+    cycle 44020   NR51 = 0x00  # disable sound output
     cycle 44032   NR52 = 0x00  # APU off
-    cycle 44052   NR52 = 0x80  # APU on (cycle 1010'1100'0001'0100)
-    cycle 44072   NR21 = 0x3d  # Channel 2 length counter = 3
-    cycle 44132   NR24 = 0xc7  # Channel 2 init with length counter
-    cycle 81916   NR52 == 0x82 # Channel 2 active
+    cycle 44052   NR52 = 0x80  # APU on
+                               # cycle 44052+4 = 1010'1100'0001'1000b
+                               # -> no frame sequencer step skipped
+    cycle 44072   NR21 = 0x3D  # Channel 2 length counter = 3
+    cycle 44092   NR22 = 0xF0  # Channel 2 volume = 15
+    cycle 44112   NR23 = 0x00
+    cycle 44132   NR24 = 0xC7  # Channel 2 init with length counter LC=3
+                               # cycle 44132 = 1010'1100'0110'0100b
+                               # -> no immediate length counter decrement
+    cycle 49152   <fs step 0>  # length counter decrement, LC=2
+    cycle 57344   <fs step 1>
+    cycle 65536   <fs step 2>  # length counter decrement, LC=1
+    cycle 73728   <fs step 3>
+
+Test rom 1:
+    cycle 81916   NR52 == 0x82 # Channel 2 still active
+    cycle 81920   <fs step 4>  # length counter decrement, LC=0
+
+Test rom 2:
+    cycle 81920   <fs step 4>  # length counter decrement, LC=0
     cycle 81920   NR52 == 0x80 # Channel 2 inactive
 ```
 
-**Conclusion**
-
-* Length counters are decremented on even frame sequencer steps
-    (0, 2, 4 and 6).
-* The frame sequencer is not reset when switching the APU off and back on,
-    it will not restart with step 0.
-
+*Test roms 3, 4 (CGB)*
 ```yaml
-    cycle 0       <fs-0>       # length counter decrement
-    cycle 7892    NR52 = 0x00  # APU off
-    cycle 7912    NR52 = 0x80  # APU on (cycle 0001'1110'1110'1000)
-    cycle 7932    NR21 = 0x3d  # Channel 2 length counter = 3
-    cycle 7992    NR24 = 0xc7  # Channel 2 init with length counter LC=3
-    cycle 7992                 # immediate length counter decrement
-    cycle 8192    <fs-1>
-    cycle 16384   <fs-2>       # length counter decrement, LC=1
-    cycle 24576   <fs-3>
-    cycle 32764   NR52 == 0x82 # Channel 2 active
-    cycle 32768   <fs-4>       # length counter decrement, LC=0
-    cycle 32768   NR52 == 0x80 # Channel 2 inactive
-    cycle 40960   <fs-5>
+    cycle  7868   NR50 = 0x00
+    cycle  7880   NR51 = 0x00  # disable sound output
+    cycle  7892   NR52 = 0x00  # APU off
+    cycle  7912   NR52 = 0x80  # APU on
+                               # cycle 7912+4 = 0001'1110'1110'1100b
+                               # -> one frame sequencer step skipped
+    cycle  7932   NR21 = 0x3D  # Channel 2 length counter = 3
+    cycle  7952   NR22 = 0xF0  # Channel 2 volume = 15
+    cycle  7972   NR23 = 0x00
+    cycle  7992   NR24 = 0xC7  # Channel 2 init with length counter LC=3
+                               # cycle 7992 = 0001'1111'0011'1000b
+                               # -> immediate length counter decrement, LC=2
+    cycle  8192   <fs step skipped>
+    cycle 16384   <fs step 0>  # length counter decrement, LC=1
+    cycle 24576   <fs step 1>
 
-    cycle 44032   NR52 = 0x00  # APU off
-    cycle 44052   NR52 = 0x80  # APU on (cycle 1010'1100'0001'0100)
-    cycle 44072   NR21 = 0x3d  # Channel 2 length counter = 3
-    cycle 44132   NR24 = 0xc7  # Channel 2 init with length counter LC=3
-    cycle 49152   <fs-6>       # length counter decrement, LC=2
-    cycle 57344   <fs-7>
-    cycle 65536   <fs-0>       # length counter decrement, LC=1
-    cycle 73728   <fs-1>
-    cycle 81916   NR52 == 0x82 # Channel 2 active
-    cycle 81920   <fs-2>       # length counter decrement, LC=0
-    cycle 81920   NR52 == 0x80 # Channel 2 inactive
-    cycle 90112   <fs-3>
+Test rom 3:
+    cycle 32764   NR52 == 0x82 # Channel 2 still active
+    cycle 32768   <fs step 2>  # length counter decrement, LC=0
+
+Test rom 4:
+    cycle 32768   <fs step 2>  # length counter decrement, LC=0
+    cycle 32768   NR52 == 0x80 # Channel 2 inactive
 ```
 
 
