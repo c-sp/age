@@ -539,7 +539,8 @@ As described by [Shay Green (blargg)](https://gist.github.com/drhelius/3652407)
 a length counter is decremented immediately on channel initialization if the
 next frame sequencer step does *not* decrement length counters.
 This also works with [Frame Sequencer Skips](#frame-sequencer-skips) when
-considering step 7 is being skipped.
+considering step 7 as the one being skipped
+(which makes sense as the next step being executed is step 0).
 
 **Gambatte test roms**
 
