@@ -273,6 +273,7 @@ specific cycles and measuring when the next volume envelope step occurs.
     cycle  45048   NR52 = 0x80  # APU on
                                 # cycle 45048   = 1010'1111'1111'1000b
                                 # cycle 45048+4 = 1010'1111'1111'1100b
+                                # -> no frame sequencer step skipped
     cycle  45108   NR21 = 0x00
     cycle  45128   NR22 = 0x09  # Channel 2 volume 0 on init,
                                 # incrementing volume envelope, period 1
@@ -303,6 +304,7 @@ Test rom 2:
     cycle  45052   NR52 = 0x80  # APU on
                                 # cycle 45052   = 1010'1111'1111'1100b
                                 # cycle 45052+4 = 1011'0000'0000'0000b
+                                # -> one frame sequencer step skipped
     cycle  45112   NR21 = 0x00
     cycle  45132   NR22 = 0x09  # Channel 2 volume 0 on init,
                                 # incrementing volume envelope, period 1
@@ -357,6 +359,8 @@ specific cycles and measuring when the next volume envelope step occurs.
 ```yaml
     cycle  44008   NR52 = 0x00  # APU off
     cycle  44028   NR52 = 0x80  # APU on
+                                # cycle 44028+4 = 1010'1100'0000'0000b
+                                # -> no frame sequencer step skipped
     cycle  49152   <fs step 0>
     cycle  57344   <fs step 1>
     cycle  65536   <fs step 2>
@@ -386,6 +390,8 @@ Test rom 2:
 ```yaml
     cycle  44008   NR52 = 0x00  # APU off
     cycle  44028   NR52 = 0x80  # APU on
+                                # cycle 44028+4 = 1010'1100'0000'0000b
+                                # -> no frame sequencer step skipped
     cycle  49152   <fs step 0>
     cycle  57344   <fs step 1>
     cycle  65536   <fs step 2>
@@ -537,7 +543,7 @@ expected to be decremented.
     cycle  7952   NR22 = 0xF0  # Channel 2 volume = 15
     cycle  7972   NR23 = 0x00
     cycle  7992   NR24 = 0xC7  # Channel 2 init with length counter LC=3
-                               # cycle 7992 = 0001'1111'0011'1000b
+                               # skipped frame sequencer step considered step 7
                                # -> immediate length counter decrement, LC=2
     cycle  8192   <fs step skipped>
     cycle 16384   <fs step 0>  # length counter decrement, LC=1
@@ -549,9 +555,9 @@ expected to be decremented.
 
 
 
-### Frequency Sweep Timing
+### Frequency Sweep Overflow Delay
 
-TODO align frame sequencer steps
+The check for frequency sweep overflow is delayed by 4 cycles.
 
 **Gambatte test roms**
 
@@ -567,83 +573,45 @@ expected to perform frequency sweep.
 
 **Logs**
 
-This is a combination of test logs.
-The tests basically do the same thing,
-they just read NR52 at different times.
-
-*Test roms 1, 2 (DMG):*
-
+*Test roms 1, 2 (DMG)*
 ```yaml
     cycle 44032   NR52 = 0x00  # APU off
-    cycle 44052   NR52 = 0x80  # APU on (cycle 1010'1100'0001'0100)
-    cycle 44072   NR10 = 0x20  # Channel 1 frequency sweep (up), F-Counter=2
-    cycle 44132   NR14 = 0x87  # Channel 1 init, first frequency sweep overflows
-    cycle 98304   NR52 == 0x81 # Channel 1 active
-    cycle 98308   NR52 == 0x80 # Channel 1 inactive
-```
-
-*Test roms 3, 4 (CGB):*
-
-```yaml
-    cycle 7892    NR52 = 0x00  # APU off
-    cycle 7912    NR52 = 0x80  # APU on (cycle 0001'1110'1110'1000)
-    cycle 7932    NR10 = 0x20  # Channel 1 frequency sweep (up), F-Counter=2
-    cycle 7992    NR14 = 0x87  # Channel 1 init, first frequency sweep overflows
-    cycle 65536   NR52 == 0x81 # Channel 1 active
-    cycle 65540   NR52 == 0x80 # Channel 1 inactive
-```
-
-**Conclusion**
-
-* Frequency sweep happens on frame sequencer steps 0 and 4.
-* The check for frequency sweep overflow is delayed by 4 cycles.
-* The frame sequencer is not reset when switching the APU off and back on,
-    it will not restart with step 0.
-
-*Test roms 1, 2 (DMG):*
-
-```yaml
-    cycle 0       <fs-0>       # frequency sweep
-    cycle 8192    <fs-1>
-    cycle 16384   <fs-2>
-    cycle 24576   <fs-3>
-    cycle 32768   <fs-4>       # frequency sweep
-    cycle 40960   <fs-5>
-    cycle 44032   NR52 = 0x00  # APU off
-    cycle 44052   NR52 = 0x80  # APU on (cycle 1010'1100'0001'0100)
-    cycle 44072   NR10 = 0x20  # Channel 1 frequency sweep (up), F-Counter=2
-    cycle 44132   NR14 = 0x87  # Channel 1 init, first frequency sweep overflows
-    cycle 49152   <fs-6>
-    cycle 57344   <fs-7>
-    cycle 65536   <fs-0>       # frequency sweep, F-Counter=1
-    cycle 73728   <fs-1>
-    cycle 81920   <fs-2>
-    cycle 90112   <fs-3>
-    cycle 98304   <fs-4>       # frequency sweep, F-Counter=0 -> perform sweep
-    cycle 98304   NR52 == 0x81 # Channel 1 active
+    cycle 44052   NR52 = 0x80  # APU on
+                               # cycle 44052+4 = 1010'1100'0001'1000b
+                               # -> no frame sequencer step skipped
+    cycle 44072   NR10 = 0x20  # Channel 1 frequency sweep up, FC=2
+    cycle 44132   NR14 = 0x87  # Channel 1 init,
+                               # first frequency sweep will overflow
+    cycle 49152   <fs step 0>
+    cycle 57344   <fs step 1>
+    cycle 65536   <fs step 2>  # FC=1
+    cycle 73728   <fs step 3>
+    cycle 81920   <fs step 4>
+    cycle 90112   <fs step 5>
+    cycle 98304   <fs step 6>  # FC=0 -> perform frequency sweep
+    cycle 98304   NR52 == 0x81 # Channel 1 active (checked by test rom 1)
     cycle 98308                # frequency sweep overflow check: positive
-    cycle 98308   NR52 == 0x80 # Channel 1 inactive
-    cycle 106496  <fs-5>
+    cycle 98308   NR52 == 0x80 # Channel 1 inactive (checked by test rom 2)
 ```
 
-*Test roms 3, 4 (CGB):*
-
+*Test roms 3, 4 (CGB)*
 ```yaml
-    cycle 0       <fs-0>       # frequency sweep
     cycle 7892    NR52 = 0x00  # APU off
-    cycle 7912    NR52 = 0x80  # APU on (cycle 0001'1110'1110'1000)
-    cycle 7932    NR10 = 0x20  # Channel 1 frequency sweep (up), F-Counter=2
-    cycle 7992    NR14 = 0x87  # Channel 1 init, first frequency sweep overflows
-    cycle 8192    <fs-1>
-    cycle 16384   <fs-2>
-    cycle 24576   <fs-3>
-    cycle 32768   <fs-4>       # frequency sweep, F-Counter=1
-    cycle 40960   <fs-5>
-    cycle 49152   <fs-6<
-    cycle 57344   <fs-7>
-    cycle 65536   <fs-0>       # frequency sweep, F-Counter=0 -> perform sweep
-    cycle 65536   NR52 == 0x81 # Channel 1 active
+    cycle 7912    NR52 = 0x80  # APU on
+                               # cycle 7912+4 = 0001'1110'1110'1100b
+                               # -> one frame sequencer step skipped
+    cycle 7932    NR10 = 0x20  # Channel 1 frequency sweep up, FC=2
+    cycle 7992    NR14 = 0x87  # Channel 1 init,
+                               # first frequency sweep will overflow
+    cycle 8192    <fs step skipped>
+    cycle 16384   <fs step 0>
+    cycle 24576   <fs step 1>
+    cycle 32768   <fs step 2>  # FC=1
+    cycle 40960   <fs step 3>
+    cycle 49152   <fs step 4>
+    cycle 57344   <fs step 5>
+    cycle 65536   <fs step 6>  # FC=0 -> perform frequency sweep
+    cycle 65536   NR52 == 0x81 # Channel 1 active (checked by test rom 3)
     cycle 65540                # frequency sweep overflow check: positive
-    cycle 65540   NR52 == 0x80 # Channel 1 inactive
-    cycle 73728   <fs-1>
+    cycle 65540   NR52 == 0x80 # Channel 1 inactive (checked by test rom 4)
 ```
