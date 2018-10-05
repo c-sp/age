@@ -58,7 +58,7 @@ age::gb_wave_generator::gb_wave_generator(int8_t frequency_counter_shift, uint8_
     : m_frequency_counter_shift(frequency_counter_shift),
       m_index_mask(index_mask)
 {
-    AGE_ASSERT( // channel 1, 2, 4
+    AGE_ASSERT( // channel 1, 2
                 ((m_frequency_counter_shift == 1) && (m_index_mask == 7))
                 // channel 3
                 || ((m_frequency_counter_shift == 0) && (m_index_mask == 31))
@@ -90,11 +90,13 @@ age::uint8_t age::gb_wave_generator::get_wave_pattern_index() const
 
 
 
+#define FREQ_TO_SAMPLES ((2048 - m_frequency_bits) << m_frequency_counter_shift)
+
 void age::gb_wave_generator::set_frequency_bits(int16_t frequency_bits)
 {
     AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048));
     m_frequency_bits = frequency_bits;
-    int samples = (2048 - m_frequency_bits) << m_frequency_counter_shift;
+    int samples = FREQ_TO_SAMPLES;
     set_frequency_timer_period(samples);
 }
 
@@ -142,6 +144,13 @@ void age::gb_wave_generator::set_wave_pattern_duty(uint8_t nrX1)
     AGE_ASSERT(m_index_mask == 7); // only for channels 1 & 2
     unsigned duty = nrX1 >> 6;
     m_wave_pattern = gb_wave_pattern_duty[duty];
+}
+
+void age::gb_wave_generator::init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index)
+{
+    set_frequency_bits(frequency_bits);
+    reset_frequency_timer(sample_offset - FREQ_TO_SAMPLES);
+    m_index = index;
 }
 
 

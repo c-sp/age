@@ -90,7 +90,45 @@ Duty Waveform 2  -----+                       +-----+-----+-----
 
 
 
-### Initial Frequency Timer Delay
+#### Channel 1 Initial State
+
+Channel 1 is used by the Gameboy boot rom to play the iconic "ding-ding" sound
+when the Nintendo logo is displayed.
+When reaching `PC 0x100` it produces no audible sound due to it's volume being
+zero,
+but it still iterates the configured duty waveform.
+
+The initial duty waveform position and the frequency timer can be determined
+by checking when the waveform changes.
+
+**Gambatte test roms**
+
+1. `ch1_init_pos_1_dmg08_outaudio0_cgb04c_outaudio1`
+1. `ch1_init_pos_2_dmg08_cgb04c_outaudio1`
+1. `ch1_init_pos_3_dmg08_cgb04c_outaudio1`
+1. `ch1_init_pos_4_dmg08_outaudio1_cgb04c_outaudio0`
+1. `ch1_init_pos_5_dmg08_outaudio1_cgb04c_outaudio0`
+1. `ch1_init_pos_6_dmg08_cgb04c_outaudio0`
+1. `ch1_init_pos_7_dmg08_cgb04c_outaudio0`
+1. `ch1_init_pos_8_dmg08_outaudio0_cgb04c_outaudio1`
+
+TODO description
+
+**Logs**
+
+TODO finish
+
+*DMG*
+* pos_1, pos_2: waveform-4-to-5 edge at cycles 44504 (4), 44508 (5)
+* pos_5, pos_6: waveform-0-to-1 edge at cycles 45512 (0), cycle 45516 (1)
+
+*CGB*
+* pos_7, pos_8: waveform-4-to-5 edge at cycles 9496 (4), 9500 (5)
+* pos_3, pos_4: waveform-0-to-1 edge at cycles 8488 (0), 8492 (1)
+
+
+
+#### Initial Frequency Timer Delay
 
 The channel 1 and 2 frequency timer for the first duty waveform step is
 delayed by 8 cycles on channel initialization.
@@ -496,10 +534,10 @@ considering step 7 is being skipped.
 
 **Gambatte test roms**
 
-1. sound/ch2_init_reset_length_counter_timing_nr52_1_dmg08_out2_cgb04c_out0
-1. sound/ch2_init_reset_length_counter_timing_nr52_2_dmg08_cgb04c_out0
-1. sound/ch2_init_reset_length_counter_timing_nr52_3_dmg08_cgb04c_out2
-1. sound/ch2_init_reset_length_counter_timing_nr52_4_dmg08_out2_cgb04c_out0
+1. `ch2_init_reset_length_counter_timing_nr52_1_dmg08_out2_cgb04c_out0`
+1. `ch2_init_reset_length_counter_timing_nr52_2_dmg08_cgb04c_out0`
+1. `ch2_init_reset_length_counter_timing_nr52_3_dmg08_cgb04c_out2`
+1. `ch2_init_reset_length_counter_timing_nr52_4_dmg08_out2_cgb04c_out0`
 
 Sound channel 2 is initialized to automatically deactivate when it's length
 counter reaches zero.
@@ -561,10 +599,10 @@ The check for frequency sweep overflow is delayed by 4 cycles.
 
 **Gambatte test roms**
 
-1. sound/ch1_init_reset_sweep_counter_timing_nr52_1_dmg08_cgb04c_out1
-1. sound/ch1_init_reset_sweep_counter_timing_nr52_2_dmg08_out0_cgb04c_out1
-1. sound/ch1_init_reset_sweep_counter_timing_nr52_3_dmg08_out0_cgb04c_out1
-1. sound/ch1_init_reset_sweep_counter_timing_nr52_4_dmg08_cgb04c_out0
+1. `ch1_init_reset_sweep_counter_timing_nr52_1_dmg08_cgb04c_out1`
+1. `ch1_init_reset_sweep_counter_timing_nr52_2_dmg08_out0_cgb04c_out1`
+1. `ch1_init_reset_sweep_counter_timing_nr52_3_dmg08_out0_cgb04c_out1`
+1. `ch1_init_reset_sweep_counter_timing_nr52_4_dmg08_cgb04c_out0`
 
 Sound channel 2 is initialized to automatically deactivate when frequency sweep
 overflows.

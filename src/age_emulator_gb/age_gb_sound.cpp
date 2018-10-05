@@ -317,6 +317,24 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     m_c1.write_nrX2(0xF3);
     m_c1.set_wave_pattern_duty(0x80);
 
+    // channel 1 initial state:
+    // we know from gambatte test roms at which cycle
+    // the duty waveform reaches position 5
+    // and that each waveform step takes 252 cycles
+    int duty_pos5_cycle = m_is_cgb ? 9500 : 44508;
+    AGE_ASSERT(m_core.get_oscillation_cycle() < duty_pos5_cycle);
+
+    int cycle_diff = duty_pos5_cycle - m_core.get_oscillation_cycle();
+    int sample_offset = (cycle_diff % 252) / 2;
+    int index = 4 - (cycle_diff / 252);
+
+    LOG("channel 1 init (cgb " << m_is_cgb << "): "
+        << "cycle_diff " << cycle_diff
+        << ", sample_offset " << sample_offset
+        << ", index " << index << "(" << (index & 7) << ")"
+        );
+    m_c1.init_duty_waveform_position(0x7C1, sample_offset, index & 7);
+
     // fast-forward the first N frame sequencer steps
     // (no pcm samples will be generated since we set
     // m_last_sample_cycle to the current cycle)

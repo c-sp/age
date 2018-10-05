@@ -399,6 +399,8 @@ public:
     void reset_duty_counter();
     void set_wave_pattern_duty(uint8_t nrX1);
 
+    void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index);
+
     uint8_t next_wave_sample();
 
 protected:
