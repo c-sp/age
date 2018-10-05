@@ -144,15 +144,9 @@ void age::gb_sound::write_nr52(uint8_t value)
         update_state();
         m_nr52 = gb_sound_master_switch;
 
-        // skip the next frame sequencer step,
-        // if bit 12 of (cycle + 4) is set
-        if ((m_core.get_oscillation_cycle() + 4) & 0x1000)
-        {
-            LOG("skipping APU event at cycle " << m_next_apu_event_cycle);
-            m_next_apu_event_cycle += gb_apu_event_cycles;
-        }
-        m_next_frame_sequencer_step = 0;
         m_delayed_disable_c1 = false;
+        m_skip_frame_sequencer_step = (m_core.get_oscillation_cycle() + 4) & 0x1000;
+        m_next_frame_sequencer_step = m_skip_frame_sequencer_step ? 7 : 0;
     }
 
     m_master_on = new_master_on;

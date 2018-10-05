@@ -425,7 +425,7 @@ and a skipped frame sequencer step right after switching on the APU.*
 
 
 
-####   Cycle table
+#### Volume Envelope Test Cycles
 
 The following table contains the cycles at which the APU is switched on and
 channel 2 is initialized for `ch2_init_reset_env_counter_timing_*` test roms.
@@ -482,11 +482,11 @@ steps between initializing channel 2 and disabling the volume envelope.
 If a channel is initialized with length counter,
 it is deactivated once the length counter is decremented to zero.
 
-When a frame sequencer step is skipped as a result of switching on the APU at
-specific cycles,
-the length counter is immediately decremented by one on channel initialization.
-This is additional to the immediate length counter decrement described by
-[Shay Green (blargg)](https://gist.github.com/drhelius/3652407).
+As described by [Shay Green (blargg)](https://gist.github.com/drhelius/3652407)
+a length counter is decremented immediately on channel initialization if the
+next frame sequencer step does *not* decrement length counters.
+This also works with [Frame Sequencer Skips](#frame-sequencer-skips) when
+considering step 7 is being skipped.
 
 **Gambatte test roms**
 
@@ -520,14 +520,9 @@ expected to be decremented.
     cycle 57344   <fs step 1>
     cycle 65536   <fs step 2>  # length counter decrement, LC=1
     cycle 73728   <fs step 3>
-
-Test rom 1:
-    cycle 81916   NR52 == 0x82 # Channel 2 still active
+    cycle 81916   NR52 == 0x82 # Channel 2 active (checked by test rom 1)
     cycle 81920   <fs step 4>  # length counter decrement, LC=0
-
-Test rom 2:
-    cycle 81920   <fs step 4>  # length counter decrement, LC=0
-    cycle 81920   NR52 == 0x80 # Channel 2 inactive
+    cycle 81920   NR52 == 0x80 # Channel 2 inactive (checked by test rom 2)
 ```
 
 *Test roms 3, 4 (CGB)*
@@ -547,14 +542,9 @@ Test rom 2:
     cycle  8192   <fs step skipped>
     cycle 16384   <fs step 0>  # length counter decrement, LC=1
     cycle 24576   <fs step 1>
-
-Test rom 3:
-    cycle 32764   NR52 == 0x82 # Channel 2 still active
+    cycle 32764   NR52 == 0x82 # Channel 2 active (checked by test rom 3)
     cycle 32768   <fs step 2>  # length counter decrement, LC=0
-
-Test rom 4:
-    cycle 32768   <fs step 2>  # length counter decrement, LC=0
-    cycle 32768   NR52 == 0x80 # Channel 2 inactive
+    cycle 32768   NR52 == 0x80 # Channel 2 inactive (checked by test rom 4)
 ```
 
 

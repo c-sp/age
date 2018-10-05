@@ -126,6 +126,7 @@ private:
     int m_next_apu_event_cycle = 0;
     int8_t m_next_frame_sequencer_step = 0;
     bool m_delayed_disable_c1 = false;
+    bool m_skip_frame_sequencer_step = false;
 
     // channel control
 
@@ -188,10 +189,8 @@ private:
     inline void length_counter_write_nrX4(uint8_t value)
     {
         gb_length_counter &lc = m_length_counter[channel];
-        bool decrement = (m_next_frame_sequencer_step & 1)
-                || (m_next_apu_event_cycle - m_core.get_oscillation_cycle() > 8192);
 
-        bool deactivate = lc.write_nrX4(value, decrement);
+        bool deactivate = lc.write_nrX4(value, m_next_frame_sequencer_step & 1);
         if (deactivate)
         {
             deactivate_channel<channel>();

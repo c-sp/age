@@ -147,10 +147,14 @@ bool age::gb_sound::inc_period() const
     // the initial volume envelope period is increased by one,
     // if the next frame sequencer step 7 is near
     return
-            // frame sequncer step is next
-            (m_next_frame_sequencer_step == 7)
+            // frame sequncer step 7 is next
+            (
+                (m_next_frame_sequencer_step == 7)
+                && !m_skip_frame_sequencer_step
+                )
             // frame sequencer step 6 is at most 4 cycles away
-            || ((m_next_frame_sequencer_step == 6)
+            || (
+                (m_next_frame_sequencer_step == 6)
                 && !m_delayed_disable_c1
                 && (m_next_apu_event_cycle - m_core.get_oscillation_cycle() <= 4)
                 );
@@ -167,6 +171,18 @@ int age::gb_sound::apu_event(int at_cycle)
     if (!m_master_on)
     {
         LOG("ignored at cycle " << at_cycle << ": APU off");
+        return gb_apu_event_cycles;
+    }
+
+    // skip this frame sequencer step
+    // (triggered by switching on the APU at specific cycles)
+    if (m_skip_frame_sequencer_step)
+    {
+        LOG("skipping step at cycle " << at_cycle);
+        AGE_ASSERT(!m_delayed_disable_c1);
+        AGE_ASSERT(m_next_frame_sequencer_step == 7);
+        m_next_frame_sequencer_step = 0;
+        m_skip_frame_sequencer_step = false;
         return gb_apu_event_cycles;
     }
 
