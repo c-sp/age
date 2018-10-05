@@ -29,9 +29,13 @@ TODO cycle init using DIV test roms
 
 ## Sound
 
-Frequency sweep, volume sweep and length counters are controlled by the frame
-sequencer which has been
-[described by Shay Green (blargg)](https://gist.github.com/drhelius/3652407).
+The Gameboy APU has been
+[described by Shay Green (blargg)](https://gist.github.com/drhelius/3652407)
+in great detail.
+[Sinamas](https://github.com/sinamas) has extended that by creating
+[Gameboy APU test roms](https://github.com/sinamas/gambatte/tree/master/test/hwtests/sound)
+for several corner cases as part of his Gameboy emulator
+[Gambatte](https://github.com/sinamas/gambatte).
 
 
 
@@ -50,15 +54,15 @@ the frequency timer and thus prevents any further duty waveform progression.
 The resulting audio output is based on one and the same duty waveform
 step being modulated in an infinite loop.
 
-Example for `outaudio0` test (the modulation has no effect on a waveform input
-of 0):
+Example for an `outaudio0` test (the modulation has no effect on a waveform
+input of 0):
 ```
 Duty Waveform 2  -----+                       +-----+-----+-----
                       |                       |
                       |                       |
                       +-----+-----+-----+-----+
                                           .
-     Modulation                           +--+  +--+  +--+  +---
+                              Modulation  +--+  +--+  +--+  +---
                                           .  |  |  |  |  |  |
                                           .  +--+  +--+  +--+
          Result  -----+                   .
@@ -69,14 +73,14 @@ Duty Waveform 2  -----+                       +-----+-----+-----
      duty waveform progression stops here ^
 ```
 
-Example for `outaudio1` test:
+Example for an `outaudio1` test:
 ```
 Duty Waveform 2  -----+                       +-----+-----+-----
                       |                       |  .
                       |                       |  .
                       +-----+-----+-----+-----+  .
                                                  .
-     Modulation                                  +--+  +--+  +--
+                                     Modulation  +--+  +--+  +--
                                                  .  |  |  |  |
                                                  .  +--+  +--+
                                                  .
@@ -96,10 +100,10 @@ Channel 1 is used by the Gameboy boot rom to play the iconic "ding-ding" sound
 when the Nintendo logo is displayed.
 When reaching `PC 0x100` it produces no audible sound due to it's volume being
 zero,
-but it still iterates the configured duty waveform.
+but it still iterates over the configured duty waveform.
 
 The initial duty waveform position and the frequency timer can be determined
-by checking when the waveform changes.
+by checking when the waveform changes from 0 to 1 and vice versa.
 
 **Gambatte test roms**
 
@@ -140,7 +144,12 @@ delayed by 8 cycles on channel initialization.
 1. `ch1_duty0_pos6_to_pos7_timing_ds_1_cgb04c_outaudio0`
 1. `ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1`
 
-TODO description
+The tests measure the exact cycle when duty 0 waveform position 7 is reached
+by applying
+[the modulation described above](#gambatte-test-roms-custom-modulation)
+around that cycle.
+Based on the cycle difference between initializing channel 1 and reaching
+waveform position 7 the initial delay can be calculated.
 
 **Logs**
 
@@ -182,19 +191,20 @@ complete (until then cycle numbers are not accurate)*
 
 ### Gambatte Volume Envelope Tests
 
-Several Gambatte test roms are based on measuring the exact cycle of the
-frame sequencer step handling the volume envelope.
+Several
+[Gambatte sound tests](https://github.com/sinamas/gambatte/tree/master/test/hwtests/sound)
+are based on determining the exact cycle of the frame sequencer step handling
+the volume envelope.
 The process is always the same:
 
 *   Channel 2 is initialized with volume 0 (silence) and incrementing volume
-    envelope.
-    The next volume envelope step (frame sequencer step 7) will end that
-    silence by changing the volume from 0 to 1.
+    envelope so that the next volume envelope step (frame sequencer step 7)
+    will end that silence by changing the volume from 0 to 1.
 *   To determine the exact cycle of that step,
-    a test tries to disable the volume envelope around that cycle by setting
-    the volume envelope period to zero.
+    a test disables the volume envelope around that cycle by setting the volume
+    envelope period to zero.
 *   Depending on wether or not disabling the volume envelope was successful
-    (i.e. it was disabled right before or right after the volume envelope step),
+    (it was disabled right before or right after the volume envelope step),
     the test finishes either with silence or with audible sound.
 
 
@@ -202,8 +212,7 @@ The process is always the same:
 #### Frame Sequencer Initialization
 
 Volume updates by envelope occur only once in a complete frame sequencer cycle.
-This makes volume envelope test roms perfect for determining the correct frame
-sequencer "alignment" during
+This allows inferring the frame sequencers state during
 [emulator initialization](#emulator-initialization).
 
 **Gambatte test roms**
@@ -216,7 +225,7 @@ sequencer "alignment" during
 Since the APU is not switched off and back on by these tests,
 the frame sequencer is not reset and it's initial state
 (the frame sequencer step occurring on emulator cycle 0)
-can be inferred by measuring when the next volume envelope step occurs.
+can be inferred by determining when the next volume envelope step occurs.
 
 **Logs**
 
