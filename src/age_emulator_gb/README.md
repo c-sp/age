@@ -425,6 +425,58 @@ and a skipped frame sequencer step right after switching on the APU.*
 
 
 
+####   Cycle table
+
+The following table contains the cycles at which the APU is switched on and
+channel 2 is initialized for `ch2_init_reset_env_counter_timing_*` test roms.
+
+The `type` column contains the type of Gameboy hardware the test is tailored to
+and if the test is expected to finish with silence or audible sound.
+E.g. `CGB-0` is a test tailored to the Color Gameboy and expected to finish
+with silence.
+
+The `steps` column contains the number of framesequencer steps between
+switching on the APU and disabling the volume envelope.
+If noted as `X+Y`, `X` is the number of frame sequencer steps between switching
+on the APU and initializing channel 2 and `Y` is the number of frame sequencer
+steps between initializing channel 2 and disabling the volume envelope.
+
+```
++-----------+-------+-------+---------------------+-----------------------+
+| test file | type  | steps | APU on @cycle       | channel init @cycle   |
++-----------+-------+-------+---------------------+-----------------------+
+|           |       |       |                     |                       |
+| timing_1  | DMG-0 |     7 | 1010'1111'1111'1000 |   1011'0000'0111'0000 |
+| timing_2  | DMG-1 |     8 | 1010'1111'1111'1000 |   1011'0000'0111'0000 |
+|           |       |       |                     |                       |
+| timing_5  | DMG-0 |     8 | 1010'1111'1111'1100 |   1011'0000'0111'0100 |
+| timing_6  | DMG-1 |     9 | 1010'1111'1111'1100 |   1011'0000'0111'0100 |
+|           |       |       |                     |                       |
+| timing_3  | CGB-0 |     7 | 0010'1111'1111'1000 |   0011'0000'0111'0000 |
+| timing_4  | CGB-1 |     8 | 0010'1111'1111'1000 |   0011'0000'0111'0000 |
+|           |       |       |                     |                       |
+| timing_7  | CGB-0 |     8 | 0010'1111'1111'1100 |   0011'0000'0111'0100 |
+| timing_8  | CGB-1 |     9 | 0010'1111'1111'1100 |   0011'0000'0111'0100 |
+|           |       |       |                     |                       |
++-----------+-------+-------+---------------------+-----------------------+
+|           |       |       |                     |                       |
+| timing_9  | DMG-0 |   6+1 | 1010'1011'1111'1100 | 1'0111'1111'1111'1000 |
+| timing_10 | DMG-1 |   6+2 | 1010'1011'1111'1100 | 1'0111'1111'1111'1000 |
+|           |       |       |                     |                       |
+| timing_11 | DMG-0 |  6+ 9 | 1010'1011'1111'1100 | 1'0111'1111'1111'1100 |
+| timing_12 | DMG-1 |  6+10 | 1010'1011'1111'1100 | 1'0111'1111'1111'1100 |
+|           |       |       |                     |                       |
+| timing_13 | CGB-0 |   7+1 | 0001'1110'1101'0000 |   1111'1111'1111'1000 |
+| timing_14 | CGB-1 |   7+2 | 0001'1110'1101'0000 |   1111'1111'1111'1000 |
+|           |       |       |                     |                       |
+| timing_15 | CGB-0 |  7+ 9 | 0001'1110'1101'0000 |   1111'1111'1111'1100 |
+| timing_16 | CGB-1 |  7+10 | 0001'1110'1101'0000 |   1111'1111'1111'1100 |
+|           |       |       |                     |                       |
++-----------+-------+-------+---------------------+-----------------------+
+```
+
+
+
 ### Length Counter Timing
 
 If a channel is initialized with length counter,
