@@ -615,3 +615,26 @@ expected to perform frequency sweep.
     cycle 65540                # frequency sweep overflow check: positive
     cycle 65540   NR52 == 0x80 # Channel 1 inactive (checked by test rom 4)
 ```
+
+
+
+### Initial Frequency Sweep Delay
+
+If channel 1 is initialized with frequency sweep while the next frame sequencer
+step 2 or 6 (the frequency sweep steps) is at most 4 cycles away
+(8 cycles on CGB),
+this first frequency sweep step is skipped.
+
+**Gambatte test roms**
+
+DMG 4 cycles:
+ch1_init_reset_sweep_counter_timing_4_dmg08_outaudio1_cgb04c_outaudio0
+
+CGB 8 cycles:
+ch1_init_reset_sweep_counter_timing_10_dmg08_outaudio0_cgb04c_outaudio1
+
+TODO finish
+
+**Logs**
+
+TODO finish

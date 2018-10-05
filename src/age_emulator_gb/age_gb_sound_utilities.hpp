@@ -289,8 +289,10 @@ public:
         return deactivate;
     }
 
-    bool init_frequency_sweep()
+    bool init_frequency_sweep(bool skip_first_step)
     {
+        m_skip_first_step = skip_first_step;
+
         m_swept_down = false;
         m_frequency_bits = TYPE::get_frequency_bits();
 
@@ -310,7 +312,7 @@ public:
     {
         bool deactivate = false;
 
-        if (m_sweep_enabled)
+        if (m_sweep_enabled && !m_skip_first_step)
         {
             AGE_ASSERT(m_period_counter > 0);
             --m_period_counter;
@@ -331,6 +333,7 @@ public:
                 set_period_counter();
             }
         }
+        m_skip_first_step = false;
 
         return deactivate;
     }
@@ -369,6 +372,7 @@ private:
     int8_t m_shift = 0;
     bool m_sweep_up = true;
 
+    bool m_skip_first_step = false;
     bool m_sweep_enabled = false;
     bool m_swept_down = false;
     int8_t m_period_counter = 0;

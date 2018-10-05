@@ -254,7 +254,11 @@ void age::gb_sound::write_nr14(uint8_t value)
         {
             m_c1.reset_duty_counter();
 
-            bool sweep_deactivate = m_c1.init_frequency_sweep();
+            int cycles = m_next_apu_event_cycle - m_core.get_oscillation_cycle();
+            bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
+                    && (cycles <= (m_is_cgb ? 8: 4));
+
+            bool sweep_deactivate = m_c1.init_frequency_sweep(skip_sweep_step);
             bool volume_deactivate = m_c1.init_volume_envelope(inc_period());
 
             if (sweep_deactivate || volume_deactivate)
