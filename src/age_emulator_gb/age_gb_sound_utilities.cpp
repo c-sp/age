@@ -47,6 +47,8 @@ constexpr const std::array<age::uint8_array<32>, 4> gb_wave_pattern_duty =
 //
 //---------------------------------------------------------
 
+//! \todo split this up into two classes for channel 3 and channels 1,2
+
 age::gb_wave_generator::gb_wave_generator()
     : gb_wave_generator(1, 7)
 {
@@ -64,6 +66,12 @@ age::gb_wave_generator::gb_wave_generator(int8_t frequency_counter_shift, uint8_
 
     std::fill(begin(m_wave_pattern), end(m_wave_pattern), 0);
     set_frequency_bits(0);
+
+    // set duty waveform 0 as default for channels 1 and 2
+    if (m_index_mask == 7)
+    {
+        set_wave_pattern_duty(0);
+    }
 }
 
 
