@@ -75,6 +75,7 @@ constexpr int gb_machine_cycles_per_second = 4194304;
 
 
 
+//! \todo remove this once it's no longer used (no negative cycle numbers!)
 #define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
     if (value != gb_no_cycle) \
     { \

@@ -123,12 +123,7 @@ void age::gb_sound::update_state()
 
 void age::gb_sound::set_back_cycles(int offset)
 {
-    // update_state() must have been called to make sure cycle values
-    // are within range and no integer underflow is happening
-    AGE_ASSERT((m_core.get_oscillation_cycle() >> gb_sample_cycle_shift)
-               >= m_last_sample_cycle);
-
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_last_sample_cycle, offset);
+    AGE_GB_SET_BACK_CYCLES(m_last_sample_cycle, offset);
     AGE_GB_SET_BACK_CYCLES(m_next_apu_event_cycle, offset);
 }
 
