@@ -97,13 +97,15 @@ Duty Waveform 2  -----+                       +-----+-----+-----
 #### Channel 1 Initial State
 
 Channel 1 is used by the Gameboy boot rom to play the iconic "ding-ding" sound
-when the Nintendo logo is displayed.
-When reaching `PC 0x100` it produces no audible sound due to it's volume being
-zero,
-but it still iterates over the configured duty waveform.
+while the Nintendo logo is displayed.
+When reaching `PC 0x100` it produces no audible sound any more due to it's
+volume being zero,
+but it's frequency timer is still running and iterates over the configured duty
+waveform.
 
-The initial duty waveform position and the frequency timer can be determined
-by checking when the waveform changes from 0 to 1 and vice versa.
+For [emulator initialization](#emulator-initialization) the duty waveform
+position and frequency timer state can be calculated by determining when the
+waveform changes from 0 to 1 and vice versa.
 
 **Gambatte test roms**
 
@@ -116,23 +118,95 @@ by checking when the waveform changes from 0 to 1 and vice versa.
 1. `ch1_init_pos_7_dmg08_cgb04c_outaudio0`
 1. `ch1_init_pos_8_dmg08_outaudio0_cgb04c_outaudio1`
 
-TODO description
+[The modulation described above](#gambatte-test-roms-custom-modulation) is used
+to "lock" the duty waveform position starting from a specific cycle.
 
 **Logs**
 
-TODO finish
+*Test roms 1, 2, 5, 6 (DMG)*
+```yaml
+    cycle 44004   <waveform position 3 = 0>
+    cycle 44020   NR10 = 0x00  # turn off frequency sweep
+    cycle 44040   NR11 = 0x80  # select duty waveform 2 (10000111)
+    cycle 44256   <waveform position 4 = 0>
 
-*DMG*
-* pos_1, pos_2: waveform-4-to-5 edge at cycles 44504 (4), 44508 (5)
-* pos_5, pos_6: waveform-0-to-1 edge at cycles 45512 (0), cycle 45516 (1)
+Test rom 1:
+    cycle 44480   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 44504   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+                               # (4 cycles before waveform position 5)
+    <...>         <custom modulation of waveform position 4>  # outaudio0
 
-*CGB*
-* pos_7, pos_8: waveform-4-to-5 edge at cycles 9496 (4), 9500 (5)
-* pos_3, pos_4: waveform-0-to-1 edge at cycles 8488 (0), 8492 (1)
+Test rom 2:
+    cycle 44484   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 44508   <waveform position 5 = 1>
+    cycle 44508   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+    <...>         <custom modulation of waveform position 5>  # outaudio1
+
+Test rom 5:
+    cycle 44508   <waveform position 5 = 1>
+    cycle 44760   <waveform position 6 = 1>
+    cycle 45012   <waveform position 7 = 1>
+    cycle 45264   <waveform position 0 = 1>
+    cycle 45488   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 45512   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+                               # (4 cycles before waveform position 1)
+    <...>         <custom modulation of waveform position 0>  # outaudio1
+
+Test rom 6:
+    cycle 44508   <waveform position 5 = 1>
+    cycle 44760   <waveform position 6 = 1>
+    cycle 45012   <waveform position 7 = 1>
+    cycle 45264   <waveform position 0 = 1>
+    cycle 45492   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 45516   <waveform position 1 = 0>
+    cycle 45516   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+    <...>         <custom modulation of waveform position 1>  # outaudio0
+```
+
+*Test roms 3, 4, 7, 8 (CGB)*
+```yaml
+    cycle 7736   <waveform position 6 = 1>
+    cycle 7880   NR10 = 0x00  # turn off frequency sweep
+    cycle 7900   NR11 = 0x80  # select duty waveform 2 (10000111)
+    cycle 7988   <waveform position 7 = 1>
+    cycle 8240   <waveform position 0 = 1>
+
+Test rom 3:
+    cycle 8464   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 8488   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+                              # (4 cycles before waveform position 1)
+    <...>        <custom modulation of waveform position 0>  # outaudio1
+
+Test rom 4:
+    cycle 8468   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 8492   <waveform position 1 = 0>
+    cycle 8492   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+    <...>        <custom modulation of waveform position 1>  # outaudio0
+
+Test rom 7:
+    cycle 8492   <waveform position 1 = 0>
+    cycle 8744   <waveform position 2 = 0>
+    cycle 8996   <waveform position 3 = 0>
+    cycle 9248   <waveform position 4 = 0>
+    cycle 9472   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 9496   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+                              # (4 cycles before waveform position 5)
+    <...>        <custom modulation of waveform position 4>  # outaudio1
+
+Test rom 8:
+    cycle 8492   <waveform position 1 = 0>
+    cycle 8744   <waveform position 2 = 0>
+    cycle 8996   <waveform position 3 = 0>
+    cycle 9248   <waveform position 4 = 0>
+    cycle 9476   NR12 = 0xC0  # Channel 1, set volume 12
+    cycle 9500   <waveform position 5 = 1>
+    cycle 9500   NR14 = 0x80  # Channel 1 init, frequency timer restarted
+    <...>        <custom modulation of waveform position 5>  # outaudio0
+```
 
 
 
-#### Initial Frequency Timer Delay
+#### Frequency Timer Delay on Channel Initialization
 
 The channel 1 and 2 frequency timer for the first duty waveform step is
 delayed by 8 cycles on channel initialization.
