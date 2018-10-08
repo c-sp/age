@@ -42,8 +42,6 @@ typedef gb_volume_envelope<gb_noise_generator> gb_sound_channel4;
 
 
 
-constexpr int gb_apu_event_cycles = 1 << 13;
-
 constexpr unsigned gb_channel_1 = 0;
 constexpr unsigned gb_channel_2 = 1;
 constexpr unsigned gb_channel_3 = 2;
@@ -62,7 +60,7 @@ class gb_sound
 
 public:
 
-    gb_sound(gb_core &core, pcm_vector &samples);
+    gb_sound(const gb_core &core, pcm_vector &samples);
 
     uint8_t read_nr10() const;
     uint8_t read_nr11() const;
@@ -112,18 +110,19 @@ public:
     void write_wave_ram(unsigned offset, uint8_t value);
 
     void update_state();
-    void set_back_cycles(int offset);
+    void set_back_cycles();
 
 
 
 private:
 
-    gb_core &m_core;
+    const gb_core &m_core;
     const bool m_is_cgb;
 
     pcm_vector &m_samples;
-    int m_last_sample_cycle = 0;
-    int m_next_apu_event_cycle = 0;
+    int m_sample_count = 0;
+
+    int m_sample_next_apu_event = 0;
     int8_t m_next_frame_sequencer_step = 0;
     bool m_delayed_disable_c1 = false;
     bool m_skip_frame_sequencer_step = false;
@@ -152,12 +151,14 @@ private:
 
 
 
-    // channel template methods
+    // private methods
 
     bool inc_period() const;
-    int apu_event(int at_cycle);
-    void generate_samples(int until_cycle);
+    int apu_event();
+    void generate_samples(int sample_count);
     void set_wave_ram_byte(unsigned offset, uint8_t value);
+
+    // channel template methods
 
     template<unsigned channel>
     inline void init_channel()

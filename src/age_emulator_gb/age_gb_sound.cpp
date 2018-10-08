@@ -31,7 +31,8 @@
 namespace
 {
 
-constexpr int gb_frequency_sweep_check_delay = 4;
+constexpr int gb_apu_event_samples = 1 << 12;
+constexpr int gb_frequency_sweep_check_delay = 2;
 
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code
@@ -50,6 +51,13 @@ constexpr const age::uint8_array<0x10> cgb_wave_ram =
  }};
 
 }
+
+
+
+#define SAMPLE_COUNT(cycle) ((cycle) >> 1)
+#define CORE_SAMPLE_COUNT SAMPLE_COUNT(m_core.get_oscillation_cycle())
+
+#define ASSERT_UPDATED AGE_ASSERT(m_sample_count == CORE_SAMPLE_COUNT)
 
 
 
@@ -108,23 +116,33 @@ void age::gb_sound::update_state()
 {
     // see https://gist.github.com/drhelius/3652407
 
-    int current_cycle = m_core.get_oscillation_cycle();
+    int sample_count = CORE_SAMPLE_COUNT;
 
-    while (current_cycle >= m_next_apu_event_cycle)
+    while (sample_count >= m_sample_next_apu_event)
     {
-        int cycles = apu_event(m_next_apu_event_cycle);
-        m_next_apu_event_cycle += cycles;
+        generate_samples(m_sample_next_apu_event);
+        int samples = apu_event();
+        m_sample_next_apu_event += samples;
     }
 
-    generate_samples(current_cycle);
+    generate_samples(sample_count);
 }
 
 
 
-void age::gb_sound::set_back_cycles(int offset)
+void age::gb_sound::set_back_cycles()
 {
-    AGE_GB_SET_BACK_CYCLES(m_last_sample_cycle, offset);
-    AGE_GB_SET_BACK_CYCLES(m_next_apu_event_cycle, offset);
+    // update_state() must have been called before
+    // (though with m_core.set_back_cycle() already having been called,
+    // there is no way we can assert that)
+
+    AGE_ASSERT(m_sample_count >= CORE_SAMPLE_COUNT);
+    int sample_diff = m_sample_count - CORE_SAMPLE_COUNT;
+
+    m_sample_count -= sample_diff;
+    m_sample_next_apu_event -= sample_diff;
+
+    AGE_ASSERT((m_sample_next_apu_event % gb_apu_event_samples) == 0);
 }
 
 
@@ -139,6 +157,8 @@ void age::gb_sound::set_back_cycles(int offset)
 
 bool age::gb_sound::inc_period() const
 {
+    ASSERT_UPDATED;
+
     // the initial volume envelope period is increased by one,
     // if the next frame sequencer step 7 is near
     return
@@ -147,17 +167,17 @@ bool age::gb_sound::inc_period() const
                 (m_next_frame_sequencer_step == 7)
                 && !m_skip_frame_sequencer_step
                 )
-            // frame sequencer step 6 is at most 4 cycles away
+            // frame sequencer step 6 is at most 2 samples away
             || (
                 (m_next_frame_sequencer_step == 6)
                 && !m_delayed_disable_c1
-                && (m_next_apu_event_cycle - m_core.get_oscillation_cycle() <= 4)
+                && (m_sample_next_apu_event - m_sample_count <= 2)
                 );
 }
 
 
 
-int age::gb_sound::apu_event(int at_cycle)
+int age::gb_sound::apu_event()
 {
     AGE_ASSERT((m_next_frame_sequencer_step >= 0)
                && (m_next_frame_sequencer_step <= 7));
@@ -165,53 +185,50 @@ int age::gb_sound::apu_event(int at_cycle)
     // no frame sequencer activity if the APU is switched off
     if (!m_master_on)
     {
-        LOG("ignored at cycle " << at_cycle << ": APU off");
-        return gb_apu_event_cycles;
+        LOG("ignored at sample " << m_sample_count << ": APU off");
+        return gb_apu_event_samples;
     }
 
     // skip this frame sequencer step
     // (triggered by switching on the APU at specific cycles)
     if (m_skip_frame_sequencer_step)
     {
-        LOG("skipping step at cycle " << at_cycle);
+        LOG("skipping step at sample " << m_sample_count);
         AGE_ASSERT(!m_delayed_disable_c1);
         AGE_ASSERT(m_next_frame_sequencer_step == 7);
         m_next_frame_sequencer_step = 0;
         m_skip_frame_sequencer_step = false;
-        return gb_apu_event_cycles;
+        return gb_apu_event_samples;
     }
 
     // delayed disabling of channel 1 due to frequency sweep overflow
     if (m_delayed_disable_c1)
     {
-        LOG("delayed disable c1 at cycle " << at_cycle);
-        generate_samples(at_cycle);
+        LOG("delayed disable c1 at sample " << m_sample_count);
         deactivate_channel<gb_channel_1>();
         m_delayed_disable_c1 = false;
-        return gb_apu_event_cycles - gb_frequency_sweep_check_delay;
+        return gb_apu_event_samples - gb_frequency_sweep_check_delay;
     }
 
     // perform next frame sequencer step
     LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
-        << " at cycle " << at_cycle
+        << " at sample " << m_sample_count
         << " (disable c1: " << m_delayed_disable_c1 << ")");
 
-    int cycles = gb_apu_event_cycles;
+    int samples = gb_apu_event_samples;
     switch (m_next_frame_sequencer_step)
     {
         case 2:
         case 6:
-            generate_samples(at_cycle);
             if (m_c1.sweep_frequency())
             {
                 m_delayed_disable_c1 = true;
-                cycles = gb_frequency_sweep_check_delay;
+                samples = gb_frequency_sweep_check_delay;
             }
             // fall through
             [[clang::fallthrough]];
         case 0:
         case 4:
-            generate_samples(at_cycle);
             length_counter_tick<gb_channel_1>();
             length_counter_tick<gb_channel_2>();
             length_counter_tick<gb_channel_3>();
@@ -225,7 +242,6 @@ int age::gb_sound::apu_event(int at_cycle)
             break;
 
         case 7:
-            generate_samples(at_cycle);
             m_c1.volume_envelope();
             m_c2.volume_envelope();
             m_c4.volume_envelope();
@@ -233,27 +249,21 @@ int age::gb_sound::apu_event(int at_cycle)
             break;
     }
 
-    return cycles;
+    return samples;
 }
 
 
 
-void age::gb_sound::generate_samples(int until_cycle)
+void age::gb_sound::generate_samples(int sample_count)
 {
-    AGE_ASSERT(!(m_last_sample_cycle & ((1 << gb_sample_cycle_shift) - 1)));
-    int cycles_elapsed = until_cycle - m_last_sample_cycle;
-    if (cycles_elapsed <= 0)
-    {
-        return;
-    }
+    AGE_ASSERT(sample_count >= m_sample_count);
 
-    int samples_to_generate = cycles_elapsed >> gb_sample_cycle_shift;
+    int samples_to_generate = sample_count - m_sample_count;
     if (samples_to_generate <= 0)
     {
         return;
     }
-    m_last_sample_cycle += samples_to_generate << gb_sample_cycle_shift;
-    AGE_ASSERT(!(m_last_sample_cycle & ((1 << gb_sample_cycle_shift) - 1)));
+    m_sample_count = sample_count;
 
     // allocate silence
     AGE_ASSERT(m_samples.size() <= int_max);
@@ -297,13 +307,17 @@ void age::gb_sound::set_wave_ram_byte(unsigned offset, uint8_t value)
 //
 //---------------------------------------------------------
 
-age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
+age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
     : m_core(core),
       m_is_cgb(m_core.is_cgb()),
       m_samples(samples),
-      m_last_sample_cycle(m_core.get_oscillation_cycle()),
-      m_next_frame_sequencer_step(m_is_cgb ? 7 : 3)
+      m_sample_count(CORE_SAMPLE_COUNT)
 {
+    // initialize frame sequencer
+    int fs_steps = m_sample_count / gb_apu_event_samples;
+    m_sample_next_apu_event = (fs_steps + 1) * gb_apu_event_samples;
+    m_next_frame_sequencer_step = m_is_cgb ? 0 : 1;
+
     // initialize wave ram
     const uint8_array<0x10> &src = m_is_cgb ? cgb_wave_ram : dmg_wave_ram;
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
@@ -315,23 +329,18 @@ age::gb_sound::gb_sound(gb_core &core, pcm_vector &samples)
     // channel 1 initial state:
     // we know from gambatte test roms at which cycle
     // the duty waveform reaches position 5
-    // and that each waveform step takes 252 cycles
-    int duty_pos5_cycle = m_is_cgb ? 9500 : 44508;
-    AGE_ASSERT(m_core.get_oscillation_cycle() < duty_pos5_cycle);
+    // and that each waveform step takes 126 samples
+    int duty_pos5_sample = SAMPLE_COUNT(m_is_cgb ? 9500 : 44508);
+    AGE_ASSERT(m_sample_count < duty_pos5_sample);
 
-    int cycle_diff = duty_pos5_cycle - m_core.get_oscillation_cycle();
-    int sample_offset = (cycle_diff % 252) / 2;
-    int index = 4 - (cycle_diff / 252);
+    int sample_diff = duty_pos5_sample - m_sample_count;
+    int sample_offset = sample_diff % 126;
+    int index = 4 - (sample_diff / 126);
 
     LOG("channel 1 init (cgb " << m_is_cgb << "): "
-        << "cycle_diff " << cycle_diff
+        << "sample_diff " << sample_diff
         << ", sample_offset " << sample_offset
         << ", index " << index << "(" << (index & 7) << ")"
         );
     m_c1.init_duty_waveform_position(0x7C1, sample_offset, index & 7);
-
-    // fast-forward the first N frame sequencer steps
-    // (no pcm samples will be generated since we set
-    // m_last_sample_cycle to the current cycle)
-    update_state();
 }

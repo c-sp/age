@@ -119,7 +119,8 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
             << " -> " << cycles_to_keep
             << " (-" << offset << ")");
 
-        m_sound.set_back_cycles(offset);
+        m_core.set_back_cycles(offset);
+        m_sound.set_back_cycles();
         m_lcd.set_back_cycles(offset);
         m_timer.set_back_cycles(offset);
         m_serial.set_back_cycles(offset);

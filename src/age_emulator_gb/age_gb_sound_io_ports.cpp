@@ -146,11 +146,11 @@ void age::gb_sound::write_nr52(uint8_t value)
     // sound switched on
     else if (!m_master_on && new_master_on)
     {
-        update_state();
+        update_state(); // m_sample_count updated
         m_nr52 = gb_sound_master_switch;
 
         m_delayed_disable_c1 = false;
-        m_skip_frame_sequencer_step = (m_core.get_oscillation_cycle() + 4) & 0x1000;
+        m_skip_frame_sequencer_step = (m_sample_count + 2) & 0x800;
         m_next_frame_sequencer_step = m_skip_frame_sequencer_step ? 7 : 0;
     }
 
@@ -246,7 +246,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
     if (m_master_on)
     {
-        update_state();
+        update_state(); // m_sample_count & m_sample_next_apu_event updated
         m_c1.set_high_frequency_bits(value);
         length_counter_write_nrX4<gb_channel_1>(value);
 
@@ -254,9 +254,9 @@ void age::gb_sound::write_nr14(uint8_t value)
         {
             m_c1.reset_duty_counter();
 
-            int cycles = m_next_apu_event_cycle - m_core.get_oscillation_cycle();
+            int samples = m_sample_next_apu_event - m_sample_count;
             bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
-                    && (cycles <= (m_is_cgb ? 8: 4));
+                    && (samples <= (m_is_cgb ? 4 : 2));
 
             bool sweep_deactivate = m_c1.init_frequency_sweep(skip_sweep_step);
             bool volume_deactivate = m_c1.init_volume_envelope(inc_period());

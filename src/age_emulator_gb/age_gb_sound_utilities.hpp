@@ -32,7 +32,6 @@
 namespace age
 {
 
-constexpr int8_t gb_sample_cycle_shift = 1; // 2097152 samples per second for easier emulation (will be downsampled later on)
 constexpr uint8_t gb_nrX4_initialize = 0x80;
 
 
