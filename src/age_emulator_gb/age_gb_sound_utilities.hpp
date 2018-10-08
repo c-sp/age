@@ -83,7 +83,9 @@ public:
 
             for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
             {
-                //! \todo result distorted by overflow from one sample into the other
+                // result might be slightly distorted by overflow from
+                // lower sample into upper sample
+                // (ignored since it's just +1/-1)
                 buffer[buffer_index].m_stereo_sample += m_output_sample;
             }
 
@@ -125,18 +127,23 @@ private:
     {
         AGE_ASSERT(m_wave_sample <= 15);
         AGE_ASSERT(m_volume <= 60);
+
+        int value = (m_volume > 0)
+                ? (2 * m_wave_sample * m_volume - 15 * 60) * int16_t_max
+                : 0;
         //
         // divider:
         //
         //   / 15  ->  max amplitude
-        //   / 32  ->  4 channels, s0x volume up to 8
+        //   / 32  ->  4 channels, SOx volume up to 8
         //   / 60  ->  combining volume 1-15 (channels 1,2,4)
         //             and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        int value = (2 * m_wave_sample * m_volume - 15 * 60) * int16_t_max;
-        // int value = (2 * m_wave_sample - 15) * int16_t_max * m_volume;
-        value /= 15 * 32 * 60;
-        //! \todo result distorted by overflow from one sample into the other
+        value /= 15 * 32 * 60; // 15 * 32 * 60 = 28800
+
+        // result might be slightly distorted by overflow from
+        // lower sample into upper sample
+        // (ignored since it's just +1/-1)
         m_output_sample = value * m_channel_multiplier;
     }
 

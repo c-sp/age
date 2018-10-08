@@ -114,8 +114,6 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
 
 void age::gb_sound::update_state()
 {
-    // see https://gist.github.com/drhelius/3652407
-
     int sample_count = CORE_SAMPLE_COUNT;
 
     while (sample_count >= m_sample_next_apu_event)
