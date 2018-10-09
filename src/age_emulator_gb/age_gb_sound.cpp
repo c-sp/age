@@ -78,7 +78,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
     if (m_c3.active())
     {
         update_state();
-        if (!m_is_cgb && !m_c3.timer_reload_on_last_sample())
+        if (!m_is_cgb && !m_c3.wave_ram_just_read())
         {
             return 0xFF;
         }
@@ -99,7 +99,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
     if (m_c3.active())
     {
         update_state();
-        if (!m_is_cgb && !m_c3.timer_reload_on_last_sample())
+        if (!m_is_cgb && !m_c3.wave_ram_just_read())
         {
             return;
         }
@@ -325,7 +325,7 @@ age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
     // initialize channel 1
     m_c1.activate();
     m_c1.write_nrX2(0xF3);
-    m_c1.set_wave_pattern_duty(0x80);
+    m_c1.set_duty_waveform(0x80);
 
     // channel 1 initial state:
     // we know from gambatte test roms at which cycle

@@ -143,7 +143,7 @@ void age::gb_sound::write_nr52(uint8_t value)
 
         m_c1 = gb_sound_channel1();
         m_c2 = gb_sound_channel2();
-        m_c3 = gb_sound_channel3(0, 31);
+        m_c3 = gb_sound_channel3();
         m_c4 = gb_sound_channel4();
 
         std::for_each(begin(m_length_counter), end(m_length_counter), [&](auto &elem)
@@ -204,7 +204,7 @@ void age::gb_sound::write_nr11(uint8_t value)
     // wave pattern duty only changeable, if switched on
     if (m_master_on)
     {
-        m_c1.set_wave_pattern_duty(value);
+        m_c1.set_duty_waveform(value);
         m_nr11 = value;
     }
 }
@@ -252,7 +252,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            m_c1.reset_duty_counter();
+            m_c1.init_frequency_timer();
 
             int samples = m_sample_next_apu_event - m_sample_count;
             bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
@@ -293,7 +293,7 @@ void age::gb_sound::write_nr21(uint8_t value)
     // wave pattern duty only changeable, if switched on
     if (m_master_on)
     {
-        m_c2.set_wave_pattern_duty(value);
+        m_c2.set_duty_waveform(value);
         m_nr21 = value;
     }
 }
@@ -341,7 +341,7 @@ void age::gb_sound::write_nr24(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            m_c2.reset_duty_counter();
+            m_c2.init_frequency_timer();
 
             bool deactivated = m_c2.init_volume_envelope(inc_period());
             if (!deactivated)
@@ -436,7 +436,7 @@ void age::gb_sound::write_nr34(uint8_t value)
 
             // DMG: if we're about to read a wave sample,
             // wave pattern memory will be "scrambled"
-            if (!m_is_cgb && (m_c3.get_frequency_timer() == 1))
+            if (!m_is_cgb && m_c3.next_sample_reads_wave_ram())
             {
                 unsigned index = (m_c3.get_wave_pattern_index() + 1) & 31;
                 index >>= 1;
@@ -455,8 +455,8 @@ void age::gb_sound::write_nr34(uint8_t value)
                 }
             }
 
-            // reset wave pattern index (restart wave playback)
-            m_c3.reset_wave_pattern_index();
+            // restart the wave pattern
+            m_c3.init_wave_pattern_position();
         }
 
         m_nr34 = value;

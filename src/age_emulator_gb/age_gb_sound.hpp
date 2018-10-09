@@ -35,10 +35,10 @@
 namespace age
 {
 
-typedef gb_frequency_sweep<gb_volume_envelope<gb_wave_generator>> gb_sound_channel1;
-typedef gb_volume_envelope<gb_wave_generator> gb_sound_channel2;
-typedef gb_wave_generator gb_sound_channel3;
-typedef gb_volume_envelope<gb_noise_generator> gb_sound_channel4;
+typedef gb_frequency_sweep<gb_volume_envelope<gb_duty_source>> gb_sound_channel1;
+typedef gb_volume_envelope<gb_duty_source> gb_sound_channel2;
+typedef gb_wave_source gb_sound_channel3;
+typedef gb_volume_envelope<gb_noise_source> gb_sound_channel4;
 
 
 
@@ -144,7 +144,7 @@ private:
 
     uint8_t m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
     uint8_array<16> m_c3_wave_ram;
-    gb_sound_channel3 m_c3 = {0, 31};
+    gb_sound_channel3 m_c3;
 
     uint8_t m_nr44 = 0;
     gb_sound_channel4 m_c4;

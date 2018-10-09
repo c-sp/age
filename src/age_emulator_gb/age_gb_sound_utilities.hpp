@@ -63,23 +63,6 @@ class gb_sample_generator
 {
 public:
 
-    int get_frequency_timer() const
-    {
-        return m_frequency_timer;
-    }
-
-    bool timer_reload_on_last_sample() const
-    {
-        return m_frequency_timer_just_reloaded;
-    }
-
-    void set_volume(uint8_t volume)
-    {
-        AGE_ASSERT(volume <= 60);
-        m_volume = volume;
-        calculate_output_sample();
-    }
-
     void generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate)
     {
         AGE_ASSERT((buffer_index >= 0) && (samples_to_generate > 0));
@@ -90,9 +73,6 @@ public:
         uint32_t channel_multiplier = static_cast<TYPE*>(this)->get_multiplier();
         AGE_ASSERT((channel_multiplier & 0xFFFF) <= 8);
         AGE_ASSERT((channel_multiplier >> 16) <= 8);
-
-        // we assume to generate at least one sample
-        m_frequency_timer_just_reloaded = false;
 
         for (int samples_remaining = samples_to_generate; samples_remaining > 0; )
         {
@@ -106,10 +86,12 @@ public:
 
             for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
             {
+                unsigned idx = static_cast<unsigned>(buffer_index);
+
                 // result might be slightly distorted by overflow from
                 // lower sample into upper sample
                 // (ignored since it's just +1/-1)
-                buffer[buffer_index].m_stereo_sample += output_sample;
+                buffer[idx].m_stereo_sample += output_sample;
             }
 
             samples_remaining -= samples;
@@ -118,17 +100,20 @@ public:
             // check for next wave input
             if (m_frequency_timer == 0)
             {
-                m_frequency_timer_just_reloaded = true;
                 m_frequency_timer = m_frequency_timer_period;
                 m_wave_sample = static_cast<TYPE*>(this)->next_wave_sample();
                 calculate_output_sample();
             }
         }
 
-        bool just_reloaded = m_frequency_timer == m_frequency_timer_period;
-        m_frequency_timer_just_reloaded &= just_reloaded;
-
         AGE_ASSERT(m_frequency_timer > 0);
+    }
+
+    void set_volume(uint8_t volume)
+    {
+        AGE_ASSERT(volume <= 60);
+        m_volume = volume;
+        calculate_output_sample();
     }
 
 protected:
@@ -142,6 +127,16 @@ protected:
     void reset_frequency_timer(int sample_offset)
     {
         m_frequency_timer = m_frequency_timer_period + sample_offset;
+    }
+
+    int get_frequency_timer() const
+    {
+        return m_frequency_timer;
+    }
+
+    bool frequency_timer_just_reloaded() const
+    {
+        return m_frequency_timer == m_frequency_timer_period;
     }
 
 private:
@@ -167,7 +162,6 @@ private:
 
     int m_frequency_timer_period = 0;
     int m_frequency_timer = 0;
-    bool m_frequency_timer_just_reloaded = false;
 
     //!
     //! \brief the current wave sample
@@ -183,25 +177,18 @@ private:
 
 
 
-//! \todo split up & rename to gb_duty_channel & gb_wave_channel
-class gb_wave_generator :
-        public gb_sample_generator<gb_wave_generator>,
+class gb_duty_source :
+        public gb_sample_generator<gb_duty_source>,
         public gb_sound_channel
 {
 public:
 
-    gb_wave_generator();
-    gb_wave_generator(int8_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
-
-    uint8_t get_wave_pattern_index() const;
+    gb_duty_source();
 
     void set_low_frequency_bits(uint8_t nrX3);
     void set_high_frequency_bits(uint8_t nrX4);
-
-    void reset_wave_pattern_index();
-    void set_wave_pattern_byte(unsigned offset, uint8_t value);
-    void reset_duty_counter();
-    void set_wave_pattern_duty(uint8_t nrX1);
+    void set_duty_waveform(uint8_t nrX1);
+    void init_frequency_timer();
 
     void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index);
 
@@ -215,27 +202,61 @@ protected:
 
 private:
 
-    int8_t m_frequency_counter_shift;
     int16_t m_frequency_bits = 0;
-
-    uint8_t m_index_mask;
     uint8_t m_index = 0;
-
-    uint8_array<32> m_wave_pattern;
+    uint8_t m_duty = 0;
 };
 
 
 
 
 
-//! \todo rename to gb_noise_channel
-class gb_noise_generator :
-        public gb_sample_generator<gb_noise_generator>,
+class gb_wave_source :
+        public gb_sample_generator<gb_wave_source>,
         public gb_sound_channel
 {
 public:
 
-    gb_noise_generator();
+    gb_wave_source();
+
+    bool next_sample_reads_wave_ram() const;
+    bool wave_ram_just_read() const;
+    uint8_t get_wave_pattern_index() const;
+
+    void set_low_frequency_bits(uint8_t nrX3);
+    void set_high_frequency_bits(uint8_t nrX4);
+
+    void init_wave_pattern_position();
+    void set_wave_pattern_byte(unsigned offset, uint8_t value);
+
+    uint8_t next_wave_sample();
+
+    void generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate);
+
+protected:
+
+    void calculate_frequency_timer_period();
+
+private:
+
+    uint8_array<32> m_wave_pattern;
+    uint8_t m_frequency_low = 0;
+    uint8_t m_frequency_high = 0;
+    uint8_t m_index = 0;
+    bool m_wave_ram_just_read = false;
+};
+
+
+
+
+
+class gb_noise_source :
+        public gb_sample_generator<gb_noise_source>,
+        public gb_sound_channel
+{
+public:
+
+    gb_noise_source();
 
     uint8_t read_nrX3() const;
 
