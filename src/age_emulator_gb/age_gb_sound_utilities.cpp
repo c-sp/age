@@ -54,7 +54,7 @@ bool age::gb_sound_channel::active() const
 
 age::uint32_t age::gb_sound_channel::get_multiplier() const
 {
-    return active() ? m_multiplier : 0;
+    return m_active ? m_multiplier : 0;
 }
 
 
@@ -76,8 +76,8 @@ void age::gb_sound_channel::set_multiplier(uint8_t nr50, uint8_t shifted_nr51)
     //     - SOx volume
     //     - channel to SOx "routing"
 
-    int16_t volume_SO1 = nr50 & 7;
-    int16_t volume_SO2 = (nr50 >> 4) & 7;
+    int16_t volume_SO1 = (nr50 & 7) + 1;
+    int16_t volume_SO2 = ((nr50 >> 4) & 7) + 1;
 
     volume_SO1 *= shifted_nr51 & 1;
     volume_SO2 *= (shifted_nr51 >> 4) & 1;

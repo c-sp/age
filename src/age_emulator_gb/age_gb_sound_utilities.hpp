@@ -157,7 +157,7 @@ private:
         //   / 60  ->  combining volume 1-15 (channels 1,2,4)
         //             and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        m_output_value = value / 15 * 32 * 60; // 15 * 32 * 60 = 28800
+        m_output_value = value / (15 * 32 * 60); // 15 * 32 * 60 = 28800
     }
 
     int m_frequency_timer_period = 0;
