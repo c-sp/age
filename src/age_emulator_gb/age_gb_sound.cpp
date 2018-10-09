@@ -75,7 +75,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
 
     // if channel 3 is currently active, we can only read the last accessed
     // wave sample (DMG: only if within clock range)
-    if ((m_nr52 & gb_channel_bit(gb_channel_3)) > 0)
+    if (m_c3.active())
     {
         update_state();
         if (!m_is_cgb && !m_c3.timer_reload_on_last_sample())
@@ -96,7 +96,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
 
     // if channel 3 is currently active, we can only write the last accessed
     // wave sample (DMG: only if within clock range)
-    if ((m_nr52 & gb_channel_bit(gb_channel_3)) > 0)
+    if (m_c3.active())
     {
         update_state();
         if (!m_is_cgb && !m_c3.timer_reload_on_last_sample())
@@ -205,7 +205,7 @@ int age::gb_sound::apu_event()
     if (m_delayed_disable_c1)
     {
         LOG("delayed disable c1 at sample " << m_sample_count);
-        deactivate_channel<gb_channel_1>();
+        m_c1.deactivate();
         m_delayed_disable_c1 = false;
         return gb_apu_event_samples - gb_frequency_sweep_check_delay;
     }
@@ -276,11 +276,11 @@ void age::gb_sound::generate_samples(int sample_count)
     if (m_master_on)
     {
         //! \todo find out when frequency timers are counting and when not
-        if (m_nr52 & gb_channel_bit(gb_channel_1))
+        if (m_c1.active())
         {
             m_c1.generate_samples(m_samples, sample_index, samples_to_generate);
         }
-        if (m_nr52 & gb_channel_bit(gb_channel_2))
+        if (m_c2.active())
         {
             m_c2.generate_samples(m_samples, sample_index, samples_to_generate);
         }
@@ -323,6 +323,7 @@ age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
 
     // initialize channel 1
+    m_c1.activate();
     m_c1.write_nrX2(0xF3);
     m_c1.set_wave_pattern_duty(0x80);
 

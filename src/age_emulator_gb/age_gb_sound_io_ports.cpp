@@ -63,11 +63,21 @@ age::uint8_t age::gb_sound::read_nr44() const { return m_nr44 | 0xBF; }
 
 age::uint8_t age::gb_sound::read_nr50() const { return m_nr50; }
 age::uint8_t age::gb_sound::read_nr51() const { return m_nr51; }
+
 age::uint8_t age::gb_sound::read_nr52()
 {
     update_state();
-    LOG(AGE_LOG_HEX(m_nr52));
-    return m_nr52 | 0x70;
+
+    uint8_t result = m_master_on ? gb_sound_master_switch : 0;
+    result |= 0x70;
+
+    result |= m_c1.active() ? gb_channel_bit(gb_channel_1) : 0;
+    result |= m_c2.active() ? gb_channel_bit(gb_channel_2) : 0;
+    result |= m_c3.active() ? gb_channel_bit(gb_channel_3) : 0;
+    result |= m_c4.active() ? gb_channel_bit(gb_channel_4) : 0;
+
+    LOG(AGE_LOG_HEX(result));
+    return result;
 }
 
 
@@ -88,12 +98,12 @@ void age::gb_sound::write_nr50(uint8_t value)
     if (m_master_on)
     {
         update_state();
-        m_nr50 = value; // S01 S02 volume
+        m_nr50 = value; // SO1 SO2 volume
 
-        calculate_channel_multiplier<gb_channel_1>();
-        calculate_channel_multiplier<gb_channel_2>();
-        calculate_channel_multiplier<gb_channel_3>();
-        calculate_channel_multiplier<gb_channel_4>();
+        m_c1.set_multiplier(m_nr50, m_nr51);
+        m_c2.set_multiplier(m_nr50, m_nr51 >> 1);
+        m_c3.set_multiplier(m_nr50, m_nr51 >> 2);
+        m_c4.set_multiplier(m_nr50, m_nr51 >> 3);
     }
 }
 
@@ -105,12 +115,12 @@ void age::gb_sound::write_nr51(uint8_t value)
     if (m_master_on)
     {
         update_state();
-        m_nr51 = value; // C1..4 to S01 S02 "routing"
+        m_nr51 = value; // C1..4 to SO1 SO2 "routing"
 
-        calculate_channel_multiplier<gb_channel_1>();
-        calculate_channel_multiplier<gb_channel_2>();
-        calculate_channel_multiplier<gb_channel_3>();
-        calculate_channel_multiplier<gb_channel_4>();
+        m_c1.set_multiplier(m_nr50, m_nr51);
+        m_c2.set_multiplier(m_nr50, m_nr51 >> 1);
+        m_c3.set_multiplier(m_nr50, m_nr51 >> 2);
+        m_c4.set_multiplier(m_nr50, m_nr51 >> 3);
     }
 }
 
@@ -129,7 +139,7 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_nr21 = m_nr24 = 0;
         m_nr30 = m_nr32 = m_nr34 = 0;
         m_nr44 = 0;
-        m_nr50 = m_nr51 = m_nr52 = 0;
+        m_nr50 = m_nr51 = 0;
 
         m_c1 = gb_sound_channel1();
         m_c2 = gb_sound_channel2();
@@ -139,7 +149,7 @@ void age::gb_sound::write_nr52(uint8_t value)
         std::for_each(begin(m_length_counter), end(m_length_counter), [&](auto &elem)
         {
             elem.write_nrX1(0);
-            elem.write_nrX4(0, false);
+            elem.init_length_counter(0, false);
         });
     }
 
@@ -147,7 +157,6 @@ void age::gb_sound::write_nr52(uint8_t value)
     else if (!m_master_on && new_master_on)
     {
         update_state(); // m_sample_count updated
-        m_nr52 = gb_sound_master_switch;
 
         m_delayed_disable_c1 = false;
         m_skip_frame_sequencer_step = (m_sample_count + 2) & 0x800;
@@ -179,12 +188,7 @@ void age::gb_sound::write_nr10(uint8_t value)
     {
         update_state();
         m_nr10 = value;
-        bool deactivate = m_c1.write_nrX0(value);
-        if (deactivate)
-        {
-            LOG("channel 1 deactivated by write to NR10");
-            deactivate_channel<gb_channel_1>();
-        }
+        m_c1.write_nrX0(value);
     }
 }
 
@@ -216,11 +220,7 @@ void age::gb_sound::write_nr12(uint8_t value)
     if (m_master_on)
     {
         update_state();
-        bool deactivate = m_c1.write_nrX2(value);
-        if (deactivate)
-        {
-            deactivate_channel<gb_channel_1>();
-        }
+        m_c1.write_nrX2(value);
     }
 }
 
@@ -258,16 +258,12 @@ void age::gb_sound::write_nr14(uint8_t value)
             bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
                     && (samples <= (m_is_cgb ? 4 : 2));
 
-            bool sweep_deactivate = m_c1.init_frequency_sweep(skip_sweep_step);
-            bool volume_deactivate = m_c1.init_volume_envelope(inc_period());
+            bool deactivated = m_c1.init_frequency_sweep(skip_sweep_step);
+            deactivated |= m_c1.init_volume_envelope(inc_period());
 
-            if (sweep_deactivate || volume_deactivate)
+            if (!deactivated)
             {
-                deactivate_channel<gb_channel_1>();
-            }
-            else
-            {
-                init_channel<gb_channel_1>();
+                m_c1.activate();
             }
         }
 
@@ -313,11 +309,7 @@ void age::gb_sound::write_nr22(uint8_t value)
     if (m_master_on)
     {
         update_state();
-        bool deactivate = m_c2.write_nrX2(value);
-        if (deactivate)
-        {
-            deactivate_channel<gb_channel_2>();
-        }
+        m_c2.write_nrX2(value);
     }
 }
 
@@ -351,14 +343,10 @@ void age::gb_sound::write_nr24(uint8_t value)
         {
             m_c2.reset_duty_counter();
 
-            bool volume_deactivated = m_c2.init_volume_envelope(inc_period());
-            if (volume_deactivated)
+            bool deactivated = m_c2.init_volume_envelope(inc_period());
+            if (!deactivated)
             {
-                deactivate_channel<gb_channel_2>();
-            }
-            else
-            {
-                init_channel<gb_channel_2>();
+                m_c2.activate();
             }
         }
 
@@ -387,7 +375,7 @@ void age::gb_sound::write_nr30(uint8_t value)
         if ((m_nr30 & gb_sound_master_switch) == 0)
         {
             update_state();
-            deactivate_channel<gb_channel_3>();
+            m_c3.deactivate();
         }
     }
 }
@@ -444,7 +432,7 @@ void age::gb_sound::write_nr34(uint8_t value)
 
         if ((value & m_nr30 & gb_nrX4_initialize) > 0)
         {
-            init_channel<gb_channel_3>();
+            m_c3.activate();
 
             // DMG: if we're about to read a wave sample,
             // wave pattern memory will be "scrambled"
@@ -501,11 +489,7 @@ void age::gb_sound::write_nr42(uint8_t value)
     if (m_master_on)
     {
         update_state();
-        bool deactivate = m_c4.write_nrX2(value);
-        if (deactivate)
-        {
-            deactivate_channel<gb_channel_4>();
-        }
+        m_c4.write_nrX2(value);
     }
 }
 
@@ -533,14 +517,10 @@ void age::gb_sound::write_nr44(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            bool volume_deactivated = m_c4.init_volume_envelope(inc_period());
-            if (volume_deactivated)
+            bool deactivated = m_c4.init_volume_envelope(inc_period());
+            if (!deactivated)
             {
-                deactivate_channel<gb_channel_4>();
-            }
-            else
-            {
-                init_channel<gb_channel_4>();
+                m_c4.activate();
                 m_c4.init_generator();
             }
         }

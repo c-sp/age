@@ -43,7 +43,56 @@ constexpr const std::array<age::uint8_array<32>, 4> gb_wave_pattern_duty =
 
 //---------------------------------------------------------
 //
-//   wave generator
+//   sound channel common
+//
+//---------------------------------------------------------
+
+bool age::gb_sound_channel::active() const
+{
+    return m_active;
+}
+
+age::uint32_t age::gb_sound_channel::get_multiplier() const
+{
+    return active() ? m_multiplier : 0;
+}
+
+
+
+void age::gb_sound_channel::activate()
+{
+    m_active = true;
+}
+
+void age::gb_sound_channel::deactivate()
+{
+    m_active = false;
+}
+
+void age::gb_sound_channel::set_multiplier(uint8_t nr50, uint8_t shifted_nr51)
+{
+    // calculate channel multiplier
+    // this value includes:
+    //     - SOx volume
+    //     - channel to SOx "routing"
+
+    int16_t volume_SO1 = nr50 & 7;
+    int16_t volume_SO2 = (nr50 >> 4) & 7;
+
+    volume_SO1 *= shifted_nr51 & 1;
+    volume_SO2 *= (shifted_nr51 >> 4) & 1;
+
+    // SO1 is the right channel, SO2 is the left channel
+    m_multiplier = pcm_sample(volume_SO2, volume_SO1).m_stereo_sample;
+}
+
+
+
+
+
+//---------------------------------------------------------
+//
+//   wave channel
 //
 //---------------------------------------------------------
 
@@ -170,7 +219,7 @@ age::uint8_t age::gb_wave_generator::next_wave_sample()
 
 //---------------------------------------------------------
 //
-//   noise generator
+//   noise channel
 //
 //---------------------------------------------------------
 
@@ -258,7 +307,7 @@ void age::gb_length_counter::write_nrX1(uint8_t nrX1)
     m_counter = (~nrX1 & m_counter_mask) + 1;
 }
 
-bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool immediate_decrement)
+bool age::gb_length_counter::init_length_counter(uint8_t nrX4, bool immediate_decrement)
 {
     bool disable_channel = false;
 
@@ -285,7 +334,7 @@ bool age::gb_length_counter::write_nrX4(uint8_t nrX4, bool immediate_decrement)
     return disable_channel;
 }
 
-bool age::gb_length_counter::tick()
+bool age::gb_length_counter::decrement_length_counter()
 {
     bool deactivate = false;
 

@@ -22,6 +22,7 @@
 //!
 
 #include <algorithm> // std::min
+#include <type_traits> // std::is_base_of
 
 #include <age_debug.hpp>
 #include <age_types.hpp>
@@ -33,6 +34,27 @@ namespace age
 {
 
 constexpr uint8_t gb_nrX4_initialize = 0x80;
+
+
+
+class gb_sound_channel
+{
+public:
+
+    bool active() const;
+    uint32_t get_multiplier() const;
+
+    void activate();
+    void deactivate();
+    void set_multiplier(uint8_t nr50, uint8_t shifted_nr51);
+
+private:
+
+    bool m_active = false;
+    uint32_t m_multiplier = 0;
+};
+
+
 
 
 
@@ -51,14 +73,6 @@ public:
         return m_frequency_timer_just_reloaded;
     }
 
-    void set_channel_multiplier(uint32_t channel_multiplier)
-    {
-        AGE_ASSERT((channel_multiplier & 0xFFFF) <= 8);
-        AGE_ASSERT((channel_multiplier >> 16) <= 8);
-        m_channel_multiplier = channel_multiplier;
-        calculate_output_sample();
-    }
-
     void set_volume(uint8_t volume)
     {
         AGE_ASSERT(volume <= 60);
@@ -73,6 +87,10 @@ public:
         AGE_ASSERT(m_frequency_timer_period > 0);
         AGE_ASSERT(m_frequency_timer >= 0);
 
+        uint32_t channel_multiplier = static_cast<TYPE*>(this)->get_multiplier();
+        AGE_ASSERT((channel_multiplier & 0xFFFF) <= 8);
+        AGE_ASSERT((channel_multiplier >> 16) <= 8);
+
         // we assume to generate at least one sample
         m_frequency_timer_just_reloaded = false;
 
@@ -81,12 +99,17 @@ public:
             // write output samples until we have to retrieve the next wave sample
             int samples = std::min(samples_remaining, m_frequency_timer);
 
+            // the result might be slightly distorted by overflow from
+            // lower sample into upper sample
+            // (ignored since it's just +1/-1)
+            uint32_t output_sample = m_output_value * channel_multiplier;
+
             for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
             {
                 // result might be slightly distorted by overflow from
                 // lower sample into upper sample
                 // (ignored since it's just +1/-1)
-                buffer[buffer_index].m_stereo_sample += m_output_sample;
+                buffer[buffer_index].m_stereo_sample += output_sample;
             }
 
             samples_remaining -= samples;
@@ -139,12 +162,7 @@ private:
         //   / 60  ->  combining volume 1-15 (channels 1,2,4)
         //             and volume 0, 1, 0.5, 0.25 (channel 3)
         //
-        value /= 15 * 32 * 60; // 15 * 32 * 60 = 28800
-
-        // result might be slightly distorted by overflow from
-        // lower sample into upper sample
-        // (ignored since it's just +1/-1)
-        m_output_sample = value * m_channel_multiplier;
+        m_output_value = value / 15 * 32 * 60; // 15 * 32 * 60 = 28800
     }
 
     int m_frequency_timer_period = 0;
@@ -156,10 +174,82 @@ private:
     //! (taken from duty waveform, wave ram or noise LFSR)
     //!
     uint8_t m_wave_sample = 0;
-    uint32_t m_channel_multiplier = 0;
     uint8_t m_volume = 0;
 
-    uint32_t m_output_sample = 0;
+    int16_t m_output_value = 0;
+};
+
+
+
+
+
+//! \todo split up & rename to gb_duty_channel & gb_wave_channel
+class gb_wave_generator :
+        public gb_sample_generator<gb_wave_generator>,
+        public gb_sound_channel
+{
+public:
+
+    gb_wave_generator();
+    gb_wave_generator(int8_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
+
+    uint8_t get_wave_pattern_index() const;
+
+    void set_low_frequency_bits(uint8_t nrX3);
+    void set_high_frequency_bits(uint8_t nrX4);
+
+    void reset_wave_pattern_index();
+    void set_wave_pattern_byte(unsigned offset, uint8_t value);
+    void reset_duty_counter();
+    void set_wave_pattern_duty(uint8_t nrX1);
+
+    void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index);
+
+    uint8_t next_wave_sample();
+
+protected:
+
+    int16_t get_frequency_bits() const;
+
+    void set_frequency_bits(int16_t frequency_bits);
+
+private:
+
+    int8_t m_frequency_counter_shift;
+    int16_t m_frequency_bits = 0;
+
+    uint8_t m_index_mask;
+    uint8_t m_index = 0;
+
+    uint8_array<32> m_wave_pattern;
+};
+
+
+
+
+
+//! \todo rename to gb_noise_channel
+class gb_noise_generator :
+        public gb_sample_generator<gb_noise_generator>,
+        public gb_sound_channel
+{
+public:
+
+    gb_noise_generator();
+
+    uint8_t read_nrX3() const;
+
+    void write_nrX3(uint8_t nrX3);
+    void init_generator();
+
+    uint8_t next_wave_sample();
+
+private:
+
+    uint8_t m_nrX3 = 0;
+    bool m_7steps = false;
+    bool m_allow_shift = true;
+    uint16_t m_lfsr = 0;
 };
 
 
@@ -169,6 +259,10 @@ private:
 template<typename TYPE>
 class gb_volume_envelope : public TYPE
 {
+    static_assert(
+            std::is_base_of<gb_sound_channel, TYPE>::value,
+            "gb_volume_envelope must derive from gb_sound_channel"
+            );
 public:
 
     uint8_t read_nrX2() const
@@ -176,7 +270,7 @@ public:
         return m_nrX2;
     }
 
-    bool write_nrX2(uint8_t nrX2)
+    void write_nrX2(uint8_t nrX2)
     {
         // "zombie" update
         int volume = m_volume;
@@ -202,15 +296,17 @@ public:
         m_period = m_nrX2 & 0x07;
         m_increase_volume = (m_nrX2 & 0x08) > 0;
 
-        return channel_off();
+        deactivate_if_silent();
     }
 
     bool init_volume_envelope(bool inc_period)
     {
         m_period_counter = (m_period == 0) ? 8 : m_period;
         m_period_counter += inc_period ? 1 : 0;
+
         update_volume(m_nrX2 >> 4);
-        return channel_off();
+
+        return deactivate_if_silent();
     }
 
     void volume_envelope()
@@ -239,20 +335,21 @@ public:
 
 private:
 
-    bool channel_off() const
+    bool deactivate_if_silent()
     {
-        bool result = (m_nrX2 & 0xF8) == 0;
-        return result;
+        bool is_silent = !(m_nrX2 & 0xF8);
+        if (is_silent)
+        {
+            gb_sound_channel::deactivate();
+        };
+        return is_silent;
     }
 
     void update_volume(int new_volume)
     {
         AGE_ASSERT((new_volume >= 0) && (new_volume < 0x10));
-        if (m_volume != new_volume)
-        {
-            m_volume = new_volume;
-            TYPE::set_volume(m_volume * 4);
-        }
+        m_volume = new_volume;
+        TYPE::set_volume(m_volume * 4);
     }
 
     bool adjust_volume()
@@ -283,16 +380,22 @@ private:
 template<typename TYPE>
 class gb_frequency_sweep : public TYPE
 {
+    static_assert(
+            std::is_base_of<gb_sound_channel, TYPE>::value,
+            "gb_frequency_sweep must derive from gb_sound_channel"
+            );
 public:
 
-    bool write_nrX0(uint8_t nrX0)
+    void write_nrX0(uint8_t nrX0)
     {
         m_period = (nrX0 >> 4) & 7;
         m_shift = nrX0 & 7;
         m_sweep_up = (nrX0 & 8) == 0;
 
-        bool deactivate = m_swept_down && m_sweep_up;
-        return deactivate;
+        if (m_swept_down && m_sweep_up)
+        {
+            gb_sound_channel::deactivate();
+        }
     }
 
     bool init_frequency_sweep(bool skip_first_step)
@@ -311,6 +414,10 @@ public:
 
         // check for channel deactivation only, if shift is not zero
         bool deactivate = (m_shift > 0) && next_sweep_invalid();
+        if (deactivate)
+        {
+            gb_sound_channel::deactivate();
+        }
         return deactivate;
     }
 
@@ -388,73 +495,6 @@ private:
 
 
 
-class gb_wave_generator : public gb_sample_generator<gb_wave_generator>
-{
-public:
-
-    gb_wave_generator();
-    gb_wave_generator(int8_t frequency_counter_shift, uint8_t wave_pattern_index_mask);
-
-    uint8_t get_wave_pattern_index() const;
-
-    void set_low_frequency_bits(uint8_t nrX3);
-    void set_high_frequency_bits(uint8_t nrX4);
-
-    void reset_wave_pattern_index();
-    void set_wave_pattern_byte(unsigned offset, uint8_t value);
-    void reset_duty_counter();
-    void set_wave_pattern_duty(uint8_t nrX1);
-
-    void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index);
-
-    uint8_t next_wave_sample();
-
-protected:
-
-    int16_t get_frequency_bits() const;
-
-    void set_frequency_bits(int16_t frequency_bits);
-
-private:
-
-    int8_t m_frequency_counter_shift;
-    int16_t m_frequency_bits = 0;
-
-    uint8_t m_index_mask;
-    uint8_t m_index = 0;
-
-    uint8_array<32> m_wave_pattern;
-};
-
-
-
-
-
-class gb_noise_generator : public gb_sample_generator<gb_noise_generator>
-{
-public:
-
-    gb_noise_generator();
-
-    uint8_t read_nrX3() const;
-
-    void write_nrX3(uint8_t nrX3);
-    void init_generator();
-
-    uint8_t next_wave_sample();
-
-private:
-
-    uint8_t m_nrX3 = 0;
-    bool m_7steps = false;
-    bool m_allow_shift = true;
-    uint16_t m_lfsr = 0;
-};
-
-
-
-
-
 class gb_length_counter
 {
 public:
@@ -462,8 +502,8 @@ public:
     gb_length_counter(uint8_t counter_mask);
 
     void write_nrX1(uint8_t nrX1);
-    bool write_nrX4(uint8_t nrX4, bool last_fs_step_ticked_lc);
-    bool tick();
+    bool init_length_counter(uint8_t nrX4, bool last_fs_step_ticked_lc);
+    bool decrement_length_counter();
 
 private:
 
