@@ -125,9 +125,6 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
         m_timer.set_back_cycles(offset);
         m_serial.set_back_cycles(offset);
         m_bus.set_back_cycles(offset);
-        // do m_core last in case any set_back_cycles() implementation
-        // depends on the current cycle counter
-        m_core.set_back_cycles(offset);
     }
 
     return cycles_emulated;

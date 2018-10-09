@@ -124,6 +124,7 @@ void age::gb_sound::update_state()
     }
 
     generate_samples(sample_count);
+    AGE_ASSERT(m_sample_count < m_sample_next_apu_event);
 }
 
 
@@ -131,7 +132,7 @@ void age::gb_sound::update_state()
 void age::gb_sound::set_back_cycles()
 {
     // update_state() must have been called before
-    // (though with m_core.set_back_cycle() already having been called,
+    // (with m_core.set_back_cycle() already having been called,
     // there is no way we can assert that)
 
     AGE_ASSERT(m_sample_count >= CORE_SAMPLE_COUNT);
@@ -141,6 +142,7 @@ void age::gb_sound::set_back_cycles()
     m_sample_next_apu_event -= sample_diff;
 
     AGE_ASSERT((m_sample_next_apu_event % gb_apu_event_samples) == 0);
+    AGE_ASSERT(m_sample_count < m_sample_next_apu_event);
 }
 
 
