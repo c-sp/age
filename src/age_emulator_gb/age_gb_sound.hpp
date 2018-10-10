@@ -35,22 +35,21 @@
 namespace age
 {
 
-typedef gb_frequency_sweep<gb_volume_envelope<gb_duty_source>> gb_sound_channel1;
-typedef gb_volume_envelope<gb_duty_source> gb_sound_channel2;
-typedef gb_wave_source gb_sound_channel3;
-typedef gb_volume_envelope<gb_noise_source> gb_sound_channel4;
+typedef
+gb_length_counter<gb_frequency_sweep<gb_volume_envelope<gb_duty_source>>>
+gb_sound_channel1;
 
+typedef
+gb_length_counter<gb_volume_envelope<gb_duty_source>>
+gb_sound_channel2;
 
+typedef
+gb_length_counter<gb_wave_source>
+gb_sound_channel3;
 
-constexpr unsigned gb_channel_1 = 0;
-constexpr unsigned gb_channel_2 = 1;
-constexpr unsigned gb_channel_3 = 2;
-constexpr unsigned gb_channel_4 = 3;
-
-constexpr uint8_t gb_channel_bit(unsigned channel)
-{
-    return static_cast<uint8_t>(0x01 << channel);
-}
+typedef
+gb_length_counter<gb_volume_envelope<gb_noise_source>>
+gb_sound_channel4;
 
 
 
@@ -116,6 +115,11 @@ public:
 
 private:
 
+    bool inc_period() const;
+    int apu_event();
+    void generate_samples(int sample_count);
+    void set_wave_ram_byte(unsigned offset, uint8_t value);
+
     const gb_core &m_core;
     const bool m_is_cgb;
 
@@ -134,92 +138,19 @@ private:
 
     // channels
 
-    std::array<gb_length_counter, 4> m_length_counter = {{ {0x3F}, {0x3F}, {0xFF}, {0x3F} }};
-
     uint8_t m_nr10 = 0, m_nr11 = 0x80, m_nr14 = 0;
-    gb_sound_channel1 m_c1;
+    gb_sound_channel1 m_c1 = {0x3F};
 
     uint8_t m_nr21 = 0, m_nr24 = 0;
-    gb_sound_channel2 m_c2;
+    gb_sound_channel2 m_c2 = {0x3F};
 
     uint8_t m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
     uint8_array<16> m_c3_wave_ram;
-    gb_sound_channel3 m_c3;
+    gb_sound_channel3 m_c3 = {0xFF};
 
     uint8_t m_nr44 = 0;
-    gb_sound_channel4 m_c4;
-
-
-
-    // private methods
-
-    bool inc_period() const;
-    int apu_event();
-    void generate_samples(int sample_count);
-    void set_wave_ram_byte(unsigned offset, uint8_t value);
-
-    // channel template methods
-
-    template<unsigned>
-    inline void deactivate_channel()
-    {
-        AGE_ASSERT(false); // implementation for each channel see below
-    }
-
-    template<unsigned channel>
-    inline void length_counter_tick()
-    {
-        if (m_length_counter[channel].decrement_length_counter())
-        {
-            deactivate_channel<channel>();
-        }
-    }
-
-    template<unsigned channel>
-    inline void length_counter_write_nrX4(uint8_t value)
-    {
-        gb_length_counter &lc = m_length_counter[channel];
-
-        bool deactivate = lc.init_length_counter(value, m_next_frame_sequencer_step & 1);
-        if (deactivate)
-        {
-            deactivate_channel<channel>();
-        }
-    }
-
-    template<unsigned channel>
-    inline void length_counter_write_nrX1(uint8_t value)
-    {
-        // length counter always writable for DMG
-        if (m_master_on || !m_is_cgb)
-        {
-            update_state();
-            m_length_counter[channel].write_nrX1(value);
-        }
-    }
+    gb_sound_channel4 m_c4 = {0x3F};
 };
-
-
-
-template<> inline void gb_sound::deactivate_channel<gb_channel_1>()
-{
-    m_c1.deactivate();
-}
-
-template<> inline void gb_sound::deactivate_channel<gb_channel_2>()
-{
-    m_c2.deactivate();
-}
-
-template<> inline void gb_sound::deactivate_channel<gb_channel_3>()
-{
-    m_c3.deactivate();
-}
-
-template<> inline void gb_sound::deactivate_channel<gb_channel_4>()
-{
-    m_c4.deactivate();
-}
 
 } // namespace age
 

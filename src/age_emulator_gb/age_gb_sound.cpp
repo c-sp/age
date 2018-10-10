@@ -229,10 +229,10 @@ int age::gb_sound::apu_event()
             [[clang::fallthrough]];
         case 0:
         case 4:
-            length_counter_tick<gb_channel_1>();
-            length_counter_tick<gb_channel_2>();
-            length_counter_tick<gb_channel_3>();
-            length_counter_tick<gb_channel_4>();
+            m_c1.decrement_length_counter();
+            m_c2.decrement_length_counter();
+            m_c3.decrement_length_counter();
+            m_c4.decrement_length_counter();
             // fall through
             [[clang::fallthrough]];
         case 1:

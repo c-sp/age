@@ -25,8 +25,6 @@
 namespace
 {
 
-constexpr age::uint8_t gb_nrX4_length_counter = 0x40;
-
 constexpr const std::array<age::uint8_array<8>, 4> gb_duty_waveforms =
 {{
      {{  0, 0, 0, 0,   0, 0, 0,15 }},
@@ -329,70 +327,4 @@ age::uint8_t age::gb_noise_source::next_wave_sample()
 
     uint8_t sample = static_cast<uint8_t>(~m_lfsr & 1) * 15;
     return sample;
-}
-
-
-
-
-
-//---------------------------------------------------------
-//
-//   length counter
-//
-//---------------------------------------------------------
-
-age::gb_length_counter::gb_length_counter(uint8_t counter_mask)
-    : m_counter_mask(counter_mask)
-{
-    AGE_ASSERT(m_counter_mask > 0);
-}
-
-
-
-void age::gb_length_counter::write_nrX1(uint8_t nrX1)
-{
-    m_counter = (~nrX1 & m_counter_mask) + 1;
-}
-
-bool age::gb_length_counter::init_length_counter(uint8_t nrX4, bool immediate_decrement)
-{
-    bool disable_channel = false;
-
-    int8_t decrement = 0;
-    bool new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
-    if (new_counter_enabled)
-    {
-        decrement = immediate_decrement ? 1 : 0;
-
-        if (!m_counter_enabled && (m_counter > 0))
-        {
-            m_counter -= decrement;
-            disable_channel = m_counter == 0;
-        }
-    }
-    m_counter_enabled = new_counter_enabled;
-
-    // store max-length counter on channel init, if current counter is zero
-    if (((nrX4 & gb_nrX4_initialize) > 0) && (m_counter == 0))
-    {
-        m_counter = m_counter_mask + 1 - decrement;
-    }
-
-    return disable_channel;
-}
-
-bool age::gb_length_counter::decrement_length_counter()
-{
-    bool deactivate = false;
-
-    if (m_counter_enabled)
-    {
-        if (m_counter > 0)
-        {
-            --m_counter;
-            deactivate = (m_counter == 0);
-        }
-    }
-
-    return deactivate;
 }

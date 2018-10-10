@@ -29,6 +29,8 @@ constexpr age::uint8_t gb_sound_master_switch = 0x80;
 
 }
 
+#define LC_IMMEDIATE_DECREMENT (m_next_frame_sequencer_step & 1)
+
 
 
 
@@ -71,10 +73,10 @@ age::uint8_t age::gb_sound::read_nr52()
     uint8_t result = m_master_on ? gb_sound_master_switch : 0;
     result |= 0x70;
 
-    result |= m_c1.active() ? gb_channel_bit(gb_channel_1) : 0;
-    result |= m_c2.active() ? gb_channel_bit(gb_channel_2) : 0;
-    result |= m_c3.active() ? gb_channel_bit(gb_channel_3) : 0;
-    result |= m_c4.active() ? gb_channel_bit(gb_channel_4) : 0;
+    result |= m_c1.active() ? 1 : 0;
+    result |= m_c2.active() ? 2 : 0;
+    result |= m_c3.active() ? 4 : 0;
+    result |= m_c4.active() ? 8 : 0;
 
     LOG(AGE_LOG_HEX(result));
     return result;
@@ -141,16 +143,10 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_nr44 = 0;
         m_nr50 = m_nr51 = 0;
 
-        m_c1 = gb_sound_channel1();
-        m_c2 = gb_sound_channel2();
-        m_c3 = gb_sound_channel3();
-        m_c4 = gb_sound_channel4();
-
-        std::for_each(begin(m_length_counter), end(m_length_counter), [&](auto &elem)
-        {
-            elem.write_nrX1(0);
-            elem.init_length_counter(0, false);
-        });
+        m_c1 = gb_sound_channel1(0x3F);
+        m_c2 = gb_sound_channel2(0x3F);
+        m_c3 = gb_sound_channel3(0xFF);
+        m_c4 = gb_sound_channel4(0x3F);
     }
 
     // sound switched on
@@ -199,7 +195,13 @@ void age::gb_sound::write_nr11(uint8_t value)
         << ", duty " << AGE_LOG_DEC(value >> 6)
         << ", master " << m_master_on);
 
-    length_counter_write_nrX1<gb_channel_1>(value);
+    update_state();
+
+    // length counter always writable for DMG
+    if (m_master_on || !m_is_cgb)
+    {
+        m_c1.write_nrX1(value);
+    }
 
     // wave pattern duty only changeable, if switched on
     if (m_master_on)
@@ -248,7 +250,7 @@ void age::gb_sound::write_nr14(uint8_t value)
     {
         update_state(); // m_sample_count & m_sample_next_apu_event updated
         m_c1.set_high_frequency_bits(value);
-        length_counter_write_nrX4<gb_channel_1>(value);
+        m_c1.init_length_counter(value, LC_IMMEDIATE_DECREMENT);
 
         if ((value & gb_nrX4_initialize) > 0)
         {
@@ -288,7 +290,13 @@ void age::gb_sound::write_nr21(uint8_t value)
         << ", duty " << AGE_LOG_DEC(value >> 6)
         << ", master " << m_master_on);
 
-    length_counter_write_nrX1<gb_channel_2>(value);
+    update_state();
+
+    // length counter always writable for DMG
+    if (m_master_on || !m_is_cgb)
+    {
+        m_c2.write_nrX1(value);
+    }
 
     // wave pattern duty only changeable, if switched on
     if (m_master_on)
@@ -337,7 +345,7 @@ void age::gb_sound::write_nr24(uint8_t value)
     {
         update_state();
         m_c2.set_high_frequency_bits(value);
-        length_counter_write_nrX4<gb_channel_2>(value);
+        m_c2.init_length_counter(value, LC_IMMEDIATE_DECREMENT);
 
         if ((value & gb_nrX4_initialize) > 0)
         {
@@ -385,7 +393,12 @@ void age::gb_sound::write_nr31(uint8_t value)
     LOG(AGE_LOG_HEX(value)
         << ", master " << m_master_on);
 
-    length_counter_write_nrX1<gb_channel_3>(value);
+    // length counter always writable for DMG
+    if (m_master_on || !m_is_cgb)
+    {
+        update_state();
+        m_c3.write_nrX1(value);
+    }
 }
 
 void age::gb_sound::write_nr32(uint8_t value)
@@ -428,7 +441,7 @@ void age::gb_sound::write_nr34(uint8_t value)
     {
         update_state();
         m_c3.set_high_frequency_bits(value);
-        length_counter_write_nrX4<gb_channel_3>(value);
+        m_c3.init_length_counter(value, LC_IMMEDIATE_DECREMENT);
 
         if ((value & m_nr30 & gb_nrX4_initialize) > 0)
         {
@@ -478,7 +491,12 @@ void age::gb_sound::write_nr41(uint8_t value)
     LOG(AGE_LOG_HEX(value)
         << ", master " << m_master_on);
 
-    length_counter_write_nrX1<gb_channel_4>(value);
+    // length counter always writable for DMG
+    if (m_master_on || !m_is_cgb)
+    {
+        update_state();
+        m_c4.write_nrX1(value);
+    }
 }
 
 void age::gb_sound::write_nr42(uint8_t value)
@@ -513,7 +531,7 @@ void age::gb_sound::write_nr44(uint8_t value)
     if (m_master_on)
     {
         update_state();
-        length_counter_write_nrX4<gb_channel_4>(value);
+        m_c4.init_length_counter(value, LC_IMMEDIATE_DECREMENT);
 
         if ((value & gb_nrX4_initialize) > 0)
         {
