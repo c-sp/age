@@ -16,6 +16,12 @@
 
 #include "age_gb_emulator_impl.hpp"
 
+#if 0
+#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#else
+#define LOG(x)
+#endif
+
 
 
 age::gb_test_info age::gb_emulator_impl::get_test_info() const
@@ -47,15 +53,23 @@ void age::gb_emulator_impl::set_buttons_up(int buttons)
 
 int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 {
+    AGE_ASSERT(cycles_to_emulate > 0);
+
     // make sure we have some headroom since we usually emulate
     // a few more cycles than requested
     constexpr int cycle_limit = int_max - gb_machine_cycles_per_second;
+    constexpr int cycle_setback_limit = 2 * gb_machine_cycles_per_second;
 
+    // calculate the number of cycles to emulate based on the current
+    // cycle and the cycle limit
     int starting_cycle = m_core.get_oscillation_cycle();
-    AGE_ASSERT(starting_cycle < cycle_limit);
-    AGE_ASSERT(cycles_to_emulate > 0);
+    AGE_ASSERT(starting_cycle < cycle_setback_limit);
 
     int cycle_to_go = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
+
+    // emulate until we reach the calculated cycle
+    // (depending on CPU instruction length or running DMA
+    // we usually emulate a little bit past that cycle)
     while (m_core.get_oscillation_cycle() < cycle_to_go)
     {
         m_bus.handle_events(); // may change the current gb_state
@@ -78,21 +92,35 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     }
 
     // make sure audio output is complete
-    m_sound.generate_samples();
+    m_sound.update_state();
 
-    int cycles_emulated = m_core.get_oscillation_cycle() - starting_cycle;
+    // calculate the cycles actually emulated
+    int current_cycle = m_core.get_oscillation_cycle();
+    int cycles_emulated = current_cycle - starting_cycle;
     AGE_ASSERT(cycles_emulated >= 0);
 
-    if (m_core.get_oscillation_cycle() > (cycle_limit / 2))
+    // if the cycle counter reaches a certain threshold,
+    // set back all stored cycle values to keep the
+    // cycle counter from overflowing
+    if (current_cycle >= cycle_setback_limit)
     {
-        int cycles_to_keep = m_core.get_oscillation_cycle() % gb_machine_cycles_per_second;
-        int offset = m_core.get_oscillation_cycle() - cycles_to_keep;
+        AGE_ASSERT(cycle_setback_limit >= 2 * gb_machine_cycles_per_second);
 
+        // keep a minimum of cycles to prevent negative cycle values
+        // (which should still work but is kind of unintuitive)
+        int cycles_to_keep = gb_machine_cycles_per_second
+                + (current_cycle % gb_machine_cycles_per_second);
+
+        int offset = current_cycle - cycles_to_keep;
         AGE_ASSERT(offset > 0);
-        AGE_ASSERT(offset < m_core.get_oscillation_cycle());
+        AGE_ASSERT(offset < current_cycle);
+
+        LOG("set back cycles: " << current_cycle
+            << " -> " << cycles_to_keep
+            << " (-" << offset << ")");
 
         m_core.set_back_cycles(offset);
-        m_sound.set_back_cycles(offset);
+        m_sound.set_back_cycles();
         m_lcd.set_back_cycles(offset);
         m_timer.set_back_cycles(offset);
         m_serial.set_back_cycles(offset);

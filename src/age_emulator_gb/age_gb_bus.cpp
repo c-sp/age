@@ -454,10 +454,6 @@ void age::gb_bus::handle_events()
                 m_timer.timer_overflow();
                 break;
 
-            case gb_event::sound_frame_sequencer:
-                m_sound.frame_sequencer_cycle();
-                break;
-
             case gb_event::lcd_lyc_check:
                 m_lcd.lyc_event();
                 break;

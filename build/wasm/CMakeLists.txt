@@ -55,7 +55,7 @@ set (SOURCES_AGE_EMULATOR_GB
     ${DIR_AGE_EMULATOR_GB}/age_gb_memory_init.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_serial.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_sound.cpp
-    ${DIR_AGE_EMULATOR_GB}/age_gb_sound_channels.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_sound_io_ports.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_sound_utilities.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_timer.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_timer_utils.cpp

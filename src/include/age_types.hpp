@@ -74,6 +74,7 @@ typedef std::vector<uint8_t> uint8_vector;
 
 constexpr int int_max = std::numeric_limits<int>::max();
 constexpr int16_t int16_t_max = std::numeric_limits<int16_t>::max();
+constexpr int16_t int16_t_min = std::numeric_limits<int16_t>::min();
 constexpr int32_t int32_t_max = std::numeric_limits<int32_t>::max();
 
 constexpr const char *project_name = "AGE";

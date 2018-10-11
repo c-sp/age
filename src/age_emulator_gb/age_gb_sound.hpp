@@ -35,17 +35,21 @@
 namespace age
 {
 
-constexpr unsigned gb_channel_1 = 0;
-constexpr unsigned gb_channel_2 = 1;
-constexpr unsigned gb_channel_3 = 2;
-constexpr unsigned gb_channel_4 = 3;
+typedef
+gb_length_counter<gb_frequency_sweep<gb_volume_envelope<gb_duty_source>>>
+gb_sound_channel1;
 
-constexpr uint8_t gb_master_switch = 0x80;
+typedef
+gb_length_counter<gb_volume_envelope<gb_duty_source>>
+gb_sound_channel2;
 
-constexpr const uint8_array<4> gb_channel_bit =
-{{
-     0x01, 0x02, 0x04, 0x08
- }};
+typedef
+gb_length_counter<gb_wave_source>
+gb_sound_channel3;
+
+typedef
+gb_length_counter<gb_volume_envelope<gb_noise_source>>
+gb_sound_channel4;
 
 
 
@@ -55,7 +59,7 @@ class gb_sound
 
 public:
 
-    gb_sound(gb_core &core, pcm_vector &samples);
+    gb_sound(const gb_core &core, pcm_vector &samples);
 
     uint8_t read_nr10() const;
     uint8_t read_nr11() const;
@@ -77,7 +81,7 @@ public:
     uint8_t read_nr44() const;
     uint8_t read_nr50() const;
     uint8_t read_nr51() const;
-    uint8_t read_nr52() const;
+    uint8_t read_nr52();
 
     void write_nr10(uint8_t value);
     void write_nr11(uint8_t value);
@@ -104,128 +108,49 @@ public:
     uint8_t read_wave_ram(unsigned offset);
     void write_wave_ram(unsigned offset, uint8_t value);
 
-    void frame_sequencer_cycle();
-    void generate_samples();
-    void set_back_cycles(int offset);
+    void update_state();
+    void set_back_cycles();
 
 
 
 private:
 
-    template<unsigned channel>
-    void activate_channel()
-    {
-        uint8_t channel_bit = gb_channel_bit[channel];
-        m_nr52 |= channel_bit;
-        calculate_channel_multiplier<channel>();
-    }
-
-    template<unsigned channel>
-    void deactivate_channel()
-    {
-        uint8_t channel_bit = gb_channel_bit[channel];
-        m_nr52 &= ~channel_bit;
-        calculate_channel_multiplier<channel>();
-    }
-
-    template<unsigned channel>
-    void cycle_length_counter()
-    {
-        if (m_length_counter[channel].cycle())
-        {
-            generate_samples();
-            deactivate_channel<channel>();
-        }
-    }
-
-    template<unsigned channel>
-    void calculate_channel_multiplier()
-    {
-        // calculate channel multiplier
-        // (s01 is the right channel, s02 is the left channel)
-        // this value includes:
-        //     - s0x volume
-        //     - channel active flag
-        //     - channel to s0x routing
-        uint8_t channel_bit = gb_channel_bit[channel];
-
-        int16_t channel_s01 = ((m_nr52 & channel_bit) > 0) ? (m_nr50 & 7) + 1 : 0;
-        int16_t channel_s02 = ((m_nr52 & channel_bit) > 0) ? ((m_nr50 >> 4) & 7) + 1 : 0;
-
-        channel_s01 = ((m_nr51 & channel_bit) > 0) ? channel_s01 : 0;
-        channel_s02 = (((m_nr51 >> 4) & channel_bit) > 0) ? channel_s02 : 0;
-
-        pcm_sample channel_multiplier = {channel_s02, channel_s01};
-        set_channel_multiplier<channel>(channel_multiplier.m_stereo_sample);
-    }
-
-    template<unsigned channel> void set_channel_multiplier(uint32_t)
-    {
-        AGE_ASSERT(false); // see implementations below this class
-    }
-
+    bool inc_period() const;
+    int apu_event();
+    void generate_samples(int sample_count);
     void set_wave_ram_byte(unsigned offset, uint8_t value);
 
-
-
-    // common members
-
-    gb_core &m_core;
+    const gb_core &m_core;
     const bool m_is_cgb;
 
-    int m_last_generate_samples_cycle = 0;
     pcm_vector &m_samples;
+    int m_sample_count = 0;
 
+    int m_sample_next_apu_event = 0;
     int8_t m_next_frame_sequencer_step = 0;
-    bool m_next_frame_sequencer_step_odd = false;
+    bool m_delayed_disable_c1 = false;
+    bool m_skip_frame_sequencer_step = false;
 
     // channel control
 
-    uint8_t m_nr50 = 0, m_nr51 = 0, m_nr52 = 0xF0;
+    uint8_t m_nr50 = 0x77, m_nr51 = 0xF3;
     bool m_master_on = true;
-    int16_t m_s01_volume = 0;
-    int16_t m_s02_volume = 0;
 
     // channels
 
-    std::array<gb_length_counter, 4> m_length_counter = {{ {0x3F}, {0x3F}, {0xFF}, {0x3F} }};
-
-    uint8_t m_nr11 = 0, m_nr14 = 0;
-    gb_frequency_sweep<gb_volume_sweep<gb_wave_generator>> m_c1;
+    uint8_t m_nr10 = 0, m_nr11 = 0x80, m_nr14 = 0;
+    gb_sound_channel1 m_c1 = {0x3F};
 
     uint8_t m_nr21 = 0, m_nr24 = 0;
-    gb_volume_sweep<gb_wave_generator> m_c2;
+    gb_sound_channel2 m_c2 = {0x3F};
 
     uint8_t m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
     uint8_array<16> m_c3_wave_ram;
-    int m_c3_last_wave_access_cycle = 0;
-    gb_wave_generator m_c3 = {1, 31};
+    gb_sound_channel3 m_c3 = {0xFF};
 
     uint8_t m_nr44 = 0;
-    gb_volume_sweep<gb_noise_generator> m_c4;
+    gb_sound_channel4 m_c4 = {0x3F};
 };
-
-
-
-template<> inline void gb_sound::set_channel_multiplier<0>(uint32_t multiplier)
-{
-    m_c1.set_channel_multiplier(multiplier);
-}
-
-template<> inline void gb_sound::set_channel_multiplier<1>(uint32_t multiplier)
-{
-    m_c2.set_channel_multiplier(multiplier);
-}
-
-template<> inline void gb_sound::set_channel_multiplier<2>(uint32_t multiplier)
-{
-    m_c3.set_channel_multiplier(multiplier);
-}
-
-template<> inline void gb_sound::set_channel_multiplier<3>(uint32_t multiplier)
-{
-    m_c4.set_channel_multiplier(multiplier);
-}
 
 } // namespace age
 
