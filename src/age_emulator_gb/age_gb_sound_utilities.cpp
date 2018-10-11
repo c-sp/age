@@ -135,6 +135,8 @@ void age::gb_duty_source::set_high_frequency_bits(uint8_t nrX4)
 
 void age::gb_duty_source::init_frequency_timer()
 {
+    // frequency timer delay on channel initialization
+    // (see test rom analysis)
     reset_frequency_timer(4);
 }
 

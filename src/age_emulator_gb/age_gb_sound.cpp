@@ -161,6 +161,7 @@ bool age::gb_sound::inc_period() const
 
     // the initial volume envelope period is increased by one,
     // if the next frame sequencer step 7 is near
+    // (see test rom analysis)
     return
             // frame sequncer step 7 is next
             (
@@ -222,6 +223,8 @@ int age::gb_sound::apu_event()
         case 6:
             if (m_c1.sweep_frequency())
             {
+                // deactivation of channel 1 is delayed by 2 samples
+                // (see test rom analysis)
                 m_delayed_disable_c1 = true;
                 samples = gb_frequency_sweep_check_delay;
             }
@@ -314,6 +317,7 @@ age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
       m_sample_count(CORE_SAMPLE_COUNT)
 {
     // initialize frame sequencer
+    // (see test rom analysis)
     int fs_steps = m_sample_count / gb_apu_event_samples;
     m_sample_next_apu_event = (fs_steps + 1) * gb_apu_event_samples;
     m_next_frame_sequencer_step = m_is_cgb ? 0 : 1;
@@ -331,6 +335,7 @@ age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
     // we know from gambatte test roms at which cycle
     // the duty waveform reaches position 5
     // and that each waveform step takes 126 samples
+    // (see test rom analysis)
     int duty_pos5_sample = SAMPLE_COUNT(m_is_cgb ? 9500 : 44508);
     AGE_ASSERT(m_sample_count < duty_pos5_sample);
 

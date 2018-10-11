@@ -155,6 +155,9 @@ void age::gb_sound::write_nr52(uint8_t value)
         update_state(); // m_sample_count updated
 
         m_delayed_disable_c1 = false;
+
+        // delay frame sequencer step 0
+        // (see test rom analysis)
         m_skip_frame_sequencer_step = (m_sample_count + 2) & 0x800;
         m_next_frame_sequencer_step = m_skip_frame_sequencer_step ? 7 : 0;
     }
@@ -256,6 +259,9 @@ void age::gb_sound::write_nr14(uint8_t value)
         {
             m_c1.init_frequency_timer();
 
+            // one frequency sweep step is skipped if the next frame sequencer
+            // step 2 or 6 is near
+            // (see test rom analysis)
             int samples = m_sample_next_apu_event - m_sample_count;
             bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
                     && (samples <= (m_is_cgb ? 4 : 2));

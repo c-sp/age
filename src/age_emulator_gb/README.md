@@ -44,7 +44,7 @@ for several corner cases as part of his Gameboy emulator
 Several
 [Gambatte sound tests](https://github.com/sinamas/gambatte/tree/master/test/hwtests/sound)
 produce audio output as test result:
-a test either finishes with audible output or with silence.
+a test either finishes with audible sound or with silence.
 
 To achieve this, test roms apply a custom modulation to the duty waveform of
 channel 1 or 2.
@@ -749,14 +749,86 @@ this first frequency sweep step is skipped.
 
 **Gambatte test roms**
 
-DMG 4 cycles:
-ch1_init_reset_sweep_counter_timing_4_dmg08_outaudio1_cgb04c_outaudio0
+1. `ch1_init_reset_sweep_counter_timing_4_dmg08_outaudio1_cgb04c_outaudio0`
+1. `ch1_init_reset_sweep_counter_timing_5_dmg08_xoutaudio1lowpitch_cgb04c_outaudio0`
+1. `ch1_init_reset_sweep_counter_timing_6_dmg08_cgb04c_outaudio0`
+1. `ch1_init_reset_sweep_counter_timing_10_dmg08_outaudio0_cgb04c_outaudio1`
+1. `ch1_init_reset_sweep_counter_timing_11_dmg08_outaudio0_cgb_xoutaudio1lowpitch`
+1. `ch1_init_reset_sweep_counter_timing_12_dmg08_cgb04c_outaudio0`
 
-CGB 8 cycles:
-ch1_init_reset_sweep_counter_timing_10_dmg08_outaudio0_cgb04c_outaudio1
-
-TODO finish
+Channel 1 is initialized with frequency sweep configured to deactivate it after
+two sweep steps.
+In every test there are three sweep steps between initializing channel 1 and
+turning off frequency sweep.
+Depending on when channel 1 was initialized and if the test finishes with
+silence or audible sound the skipping of a sweep step can be detected.
 
 **Logs**
 
-TODO finish
+*Test roms 1, 2, 3 (DMG)*
+```yaml
+    cycle  44032  NR52 = 0x00  # APU off
+    cycle  44052  NR52 = 0x80  # APU on
+    cycle  49152  <fs step 0>
+    cycle  57344  <fs step 1>
+    cycle  65472  NR10 = 0x20  # Channel 1 frequency sweep up, FC=2
+    cycle  65532  NR14 = 0x87  # Channel 1 init,
+                               # first frequency sweep will overflow
+    cycle  65536  <fs step 2>  # frequency sweep step skipped
+    cycle  73728  <fs step 3>
+    cycle  81920  <fs step 4>
+    cycle  90112  <fs step 5>
+    cycle  98304  <fs step 6>  # FC=1
+    cycle 106496  <fs step 7>
+    cycle 114688  <fs step 0>
+    cycle 122880  <fs step 1>
+
+test rom 1:
+    cycle 131068  NR10 = 0x00  # deactivate frequency sweep
+    cycle 131072  <fs step 2>  # frequency sweep turned off
+    <...>         <test finishes with audible sound>  # outaudio1
+
+test rom 2:
+    cycle 131072  <fs step 2>  # FC=0 -> perform frequency sweep
+    cycle 131072  NR10 = 0x00  # deactivate frequency sweep
+    <...>         <test finishes undefined>  # xoutaudio1lowpitch
+
+test rom 3:
+    cycle 131072  <fs step 2>  # FC=0 -> perform frequency sweep
+    cycle 131076  NR10 = 0x00  # deactivate frequency sweep
+    <...>         <test finishes with silence>  # outaudio0
+```
+
+*Test roms 4, 5, 6 (CGB)*
+```yaml
+    cycle  7892   NR52 = 0x00  # APU off
+    cycle  7912   NR52 = 0x80  # APU on
+    cycle 16384   <fs step 0>
+    cycle 24576   <fs step 1>
+    cycle 32700   NR10 = 0x20  # Channel 1 frequency sweep up, FC=2
+    cycle 32760   NR14 = 0x87  # Channel 1 init,
+                               # first frequency sweep will overflow
+    cycle 32768   <fs step 2>  # frequency sweep step skipped
+    cycle 40960   <fs step 3>
+    cycle 49152   <fs step 4>
+    cycle 57344   <fs step 5>
+    cycle 65536   <fs step 6>  # FC=1
+    cycle 73728   <fs step 7>
+    cycle 81920   <fs step 0>
+    cycle 90112   <fs step 1>
+
+test rom 4:
+    cycle 98300   NR10 = 0x00  # deactivate frequency sweep
+    cycle 98304   <fs step 2>  # frequency sweep turned off
+    <...>         <test finishes with audible sound>  # outaudio1
+
+test rom 5:
+    cycle 98304   <fs step 2>  # FC=0 -> perform frequency sweep
+    cycle 98304   NR10 = 0x00  # deactivate frequency sweep
+    <...>         <test finishes undefined>  # xoutaudio1lowpitch
+
+test rom 6:
+    cycle 98304   <fs step 2>  # FC=0 -> perform frequency sweep
+    cycle 98308   NR10 = 0x00  # deactivate frequency sweep
+    <...>         <test finishes with silence>  # outaudio0
+```
