@@ -1,4 +1,4 @@
-image: registry.gitlab.com/csprenger/docker-age-ci:latest
+image: registry.gitlab.com/csprenger/docker-age-ci:1.0
 
 stages:
     - build
@@ -39,7 +39,7 @@ before_script:
 # https://docs.gitlab.com/ee/ci/caching/#good-caching-practices
 
 .age-js-common: &age-js-common
-    image: registry.gitlab.com/csprenger/docker-age-ci/js:latest
+    image: registry.gitlab.com/csprenger/docker-age-ci/js:1.0
     cache:
         key: ${CI_COMMIT_REF_SLUG}
         paths:
@@ -76,7 +76,7 @@ build-qt-release:
 build-wasm:
     stage: build
     <<: *artifacts
-    image: registry.gitlab.com/csprenger/docker-age-ci/wasm:latest
+    image: registry.gitlab.com/csprenger/docker-age-ci/wasm:1.0
     script:
         - source "${REPO_EMSDK}/emsdk_env.sh"
         - ./build/age_ci.sh wasm Release
