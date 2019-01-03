@@ -37,6 +37,7 @@ set (SOURCES_AGE_COMMON
     ${DIR_AGE_COMMON}/age_emulator.cpp
     ${DIR_AGE_COMMON}/age_pcm_ring_buffer.cpp
     ${DIR_AGE_COMMON}/age_screen_buffer.cpp
+    ${DIR_AGE_COMMON}/age_utilities.cpp
 )
 
 set (SOURCES_AGE_EMULATOR_GB
