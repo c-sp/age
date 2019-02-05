@@ -25,4 +25,4 @@ if (environment.production) {
 }
 
 platformBrowserDynamic().bootstrapModule(AgeAppModule)
-    .catch(err => console.log(err));
+    .catch(err => console.error(err));

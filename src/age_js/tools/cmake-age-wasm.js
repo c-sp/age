@@ -15,7 +15,7 @@
 //
 
 //
-// use this file to bild the AGE wasm binary
+// use this file to build the AGE wasm binary
 // and it's "glue code"
 //
 
@@ -29,7 +29,7 @@ const fs = require('fs');
 
 const emscripten = process.env.EMSCRIPTEN;
 if (!emscripten) {
-    throw new Error('EMSCRIPTEN not set, did you call emsdk_env.sh?');
+    throw new Error('EMSCRIPTEN not set, did you source emsdk_env.sh?');
 }
 
 const toolchain_file_path = path.resolve(emscripten, 'cmake', 'Modules', 'Platform', 'Emscripten.cmake');

@@ -110,7 +110,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
 
     private runEmulation(): void {
-        let newRuntimeInfo = undefined;
+        let newRuntimeInfo;
 
         if (this._emulationRunner) {
             this._emulationRunner.emulate(this._audio.sampleRate);
