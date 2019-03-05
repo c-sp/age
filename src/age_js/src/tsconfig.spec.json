@@ -2,21 +2,20 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "outDir": "../out-tsc/spec",
-        "baseUrl": "./",
         "paths": {
             // see https://github.com/Stuk/jszip/issues/524
             "stream": [
-                "../node_modules/readable-stream/readable.js"
+                "node_modules/readable-stream/readable.js"
             ]
         },
-        "module": "commonjs",
         "types": [
             "jasmine",
             "node"
         ]
     },
     "files": [
-        "test.ts"
+        "test.ts",
+        "polyfills.ts"
     ],
     "include": [
         "**/*.spec.ts",

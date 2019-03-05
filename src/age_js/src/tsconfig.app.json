@@ -6,14 +6,12 @@
     },
     "compilerOptions": {
         "outDir": "../out-tsc/app",
-        "baseUrl": "./",
         "paths": {
             // see https://github.com/Stuk/jszip/issues/524
             "stream": [
-                "../node_modules/readable-stream/readable.js"
+                "node_modules/readable-stream/readable.js"
             ]
         },
-        "module": "es2015",
         "types": []
     },
     "exclude": [

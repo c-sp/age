@@ -16,7 +16,7 @@
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
-import * as FileType from 'file-type';
+import fileType from 'file-type';
 import * as JSZip from 'jszip';
 
 
@@ -73,7 +73,7 @@ export class AgeRomFileExtractorComponent {
             // If this is a zip file, look for a rom file within that zip file.
             // Otherwise we just pass on the file contents.
             // (funnily enough Gameboy roms are sometimes identified as MP3 files)
-            const type = FileType(new Uint8Array(fileContents));
+            const type = fileType(new Uint8Array(fileContents));
             if (type && (type.ext === 'zip')) {
                 this._extractorState = AgeLoaderState.WORKING;
 
