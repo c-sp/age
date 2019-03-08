@@ -3,6 +3,7 @@ image: registry.gitlab.com/csprenger/docker-age-ci:1.1
 stages:
     - build
     - test
+    - assemble
     - deploy
 
 
@@ -157,9 +158,27 @@ lint-age-js:
 
 ############################################################
 ##
-##   deploy
+##   assemble & deploy
 ##
 ############################################################
+
+assemble-ref-pages:
+    stage: assemble
+    image: alpine:3.7
+    dependencies:
+        - build-wasm
+        - build-js
+    variables:
+        PAGES_OUT: ref-pages
+    script:
+        - build/age_ci.sh pages "${PAGES_OUT}"
+        - ls -lsahR "${PAGES_OUT}"
+    artifacts:
+        # expire_in: GitLab.com keeps artifacts forever by default
+        paths:
+            - ${PAGES_OUT}
+    tags:
+        - linux
 
 pages:
     stage: deploy
