@@ -39,7 +39,7 @@ switch_to_out_dir()
     OUT_DIR=$(out_dir $1)
 
     # remove previous build artifacts
-    if [ -e "$OUT_DIR" ]; then
+    if [[ -e "$OUT_DIR" ]]; then
         rm -rf "$OUT_DIR"
     fi
 
@@ -79,14 +79,14 @@ build_age_wasm()
         *) print_usage_and_exit ;;
     esac
 
-    if ! [ -n "$EMSCRIPTEN" ]; then
+    if ! [[ -n "$EMSCRIPTEN" ]]; then
         echo "EMSCRIPTEN is not set!"
         echo "We require this variable to point to the emscripten repository."
         exit 1
     fi
 
     TOOLCHAIN_FILE="$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake"
-    if ! [ -f "$TOOLCHAIN_FILE" ]; then
+    if ! [[ -f "$TOOLCHAIN_FILE" ]]; then
         echo "The emscripten toolchain file could not be found:"
         echo "$TOOLCHAIN_FILE"
         exit 1
@@ -125,7 +125,7 @@ age_js()
     # in case of a build, gzip all generated files
     # so that web servers can serve compressed content
     # (GitLab pages: https://docs.gitlab.com/ee/user/project/pages/introduction.html#serving-compressed-assets)
-    if [ ${CMD} = ${JS_BUILD} ]; then
+    if [[ ${CMD} = ${JS_BUILD} ]]; then
         OUT_DIR=$(out_dir js)
         echo "compressing contents of $OUT_DIR"
         npm run gzip-directory "$OUT_DIR"
@@ -135,7 +135,7 @@ age_js()
 assemble_pages()
 {
     # exit if the output path has not been specified
-    if ! [ -n "$1" ]; then
+    if ! [[ -n "$1" ]]; then
         print_usage_and_exit
     fi
 
@@ -147,7 +147,7 @@ assemble_pages()
     JS_DIR="$(out_dir js)"
 
     # remove previous pages
-    if [ -e "$PAGES_DIR" ]; then
+    if [[ -e "$PAGES_DIR" ]]; then
         rm -rf "$PAGES_DIR"
     fi
 
@@ -190,13 +190,13 @@ run_tests()
     esac
 
     # exit if the test file path has not been specified
-    if ! [ -n "$2" ]; then
+    if ! [[ -n "$2" ]]; then
         print_usage_and_exit
     fi
 
     # the executable file must exist
     TEST_EXEC="$(out_dir qt)/age_qt_emu_test/age_qt_emu_test"
-    if ! [ -x "$TEST_EXEC" ]; then
+    if ! [[ -x "$TEST_EXEC" ]]; then
         echo "The AGE test executable could not be found at:"
         echo "$TEST_EXEC"
         exit 1
@@ -242,20 +242,20 @@ BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
 
 # set the artifacts subdirectory,
 # if it has not been set yet (e.g. as environment variable)
-if ! [ -n "$AGE_ARTIFACTS_SUBDIR" ]; then
+if ! [[ -n "$AGE_ARTIFACTS_SUBDIR" ]]; then
     AGE_ARTIFACTS_SUBDIR=artifacts
 fi
 
 # get the number of CPU cores
 # (used for e.g. make)
 NUM_CORES=`grep -c '^processor' /proc/cpuinfo`
-if [ ${NUM_CORES} -lt 4 ]; then
+if [[ ${NUM_CORES} -lt 4 ]]; then
     NUM_CORES=4
 fi
 
 # check the command in the first parameter
 CMD=$1
-if [ -n "$CMD" ]; then
+if [[ -n "$CMD" ]]; then
     shift
 fi
 
