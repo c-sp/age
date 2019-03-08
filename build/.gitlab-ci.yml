@@ -162,21 +162,19 @@ lint-age-js:
 ##
 ############################################################
 
-assemble-ref-pages:
+assemble-pages:
     stage: assemble
     image: alpine:3.7
     dependencies:
         - build-wasm
         - build-js
-    variables:
-        PAGES_OUT: ref-pages
     script:
-        - build/age_ci.sh assemble-pages "${PAGES_OUT}"
-        - ls -lsahR "${PAGES_OUT}"
+        - build/age_ci.sh assemble-pages "${CI_COMMIT_REF_NAME}"
+        - ls -lsahR "${CI_COMMIT_REF_NAME}"
     artifacts:
         # expire_in: GitLab.com keeps artifacts forever by default
         paths:
-            - ${PAGES_OUT}
+            - ${CI_COMMIT_REF_NAME}
     tags:
         - linux
 
