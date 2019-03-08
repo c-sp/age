@@ -19,7 +19,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_BUILD"
     echo "    $0 $CMD_JS $JS_TEST"
     echo "    $0 $CMD_JS $JS_LINT"
-    echo "    $0 $CMD_PAGES <gitlab-pages-subdir>"
+    echo "    $0 $CMD_ASSEMBLE_PAGES <gitlab-pages-subdir>"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_BLARGG <path-to-mooneye-tests>"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
@@ -231,7 +231,7 @@ TESTS_MOONEYE=mooneye
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_JS=js
-CMD_PAGES=pages
+CMD_ASSEMBLE_PAGES=assemble-pages
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -260,12 +260,12 @@ if [[ -n "$CMD" ]]; then
 fi
 
 case ${CMD} in
-    ${CMD_QT})      build_age_qt $@ ;;
-    ${CMD_WASM})    build_age_wasm $@ ;;
-    ${CMD_JS})      age_js $@ ;;
-    ${CMD_PAGES})   assemble_pages $@ ;;
+    ${CMD_QT}) build_age_qt $@ ;;
+    ${CMD_WASM}) build_age_wasm $@ ;;
+    ${CMD_JS}) age_js $@ ;;
+    ${CMD_ASSEMBLE_PAGES}) assemble_pages $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
-    ${CMD_TEST})    run_tests $@ $@ ;;
+    ${CMD_TEST}) run_tests $@ $@ ;;
 
     *) print_usage_and_exit ;;
 esac

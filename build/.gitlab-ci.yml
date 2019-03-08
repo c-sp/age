@@ -171,7 +171,7 @@ assemble-ref-pages:
     variables:
         PAGES_OUT: ref-pages
     script:
-        - build/age_ci.sh pages "${PAGES_OUT}"
+        - build/age_ci.sh assemble-pages "${PAGES_OUT}"
         - ls -lsahR "${PAGES_OUT}"
     artifacts:
         # expire_in: GitLab.com keeps artifacts forever by default
