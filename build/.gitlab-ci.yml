@@ -187,7 +187,7 @@ pages:
     variables:
         PAGES_OUT: public
     script:
-        - build/age_ci.sh pages "${PAGES_OUT}"
+        - build/age_ci.sh assemble-pages "${PAGES_OUT}"
         - ls -lsahR "${PAGES_OUT}"
     artifacts:
         expire_in: 30 mins
