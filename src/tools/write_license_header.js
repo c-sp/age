@@ -20,6 +20,8 @@
 //      node write_license_header.js
 //
 
+'use strict';
+
 const child_process = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -117,11 +119,12 @@ async function get_files_to_check() {
         });
     }
 
-    const git_ls_files = child_process.execSync('git ls-files -co --exclude-standard', {cwd: __dirname});
+    const cwd = path.resolve(__dirname, '..');
+    const git_ls_files = child_process.execSync('git ls-files -co --exclude-standard', {cwd});
     const ls_files = git_ls_files.toString().trim().split('\n').sort();
 
     return await Promise.all(ls_files.map(async (ls_file) => {
-        const file = path.resolve(__dirname, ls_file)
+        const file = path.resolve(cwd, ls_file);
         const ignore = (file_extensions.indexOf(path.extname(file)) < 0)
             || (ignore_files.indexOf(path.basename(file)) >= 0);
         const header = await read_license_header(file);
@@ -166,7 +169,7 @@ async function confirm_updates(files) {
         return false;
 
     } else {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             readline.createInterface({
                 input: process.stdin,
                 output: process.stdout

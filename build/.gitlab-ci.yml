@@ -178,6 +178,22 @@ assemble-pages:
     tags:
         - linux
 
+pages-test:
+    stage: deploy
+    image: node:10-slim
+    dependencies: []
+#    variables:
+#        PAGES_OUT: public
+    script:
+        - node src/tools/collect-pages.js
+#        - ls -lsahR "${PAGES_OUT}"
+#    artifacts:
+#        expire_in: 30 mins
+#        paths:
+#            - ${PAGES_OUT}
+    tags:
+        - linux
+
 pages:
     stage: deploy
     image: alpine:3.7
