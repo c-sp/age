@@ -6,6 +6,7 @@ const https = require('https');
 const gitlab_api_token = process.env.GITLAB_API_TOKEN;
 
 const assemble_pages_job_name = 'assemble-pages';
+const age_project_id = '2686832';
 
 
 (async function main() {
@@ -13,22 +14,56 @@ const assemble_pages_job_name = 'assemble-pages';
         throw new Error('GITLAB_API_TOKEN not set');
     }
 
+    // get active branches
+    console.log('\nrequesting AGE branches ...');
+    const branches = await https_request('GET', '/repository/branches?per_page=100');
+    const branches_map = branches.reduce((prev, cur) => Object.assign(prev, {...prev, [cur.name]: {}}), {});
+    console.log(`found ${branches.length} active branch(es):\n    ${Object.keys(branches_map).sort().join('\n    ')}`);
+
     // collect information for all AGE CI jobs
-    console.log('requesting AGE CI job list ...');
+    console.log('\nrequesting AGE CI job list ...');
     let jobs = await get_age_ci_jobs();
     console.log(`found ${jobs.length} AGE CI jobs`);
 
-    // find and sort assemble-pages jobs (first by ref, then by finished_at)
+    // find and sort assemble-pages jobs with artifact (first by ref, then by finished_at)
     jobs = jobs
         .filter(job => job.name === assemble_pages_job_name)
+        .filter(job => !!job.artifacts_file)
         .sort(compare_assemble_pages);
 
     console.log(`found ${jobs.length} '${assemble_pages_job_name}' jobs:`);
-    jobs.forEach(job => console.log(`   ${job.finished_at} ${job.artifacts_file ? '(A)' : '   '} ${job.ref}`));
+    let will_delete_jobs = false;
+    jobs.forEach(job => {
+        // branch still exists and it's the latest job => use this artifact
+        if (branches_map[job.ref] && !branches_map[job.ref].id) {
+            branches_map[job.ref] = job;
+        } else {
+            will_delete_jobs = job.__delete = true;
+        }
+        console.log(`    ${job.finished_at}  ${job.__delete ? 'D' : ' '} ${job.ref}  (id ${job.id})`);
+    });
 
-    // TODO download & extract pages artifacts, put master into root
+    // download & extract pages artifacts, put master into root
+    console.log(`\ndownloading & extracting artifacts ...`);
+    //await Promise.all(
+    jobs.filter(job => !job.__delete)
+        .forEach(async job => {
+            // TODO
+            console.log(`    ${job.finished_at}    ${job.ref}  (id ${job.id})`);
+        });
+    //);
 
-    // TODO cleanup garbage: delete artifacts that were not deployed
+    // cleanup garbage: delete artifacts that were not deployed
+    if (will_delete_jobs) {
+        console.log(`\ndeleting old artifacts ...`);
+        await Promise.all(
+            jobs.filter(job => job.__delete)
+                .map(async job => {
+                    await https_request('DELETE', `/jobs/${job.id}/artifacts`);
+                    console.log(`    ${job.finished_at}    ${job.ref}  (id ${job.id})`);
+                })
+        );
+    }
 
 })()
     .then(() => process.exit(0))
@@ -46,12 +81,10 @@ async function get_age_ci_jobs() {
     while (!finished) {
         const jobs_list = await Promise.all(
             // https://itnext.io/heres-why-mapping-a-constructed-array-doesn-t-work-in-javascript-f1195138615a
-            [...new Array(10)]
-                .map(async () => {
-                    const page = ++last_page;
-                    const url = `https://gitlab.com/api/v4/projects/csprenger%2FAGE/jobs?per_page=100&page=${page}`;
-                    return await https_get(url);
-                })
+            [...new Array(10)].map(async () => {
+                const page = ++last_page;
+                return await https_request('GET', `/jobs?per_page=100&page=${page}`);
+            })
         );
 
         jobs_list.forEach(jobs => {
@@ -67,23 +100,26 @@ async function get_age_ci_jobs() {
 }
 
 
-async function https_get(url) {
+async function https_request(method, path) {
     return new Promise((resolve, reject) => {
         const options = {
+            host: 'gitlab.com',
+            path: `/api/v4/projects/${age_project_id}${path}`,
+            method,
             headers: {
-                'Private-Token': gitlab_api_token
+                'Private-Token': gitlab_api_token,
             }
         };
 
-        https.get(url, options, res => {
+        https.request(options, res => {
             let body = '';
 
             res.setEncoding('utf8');
             res.on('data', data => body += data);
 
             res.on('end', () => {
-                if (res.statusCode !== 200) {
-                    reject(`${url}: ${body}`);
+                if (res.statusCode / 100 !== 2) {
+                    reject(`${method}  ${options.path}  ${res.statusCode}  ${body}`);
                 } else {
                     const body_json = JSON.parse(body);
                     resolve(body_json);
@@ -92,7 +128,7 @@ async function https_get(url) {
 
         }).on('error', (e) => {
             reject(e);
-        });
+        }).end();
     });
 }
 
