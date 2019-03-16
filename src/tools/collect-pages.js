@@ -65,6 +65,7 @@ const age_project_id = '2686832';
         );
     }
 
+    console.log('');
 })()
     .then(() => process.exit(0))
     .catch(err => {
@@ -118,11 +119,13 @@ async function https_request(method, path) {
             res.on('data', data => body += data);
 
             res.on('end', () => {
-                if (res.statusCode / 100 !== 2) {
-                    reject(`${method}  ${options.path}  ${res.statusCode}  ${body}`);
-                } else {
+                if (res.statusCode === 200) {
                     const body_json = JSON.parse(body);
                     resolve(body_json);
+                } else if (res.statusCode < 200 || res.statusCode >= 300) {
+                    reject(`${method}  ${options.path}  ${res.statusCode}  ${body}`);
+                } else {
+                    resolve(); // e.g. 204 - no further data
                 }
             });
 
