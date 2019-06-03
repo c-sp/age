@@ -14,14 +14,22 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
-import {AgeLoaderState} from './age-loader-state.component';
-import {AgeRomFileToLoad} from '../../common';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    Output,
+} from "@angular/core";
+import {AgeRomFileToLoad} from "../../common";
+import {AgeLoaderState} from "./age-loader-state.component";
 
 
 @Component({
-    selector: 'age-rom-file-loader',
+    selector: "age-rom-file-loader",
     template: `
         <age-loader-state [state]="fileLoaderState">
             <ng-container ageLoaderWorking>loading rom file ...</ng-container>
@@ -29,13 +37,13 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
             <ng-container ageLoaderError>error loading rom file</ng-container>
         </age-loader-state>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeRomFileLoaderComponent implements OnDestroy {
 
     readonly supportedContentTypes = [
-        'application/octet-stream',
-        'application/zip'
+        "application/octet-stream",
+        "application/zip",
     ];
 
     @Output() readonly fileLoaded = new EventEmitter<ArrayBuffer>();
@@ -91,12 +99,12 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
         this._httpClient.get(
             url,
             {
-                responseType: 'arraybuffer',
-                observe: 'response'
-            }
+                responseType: "arraybuffer",
+                observe: "response",
+            },
         ).subscribe(
             httpResponse => {
-                const contentType = httpResponse.headers.get('content-type') || '';
+                const contentType = httpResponse.headers.get("content-type") || "";
                 if (this.supportedContentTypes.indexOf(contentType) < 0) {
                     throw new Error(`unknown content-type: ${contentType}`);
                 }
@@ -114,7 +122,7 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
                 });
                 console.log(`error reading url ${url}`, httpErrorResponse);
                 this.loaderError();
-            }
+            },
         );
     }
 

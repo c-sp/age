@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
-import {AgeEmulationPackage, AgeRomFileToLoad, EmGbModule} from '../../common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from "@angular/core";
+import {AgeEmulationPackage, AgeRomFileToLoad, IEmGbModule} from "../../common";
 
 
 @Component({
-    selector: 'age-loader',
+    selector: "age-loader",
     template: `
 
         <!--
@@ -40,13 +40,13 @@ import {AgeEmulationPackage, AgeRomFileToLoad, EmGbModule} from '../../common';
 
         </ng-container>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeLoaderComponent {
 
     @Output() readonly loadingComplete = new EventEmitter<AgeEmulationPackage>();
 
-    private _emGbModule?: EmGbModule;
+    private _emGbModule?: IEmGbModule;
     private _romFileToLoad?: AgeRomFileToLoad;
     private _romFileContents?: ArrayBuffer;
 
@@ -73,7 +73,7 @@ export class AgeLoaderComponent {
     }
 
 
-    emGbModuleLoaded(emGbModule?: EmGbModule): void {
+    emGbModuleLoaded(emGbModule?: IEmGbModule): void {
         this._emGbModule = emGbModule;
         this.checkForLoadingComplete();
     }

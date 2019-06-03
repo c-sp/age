@@ -14,29 +14,29 @@
 // limitations under the License.
 //
 
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {AgeOpenRomLocalComponent} from './age-open-rom-local.component';
-import {AgeOpenRomUrlComponent} from './age-open-rom-url.component';
-import {HttpClientModule} from '@angular/common/http';
-import {AgeOpenRomComponent} from './age-open-rom.component';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+import {CommonModule} from "@angular/common";
+import {HttpClientModule} from "@angular/common/http";
+import {NgModule} from "@angular/core";
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {AgeOpenRomLocalComponent} from "./age-open-rom-local.component";
+import {AgeOpenRomUrlComponent} from "./age-open-rom-url.component";
+import {AgeOpenRomComponent} from "./age-open-rom.component";
 
 
 @NgModule({
     imports: [
         CommonModule,
         HttpClientModule,
-        FontAwesomeModule
+        FontAwesomeModule,
     ],
     declarations: [
         AgeOpenRomComponent,
         AgeOpenRomLocalComponent,
-        AgeOpenRomUrlComponent
+        AgeOpenRomUrlComponent,
     ],
     exports: [
-        AgeOpenRomComponent
-    ]
+        AgeOpenRomComponent,
+    ],
 })
 export class AgeOpenRomModule {
 }

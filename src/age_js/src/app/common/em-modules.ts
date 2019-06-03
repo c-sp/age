@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-export interface EmModule {
+export interface IEmModule {
 
     HEAPU8: Uint8Array;
     HEAP16: Int16Array;
 }
 
-export interface EmGbModule extends EmModule {
+export interface IEmGbModule extends IEmModule {
 
     _gb_allocate_rom_buffer(romSize: number): number;
     _gb_new_emulator(): void;

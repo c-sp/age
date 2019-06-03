@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {faFolderOpen} from '@fortawesome/free-solid-svg-icons/faFolderOpen';
-import {faExclamationCircle} from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} from "@angular/core";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
 
 
 @Component({
-    selector: 'age-splash-screen',
+    selector: "age-splash-screen",
     template: `
         <div class="container age-ui">
 
@@ -101,18 +101,18 @@ import {faExclamationCircle} from '@fortawesome/free-solid-svg-icons/faExclamati
             margin-right: .25em;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeSplashScreenComponent implements AfterViewInit {
 
-    private static isAudioWorkletAvailable(): boolean {
+    private static async isAudioWorkletAvailable() {
         const audioCtx = new AudioContext();
 
         /* tslint:disable no-any */ // at the moment I see no other way ...
         const result = !!(audioCtx as any).audioWorklet;
         /* tslint:enable no-any */
 
-        audioCtx.close();
+        await audioCtx.close();
         return result;
     }
 
@@ -129,8 +129,8 @@ export class AgeSplashScreenComponent implements AfterViewInit {
     constructor(private _cdRef: ChangeDetectorRef) {
     }
 
-    ngAfterViewInit(): void {
-        this._audioWorkletAvailable = AgeSplashScreenComponent.isAudioWorkletAvailable();
+    async ngAfterViewInit() {
+        this._audioWorkletAvailable = await AgeSplashScreenComponent.isAudioWorkletAvailable();
         this.measureTimerPrecision();
     }
 
@@ -153,7 +153,7 @@ export class AgeSplashScreenComponent implements AfterViewInit {
 
             this._intervalHandle = window.setInterval(
                 () => this.measureTimerPrecisionStep(),
-                2
+                2,
             );
         }
     }

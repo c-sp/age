@@ -14,20 +14,20 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {AgeEmulationRuntimeInfo} from '../../common';
-import {faFolderOpen} from '@fortawesome/free-solid-svg-icons/faFolderOpen';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons/faInfoCircle';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
+import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
+import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import {IAgeEmulationRuntimeInfo} from "../../common";
 
 
 export enum TitleBarButton {
-    OPEN_ROM = 'OPEN_ROM',
-    INFO = 'INFO'
+    OPEN_ROM = "OPEN_ROM",
+    INFO = "INFO",
 }
 
 
 @Component({
-    selector: 'age-title-bar',
+    selector: "age-title-bar",
     template: `
         <div class="container age-ui">
 
@@ -132,7 +132,7 @@ export enum TitleBarButton {
             margin-right: .25em;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeTitleBarComponent {
 
@@ -142,19 +142,19 @@ export class AgeTitleBarComponent {
 
     @Output() readonly buttonClicked = new EventEmitter<TitleBarButton>();
 
-    private _runtimeInfo?: AgeEmulationRuntimeInfo;
+    private _runtimeInfo?: IAgeEmulationRuntimeInfo;
 
-    get runtimeInfo(): AgeEmulationRuntimeInfo | undefined {
+    get runtimeInfo(): IAgeEmulationRuntimeInfo | undefined {
         return this._runtimeInfo;
     }
 
     @Input()
-    set runtimeInfo(info: AgeEmulationRuntimeInfo | undefined) {
+    set runtimeInfo(info: IAgeEmulationRuntimeInfo | undefined) {
         this._runtimeInfo = !info ? undefined : {
             romName: info.romName,
             emulatedSeconds: info.emulatedSeconds && Math.round(info.emulatedSeconds * 10) / 10,
             emulationSpeed: info.emulationSpeed && Math.round(info.emulationSpeed * 100),
-            emulationMaxSpeed: info.emulationMaxSpeed && Math.round(info.emulationMaxSpeed * 100)
+            emulationMaxSpeed: info.emulationMaxSpeed && Math.round(info.emulationMaxSpeed * 100),
         };
     }
 }

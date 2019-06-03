@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
-import {AgeRomFileToLoad} from '../../common';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons/faInfoCircle';
+import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
+import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import {AgeRomFileToLoad} from "../../common";
 
 
 @Component({
-    selector: 'age-open-rom',
+    selector: "age-open-rom",
     template: `
         <div class="container age-ui">
 
@@ -76,7 +76,7 @@ import {faInfoCircle} from '@fortawesome/free-solid-svg-icons/faInfoCircle';
             font-weight: bold;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeOpenRomComponent {
 

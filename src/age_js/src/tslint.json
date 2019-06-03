@@ -1,12 +1,6 @@
 {
     "extends": "../tslint.json",
     "rules": {
-        //
-        //  -------------------------
-        //  CODELYZER RULES (ANGULAR)
-        //  -------------------------
-        //
-
         // naming rules for component selectors
         //  -> http://codelyzer.com/rules/component-selector
         "component-selector": [

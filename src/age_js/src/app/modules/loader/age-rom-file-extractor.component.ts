@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
-import {AgeLoaderState} from './age-loader-state.component';
-import * as fileType from 'file-type';
-import * as JSZip from 'jszip';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from "@angular/core";
+import * as fileType from "file-type";
+import * as JSZip from "jszip";
+import {AgeLoaderState} from "./age-loader-state.component";
 
 
 @Component({
-    selector: 'age-rom-file-extractor',
+    selector: "age-rom-file-extractor",
     template: `
         <age-loader-state [state]="fileExtractorState">
             <ng-container ageLoaderWorking>extracting rom file ...</ng-container>
@@ -29,7 +29,7 @@ import * as JSZip from 'jszip';
             <ng-container ageLoaderError>error extracting rom file</ng-container>
         </age-loader-state>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeRomFileExtractorComponent {
 
@@ -39,7 +39,7 @@ export class AgeRomFileExtractorComponent {
         // get a list of all rom files within that archive
         const files = zip.file(/.*(\.gb)|(\.gbc)$/i);
         if (!files || !files.length) {
-            throw Error('no Gameboy rom file found');
+            throw Error("no Gameboy rom file found");
         }
 
         // sort the files in case there are multiple rom files available
@@ -49,7 +49,7 @@ export class AgeRomFileExtractorComponent {
         });
 
         // extract the first file
-        return files[0].async('arraybuffer');
+        return files[0].async("arraybuffer");
     }
 
 
@@ -74,7 +74,7 @@ export class AgeRomFileExtractorComponent {
             // Otherwise we just pass on the file contents.
             // (funnily enough Gameboy roms are sometimes identified as MP3 files)
             const type = fileType(new Uint8Array(fileContents));
-            if (type && (type.ext === 'zip')) {
+            if (type && (type.ext === "zip")) {
                 this._extractorState = AgeLoaderState.WORKING;
 
                 AgeRomFileExtractorComponent.extractRomFile(fileContents).then(
@@ -85,7 +85,7 @@ export class AgeRomFileExtractorComponent {
                     error => {
                         console.error(error);
                         this.setExtractorState(AgeLoaderState.ERROR);
-                    }
+                    },
                 );
 
             } else {

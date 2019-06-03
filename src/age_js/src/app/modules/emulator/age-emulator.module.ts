@@ -14,23 +14,23 @@
 // limitations under the License.
 //
 
-import {NgModule} from '@angular/core';
-import {AgeEmulatorComponent} from './age-emulator.component';
-import {CommonModule} from '@angular/common';
-import {AgeCanvasRendererModule} from './renderer/canvas/age-canvas-renderer.module';
+import {CommonModule} from "@angular/common";
+import {NgModule} from "@angular/core";
+import {AgeEmulatorComponent} from "./age-emulator.component";
+import {AgeCanvasRendererModule} from "./renderer/canvas/age-canvas-renderer.module";
 
 
 @NgModule({
     imports: [
         CommonModule,
-        AgeCanvasRendererModule
+        AgeCanvasRendererModule,
     ],
     declarations: [
-        AgeEmulatorComponent
+        AgeEmulatorComponent,
     ],
     exports: [
-        AgeEmulatorComponent
-    ]
+        AgeEmulatorComponent,
+    ],
 })
 export class AgeEmulatorModule {
 }

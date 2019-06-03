@@ -14,25 +14,25 @@
 // limitations under the License.
 //
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {AgeInfoComponent} from './age-info.component';
-import {AgeRepoCommitLinkComponent} from './age-repo-commit-link.component';
-import {AgeRepoLinkComponent} from './age-repo-link.component';
+import {CommonModule} from "@angular/common";
+import {NgModule} from "@angular/core";
+import {AgeInfoComponent} from "./age-info.component";
+import {AgeRepoCommitLinkComponent} from "./age-repo-commit-link.component";
+import {AgeRepoLinkComponent} from "./age-repo-link.component";
 
 
 @NgModule({
     imports: [
-        CommonModule
+        CommonModule,
     ],
     declarations: [
         AgeInfoComponent,
         AgeRepoCommitLinkComponent,
-        AgeRepoLinkComponent
+        AgeRepoLinkComponent,
     ],
     exports: [
-        AgeInfoComponent
-    ]
+        AgeInfoComponent,
+    ],
 })
 export class AgeInfoModule {
 }

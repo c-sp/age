@@ -29,7 +29,7 @@ export class AgeRomFileToLoad {
 
     static forUrl(url: string) {
         if (!url) { // prevent empty strings
-            throw new Error('url not specified');
+            throw new Error("url not specified");
         }
         return new AgeRomFileToLoad(undefined, url);
     }

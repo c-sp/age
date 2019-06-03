@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {VERSION_INFO} from '../../../environments/version';
+import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {VERSION_INFO} from "../../../environments/version";
 
 
 @Component({
-    selector: 'age-repo-commit-link',
+    selector: "age-repo-commit-link",
     template: `
         <a href="https://gitlab.com/csprenger/AGE/tree/{{commitHash}}"
            target="_blank"
@@ -32,7 +32,7 @@ import {VERSION_INFO} from '../../../environments/version';
 
         </a>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeRepoCommitLinkComponent {
 

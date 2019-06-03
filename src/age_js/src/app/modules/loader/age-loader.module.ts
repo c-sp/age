@@ -14,26 +14,26 @@
 // limitations under the License.
 //
 
-import {NgModule} from '@angular/core';
+import {CommonModule} from "@angular/common";
+import {NgModule} from "@angular/core";
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {
     AgeLoaderErrorDirective,
     AgeLoaderNoStateDirective,
     AgeLoaderSuccessDirective,
-    AgeLoaderWorkingDirective
-} from './age-loader-label.directive';
-import {AgeLoaderStateComponent} from './age-loader-state.component';
-import {AgeRomFileLoaderComponent} from './age-rom-file-loader.component';
-import {AgeWasmLoaderComponent} from './age-wasm-loader.component';
-import {CommonModule} from '@angular/common';
-import {AgeLoaderComponent} from './age-loader.component';
-import {AgeRomFileExtractorComponent} from './age-rom-file-extractor.component';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+    AgeLoaderWorkingDirective,
+} from "./age-loader-label.directive";
+import {AgeLoaderStateComponent} from "./age-loader-state.component";
+import {AgeLoaderComponent} from "./age-loader.component";
+import {AgeRomFileExtractorComponent} from "./age-rom-file-extractor.component";
+import {AgeRomFileLoaderComponent} from "./age-rom-file-loader.component";
+import {AgeWasmLoaderComponent} from "./age-wasm-loader.component";
 
 
 @NgModule({
     imports: [
         CommonModule,
-        FontAwesomeModule
+        FontAwesomeModule,
     ],
     declarations: [
         AgeLoaderComponent,
@@ -44,11 +44,11 @@ import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
         AgeLoaderStateComponent,
         AgeRomFileExtractorComponent,
         AgeRomFileLoaderComponent,
-        AgeWasmLoaderComponent
+        AgeWasmLoaderComponent,
     ],
     exports: [
-        AgeLoaderComponent
-    ]
+        AgeLoaderComponent,
+    ],
 })
 export class AgeLoaderModule {
 }

@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {VERSION_INFO} from '../../../environments/version';
+import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {VERSION_INFO} from "../../../environments/version";
 
 
 @Component({
-    selector: 'age-info',
+    selector: "age-info",
     template: `
         <div class="container age-ui">
 
@@ -123,7 +123,7 @@ import {VERSION_INFO} from '../../../environments/version';
             padding-left: .5em;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeInfoComponent {
 

@@ -36,11 +36,11 @@ export class AgeAudio {
         /* tslint:enable no-any */
 
         if (audioCtx.audioWorklet) {
-            audioCtx.audioWorklet.addModule('assets/age-audio-stream.js').then(() => {
-                this._workletNode = new AudioWorkletNode(this._audioCtx, 'age-audio-stream', {
+            audioCtx.audioWorklet.addModule("assets/age-audio-stream.js").then(() => {
+                this._workletNode = new AudioWorkletNode(this._audioCtx, "age-audio-stream", {
                     numberOfInputs: 1,
                     numberOfOutputs: 1,
-                    outputChannelCount: [2]
+                    outputChannelCount: [2],
                 });
 
                 this._workletNode.connect(this._audioCtx.destination);
@@ -48,8 +48,8 @@ export class AgeAudio {
         }
     }
 
-    close(): void {
-        this._audioCtx.close();
+    async close() {
+        await this._audioCtx.close();
     }
 
     get sampleRate(): number {
@@ -62,7 +62,7 @@ export class AgeAudio {
         if (this._workletNode) {
             this._workletNode.port.postMessage({
                 sampleRate: this._audioCtx.sampleRate,
-                samples: buffer
+                samples: buffer,
             });
         }
     }

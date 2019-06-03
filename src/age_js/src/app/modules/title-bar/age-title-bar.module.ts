@@ -14,23 +14,23 @@
 // limitations under the License.
 //
 
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {AgeTitleBarComponent} from './age-title-bar.component';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
+import {CommonModule} from "@angular/common";
+import {NgModule} from "@angular/core";
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {AgeTitleBarComponent} from "./age-title-bar.component";
 
 
 @NgModule({
     imports: [
         CommonModule,
-        FontAwesomeModule
+        FontAwesomeModule,
     ],
     declarations: [
-        AgeTitleBarComponent
+        AgeTitleBarComponent,
     ],
     exports: [
-        AgeTitleBarComponent
-    ]
+        AgeTitleBarComponent,
+    ],
 })
 export class AgeTitleBarModule {
 }

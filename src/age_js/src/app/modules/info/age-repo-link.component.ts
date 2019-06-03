@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from "@angular/core";
 
 
 @Component({
-    selector: 'age-repo-link',
+    selector: "age-repo-link",
     template: `
         <a href="https://gitlab.com/csprenger/AGE"
            target="_blank"
@@ -30,7 +30,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 
         </a>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeRepoLinkComponent {
 }

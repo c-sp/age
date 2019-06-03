@@ -14,16 +14,26 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {AgeLoaderState} from './age-loader-state.component';
-import {EmGbModule} from '../../common';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Inject,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+} from "@angular/core";
+import {IEmGbModule} from "../../common";
+import {AgeLoaderState} from "./age-loader-state.component";
 
 
-const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
+const SCRIPT_ELEMENT_NAME = "emscripten_age_wasm_module";
 
 
 @Component({
-    selector: 'age-wasm-loader',
+    selector: "age-wasm-loader",
     template: `
         <ng-container *ngIf="showState">
 
@@ -42,13 +52,13 @@ const SCRIPT_ELEMENT_NAME = 'emscripten_age_wasm_module';
 
         </ng-container>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
 
     @Input() showState = false;
 
-    @Output() readonly emGbModuleLoaded = new EventEmitter<EmGbModule | undefined>();
+    @Output() readonly emGbModuleLoaded = new EventEmitter<IEmGbModule | undefined>();
 
     // I currently see no other way than to use "any" here
     /* tslint:disable:no-any */
@@ -83,7 +93,7 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
 
     private createEmscriptenModule(): void {
         if (this._window.Module) {
-            console.warn('window.Module already defined!');
+            console.warn("window.Module already defined!");
         }
 
         // augment the emscripten Module
@@ -91,7 +101,7 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
 
             // tell the emscripten Module where to find the wasm binary
             locateFile: (file: string) => {
-                return 'assets/' + file;
+                return "assets/" + file;
             },
 
             // notify us once WebAssembly compilation is complete
@@ -105,7 +115,7 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
             onAbort: () => {
                 this._runtimeInitState = AgeLoaderState.ERROR;
                 this._changeDetector.detectChanges();
-            }
+            },
         };
     }
 
@@ -115,9 +125,9 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
         }
 
         // insert a script tag for loading the emscripten Module
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.id = SCRIPT_ELEMENT_NAME;
-        script.src = 'assets/age_wasm.js';
+        script.src = "assets/age_wasm.js";
 
         // notify us once the script has been successfully loaded
         script.onload = () => {
@@ -145,8 +155,7 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
 
             try {
                 mod.exit(0);
-            }
-            catch (err) {
+            } catch (err) {
                 // ignore emscripten cleanup errors
             }
         }

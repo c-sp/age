@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-import {AgeGbButton} from './age-emulator-keymap';
-import {AgeEmulationRuntimeInfo, AgeRect, EmGbModule} from '../../common';
+import {AgeRect, IAgeEmulationRuntimeInfo, IEmGbModule} from "../../common";
+import {AgeGbButton} from "./age-emulator-keymap";
 
 
 export class AgeScreenBuffer {
@@ -26,7 +26,7 @@ export class AgeScreenBuffer {
 }
 
 
-interface AgeEmulation {
+interface IAgeEmulation {
 
     getCyclesPerSecond(): number;
 
@@ -48,9 +48,9 @@ interface AgeEmulation {
 }
 
 
-export class AgeGbEmulation implements AgeEmulation {
+export class AgeGbEmulation implements IAgeEmulation {
 
-    constructor(private readonly _emGbModule: EmGbModule,
+    constructor(private readonly _emGbModule: IEmGbModule,
                 romFileContents: ArrayBuffer) {
 
         const romArray = new Uint8Array(romFileContents, 0, romFileContents.byteLength);
@@ -68,7 +68,7 @@ export class AgeGbEmulation implements AgeEmulation {
     }
 
     getRomName(): string {
-        let romName = '';
+        let romName = "";
 
         for (let i = this._emGbModule._gb_get_rom_name(), end = i + 32; i < end; ++i) {
             // the rom name is null terminated and made of ascii chars
@@ -80,7 +80,7 @@ export class AgeGbEmulation implements AgeEmulation {
         }
 
         // some rom names seem to be padded with underscores: trim them
-        while (romName.endsWith('_')) {
+        while (romName.endsWith("_")) {
             romName = romName.substr(0, romName.length - 1);
         }
 
@@ -90,7 +90,7 @@ export class AgeGbEmulation implements AgeEmulation {
     getScreenSize(): AgeRect {
         return new AgeRect(
             this._emGbModule._gb_get_screen_width(),
-            this._emGbModule._gb_get_screen_height()
+            this._emGbModule._gb_get_screen_height(),
         );
     }
 
@@ -129,7 +129,7 @@ export class AgeEmulationRunner {
     private _audioBuffer: Int16Array;
     private _runtimeInfoGenerator: AgeEmulationRuntimeInfoGenerator;
 
-    constructor(private readonly _emulation: AgeEmulation) {
+    constructor(private readonly _emulation: IAgeEmulation) {
         this.screenSize = this._emulation.getScreenSize();
         this._lastEmuTime = performance.now();
         this._screenBuffer = this._emulation.getScreenBuffer();
@@ -145,7 +145,7 @@ export class AgeEmulationRunner {
         return this._audioBuffer;
     }
 
-    get runtimeInfo(): AgeEmulationRuntimeInfo {
+    get runtimeInfo(): IAgeEmulationRuntimeInfo {
         return this._runtimeInfoGenerator.runtimeInfo;
     }
 
@@ -193,18 +193,18 @@ export class AgeEmulationRunner {
 
 class AgeEmulationRuntimeInfoGenerator {
 
-    private _runtimeInfo: AgeEmulationRuntimeInfo;
+    private _runtimeInfo: IAgeEmulationRuntimeInfo;
     private _lastRuntimeInfoTime = performance.now();
     private _lastEmulatedCycles = 0;
     private _emuMillis = 0;
 
-    constructor(private readonly _emulation: AgeEmulation) {
+    constructor(private readonly _emulation: IAgeEmulation) {
         this._runtimeInfo = {
-            romName: this._emulation.getRomName()
+            romName: this._emulation.getRomName(),
         };
     }
 
-    get runtimeInfo(): AgeEmulationRuntimeInfo {
+    get runtimeInfo(): IAgeEmulationRuntimeInfo {
         return this._runtimeInfo;
     }
 
@@ -221,7 +221,7 @@ class AgeEmulationRuntimeInfoGenerator {
                 romName: this._runtimeInfo.romName,
                 emulatedSeconds: emulatedCycles / cyclesPerSecond,
                 emulationSpeed: elapsedCycles * 1000 / elapsedMillis / cyclesPerSecond,
-                emulationMaxSpeed: elapsedCycles * 1000 / Math.max(1, this._emuMillis) / cyclesPerSecond
+                emulationMaxSpeed: elapsedCycles * 1000 / Math.max(1, this._emuMillis) / cyclesPerSecond,
             };
 
             this._lastRuntimeInfoTime = now;

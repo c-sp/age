@@ -14,21 +14,21 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
-import {faCheck} from '@fortawesome/free-solid-svg-icons/faCheck';
-import {faExclamationCircle} from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
+import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
 
 
 export enum AgeLoaderState {
     WORKING,
     SUCCESS,
-    ERROR
+    ERROR,
 }
 
 
 @Component({
-    selector: 'age-loader-state',
+    selector: "age-loader-state",
     template: `
         <div>
             <ng-container [ngSwitch]="state">
@@ -78,7 +78,7 @@ export enum AgeLoaderState {
             color: #505050;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeLoaderStateComponent {
 

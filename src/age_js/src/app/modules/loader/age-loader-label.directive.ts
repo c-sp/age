@@ -14,32 +14,32 @@
 // limitations under the License.
 //
 
-import {Directive} from '@angular/core';
+import {Directive} from "@angular/core";
 
 
 @Directive({
-    selector: '[ageLoaderError]'
+    selector: "[ageLoaderError]",
 })
 export class AgeLoaderErrorDirective {
 }
 
 
 @Directive({
-    selector: '[ageLoaderSuccess]'
+    selector: "[ageLoaderSuccess]",
 })
 export class AgeLoaderSuccessDirective {
 }
 
 
 @Directive({
-    selector: '[ageLoaderWorking]'
+    selector: "[ageLoaderWorking]",
 })
 export class AgeLoaderWorkingDirective {
 }
 
 
 @Directive({
-    selector: '[ageLoaderNoState]'
+    selector: "[ageLoaderNoState]",
 })
 export class AgeLoaderNoStateDirective {
 }

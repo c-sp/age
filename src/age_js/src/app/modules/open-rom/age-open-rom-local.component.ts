@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
-import {faFolderOpen} from '@fortawesome/free-solid-svg-icons/faFolderOpen';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild} from "@angular/core";
+import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
 
 
 @Component({
-    selector: 'age-open-rom-local',
+    selector: "age-open-rom-local",
     template: `
         <!-- the div is used to limit the size of the label -->
         <div>
@@ -58,7 +58,7 @@ The rom file is not being uploaded anywhere, it will not leave your device.">
             display: none;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeOpenRomLocalComponent {
 
@@ -66,7 +66,7 @@ export class AgeOpenRomLocalComponent {
 
     @Output() readonly openFile = new EventEmitter<File>();
 
-    @ViewChild('fileInput') private _fileInput!: ElementRef;
+    @ViewChild("fileInput") private _fileInput!: ElementRef;
 
     emitSelectedFile() {
         const files: FileList = this._fileInput.nativeElement.files;

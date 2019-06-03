@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {AgeRect} from '../../../../common';
-import {AgeScreenBuffer} from '../../age-emulation';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild} from "@angular/core";
+import {AgeRect} from "../../../../common";
+import {AgeScreenBuffer} from "../../age-emulation";
 
 
 @Component({
-    selector: 'age-canvas-renderer',
+    selector: "age-canvas-renderer",
     template: `
         <canvas #rendererDisplay
                 width="{{screenSize.width}}"
@@ -28,21 +28,21 @@ import {AgeScreenBuffer} from '../../age-emulation';
                 [style.width]="cssWidth"
                 [style.height]="cssHeight"></canvas>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeCanvasRendererComponent implements AfterViewInit {
 
-    @ViewChild('rendererDisplay') private _canvas!: ElementRef;
+    @ViewChild("rendererDisplay") private _canvas!: ElementRef;
 
     private _canvas2dCtx?: CanvasRenderingContext2D;
 
     private _screenSize = new AgeRect(1, 1);
-    private _cssWidth = '0';
-    private _cssHeight = '0';
+    private _cssWidth = "0";
+    private _cssHeight = "0";
 
     ngAfterViewInit(): void {
         const canvas = this._canvas.nativeElement;
-        this._canvas2dCtx = canvas.getContext('2d', {alpha: false});
+        this._canvas2dCtx = canvas.getContext("2d", {alpha: false});
     }
 
 

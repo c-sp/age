@@ -14,18 +14,19 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
-import {faGlobeAfrica} from '@fortawesome/free-solid-svg-icons/faGlobeAfrica';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild} from "@angular/core";
+import {faGlobeAfrica} from "@fortawesome/free-solid-svg-icons/faGlobeAfrica";
 
 
 @Component({
-    selector: 'age-open-rom-url',
+    selector: "age-open-rom-url",
     template: `
         <div>
             <span [class.age-ui-clickable]="!urlHint"
                   title="Open the Gameboy rom file at the specified URL.
 This will use a proxy host to circumvent possible Cross Origin Resource Sharing (CORS) issues."
-                  (click)="emitValidUrl()">
+                  (click)="emitValidUrl()"
+                  (keypress)="emitValidUrl()">
 
                 <fa-icon [icon]="faGlobeAfrica" class="age-ui-big-icon icon"></fa-icon>
                 open URL
@@ -66,9 +67,6 @@ This will use a proxy host to circumvent possible Cross Origin Resource Sharing 
                 <option label="(Demo) Cenotaph"
                         value="https://files.scene.org/get/parties/2012/revision12/oldskool_demo/dcs-ctph.zip">
 
-                <option label="(Demo) child's play"
-                        value="https://files.scene.org/get/parties/2002/assembly02/mobiledemo/child_s_play_by_cncd--gbc.zip">
-
                 <option label="(Demo) Demotronic"
                         value="http://lcp.c64.org/files/2002-LCP/compo/demos/mb-dtrnc.zip">
 
@@ -105,21 +103,21 @@ This will use a proxy host to circumvent possible Cross Origin Resource Sharing 
             margin-right: .25em;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeOpenRomUrlComponent {
 
     readonly faGlobeAfrica = faGlobeAfrica;
 
-    readonly urlEmpty = 'urlEmpty';
-    readonly urlInvalid = 'urlInvalid';
+    readonly urlEmpty = "urlEmpty";
+    readonly urlInvalid = "urlInvalid";
 
     @Output() readonly openUrl = new EventEmitter<string>();
 
-    @ViewChild('urlInput') private _urlInput!: ElementRef;
+    @ViewChild("urlInput") private _urlInput!: ElementRef;
 
     get urlHint(): string {
-        let result = '';
+        let result = "";
 
         if (!this._urlInput.nativeElement.value) {
             result = this.urlEmpty;

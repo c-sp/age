@@ -14,25 +14,25 @@
 // limitations under the License.
 //
 
-import {EmGbModule} from './em-modules';
+import {IEmGbModule} from "./em-modules";
 
 
 export class AgeEmulationPackage {
 
-    constructor(readonly emGbModule: EmGbModule,
+    constructor(readonly emGbModule: IEmGbModule,
                 readonly romFileContents: ArrayBuffer) {
     }
 }
 
 
-export interface AgeEmulationRuntimeInfo {
+export interface IAgeEmulationRuntimeInfo {
     romName: string;
     emulatedSeconds?: number;
     emulationSpeed?: number;
     emulationMaxSpeed?: number;
 }
 
-export function compareRuntimeInfo(x?: AgeEmulationRuntimeInfo, y?: AgeEmulationRuntimeInfo): boolean {
+export function compareRuntimeInfo(x?: IAgeEmulationRuntimeInfo, y?: IAgeEmulationRuntimeInfo): boolean {
     return !!x && !!y
         && (x.romName === y.romName)
         && (x.emulatedSeconds === y.emulatedSeconds)

@@ -14,17 +14,18 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
-import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, AgeRomFileToLoad} from './common';
-import {TitleBarButton} from './modules/title-bar/age-title-bar.component';
-import {faTimesCircle} from '@fortawesome/free-solid-svg-icons/faTimesCircle';
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from "@angular/core";
+import {faTimesCircle} from "@fortawesome/free-solid-svg-icons/faTimesCircle";
+import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad, IAgeEmulationRuntimeInfo} from "./common";
+import {TitleBarButton} from "./modules/title-bar/age-title-bar.component";
 
 
 @Component({
-    selector: 'age-app-root',
+    selector: "age-app-root",
     template: `
         <div class="container"
-             (click)="closeDialogs($event)">
+             (click)="closeDialogs($event)"
+             (keypress)="closeDialogs($event)">
 
             <div>
                 <age-title-bar [runtimeInfo]="emulationRuntimeInfo"
@@ -93,7 +94,7 @@ import {faTimesCircle} from '@fortawesome/free-solid-svg-icons/faTimesCircle';
             right: .25em;
         }
     `],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeAppComponent {
 
@@ -101,11 +102,11 @@ export class AgeAppComponent {
     readonly faTimesCircle = faTimesCircle;
 
     @Input() romFileToLoad?: AgeRomFileToLoad;
-    @Input() emulationRuntimeInfo?: AgeEmulationRuntimeInfo;
+    @Input() emulationRuntimeInfo?: IAgeEmulationRuntimeInfo;
     @Input() showDialog?: TitleBarButton;
 
-    @ViewChild('emulatorContainer') private _emulatorContainer?: ElementRef;
-    @ViewChild('dialogDiv') private _dialogDiv?: ElementRef;
+    @ViewChild("emulatorContainer") private _emulatorContainer?: ElementRef;
+    @ViewChild("dialogDiv") private _dialogDiv?: ElementRef;
 
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);
@@ -154,11 +155,11 @@ export class AgeAppComponent {
         this._ignoreCloseDialogs = false;
     }
 
-    @HostListener('window:resize') emulatorContainerResize(): void {
+    @HostListener("window:resize") emulatorContainerResize(): void {
         if (this._emulatorContainer) {
             this._viewport = new AgeRect(
                 this._emulatorContainer.nativeElement.offsetWidth,
-                this._emulatorContainer.nativeElement.offsetHeight
+                this._emulatorContainer.nativeElement.offsetHeight,
             );
         }
     }

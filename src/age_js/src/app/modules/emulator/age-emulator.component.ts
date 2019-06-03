@@ -24,16 +24,16 @@ import {
     Input,
     OnDestroy,
     OnInit,
-    Output
-} from '@angular/core';
-import {AgeEmulationRunner, AgeGbEmulation} from './age-emulation';
-import {AgeGbKeyMap} from './age-emulator-keymap';
-import {AgeAudio} from './audio/age-audio';
-import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, compareRuntimeInfo} from '../../common';
+    Output,
+} from "@angular/core";
+import {AgeEmulationPackage, AgeRect, compareRuntimeInfo, IAgeEmulationRuntimeInfo} from "../../common";
+import {AgeEmulationRunner, AgeGbEmulation} from "./age-emulation";
+import {AgeGbKeyMap} from "./age-emulator-keymap";
+import {AgeAudio} from "./audio/age-audio";
 
 
 @Component({
-    selector: 'age-emulator',
+    selector: "age-emulator",
     template: `
         <ng-container *ngIf="emulationRunner as emulator">
             <age-canvas-renderer [screenSize]="emulator.screenSize"
@@ -41,19 +41,19 @@ import {AgeEmulationPackage, AgeEmulationRuntimeInfo, AgeRect, compareRuntimeInf
                                  [viewport]="viewport"></age-canvas-renderer>
         </ng-container>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     @Input() viewport = new AgeRect(1, 1);
-    @Output() readonly updateRuntimeInfo = new EventEmitter<AgeEmulationRuntimeInfo | undefined>();
+    @Output() readonly updateRuntimeInfo = new EventEmitter<IAgeEmulationRuntimeInfo | undefined>();
 
     private readonly _keyMap = new AgeGbKeyMap();
 
     private _audio!: AgeAudio;
     private _timerHandle!: number;
     private _emulationRunner?: AgeEmulationRunner;
-    private _lastRuntimeInfo?: AgeEmulationRuntimeInfo;
+    private _lastRuntimeInfo?: IAgeEmulationRuntimeInfo;
 
     constructor(@Inject(ChangeDetectorRef) private readonly _changeDetector: ChangeDetectorRef) {
     }
@@ -62,13 +62,13 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
         this._audio = new AgeAudio();
         this._timerHandle = window.setInterval(
             () => this.runEmulation(),
-            10
+            10,
         );
     }
 
-    ngOnDestroy(): void {
+    async ngOnDestroy() {
         window.clearInterval(this._timerHandle);
-        this._audio.close();
+        await this._audio.close();
     }
 
 
@@ -83,14 +83,14 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
             this._emulationRunner = new AgeEmulationRunner(
                 new AgeGbEmulation(
                     emulationPackage.emGbModule,
-                    emulationPackage.romFileContents
-                )
+                    emulationPackage.romFileContents,
+                ),
             );
         }
     }
 
 
-    @HostListener('document:keydown', ['$event']) handleKeyDown(event: KeyboardEvent) {
+    @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
         if (this._emulationRunner && gbButton) {
@@ -99,7 +99,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
         }
     }
 
-    @HostListener('document:keyup', ['$event']) handleKeyUp(event: KeyboardEvent) {
+    @HostListener("document:keyup", ["$event"]) handleKeyUp(event: KeyboardEvent) {
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
         if (this._emulationRunner && gbButton) {
