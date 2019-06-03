@@ -16,7 +16,7 @@
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {AgeLoaderState} from './age-loader-state.component';
-import fileType from 'file-type';
+import * as fileType from 'file-type';
 import * as JSZip from 'jszip';
 
 
