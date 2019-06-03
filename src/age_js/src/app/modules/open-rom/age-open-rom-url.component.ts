@@ -114,23 +114,20 @@ export class AgeOpenRomUrlComponent {
 
     @Output() readonly openUrl = new EventEmitter<string>();
 
-    @ViewChild("urlInput") private _urlInput!: ElementRef;
+    @ViewChild("urlInput", {static: false}) private _urlInput?: ElementRef;
 
     get urlHint(): string {
-        let result = "";
-
-        if (!this._urlInput.nativeElement.value) {
-            result = this.urlEmpty;
-
-        } else if (!this._urlInput.nativeElement.checkValidity()) {
-            result = this.urlInvalid;
+        if (!this._urlInput || !this._urlInput.nativeElement.value) {
+            return this.urlEmpty;
         }
-
-        return result;
+        if (!this._urlInput || !this._urlInput.nativeElement.checkValidity()) {
+            return this.urlInvalid;
+        }
+        return "";
     }
 
     emitValidUrl(): void {
-        if (!this.urlHint) {
+        if (this._urlInput && !this.urlHint) {
             const url = `https://cors-anywhere.herokuapp.com/${this._urlInput.nativeElement.value}`;
             this.openUrl.emit(url);
         }

@@ -66,10 +66,10 @@ export class AgeOpenRomLocalComponent {
 
     @Output() readonly openFile = new EventEmitter<File>();
 
-    @ViewChild("fileInput") private _fileInput!: ElementRef;
+    @ViewChild("fileInput", {static: false}) private _fileInput?: ElementRef;
 
     emitSelectedFile() {
-        const files: FileList = this._fileInput.nativeElement.files;
+        const files: FileList = this._fileInput && this._fileInput.nativeElement.files;
 
         if (files && files.length) {
             this.openFile.emit(files[0]);

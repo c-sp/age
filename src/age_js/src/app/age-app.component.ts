@@ -105,8 +105,8 @@ export class AgeAppComponent {
     @Input() emulationRuntimeInfo?: IAgeEmulationRuntimeInfo;
     @Input() showDialog?: TitleBarButton;
 
-    @ViewChild("emulatorContainer") private _emulatorContainer?: ElementRef;
-    @ViewChild("dialogDiv") private _dialogDiv?: ElementRef;
+    @ViewChild("emulatorContainer", {static: false}) private _emulatorContainer?: ElementRef;
+    @ViewChild("dialogDiv", {static: false}) private _dialogDiv?: ElementRef;
 
     private _emulationPackage?: AgeEmulationPackage;
     private _viewport = new AgeRect(1, 1);

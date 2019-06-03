@@ -32,7 +32,7 @@ import {AgeScreenBuffer} from "../../age-emulation";
 })
 export class AgeCanvasRendererComponent implements AfterViewInit {
 
-    @ViewChild("rendererDisplay") private _canvas!: ElementRef;
+    @ViewChild("rendererDisplay", {static: false}) private _canvas?: ElementRef;
 
     private _canvas2dCtx?: CanvasRenderingContext2D;
 
@@ -41,7 +41,7 @@ export class AgeCanvasRendererComponent implements AfterViewInit {
     private _cssHeight = "0";
 
     ngAfterViewInit(): void {
-        const canvas = this._canvas.nativeElement;
+        const canvas = this._canvas && this._canvas.nativeElement;
         this._canvas2dCtx = canvas.getContext("2d", {alpha: false});
     }
 
