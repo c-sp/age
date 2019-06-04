@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {AgeRect, IAgeEmulationRuntimeInfo, IEmGbModule} from "../../common";
+import {AgeRect, IAgeEmulationRuntimeInfo, IEmGbModule} from "../common";
 import {AgeGbButton} from "./age-emulator-keymap";
 
 

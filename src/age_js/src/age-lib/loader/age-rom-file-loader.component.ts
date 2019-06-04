@@ -24,7 +24,7 @@ import {
     OnDestroy,
     Output,
 } from "@angular/core";
-import {AgeRomFileToLoad} from "../../common";
+import {AgeRomFileToLoad} from "../common";
 import {AgeLoaderState} from "./age-loader-state.component";
 
 

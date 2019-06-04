@@ -19,21 +19,20 @@ import {BrowserModule} from "@angular/platform-browser";
 import {ServiceWorkerModule} from "@angular/service-worker";
 
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {environment} from "../environments/environment";
+import {AgeEmulatorModule, AgeLoaderModule} from "age-lib";
+import {environment} from "../../environments/environment";
 
 import {AgeAppComponent} from "./age-app.component";
 import {AgeSplashScreenComponent} from "./age-splash-screen.component";
-import {AgeEmulatorModule} from "./modules/emulator/age-emulator.module";
-import {AgeInfoModule} from "./modules/info/age-info.module";
-import {AgeLoaderModule} from "./modules/loader/age-loader.module";
-import {AgeOpenRomModule} from "./modules/open-rom/age-open-rom.module";
-import {AgeTitleBarModule} from "./modules/title-bar/age-title-bar.module";
+import {AgeInfoModule} from "./info/age-info.module";
+import {AgeOpenRomModule} from "./open-rom/age-open-rom.module";
+import {AgeTitleBarModule} from "./title-bar/age-title-bar.module";
 
 
 @NgModule({
     imports: [
         BrowserModule,
-        ServiceWorkerModule.register("./ngsw-worker.js", {enabled: environment.production}),
+        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
         FontAwesomeModule,
         AgeInfoModule,
         AgeEmulatorModule,

@@ -14,13 +14,17 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/age-js",
-            "index": "src/index.html",
-            "main": "src/main.ts",
+            "index": "src/age-app/index.html",
+            "main": "src/age-app/main.ts",
             "polyfills": "src/polyfills.ts",
-            "tsConfig": "src/tsconfig.app.json",
+            "tsConfig": "src/age-app/tsconfig.json",
             "assets": [
               "src/assets",
-              "src/manifest.json"
+              {
+                "glob": "manifest.webmanifest",
+                "input": "src/age-app",
+                "output": "./"
+              }
             ],
             "styles": [
             ],
@@ -50,7 +54,8 @@
                   "maximumError": "5mb"
                 }
               ],
-              "serviceWorker": true
+              "serviceWorker": true,
+              "ngswConfigPath": "src/age-app/ngsw-config.json"
             }
           }
         },
@@ -70,7 +75,37 @@
           "options": {
             "browserTarget": "age-js:build"
           }
-        },
+        }
+      }
+    },
+    "lint": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "library",
+      "prefix": "lib",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/age-app/tsconfig.json",
+              "src/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "test": {
+      "root": "",
+      "sourceRoot": "src",
+      "projectType": "library",
+      "prefix": "lib",
+      "schematics": {},
+      "architect": {
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
@@ -82,20 +117,7 @@
             ],
             "scripts": [],
             "assets": [
-              "src/assets",
-              "src/manifest.json"
-            ]
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+              "src/assets"
             ]
           }
         }

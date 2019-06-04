@@ -15,7 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from "@angular/core";
-import {AgeEmulationPackage, AgeRomFileToLoad, IEmGbModule} from "../../common";
+import {AgeEmulationPackage, AgeRomFileToLoad, IEmGbModule} from "../common";
 
 
 @Component({

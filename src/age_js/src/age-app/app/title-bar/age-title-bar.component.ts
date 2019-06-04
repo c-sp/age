@@ -17,7 +17,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
 import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
 import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import {IAgeEmulationRuntimeInfo} from "../../common";
+import {IAgeEmulationRuntimeInfo} from "age-lib";
 
 
 export enum TitleBarButton {

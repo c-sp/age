@@ -16,7 +16,7 @@
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
 import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import {AgeRomFileToLoad} from "../../common";
+import {AgeRomFileToLoad} from "age-lib";
 
 
 @Component({

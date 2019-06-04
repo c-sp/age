@@ -16,8 +16,8 @@
 
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from "@angular/core";
 import {faTimesCircle} from "@fortawesome/free-solid-svg-icons/faTimesCircle";
-import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad, IAgeEmulationRuntimeInfo} from "./common";
-import {TitleBarButton} from "./modules/title-bar/age-title-bar.component";
+import {AgeEmulationPackage, AgeRect, AgeRomFileToLoad, IAgeEmulationRuntimeInfo} from "age-lib";
+import {TitleBarButton} from "./title-bar/age-title-bar.component";
 
 
 @Component({
@@ -48,7 +48,7 @@ import {TitleBarButton} from "./modules/title-bar/age-title-bar.component";
 
             <div #emulatorContainer>
                 <div *ngIf="showSplashScreen">
-                    <age-splash-screen (openRom)="openRom($event)"></age-splash-screen>
+                    <age-splash-screen></age-splash-screen>
                 </div>
 
                 <age-loader [romFileToLoad]="romFileToLoad"

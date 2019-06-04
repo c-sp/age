@@ -26,7 +26,7 @@ import {
     OnInit,
     Output,
 } from "@angular/core";
-import {AgeEmulationPackage, AgeRect, compareRuntimeInfo, IAgeEmulationRuntimeInfo} from "../../common";
+import {AgeEmulationPackage, AgeRect, compareRuntimeInfo, IAgeEmulationRuntimeInfo} from "../common";
 import {AgeEmulationRunner, AgeGbEmulation} from "./age-emulation";
 import {AgeGbKeyMap} from "./age-emulator-keymap";
 import {AgeAudio} from "./audio/age-audio";
