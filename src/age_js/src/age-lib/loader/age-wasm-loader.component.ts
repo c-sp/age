@@ -83,10 +83,10 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
         of(true)
             .pipe(
                 tap(() => this._javascriptLoadingState = this._updateView(AgeLoaderState.WORKING)),
-                switchMap(() => combineLatest(
+                switchMap(() => combineLatest([
                     from(importJs),
                     this._httpClient.get("assets/age_wasm.wasm", {responseType: "arraybuffer"}),
-                )),
+                ])),
                 tap(values => {
                     this._javascriptLoadingState = this._updateView(AgeLoaderState.SUCCESS);
                     this._runtimeInitState = this._updateView(AgeLoaderState.WORKING);
