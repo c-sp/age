@@ -36,15 +36,20 @@ export class AgeAudio {
         const audioCtx = this._audioCtx = new _AudioContext();
 
         if (audioCtx.audioWorklet) {
-            audioCtx.audioWorklet.addModule("assets/age-audio-stream.js").then(() => {
-                this._workletNode = new AudioWorkletNode(this._audioCtx, "age-audio-stream", {
-                    numberOfInputs: 1,
-                    numberOfOutputs: 1,
-                    outputChannelCount: [2],
-                });
+            audioCtx.audioWorklet.addModule("assets/age-audio-stream.js").then(
+                () => {
+                    this._workletNode = new AudioWorkletNode(this._audioCtx, "age-audio-stream", {
+                        numberOfInputs: 1,
+                        numberOfOutputs: 1,
+                        outputChannelCount: [2],
+                    });
 
-                this._workletNode.connect(this._audioCtx.destination);
-            });
+                    this._workletNode.connect(this._audioCtx.destination);
+                },
+                () => {
+                    // TODO handle or log error
+                },
+            );
         }
     }
 
