@@ -27,6 +27,7 @@ const version_info = {
     hash: parts[2]
 };
 
+// TODO adjust to observe TSLint rules
 const file_path = path.resolve(__dirname, '..', 'src', 'environments', 'version.ts');
 fs.writeFileSync(file_path, `
 // THIS FILE IS AUTO GENERATED, DON'T EDIT IT MANUALLY!

@@ -1,24 +1,23 @@
 {
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "outDir": "../out-tsc/spec",
-        "paths": {
-            // see https://github.com/Stuk/jszip/issues/524
-            "stream": [
-                "node_modules/readable-stream/readable.js"
-            ]
-        },
-        "types": [
-            "jasmine",
-            "node"
-        ]
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/spec",
+    "paths": {
+      "age-lib": [
+        "src/age-lib/index.ts"
+      ]
     },
-    "files": [
-        "test.ts",
-        "polyfills.ts"
-    ],
-    "include": [
-        "**/*.spec.ts",
-        "**/*.d.ts"
+    "types": [
+      "jasmine",
+      "node"
     ]
+  },
+  "files": [
+    "test.ts",
+    "polyfills.ts"
+  ],
+  "include": [
+    "**/*.spec.ts",
+    "**/*.d.ts"
+  ]
 }

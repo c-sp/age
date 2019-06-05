@@ -88,4 +88,17 @@ target_link_libraries(age_emulator_gb age_common)
 
 add_executable(age_wasm ${SOURCES_AGE_WASM})
 target_link_libraries(age_wasm age_emulator_gb)
-set_target_properties(age_wasm PROPERTIES LINK_FLAGS "-s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s NO_FILESYSTEM=1")
+
+# MODULARIZE=1     to prevent using the global scope
+# EXPORT_ES6=1     to generate an ES6 module export
+# ENVIRONMENT=web  to omit node/shell/web-worker code
+#
+set(WASM_LINK_FLAGS "\
+-s WASM=1 \
+-s ALLOW_MEMORY_GROWTH=1 \
+-s NO_FILESYSTEM=1 \
+-s MODULARIZE=1 \
+-s EXPORT_ES6=1 \
+-s ENVIRONMENT=web \
+")
+set_target_properties(age_wasm PROPERTIES LINK_FLAGS ${WASM_LINK_FLAGS})
