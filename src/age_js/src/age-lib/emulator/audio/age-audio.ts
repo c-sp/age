@@ -27,13 +27,13 @@
 
 export class AgeAudio {
 
-    private readonly _audioCtx = new AudioContext();
+    private readonly _audioCtx: AudioContext;
     private _workletNode?: AudioWorkletNode;
 
     constructor() {
-        /* tslint:disable no-any */ // at the moment I see no other way ...
-        const audioCtx: any = this._audioCtx;
-        /* tslint:enable no-any */
+        // tslint:disable-next-line:no-any
+        const _AudioContext = AudioContext || (window as any).webkitAudioContext;
+        const audioCtx = this._audioCtx = new _AudioContext();
 
         if (audioCtx.audioWorklet) {
             audioCtx.audioWorklet.addModule("assets/age-audio-stream.js").then(() => {

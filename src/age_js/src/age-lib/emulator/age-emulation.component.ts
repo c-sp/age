@@ -26,26 +26,23 @@ import {
     OnInit,
     Output,
 } from "@angular/core";
-import {AgeEmulationPackage, AgeRect, compareRuntimeInfo, IAgeEmulationRuntimeInfo} from "../common";
+import {AgeEmulationPackage, compareRuntimeInfo, IAgeEmulationRuntimeInfo} from "../common";
+import {AgeGbKeyMap} from "../settings";
 import {AgeEmulationRunner, AgeGbEmulation} from "./age-emulation";
-import {AgeGbKeyMap} from "./age-emulator-keymap";
 import {AgeAudio} from "./audio/age-audio";
 
 
 @Component({
-    selector: "age-emulator",
+    selector: "age-emulation",
     template: `
-        <ng-container *ngIf="emulationRunner as emulator">
-            <age-canvas-renderer [screenSize]="emulator.screenSize"
-                                 [newFrame]="emulator.screenBuffer"
-                                 [viewport]="viewport"></age-canvas-renderer>
-        </ng-container>
+        <age-canvas-renderer *ngIf="emulationRunner as emulator"
+                             [screenSize]="emulator.screenSize"
+                             [newFrame]="emulator.screenBuffer"></age-canvas-renderer>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeEmulatorComponent implements OnInit, OnDestroy {
+export class AgeEmulationComponent implements OnInit, OnDestroy {
 
-    @Input() viewport = new AgeRect(1, 1);
     @Output() readonly updateRuntimeInfo = new EventEmitter<IAgeEmulationRuntimeInfo | undefined>();
 
     private readonly _keyMap = new AgeGbKeyMap();
@@ -117,7 +114,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
             newRuntimeInfo = this._emulationRunner.runtimeInfo;
 
             this._audio.stream(this._emulationRunner.audioBuffer);
-            this._changeDetector.detectChanges();
+            this._changeDetector.markForCheck();
         }
 
         if (!compareRuntimeInfo(newRuntimeInfo, this._lastRuntimeInfo)) {

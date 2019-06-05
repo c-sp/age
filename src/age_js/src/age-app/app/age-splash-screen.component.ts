@@ -106,13 +106,13 @@ import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
 export class AgeSplashScreenComponent implements AfterViewInit {
 
     private static async isAudioWorkletAvailable() {
-        const audioCtx = new AudioContext();
+        // tslint:disable-next-line:no-any
+        const _AudioContext = AudioContext || (window as any).webkitAudioContext;
 
-        /* tslint:disable no-any */ // at the moment I see no other way ...
-        const result = !!(audioCtx as any).audioWorklet;
-        /* tslint:enable no-any */
-
+        const audioCtx = new _AudioContext();
+        const result = !!audioCtx.audioWorklet;
         await audioCtx.close();
+
         return result;
     }
 
@@ -148,6 +148,9 @@ export class AgeSplashScreenComponent implements AfterViewInit {
         // depending on the browser and it's configuration:
         // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
 
+        // TODO this will produce incorrect results on some browsers,
+        //      if e.g. the tab is not visible or the browser is minimized
+
         if (!this._intervalHandle) {
             this._timestamps = [performance.now()];
 
@@ -181,7 +184,7 @@ export class AgeSplashScreenComponent implements AfterViewInit {
             }
 
             this._preciseTimer = minDiff < 10;
-            this._cdRef.detectChanges();
+            this._cdRef.markForCheck();
         }
     }
 }

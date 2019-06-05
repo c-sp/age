@@ -17,6 +17,7 @@
 import {IEmGbModule} from "./em-modules";
 
 
+// TODO lib
 export class AgeEmulationPackage {
 
     constructor(readonly emGbModule: IEmGbModule,
@@ -25,6 +26,7 @@ export class AgeEmulationPackage {
 }
 
 
+// TODO app & lib
 export interface IAgeEmulationRuntimeInfo {
     romName: string;
     emulatedSeconds?: number;
@@ -32,6 +34,7 @@ export interface IAgeEmulationRuntimeInfo {
     emulationMaxSpeed?: number;
 }
 
+// TODO lib
 export function compareRuntimeInfo(x?: IAgeEmulationRuntimeInfo, y?: IAgeEmulationRuntimeInfo): boolean {
     return !!x && !!y
         && (x.romName === y.romName)

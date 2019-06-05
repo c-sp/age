@@ -24,6 +24,11 @@
                 "glob": "manifest.webmanifest",
                 "input": "src/age-app",
                 "output": "./"
+              },
+              {
+                "glob": "age-audio-stream.js",
+                "input": "src/age-lib/emulator/audio",
+                "output": "./assets"
               }
             ],
             "styles": [
@@ -117,7 +122,12 @@
             ],
             "scripts": [],
             "assets": [
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "age-audio-stream.js",
+                "input": "src/age-lib/emulator/audio",
+                "output": "./assets"
+              }
             ]
           }
         }

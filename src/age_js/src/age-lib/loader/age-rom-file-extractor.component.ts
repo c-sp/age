@@ -98,6 +98,6 @@ export class AgeRomFileExtractorComponent {
 
     private setExtractorState(extractorState: AgeLoaderState): void {
         this._extractorState = extractorState;
-        this._changeDetector.detectChanges();
+        this._changeDetector.markForCheck();
     }
 }

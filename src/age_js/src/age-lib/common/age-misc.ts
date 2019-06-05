@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+// TODO lib
 export class AgeRect {
 
     constructor(readonly width: number,
@@ -21,6 +22,8 @@ export class AgeRect {
     }
 }
 
+// TODO app & lib
+// TODO refactor: IAgeLoadRomFile
 export class AgeRomFileToLoad {
 
     static forLocalFile(file: File) {

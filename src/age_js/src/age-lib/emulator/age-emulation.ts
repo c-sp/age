@@ -15,7 +15,7 @@
 //
 
 import {AgeRect, IAgeEmulationRuntimeInfo, IEmGbModule} from "../common";
-import {AgeGbButton} from "./age-emulator-keymap";
+import {AgeGbButton} from "../settings";
 
 
 export class AgeScreenBuffer {

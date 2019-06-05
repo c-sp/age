@@ -85,7 +85,7 @@ export class AgeLoaderComponent {
 
 
     private checkForLoadingComplete(): void {
-        this._changeDetector.detectChanges();
+        this._changeDetector.markForCheck();
         if (!!this._emGbModule && !!this._romFileContents) {
             this.loadingComplete.emit(new AgeEmulationPackage(this._emGbModule, this._romFileContents));
         }

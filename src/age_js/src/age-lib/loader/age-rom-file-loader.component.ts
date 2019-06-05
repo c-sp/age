@@ -80,19 +80,17 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
 
 
     private loadLocalFile(file: File) {
-        this._fileReader = new FileReader();
+        const fileReader = this._fileReader = new FileReader();
 
-        this._fileReader.onload = event => {
-            /* tslint:disable:no-any */
-            const eventTarget: any = event.target;
-            /* tslint:enable:no-any */
-            this.loaderFinished(eventTarget.result);
+        fileReader.onload = () => {
+            if (!(fileReader.result instanceof ArrayBuffer)) {
+                throw new Error(`expected ArrayBuffer, found ${typeof fileReader.result}`);
+            }
+            this.loaderFinished(fileReader.result);
         };
-        this._fileReader.onerror = () => {
-            this.loaderError();
-        };
+        fileReader.onerror = () => this.loaderError();
 
-        this._fileReader.readAsArrayBuffer(file);
+        fileReader.readAsArrayBuffer(file);
     }
 
     private loadFileFromUrl(url: string) {
@@ -138,7 +136,7 @@ export class AgeRomFileLoaderComponent implements OnDestroy {
 
     private setLoaderState(loaderState: AgeLoaderState) {
         this._loaderState = loaderState;
-        this._changeDetector.detectChanges();
+        this._changeDetector.markForCheck();
     }
 
     private cleanupReader(): void {

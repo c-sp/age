@@ -21,7 +21,6 @@ import {
     Component,
     EventEmitter,
     Input,
-    OnDestroy,
     OnInit,
     Output,
 } from "@angular/core";
@@ -53,7 +52,7 @@ import {AgeLoaderState} from "./age-loader-state.component";
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
+export class AgeWasmLoaderComponent implements OnInit {
 
     @Input() showState = false;
 
@@ -61,7 +60,6 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
 
     private _javascriptLoadingState?: AgeLoaderState;
     private _runtimeInitState?: AgeLoaderState;
-    private _wasmModule?: IEmGbModule;
 
 
     constructor(private _changeDetector: ChangeDetectorRef,
@@ -98,26 +96,12 @@ export class AgeWasmLoaderComponent implements OnInit, OnDestroy {
                         },
                         onRuntimeInitialized: () => {
                             this._runtimeInitState = this._updateView(AgeLoaderState.SUCCESS);
-                            this.emGbModuleLoaded.emit(this._wasmModule = wasmModule);
+                            this.emGbModuleLoaded.emit(wasmModule);
                         },
                     });
                 }),
             )
             .subscribe();
-    }
-
-    ngOnDestroy(): void {
-        if (this._wasmModule) {
-            // tslint:disable-next-line:no-any
-            const wasmModule: any = this._wasmModule;
-
-            wasmModule.noExitRuntime = false;
-            try {
-                wasmModule.exit(0);
-            } catch (err) {
-                // ignore emscripten cleanup errors
-            }
-        }
     }
 
 
