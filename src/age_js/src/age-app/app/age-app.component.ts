@@ -16,7 +16,7 @@
 
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from "@angular/core";
 import {faTimesCircle} from "@fortawesome/free-solid-svg-icons/faTimesCircle";
-import {AgeRomFileToLoad, IAgeEmulationRuntimeInfo} from "age-lib";
+import {IAgeEmulationRuntimeInfo, TAgeRomFile} from "age-lib";
 import {TitleBarButton} from "./title-bar/age-title-bar.component";
 
 
@@ -84,7 +84,7 @@ export class AgeAppComponent {
     readonly TitleBarButton = TitleBarButton;
     readonly faTimesCircle = faTimesCircle;
 
-    @Input() romFileToLoad?: AgeRomFileToLoad;
+    @Input() romFileToLoad?: TAgeRomFile;
     @Input() emulationRuntimeInfo?: IAgeEmulationRuntimeInfo;
     @Input() showDialog?: TitleBarButton;
 
@@ -92,8 +92,8 @@ export class AgeAppComponent {
 
     private _ignoreCloseDialogs = false;
 
-    openRom(fileToLoad: AgeRomFileToLoad): void {
-        this.romFileToLoad = fileToLoad;
+    openRom(romFileToLoad: TAgeRomFile): void {
+        this.romFileToLoad = romFileToLoad;
         this.closeDialogs();
     }
 

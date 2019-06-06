@@ -14,5 +14,8 @@
 // limitations under the License.
 //
 
+export {IAgeEmulationRuntimeInfo} from "./common";
+export {IAgeLocalRomFile, IAgeRomFileUrl, TAgeRomFile} from "./loader";
+
 export * from "./age-emulator.component";
 export * from "./age-lib.module";

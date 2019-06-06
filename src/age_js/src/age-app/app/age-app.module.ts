@@ -19,7 +19,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {ServiceWorkerModule} from "@angular/service-worker";
 
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {AgeLibModule} from "../../age-lib/age-lib.module";
+import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 
 import {AgeAppComponent} from "./age-app.component";

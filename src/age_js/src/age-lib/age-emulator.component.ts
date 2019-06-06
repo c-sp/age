@@ -14,20 +14,28 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
-import {AgeEmulationPackage, AgeRomFileToLoad, IAgeEmulationRuntimeInfo} from "./common";
-
-// export @Input and @Output types
-export {AgeRomFileToLoad, IAgeEmulationRuntimeInfo};
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Inject,
+    Input,
+    Optional,
+    Output,
+    SkipSelf,
+} from "@angular/core";
+import {combineLatest, Observable} from "rxjs";
+import {map} from "rxjs/operators";
+import {AgeEmulationPackage, IAgeEmulationRuntimeInfo} from "./common";
+import {AgeRomFileLoaderService, AgeWasmModuleLoaderService, TAgeRomFile} from "./loader";
+import {AgeTaskStatusService} from "./loader/age-task-status.service";
 
 
 @Component({
     selector: "age-emulator",
     template: `
-        <age-loader [romFileToLoad]="loadRomFile"
-                    (loadingComplete)="loadingComplete($event)"></age-loader>
-
-        <age-emulation *ngIf="emulationPackage"
+        <!-- TODO task status list -->
+        <age-emulation *ngIf="(emulationPackage$ | async) as emulationPackage"
                        [emulationPackage]="emulationPackage"
                        (updateRuntimeInfo)="updateRuntimeInfo.emit($event)"></age-emulation>
     `,
@@ -37,31 +45,41 @@ export {AgeRomFileToLoad, IAgeEmulationRuntimeInfo};
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        AgeTaskStatusService,
+        AgeRomFileLoaderService,
+        AgeWasmModuleLoaderService, // this is just a fallback in case there is no global WASM loader
+    ],
 })
 export class AgeEmulatorComponent {
 
     @Output() readonly updateRuntimeInfo = new EventEmitter<IAgeEmulationRuntimeInfo | undefined>();
 
-    private _romFileToLoad?: AgeRomFileToLoad;
-    private _emulationPackage?: AgeEmulationPackage;
+    private readonly _wasmModuleLoader: AgeWasmModuleLoaderService;
+    private _emulationPackage$?: Observable<AgeEmulationPackage>;
 
+    constructor(private readonly _romFileLoader: AgeRomFileLoaderService,
+                ownWasmModuleLoader: AgeWasmModuleLoaderService,
+                @Inject(AgeWasmModuleLoaderService) @SkipSelf() @Optional()
+                    parentWasmModuleLoader: AgeWasmModuleLoaderService | null) {
 
-    get emulationPackage(): AgeEmulationPackage | undefined {
-        return this._emulationPackage;
+        this._wasmModuleLoader = parentWasmModuleLoader || ownWasmModuleLoader;
     }
 
-    get loadRomFile(): AgeRomFileToLoad | undefined {
-        return this._romFileToLoad;
+    get emulationPackage$(): Observable<AgeEmulationPackage> | undefined {
+        return this._emulationPackage$;
     }
 
-    @Input() set loadRomFile(fileToLoad: AgeRomFileToLoad | undefined) {
-        this._romFileToLoad = fileToLoad;
-        this._emulationPackage = undefined;
+    @Input() set loadRomFile(romFileToLoad: TAgeRomFile | undefined) {
         this.updateRuntimeInfo.emit(undefined);
-    }
 
-
-    loadingComplete(emulationPackage: AgeEmulationPackage) {
-        this._emulationPackage = emulationPackage;
+        this._emulationPackage$ = !romFileToLoad
+            ? undefined
+            : combineLatest([
+                this._wasmModuleLoader.wasmModule$,
+                this._romFileLoader.loadRomFile$(romFileToLoad),
+            ]).pipe(
+                map(values => new AgeEmulationPackage(values[0], values[1])),
+            );
     }
 }

@@ -14,32 +14,5 @@
 // limitations under the License.
 //
 
-import {Directive} from "@angular/core";
-
-
-@Directive({
-    selector: "[ageLoaderError]",
-})
-export class AgeLoaderErrorDirective {
-}
-
-
-@Directive({
-    selector: "[ageLoaderSuccess]",
-})
-export class AgeLoaderSuccessDirective {
-}
-
-
-@Directive({
-    selector: "[ageLoaderWorking]",
-})
-export class AgeLoaderWorkingDirective {
-}
-
-
-@Directive({
-    selector: "[ageLoaderNoState]",
-})
-export class AgeLoaderNoStateDirective {
-}
+export * from "./age-rom-file-loader.service";
+export * from "./age-wasm-module-loader.service";
