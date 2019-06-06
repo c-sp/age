@@ -76,7 +76,7 @@ export class AgeWasmLoaderComponent implements OnInit {
         // since this will break webpack Magic Comments.
 
         // tslint:disable-next-line:no-any
-        const importJs = import(/* webpackIgnore: true */ "/assets/age_wasm.js" as any);
+        const importJs = import(/* webpackIgnore: true */ "./assets/age_wasm.js" as any);
 
         of(true)
             .pipe(

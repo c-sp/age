@@ -14,6 +14,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/age-js",
+            "baseHref": "age-js", // we have a base-href !== '/' for gitlab.io => simulate it for testing
             "index": "src/age-app/index.html",
             "main": "src/age-app/main.ts",
             "polyfills": "src/polyfills.ts",

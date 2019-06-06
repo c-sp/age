@@ -4,7 +4,7 @@
   "license": "Apache 2.0",
   "scripts": {
     "ng": "ng",
-    "http-serve-dist": "http-server ./dist/age-js --gzip",
+    "http-serve-dist": "http-server ./dist --gzip",
     "build": "npm run generate-files && ng build --prod",
     "build:analyze": "npm run build -- --stats-json && webpack-bundle-analyzer dist/age-js/stats.json",
     "start:dev": "npm run generate-files && ng serve",
