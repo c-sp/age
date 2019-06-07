@@ -14,5 +14,7 @@
 // limitations under the License.
 //
 
-export * from "./age-rom-file-loader.service";
-export * from "./age-wasm-module-loader.service";
+export * from "./age-emulation-factory.service";
+export * from "./age-rom-file-loader";
+export * from "./age-task-status-handler.service";
+export * from "./age-wasm-module-loader";

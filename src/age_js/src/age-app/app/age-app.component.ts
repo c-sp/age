@@ -15,8 +15,13 @@
 //
 
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from "@angular/core";
+import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
+import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
 import {faTimesCircle} from "@fortawesome/free-solid-svg-icons/faTimesCircle";
-import {IAgeEmulationRuntimeInfo, TAgeRomFile} from "age-lib";
+import {AgeTaskStatusHandlerService, IAgeEmulationRuntimeInfo, ITaskStatus, TAgeRomFile, TTaskId} from "age-lib";
+import {Observable} from "rxjs";
 import {TitleBarButton} from "./title-bar/age-title-bar.component";
 
 
@@ -41,6 +46,21 @@ import {TitleBarButton} from "./title-bar/age-title-bar.component";
         </div>
 
         <age-splash-screen *ngIf="!romFileToLoad"></age-splash-screen>
+
+        <div *ngIf="(taskStatusList$ | async) as statusList"
+             class="status-list">
+            <div *ngFor="let status of statusList; trackBy: trackByTaskId">
+
+                <ng-container [ngSwitch]="status.taskStatus">
+                    <fa-icon *ngSwitchCase="'working'" [icon]="faCog" [spin]="true"></fa-icon>
+                    <fa-icon *ngSwitchCase="'success'" [icon]="faCheck"></fa-icon>
+                    <fa-icon *ngSwitchCase="'cancelled'" [icon]="faTimes"></fa-icon>
+                    <fa-icon *ngSwitchDefault [icon]="faExclamationCircle" class="age-ui-error"></fa-icon>
+                </ng-container>
+
+                {{status.taskDescription}}
+            </div>
+        </div>
 
         <age-emulator *ngIf="romFileToLoad"
                       [loadRomFile]="romFileToLoad"
@@ -72,17 +92,36 @@ import {TitleBarButton} from "./title-bar/age-title-bar.component";
             margin-bottom: 3em;
         }
 
+        .status-list {
+            margin-top: 3em;
+            text-align: center;
+            font-size: smaller;
+        }
+
+        .status-list > fa-icon {
+            margin-right: 0.5em;
+        }
+
         age-emulator {
             flex: 1 1;
             margin: .2em;
         }
     `],
+    providers: [
+        AgeTaskStatusHandlerService,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeAppComponent {
 
+    readonly faCheck = faCheck;
+    readonly faCog = faCog;
+    readonly faTimes = faTimes;
+    readonly faExclamationCircle = faExclamationCircle;
+
     readonly TitleBarButton = TitleBarButton;
     readonly faTimesCircle = faTimesCircle;
+    readonly taskStatusList$: Observable<ReadonlyArray<ITaskStatus> | undefined>;
 
     @Input() romFileToLoad?: TAgeRomFile;
     @Input() emulationRuntimeInfo?: IAgeEmulationRuntimeInfo;
@@ -91,6 +130,11 @@ export class AgeAppComponent {
     @ViewChild("dialogDiv", {static: false}) private _dialogDiv?: ElementRef;
 
     private _ignoreCloseDialogs = false;
+
+    constructor(statusHandler: AgeTaskStatusHandlerService) {
+        this.taskStatusList$ = statusHandler.taskStatusList$;
+    }
+
 
     openRom(romFileToLoad: TAgeRomFile): void {
         this.romFileToLoad = romFileToLoad;
@@ -114,5 +158,9 @@ export class AgeAppComponent {
             this.showDialog = undefined;
         }
         this._ignoreCloseDialogs = false;
+    }
+
+    trackByTaskId(_index: number, taskStatus: ITaskStatus): TTaskId {
+        return taskStatus.taskId;
     }
 }

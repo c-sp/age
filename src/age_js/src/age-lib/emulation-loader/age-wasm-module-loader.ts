@@ -15,21 +15,18 @@
 //
 
 import {HttpClient} from "@angular/common/http";
-import {Injectable} from "@angular/core";
 import {combineLatest, from, Observable, of} from "rxjs";
-import {fromPromise} from "rxjs/internal-compatibility";
 import {map, shareReplay, switchMap} from "rxjs/operators";
-import {IEmGbModule} from "../common";
-import {AgeTaskStatusService} from "./age-task-status.service";
+import {IEmGbModule} from "../emulation";
+import {AgeTaskStatusHandlerService} from "./age-task-status-handler.service";
 
 
-@Injectable()
-export class AgeWasmModuleLoaderService {
+export class AgeWasmModuleLoader {
 
     private _wasmModule$?: Observable<IEmGbModule>;
 
     constructor(private readonly _httpClient: HttpClient,
-                private readonly _taskStatusService: AgeTaskStatusService) {
+                private readonly _taskStatusHandler: AgeTaskStatusHandlerService) {
     }
 
     get wasmModule$(): Observable<IEmGbModule> {
@@ -47,19 +44,27 @@ export class AgeWasmModuleLoaderService {
             // One should obviously not activate the TypeScript Compiler option "removeComments"
             // since this will break webpack Magic Comments.
             switchMap(() => combineLatest([
-                this._taskStatusService.addTask$(
+                this._taskStatusHandler.addTask$(
                     "loading WASM JavaScript",
+                    // TODO if the dynamic import observable is cancelled by failing to load the WASM binary,
+                    //      strange things happen ...
                     // tslint:disable-next-line:no-any
                     from(import(/* webpackIgnore: true */ "./assets/age_wasm.js" as any)),
                 ),
-                this._taskStatusService.addTask$(
+                this._taskStatusHandler.addTask$(
                     "loading WASM binary",
                     this._httpClient.get("assets/age_wasm.wasm", {responseType: "arraybuffer"}),
                 ),
             ])),
 
+            // Share a single subscription and cache the loaded files
+            // (making this a hot observable).
+            // On error all observers are unsubscribed and the next observer
+            // restarts the operation.
+            shareReplay(1),
+
             // Once the JavaScript and WASM Code has been loaded,
-            // create the WASM module.
+            // instantiate a new WASM module.
             switchMap(values => {
                 let wasmModule: IEmGbModule | undefined;
                 const wasmModulePromise = new Promise((resolve, reject) => {
@@ -72,9 +77,9 @@ export class AgeWasmModuleLoaderService {
                         onRuntimeInitialized: resolve,
                     });
                 });
-                return this._taskStatusService.addTask$(
+                return this._taskStatusHandler.addTask$(
                     "initializing WASM binary",
-                    fromPromise(wasmModulePromise).pipe(
+                    from(wasmModulePromise).pipe(
                         map(() => {
                             if (!wasmModule) {
                                 throw new Error("WASM Module not initialized");
@@ -85,11 +90,6 @@ export class AgeWasmModuleLoaderService {
                 );
             }),
 
-            // Share a single subscription and cache the WASM module
-            // (making this a hot observable).
-            // On error all observers are unsubscribed and the next observer
-            // restarts the operation.
-            shareReplay(1),
-        );
+        ); // pipe() end
     }
 }

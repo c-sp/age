@@ -86,8 +86,6 @@ class AgeAudioStream extends AudioWorkletProcessor {
 
     handleMessage(event) {
         if (event.data.sampleRate && (event.data.sampleRate !== this.sampleRate)) {
-            console.log(`changing sample rate from ${this.sampleRate} to ${event.data.sampleRate}`);
-
             this.sampleRate = event.data.sampleRate;
             const bufferSize = this.sampleRate * BUFFER_MILLIS * 2 / 1000; // 2 channels
             this.buffer = new Int16Buffer(bufferSize);

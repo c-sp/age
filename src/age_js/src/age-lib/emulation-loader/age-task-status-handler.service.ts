@@ -21,24 +21,28 @@ import {tap} from "rxjs/operators";
 
 export type TTaskStatus = "working" | "success" | "failure" | "cancelled";
 export type TTaskId = number;
+// tslint:disable-next-line:no-any
+export type TTaskError = any;
 
 export interface ITaskStatus {
+    readonly taskId: TTaskId;
     readonly taskDescription: string;
     readonly taskStatus: TTaskStatus;
+    readonly taskError?: TTaskError;
 }
 
 
 @Injectable()
-export class AgeTaskStatusService {
+export class AgeTaskStatusHandlerService {
 
-    private readonly _taskStatusListSubject = new BehaviorSubject<ReadonlyArray<ITaskStatus>>([]);
+    private readonly _taskStatusListSubject = new BehaviorSubject<ReadonlyArray<ITaskStatus> | undefined>(undefined);
     private readonly _taskStatusList$ = this._taskStatusListSubject.asObservable();
 
     private readonly _taskIdToListIndexMap = new Map<TTaskId, number>();
     private readonly _taskStatusList: ITaskStatus[] = [];
     private _nextTaskId = 1;
 
-    get taskStatusList$(): Observable<ReadonlyArray<ITaskStatus>> {
+    get taskStatusList$(): Observable<ReadonlyArray<ITaskStatus> | undefined> {
         return this._taskStatusList$;
     }
 
@@ -48,30 +52,38 @@ export class AgeTaskStatusService {
     }
 
 
+    clearTasks(): void {
+        this._taskStatusListSubject.next(undefined);
+        this._taskIdToListIndexMap.clear();
+        this._taskStatusList.splice(0, this._taskStatusList.length);
+    }
+
     addTask(taskDescription: string, initialStatus: TTaskStatus = "working"): TTaskId {
         const taskId = this._nextTaskId++;
 
         this._taskStatusList.push({
+            taskId,
             taskDescription,
             taskStatus: initialStatus,
         });
         this._taskIdToListIndexMap.set(taskId, this._taskStatusList.length - 1);
         this._taskStatusListSubject.next(this._taskStatusList);
-        console.log("###", taskDescription, initialStatus);
 
         return taskId;
     }
 
-    setTaskStatus(taskId: TTaskId, taskStatus: TTaskStatus): void {
+    setTaskStatus(taskId: TTaskId, taskStatus: TTaskStatus, taskError?: TTaskError): void {
         const taskListIndex = this._taskIdToListIndexMap.get(taskId);
         if (taskListIndex === undefined) {
             return;
         }
-        console.log("###", this._taskStatusList[taskListIndex].taskDescription, taskStatus);
+
         this._taskStatusList[taskListIndex] = {
             ...this._taskStatusList[taskListIndex],
             taskStatus,
+            taskError,
         };
+        this._taskStatusListSubject.next(this._taskStatusList);
     }
 
     addTask$<T>(taskDescription: string, obs$: Observable<T>): Observable<T> {
@@ -86,13 +98,12 @@ export class AgeTaskStatusService {
 
         return obs$
             .pipe(
-                // Task success and failure can be detected using the "complete" and "error" callbacks.
                 tap({
-                    error: err => {
-                        this.setTaskStatus(taskId, "failure");
-                        console.error(err); // TODO just for debugging, remove later
-                    },
-                    complete: () => this.setTaskStatus(taskId, "success"),
+                    // we use "next" instead of "complete" to detect task success the moment
+                    // tap() is reached instead of the moment of observable completion
+                    // (the latter might never occur, e.g. if a subsequent operator throws an error)
+                    next: () => this.setTaskStatus(taskId, "success"),
+                    error: err => this.setTaskStatus(taskId, "failure", err),
                 }),
             )
             // to detect task cancellation we have to add a teardown logic to the subscriber

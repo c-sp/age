@@ -15,13 +15,11 @@
 //
 
 import {HttpClient} from "@angular/common/http";
-import {Injectable} from "@angular/core";
 import * as fileType from "file-type";
 import * as JSZip from "jszip";
-import {Observable, of} from "rxjs";
-import {fromPromise} from "rxjs/internal-compatibility";
+import {from, Observable, of} from "rxjs";
 import {map, switchMap} from "rxjs/operators";
-import {AgeTaskStatusService} from "./age-task-status.service";
+import {AgeTaskStatusHandlerService} from "./age-task-status-handler.service";
 
 
 export interface IAgeLocalRomFile {
@@ -37,8 +35,7 @@ export interface IAgeRomFileUrl {
 export type TAgeRomFile = IAgeLocalRomFile | IAgeRomFileUrl;
 
 
-@Injectable()
-export class AgeRomFileLoaderService {
+export class AgeRomFileLoader {
 
     readonly supportedContentTypes: ReadonlyArray<string> = [
         "application/octet-stream",
@@ -46,7 +43,7 @@ export class AgeRomFileLoaderService {
     ];
 
     constructor(private readonly _httpClient: HttpClient,
-                private readonly _taskStatusService: AgeTaskStatusService) {
+                private readonly _taskStatusHandler: AgeTaskStatusHandlerService) {
     }
 
     loadRomFile$(romFileToLoad: TAgeRomFile): Observable<ArrayBuffer> {
@@ -76,9 +73,10 @@ export class AgeRomFileLoaderService {
         });
 
         // TODO cleanup fileReader on unsubscribe()
+        //      (should be necessary only when loading is cancelled)
         return of(true).pipe(
             // add the task after subscribe() has been called
-            switchMap(() => this._taskStatusService.addTask$("reading rom file", fromPromise(readRomPromise))),
+            switchMap(() => this._taskStatusHandler.addTask$("reading rom file", from(readRomPromise))),
         );
     }
 
@@ -108,7 +106,7 @@ export class AgeRomFileLoaderService {
 
         return of(true).pipe(
             // add the task after subscribe() has been called
-            switchMap(() => this._taskStatusService.addTask$("downloading rom file", loadRom$)),
+            switchMap(() => this._taskStatusHandler.addTask$("downloading rom file", loadRom$)),
         );
     }
 
@@ -122,9 +120,9 @@ export class AgeRomFileLoaderService {
 
         // If this is a zip file, look for a rom file within that zip file.
         // (fun fact: Gameboy roms are sometimes identified as MP3 files)
-        return this._taskStatusService.addTask$(
+        return this._taskStatusHandler.addTask$(
             "extracting rom file from zip archive",
-            fromPromise(extractRomFile(romFile)),
+            from(extractRomFile(romFile)),
         );
     }
 }

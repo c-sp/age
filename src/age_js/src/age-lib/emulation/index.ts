@@ -14,30 +14,6 @@
 // limitations under the License.
 //
 
-// TODO lib
-export class AgeRect {
-
-    constructor(readonly width: number,
-                readonly height: number) {
-    }
-}
-
-// TODO app & lib
-// TODO refactor: IAgeLoadRomFile
-export class AgeRomFileToLoad {
-
-    static forLocalFile(file: File) {
-        return new AgeRomFileToLoad(file);
-    }
-
-    static forUrl(url: string) {
-        if (!url) { // prevent empty strings
-            throw new Error("url not specified");
-        }
-        return new AgeRomFileToLoad(undefined, url);
-    }
-
-    private constructor(readonly file?: File,
-                        readonly url?: string) {
-    }
-}
+export * from "./age-emulation";
+export * from "./age-emulation-runner";
+export * from "./age-wasm-module";

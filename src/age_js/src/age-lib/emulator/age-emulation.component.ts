@@ -26,18 +26,18 @@ import {
     OnInit,
     Output,
 } from "@angular/core";
-import {AgeEmulationPackage, compareRuntimeInfo, IAgeEmulationRuntimeInfo} from "../common";
+import {AgeEmulationRunner, IAgeEmulationRuntimeInfo} from "../emulation";
 import {AgeGbKeyMap} from "../settings";
-import {AgeEmulationRunner, AgeGbEmulation} from "./age-emulation";
 import {AgeAudio} from "./audio/age-audio";
 
 
 @Component({
     selector: "age-emulation",
     template: `
-        <age-canvas-renderer *ngIf="emulationRunner as emulator"
-                             [screenSize]="emulator.screenSize"
-                             [newFrame]="emulator.screenBuffer"></age-canvas-renderer>
+        <age-canvas-renderer *ngIf="emulationRunner as emuRunner"
+                             [screenWidth]="emuRunner.screenSize.width"
+                             [screenHeight]="emuRunner.screenSize.height"
+                             [newFrame]="emuRunner.screenBuffer"></age-canvas-renderer>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -73,17 +73,8 @@ export class AgeEmulationComponent implements OnInit, OnDestroy {
         return this._emulationRunner;
     }
 
-    @Input() set emulationPackage(emulationPackage: AgeEmulationPackage | undefined) {
-        if (!emulationPackage) {
-            this._emulationRunner = undefined;
-        } else {
-            this._emulationRunner = new AgeEmulationRunner(
-                new AgeGbEmulation(
-                    emulationPackage.emGbModule,
-                    emulationPackage.romFileContents,
-                ),
-            );
-        }
+    @Input() set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
+        this._emulationRunner = emulationRunner;
     }
 
 
@@ -117,9 +108,19 @@ export class AgeEmulationComponent implements OnInit, OnDestroy {
             this._changeDetector.markForCheck();
         }
 
-        if (!compareRuntimeInfo(newRuntimeInfo, this._lastRuntimeInfo)) {
+        if (!isSameRuntimeInfo(newRuntimeInfo, this._lastRuntimeInfo)) {
             this._lastRuntimeInfo = newRuntimeInfo;
             this.updateRuntimeInfo.emit(this._lastRuntimeInfo);
         }
     }
+}
+
+
+function isSameRuntimeInfo(x?: IAgeEmulationRuntimeInfo, y?: IAgeEmulationRuntimeInfo): boolean {
+    return !!x && !!y
+        && (x.romName === y.romName)
+        && (x.emulatedSeconds === y.emulatedSeconds)
+        && (x.emulationSpeed === y.emulationSpeed)
+        && (x.emulationMaxSpeed === y.emulationMaxSpeed)
+        || (!x && !y);
 }
