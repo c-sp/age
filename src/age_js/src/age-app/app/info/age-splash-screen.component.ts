@@ -14,8 +14,7 @@
 // limitations under the License.
 //
 
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} from "@angular/core";
-import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import {ChangeDetectionStrategy, Component} from "@angular/core";
 import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
 
 
@@ -39,7 +38,7 @@ import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
                 icon above.
             </div>
 
-            <div *ngIf="!audioWorkletAvailable" class="warning age-ui-error">
+            <!--div *ngIf="!audioWorkletAvailable" class="warning age-ui-error">
                 <fa-icon [icon]="faExclamationCircle" class="age-ui-big-icon warning-icon"></fa-icon>
                 <div>
                     AGE will remain silent as the required audio API is not available:
@@ -57,7 +56,7 @@ import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
                 <div>
                     This browser's timer precision may be too low for AGE to run a smooth emulation.
                 </div>
-            </div>
+            </div-->
 
         </div>
     `,
@@ -88,7 +87,7 @@ import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
             text-shadow: .07em .07em rgba(180, 150, 120, 0.4);
         }
 
-        .warning {
+        /*.warning {
             max-width: 30em;
             margin-left: auto;
             margin-right: auto;
@@ -99,92 +98,92 @@ import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
 
         .warning-icon {
             margin-right: .25em;
-        }
+        }*/
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeSplashScreenComponent implements AfterViewInit {
+export class AgeSplashScreenComponent { // implements AfterViewInit {
 
-    private static async isAudioWorkletAvailable() {
-        // tslint:disable-next-line:no-any
-        const _AudioContext = AudioContext || (window as any).webkitAudioContext;
-
-        const audioCtx = new _AudioContext();
-        const result = !!audioCtx.audioWorklet;
-        await audioCtx.close();
-
-        return result;
-    }
+    // private static async isAudioWorkletAvailable() {
+    //     // tslint:disable-next-line:no-any
+    //     const _AudioContext = AudioContext || (window as any).webkitAudioContext;
+    //
+    //     const audioCtx = new _AudioContext();
+    //     const result = !!audioCtx.audioWorklet;
+    //     await audioCtx.close();
+    //
+    //     return result;
+    // }
 
 
     readonly faFolderOpen = faFolderOpen;
-    readonly faExclamationCircle = faExclamationCircle;
+    // readonly faExclamationCircle = faExclamationCircle;
 
-    private _audioWorkletAvailable = true;
-    private _preciseTimer = true;
+    // private _audioWorkletAvailable = true;
+    // private _preciseTimer = true;
 
-    private _timestamps: number[] = [];
-    private _intervalHandle?: number;
+    // private _timestamps: number[] = [];
+    // private _intervalHandle?: number;
+    //
+    // constructor(private _cdRef: ChangeDetectorRef) {
+    // }
 
-    constructor(private _cdRef: ChangeDetectorRef) {
-    }
+    // async ngAfterViewInit() {
+    //     this._audioWorkletAvailable = await AgeSplashScreenComponent.isAudioWorkletAvailable();
+    //     this.measureTimerPrecision();
+    // }
 
-    async ngAfterViewInit() {
-        this._audioWorkletAvailable = await AgeSplashScreenComponent.isAudioWorkletAvailable();
-        this.measureTimerPrecision();
-    }
-
-    get audioWorkletAvailable(): boolean {
-        return this._audioWorkletAvailable;
-    }
-
-    get preciseTimer(): boolean {
-        return this._preciseTimer;
-    }
+    // get audioWorkletAvailable(): boolean {
+    //     return this._audioWorkletAvailable;
+    // }
+    //
+    // get preciseTimer(): boolean {
+    //     return this._preciseTimer;
+    // }
 
 
-    private measureTimerPrecision() {
-        // We measure the timer precision since it may be severely limited
-        // depending on the browser and it's configuration:
-        // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
-
-        // TODO this will produce incorrect results on some browsers,
-        //      if e.g. the tab is not visible or the browser is minimized
-
-        if (!this._intervalHandle) {
-            this._timestamps = [performance.now()];
-
-            this._intervalHandle = window.setInterval(
-                () => this.measureTimerPrecisionStep(),
-                2,
-            );
-        }
-    }
-
-    private measureTimerPrecisionStep() {
-        this._timestamps.push(performance.now());
-
-        const duration = this._timestamps[this._timestamps.length - 1] - this._timestamps[0];
-        if (duration > 200) {
-            this.finishTimerPrecisionMeasurement();
-        }
-    }
-
-    private finishTimerPrecisionMeasurement() {
-        if (this._intervalHandle) {
-            window.clearInterval(this._intervalHandle);
-            this._intervalHandle = undefined;
-
-            let minDiff = 100000;
-            for (let i = 0, end = this._timestamps.length - 1; i < end; ++i) {
-                const diff = this._timestamps[i + 1] - this._timestamps[i];
-                if (diff > 0) {
-                    minDiff = Math.min(diff, minDiff);
-                }
-            }
-
-            this._preciseTimer = minDiff < 10;
-            this._cdRef.markForCheck();
-        }
-    }
+    // private measureTimerPrecision() {
+    //     // We measure the timer precision since it may be severely limited
+    //     // depending on the browser and it's configuration:
+    //     // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+    //
+    //     // TODO this will produce incorrect results on some browsers,
+    //     //      if e.g. the tab is not visible or the browser is minimized
+    //
+    //     if (!this._intervalHandle) {
+    //         this._timestamps = [performance.now()];
+    //
+    //         this._intervalHandle = window.setInterval(
+    //             () => this.measureTimerPrecisionStep(),
+    //             2,
+    //         );
+    //     }
+    // }
+    //
+    // private measureTimerPrecisionStep() {
+    //     this._timestamps.push(performance.now());
+    //
+    //     const duration = this._timestamps[this._timestamps.length - 1] - this._timestamps[0];
+    //     if (duration > 200) {
+    //         this.finishTimerPrecisionMeasurement();
+    //     }
+    // }
+    //
+    // private finishTimerPrecisionMeasurement() {
+    //     if (this._intervalHandle) {
+    //         window.clearInterval(this._intervalHandle);
+    //         this._intervalHandle = undefined;
+    //
+    //         let minDiff = 100000;
+    //         for (let i = 0, end = this._timestamps.length - 1; i < end; ++i) {
+    //             const diff = this._timestamps[i + 1] - this._timestamps[i];
+    //             if (diff > 0) {
+    //                 minDiff = Math.min(diff, minDiff);
+    //             }
+    //         }
+    //
+    //         this._preciseTimer = minDiff < 10;
+    //         this._cdRef.markForCheck();
+    //     }
+    // }
 }

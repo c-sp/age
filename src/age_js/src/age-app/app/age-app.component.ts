@@ -15,8 +15,21 @@
 //
 
 import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from "@angular/core";
+import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
+import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
 import {faTimesCircle} from "@fortawesome/free-solid-svg-icons/faTimesCircle";
-import {AgeRomFileToLoad, IAgeEmulationRuntimeInfo} from "age-lib";
+import {
+    AgeEmulationFactoryService,
+    AgeEmulationRunner,
+    AgeTaskStatusHandlerService,
+    IAgeEmulationRuntimeInfo,
+    ITaskStatus,
+    TAgeRomFile,
+    TTaskId,
+} from "age-lib";
+import {Observable} from "rxjs";
 import {TitleBarButton} from "./title-bar/age-title-bar.component";
 
 
@@ -40,10 +53,25 @@ import {TitleBarButton} from "./title-bar/age-title-bar.component";
             </div>
         </div>
 
-        <age-splash-screen *ngIf="!romFileToLoad"></age-splash-screen>
+        <age-splash-screen *ngIf="!emulationRunner$"></age-splash-screen>
 
-        <age-emulator *ngIf="romFileToLoad"
-                      [loadRomFile]="romFileToLoad"
+        <div *ngIf="(taskStatusList$ | async) as statusList"
+             class="status-list">
+            <div *ngFor="let status of statusList; trackBy: trackByTaskId">
+
+                <ng-container [ngSwitch]="status.taskStatus">
+                    <fa-icon *ngSwitchCase="'working'" [icon]="faCog" [spin]="true"></fa-icon>
+                    <fa-icon *ngSwitchCase="'success'" [icon]="faCheck"></fa-icon>
+                    <fa-icon *ngSwitchCase="'cancelled'" [icon]="faTimes"></fa-icon>
+                    <fa-icon *ngSwitchDefault [icon]="faExclamationCircle" class="age-ui-error"></fa-icon>
+                </ng-container>
+
+                {{status.taskDescription}}
+            </div>
+        </div>
+
+        <age-emulator *ngIf="(emulationRunner$ | async) as emuRunner"
+                      [emulationRunner]="emuRunner"
                       (updateRuntimeInfo)="emulationRuntimeInfo = $event"></age-emulator>
     `,
     styles: [`
@@ -72,28 +100,59 @@ import {TitleBarButton} from "./title-bar/age-title-bar.component";
             margin-bottom: 3em;
         }
 
+        .status-list {
+            margin-top: 3em;
+            text-align: center;
+            font-size: smaller;
+        }
+
+        .status-list > fa-icon {
+            margin-right: 0.5em;
+        }
+
         age-emulator {
             flex: 1 1;
             margin: .2em;
         }
     `],
+    providers: [
+        AgeTaskStatusHandlerService,
+        AgeEmulationFactoryService,
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeAppComponent {
 
+    readonly faCheck = faCheck;
+    readonly faCog = faCog;
+    readonly faTimes = faTimes;
+    readonly faExclamationCircle = faExclamationCircle;
+
     readonly TitleBarButton = TitleBarButton;
     readonly faTimesCircle = faTimesCircle;
+    readonly taskStatusList$: Observable<ReadonlyArray<ITaskStatus> | undefined>;
 
-    @Input() romFileToLoad?: AgeRomFileToLoad;
     @Input() emulationRuntimeInfo?: IAgeEmulationRuntimeInfo;
     @Input() showDialog?: TitleBarButton;
 
     @ViewChild("dialogDiv", {static: false}) private _dialogDiv?: ElementRef;
 
+    private _emulationRunner$?: Observable<AgeEmulationRunner>;
     private _ignoreCloseDialogs = false;
 
-    openRom(fileToLoad: AgeRomFileToLoad): void {
-        this.romFileToLoad = fileToLoad;
+    constructor(private readonly _emulationFactory: AgeEmulationFactoryService,
+                statusHandler: AgeTaskStatusHandlerService) {
+
+        this.taskStatusList$ = statusHandler.taskStatusList$;
+    }
+
+
+    get emulationRunner$(): Observable<AgeEmulationRunner> | undefined {
+        return this._emulationRunner$;
+    }
+
+    openRom(romFileToLoad: TAgeRomFile): void {
+        this._emulationRunner$ = this._emulationFactory.newEmulation$(romFileToLoad);
         this.closeDialogs();
     }
 
@@ -114,5 +173,9 @@ export class AgeAppComponent {
             this.showDialog = undefined;
         }
         this._ignoreCloseDialogs = false;
+    }
+
+    trackByTaskId(_index: number, taskStatus: ITaskStatus): TTaskId {
+        return taskStatus.taskId;
     }
 }

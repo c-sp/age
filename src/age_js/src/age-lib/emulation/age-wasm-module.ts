@@ -14,14 +14,13 @@
 // limitations under the License.
 //
 
-// TODO lib
+
 export interface IEmModule {
 
     HEAPU8: Uint8Array;
     HEAP16: Int16Array;
 }
 
-// TODO lib
 export interface IEmGbModule extends IEmModule {
 
     _gb_allocate_rom_buffer(romSize: number): number;

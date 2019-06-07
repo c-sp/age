@@ -16,7 +16,7 @@
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
 import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import {AgeRomFileToLoad} from "age-lib";
+import {TAgeRomFile} from "age-lib";
 
 
 @Component({
@@ -82,13 +82,13 @@ export class AgeOpenRomComponent {
 
     readonly faInfoCircle = faInfoCircle;
 
-    @Output() readonly openRom = new EventEmitter<AgeRomFileToLoad>();
+    @Output() readonly openRom = new EventEmitter<TAgeRomFile>();
 
-    selectLocalFile(file: File) {
-        this.openRom.emit(AgeRomFileToLoad.forLocalFile(file));
+    selectLocalFile(localFile: File) {
+        this.openRom.emit({type: "local-rom-file", localFile});
     }
 
-    selectFileFromURL(url: string) {
-        this.openRom.emit(AgeRomFileToLoad.forUrl(url));
+    selectFileFromURL(fileUrl: string) {
+        this.openRom.emit({type: "rom-file-url", fileUrl});
     }
 }

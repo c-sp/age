@@ -19,14 +19,14 @@ import {BrowserModule} from "@angular/platform-browser";
 import {ServiceWorkerModule} from "@angular/service-worker";
 
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {AgeLibModule} from "../../age-lib/age-lib.module";
+import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 
 import {AgeAppComponent} from "./age-app.component";
-import {AgeSplashScreenComponent} from "./age-splash-screen.component";
 import {AgeInfoComponent} from "./info/age-info.component";
 import {AgeRepoCommitLinkComponent} from "./info/age-repo-commit-link.component";
 import {AgeRepoLinkComponent} from "./info/age-repo-link.component";
+import {AgeSplashScreenComponent} from "./info/age-splash-screen.component";
 import {AgeOpenRomLocalComponent} from "./open-rom/age-open-rom-local.component";
 import {AgeOpenRomUrlComponent} from "./open-rom/age-open-rom-url.component";
 import {AgeOpenRomComponent} from "./open-rom/age-open-rom.component";
@@ -46,6 +46,7 @@ import {AgeTitleBarComponent} from "./title-bar/age-title-bar.component";
         AgeInfoComponent,
         AgeRepoCommitLinkComponent,
         AgeRepoLinkComponent,
+        AgeSplashScreenComponent,
 
         AgeOpenRomComponent,
         AgeOpenRomLocalComponent,
@@ -54,7 +55,6 @@ import {AgeTitleBarComponent} from "./title-bar/age-title-bar.component";
         AgeTitleBarComponent,
 
         AgeAppComponent,
-        AgeSplashScreenComponent,
     ],
     bootstrap: [AgeAppComponent],
 })

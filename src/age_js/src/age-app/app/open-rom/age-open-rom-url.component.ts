@@ -128,6 +128,7 @@ export class AgeOpenRomUrlComponent {
 
     emitValidUrl(): void {
         if (this._urlInput && !this.urlHint) {
+            // TODO move cors-anywhere call to age-lib & make it optional
             const url = `https://cors-anywhere.herokuapp.com/${this._urlInput.nativeElement.value}`;
             this.openUrl.emit(url);
         }
