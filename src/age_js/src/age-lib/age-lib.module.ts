@@ -18,7 +18,6 @@ import {CommonModule} from "@angular/common";
 import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {AgeEmulationComponent} from "./emulator/age-emulation.component";
 import {AgeEmulatorComponent} from "./emulator/age-emulator.component";
 import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-renderer.component";
 
@@ -32,7 +31,6 @@ import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-
     ],
     declarations: [
         AgeCanvasRendererComponent,
-        AgeEmulationComponent,
         AgeEmulatorComponent,
     ],
     exports: [

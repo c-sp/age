@@ -16,60 +16,111 @@
 
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     EventEmitter,
+    HostListener,
     Inject,
     Input,
-    Optional,
+    OnDestroy,
+    OnInit,
     Output,
-    SkipSelf,
 } from "@angular/core";
-import {Observable} from "rxjs";
 import {AgeEmulationRunner, IAgeEmulationRuntimeInfo} from "../emulation";
-import {AgeEmulationFactoryService, AgeTaskStatusHandlerService, TAgeRomFile} from "../emulation-loader";
+import {AgeGbKeyMap} from "../settings";
+import {AgeAudio} from "./audio/age-audio";
 
 
 @Component({
     selector: "age-emulator",
     template: `
-        <age-emulation *ngIf="(emulationRunner$ | async) as emulationRunner"
-                       [emulationRunner]="emulationRunner"
-                       (updateRuntimeInfo)="updateRuntimeInfo.emit($event)"></age-emulation>
+        <age-canvas-renderer *ngIf="emulationRunner as emuRunner"
+                             [screenWidth]="emuRunner.screenSize.width"
+                             [screenHeight]="emuRunner.screenSize.height"
+                             [newFrame]="emuRunner.screenBuffer"></age-canvas-renderer>
     `,
-    styles: [`
-        :host {
-            text-align: center;
-        }
-    `],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        // these are just fallback services in case there are no global ones
-        // (global services allow for displaying loading status information and
-        // for WASM code file caching independent of this component's lifecycle)
-        AgeTaskStatusHandlerService,
-        AgeEmulationFactoryService,
-    ],
 })
-export class AgeEmulatorComponent {
+export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     @Output() readonly updateRuntimeInfo = new EventEmitter<IAgeEmulationRuntimeInfo | undefined>();
 
-    private readonly _emulationFactory: AgeEmulationFactoryService;
-    private _emulationRunner$?: Observable<AgeEmulationRunner>;
+    private readonly _keyMap = new AgeGbKeyMap();
 
-    constructor(ownEmulationFactory: AgeEmulationFactoryService,
-                @Inject(AgeEmulationFactoryService) @SkipSelf() @Optional()
-                    parentEmulationFactory: AgeEmulationFactoryService | null) {
+    private _audio!: AgeAudio;
+    private _timerHandle!: number;
+    private _emulationRunner?: AgeEmulationRunner;
+    private _lastRuntimeInfo?: IAgeEmulationRuntimeInfo;
 
-        this._emulationFactory = parentEmulationFactory || ownEmulationFactory;
+    constructor(@Inject(ChangeDetectorRef) private readonly _changeDetector: ChangeDetectorRef) {
     }
 
-    get emulationRunner$(): Observable<AgeEmulationRunner> | undefined {
-        return this._emulationRunner$;
+    ngOnInit(): void {
+        this._audio = new AgeAudio();
+        this._timerHandle = window.setInterval(
+            () => this.runEmulation(),
+            10,
+        );
     }
 
-    @Input() set loadRomFile(romFileToLoad: TAgeRomFile) {
-        this.updateRuntimeInfo.emit(undefined);
-        this._emulationRunner$ = this._emulationFactory.newEmulation$(romFileToLoad);
+    async ngOnDestroy() {
+        window.clearInterval(this._timerHandle);
+        await this._audio.close();
     }
+
+
+    get emulationRunner(): AgeEmulationRunner | undefined {
+        return this._emulationRunner;
+    }
+
+    @Input() set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
+        this._emulationRunner = emulationRunner;
+    }
+
+
+    @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
+        const gbButton = this._keyMap.getButtonForKey(event.key);
+
+        if (this._emulationRunner && gbButton) {
+            this._emulationRunner.buttonDown(gbButton);
+            event.preventDefault();
+        }
+    }
+
+    @HostListener("document:keyup", ["$event"]) handleKeyUp(event: KeyboardEvent) {
+        const gbButton = this._keyMap.getButtonForKey(event.key);
+
+        if (this._emulationRunner && gbButton) {
+            this._emulationRunner.buttonUp(gbButton);
+            event.preventDefault();
+        }
+    }
+
+
+    private runEmulation(): void {
+        let newRuntimeInfo;
+
+        if (this._emulationRunner) {
+            this._emulationRunner.emulate(this._audio.sampleRate);
+            newRuntimeInfo = this._emulationRunner.runtimeInfo;
+
+            this._audio.stream(this._emulationRunner.audioBuffer);
+            this._changeDetector.markForCheck();
+        }
+
+        if (!isSameRuntimeInfo(newRuntimeInfo, this._lastRuntimeInfo)) {
+            this._lastRuntimeInfo = newRuntimeInfo;
+            this.updateRuntimeInfo.emit(this._lastRuntimeInfo);
+        }
+    }
+}
+
+
+function isSameRuntimeInfo(x?: IAgeEmulationRuntimeInfo, y?: IAgeEmulationRuntimeInfo): boolean {
+    return !!x && !!y
+        && (x.romName === y.romName)
+        && (x.emulatedSeconds === y.emulatedSeconds)
+        && (x.emulationSpeed === y.emulationSpeed)
+        && (x.emulationMaxSpeed === y.emulationMaxSpeed)
+        || (!x && !y);
 }

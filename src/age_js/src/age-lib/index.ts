@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-export {IAgeEmulationRuntimeInfo} from "./emulation";
+export {AgeEmulationRunner, IAgeEmulationRuntimeInfo} from "./emulation";
 export {
     IAgeLocalRomFile,
     IAgeRomFileUrl,
