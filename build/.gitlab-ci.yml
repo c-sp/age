@@ -2,8 +2,7 @@ image: registry.gitlab.com/csprenger/docker-age-ci:1.1
 
 stages:
     - build
-    - test
-    - assemble
+    - test-and-assemble
     - deploy
 
 
@@ -93,17 +92,17 @@ build-js:
 
 ############################################################
 ##
-##   test
+##   test &  assemble
 ##
 ############################################################
 
 .test-release: &test-release
-    stage: test
+    stage: test-and-assemble
     dependencies:
         - build-qt-release
 
 .test-debug: &test-debug
-    stage: test
+    stage: test-and-assemble
     dependencies:
         - build-qt-debug
 
@@ -147,7 +146,7 @@ test-blargg-debug:
 
 
 lint-age-js:
-    stage: test
+    stage: test-and-assemble
     <<: *age-js-common
     script:
         - build/age_ci.sh js lint
@@ -155,16 +154,10 @@ lint-age-js:
     dependencies: []
 
 
-
-############################################################
-##
-##   assemble & deploy
-##
-############################################################
-
 # assemble pages files for this branch
+# (run parallel to tests to speed up the pipeline)
 assemble-pages:
-    stage: assemble
+    stage: test-and-assemble
     image: alpine:3.7
     dependencies:
         - build-wasm
@@ -173,11 +166,19 @@ assemble-pages:
         - build/age_ci.sh assemble-pages "${CI_COMMIT_REF_NAME}"
         - ls -lsahR "${CI_COMMIT_REF_NAME}"
     artifacts:
-        # expire_in: GitLab.com keeps artifacts forever by default
+        # no expire_in => GitLab.com keeps artifacts forever by default
         paths:
             - ${CI_COMMIT_REF_NAME}
     tags:
         - linux
+
+
+
+############################################################
+##
+##   deploy
+##
+############################################################
 
 # deploy pages artifacts for all branches
 collect-pages:
@@ -187,7 +188,7 @@ collect-pages:
 #    variables:
 #        PAGES_OUT: public
     script:
-        - node src/tools/collect_pages.js
+        - node src/age-js/tools/collect_pages.js
 #        - ls -lsahR "${PAGES_OUT}"
 #    artifacts:
 #        expire_in: 30 mins
