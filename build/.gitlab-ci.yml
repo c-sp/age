@@ -162,6 +162,7 @@ lint-age-js:
 ##
 ############################################################
 
+# assemble pages files for this branch
 assemble-pages:
     stage: assemble
     image: alpine:3.7
@@ -178,14 +179,15 @@ assemble-pages:
     tags:
         - linux
 
-pages-test:
+# deploy pages artifacts for all branches
+collect-pages:
     stage: deploy
     image: node:10-slim
     dependencies: []
 #    variables:
 #        PAGES_OUT: public
     script:
-        - node src/tools/collect-pages.js
+        - node src/tools/collect_pages.js
 #        - ls -lsahR "${PAGES_OUT}"
 #    artifacts:
 #        expire_in: 30 mins

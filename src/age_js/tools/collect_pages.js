@@ -1,6 +1,8 @@
 'use strict';
 
 const https = require('https');
+const path = require('path');
+const fs = require('fs');
 
 // we need a token to access the GitLab API
 const gitlab_api_token = process.env.GITLAB_API_TOKEN;
@@ -13,6 +15,13 @@ const age_project_id = '2686832';
     if (!gitlab_api_token) {
         throw new Error('GITLAB_API_TOKEN not set');
     }
+
+    process.argv.shift(); // node path
+    process.argv.shift(); // script path
+    if (process.argv.length !== 1) {
+        throw new Error(`expected exactly 1 argument, found ${process.argv.length} instead`);
+    }
+    const out_dir = prepare_out_dir(process.argv[0]);
 
     // get active branches
     console.log('\nrequesting AGE branches ...');
@@ -45,13 +54,15 @@ const age_project_id = '2686832';
 
     // download & extract pages artifacts, put master into root
     console.log(`\ndownloading & extracting artifacts ...`);
-    //await Promise.all(
-    jobs.filter(job => !job.__delete)
-        .forEach(async job => {
-            // TODO
-            console.log(`    ${job.finished_at}    ${job.ref}  (id ${job.id})`);
-        });
-    //);
+    await Promise.all(
+        jobs.filter(job => !job.__delete)
+            .map(async job => {
+                const artifacts = await https_request('GET', `/jobs/${job.id}/artifacts`);
+                // TODO
+                console.log(`    ${job.finished_at}    ${job.ref}  (id ${job.id})`);
+                console.log('###', artifacts);
+            })
+    );
 
     // cleanup garbage: delete artifacts that were not deployed
     if (will_delete_jobs) {
@@ -141,4 +152,16 @@ function compare_assemble_pages(a, b) {
     return ref_compare
         // same ref => newest first
         || new Date(b.finished_at).getTime() - new Date(a.finished_at).getTime();
+}
+
+
+function prepare_out_dir(out_dir) {
+    out_dir = path.resolve(__dirname, '../..', out_dir);
+    if (fs.existsSync(out_dir)) {
+        throw new Error(`directory already exists: ${out_dir}`);
+    }
+
+    fs.mkdirSync(out_dir);
+    console.log(`\ncreated output directory: ${out_dir}`);
+    return out_dir;
 }

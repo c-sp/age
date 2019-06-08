@@ -17,3 +17,4 @@ src/age_js/src/environments/version.ts
 
 # miscellaneous files
 Thumbs.db
+src/age_js/tools/api-token.txt
