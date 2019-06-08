@@ -15,5 +15,5 @@
 //
 
 export * from "./age-emulation";
-export * from "./age-misc";
-export * from "./em-modules";
+export * from "./age-emulation-runner";
+export * from "./age-wasm-module";

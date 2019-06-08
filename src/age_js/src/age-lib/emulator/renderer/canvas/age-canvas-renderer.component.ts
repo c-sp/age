@@ -19,22 +19,21 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
-    ElementRef, HostBinding,
+    ElementRef,
     Input,
     OnDestroy,
     ViewChild,
 } from "@angular/core";
 import ResizeObserver from "resize-observer-polyfill";
-import {AgeRect} from "../../../common";
-import {AgeScreenBuffer} from "../../age-emulation";
+import {AgeScreenBuffer} from "../../../emulation";
 
 
 @Component({
     selector: "age-canvas-renderer",
     template: `
         <canvas #rendererDisplay
-                width="{{screenSize.width}}"
-                height="{{screenSize.height}}"
+                [width]="screenWidth"
+                [height]="screenHeight"
                 [ngStyle]="canvasStyle"></canvas>
     `,
     styles: [`
@@ -51,6 +50,8 @@ import {AgeScreenBuffer} from "../../age-emulation";
             /*
              take the canvas element out of flow,
              so that it does not affect the parent element's size
+             => we can calculate the canvas size based on the parent element's size
+                without the current canvas size affecting the result
               */
             position: absolute;
             /* center it horizontally */
@@ -67,28 +68,21 @@ export class AgeCanvasRendererComponent implements AfterViewInit, OnDestroy {
     @ViewChild("rendererDisplay", {static: false}) private _canvas?: ElementRef;
     private _canvas2dCtx?: CanvasRenderingContext2D;
 
-    private _hostElementSize = new AgeRect(1, 1);
-    private _screenSize = new AgeRect(1, 1);
+    private _hostElementObserverEntry?: ResizeObserverEntry;
+    private _screenWidth = 1;
+    private _screenHeight = 1;
     private _canvasStyle = {
         width: "10px",
         height: "10px",
     };
-    private _hostMinWidth = "10px";
-    private _hostMinHeight = "10px";
 
     constructor(hostElementRef: ElementRef,
                 private readonly _changeDetectorRef: ChangeDetectorRef) {
 
         this._resizeObserver = new ResizeObserver(entries => {
             // we observe a single element and thus use only the first entry
-            const entry = entries && entries.length && entries[0];
-            if (entry) {
-                this._hostElementSize = new AgeRect(
-                    entry.contentRect.width,
-                    entry.contentRect.height,
-                );
-                this._calculateViewport();
-            }
+            this._hostElementObserverEntry = (entries && entries.length) ? entries[0] : undefined;
+            this._calculateViewport();
         });
         this._resizeObserver.observe(hostElementRef.nativeElement);
     }
@@ -107,53 +101,54 @@ export class AgeCanvasRendererComponent implements AfterViewInit, OnDestroy {
         return this._canvasStyle;
     }
 
-    @HostBinding("style.minWidth")
-    get hostMinWidth(): string {
-        return this._hostMinWidth;
+    get screenWidth(): number {
+        return this._screenWidth;
     }
 
-    @HostBinding("style.minHeight")
-    get hostMinHeight(): string {
-        return this._hostMinHeight;
+    @Input() set screenWidth(screenWidth: number) {
+        this._screenWidth = screenWidth;
+        this._calculateViewport();
     }
 
-    get screenSize(): AgeRect {
-        return this._screenSize;
+    get screenHeight(): number {
+        return this._screenHeight;
     }
 
-    @Input() set screenSize(screenSize: AgeRect) {
-        this._screenSize = screenSize;
-        this._hostMinWidth = `${screenSize.width}px`;
-        this._hostMinHeight = `${screenSize.height}px`;
+    @Input() set screenHeight(screenHeight: number) {
+        this._screenHeight = screenHeight;
         this._calculateViewport();
     }
 
     @Input() set newFrame(screenBuffer: AgeScreenBuffer) {
         if (this._canvas2dCtx) {
-            const numBytes = this.screenSize.width * this.screenSize.height * 4;
+            const numBytes = this.screenWidth * this.screenHeight * 4;
             const bytes = new Uint8ClampedArray(screenBuffer.buffer.buffer, screenBuffer.offset, numBytes);
-            const imageData = new ImageData(bytes, this.screenSize.width, this.screenSize.height);
+            const imageData = new ImageData(bytes, this.screenWidth, this.screenHeight);
             this._canvas2dCtx.putImageData(imageData, 0, 0);
         }
     }
 
 
     private _calculateViewport() {
-        const viewportWidth = this._hostElementSize.width;
-        const viewportHeight = this._hostElementSize.height;
+        if (!this._hostElementObserverEntry) {
+            return;
+        }
 
-        const widthFactor = viewportWidth / this._screenSize.width;
-        const heightFactor = viewportHeight / this._screenSize.height;
+        const viewportWidth = this._hostElementObserverEntry.contentRect.width;
+        const viewportHeight = this._hostElementObserverEntry.contentRect.height;
+
+        const widthFactor = viewportWidth / this.screenWidth;
+        const heightFactor = viewportHeight / this.screenHeight;
 
         if (widthFactor < heightFactor) {
             this._canvasStyle = {
                 width: `${viewportWidth}px`,
-                height: `${Math.floor(this._screenSize.height * widthFactor)}px`,
+                height: `${Math.floor(this.screenHeight * widthFactor)}px`,
             };
 
         } else {
             this._canvasStyle = {
-                width: `${Math.floor(this._screenSize.width * heightFactor)}px`,
+                width: `${Math.floor(this.screenWidth * heightFactor)}px`,
                 height: `${viewportHeight}px`,
             };
         }
