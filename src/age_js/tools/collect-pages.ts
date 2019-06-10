@@ -43,13 +43,10 @@ function main$(): Observable<any> {
                 .filter(job => !!job.artifacts_file)
                 .sort(compareAssemblePagesJobs); // sort first by ref, second by finished_at
 
-            let foundJobsToDelete = false;
             artifactJobs.forEach(job => {
                 // branch still exists and it's the latest job => use this artifact
                 if (branchesMap.get(job.ref) && !branchesMap.get(job.ref).id) {
                     branchesMap.set(job.ref, job);
-                } else {
-                    foundJobsToDelete = job.__del__ = true;
                 }
             });
 

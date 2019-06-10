@@ -183,19 +183,17 @@ assemble-pages:
 # deploy pages artifacts for all branches
 collect-pages:
     stage: deploy
-    image: node:10-slim
+    <<: *age-js-common
     dependencies: []
 #    variables:
 #        PAGES_OUT: public
     script:
-        - node src/age_js/tools/collect_pages.js
+        - cd src/age_js/tools && npx ts-node collect-pages.ts
 #        - ls -lsahR "${PAGES_OUT}"
 #    artifacts:
 #        expire_in: 30 mins
 #        paths:
 #            - ${PAGES_OUT}
-    tags:
-        - linux
 
 pages:
     stage: deploy
