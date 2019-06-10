@@ -1,8 +1,8 @@
 'use strict';
 
 const https = require('https');
-const path = require('path');
-const fs = require('fs');
+// const path = require('path');
+// const fs = require('fs');
 
 // we need a token to access the GitLab API
 const gitlab_api_token = process.env.GITLAB_API_TOKEN;
@@ -16,12 +16,12 @@ const age_project_id = '2686832';
         throw new Error('GITLAB_API_TOKEN not set');
     }
 
-    process.argv.shift(); // node path
-    process.argv.shift(); // script path
-    if (process.argv.length !== 1) {
-        throw new Error(`expected exactly 1 argument, found ${process.argv.length} instead`);
-    }
-    const out_dir = prepare_out_dir(process.argv[0]);
+    // process.argv.shift(); // node path
+    // process.argv.shift(); // script path
+    // if (process.argv.length !== 1) {
+    //     throw new Error(`expected exactly 1 argument, found ${process.argv.length} instead`);
+    // }
+    // const out_dir = prepare_out_dir(process.argv[0]);
 
     // get active branches
     console.log('\nrequesting AGE branches ...');
@@ -155,13 +155,13 @@ function compare_assemble_pages(a, b) {
 }
 
 
-function prepare_out_dir(out_dir) {
-    out_dir = path.resolve(__dirname, '../..', out_dir);
-    if (fs.existsSync(out_dir)) {
-        throw new Error(`directory already exists: ${out_dir}`);
-    }
-
-    fs.mkdirSync(out_dir);
-    console.log(`\ncreated output directory: ${out_dir}`);
-    return out_dir;
-}
+// function prepare_out_dir(out_dir) {
+//     out_dir = path.resolve(__dirname, '../..', out_dir);
+//     if (fs.existsSync(out_dir)) {
+//         throw new Error(`directory already exists: ${out_dir}`);
+//     }
+//
+//     fs.mkdirSync(out_dir);
+//     console.log(`\ncreated output directory: ${out_dir}`);
+//     return out_dir;
+// }
