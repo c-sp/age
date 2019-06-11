@@ -185,11 +185,11 @@ collect-pages:
     stage: deploy
     <<: *age-js-common
     dependencies: []
-#    variables:
-#        PAGES_OUT: public
+    variables:
+        PAGES_OUT: public
     script:
-        - cd src/age_js/tools && npx ts-node collect-pages.ts
-#        - ls -lsahR "${PAGES_OUT}"
+        - cd src/age_js/tools && npx ts-node collect-pages.ts "${PAGES_OUT}"
+        - ls -lsahR "${PAGES_OUT}"
 #    artifacts:
 #        expire_in: 30 mins
 #        paths:

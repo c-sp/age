@@ -1,3 +1,21 @@
+//
+// Copyright 2018 Christoph Sprenger
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+import {existsSync, mkdirSync} from "fs";
+import {resolve} from "path";
 import {argv} from "process";
 import {combineLatest, Observable, of} from "rxjs";
 import {catchError, map, switchMap, tap} from "rxjs/operators";
@@ -6,8 +24,16 @@ import {httpRequest$, IHttpsResponse} from "./utilities/https";
 /* tslint:disable:no-any */
 
 
-const args = argv.slice();
-console.log("###", args);
+if (argv.length < 3) {
+    console.error("output path not specified");
+    process.exit(1);
+}
+const outputPath = resolve(argv[2]);
+console.log(`\noutput path: "${outputPath}"`);
+if (!existsSync(outputPath)) {
+    mkdirSync(outputPath, {recursive: true});
+}
+
 
 main$().pipe(
     map(() => 0),
@@ -73,7 +99,7 @@ function main$(): Observable<any> {
                 console.log(`\ndeleting old artifacts ...`);
             }
             return combineLatest([
-                of(true),
+                of(true), // combineLatest requires at least one observable
                 ...jobs.jobsToDelete.map(
                     job => gitlabApi$("DELETE", `/jobs/${job.id}/artifacts`).pipe(
                         tap(() => console.log(`    ${job.finished_at}    ${job.ref}  (id ${job.id})`)),
@@ -85,16 +111,23 @@ function main$(): Observable<any> {
         }),
 
         // download artifacts to deploy
-        switchMap(jobsToKeep => combineLatest(
-            jobsToKeep.map(job => gitlabApiBinary$("GET", `/jobs/${job.id}/artifacts`)),
-        )),
+        switchMap(jobsToKeep => {
+            console.log(`\ndownloading ${jobsToKeep.length} artifact archives ...`);
+            return combineLatest(
+                jobsToKeep.map(job => gitlabApiBinary$("GET", `/jobs/${job.id}/artifacts`).pipe(
+                    tap(archive => console.log(`    ${job.ref} (id ${job.id}) finished: ${archive.length} bytes`)),
+                )),
+            );
+        }),
 
-        // TODO assemble final GitLab pages
-        map(artifacts => {
-            console.log("artifacts", artifacts);
+        // TODO extract archives into outputPath
+        switchMap(_artifacts => {
+            return of(true);
         }),
 
         // TODO adjust base-href
+
+        // TODO move "master" files up one level
     );
 }
 
