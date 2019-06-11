@@ -31,6 +31,7 @@
     "@angular/service-worker": "8.0.0",
     "@fortawesome/angular-fontawesome": "0.4.0",
     "@fortawesome/fontawesome-svg-core": "1.2.19",
+    "@fortawesome/free-brands-svg-icons": "5.9.0",
     "@fortawesome/free-solid-svg-icons": "5.9.0",
     "file-type": "11.1.0",
     "jszip": "3.2.1",

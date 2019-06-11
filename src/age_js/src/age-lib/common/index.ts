@@ -14,20 +14,4 @@
 // limitations under the License.
 //
 
-export {AgeEmulationRunner, IAgeEmulationRuntimeInfo} from "./emulation";
-
-export {
-    IAgeLocalRomFile,
-    IAgeRomFileUrl,
-    TAgeRomFile,
-    AgeEmulationFactoryService,
-    AgeTaskStatusHandlerService,
-    ITaskStatus,
-    TTaskId,
-}from "./emulation-loader";
-
-export {AgeEmulatorComponent} from "./emulator/age-emulator.component";
-
-export {AgeOnlineRomLibraryComponent, IAgeOnlineRom} from "./rom-library/age-online-rom-library.component";
-
-export {AgeLibModule} from "./age-lib.module";
+export * from "./age-linkify.component";

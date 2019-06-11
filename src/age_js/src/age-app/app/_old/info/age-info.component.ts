@@ -15,7 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {VERSION_INFO} from "../../../environments/version";
+import {VERSION_INFO} from "../../../../environments/version";
 
 
 @Component({

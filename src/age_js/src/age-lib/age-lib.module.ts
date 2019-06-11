@@ -18,8 +18,10 @@ import {CommonModule} from "@angular/common";
 import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {AgeLinkifyComponent} from "./common";
 import {AgeEmulatorComponent} from "./emulator/age-emulator.component";
 import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-renderer.component";
+import {AgeOnlineRomLibraryComponent} from "./rom-library/age-online-rom-library.component";
 
 
 @NgModule({
@@ -30,11 +32,17 @@ import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-
         FontAwesomeModule,
     ],
     declarations: [
+        AgeLinkifyComponent,
+
         AgeCanvasRendererComponent,
         AgeEmulatorComponent,
+
+        AgeOnlineRomLibraryComponent,
     ],
     exports: [
+        AgeLinkifyComponent,
         AgeEmulatorComponent,
+        AgeOnlineRomLibraryComponent,
     ],
 })
 export class AgeLibModule {
