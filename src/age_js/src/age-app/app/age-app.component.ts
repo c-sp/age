@@ -24,7 +24,7 @@ import {
     IAgeOnlineRom,
     IAgeRomFileUrl,
 } from "age-lib";
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
 import {AgeLayoutService} from "./common/age-layout.service";
 
 
@@ -88,7 +88,7 @@ export class AgeAppComponent extends AgeSubscriptionSink {
     }
 
     runRom(onlineRom: IAgeOnlineRom) {
-        this._router.navigate(["url", onlineRom.romUrl]).then();
+        from(this._router.navigate(["url", onlineRom.romUrl])).subscribe();
         const romFileToLoad: IAgeRomFileUrl = {
             type: "rom-file-url",
             fileUrl: onlineRom.romUrl,
