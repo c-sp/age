@@ -21,10 +21,9 @@ import {
     Component,
     ElementRef,
     Input,
-    OnDestroy,
     ViewChild,
 } from "@angular/core";
-import ResizeObserver from "resize-observer-polyfill";
+import {AgeResizeObserver, AgeSubscriptionSink} from "../../../common";
 import {AgeScreenBuffer} from "../../../emulation";
 
 
@@ -44,6 +43,8 @@ import {AgeScreenBuffer} from "../../../emulation";
               */
             display: block;
             height: 100%;
+            /* to position the canvas child element, this must be a non-static block */
+            position: relative;
         }
 
         canvas {
@@ -54,16 +55,15 @@ import {AgeScreenBuffer} from "../../../emulation";
                 without the current canvas size affecting the result
               */
             position: absolute;
-            /* center it horizontally */
+            /* center it */
             left: 50%;
-            transform: translateX(-50%);
+            top: 50%;
+            transform: translateX(-50%) translateY(-50%);
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeCanvasRendererComponent implements AfterViewInit, OnDestroy {
-
-    private readonly _resizeObserver: ResizeObserver;
+export class AgeCanvasRendererComponent extends AgeSubscriptionSink implements AfterViewInit {
 
     @ViewChild("rendererDisplay", {static: false}) private _canvas?: ElementRef;
     private _canvas2dCtx?: CanvasRenderingContext2D;
@@ -78,22 +78,20 @@ export class AgeCanvasRendererComponent implements AfterViewInit, OnDestroy {
 
     constructor(hostElementRef: ElementRef,
                 private readonly _changeDetectorRef: ChangeDetectorRef) {
+        super();
 
-        this._resizeObserver = new ResizeObserver(entries => {
-            // we observe a single element and thus use only the first entry
-            this._hostElementObserverEntry = (entries && entries.length) ? entries[0] : undefined;
-            this._calculateViewport();
-        });
-        this._resizeObserver.observe(hostElementRef.nativeElement);
+        this.newSubscription = new AgeResizeObserver(
+            hostElementRef,
+            entry => {
+                this._hostElementObserverEntry = entry;
+                this._calculateViewport();
+            },
+        );
     }
 
     ngAfterViewInit(): void {
         const canvas = this._canvas && this._canvas.nativeElement;
         this._canvas2dCtx = canvas.getContext("2d", {alpha: false});
-    }
-
-    ngOnDestroy(): void {
-        this._resizeObserver.disconnect();
     }
 
 
@@ -143,12 +141,12 @@ export class AgeCanvasRendererComponent implements AfterViewInit, OnDestroy {
         if (widthFactor < heightFactor) {
             this._canvasStyle = {
                 width: `${viewportWidth}px`,
-                height: `${Math.floor(this.screenHeight * widthFactor)}px`,
+                height: `${this.screenHeight * widthFactor}px`,
             };
 
         } else {
             this._canvasStyle = {
-                width: `${Math.floor(this.screenWidth * heightFactor)}px`,
+                width: `${this.screenWidth * heightFactor}px`,
                 height: `${viewportHeight}px`,
             };
         }

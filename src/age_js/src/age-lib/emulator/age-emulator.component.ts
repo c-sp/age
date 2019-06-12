@@ -20,7 +20,6 @@ import {
     Component,
     EventEmitter,
     HostListener,
-    Inject,
     Input,
     OnDestroy,
     OnInit,
@@ -47,16 +46,15 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     private readonly _keyMap = new AgeGbKeyMap();
 
-    private _audio!: AgeAudio;
+    private _audio?: AgeAudio;
     private _timerHandle!: number;
     private _emulationRunner?: AgeEmulationRunner;
     private _lastRuntimeInfo?: IAgeEmulationRuntimeInfo;
 
-    constructor(@Inject(ChangeDetectorRef) private readonly _changeDetector: ChangeDetectorRef) {
+    constructor(private readonly _changeDetector: ChangeDetectorRef) {
     }
 
     ngOnInit(): void {
-        this._audio = new AgeAudio();
         this._timerHandle = window.setInterval(
             () => this.runEmulation(),
             10,
@@ -65,7 +63,9 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     async ngOnDestroy() {
         window.clearInterval(this._timerHandle);
-        await this._audio.close();
+        if (this._audio) {
+            await this._audio.close();
+        }
     }
 
 
@@ -75,6 +75,12 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
 
     @Input() set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
         this._emulationRunner = emulationRunner;
+        // init after the emulationRunner has been set,
+        // because the latter is triggere by a user interaction which
+        // is required to create the AudioContext
+        if (!this._audio) {
+            this._audio = new AgeAudio();
+        }
     }
 
 
@@ -100,7 +106,7 @@ export class AgeEmulatorComponent implements OnInit, OnDestroy {
     private runEmulation(): void {
         let newRuntimeInfo;
 
-        if (this._emulationRunner) {
+        if (this._emulationRunner && this._audio) {
             this._emulationRunner.emulate(this._audio.sampleRate);
             newRuntimeInfo = this._emulationRunner.runtimeInfo;
 

@@ -14,6 +14,22 @@
 // limitations under the License.
 //
 
-export * from "./age-linkify.component";
-export * from "./age-resize-observer";
-export * from "./age-subscription-sink";
+import {ChangeDetectionStrategy, Component, OnDestroy} from "@angular/core";
+import {AgeLayoutService} from "../common/age-layout.service";
+
+
+@Component({
+    selector: "age-library",
+    template: ``,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AgeRouteLibraryComponent implements OnDestroy {
+
+    constructor(private readonly _layoutService: AgeLayoutService) {
+        this._layoutService.libraryRouteActive = true;
+    }
+
+    ngOnDestroy(): void {
+        this._layoutService.libraryRouteActive = false;
+    }
+}

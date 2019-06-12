@@ -90,6 +90,7 @@ export class AgeRomFileLoader {
             },
         ).pipe(
             map(httpResponse => {
+                // TODO use cors-anywhere on cors failure
                 const contentType = httpResponse.headers.get("content-type") || "";
                 if (this.supportedContentTypes.indexOf(contentType) < 0) {
                     throw new Error(`unknown content-type: ${contentType}`);

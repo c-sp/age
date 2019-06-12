@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
+import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output} from "@angular/core";
 import {faFileCode} from "@fortawesome/free-solid-svg-icons/faFileCode";
 import {faHome} from "@fortawesome/free-solid-svg-icons/faHome";
 import {Observable, of} from "rxjs";
@@ -92,7 +92,6 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
             flex-direction: row;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: center;
         }
 
         .library-item {
@@ -138,8 +137,6 @@ export class AgeOnlineRomLibraryComponent {
     readonly homepageIcon = faHome;
     readonly sourceIcon = faFileCode;
 
-    @Output() readonly romClicked = new EventEmitter<IAgeOnlineRom>();
-
     readonly onlineRoms$: Observable<ReadonlyArray<IAgeRomLibraryItem>> = of(onlineRoms()).pipe(
         map<IAgeOnlineRom[], IAgeRomLibraryItem[]>(onlineRomList => onlineRomList.map(onlineRom => {
             return {
@@ -152,6 +149,10 @@ export class AgeOnlineRomLibraryComponent {
             };
         })),
     );
+
+    @Output() readonly romClicked = new EventEmitter<IAgeOnlineRom>();
+
+    @Input() @HostBinding("style.justifyContent") justifyContent: "normal" | "center" = "normal";
 
     trackByTitle(_index: number, libraryItem: IAgeRomLibraryItem): string {
         return libraryItem.romTitle;
@@ -166,7 +167,7 @@ function onlineRoms(): IAgeOnlineRom[] {
             romTitle: "Back To Color",
             romAuthors: "SkyLyrac",
             romUrl: "https://github.com/AntonioND/back-to-color/archive/v1.1.zip",
-            romScreenshotUrl: "https://github.com/AntonioND/back-to-color/raw/master/back_to_color_screenshots.png",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00063/00063691.png",
             romAuthorsUrl: "https://www.pouet.net/user.php?who=98359",
             romSiteUrl: "https://www.pouet.net/prod.php?which=63691",
             romSourceUrl: "https://github.com/AntonioND/back-to-color",
@@ -185,7 +186,7 @@ function onlineRoms(): IAgeOnlineRom[] {
             romTitle: "Cute Demo CGB",
             romAuthors: "Mills",
             romUrl: "https://github.com/mills32/CUTE_DEMO/raw/master/0_rom/CUTEDEMO.gbc",
-            romScreenshotUrl: "https://github.com/mills32/CUTE_DEMO/raw/master/random_data/cutedemo.png",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00073/00073290.png",
             romAuthorsUrl: "https://www.pouet.net/user.php?who=98229",
             romSiteUrl: "https://www.pouet.net/prod.php?which=73290",
             romSourceUrl: "https://github.com/mills32/CUTE_DEMO",
