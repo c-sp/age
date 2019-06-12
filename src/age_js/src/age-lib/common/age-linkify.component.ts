@@ -38,24 +38,19 @@ import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
             <ng-content *ngIf="!icon"></ng-content>
         </ng-template>
     `,
-    styles: [`
-        fa-icon {
-            font-size: 1.5em;
-        }
-    `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeLinkifyComponent {
 
     @Input() linkTooltip?: string;
 
-    private _allowIcon = false;
+    private _autoIcon = false;
     private _icon?: IconDefinition;
     private _linkUrl?: string;
 
 
-    @Input() set allowIcon(allowIcon: boolean) {
-        this._allowIcon = allowIcon;
+    @Input() set autoIcon(autoIcon: boolean) {
+        this._autoIcon = autoIcon;
         this._updateIcon();
     }
 
@@ -74,7 +69,7 @@ export class AgeLinkifyComponent {
 
 
     private _updateIcon() {
-        const linkHostname = (this._allowIcon && this._linkUrl) ? new URL(this._linkUrl).hostname : "";
+        const linkHostname = (this._autoIcon && this._linkUrl) ? new URL(this._linkUrl).hostname : "";
         switch (linkHostname) {
 
             case "github.com":

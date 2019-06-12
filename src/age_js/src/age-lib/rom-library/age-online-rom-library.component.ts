@@ -15,6 +15,8 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
+import {faFileCode} from "@fortawesome/free-solid-svg-icons/faFileCode";
+import {faHome} from "@fortawesome/free-solid-svg-icons/faHome";
 import {Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
 
@@ -25,17 +27,19 @@ export interface IAgeOnlineRom {
     readonly romType: TAgeRomType;
     readonly romTitle: string; // this is the primary key
     readonly romAuthors: string;
+    readonly romUrl: string;
+    readonly romScreenshotUrl?: string;
     readonly romAuthorsUrl?: string;
     readonly romSiteUrl?: string;
-    readonly romUrl: string;
-    readonly screenshotUrl?: string;
+    readonly romSourceUrl?: string;
 }
 
 interface IAgeRomLibraryItem extends IAgeOnlineRom {
-    readonly authorsLinkTooltip: string;
+    readonly screenshotAlt: string;
     readonly clickTooltip: string;
+    readonly authorsLinkTooltip: string;
     readonly romSiteLinkTooltip: string;
-    readonly screenshotTooltip: string;
+    readonly romSourceLinkTooltip: string;
 }
 
 
@@ -46,10 +50,10 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
             <div *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle"
                  class="library-item">
 
-                <img *ngIf="libraryItem.screenshotUrl"
-                     [alt]="libraryItem.screenshotTooltip"
+                <img *ngIf="libraryItem.romScreenshotUrl"
+                     [alt]="libraryItem.screenshotAlt"
                      (click)="romClicked.emit(libraryItem)"
-                     [src]="libraryItem.screenshotUrl"
+                     [src]="libraryItem.romScreenshotUrl"
                      [title]="libraryItem.clickTooltip">
 
                 <div class="details">
@@ -66,10 +70,16 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
                     </div>
 
                     <age-linkify *ngIf="libraryItem.romSiteUrl as romSiteUrl"
-                                 [allowIcon]="true"
                                  [linkUrl]="romSiteUrl"
                                  [linkTooltip]="libraryItem.romSiteLinkTooltip">
-                        website
+                        <fa-icon [icon]="homepageIcon"></fa-icon>
+                    </age-linkify>
+
+                    <age-linkify *ngIf="libraryItem.romSourceUrl as romSourceUrl"
+                                 [autoIcon]="true"
+                                 [linkUrl]="romSourceUrl"
+                                 [linkTooltip]="libraryItem.romSourceLinkTooltip">
+                        <fa-icon [icon]="sourceIcon"></fa-icon>
                     </age-linkify>
                 </div>
 
@@ -88,22 +98,19 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
         .library-item {
             cursor: default;
             margin: 1em;
-            width: 14em;
+            width: 12em;
+            text-align: center;
         }
 
         .library-item > img {
             cursor: pointer;
             object-fit: contain;
-            max-width: 12em;
+            width: 12em;
             max-height: 12em;
-            margin: 1em 1em 0.25em;
         }
 
         .details {
             line-height: 1.6em;
-            text-align: center;
-            padding-left: 0.5em;
-            padding-right: 0.5em;
         }
 
         .details > div {
@@ -116,21 +123,32 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
             cursor: pointer;
             font-weight: bold;
         }
+
+        .details > age-linkify {
+            font-size: 1.5em;
+            line-height: 1.6em;
+            margin-left: 0.3em;
+            margin-right: 0.3em;
+        }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeOnlineRomLibraryComponent {
 
+    readonly homepageIcon = faHome;
+    readonly sourceIcon = faFileCode;
+
     @Output() readonly romClicked = new EventEmitter<IAgeOnlineRom>();
 
     readonly onlineRoms$: Observable<ReadonlyArray<IAgeRomLibraryItem>> = of(onlineRoms()).pipe(
-        map(onlineRomList => onlineRomList.map(onlineRom => {
+        map<IAgeOnlineRom[], IAgeRomLibraryItem[]>(onlineRomList => onlineRomList.map(onlineRom => {
             return {
                 ...onlineRom,
-                authorsLinkTooltip: `${onlineRom.romAuthors} website`,
+                screenshotAlt: `${onlineRom.romTitle} screenshot`,
                 clickTooltip: `run ${onlineRom.romTitle}`,
+                authorsLinkTooltip: `${onlineRom.romAuthors} website`,
                 romSiteLinkTooltip: `${onlineRom.romTitle} website`,
-                screenshotTooltip: `${onlineRom.romTitle} screenshot`,
+                romSourceLinkTooltip: `${onlineRom.romTitle} source code`,
             };
         })),
     );
@@ -146,74 +164,86 @@ function onlineRoms(): IAgeOnlineRom[] {
         {
             romType: "demo",
             romTitle: "Back To Color",
-            romAuthors: "AntonioND",
-            romAuthorsUrl: "https://github.com/AntonioND",
-            romSiteUrl: "https://github.com/AntonioND/back-to-color",
+            romAuthors: "SkyLyrac",
             romUrl: "https://github.com/AntonioND/back-to-color/archive/v1.1.zip",
-            screenshotUrl: "https://github.com/AntonioND/back-to-color/raw/master/back_to_color_screenshots.png",
+            romScreenshotUrl: "https://github.com/AntonioND/back-to-color/raw/master/back_to_color_screenshots.png",
+            romAuthorsUrl: "https://www.pouet.net/user.php?who=98359",
+            romSiteUrl: "https://www.pouet.net/prod.php?which=63691",
+            romSourceUrl: "https://github.com/AntonioND/back-to-color",
         },
         {
             romType: "demo",
             romTitle: "Cenotaph",
             romAuthors: "Dual Crew & Shining [DCS]",
+            romUrl: "https://gameboy.modermodemet.se/files/DCS-CTPH.ZIP",
+            romScreenshotUrl: "https://content.pouet.net/files/screenshots/00059/00059139.jpg",
             romAuthorsUrl: "https://www.pouet.net/groups.php?which=468",
             romSiteUrl: "https://www.pouet.net/prod.php?which=59139",
-            romUrl: "https://gameboy.modermodemet.se/files/DCS-CTPH.ZIP",
-            screenshotUrl: "https://content.pouet.net/files/screenshots/00059/00059139.jpg",
         },
         {
             romType: "demo",
             romTitle: "Cute Demo CGB",
             romAuthors: "Mills",
-            romAuthorsUrl: "https://github.com/mills32",
-            romSiteUrl: "https://github.com/mills32/CUTE_DEMO",
             romUrl: "https://github.com/mills32/CUTE_DEMO/raw/master/0_rom/CUTEDEMO.gbc",
-            screenshotUrl: "https://github.com/mills32/CUTE_DEMO/raw/master/random_data/cutedemo.png",
+            romScreenshotUrl: "https://github.com/mills32/CUTE_DEMO/raw/master/random_data/cutedemo.png",
+            romAuthorsUrl: "https://www.pouet.net/user.php?who=98229",
+            romSiteUrl: "https://www.pouet.net/prod.php?which=73290",
+            romSourceUrl: "https://github.com/mills32/CUTE_DEMO",
         },
         {
             romType: "demo",
             romTitle: "Demotronic",
             romAuthors: "1.000.000 boys [1MB]",
+            romUrl: "https://gameboy.modermodemet.se/files/MB-DTRNC.ZIP",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00007/00007175.gif",
             romAuthorsUrl: "https://www.pouet.net/groups.php?which=1237",
             romSiteUrl: "https://www.pouet.net/prod.php?which=7175",
-            romUrl: "https://gameboy.modermodemet.se/files/MB-DTRNC.ZIP",
-            screenshotUrl: "https://www.pouet.net/content/files/screenshots/00007/00007175.gif",
         },
         {
             romType: "demo",
             romTitle: "It Came from Planet Zilog",
             romAuthors: "phantasy",
+            romUrl: "https://gameboy.modermodemet.se/files/PHT-PZ.ZIP",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00065/00065345.gif",
             romAuthorsUrl: "https://www.pouet.net/groups.php?which=754",
             romSiteUrl: "https://www.pouet.net/prod.php?which=65345",
-            romUrl: "https://gameboy.modermodemet.se/files/PHT-PZ.ZIP",
-            screenshotUrl: "https://www.pouet.net/content/files/screenshots/00065/00065345.gif",
         },
         {
             romType: "demo",
             romTitle: "Mental Respirator",
             romAuthors: "phantasy",
+            romUrl: "http://gameboy.modermodemet.se/files/PHT-MR.ZIP",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00016/00016402.gif",
             romAuthorsUrl: "https://www.pouet.net/groups.php?which=754",
             romSiteUrl: "https://www.pouet.net/prod.php?which=16402",
-            romUrl: "http://gameboy.modermodemet.se/files/PHT-MR.ZIP",
-            screenshotUrl: "https://www.pouet.net/content/files/screenshots/00016/00016402.gif",
         },
         {
             romType: "demo",
             romTitle: "Oh!",
             romAuthors: "Snorpung",
+            romUrl: "https://www.nordloef.com/gbdemos/oh.zip",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00054/00054175.jpg",
             romAuthorsUrl: "https://www.pouet.net/groups.php?which=10735",
             romSiteUrl: "https://www.pouet.net/prod.php?which=54175",
-            romUrl: "https://www.nordloef.com/gbdemos/oh.zip",
-            screenshotUrl: "https://www.pouet.net/content/files/screenshots/00054/00054175.jpg",
         },
         {
             romType: "demo",
             romTitle: "Pickpocket",
             romAuthors: "inka",
+            romUrl: "https://www.izik.se/files/demos/inka-PP.zip",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00005/00005681.gif",
             romAuthorsUrl: "https://www.pouet.net/groups.php?which=1328",
             romSiteUrl: "https://www.pouet.net/prod.php?which=5681",
-            romUrl: "https://www.izik.se/files/demos/inka-PP.zip",
-            screenshotUrl: "https://www.pouet.net/content/files/screenshots/00005/00005681.gif",
+        },
+        {
+            romType: "demo",
+            romTitle: "Roboto",
+            romAuthors: "naavis",
+            romUrl: "https://naavis.untergrund.net/skrolliparty2017/naavis_roboto_skrolli-party.gb",
+            romScreenshotUrl: "https://www.pouet.net/content/files/screenshots/00069/00069944.jpg",
+            romAuthorsUrl: "https://www.pouet.net/user.php?who=97913",
+            romSiteUrl: "https://www.pouet.net/prod.php?which=69944",
+            romSourceUrl: "https://github.com/naavis/roboto-demo",
         },
     ];
 
