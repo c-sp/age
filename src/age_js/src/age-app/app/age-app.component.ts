@@ -14,85 +14,86 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {Router} from "@angular/router";
-import {
-    AgeEmulationFactoryService,
-    AgeEmulationRunner,
-    AgeSubscriptionSink,
-    AgeTaskStatusHandlerService,
-    IAgeOnlineRom,
-    IAgeRomFileUrl,
-} from "age-lib";
-import {from, Observable} from "rxjs";
-import {AgeViewService} from "./view/age-view.service";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding} from "@angular/core";
+import {AgeSubscriptionSink} from "age-lib";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
+import {AgeView, AgeViewService} from "./age-view.service";
+import {AgeCurrentRouteService} from "./routing";
 
 
 @Component({
     selector: "age-app-root",
     template: `
-        <age-emulator [emulationRunner]="emulationRunner$ | async"></age-emulator>
-        <age-rom-library (romClicked)="runRom($event)"></age-rom-library>
-        <router-outlet></router-outlet>
+        <age-app-emulator [romUrl]="romUrl$ | async"></age-app-emulator>
+        <age-app-rom-library></age-app-rom-library>
     `,
     styles: [`
         :host {
-            display: flex;
+            display: block;
             height: 100%;
-            max-width: 80em;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        age-emulator {
-            background-color: darkblue;
-            flex: 1 1;
-            min-width: 160px;
-            min-height: 144px;
-        }
-
-        age-rom-library {
-            flex: 4 4;
-            align-self: flex-start;
             overflow: auto;
+        }
+
+        :host.only-emulator age-app-emulator {
             height: 100%;
+        }
+
+        :host.only-emulator age-app-rom-library {
+            display: none;
+        }
+
+        :host.only-library age-app-emulator {
+            display: none;
+        }
+
+        :host.focus-emulator age-app-emulator {
+            height: 80%;
+        }
+
+        :host.focus-library age-app-emulator {
+            height: 30%;
         }
     `],
-    providers: [
-        AgeTaskStatusHandlerService,
-        AgeEmulationFactoryService,
-    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeAppComponent extends AgeSubscriptionSink {
 
-    private _emulationRunner$?: Observable<AgeEmulationRunner>;
+    readonly romUrl$: Observable<string | undefined>;
 
-    constructor(// hostElementRef: ElementRef,
-                layoutService: AgeViewService,
-                private readonly _emulationFactory: AgeEmulationFactoryService,
-                private readonly _router: Router) {
+    private _view = AgeView.COMBINED_FOCUS_EMULATOR;
+
+    constructor(viewService: AgeViewService,
+                currentRouteService: AgeCurrentRouteService,
+                changeDetectorRef: ChangeDetectorRef) {
         super();
 
-        // this.newSubscription = new AgeResizeObserver(
-        //     hostElementRef,
-        //     entry => console.log(entry.contentRect),
-        // );
+        this.newSubscription = viewService.viewChange$.subscribe(view => {
+            this._view = view;
+            changeDetectorRef.markForCheck();
+        });
 
-        this.newSubscription = layoutService.viewChange$.subscribe();
+        this.romUrl$ = currentRouteService.currentRoute$.pipe(
+            map(route => {
+                const romUrl = (route.route === "romUrl") && route.romUrl;
+                return romUrl ? romUrl : undefined;
+            }),
+        );
     }
 
-
-    get emulationRunner$(): Observable<AgeEmulationRunner> | undefined {
-        return this._emulationRunner$;
+    @HostBinding("class.only-emulator") get cssOnlyEmulator() {
+        return this._view === AgeView.ONLY_EMULATOR;
     }
 
-    runRom(onlineRom: IAgeOnlineRom) {
-        from(this._router.navigate(["url", onlineRom.romUrl])).subscribe();
-        const romFileToLoad: IAgeRomFileUrl = {
-            type: "rom-file-url",
-            fileUrl: onlineRom.romUrl,
-        };
-        this._emulationRunner$ = this._emulationFactory.newEmulation$(romFileToLoad);
+    @HostBinding("class.only-library") get cssOnlyLibrary() {
+        return this._view === AgeView.ONLY_LIBRARY;
+    }
+
+    @HostBinding("class.focus-emulator") get cssFocusEmulator() {
+        return this._view === AgeView.COMBINED_FOCUS_EMULATOR;
+    }
+
+    @HostBinding("class.focus-library") get cssFocusLibrary() {
+        return this._view === AgeView.COMBINED_FOCUS_LIBRARY;
     }
 }

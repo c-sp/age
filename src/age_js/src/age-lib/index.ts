@@ -22,6 +22,7 @@ export {
     IAgeRomFileUrl,
     TAgeRomFile,
     AgeEmulationFactoryService,
+    AgeTaskStatusComponent,
     AgeTaskStatusHandlerService,
     ITaskStatus,
     TTaskId,

@@ -19,6 +19,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeLinkifyComponent} from "./common";
+import {AgeTaskStatusComponent} from "./emulation-loader";
 import {AgeEmulatorComponent} from "./emulator/age-emulator.component";
 import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-renderer.component";
 import {AgeOnlineRomLibraryComponent} from "./rom-library/age-online-rom-library.component";
@@ -28,19 +29,18 @@ import {AgeOnlineRomLibraryComponent} from "./rom-library/age-online-rom-library
     imports: [
         CommonModule,
         HttpClientModule,
-
         FontAwesomeModule,
     ],
     declarations: [
         AgeLinkifyComponent,
-
+        AgeTaskStatusComponent,
         AgeCanvasRendererComponent,
         AgeEmulatorComponent,
-
         AgeOnlineRomLibraryComponent,
     ],
     exports: [
         AgeLinkifyComponent,
+        AgeTaskStatusComponent,
         AgeEmulatorComponent,
         AgeOnlineRomLibraryComponent,
     ],

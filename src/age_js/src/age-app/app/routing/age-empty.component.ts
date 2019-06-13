@@ -19,9 +19,7 @@ import {ChangeDetectionStrategy, Component} from "@angular/core";
 
 @Component({
     selector: "age-empty",
-    template: `
-        <router-outlet></router-outlet>
-    `,
+    template: "",
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeEmptyComponent {

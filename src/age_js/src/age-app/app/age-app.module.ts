@@ -23,8 +23,9 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 import {AgeAppComponent} from "./age-app.component";
-import {AgeEmptyComponent} from "./view/age-empty.component";
-import {ROUTES} from "./view/age-routing.service";
+import {AgeAppEmulatorComponent} from "./emulator/age-app-emulator.component";
+import {AgeAppRomLibraryComponent} from "./library/age-app-rom-library.component";
+import {AgeEmptyComponent, ROUTES} from "./routing";
 
 
 @NgModule({
@@ -32,12 +33,12 @@ import {ROUTES} from "./view/age-routing.service";
         BrowserModule,
         RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
-
         FontAwesomeModule,
-
         AgeLibModule,
     ],
     declarations: [
+        AgeAppEmulatorComponent,
+        AgeAppRomLibraryComponent,
         AgeEmptyComponent,
         AgeAppComponent,
     ],

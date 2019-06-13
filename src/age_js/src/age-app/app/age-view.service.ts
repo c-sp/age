@@ -17,9 +17,9 @@
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {Injectable} from "@angular/core";
 import {AgeSubscriptionSink} from "age-lib";
-import {combineLatest, Observable, Subject} from "rxjs";
+import {BehaviorSubject, combineLatest, Observable, Subject} from "rxjs";
 import {map, shareReplay, tap} from "rxjs/operators";
-import {AgeRoutingService} from "./age-routing.service";
+import {AgeCurrentRouteService} from "./routing";
 
 
 export enum AgeView {
@@ -41,17 +41,30 @@ export class AgeViewService extends AgeSubscriptionSink {
     private readonly _viewChangeSubject = new Subject<AgeView>();
     private readonly _viewChange$ = this._viewChangeSubject.asObservable().pipe(shareReplay(1));
 
-    private readonly _attributeChangeSubject = new Subject<{}>();
+    private readonly _attributeChangeSubject = new BehaviorSubject<{}>({});
     private _focusElement: TAgeFocusElement = "library";
 
     constructor(breakpointObserver: BreakpointObserver,
-                routeService: AgeRoutingService) {
+                currentRouteService: AgeCurrentRouteService) {
         super();
 
         const events$ = combineLatest([
-            breakpointObserver.observe("(min-width: 32em)"), // 512px @ font-size:16px
-            breakpointObserver.observe("(min-height: 28em)"), // 448px @ font-size:16px
-            routeService.currentRoute$,
+            //
+            // Purpose of the breakpoints is to prevent the combined view
+            // (both emulator and library) on any viewport that is too small
+            // like e.g. mobile phones.
+            //
+            // For a list of devices and their viewport have a look at:
+            // https://material.io/tools/devices/
+            //
+            // According to that site the biggest mobile phones have a viewport
+            // of 480px.
+            // We thus choose 31em (496px @ font-size:16px) in each dimension
+            // as minimal requirement to display the combined view.
+            //
+            breakpointObserver.observe("(min-width: 31em)"),
+            breakpointObserver.observe("(min-height: 31em)"),
+            currentRouteService.currentRoute$,
             this._attributeChangeSubject.asObservable(),
         ]);
 

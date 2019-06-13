@@ -15,44 +15,11 @@
 //
 
 import {Injectable} from "@angular/core";
-import {Event, NavigationEnd, Route, Router, Routes} from "@angular/router";
+import {Event, NavigationEnd, Router} from "@angular/router";
 import {AgeSubscriptionSink} from "age-lib";
 import {Observable, Subject} from "rxjs";
-import {filter, map, shareReplay, tap} from "rxjs/operators";
-import {AgeEmptyComponent} from "./age-empty.component";
-
-
-export const ROUTE_FRAGMENT_LIBRARY = "library";
-export const ROUTE_FRAGMENT_URL = "url";
-export const ROUTE_PARAM_ROM_URL = "romUrl";
-
-const REDIRECT_TO_ROOT: Route = {
-    path: "**",
-    redirectTo: "",
-};
-
-export const ROUTES: Routes = [
-        {
-            path: ROUTE_FRAGMENT_LIBRARY,
-            component: AgeEmptyComponent,
-            // redirect all child routes to "/library"
-            children: [REDIRECT_TO_ROOT],
-        },
-        {
-            path: ROUTE_FRAGMENT_URL,
-            component: AgeEmptyComponent,
-            children: [
-                {
-                    path: `:${ROUTE_PARAM_ROM_URL}`,
-                    component: AgeEmptyComponent,
-                    // redirect all child routes to "/url/:romUrl"
-                    children: [REDIRECT_TO_ROOT],
-                },
-            ],
-        },
-        // redirect all other routes to "/"
-        REDIRECT_TO_ROOT,
-    ];
+import {filter, map, shareReplay} from "rxjs/operators";
+import {ROUTE_FRAGMENT_LIBRARY, ROUTE_FRAGMENT_URL, ROUTE_PARAM_ROM_URL} from "./age-routes";
 
 
 export type TAgeRoute = IAgeRouteRoot | IAgeRouteLibrary | IAgeRouteRomUrl;
@@ -73,22 +40,22 @@ export interface IAgeRouteRomUrl {
 @Injectable({
     providedIn: "root",
 })
-export class AgeRoutingService extends AgeSubscriptionSink {
+export class AgeCurrentRouteService extends AgeSubscriptionSink {
 
     private readonly _currentRouteSubject = new Subject<TAgeRoute>();
     private readonly _currentRoute$ = this._currentRouteSubject.asObservable().pipe(shareReplay(1));
 
-    constructor(router: Router) {
+    constructor(private readonly _router: Router) {
         super();
 
-        this.newSubscription = router.events
+        this.newSubscription = this._router.events
             .pipe(
                 // only after successful navigation
                 filter(event => event instanceof NavigationEnd),
 
                 // process current route
                 map<Event, TAgeRoute>(() => {
-                    const rootRoute = router.routerState.snapshot.root;
+                    const rootRoute = this._router.routerState.snapshot.root;
 
                     if (rootRoute.firstChild) {
                         const childPath = rootRoute.firstChild.routeConfig && rootRoute.firstChild.routeConfig.path;
@@ -113,7 +80,6 @@ export class AgeRoutingService extends AgeSubscriptionSink {
                     // treat everything else as root
                     return {route: "root"};
                 }),
-                tap(route => console.log("route", route)),
             )
             .subscribe(route => this._currentRouteSubject.next(route));
     }
