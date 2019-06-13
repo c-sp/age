@@ -14,28 +14,15 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, OnInit} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
-
-
-export const URL_PARAM = "url";
+import {ChangeDetectionStrategy, Component} from "@angular/core";
 
 
 @Component({
-    selector: "age-route-url",
-    template: ``,
+    selector: "age-empty",
+    template: `
+        <router-outlet></router-outlet>
+    `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeRouteUrlComponent implements OnInit {
-
-    constructor(private readonly _activatedRoute: ActivatedRoute) {
-    }
-
-    ngOnInit(): void {
-        // as ActivatedRoute lives and dies with this component instance,
-        // we don't have to unsubscribe
-        this._activatedRoute.paramMap.subscribe(paramMap => {
-            console.log("### url", paramMap.get(URL_PARAM));
-        });
-    }
+export class AgeEmptyComponent {
 }

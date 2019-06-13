@@ -16,46 +16,21 @@
 
 import {NgModule} from "@angular/core";
 import {BrowserModule} from "@angular/platform-browser";
-import {Route, RouterModule, Routes} from "@angular/router";
+import {RouterModule} from "@angular/router";
 import {ServiceWorkerModule} from "@angular/service-worker";
 
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 import {AgeAppComponent} from "./age-app.component";
-import {AgeRouteLibraryComponent} from "./library/age-route-library.component";
-import {AgeRouteUrlComponent, URL_PARAM} from "./url/age-route-url.component";
-
-
-const redirectToRoot: Route = {
-    path: "**",
-    redirectTo: "",
-};
-
-const routes: Routes = [
-    {
-        path: "library",
-        component: AgeRouteLibraryComponent,
-        children: [redirectToRoot],
-    },
-    {
-        path: "url",
-        pathMatch: "full",
-        component: AgeRouteUrlComponent,
-    },
-    {
-        path: `url/:${URL_PARAM}`,
-        component: AgeRouteUrlComponent,
-        children: [redirectToRoot],
-    },
-    redirectToRoot,
-];
+import {AgeEmptyComponent} from "./view/age-empty.component";
+import {ROUTES} from "./view/age-routing.service";
 
 
 @NgModule({
     imports: [
         BrowserModule,
-        RouterModule.forRoot(routes),
+        RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
 
         FontAwesomeModule,
@@ -63,8 +38,7 @@ const routes: Routes = [
         AgeLibModule,
     ],
     declarations: [
-        AgeRouteLibraryComponent,
-        AgeRouteUrlComponent,
+        AgeEmptyComponent,
         AgeAppComponent,
     ],
     bootstrap: [AgeAppComponent],

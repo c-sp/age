@@ -25,7 +25,7 @@ import {
     IAgeRomFileUrl,
 } from "age-lib";
 import {from, Observable} from "rxjs";
-import {AgeLayoutService} from "./common/age-layout.service";
+import {AgeViewService} from "./view/age-view.service";
 
 
 @Component({
@@ -68,8 +68,8 @@ export class AgeAppComponent extends AgeSubscriptionSink {
 
     private _emulationRunner$?: Observable<AgeEmulationRunner>;
 
-    constructor( // hostElementRef: ElementRef,
-                layoutService: AgeLayoutService,
+    constructor(// hostElementRef: ElementRef,
+                layoutService: AgeViewService,
                 private readonly _emulationFactory: AgeEmulationFactoryService,
                 private readonly _router: Router) {
         super();
@@ -79,7 +79,7 @@ export class AgeAppComponent extends AgeSubscriptionSink {
         //     entry => console.log(entry.contentRect),
         // );
 
-        this.newSubscription = layoutService.layoutChange$.subscribe(layout => console.log("### layout", layout));
+        this.newSubscription = layoutService.viewChange$.subscribe();
     }
 
 

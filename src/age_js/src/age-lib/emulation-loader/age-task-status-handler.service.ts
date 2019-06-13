@@ -32,6 +32,13 @@ export interface ITaskStatus {
 }
 
 
+/**
+ * Helper Service for collecting information about the current rom loading process.
+ *
+ * This service must be provided by a suitable component.
+ * It must NOT be provided by the `root` injector since it should not be shared
+ * across multiple AGE web components.
+ */
 @Injectable()
 export class AgeTaskStatusHandlerService {
 

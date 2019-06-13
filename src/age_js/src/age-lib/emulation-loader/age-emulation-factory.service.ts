@@ -24,6 +24,13 @@ import {AgeTaskStatusHandlerService} from "./age-task-status-handler.service";
 import {AgeWasmModuleLoader} from "./age-wasm-module-loader";
 
 
+/**
+ * Helper Service for loading a rom file.
+ *
+ * This service must be provided by a suitable component.
+ * It must NOT be provided by the `root` injector since it should not be shared
+ * across multiple AGE web components.
+ */
 @Injectable()
 export class AgeEmulationFactoryService {
 
