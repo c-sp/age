@@ -20,6 +20,7 @@ import {argv} from "process";
 import {combineLatest, Observable, of} from "rxjs";
 import {catchError, map, switchMap, tap} from "rxjs/operators";
 import {httpRequest$, IHttpsResponse} from "./utilities/https";
+import {unzipArchive$} from "./utilities/unzip";
 
 /* tslint:disable:no-any */
 
@@ -81,7 +82,7 @@ function main$(): Observable<any> {
             console.log(`\nfound ${jobs.length} AGE CI jobs`);
             console.log(`found ${artifactJobs.length} '${assemblePagesJobName}' jobs with artifacts:`);
             artifactJobs.forEach(
-                job => console.log(`    ${job.finished_at}  ${job.__del__ ? "D" : " "} ${job.ref}  (id ${job.id})`),
+                job => console.log(`    ${job.finished_at}  ${job.__del__ ? "D" : " "} (id ${job.id})  ${job.ref}`),
             );
 
             const jobsToKeep = artifactJobs.filter(job => !job.__del__);
@@ -94,40 +95,41 @@ function main$(): Observable<any> {
         }),
 
         // delete artifacts we don't need anymore
-        switchMap(jobs => {
+        tap(jobs => {
             if (jobs.jobsToDelete.length) {
                 console.log(`\ndeleting old artifacts ...`);
             }
-            return combineLatest([
-                of(true), // combineLatest requires at least one observable
-                ...jobs.jobsToDelete.map(
-                    job => gitlabApi$("DELETE", `/jobs/${job.id}/artifacts`).pipe(
-                        tap(() => console.log(`    ${job.finished_at}    ${job.ref}  (id ${job.id})`)),
-                    ),
-                ),
-            ]).pipe(
-                map(() => jobs.jobsToKeep),
-            );
         }),
+        switchMap(jobs => combineLatest([
+            of(true), // combineLatest requires at least one observable
+            ...jobs.jobsToDelete.map(
+                job => gitlabApi$("DELETE", `/jobs/${job.id}/artifacts`).pipe(
+                    tap(() => console.log(`    ${job.finished_at}    (id ${job.id})  ${job.ref}`)),
+                ),
+            ),
+        ]).pipe(
+            map(() => jobs.jobsToKeep),
+        )),
 
         // download artifacts to deploy
-        switchMap(jobsToKeep => {
-            console.log(`\ndownloading ${jobsToKeep.length} artifact archives ...`);
-            return combineLatest(
-                jobsToKeep.map(job => gitlabApiBinary$("GET", `/jobs/${job.id}/artifacts`).pipe(
-                    tap(archive => console.log(`    ${job.ref} (id ${job.id}) finished: ${archive.length} bytes`)),
+        tap(jobsToKeep => console.log(`\ndownloading ${jobsToKeep.length} artifact archives ...`)),
+        switchMap(jobsToKeep => combineLatest(
+            jobsToKeep.map(job => gitlabApiBinary$("GET", `/jobs/${job.id}/artifacts`).pipe(
+                tap(archive => console.log(
+                    `    (id ${job.id})  ${job.ref} finished: ${archive.byteLength} bytes`,
                 )),
-            );
-        }),
+            )),
+        )),
 
-        // TODO extract archives into outputPath
-        switchMap(_artifacts => {
-            return of(true);
-        }),
-
-        // TODO adjust base-href
+        // extract archives into outputPath
+        tap(artifacts => console.log(`\nextracting ${artifacts.length} artifact archives ...`)),
+        switchMap(artifacts => combineLatest(
+            artifacts.map(artifact => unzipArchive$(artifact, outputPath)),
+        )),
 
         // TODO move "master" files up one level
+
+        // TODO adjust base-href in non-master index.html files
     );
 }
 
@@ -169,9 +171,9 @@ function gitlabApiJson$(method: string, path: string): Observable<any> {
     );
 }
 
-function gitlabApiBinary$(method: string, path: string): Observable<Uint8Array> {
+function gitlabApiBinary$(method: string, path: string): Observable<ArrayBuffer> {
     return gitlabApi$(method, path).pipe(
-        map(httpsResponse => new Uint8Array(httpsResponse.data.buffer)),
+        map(httpsResponse => httpsResponse.data.buffer),
     );
 }
 
