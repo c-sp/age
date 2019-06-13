@@ -39,7 +39,6 @@ import {Observable} from "rxjs";
     styles: [`
         :host {
             display: block;
-            height: 100%;
             min-width: 160px;
             min-height: 144px;
             text-align: center;

@@ -33,6 +33,21 @@ written by Christoph Sprenger">
             position: fixed;
             height: 100%;
             width: 100%;
+            /*
+            reset box-sizing
+            (see also: https://css-tricks.com/box-sizing/#article-header-id-6)
+            TODO we need a better solution for the AGE web component though
+            */
+            box-sizing: border-box;
+        }
+
+        /*
+        reset box-sizing
+        (see also: https://css-tricks.com/box-sizing/#article-header-id-6)
+        TODO we need a better solution for the AGE web component though
+        */
+        *, *:before, *:after {
+            box-sizing: inherit;
         }
 
         body {
@@ -49,6 +64,8 @@ written by Christoph Sprenger">
             margin: 4em;
             text-align: center;
         }
+
+        /* TODO remove the CSS below once we have proper theming */
 
         .age-ui-clickable {
             cursor: pointer;

@@ -95,8 +95,8 @@ export class AgeViewService extends AgeSubscriptionSink {
         return this._viewChange$;
     }
 
-    set focusElement(focusElement: TAgeFocusElement) {
-        this._focusElement = focusElement;
+    toggleFocusElement(): void {
+        this._focusElement = (this._focusElement === "library") ? "emulator" : "library";
         this._attributeChangeSubject.next({});
     }
 }

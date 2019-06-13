@@ -96,8 +96,8 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
 
         .library-item {
             cursor: default;
-            margin: 1em;
-            width: 12em;
+            padding: 1em;
+            width: 14em;
             text-align: center;
         }
 
