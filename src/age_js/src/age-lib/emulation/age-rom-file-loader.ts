@@ -19,7 +19,7 @@ import * as fileType from "file-type";
 import * as JSZip from "jszip";
 import {from, Observable, of} from "rxjs";
 import {map, switchMap} from "rxjs/operators";
-import {AgeTaskStatusHandlerService} from "./age-task-status-handler.service";
+import {AgeTaskStatusHandler} from "./age-task-status-handler";
 
 
 export interface IAgeLocalRomFile {
@@ -43,7 +43,7 @@ export class AgeRomFileLoader {
     ];
 
     constructor(private readonly _httpClient: HttpClient,
-                private readonly _taskStatusHandler: AgeTaskStatusHandlerService) {
+                private readonly _taskStatusHandler: AgeTaskStatusHandler) {
     }
 
     loadRomFile$(romFileToLoad: TAgeRomFile): Observable<ArrayBuffer> {

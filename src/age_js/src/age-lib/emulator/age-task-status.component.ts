@@ -14,31 +14,28 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
 import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
 import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
-import {Observable} from "rxjs";
-import {AgeTaskStatusHandlerService, ITaskStatus, TTaskId} from "./age-task-status-handler.service";
+import {IAgeTaskStatus, TAgeTaskId} from "../emulation";
 
 
 @Component({
     selector: "age-task-status",
     template: `
-        <ng-container *ngIf="(taskStatusList$ | async) as statusList">
-            <div *ngFor="let status of statusList; trackBy: trackByTaskId">
+        <div *ngFor="let status of taskStatusList; trackBy: trackByTaskId">
 
-                <ng-container [ngSwitch]="status.taskStatus">
-                    <fa-icon *ngSwitchCase="'working'" [icon]="iconWorking" [spin]="true"></fa-icon>
-                    <fa-icon *ngSwitchCase="'success'" [icon]="iconSuccess"></fa-icon>
-                    <fa-icon *ngSwitchCase="'cancelled'" [icon]="iconCancelled"></fa-icon>
-                    <fa-icon *ngSwitchDefault [icon]="iconError"></fa-icon>
-                </ng-container>
+            <ng-container [ngSwitch]="status.taskStatus">
+                <fa-icon *ngSwitchCase="'working'" [icon]="iconWorking" [spin]="true"></fa-icon>
+                <fa-icon *ngSwitchCase="'success'" [icon]="iconSuccess"></fa-icon>
+                <fa-icon *ngSwitchCase="'cancelled'" [icon]="iconCancelled"></fa-icon>
+                <fa-icon *ngSwitchDefault [icon]="iconError"></fa-icon>
+            </ng-container>
 
-                {{status.taskDescription}}
-            </div>
-        </ng-container>
+            {{status.taskDescription}}
+        </div>
     `,
     styles: [`
         fa-icon {
@@ -54,13 +51,9 @@ export class AgeTaskStatusComponent {
     readonly iconCancelled = faTimes;
     readonly iconError = faExclamationCircle;
 
-    readonly taskStatusList$: Observable<ReadonlyArray<ITaskStatus> | undefined>;
+    @Input() taskStatusList: ReadonlyArray<IAgeTaskStatus> = [];
 
-    constructor(statusHandler: AgeTaskStatusHandlerService) {
-        this.taskStatusList$ = statusHandler.taskStatusList$;
-    }
-
-    trackByTaskId(_index: number, taskStatus: ITaskStatus): TTaskId {
+    trackByTaskId(_index: number, taskStatus: IAgeTaskStatus): TAgeTaskId {
         return taskStatus.taskId;
     }
 }

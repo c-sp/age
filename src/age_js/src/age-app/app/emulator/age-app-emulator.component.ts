@@ -15,26 +15,23 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {
-    AgeEmulationFactoryService,
-    AgeEmulationRunner,
-    AgeSubscriptionSink,
-    AgeTaskStatusHandlerService,
-    IAgeRomFileUrl,
-    TAgeRomFile,
-} from "age-lib";
+import {AgeEmulationRunnerService, IAgeEmulationRunnerStatus, IAgeRomFileUrl, TAgeRomFile} from "age-lib";
 import {Observable} from "rxjs";
 
 
 @Component({
     selector: "age-app-emulator",
     template: `
-        <age-emulator *ngIf="(emulationRunner$ |async) as emuRunner; else noEmuRunner"
-                      [emulationRunner]="emuRunner"></age-emulator>
+        <ng-container *ngIf="(emulationRunnerStatus$ |async) as emuStatus">
 
-        <ng-template #noEmuRunner>
-            <age-task-status></age-task-status>
-        </ng-template>
+            <age-emulator *ngIf="emuStatus.emulationRunner as emuRunner; else noRunner"
+                          [emulationRunner]="emuRunner"></age-emulator>
+
+            <ng-template #noRunner>
+                <age-task-status [taskStatusList]="emuStatus.taskStatusList"></age-task-status>
+            </ng-template>
+
+        </ng-container>
     `,
     styles: [`
         :host {
@@ -51,23 +48,21 @@ import {Observable} from "rxjs";
         }
     `],
     providers: [
-        AgeTaskStatusHandlerService,
-        AgeEmulationFactoryService,
+        AgeEmulationRunnerService,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeAppEmulatorComponent extends AgeSubscriptionSink {
+export class AgeAppEmulatorComponent {
 
-    private _emulationRunner$?: Observable<AgeEmulationRunner>;
+    private _emulationRunnerStatus$?: Observable<IAgeEmulationRunnerStatus>;
 
-    constructor(private readonly _emulationFactory: AgeEmulationFactoryService) {
-        super();
+    constructor(private readonly _emulationRunnerService: AgeEmulationRunnerService) {
     }
 
-    get emulationRunner$(): Observable<AgeEmulationRunner> | undefined {
-        return this._emulationRunner$;
-    }
 
+    get emulationRunnerStatus$(): Observable<IAgeEmulationRunnerStatus> | undefined {
+        return this._emulationRunnerStatus$;
+    }
 
     @Input() set romUrl(fileUrl: string | null | undefined) {
         const romFile: IAgeRomFileUrl | undefined = fileUrl ? {type: "rom-file-url", fileUrl} : undefined;
@@ -76,6 +71,6 @@ export class AgeAppEmulatorComponent extends AgeSubscriptionSink {
 
 
     private _newEmulationRunner(romFile?: TAgeRomFile): void {
-        this._emulationRunner$ = romFile ? this._emulationFactory.newEmulation$(romFile) : undefined;
+        this._emulationRunnerStatus$ = romFile && this._emulationRunnerService.newEmulationRunner$(romFile);
     }
 }

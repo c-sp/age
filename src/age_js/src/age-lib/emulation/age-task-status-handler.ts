@@ -14,58 +14,41 @@
 // limitations under the License.
 //
 
-import {Injectable} from "@angular/core";
 import {BehaviorSubject, Observable, Subscriber} from "rxjs";
 import {tap} from "rxjs/operators";
 
 
-export type TTaskStatus = "working" | "success" | "failure" | "cancelled";
-export type TTaskId = number;
+export type TAgeTaskStatus = "working" | "success" | "failure" | "cancelled";
+export type TAgeTaskId = number;
 // tslint:disable-next-line:no-any
-export type TTaskError = any;
+export type TAgeTaskError = any;
 
-export interface ITaskStatus {
-    readonly taskId: TTaskId;
+export interface IAgeTaskStatus {
+    readonly taskId: TAgeTaskId;
     readonly taskDescription: string;
-    readonly taskStatus: TTaskStatus;
-    readonly taskError?: TTaskError;
+    readonly taskStatus: TAgeTaskStatus;
+    readonly taskError?: TAgeTaskError;
 }
 
 
 /**
  * Helper Service for collecting information about the current rom loading process.
- *
- * This service must be provided by a suitable component.
- * It must NOT be provided by the `root` injector since it should not be shared
- * across multiple AGE web components.
  */
-@Injectable()
-export class AgeTaskStatusHandlerService {
+export class AgeTaskStatusHandler {
 
-    private readonly _taskStatusListSubject = new BehaviorSubject<ReadonlyArray<ITaskStatus> | undefined>(undefined);
+    private readonly _taskStatusListSubject = new BehaviorSubject<ReadonlyArray<IAgeTaskStatus>>([]);
     private readonly _taskStatusList$ = this._taskStatusListSubject.asObservable();
 
-    private readonly _taskIdToListIndexMap = new Map<TTaskId, number>();
-    private readonly _taskStatusList: ITaskStatus[] = [];
+    private readonly _taskIdToListIndexMap = new Map<TAgeTaskId, number>();
+    private readonly _taskStatusList: IAgeTaskStatus[] = [];
     private _nextTaskId = 1;
 
-    get taskStatusList$(): Observable<ReadonlyArray<ITaskStatus> | undefined> {
+    get taskStatusList$(): Observable<ReadonlyArray<IAgeTaskStatus>> {
         return this._taskStatusList$;
     }
 
-    getTaskStatus(taskId: TTaskId): ITaskStatus | undefined {
-        const taskListIndex = this._taskIdToListIndexMap.get(taskId);
-        return (taskListIndex === undefined) ? undefined : this._taskStatusList[taskListIndex];
-    }
 
-
-    clearTasks(): void {
-        this._taskStatusListSubject.next(undefined);
-        this._taskIdToListIndexMap.clear();
-        this._taskStatusList.splice(0, this._taskStatusList.length);
-    }
-
-    addTask(taskDescription: string, initialStatus: TTaskStatus = "working"): TTaskId {
+    addTask(taskDescription: string, initialStatus: TAgeTaskStatus = "working"): TAgeTaskId {
         const taskId = this._nextTaskId++;
 
         this._taskStatusList.push({
@@ -79,7 +62,42 @@ export class AgeTaskStatusHandlerService {
         return taskId;
     }
 
-    setTaskStatus(taskId: TTaskId, taskStatus: TTaskStatus, taskError?: TTaskError): void {
+    addTask$<T>(taskDescription: string, obs$: Observable<T>): Observable<T> {
+        const taskId = this.addTask(taskDescription);
+        const setCancelled = () => {
+            // only working tasks can be cancelled
+            const status = this._getTaskStatus(taskId);
+            if ((status && status.taskStatus) === "working") {
+                this._setTaskStatus(taskId, "cancelled");
+            }
+        };
+
+        return obs$
+            .pipe(
+                tap({
+                    // we use "next" instead of "complete" to detect task success the moment
+                    // tap() is reached instead of the moment of observable completion
+                    // (the latter might never occur, e.g. if a subsequent operator throws an error)
+                    next: () => this._setTaskStatus(taskId, "success"),
+                    error: err => this._setTaskStatus(taskId, "failure", err),
+                }),
+            )
+            // to detect task cancellation we have to add a teardown logic to the subscriber
+            .lift({
+                call(subscriber: Subscriber<T>, source: Observable<T>): void {
+                    subscriber.add(setCancelled);
+                    source.subscribe(subscriber);
+                },
+            });
+    }
+
+
+    private _getTaskStatus(taskId: TAgeTaskId): IAgeTaskStatus | undefined {
+        const taskListIndex = this._taskIdToListIndexMap.get(taskId);
+        return (taskListIndex === undefined) ? undefined : this._taskStatusList[taskListIndex];
+    }
+
+    private _setTaskStatus(taskId: TAgeTaskId, taskStatus: TAgeTaskStatus, taskError?: TAgeTaskError): void {
         const taskListIndex = this._taskIdToListIndexMap.get(taskId);
         if (taskListIndex === undefined) {
             return;
@@ -91,34 +109,5 @@ export class AgeTaskStatusHandlerService {
             taskError,
         };
         this._taskStatusListSubject.next(this._taskStatusList);
-    }
-
-    addTask$<T>(taskDescription: string, obs$: Observable<T>): Observable<T> {
-        const taskId = this.addTask(taskDescription);
-        const setCancelled = () => {
-            // only working tasks can be cancelled
-            const status = this.getTaskStatus(taskId);
-            if ((status && status.taskStatus) === "working") {
-                this.setTaskStatus(taskId, "cancelled");
-            }
-        };
-
-        return obs$
-            .pipe(
-                tap({
-                    // we use "next" instead of "complete" to detect task success the moment
-                    // tap() is reached instead of the moment of observable completion
-                    // (the latter might never occur, e.g. if a subsequent operator throws an error)
-                    next: () => this.setTaskStatus(taskId, "success"),
-                    error: err => this.setTaskStatus(taskId, "failure", err),
-                }),
-            )
-            // to detect task cancellation we have to add a teardown logic to the subscriber
-            .lift({
-                call(subscriber: Subscriber<T>, source: Observable<T>): void {
-                    subscriber.add(setCancelled);
-                    source.subscribe(subscriber);
-                },
-            });
     }
 }

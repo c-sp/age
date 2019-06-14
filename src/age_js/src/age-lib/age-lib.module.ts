@@ -18,8 +18,8 @@ import {CommonModule} from "@angular/common";
 import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {AgeTaskStatusComponent} from "./emulation-loader";
 import {AgeEmulatorComponent} from "./emulator/age-emulator.component";
+import {AgeTaskStatusComponent} from "./emulator/age-task-status.component";
 import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-renderer.component";
 
 

@@ -15,19 +15,9 @@
 //
 
 export * from "./common";
-export {AgeEmulationRunner, IAgeEmulationRuntimeInfo} from "./emulation";
-
-export {
-    IAgeLocalRomFile,
-    IAgeRomFileUrl,
-    TAgeRomFile,
-    AgeEmulationFactoryService,
-    AgeTaskStatusComponent,
-    AgeTaskStatusHandlerService,
-    ITaskStatus,
-    TTaskId,
-}from "./emulation-loader";
+export * from "./emulation";
 
 export {AgeEmulatorComponent} from "./emulator/age-emulator.component";
+export {AgeTaskStatusComponent} from "./emulator/age-task-status.component";
 
 export {AgeLibModule} from "./age-lib.module";

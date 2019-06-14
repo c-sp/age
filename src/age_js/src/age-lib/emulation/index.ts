@@ -14,6 +14,11 @@
 // limitations under the License.
 //
 
-export * from "./age-emulation";
+export {AgeRect, AgeScreenBuffer} from "./age-emulation";
+
+export * from "./age-emulation-runner.service";
 export * from "./age-emulation-runner";
-export * from "./age-wasm-module";
+
+export {IAgeLocalRomFile, IAgeRomFileUrl, TAgeRomFile} from "./age-rom-file-loader";
+
+export {IAgeTaskStatus, TAgeTaskId, TAgeTaskStatus, TAgeTaskError} from "./age-task-status-handler";
