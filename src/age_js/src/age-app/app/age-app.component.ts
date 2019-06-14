@@ -26,7 +26,7 @@ import {AgeCurrentRouteService} from "./routing";
     selector: "age-app-root",
     template: `
         <age-app-emulator [romUrl]="romUrl$ | async"></age-app-emulator>
-        <age-app-rom-library></age-app-rom-library>
+        <age-rom-library></age-rom-library>
     `,
     styles: [`
         :host {
@@ -39,7 +39,7 @@ import {AgeCurrentRouteService} from "./routing";
             height: 100%;
         }
 
-        :host.only-emulator age-app-rom-library {
+        :host.only-emulator age-rom-library {
             display: none;
         }
 

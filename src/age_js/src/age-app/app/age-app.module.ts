@@ -24,7 +24,7 @@ import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 import {AgeAppComponent} from "./age-app.component";
 import {AgeAppEmulatorComponent} from "./emulator/age-app-emulator.component";
-import {AgeAppRomLibraryComponent} from "./library/age-app-rom-library.component";
+import {AgeRomLibraryComponent, AgeRomLibraryContentsComponent, AgeRomLinkComponent} from "./rom-library";
 import {AgeEmptyComponent, ROUTES} from "./routing";
 
 
@@ -38,7 +38,9 @@ import {AgeEmptyComponent, ROUTES} from "./routing";
     ],
     declarations: [
         AgeAppEmulatorComponent,
-        AgeAppRomLibraryComponent,
+        AgeRomLibraryComponent,
+        AgeRomLibraryContentsComponent,
+        AgeRomLinkComponent,
         AgeEmptyComponent,
         AgeAppComponent,
     ],

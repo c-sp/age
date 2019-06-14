@@ -44,7 +44,7 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
 
 
 @Component({
-    selector: "age-rom-library",
+    selector: "age-rom-library-contents",
     template: `
         <ng-container *ngIf="(onlineRoms$ | async) as libraryItems">
             <div *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle"
@@ -63,24 +63,24 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
 
                     <div>
                         by
-                        <age-linkify [linkUrl]="libraryItem.romAuthorsUrl"
-                                     [linkTooltip]="libraryItem.authorsLinkTooltip">
+                        <age-rom-link [linkUrl]="libraryItem.romAuthorsUrl"
+                                      [linkTooltip]="libraryItem.authorsLinkTooltip">
                             {{libraryItem.romAuthors}}
-                        </age-linkify>
+                        </age-rom-link>
                     </div>
 
-                    <age-linkify *ngIf="libraryItem.romSiteUrl as romSiteUrl"
-                                 [linkUrl]="romSiteUrl"
-                                 [linkTooltip]="libraryItem.romSiteLinkTooltip">
+                    <age-rom-link *ngIf="libraryItem.romSiteUrl as romSiteUrl"
+                                  [linkUrl]="romSiteUrl"
+                                  [linkTooltip]="libraryItem.romSiteLinkTooltip">
                         <fa-icon [icon]="homepageIcon"></fa-icon>
-                    </age-linkify>
+                    </age-rom-link>
 
-                    <age-linkify *ngIf="libraryItem.romSourceUrl as romSourceUrl"
-                                 [autoIcon]="true"
-                                 [linkUrl]="romSourceUrl"
-                                 [linkTooltip]="libraryItem.romSourceLinkTooltip">
+                    <age-rom-link *ngIf="libraryItem.romSourceUrl as romSourceUrl"
+                                  [autoIcon]="true"
+                                  [linkUrl]="romSourceUrl"
+                                  [linkTooltip]="libraryItem.romSourceLinkTooltip">
                         <fa-icon [icon]="sourceIcon"></fa-icon>
-                    </age-linkify>
+                    </age-rom-link>
                 </div>
 
             </div>
@@ -123,7 +123,7 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
             font-weight: bold;
         }
 
-        .details > age-linkify {
+        .details > age-rom-link {
             font-size: 1.5em;
             line-height: 1.6em;
             margin-left: 0.3em;
@@ -132,7 +132,7 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeOnlineRomLibraryComponent {
+export class AgeRomLibraryContentsComponent {
 
     readonly homepageIcon = faHome;
     readonly sourceIcon = faFileCode;

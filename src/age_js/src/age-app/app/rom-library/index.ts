@@ -14,5 +14,6 @@
 // limitations under the License.
 //
 
-export * from "./age-resize-observer";
-export * from "./age-subscription-sink";
+export * from "./age-rom-library.component";
+export * from "./age-rom-library-contents.component";
+export * from "./age-rom-link.component";

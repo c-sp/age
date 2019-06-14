@@ -15,15 +15,15 @@
 //
 
 import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {IAgeOnlineRom} from "age-lib";
 import {AgeNavigationService} from "../routing";
+import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 
 
 @Component({
-    selector: "age-app-rom-library",
+    selector: "age-rom-library",
     template: `
-        <age-rom-library (romClicked)="runRom($event)"
-                         [justifyContent]="'center'"></age-rom-library>
+        <age-rom-library-contents (romClicked)="runRom($event)"
+                                  [justifyContent]="'center'"></age-rom-library-contents>
     `,
     styles: [`
         :host {
@@ -35,7 +35,7 @@ import {AgeNavigationService} from "../routing";
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeAppRomLibraryComponent {
+export class AgeRomLibraryComponent {
 
     constructor(private readonly _navigationService: AgeNavigationService) {
     }

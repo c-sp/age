@@ -21,7 +21,7 @@ import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
 
 
 @Component({
-    selector: "age-linkify",
+    selector: "age-rom-link",
     template: `
         <a *ngIf="linkUrl; else contents"
            class="age-ui-clickable"
@@ -40,7 +40,7 @@ import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeLinkifyComponent {
+export class AgeRomLinkComponent {
 
     @Input() linkTooltip?: string;
 

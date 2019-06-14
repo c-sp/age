@@ -29,6 +29,5 @@ export {
 }from "./emulation-loader";
 
 export {AgeEmulatorComponent} from "./emulator/age-emulator.component";
-export {AgeOnlineRomLibraryComponent, IAgeOnlineRom} from "./rom-library/age-online-rom-library.component";
 
 export {AgeLibModule} from "./age-lib.module";
