@@ -86,6 +86,8 @@ build-js:
     <<: *artifacts
     <<: *age-js-common
     script:
+        - PAGES_OUT="`pwd`/${PAGES_SUBDIR}"
+        - echo "${PAGES_OUT}"
         - build/age_ci.sh js build --progress=false --base-href /AGE/
 
 
@@ -189,6 +191,7 @@ collect-pages:
         PAGES_SUBDIR: public
         PAGES_OUT: $(pwd)${PAGES_SUBDIR}
     script:
+        - PAGES_OUT="`pwd`/${PAGES_SUBDIR}"
         - echo "${PAGES_OUT}"
         - cd src/age_js/tools && npx ts-node collect-pages.ts "${PAGES_SUBDIR}"
         - ls -lsahR "${PAGES_SUBDIR}"
