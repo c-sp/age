@@ -186,8 +186,13 @@ collect_pages()
         rm -rf "$PAGES_DIR"
     fi
 
-    # create the directory and change to it
+    # create the pages directory
     mkdir -p "$PAGES_DIR"
+
+    # always run npm install to make sure node_modules exists and is up to date
+    npm install
+
+    # collect pages for all branches
     echo "collecting pages in \"$PAGES_DIR\""
     cd "$TOOLS_DIR" && npx ts-node collect-pages.ts "$PAGES_DIR"
 }
