@@ -186,10 +186,12 @@ collect-pages:
     <<: *age-js-common
     dependencies: []
     variables:
-        PAGES_OUT: public
+        PAGES_SUBDIR: public
+        PAGES_OUT: $(pwd)${PAGES_SUBDIR}
     script:
-        - cd src/age_js/tools && npx ts-node collect-pages.ts "${PAGES_OUT}"
-        - ls -lsahR "${PAGES_OUT}"
+        - echo "${PAGES_OUT}"
+        - cd src/age_js/tools && npx ts-node collect-pages.ts "${PAGES_SUBDIR}"
+        - ls -lsahR "${PAGES_SUBDIR}"
 #    artifacts:
 #        expire_in: 30 mins
 #        paths:

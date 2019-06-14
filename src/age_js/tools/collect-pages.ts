@@ -14,11 +14,13 @@
 // limitations under the License.
 //
 
+import {exec} from "child_process";
 import {existsSync, mkdirSync} from "fs";
 import {resolve} from "path";
 import {argv} from "process";
-import {combineLatest, Observable, of} from "rxjs";
+import {combineLatest, from, Observable, of} from "rxjs";
 import {catchError, map, switchMap, tap} from "rxjs/operators";
+import {promisify} from "util";
 import {httpRequest$, IHttpsResponse} from "./utilities/https";
 import {unzipArchive$} from "./utilities/unzip";
 
@@ -127,7 +129,9 @@ function main$(): Observable<any> {
             artifacts.map(artifact => unzipArchive$(artifact, outputPath)),
         )),
 
-        // TODO move "master" files up one level
+        // copy "master" files up one level
+        tap(() => console.log(`\ncopying master files`)),
+        switchMap(() => from(promisify(exec)("cp -r master/* .", {cwd: outputPath}))),
 
         // TODO adjust base-href in non-master index.html files
     );
