@@ -76,6 +76,8 @@ function main$(): Observable<any> {
                 // branch still exists and it's the latest job => use this artifact
                 if (branchesMap.get(job.ref) && !branchesMap.get(job.ref).id) {
                     branchesMap.set(job.ref, job);
+                } else {
+                    job.__del__ = true;
                 }
             });
 
