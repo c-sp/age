@@ -20,6 +20,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_TEST"
     echo "    $0 $CMD_JS $JS_LINT"
     echo "    $0 $CMD_ASSEMBLE_PAGES <gitlab-pages-subdir>"
+    echo "    $0 $CMD_COLLECT_PAGES <gitlab-pages-subdir>"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_BLARGG <path-to-mooneye-tests>"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
@@ -32,6 +33,12 @@ print_usage_and_exit()
 out_dir()
 {
     echo "$BUILD_DIR/$AGE_ARTIFACTS_SUBDIR/$1"
+}
+
+age_js_dir()
+{
+    AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
+    echo "$AGE_JS_DIR"
 }
 
 switch_to_out_dir()
@@ -112,7 +119,7 @@ age_js()
         *) print_usage_and_exit ;;
     esac
 
-    AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
+    AGE_JS_DIR=$(age_js_dir)
     cd "$AGE_JS_DIR"
     echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
 
@@ -159,6 +166,30 @@ assemble_pages()
     cp -r "$JS_DIR/"* "$PAGES_DIR"
     cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
     cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
+}
+
+collect_pages()
+{
+    # exit if the output path has not been specified
+    if ! [ -n "$1" ]; then
+        print_usage_and_exit
+    fi
+
+    AGE_JS_DIR=$(age_js_dir)
+    TOOLS_DIR="$AGE_JS_DIR/tools"
+
+    PAGES_DIR=`cd "$BUILD_DIR/.." && pwd -P`
+    PAGES_DIR="$PAGES_DIR/$1"
+
+    # remove previous pages
+    if [ -e "$PAGES_DIR" ]; then
+        rm -rf "$PAGES_DIR"
+    fi
+
+    # create the directory and change to it
+    mkdir -p "$PAGES_DIR"
+    echo "collecting pages in \"$PAGES_DIR\""
+    cd "$TOOLS_DIR" && npx ts-node collect-pages.ts "$PAGES_DIR"
 }
 
 run_doxygen()
@@ -232,6 +263,7 @@ CMD_QT=qt
 CMD_WASM=wasm
 CMD_JS=js
 CMD_ASSEMBLE_PAGES=assemble-pages
+CMD_COLLECT_PAGES=collect-pages
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -264,6 +296,7 @@ case ${CMD} in
     ${CMD_WASM}) build_age_wasm $@ ;;
     ${CMD_JS}) age_js $@ ;;
     ${CMD_ASSEMBLE_PAGES}) assemble_pages $@ ;;
+    ${CMD_COLLECT_PAGES}) collect_pages $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
     ${CMD_TEST}) run_tests $@ $@ ;;
 
