@@ -92,7 +92,7 @@ build-js:
 
 ############################################################
 ##
-##   test &  assemble
+##   test & assemble
 ##
 ############################################################
 
@@ -180,8 +180,12 @@ assemble-pages:
 ##
 ############################################################
 
-# deploy pages artifacts for all branches
-collect-pages:
+# Deploy GitLab Pages using the artifacts of all current branches.
+#
+# To trigger GitLab Pages deployment this job has to be called "pages".
+# Only files in the "public" directory will be deployed.
+# (see also: https://docs.gitlab.com/ee/user/project/pages/getting_started_part_four.html)
+pages:
     stage: deploy
     <<: *age-js-common
     dependencies: []
@@ -190,27 +194,7 @@ collect-pages:
     script:
         - build/age_ci.sh collect-pages "${PAGES_SUBDIR}"
         - ls -lsahR "${PAGES_SUBDIR}"
-#    artifacts:
-#        expire_in: 30 mins
-#        paths:
-#            - ${PAGES_OUT}
-
-pages:
-    stage: deploy
-    image: alpine:3.7
-    dependencies:
-        - build-wasm
-        - build-js
-    variables:
-        PAGES_OUT: public
-    script:
-        - build/age_ci.sh assemble-pages "${PAGES_OUT}"
-        - ls -lsahR "${PAGES_OUT}"
     artifacts:
         expire_in: 30 mins
         paths:
-            - ${PAGES_OUT}
-    tags:
-        - linux
-    only:
-        - master
+            - ${PAGES_SUBDIR}
