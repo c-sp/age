@@ -190,7 +190,7 @@ collect_pages()
     mkdir -p "$PAGES_DIR"
 
     # always run npm install to make sure node_modules exists and is up to date
-    npm install
+    cd "$AGE_JS_DIR" && npm install
 
     # collect pages for all branches
     echo "collecting pages in \"$PAGES_DIR\""
