@@ -15,14 +15,14 @@
 //
 
 import {exec} from "child_process";
-import {existsSync, mkdirSync} from "fs";
+import {existsSync, mkdir, mkdirSync, readFile, writeFile} from "fs";
+import * as JSZip from "jszip";
 import {resolve} from "path";
 import {argv} from "process";
 import {combineLatest, from, Observable, of} from "rxjs";
 import {catchError, map, switchMap, tap} from "rxjs/operators";
 import {promisify} from "util";
 import {httpRequest$, IHttpsResponse} from "./utilities/https";
-import {unzipArchive$} from "./utilities/unzip";
 
 /* tslint:disable:no-any */
 
@@ -70,7 +70,11 @@ function main$(): Observable<any> {
             const artifactJobs = jobs
                 .filter(job => job.name === assemblePagesJobName)
                 .filter(job => !!job.artifacts_file)
-                .sort(compareAssemblePagesJobs); // sort first by ref, second by finished_at
+                .sort(
+                    // sort first by ref, second by finished_at
+                    (a, b) => a.ref.localeCompare(b.ref)
+                        || (new Date(b.finished_at).getTime() - new Date(a.finished_at).getTime()),
+                );
 
             artifactJobs.forEach(job => {
                 // branch still exists and it's the latest job => use this artifact
@@ -132,10 +136,16 @@ function main$(): Observable<any> {
         )),
 
         // copy "master" files up one level
-        tap(() => console.log(`\ncopying master files`)),
-        switchMap(() => from(promisify(exec)("cp -r master/* .", {cwd: outputPath}))),
+        // (do this before adjusting base-href)
+        tap(() => console.log(`copying master files ...`)),
+        switchMap(indexHtmlFiles => from(promisify(exec)("cp -r master/* .", {cwd: outputPath})).pipe(
+            map(() => indexHtmlFiles),
+        )),
 
-        // TODO adjust base-href in non-master index.html files
+        // adjust base-href in non-master index.html files
+        tap(() => console.log(`adjusting index.html base-href in subdirectories ...`)),
+        // TODO why is indexHtmlFiles inferred as "any"?
+        switchMap(indexHtmlFiles => combineLatest((indexHtmlFiles as string[]).map(adjustBaseHref$))),
     );
 }
 
@@ -160,14 +170,6 @@ function getCiJobs$(): Observable<any[]> {
             }),
         );
     }
-}
-
-
-function compareAssemblePagesJobs(a: any, b: any) {
-    const refCompare = a.ref.localeCompare(b.ref);
-    return refCompare
-        // same ref => newest first
-        || new Date(b.finished_at).getTime() - new Date(a.finished_at).getTime();
 }
 
 
@@ -197,4 +199,66 @@ function gitlabApi$(method: string, path: string): Observable<IHttpsResponse> {
         },
     };
     return httpRequest$(options);
+}
+
+
+export function unzipArchive$(archiveData: ArrayBuffer, destPath: string): Observable<string> {
+    let indexHtmlPath = "";
+
+    return from(JSZip.loadAsync(archiveData)).pipe(
+        switchMap(zipArchive => {
+            indexHtmlPath = Object.keys(zipArchive.files).find(fileName => fileName.endsWith("index.html")) || "";
+            indexHtmlPath = indexHtmlPath ? resolve(destPath, indexHtmlPath) : indexHtmlPath;
+            return combineLatest(
+                Object.keys(zipArchive.files).map(fileName => unzipFile$(zipArchive, fileName, destPath)),
+            );
+        }),
+        map(() => indexHtmlPath),
+    );
+}
+
+function unzipFile$(zipArchive: JSZip, fileName: string, destPath: string): Observable<void> {
+    // file is a directory => create it
+    if (fileName.endsWith("/")) {
+        const dirPath = `${destPath}/${fileName}`;
+        return from(promisify(mkdir)(dirPath, {recursive: true}));
+    }
+
+    // write file
+    return from(zipArchive.file(fileName).async("nodebuffer")).pipe(
+        switchMap(fileContents => {
+            const destFilePath = `${destPath}/${fileName}`;
+            return from(promisify(writeFile)(destFilePath, fileContents));
+        }),
+    );
+}
+
+
+function adjustBaseHref$(filePath: string): Observable<void> {
+    return from(promisify(readFile)(filePath, "utf-8")).pipe(
+        switchMap(fileContents => {
+            // extract branch name from path
+            if (!filePath.startsWith(outputPath)) {
+                throw new Error(`invalid index.html path: ${filePath}`);
+            }
+            const lastSlashIdx = filePath.lastIndexOf("/"); // TODO this might not work for Windows
+            const subDirBeginIdx = outputPath.length + 1; // don't include the slash
+            const subDir = filePath.substring(subDirBeginIdx, lastSlashIdx);
+
+            // find "base href" element
+            const baseHrefBeginIdx = fileContents.indexOf("<base href=\"");
+            const baseHrefEndQuoteIdx = fileContents.indexOf("\">", baseHrefBeginIdx);
+            if ((baseHrefBeginIdx < 0) || (baseHrefEndQuoteIdx < 0)) {
+                throw new Error(`${filePath}: base-href not found`);
+            }
+
+            // insert branch name
+            const firstPart = fileContents.slice(0, baseHrefEndQuoteIdx);
+            const lastPart = fileContents.slice(baseHrefEndQuoteIdx);
+            const newFileContents = `${firstPart}${subDir}/${lastPart}`;
+
+            //  write file
+            return from(promisify(writeFile)(filePath, newFileContents));
+        }),
+    );
 }
