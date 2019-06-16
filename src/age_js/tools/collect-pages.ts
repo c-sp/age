@@ -15,13 +15,14 @@
 //
 
 import {exec} from "child_process";
-import {existsSync, mkdir, mkdirSync, readFile, writeFile} from "fs";
+import {createReadStream, createWriteStream, existsSync, mkdir, mkdirSync, readFile, writeFile} from "fs";
 import * as JSZip from "jszip";
 import {resolve} from "path";
 import {argv} from "process";
 import {combineLatest, from, Observable, of} from "rxjs";
 import {catchError, map, switchMap, tap} from "rxjs/operators";
 import {promisify} from "util";
+import {createGzip} from "zlib";
 import {httpRequest$, IHttpsResponse} from "./utilities/https";
 
 /* tslint:disable:no-any */
@@ -234,7 +235,7 @@ function unzipFile$(zipArchive: JSZip, fileName: string, destPath: string): Obse
 }
 
 
-function adjustBaseHref$(filePath: string): Observable<void> {
+function adjustBaseHref$(filePath: string): Observable<{}> {
     return from(promisify(readFile)(filePath, "utf-8")).pipe(
         switchMap(fileContents => {
             // extract branch name from path
@@ -258,7 +259,20 @@ function adjustBaseHref$(filePath: string): Observable<void> {
             const newFileContents = `${firstPart}${subDir}/${lastPart}`;
 
             //  write file
-            return from(promisify(writeFile)(filePath, newFileContents));
+            return from(promisify(writeFile)(filePath, newFileContents)).pipe(
+                map(() => newFileContents),
+            );
         }),
+
+        // gzip new index.html
+        switchMap(() => from(new Promise((_resolve, _reject) => {
+            const gzip = createGzip();
+            const readStream = createReadStream(filePath);
+            const writeStream = createWriteStream(`${filePath}.gz`);
+            readStream.on("error", _reject);
+            writeStream.on("error", _reject);
+            writeStream.on("finish", _resolve); // wait until finished
+            readStream.pipe(gzip).pipe(writeStream);
+        }))),
     );
 }
