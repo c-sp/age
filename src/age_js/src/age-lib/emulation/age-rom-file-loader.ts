@@ -37,11 +37,6 @@ export type TAgeRomFile = IAgeLocalRomFile | IAgeRomFileUrl;
 
 export class AgeRomFileLoader {
 
-    readonly supportedContentTypes: ReadonlyArray<string> = [
-        "application/octet-stream",
-        "application/zip",
-    ];
-
     constructor(private readonly _httpClient: HttpClient,
                 private readonly _taskStatusHandler: AgeTaskStatusHandler) {
     }
@@ -90,16 +85,14 @@ export class AgeRomFileLoader {
             },
         ).pipe(
             map(httpResponse => {
-                const contentType = httpResponse.headers.get("content-type") || "";
-                if (this.supportedContentTypes.indexOf(contentType) < 0) {
-                    throw new Error(`unknown content-type: ${contentType}`);
-                }
-
+                // We don't care for the content-type here, because:
+                //  - we detect zip files by magic number using the file-type library
+                //  - depending on the server configuration the content-type is simply unusable
+                //    (e.g. text/plain for binary data)
                 const fileContents = httpResponse.body;
                 if (!fileContents || (fileContents.byteLength < 1)) {
                     throw new Error(`rom file is empty`);
                 }
-
                 return fileContents;
             }),
         );
