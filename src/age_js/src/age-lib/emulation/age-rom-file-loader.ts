@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
 import * as fileType from "file-type";
 import * as JSZip from "jszip";
 import {from, Observable, of} from "rxjs";
-import {map, switchMap} from "rxjs/operators";
+import {catchError, map, switchMap} from "rxjs/operators";
 import {AgeTaskStatusHandler} from "./age-task-status-handler";
 
 
@@ -81,7 +81,7 @@ export class AgeRomFileLoader {
     }
 
 
-    private _loadRomFileUrl$(romFileUrl: string): Observable<ArrayBuffer> {
+    private _loadRomFileUrl$(romFileUrl: string, isCorsRetry = false): Observable<ArrayBuffer> {
         const loadRom$ = this._httpClient.get(
             romFileUrl,
             {
@@ -90,7 +90,6 @@ export class AgeRomFileLoader {
             },
         ).pipe(
             map(httpResponse => {
-                // TODO use cors-anywhere on cors failure
                 const contentType = httpResponse.headers.get("content-type") || "";
                 if (this.supportedContentTypes.indexOf(contentType) < 0) {
                     throw new Error(`unknown content-type: ${contentType}`);
@@ -107,7 +106,21 @@ export class AgeRomFileLoader {
 
         return of(true).pipe(
             // add the task after subscribe() has been called
-            switchMap(() => this._taskStatusHandler.addTask$("downloading rom file", loadRom$)),
+            switchMap(() => this._taskStatusHandler.addTask$(
+                isCorsRetry ? "downloading rom file (CORS Anywhere)" : "downloading rom file",
+                loadRom$,
+            )),
+
+            // CORS Anywhere
+            catchError((errorResponse: HttpErrorResponse) => {
+                // try CORS Anywhere, if this might be a CORS error
+                // (no indication besides status 0)
+                if (!isCorsRetry && (errorResponse.status === 0)) {
+                    return this._loadRomFileUrl$(`https://cors-anywhere.herokuapp.com/${romFileUrl}`, true);
+                }
+                // else just throw the error
+                throw errorResponse;
+            }),
         );
     }
 

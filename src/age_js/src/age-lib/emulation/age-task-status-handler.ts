@@ -57,7 +57,7 @@ export class AgeTaskStatusHandler {
             taskStatus: initialStatus,
         });
         this._taskIdToListIndexMap.set(taskId, this._taskStatusList.length - 1);
-        this._taskStatusListSubject.next(this._taskStatusList);
+        this._broadcastTaskStatus();
 
         return taskId;
     }
@@ -108,6 +108,11 @@ export class AgeTaskStatusHandler {
             taskStatus,
             taskError,
         };
-        this._taskStatusListSubject.next(this._taskStatusList);
+        this._broadcastTaskStatus();
+    }
+
+    private _broadcastTaskStatus(): void {
+        // emit a new array instance so that Angular's change detection recognises the new status
+        this._taskStatusListSubject.next(this._taskStatusList.slice());
     }
 }
