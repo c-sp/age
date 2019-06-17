@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+import {HashLocationStrategy, LocationStrategy} from "@angular/common";
 import {NgModule} from "@angular/core";
 import {BrowserModule} from "@angular/platform-browser";
 import {RouterModule} from "@angular/router";
@@ -43,6 +44,12 @@ import {AgeEmptyComponent, ROUTES} from "./routing";
         AgeRomLinkComponent,
         AgeEmptyComponent,
         AgeAppComponent,
+    ],
+    providers: [
+        {
+            provide: LocationStrategy,
+            useClass: HashLocationStrategy,
+        },
     ],
     bootstrap: [AgeAppComponent],
 })
