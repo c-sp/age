@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding} from "@angular/core";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit} from "@angular/core";
 import {AgeSubscriptionSink} from "age-lib";
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
@@ -33,6 +33,12 @@ import {AgeCurrentRouteService} from "./routing";
             display: block;
             height: 100%;
             overflow: auto;
+        }
+
+        /* hide flickering scroll bar sometimes cause by rapidly resizing the viewport */
+        /*noinspection CssUnusedSymbol*/
+        :host.only-emulator {
+            overflow: hidden;
         }
 
         :host.only-emulator age-app-emulator {
@@ -57,21 +63,16 @@ import {AgeCurrentRouteService} from "./routing";
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeAppComponent extends AgeSubscriptionSink {
+export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
 
     readonly romUrl$: Observable<string | undefined>;
 
     private _view = AgeView.COMBINED_FOCUS_EMULATOR;
 
-    constructor(viewService: AgeViewService,
-                currentRouteService: AgeCurrentRouteService,
-                changeDetectorRef: ChangeDetectorRef) {
+    constructor(currentRouteService: AgeCurrentRouteService,
+                private readonly _viewService: AgeViewService,
+                private readonly _changeDetectorRef: ChangeDetectorRef) {
         super();
-
-        this.newSubscription = viewService.viewChange$.subscribe(view => {
-            this._view = view;
-            changeDetectorRef.markForCheck();
-        });
 
         this.romUrl$ = currentRouteService.currentRoute$.pipe(
             map(route => {
@@ -80,6 +81,14 @@ export class AgeAppComponent extends AgeSubscriptionSink {
             }),
         );
     }
+
+    ngOnInit(): void {
+        this.newSubscription = this._viewService.viewChange$.subscribe(view => {
+            this._view = view;
+            this._changeDetectorRef.markForCheck();
+        });
+    }
+
 
     @HostBinding("class.only-emulator") get cssOnlyEmulator() {
         return this._view === AgeView.ONLY_EMULATOR;

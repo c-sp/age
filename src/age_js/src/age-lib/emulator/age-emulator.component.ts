@@ -18,115 +18,159 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
-    EventEmitter,
+    ElementRef,
+    HostBinding,
     HostListener,
     Input,
     OnDestroy,
     OnInit,
-    Output,
+    ViewChild,
 } from "@angular/core";
-import {AgeEmulationRunner, IAgeEmulationRuntimeInfo} from "../emulation";
-import {AgeGbKeyMap} from "../settings";
-import {AgeAudio} from "./audio/age-audio";
+import {AgeResizeObserver, AgeSubscriptionSink} from "../common";
+import {AgeEmulationRunner} from "../emulation";
+import {AgeEmulator} from "./age-emulator";
 
 
 @Component({
     selector: "age-emulator",
     template: `
-        <age-canvas-renderer *ngIf="emulationRunner as emuRunner"
-                             [screenWidth]="emuRunner.screenSize.width"
-                             [screenHeight]="emuRunner.screenSize.height"
-                             [newFrame]="emuRunner.screenBuffer"></age-canvas-renderer>
+        <canvas #canvas
+                [width]="canvasWidth"
+                [height]="canvasHeight"
+                [ngStyle]="canvasStyle"></canvas>
     `,
+    styles: [`
+        :host {
+            /*
+             The host element size is used to calculate the canvas element's size.
+             It's up to the former's parent element to set a suitable size.
+              */
+            display: block;
+            /* to position the canvas child element, this must be a non-static block */
+            position: relative;
+        }
+
+        canvas {
+            /*
+             take the canvas element out of flow,
+             so that it does not affect the host element's size
+             => we can calculate the canvas size based on the host element's size
+                without the current canvas size affecting the result
+              */
+            position: absolute;
+        }
+
+        :host.no-emulator canvas {
+            display: none;
+        }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeEmulatorComponent implements OnInit, OnDestroy {
+export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit, OnDestroy {
 
-    @Output() readonly updateRuntimeInfo = new EventEmitter<IAgeEmulationRuntimeInfo | undefined>();
+    private readonly _emulator = new AgeEmulator();
 
-    private readonly _keyMap = new AgeGbKeyMap();
+    @ViewChild("canvas", {static: true}) private _canvas!: ElementRef;
+    private _canvasStyle = {
+        left: "0px",
+        top: "0px",
+        width: "10px",
+        height: "10px",
+    };
+    private _hostElementObserverEntry?: ResizeObserverEntry;
 
-    private _audio?: AgeAudio;
-    private _timerHandle!: number;
-    private _emulationRunner?: AgeEmulationRunner;
-    private _lastRuntimeInfo?: IAgeEmulationRuntimeInfo;
 
-    constructor(private readonly _changeDetector: ChangeDetectorRef) {
+    constructor(private readonly _hostElementRef: ElementRef,
+                private readonly _changeDetectorRef: ChangeDetectorRef) {
+        super();
     }
 
     ngOnInit(): void {
-        this._timerHandle = window.setInterval(
-            () => this.runEmulation(),
-            10,
+        const canvas = this._canvas && this._canvas.nativeElement;
+        this._emulator.canvasCtx = canvas.getContext("2d", {alpha: false});
+
+        this.newSubscription = new AgeResizeObserver(
+            this._hostElementRef,
+            entry => {
+                this._hostElementObserverEntry = entry;
+                this._calculateViewport();
+            },
         );
     }
 
     async ngOnDestroy() {
-        window.clearInterval(this._timerHandle);
-        if (this._audio) {
-            await this._audio.close();
-        }
+        await this._emulator.cleanup();
+        super.ngOnDestroy();
     }
 
 
-    get emulationRunner(): AgeEmulationRunner | undefined {
-        return this._emulationRunner;
+    @HostBinding("class.no-emulator") get noEmulator(): boolean {
+        return !this._emulator.emulationRunner;
+    }
+
+    get canvasStyle(): object {
+        return this._canvasStyle;
+    }
+
+    get canvasWidth(): number {
+        return (this._emulator.emulationRunner && this._emulator.emulationRunner.screenSize.width) || 1;
+    }
+
+    get canvasHeight(): number {
+        return (this._emulator.emulationRunner && this._emulator.emulationRunner.screenSize.height) || 1;
     }
 
     @Input() set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
-        this._emulationRunner = emulationRunner;
-        // init after the emulationRunner has been set,
-        // because the latter is triggere by a user interaction which
-        // is required to create the AudioContext
-        if (!this._audio) {
-            this._audio = new AgeAudio();
-        }
+        this._emulator.emulationRunner = emulationRunner;
+        this._calculateViewport();
     }
 
 
     @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
-        const gbButton = this._keyMap.getButtonForKey(event.key);
-
-        if (this._emulationRunner && gbButton) {
-            this._emulationRunner.buttonDown(gbButton);
-            event.preventDefault();
-        }
+        this._emulator.handleKeyDown(event);
     }
 
     @HostListener("document:keyup", ["$event"]) handleKeyUp(event: KeyboardEvent) {
-        const gbButton = this._keyMap.getButtonForKey(event.key);
-
-        if (this._emulationRunner && gbButton) {
-            this._emulationRunner.buttonUp(gbButton);
-            event.preventDefault();
-        }
+        this._emulator.handleKeyUp(event);
     }
 
 
-    private runEmulation(): void {
-        let newRuntimeInfo;
-
-        if (this._emulationRunner && this._audio) {
-            this._emulationRunner.emulate(this._audio.sampleRate);
-            newRuntimeInfo = this._emulationRunner.runtimeInfo;
-
-            this._audio.stream(this._emulationRunner.audioBuffer);
-            this._changeDetector.markForCheck();
+    private _calculateViewport() {
+        const contentRect = this._hostElementObserverEntry && this._hostElementObserverEntry.contentRect;
+        const emuRunner = this._emulator.emulationRunner;
+        if (!contentRect || !emuRunner) {
+            return;
         }
 
-        if (!isSameRuntimeInfo(newRuntimeInfo, this._lastRuntimeInfo)) {
-            this._lastRuntimeInfo = newRuntimeInfo;
-            this.updateRuntimeInfo.emit(this._lastRuntimeInfo);
+        const screenWidth = emuRunner.screenSize.width;
+        const screenHeight = emuRunner.screenSize.height;
+        const viewportWidth = contentRect.width;
+        const viewportHeight = contentRect.height;
+
+        const widthFactor = viewportWidth / screenWidth;
+        const heightFactor = viewportHeight / screenHeight;
+
+        if (widthFactor < heightFactor) {
+            // margin top and bottom
+            const height = screenHeight * widthFactor;
+            this._canvasStyle = {
+                left: "0px",
+                top: `${(viewportHeight - height) / 2}px`,
+                width: `${viewportWidth}px`,
+                height: `${height}px`,
+            };
+
+        } else {
+            // margin left and right
+            const width = screenWidth * heightFactor;
+            this._canvasStyle = {
+                left: `${(viewportWidth - width) / 2}px`,
+                top: "0px",
+                width: `${width}px`,
+                height: `${viewportHeight}px`,
+            };
         }
+
+        this._changeDetectorRef.markForCheck();
     }
-}
-
-
-function isSameRuntimeInfo(x?: IAgeEmulationRuntimeInfo, y?: IAgeEmulationRuntimeInfo): boolean {
-    return !!x && !!y
-        && (x.romName === y.romName)
-        && (x.emulatedSeconds === y.emulatedSeconds)
-        && (x.emulationSpeed === y.emulationSpeed)
-        && (x.emulationMaxSpeed === y.emulationMaxSpeed)
-        || (!x && !y);
 }

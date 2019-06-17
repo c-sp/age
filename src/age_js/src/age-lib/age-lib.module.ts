@@ -20,7 +20,6 @@ import {NgModule} from "@angular/core";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeEmulatorComponent} from "./emulator/age-emulator.component";
 import {AgeTaskStatusComponent} from "./emulator/age-task-status.component";
-import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-renderer.component";
 
 
 @NgModule({
@@ -31,7 +30,6 @@ import {AgeCanvasRendererComponent} from "./emulator/renderer/canvas/age-canvas-
     ],
     declarations: [
         AgeTaskStatusComponent,
-        AgeCanvasRendererComponent,
         AgeEmulatorComponent,
     ],
     exports: [

@@ -18,7 +18,7 @@ import {BreakpointObserver} from "@angular/cdk/layout";
 import {Injectable} from "@angular/core";
 import {AgeSubscriptionSink} from "age-lib";
 import {BehaviorSubject, combineLatest, Observable, Subject} from "rxjs";
-import {map, shareReplay, tap} from "rxjs/operators";
+import {map, shareReplay} from "rxjs/operators";
 import {AgeCurrentRouteService} from "./routing";
 
 
@@ -85,7 +85,6 @@ export class AgeViewService extends AgeSubscriptionSink {
                         ? AgeView.COMBINED_FOCUS_LIBRARY
                         : AgeView.COMBINED_FOCUS_EMULATOR;
                 }),
-                tap(view => console.log("view", view)),
             )
             .subscribe(view => this._viewChangeSubject.next(view));
     }
