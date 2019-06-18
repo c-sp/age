@@ -25,6 +25,8 @@
 //  https://github.com/GoogleChromeLabs/audioworklet-polyfill
 //
 
+import {from} from "rxjs";
+
 export class AgeAudio {
 
     private readonly _audioCtx: AudioContext;
@@ -53,8 +55,15 @@ export class AgeAudio {
         }
     }
 
-    async close() {
-        await this._audioCtx.close();
+    close() {
+        from(this._audioCtx.close()).subscribe(
+            () => {
+                // no-op
+            },
+            err => {
+                console.error("error closing audio context", err);
+            },
+        );
     }
 
     get sampleRate(): number {

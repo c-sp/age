@@ -14,12 +14,13 @@
 // limitations under the License.
 //
 
+import {AgeSubscriptionLike} from "../common";
 import {AgeEmulationRunner} from "../emulation";
 import {AgeGbKeyMap} from "../settings";
 import {AgeAudio} from "./audio/age-audio";
 
 
-export class AgeEmulator {
+export class AgeEmulator extends AgeSubscriptionLike {
 
     private readonly _keyMap = new AgeGbKeyMap();
     private readonly _timerHandle: number;
@@ -28,17 +29,18 @@ export class AgeEmulator {
     private _emulationRunner?: AgeEmulationRunner;
 
     constructor() {
+        super(() => {
+            window.clearInterval(this._timerHandle);
+            if (this._audio) {
+                this._audio.close();
+                this._audio = undefined;
+            }
+        });
+
         this._timerHandle = window.setInterval(
             () => this.runEmulation(),
             10,
         );
-    }
-
-    async cleanup() {
-        window.clearInterval(this._timerHandle);
-        if (this._audio) {
-            await this._audio.close();
-        }
     }
 
 

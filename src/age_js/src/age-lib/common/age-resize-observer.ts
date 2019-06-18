@@ -16,16 +16,17 @@
 
 import {ElementRef} from "@angular/core";
 import ResizeObserver from "resize-observer-polyfill";
-import {Unsubscribable} from "rxjs";
+import {AgeSubscriptionLike} from "./age-subscription-like";
 
 
-export class AgeResizeObserver implements Unsubscribable {
+export class AgeResizeObserver extends AgeSubscriptionLike {
 
     private readonly _resizeObserver: ResizeObserver;
-    private _closed = false;
 
     constructor(elementToObserve: ElementRef,
                 resizeCallback: (entry: ResizeObserverEntry) => void) {
+
+        super(() => this._resizeObserver.disconnect());
 
         this._resizeObserver = new ResizeObserver(entries => {
             // we observe a single element and thus use only the first entry
@@ -36,14 +37,5 @@ export class AgeResizeObserver implements Unsubscribable {
         });
 
         this._resizeObserver.observe(elementToObserve.nativeElement);
-    }
-
-    get closed(): boolean {
-        return this._closed;
-    }
-
-    unsubscribe(): void {
-        this._resizeObserver.disconnect();
-        this._closed = true;
     }
 }

@@ -27,7 +27,7 @@ import {
     ViewChild,
 } from "@angular/core";
 import {AgeResizeObserver, AgeSubscriptionSink} from "../common";
-import {AgeEmulationRunner} from "../emulation";
+import {AgeEmulationRunner, AgeRect} from "../emulation";
 import {AgeEmulator} from "./age-emulator";
 
 
@@ -35,8 +35,8 @@ import {AgeEmulator} from "./age-emulator";
     selector: "age-emulator",
     template: `
         <canvas #canvas
-                [width]="canvasWidth"
-                [height]="canvasHeight"
+                [width]="screenSize.width"
+                [height]="screenSize.height"
                 [ngStyle]="canvasStyle"></canvas>
     `,
     styles: [`
@@ -83,6 +83,7 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
     constructor(private readonly _hostElementRef: ElementRef,
                 private readonly _changeDetectorRef: ChangeDetectorRef) {
         super();
+        this.newSubscription = this._emulator;
     }
 
     ngOnInit(): void {
@@ -98,26 +99,14 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
         );
     }
 
-    async ngOnDestroy() {
-        await this._emulator.cleanup();
-        super.ngOnDestroy();
-    }
-
-
-    @HostBinding("class.no-emulator") get noEmulator(): boolean {
-        return !this._emulator.emulationRunner;
-    }
 
     get canvasStyle(): object {
         return this._canvasStyle;
     }
 
-    get canvasWidth(): number {
-        return (this._emulator.emulationRunner && this._emulator.emulationRunner.screenSize.width) || 1;
-    }
-
-    get canvasHeight(): number {
-        return (this._emulator.emulationRunner && this._emulator.emulationRunner.screenSize.height) || 1;
+    get screenSize(): AgeRect {
+        return (this._emulator.emulationRunner && this._emulator.emulationRunner.screenSize)
+            || {width: 1, height: 1};
     }
 
     @Input() set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
@@ -125,6 +114,10 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
         this._calculateViewport();
     }
 
+
+    @HostBinding("class.no-emulator") get noEmulator(): boolean {
+        return !this._emulator.emulationRunner;
+    }
 
     @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
         this._emulator.handleKeyDown(event);

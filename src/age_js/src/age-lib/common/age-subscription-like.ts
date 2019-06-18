@@ -14,6 +14,24 @@
 // limitations under the License.
 //
 
-export * from "./age-resize-observer";
-export * from "./age-subscription-like";
-export * from "./age-subscription-sink";
+import {SubscriptionLike} from "rxjs";
+
+
+export class AgeSubscriptionLike implements SubscriptionLike {
+
+    private _closed = false;
+
+    constructor(private readonly _unsubscribe?: () => void) {
+    }
+
+    get closed(): boolean {
+        return this._closed;
+    }
+
+    unsubscribe(): void {
+        if (!this.closed && !!this._unsubscribe) {
+            this._unsubscribe();
+        }
+        this._closed = true;
+    }
+}
