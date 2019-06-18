@@ -14,12 +14,18 @@
 // limitations under the License.
 //
 
-export * from "./common";
-export * from "./emulation";
+import {ChangeDetectionStrategy, Component} from "@angular/core";
 
-export {AgeEmulatorComponent} from "./emulator/age-emulator.component";
-export {AgeTaskStatusComponent} from "./emulator/age-task-status.component";
 
-export * from "./toolbar";
-
-export {AgeLibModule} from "./age-lib.module";
+@Component({
+    selector: "age-toolbar-spacer",
+    template: ``,
+    styles: [`
+        :host {
+            flex: 1 1 0;
+        }
+    `],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AgeToolbarSpacerComponent {
+}

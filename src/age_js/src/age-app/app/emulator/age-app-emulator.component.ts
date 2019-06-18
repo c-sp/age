@@ -14,27 +14,26 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild} from "@angular/core";
-import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
-import {AgeEmulationRunnerService, IAgeEmulationRunnerStatus, IAgeRomFileUrl, TAgeRomFile} from "age-lib";
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {
+    AgeEmulationRunnerService,
+    AgePlayPauseStatus,
+    IAgeEmulationRunnerStatus,
+    IAgeRomFileUrl,
+    TAgeRomFile,
+} from "age-lib";
 import {Observable} from "rxjs";
 
 
 @Component({
     selector: "age-app-emulator",
     template: `
-        <div class="tmp-toolbar">
-            <label for="fileInput"
-                   title="Open a Gameboy rom file on the local device.
-The rom file is not being uploaded anywhere, it will not leave your device.">
-                <fa-icon [icon]="iconOpenLocalRom"></fa-icon>
-            </label>
-            <input #fileInput
-                   type="file"
-                   id="fileInput"
-                   accept=".gb, .gbc, .zip"
-                   (change)="openLocalRom()">
-        </div>
+        <mat-toolbar>
+            <age-toolbar-action-play [playPauseStatus]="AgePlayPauseStatus.DISABLED"></age-toolbar-action-play>
+            <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
+            <age-toolbar-spacer></age-toolbar-spacer>
+            <age-toolbar-action-local-rom (openLocalRom)="newEmulationRunner($event)"></age-toolbar-action-local-rom>
+        </mat-toolbar>
 
         <ng-container *ngIf="(emulationRunnerStatus$ |async) as emuStatus">
 
@@ -51,26 +50,22 @@ The rom file is not being uploaded anywhere, it will not leave your device.">
         :host {
             display: block;
             min-width: 160px;
-            min-height: 144px;
+            /*min-height: 144px;*/
+            min-height: 208px;
             text-align: center;
             position: relative;
         }
 
         age-emulator {
-            height: 100%;
+            height: calc(100% - 64px);
         }
 
-        .tmp-toolbar {
+        /* TODO move toolbar above emulator element and use absolute position */
+        /*mat-toolbar {
             position: absolute;
-        }
-
-        .tmp-toolbar fa-icon {
-            cursor: pointer;
-        }
-
-        .tmp-toolbar input {
-            display: none;
-        }
+            top: 0;
+            left: 0;
+        }*/
 
         age-task-status {
             display: block;
@@ -85,9 +80,7 @@ The rom file is not being uploaded anywhere, it will not leave your device.">
 })
 export class AgeAppEmulatorComponent {
 
-    readonly iconOpenLocalRom = faFolderOpen;
-
-    @ViewChild("fileInput", {static: true}) private _fileInput?: ElementRef;
+    readonly AgePlayPauseStatus = AgePlayPauseStatus;
 
     private _emulationRunnerStatus$?: Observable<IAgeEmulationRunnerStatus>;
 
@@ -101,21 +94,10 @@ export class AgeAppEmulatorComponent {
 
     @Input() set romUrl(fileUrl: string | null | undefined) {
         const romFile: IAgeRomFileUrl | undefined = fileUrl ? {type: "rom-file-url", fileUrl} : undefined;
-        this._newEmulationRunner(romFile);
+        this.newEmulationRunner(romFile);
     }
 
-    openLocalRom(): void {
-        const files: FileList = this._fileInput && this._fileInput.nativeElement.files;
-        if (files && files.length) {
-            this._newEmulationRunner({
-                type: "local-rom-file",
-                localFile: files[0],
-            });
-        }
-    }
-
-
-    private _newEmulationRunner(romFile?: TAgeRomFile): void {
+    newEmulationRunner(romFile?: TAgeRomFile): void {
         this._emulationRunnerStatus$ = romFile && this._emulationRunnerService.newEmulationRunner$(romFile);
     }
 }
