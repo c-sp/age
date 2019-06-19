@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-import {AgeSubscriptionLike} from "../common";
-import {AgeEmulation} from "../emulation";
-import {AgeGbKeyMap} from "../settings";
+import {AgeSubscriptionLike} from "../../common";
+import {AgeEmulation} from "../../emulation";
+import {AgeGbKeyMap} from "../../settings";
 import {AgeAudio} from "./audio/age-audio";
 
 

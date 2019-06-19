@@ -24,8 +24,8 @@ import {
     OnInit,
     ViewChild,
 } from "@angular/core";
-import {AgeResizeObserver, AgeSubscriptionSink} from "../common";
-import {AgeEmulation, AgeScreenSize} from "../emulation";
+import {AgeResizeObserver, AgeSubscriptionSink} from "../../common";
+import {AgeEmulation, AgeScreenSize} from "../../emulation";
 import {AgeEmulationWorker} from "./age-emulation-worker";
 
 

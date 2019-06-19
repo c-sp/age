@@ -51,7 +51,6 @@ import {
         AgeToolbarSpacerComponent,
     ],
     exports: [
-        AgeEmulationComponent,
         AgeToolbarActionComponent,
         AgeToolbarSpacerComponent,
         AgeEmulatorContainerComponent,

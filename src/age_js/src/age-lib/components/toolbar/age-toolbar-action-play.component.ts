@@ -18,7 +18,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@
 import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
 import {faPause} from "@fortawesome/free-solid-svg-icons/faPause";
 import {faPlay} from "@fortawesome/free-solid-svg-icons/faPlay";
-import {assertNever} from "../common";
+import {assertNever} from "../../common";
 
 
 export enum AgePlayPauseStatus {

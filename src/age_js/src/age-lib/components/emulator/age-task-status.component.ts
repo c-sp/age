@@ -19,7 +19,7 @@ import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
 import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
 import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
-import {IAgeTaskStatus, TAgeTaskId} from "../emulation";
+import {IAgeTaskStatus, TAgeTaskId} from "../../emulation";
 
 
 @Component({

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-export * from "./common";
-export * from "./components";
-export * from "./emulation";
-export * from "./settings";
+export {AgeEmulatorContainerComponent} from "./emulator";
+export {AgeToolbarActionComponent, AgeToolbarSpacerComponent} from "./toolbar";
+export {AgeLibModule} from "./age-lib.module";

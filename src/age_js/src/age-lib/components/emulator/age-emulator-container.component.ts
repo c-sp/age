@@ -17,7 +17,7 @@
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {Observable} from "rxjs";
 import {tap} from "rxjs/operators";
-import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../emulation";
+import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
 
 
