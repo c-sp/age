@@ -15,4 +15,5 @@
 //
 
 export * from "./age-emulator.component";
+export * from "./age-emulator-container.component";
 export * from "./age-task-status.component";

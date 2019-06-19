@@ -19,7 +19,6 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
-    HostBinding,
     HostListener,
     Input,
     OnDestroy,
@@ -48,6 +47,7 @@ import {AgeEmulator} from "./age-emulator";
             display: block;
             /* to position the canvas child element, this must be a non-static block */
             position: relative;
+            overflow: hidden;
         }
 
         canvas {
@@ -59,10 +59,6 @@ import {AgeEmulator} from "./age-emulator";
               */
             position: absolute;
         }
-
-        :host.no-emulator canvas {
-            display: none;
-        }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -70,7 +66,7 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
 
     private readonly _emulator = new AgeEmulator();
 
-    @ViewChild("canvas", {static: true}) private _canvas!: ElementRef;
+    @ViewChild("canvas", {static: true}) private _canvas?: ElementRef;
     private _canvasStyle = {
         left: "0px",
         top: "0px",
@@ -109,15 +105,11 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
             || {width: 1, height: 1};
     }
 
-    @Input() set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
+    @Input() set emulationRunner(emulationRunner: AgeEmulationRunner) {
         this._emulator.emulationRunner = emulationRunner;
         this._calculateViewport();
     }
 
-
-    @HostBinding("class.no-emulator") get noEmulator(): boolean {
-        return !this._emulator.emulationRunner;
-    }
 
     @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
         this._emulator.handleKeyDown(event);

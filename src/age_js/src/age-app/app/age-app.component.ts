@@ -14,18 +14,17 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit} from "@angular/core";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit, ViewChild} from "@angular/core";
 import {AgeSubscriptionSink} from "age-lib";
-import {Observable} from "rxjs";
-import {map} from "rxjs/operators";
 import {AgeView, AgeViewService} from "./age-view.service";
+import {AgeAppEmulatorComponent} from "./emulator";
 import {AgeCurrentRouteService} from "./routing";
 
 
 @Component({
     selector: "age-app-root",
     template: `
-        <age-app-emulator [romUrl]="romUrl$ | async"></age-app-emulator>
+        <age-app-emulator></age-app-emulator>
         <age-rom-library></age-rom-library>
     `,
     styles: [`
@@ -35,10 +34,12 @@ import {AgeCurrentRouteService} from "./routing";
             overflow: auto;
         }
 
-        /* hide flickering scroll bar sometimes cause by rapidly resizing the viewport */
-        /*noinspection CssUnusedSymbol*/
-        :host.only-emulator {
-            overflow: hidden;
+        age-app-emulator {
+            /*
+             inner elements nicht have a min-height we should take into account
+             when setting any height
+              */
+            min-height: min-content;
         }
 
         :host.only-emulator age-app-emulator {
@@ -65,27 +66,27 @@ import {AgeCurrentRouteService} from "./routing";
 })
 export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
 
-    readonly romUrl$: Observable<string | undefined>;
-
+    @ViewChild(AgeAppEmulatorComponent, {static: true})
+    private _emulatorComp?: AgeAppEmulatorComponent;
     private _view = AgeView.COMBINED_FOCUS_EMULATOR;
 
-    constructor(currentRouteService: AgeCurrentRouteService,
+    constructor(private readonly _currentRouteService: AgeCurrentRouteService,
                 private readonly _viewService: AgeViewService,
                 private readonly _changeDetectorRef: ChangeDetectorRef) {
         super();
-
-        this.romUrl$ = currentRouteService.currentRoute$.pipe(
-            map(route => {
-                const romUrl = (route.route === "romUrl") && route.romUrl;
-                return romUrl ? romUrl : undefined;
-            }),
-        );
     }
 
     ngOnInit(): void {
         this.newSubscription = this._viewService.viewChange$.subscribe(view => {
             this._view = view;
             this._changeDetectorRef.markForCheck();
+        });
+        this.newSubscription = this._currentRouteService.currentRoute$.subscribe(route => {
+            const fileUrl = (route.route === "romUrl") && route.romUrl;
+            if (!fileUrl || !this._emulatorComp) {
+                return;
+            }
+            this._emulatorComp.openRomFile({type: "rom-file-url", fileUrl});
         });
     }
 

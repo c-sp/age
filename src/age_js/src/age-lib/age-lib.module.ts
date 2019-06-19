@@ -19,8 +19,9 @@ import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {MatButtonModule} from "@angular/material/button";
 import {MatSliderModule} from "@angular/material/slider";
+import {MatToolbarModule} from "@angular/material/toolbar";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {AgeEmulatorComponent, AgeTaskStatusComponent} from "./emulator";
+import {AgeEmulatorComponent, AgeEmulatorContainerComponent, AgeTaskStatusComponent} from "./emulator";
 import {
     AgeToolbarActionComponent,
     AgeToolbarActionPlayComponent,
@@ -37,22 +38,23 @@ import {
         FontAwesomeModule,
         MatButtonModule,
         MatSliderModule,
+        MatToolbarModule,
     ],
     declarations: [
         AgeEmulatorComponent,
+        AgeEmulatorContainerComponent,
         AgeTaskStatusComponent,
+
         AgeToolbarActionComponent,
         AgeToolbarActionPlayComponent,
         AgeToolbarActionVolumeComponent,
         AgeToolbarSpacerComponent,
     ],
     exports: [
-        AgeTaskStatusComponent,
         AgeEmulatorComponent,
         AgeToolbarActionComponent,
-        AgeToolbarActionPlayComponent,
-        AgeToolbarActionVolumeComponent,
         AgeToolbarSpacerComponent,
+        AgeEmulatorContainerComponent,
     ],
 })
 export class AgeLibModule {

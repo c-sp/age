@@ -14,90 +14,42 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {
-    AgeEmulationRunnerService,
-    AgePlayPauseStatus,
-    IAgeEmulationRunnerStatus,
-    IAgeRomFileUrl,
-    TAgeRomFile,
-} from "age-lib";
-import {Observable} from "rxjs";
+import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {TAgeRomFile} from "age-lib";
+import {Observable, Subject} from "rxjs";
 
 
 @Component({
     selector: "age-app-emulator",
     template: `
-        <mat-toolbar>
-            <age-toolbar-action-play [playPauseStatus]="AgePlayPauseStatus.DISABLED"></age-toolbar-action-play>
-            <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
+        <age-emulator-container [romFile]="romFile$ | async">
+
             <age-toolbar-spacer></age-toolbar-spacer>
-            <age-toolbar-action-local-rom (openLocalRom)="newEmulationRunner($event)"></age-toolbar-action-local-rom>
-        </mat-toolbar>
+            <age-toolbar-action-local-rom (openLocalRom)="openRomFile($event)"></age-toolbar-action-local-rom>
 
-        <ng-container *ngIf="(emulationRunnerStatus$ |async) as emuStatus">
-
-            <age-emulator *ngIf="emuStatus.emulationRunner as emuRunner; else noRunner"
-                          [emulationRunner]="emuRunner"></age-emulator>
-
-            <ng-template #noRunner>
-                <age-task-status [taskStatusList]="emuStatus.taskStatusList"></age-task-status>
-            </ng-template>
-
-        </ng-container>
+        </age-emulator-container>
     `,
     styles: [`
         :host {
             display: block;
-            min-width: 160px;
-            /*min-height: 144px;*/
-            min-height: 208px;
-            text-align: center;
-            position: relative;
         }
 
-        age-emulator {
-            height: calc(100% - 64px);
-        }
-
-        /* TODO move toolbar above emulator element and use absolute position */
-        /*mat-toolbar {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }*/
-
-        age-task-status {
-            display: block;
-            padding: 1em;
-            font-size: smaller;
+        age-emulator-container {
+            height: 100%;
         }
     `],
-    providers: [
-        AgeEmulationRunnerService,
-    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeAppEmulatorComponent {
 
-    readonly AgePlayPauseStatus = AgePlayPauseStatus;
+    private readonly _romFileSubject = new Subject<TAgeRomFile>();
+    private readonly _romFile$ = this._romFileSubject.asObservable();
 
-    private _emulationRunnerStatus$?: Observable<IAgeEmulationRunnerStatus>;
-
-    constructor(private readonly _emulationRunnerService: AgeEmulationRunnerService) {
+    get romFile$(): Observable<TAgeRomFile> {
+        return this._romFile$;
     }
 
-
-    get emulationRunnerStatus$(): Observable<IAgeEmulationRunnerStatus> | undefined {
-        return this._emulationRunnerStatus$;
-    }
-
-    @Input() set romUrl(fileUrl: string | null | undefined) {
-        const romFile: IAgeRomFileUrl | undefined = fileUrl ? {type: "rom-file-url", fileUrl} : undefined;
-        this.newEmulationRunner(romFile);
-    }
-
-    newEmulationRunner(romFile?: TAgeRomFile): void {
-        this._emulationRunnerStatus$ = romFile && this._emulationRunnerService.newEmulationRunner$(romFile);
+    openRomFile(romFile: TAgeRomFile): void {
+        this._romFileSubject.next(romFile);
     }
 }
