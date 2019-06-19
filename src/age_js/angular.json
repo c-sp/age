@@ -28,7 +28,7 @@
               },
               {
                 "glob": "age-audio-stream.js",
-                "input": "src/age-lib/emulator/audio",
+                "input": "src/age-lib/components/emulator/audio",
                 "output": "./assets"
               }
             ],
@@ -129,7 +129,7 @@
               "src/assets",
               {
                 "glob": "age-audio-stream.js",
-                "input": "src/age-lib/emulator/audio",
+                "input": "src/age-lib/components/emulator/audio",
                 "output": "./assets"
               }
             ]
