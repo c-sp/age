@@ -34,7 +34,7 @@ export class AgeAudio {
 
     constructor() {
         // tslint:disable-next-line:no-any
-        const _AudioContext = AudioContext || (window as any).webkitAudioContext;
+        const _AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
         const audioCtx = this._audioCtx = new _AudioContext();
 
         if (audioCtx.audioWorklet) {
