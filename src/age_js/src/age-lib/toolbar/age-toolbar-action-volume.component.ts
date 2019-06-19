@@ -31,11 +31,21 @@ import {faVolumeUp} from "@fortawesome/free-solid-svg-icons/faVolumeUp";
                     [step]="1"></mat-slider>
     `,
     styles: [`
+        :host {
+            position: relative;
+        }
+
         mat-slider {
             display: none;
-            width: 70px;
+
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+
             /* override default mat-slider min-width */
             min-width: 70px;
+            width: 70px;
         }
 
         :host:hover mat-slider {

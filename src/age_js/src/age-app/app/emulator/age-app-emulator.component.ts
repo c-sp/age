@@ -14,17 +14,40 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
+import {faMinusSquare} from "@fortawesome/free-solid-svg-icons/faMinusSquare";
+import {faPlusSquare} from "@fortawesome/free-solid-svg-icons/faPlusSquare";
+import {faThList} from "@fortawesome/free-solid-svg-icons/faThList";
 import {TAgeRomFile} from "age-lib";
 import {Observable, Subject} from "rxjs";
+import {AgeViewService} from "../age-view.service";
+import {AgeNavigationService} from "../routing";
+
+
+export enum AgeEmulatorFocusState {
+    FOCUSED = "FOCUSED",
+    NOT_FOCUSED = "NOT_FOCUSED",
+    DISABLED = "DISABLED",
+}
 
 
 @Component({
     selector: "age-app-emulator",
     template: `
-        <age-emulator-container [romFile]="romFile$ | async">
+        <age-emulator-container [forcePause]="forcePause"
+                                [romFile]="romFile$ | async">
 
             <age-toolbar-spacer></age-toolbar-spacer>
+
+            <age-toolbar-action *ngIf="showFocusAction"
+                                [icon]="focusIcon"
+                                (clicked)="viewService.toggleFocusElement()"></age-toolbar-action>
+
+            <age-toolbar-action *ngIf="showRomLibraryAction"
+                                [icon]="romLibraryIcon"
+                                (clicked)="navigationService.navigateToLibrary()"></age-toolbar-action>
+
             <age-toolbar-action-local-rom (openLocalRom)="openRomFile($event)"></age-toolbar-action-local-rom>
 
         </age-emulator-container>
@@ -42,8 +65,27 @@ import {Observable, Subject} from "rxjs";
 })
 export class AgeAppEmulatorComponent {
 
+    readonly romLibraryIcon = faThList;
+
+    @Input() emulatorFocusState = AgeEmulatorFocusState.DISABLED;
+    @Input() forcePause = false;
+    @Input() showRomLibraryAction = true;
+
     private readonly _romFileSubject = new Subject<TAgeRomFile>();
     private readonly _romFile$ = this._romFileSubject.asObservable();
+
+    constructor(readonly navigationService: AgeNavigationService,
+                readonly viewService: AgeViewService) {
+    }
+
+
+    get focusIcon(): IconDefinition {
+        return (this.emulatorFocusState === AgeEmulatorFocusState.FOCUSED) ? faMinusSquare : faPlusSquare;
+    }
+
+    get showFocusAction(): boolean {
+        return this.emulatorFocusState !== AgeEmulatorFocusState.DISABLED;
+    }
 
     get romFile$(): Observable<TAgeRomFile> {
         return this._romFile$;

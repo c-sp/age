@@ -27,6 +27,7 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
     private _canvasCtx?: CanvasRenderingContext2D | null;
     private _audio?: AgeAudio;
     private _emulation?: AgeEmulation;
+    private _pauseEmulation = false;
 
     constructor() {
         super(() => {
@@ -59,6 +60,10 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
         }
     }
 
+    set pauseEmulation(pauseEmulation: boolean) {
+        this._pauseEmulation = pauseEmulation;
+    }
+
     set canvasCtx(canvasCtx: CanvasRenderingContext2D | null | undefined) {
         this._canvasCtx = canvasCtx;
     }
@@ -86,7 +91,8 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
     private runEmulation(): void {
         const emulation = this._emulation;
 
-        if (emulation) {
+        // TODO is the timing okay when reacting to pauseEmulation like this?
+        if (emulation && !this._pauseEmulation) {
             const newFrame = emulation.emulate((this._audio && this._audio.sampleRate) || 1);
 
             if (this._audio) {

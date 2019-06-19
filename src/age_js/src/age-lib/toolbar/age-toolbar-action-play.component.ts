@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
 import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
 import {faPause} from "@fortawesome/free-solid-svg-icons/faPause";
 import {faPlay} from "@fortawesome/free-solid-svg-icons/faPlay";
@@ -31,37 +31,44 @@ export enum AgePlayPauseStatus {
 @Component({
     selector: "age-toolbar-action-play",
     template: `
-        <age-toolbar-action [disabled]="disabled" [icon]="icon"></age-toolbar-action>
+        <age-toolbar-action [disabled]="disabled"
+                            [icon]="icon"
+                            (clicked)="paused.emit(!isPaused)"></age-toolbar-action>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeToolbarActionPlayComponent {
 
+    @Output() readonly paused = new EventEmitter<boolean>();
+
     private _disabled = false;
-    private _icon = faPause;
+    private _isPaused = false;
 
     get disabled(): boolean {
         return this._disabled;
     }
 
     get icon(): IconDefinition {
-        return this._icon;
+        return this.isPaused ? faPlay : faPause;
+    }
+
+    get isPaused(): boolean {
+        return this._isPaused;
     }
 
     @Input() set playPauseStatus(playPauseStatus: AgePlayPauseStatus) {
         switch (playPauseStatus) {
             case AgePlayPauseStatus.DISABLED:
-                this._icon = faPlay;
+            case AgePlayPauseStatus.IS_PAUSED:
+                this._isPaused = true;
                 break;
             case AgePlayPauseStatus.IS_PLAYING:
-                this._icon = faPause;
-                break;
-            case AgePlayPauseStatus.IS_PAUSED:
-                this._icon = faPlay;
+                this._isPaused = false;
                 break;
             default:
                 assertNever(playPauseStatus);
                 break;
         }
+        this._disabled = playPauseStatus === AgePlayPauseStatus.DISABLED;
     }
 }

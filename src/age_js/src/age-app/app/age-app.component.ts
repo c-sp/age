@@ -17,14 +17,17 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit, ViewChild} from "@angular/core";
 import {AgeSubscriptionSink} from "age-lib";
 import {AgeView, AgeViewService} from "./age-view.service";
-import {AgeAppEmulatorComponent} from "./emulator";
+import {AgeAppEmulatorComponent, AgeEmulatorFocusState} from "./emulator";
 import {AgeCurrentRouteService} from "./routing";
 
 
 @Component({
     selector: "age-app-root",
     template: `
-        <age-app-emulator></age-app-emulator>
+        <age-app-emulator [emulatorFocusState]="emulatorFocusState"
+                          [forcePause]="forcePause"
+                          [showRomLibraryAction]="showRomLibraryAction"></age-app-emulator>
+
         <age-rom-library></age-rom-library>
     `,
     styles: [`
@@ -55,7 +58,7 @@ import {AgeCurrentRouteService} from "./routing";
         }
 
         :host.focus-emulator age-app-emulator {
-            height: 80%;
+            height: 100%;
         }
 
         :host.focus-library age-app-emulator {
@@ -68,6 +71,9 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
 
     @ViewChild(AgeAppEmulatorComponent, {static: true})
     private _emulatorComp?: AgeAppEmulatorComponent;
+
+    private _emulatorFocusState = AgeEmulatorFocusState.DISABLED;
+    private _showRomLibraryAction = false;
     private _view = AgeView.COMBINED_FOCUS_EMULATOR;
 
     constructor(private readonly _currentRouteService: AgeCurrentRouteService,
@@ -79,6 +85,8 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
     ngOnInit(): void {
         this.newSubscription = this._viewService.viewChange$.subscribe(view => {
             this._view = view;
+            this._showRomLibraryAction = view === AgeView.ONLY_EMULATOR;
+            this._emulatorFocusState = emulatorFocusStateFor(view);
             this._changeDetectorRef.markForCheck();
         });
         this.newSubscription = this._currentRouteService.currentRoute$.subscribe(route => {
@@ -90,6 +98,18 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
         });
     }
 
+
+    get emulatorFocusState(): AgeEmulatorFocusState {
+        return this._emulatorFocusState;
+    }
+
+    get forcePause(): boolean {
+        return this._view === AgeView.ONLY_LIBRARY;
+    }
+
+    get showRomLibraryAction(): boolean {
+        return this._showRomLibraryAction;
+    }
 
     @HostBinding("class.only-emulator") get cssOnlyEmulator() {
         return this._view === AgeView.ONLY_EMULATOR;
@@ -105,5 +125,19 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
 
     @HostBinding("class.focus-library") get cssFocusLibrary() {
         return this._view === AgeView.COMBINED_FOCUS_LIBRARY;
+    }
+}
+
+
+function emulatorFocusStateFor(view: AgeView): AgeEmulatorFocusState {
+    switch (view) {
+        case AgeView.COMBINED_FOCUS_EMULATOR:
+            return AgeEmulatorFocusState.FOCUSED;
+
+        case AgeView.COMBINED_FOCUS_LIBRARY:
+            return AgeEmulatorFocusState.NOT_FOCUSED;
+
+        default:
+            return AgeEmulatorFocusState.DISABLED;
     }
 }

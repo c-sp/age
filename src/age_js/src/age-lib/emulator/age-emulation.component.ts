@@ -109,6 +109,10 @@ export class AgeEmulationComponent extends AgeSubscriptionSink implements OnInit
         this._calculateViewport();
     }
 
+    @Input() set pauseEmulation(pauseEmulation: boolean) {
+        this._emulationWorker.pauseEmulation = pauseEmulation;
+    }
+
 
     @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
         this._emulationWorker.handleKeyDown(event);

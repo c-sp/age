@@ -16,6 +16,7 @@
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {Observable} from "rxjs";
+import {tap} from "rxjs/operators";
 import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
 
@@ -26,7 +27,8 @@ import {AgePlayPauseStatus} from "../toolbar";
         <ng-container *ngIf="(emulationStatus$ |async) as emuStatus; else selectRomHint">
 
             <age-emulation *ngIf="emuStatus.emulation as emulation; else noEmulation"
-                           [emulation]="emulation"></age-emulation>
+                           [emulation]="emulation"
+                           [pauseEmulation]="pauseEmulation"></age-emulation>
 
             <ng-template #noEmulation>
                 <age-task-status class="below-toolbar"
@@ -44,9 +46,15 @@ import {AgePlayPauseStatus} from "../toolbar";
         <div class="toolbar">
             <mat-toolbar></mat-toolbar>
             <mat-toolbar>
-                <age-toolbar-action-play [playPauseStatus]="PlayPauseStatus.DISABLED"></age-toolbar-action-play>
+                <age-toolbar-spacer></age-toolbar-spacer>
+
+                <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
+                                         (paused)="isPaused = $event"></age-toolbar-action-play>
+
                 <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
+
                 <ng-content></ng-content>
+                <age-toolbar-spacer></age-toolbar-spacer>
             </mat-toolbar>
         </div>
     `,
@@ -79,7 +87,7 @@ import {AgePlayPauseStatus} from "../toolbar";
         }
 
         .toolbar > :nth-child(1) {
-            opacity: 0.7;
+            opacity: 0.65;
             position: absolute;
             left: 0;
             top: 0;
@@ -96,9 +104,10 @@ import {AgePlayPauseStatus} from "../toolbar";
 })
 export class AgeEmulatorContainerComponent {
 
-    readonly PlayPauseStatus = AgePlayPauseStatus;
-
     private _emulationStatus$?: Observable<IAgeEmulationStatus>;
+    private _hasEmulation = false;
+    private _forcePause = false;
+    private _isPaused = false;
 
     constructor(private readonly _emulationService: AgeEmulationService) {
     }
@@ -108,7 +117,33 @@ export class AgeEmulatorContainerComponent {
         return this._emulationStatus$;
     }
 
+    get pauseEmulation(): boolean {
+        return this._forcePause || this._isPaused;
+    }
+
+    get playPauseStatus(): AgePlayPauseStatus {
+        if (!this._hasEmulation) {
+            return AgePlayPauseStatus.DISABLED;
+        }
+        return this.pauseEmulation ? AgePlayPauseStatus.IS_PAUSED : AgePlayPauseStatus.IS_PLAYING;
+    }
+
+    @Input() set forcePause(forcePause: boolean) {
+        this._forcePause = forcePause;
+    }
+
+    @Input() set isPaused(isPaused: boolean) {
+        this._isPaused = isPaused;
+    }
+
     @Input() set romFile(romFile: TAgeRomFile | undefined) {
-        this._emulationStatus$ = romFile && this._emulationService.newEmulation$(romFile);
+        if (!romFile) {
+            this._hasEmulation = false;
+            this._emulationStatus$ = undefined;
+            return;
+        }
+        this._emulationStatus$ = this._emulationService.newEmulation$(romFile).pipe(
+            tap(emulationStatus => this._hasEmulation = !!emulationStatus.emulation),
+        );
     }
 }
