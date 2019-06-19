@@ -21,7 +21,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatSliderModule} from "@angular/material/slider";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {AgeEmulatorComponent, AgeEmulatorContainerComponent, AgeTaskStatusComponent} from "./emulator";
+import {AgeEmulationComponent, AgeEmulatorContainerComponent, AgeTaskStatusComponent} from "./emulator";
 import {
     AgeToolbarActionComponent,
     AgeToolbarActionPlayComponent,
@@ -41,7 +41,7 @@ import {
         MatToolbarModule,
     ],
     declarations: [
-        AgeEmulatorComponent,
+        AgeEmulationComponent,
         AgeEmulatorContainerComponent,
         AgeTaskStatusComponent,
 
@@ -51,7 +51,7 @@ import {
         AgeToolbarSpacerComponent,
     ],
     exports: [
-        AgeEmulatorComponent,
+        AgeEmulationComponent,
         AgeToolbarActionComponent,
         AgeToolbarSpacerComponent,
         AgeEmulatorContainerComponent,

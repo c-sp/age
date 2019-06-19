@@ -17,7 +17,7 @@
 export * from "./common";
 export * from "./emulation";
 
-export {AgeEmulatorComponent} from "./emulator/age-emulator.component";
+export {AgeEmulationComponent} from "./emulator/age-emulation.component";
 export {AgeTaskStatusComponent} from "./emulator/age-task-status.component";
 
 export * from "./toolbar";

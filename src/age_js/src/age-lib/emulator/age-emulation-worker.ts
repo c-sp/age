@@ -15,18 +15,18 @@
 //
 
 import {AgeSubscriptionLike} from "../common";
-import {AgeEmulationRunner} from "../emulation";
+import {AgeEmulation} from "../emulation";
 import {AgeGbKeyMap} from "../settings";
 import {AgeAudio} from "./audio/age-audio";
 
 
-export class AgeEmulator extends AgeSubscriptionLike {
+export class AgeEmulationWorker extends AgeSubscriptionLike {
 
     private readonly _keyMap = new AgeGbKeyMap();
     private readonly _timerHandle: number;
-    private _canvasCtx?: CanvasRenderingContext2D;
+    private _canvasCtx?: CanvasRenderingContext2D | null;
     private _audio?: AgeAudio;
-    private _emulationRunner?: AgeEmulationRunner;
+    private _emulation?: AgeEmulation;
 
     constructor() {
         super(() => {
@@ -44,21 +44,22 @@ export class AgeEmulator extends AgeSubscriptionLike {
     }
 
 
-    get emulationRunner(): AgeEmulationRunner | undefined {
-        return this._emulationRunner;
+    get emulation(): AgeEmulation | undefined {
+        return this._emulation;
     }
 
-    set emulationRunner(emulationRunner: AgeEmulationRunner | undefined) {
-        this._emulationRunner = emulationRunner;
-        // init after the emulationRunner has been set,
-        // because the latter is triggere by a user interaction which
+    set emulation(emulation: AgeEmulation | undefined) {
+        this._emulation = emulation;
+        // init after the emulation has been set,
+        // because the latter is triggered by a user interaction which
         // is required to create the AudioContext
+        // TODO does not work when opening AGE with a rom url
         if (!this._audio) {
             this._audio = new AgeAudio();
         }
     }
 
-    set canvasCtx(canvasCtx: CanvasRenderingContext2D) {
+    set canvasCtx(canvasCtx: CanvasRenderingContext2D | null | undefined) {
         this._canvasCtx = canvasCtx;
     }
 
@@ -66,8 +67,8 @@ export class AgeEmulator extends AgeSubscriptionLike {
     handleKeyDown(event: KeyboardEvent) {
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
-        if (this._emulationRunner && gbButton) {
-            this._emulationRunner.buttonDown(gbButton);
+        if (this._emulation && gbButton) {
+            this._emulation.buttonDown(gbButton);
             event.preventDefault();
         }
     }
@@ -75,27 +76,27 @@ export class AgeEmulator extends AgeSubscriptionLike {
     handleKeyUp(event: KeyboardEvent) {
         const gbButton = this._keyMap.getButtonForKey(event.key);
 
-        if (this._emulationRunner && gbButton) {
-            this._emulationRunner.buttonUp(gbButton);
+        if (this._emulation && gbButton) {
+            this._emulation.buttonUp(gbButton);
             event.preventDefault();
         }
     }
 
 
     private runEmulation(): void {
-        const emuRunner = this._emulationRunner;
+        const emulation = this._emulation;
 
-        if (emuRunner) {
-            const newFrame = emuRunner.emulate((this._audio && this._audio.sampleRate) || 1);
+        if (emulation) {
+            const newFrame = emulation.emulate((this._audio && this._audio.sampleRate) || 1);
 
             if (this._audio) {
-                this._audio.stream(emuRunner.audioBuffer);
+                this._audio.stream(emulation.audioBuffer);
             }
 
             if (newFrame && this._canvasCtx) {
-                const screenBuffer = emuRunner.screenBuffer;
-                const screenWidth = emuRunner.screenSize.width;
-                const screenHeight = emuRunner.screenSize.height;
+                const screenBuffer = emulation.screenBuffer;
+                const screenWidth = emulation.screenSize.width;
+                const screenHeight = emulation.screenSize.height;
 
                 const numBytes = screenWidth * screenHeight * 4;
                 const bytes = new Uint8ClampedArray(screenBuffer.buffer.buffer, screenBuffer.offset, numBytes);
@@ -104,7 +105,7 @@ export class AgeEmulator extends AgeSubscriptionLike {
                 this._canvasCtx.putImageData(imageData, 0, 0);
             }
 
-            // TODO handle this.updateRuntimeInfo.emit(emuRunner.runtimeInfo);
+            // TODO handle this.updateRuntimeInfo.emit(emulation.emulationInfo);
         }
     }
 }

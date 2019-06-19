@@ -14,10 +14,8 @@
 // limitations under the License.
 //
 
-export {AgeRect, AgeScreenBuffer} from "./age-emulation";
-
-export * from "./age-emulation-runner.service";
-export * from "./age-emulation-runner";
+export * from "./age-emulation.service";
+export * from "./age-emulation";
 
 export {IAgeLocalRomFile, IAgeRomFileUrl, TAgeRomFile} from "./age-rom-file-loader";
 

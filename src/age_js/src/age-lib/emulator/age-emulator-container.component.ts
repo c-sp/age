@@ -16,19 +16,19 @@
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {Observable} from "rxjs";
-import {AgeEmulationRunnerService, IAgeEmulationRunnerStatus, TAgeRomFile} from "../emulation";
+import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
 
 
 @Component({
     selector: "age-emulator-container",
     template: `
-        <ng-container *ngIf="(emulationRunnerStatus$ |async) as emuStatus; else selectRomHint">
+        <ng-container *ngIf="(emulationStatus$ |async) as emuStatus; else selectRomHint">
 
-            <age-emulator *ngIf="emuStatus.emulationRunner as emuRunner; else noRunner"
-                          [emulationRunner]="emuRunner"></age-emulator>
+            <age-emulation *ngIf="emuStatus.emulation as emulation; else noEmulation"
+                           [emulation]="emulation"></age-emulation>
 
-            <ng-template #noRunner>
+            <ng-template #noEmulation>
                 <age-task-status class="below-toolbar"
                                  [taskStatusList]="emuStatus.taskStatusList"></age-task-status>
             </ng-template>
@@ -67,7 +67,7 @@ import {AgePlayPauseStatus} from "../toolbar";
             padding-top: calc(64px + 2em);
         }
 
-        age-emulator {
+        age-emulation {
             height: 100%;
         }
 
@@ -90,7 +90,7 @@ import {AgePlayPauseStatus} from "../toolbar";
         }
     `],
     providers: [
-        AgeEmulationRunnerService,
+        AgeEmulationService,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -98,17 +98,17 @@ export class AgeEmulatorContainerComponent {
 
     readonly PlayPauseStatus = AgePlayPauseStatus;
 
-    private _emulationRunnerStatus$?: Observable<IAgeEmulationRunnerStatus>;
+    private _emulationStatus$?: Observable<IAgeEmulationStatus>;
 
-    constructor(private readonly _emulationRunnerService: AgeEmulationRunnerService) {
+    constructor(private readonly _emulationService: AgeEmulationService) {
     }
 
 
-    get emulationRunnerStatus$(): Observable<IAgeEmulationRunnerStatus> | undefined {
-        return this._emulationRunnerStatus$;
+    get emulationStatus$(): Observable<IAgeEmulationStatus> | undefined {
+        return this._emulationStatus$;
     }
 
     @Input() set romFile(romFile: TAgeRomFile | undefined) {
-        this._emulationRunnerStatus$ = romFile && this._emulationRunnerService.newEmulationRunner$(romFile);
+        this._emulationStatus$ = romFile && this._emulationService.newEmulation$(romFile);
     }
 }

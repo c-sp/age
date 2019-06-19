@@ -18,15 +18,15 @@ import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {combineLatest, merge, Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
-import {AgeGbEmulation} from "./age-emulation";
-import {AgeEmulationRunner} from "./age-emulation-runner";
+import {AgeEmulation} from "./age-emulation";
+import {AgeGbEmulatorInstance} from "./age-gb-emulator-instance";
 import {AgeRomFileLoader, TAgeRomFile} from "./age-rom-file-loader";
 import {AgeTaskStatusHandler, IAgeTaskStatus} from "./age-task-status-handler";
 import {AgeWasmModuleLoader} from "./age-wasm-module-loader";
 
 
-export interface IAgeEmulationRunnerStatus {
-    readonly emulationRunner?: AgeEmulationRunner;
+export interface IAgeEmulationStatus {
+    readonly emulation?: AgeEmulation;
     readonly taskStatusList: ReadonlyArray<IAgeTaskStatus>;
 }
 
@@ -39,7 +39,7 @@ export interface IAgeEmulationRunnerStatus {
  * across multiple AGE web components.
  */
 @Injectable()
-export class AgeEmulationRunnerService {
+export class AgeEmulationService {
 
     private readonly _wasmModuleLoader: AgeWasmModuleLoader;
 
@@ -47,28 +47,28 @@ export class AgeEmulationRunnerService {
         this._wasmModuleLoader = new AgeWasmModuleLoader(this._httpClient);
     }
 
-    newEmulationRunner$(romFileToLoad: TAgeRomFile): Observable<IAgeEmulationRunnerStatus> {
+    newEmulation$(romFileToLoad: TAgeRomFile): Observable<IAgeEmulationStatus> {
         const taskStatusHandler = new AgeTaskStatusHandler();
 
-        // load the required files and create a new emulation runner
-        const emulationRunner$ = combineLatest([
+        // load the required files and create a new emulation
+        const emulation$ = combineLatest([
             this._wasmModuleLoader.newWasmModule$(taskStatusHandler),
             new AgeRomFileLoader(this._httpClient, taskStatusHandler).loadRomFile$(romFileToLoad),
         ]).pipe(
             map(values => {
-                const emulation = new AgeGbEmulation(values[0], values[1]);
-                return new AgeEmulationRunner(emulation);
+                const emulation = new AgeGbEmulatorInstance(values[0], values[1]);
+                return new AgeEmulation(emulation);
             }),
         );
 
-        // combine the current loading task status and the final emulation runner into one result
+        // combine the current loading task status and the final emulation into one result
         return combineLatest([
             taskStatusHandler.taskStatusList$,
-            merge(of(undefined), emulationRunner$), // emit undefined until the emulation runner is ready
+            merge(of(undefined), emulation$), // emit undefined until the emulation is ready
         ]).pipe(
             map(values => {
                 return {
-                    emulationRunner: values[1],
+                    emulation: values[1],
                     taskStatusList: values[0],
                 };
             }),

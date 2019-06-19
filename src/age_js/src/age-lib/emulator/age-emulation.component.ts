@@ -21,17 +21,16 @@ import {
     ElementRef,
     HostListener,
     Input,
-    OnDestroy,
     OnInit,
     ViewChild,
 } from "@angular/core";
 import {AgeResizeObserver, AgeSubscriptionSink} from "../common";
-import {AgeEmulationRunner, AgeRect} from "../emulation";
-import {AgeEmulator} from "./age-emulator";
+import {AgeEmulation, AgeScreenSize} from "../emulation";
+import {AgeEmulationWorker} from "./age-emulation-worker";
 
 
 @Component({
-    selector: "age-emulator",
+    selector: "age-emulation",
     template: `
         <canvas #canvas
                 [width]="screenSize.width"
@@ -62,9 +61,9 @@ import {AgeEmulator} from "./age-emulator";
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit, OnDestroy {
+export class AgeEmulationComponent extends AgeSubscriptionSink implements OnInit {
 
-    private readonly _emulator = new AgeEmulator();
+    private readonly _emulationWorker = new AgeEmulationWorker();
 
     @ViewChild("canvas", {static: true}) private _canvas?: ElementRef;
     private _canvasStyle = {
@@ -79,12 +78,12 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
     constructor(private readonly _hostElementRef: ElementRef,
                 private readonly _changeDetectorRef: ChangeDetectorRef) {
         super();
-        this.newSubscription = this._emulator;
+        this.newSubscription = this._emulationWorker;
     }
 
     ngOnInit(): void {
-        const canvas = this._canvas && this._canvas.nativeElement;
-        this._emulator.canvasCtx = canvas.getContext("2d", {alpha: false});
+        const canvas: HTMLCanvasElement | undefined = this._canvas && this._canvas.nativeElement;
+        this._emulationWorker.canvasCtx = canvas && canvas.getContext("2d", {alpha: false});
 
         this.newSubscription = new AgeResizeObserver(
             this._hostElementRef,
@@ -100,35 +99,34 @@ export class AgeEmulatorComponent extends AgeSubscriptionSink implements OnInit,
         return this._canvasStyle;
     }
 
-    get screenSize(): AgeRect {
-        return (this._emulator.emulationRunner && this._emulator.emulationRunner.screenSize)
+    get screenSize(): AgeScreenSize {
+        return (this._emulationWorker.emulation && this._emulationWorker.emulation.screenSize)
             || {width: 1, height: 1};
     }
 
-    @Input() set emulationRunner(emulationRunner: AgeEmulationRunner) {
-        this._emulator.emulationRunner = emulationRunner;
+    @Input() set emulation(emulation: AgeEmulation) {
+        this._emulationWorker.emulation = emulation;
         this._calculateViewport();
     }
 
 
     @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
-        this._emulator.handleKeyDown(event);
+        this._emulationWorker.handleKeyDown(event);
     }
 
     @HostListener("document:keyup", ["$event"]) handleKeyUp(event: KeyboardEvent) {
-        this._emulator.handleKeyUp(event);
+        this._emulationWorker.handleKeyUp(event);
     }
 
 
     private _calculateViewport() {
         const contentRect = this._hostElementObserverEntry && this._hostElementObserverEntry.contentRect;
-        const emuRunner = this._emulator.emulationRunner;
-        if (!contentRect || !emuRunner) {
+        if (!contentRect) {
             return;
         }
 
-        const screenWidth = emuRunner.screenSize.width;
-        const screenHeight = emuRunner.screenSize.height;
+        const screenWidth = this.screenSize.width;
+        const screenHeight = this.screenSize.height;
         const viewportWidth = contentRect.width;
         const viewportHeight = contentRect.height;
 

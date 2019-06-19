@@ -14,6 +14,6 @@
 // limitations under the License.
 //
 
-export * from "./age-emulator.component";
+export * from "./age-emulation.component";
 export * from "./age-emulator-container.component";
 export * from "./age-task-status.component";
