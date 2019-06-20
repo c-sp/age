@@ -29,7 +29,6 @@ import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
     `,
     styles: [`
         .just-for-the-background {
-            opacity: 0.65;
             position: absolute;
             left: 0;
             top: 0;
