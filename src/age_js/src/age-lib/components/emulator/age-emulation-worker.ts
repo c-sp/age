@@ -54,7 +54,7 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
         // init after the emulation has been set,
         // because the latter is triggered by a user interaction which
         // is required to create the AudioContext
-        // TODO does not work when opening AGE with a rom url
+        // TODO might not work without previous user interaction, check if AudioContext is suspended?
         if (!this._audio) {
             this._audio = new AgeAudio();
         }
@@ -93,7 +93,7 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
 
         // TODO is the timing okay when reacting to pauseEmulation like this?
         if (emulation && !this._pauseEmulation) {
-            const newFrame = emulation.emulate((this._audio && this._audio.sampleRate) || 1);
+            const newFrame = emulation.emulate((this._audio && this._audio.sampleRate) || 48000);
 
             if (this._audio) {
                 this._audio.stream(emulation.audioBuffer);
