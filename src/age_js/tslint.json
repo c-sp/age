@@ -52,6 +52,13 @@
     // prevent using the built-in Function constructor
     //  -> https://palantir.github.io/tslint/rules/function-constructor/
     "function-constructor": true,
+    // disallow specific imports
+    //  -> https://palantir.github.io/tslint/rules/import-blacklist/
+    "import-blacklist": [
+      true,
+      // import angular material submodules
+      "@angular/material"
+    ],
     // four-space-indentation
     // (override tslint:recommended)
     //  -> https://palantir.github.io/tslint/rules/indent
