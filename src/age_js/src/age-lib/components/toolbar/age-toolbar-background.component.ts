@@ -18,29 +18,23 @@ import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 
 
 @Component({
-    selector: "age-toolbar",
+    selector: "age-toolbar-background",
     template: `
-        <mat-toolbar class="just-for-the-background"
-                     [ngStyle]="bgStyle"></mat-toolbar>
-
-        <mat-toolbar class="actual-toolbar">
-            <ng-content></ng-content>
-        </mat-toolbar>
+        <div class="mat-toolbar background" [ngStyle]="bgStyle"></div>
+        <ng-content></ng-content>
     `,
     styles: [`
-        .just-for-the-background {
+        .background {
             position: absolute;
             left: 0;
             top: 0;
-        }
-
-        .actual-toolbar {
-            background: none;
+            width: 100%;
+            height: 100%;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeToolbarComponent {
+export class AgeToolbarBackgroundComponent {
 
     private _bgStyle = {
         opacity: 0.65,

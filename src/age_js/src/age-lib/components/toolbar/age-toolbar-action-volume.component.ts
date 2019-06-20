@@ -20,35 +20,35 @@ import {faVolumeMute} from "@fortawesome/free-solid-svg-icons/faVolumeMute";
 import {faVolumeUp} from "@fortawesome/free-solid-svg-icons/faVolumeUp";
 
 
-// TODO no hover on mobile devices => hide slider, just display mute/unmute button
+// TODO no hover => no slider, just display mute/unmute button
 
 @Component({
     selector: "age-toolbar-action-volume",
     template: `
         <age-toolbar-action [icon]="icon"></age-toolbar-action>
-        <mat-slider [min]="0"
-                    [max]="100"
-                    [step]="1"></mat-slider>
+
+        <age-toolbar-background>
+            <mat-slider [min]="0"
+                        [max]="100"
+                        [step]="1"
+                        [vertical]="true"></mat-slider>
+        </age-toolbar-background>
     `,
     styles: [`
         :host {
             position: relative;
         }
 
-        mat-slider {
+        age-toolbar-background {
             display: none;
-
             position: absolute;
-            left: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-
-            /* override default mat-slider min-width */
-            min-width: 70px;
-            width: 70px;
+            left: 0;
+            top: 100%;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
         }
 
-        :host:hover mat-slider {
+        :host:hover age-toolbar-background {
             display: inline-block;
         }
     `],

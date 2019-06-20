@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-export * from "./age-toolbar.component";
 export * from "./age-toolbar-action.component";
 export * from "./age-toolbar-action-play.component";
 export * from "./age-toolbar-action-volume.component";
+export * from "./age-toolbar-background.component";
 export * from "./age-toolbar-spacer.component";
