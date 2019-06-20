@@ -26,6 +26,7 @@ import {
     AgeToolbarActionComponent,
     AgeToolbarActionPlayComponent,
     AgeToolbarActionVolumeComponent,
+    AgeToolbarComponent,
     AgeToolbarSpacerComponent,
 } from "./toolbar";
 
@@ -45,6 +46,7 @@ import {
         AgeEmulatorContainerComponent,
         AgeTaskStatusComponent,
 
+        AgeToolbarComponent,
         AgeToolbarActionComponent,
         AgeToolbarActionPlayComponent,
         AgeToolbarActionVolumeComponent,

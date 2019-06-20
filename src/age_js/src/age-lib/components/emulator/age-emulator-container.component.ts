@@ -43,20 +43,17 @@ import {AgePlayPauseStatus} from "../toolbar";
             </div>
         </ng-template>
 
-        <div class="toolbar">
-            <mat-toolbar></mat-toolbar>
-            <mat-toolbar>
-                <age-toolbar-spacer></age-toolbar-spacer>
+        <age-toolbar>
+            <age-toolbar-spacer></age-toolbar-spacer>
 
-                <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
-                                         (paused)="isPaused = $event"></age-toolbar-action-play>
+            <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
+                                     (paused)="isPaused = $event"></age-toolbar-action-play>
 
-                <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
+            <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
 
-                <ng-content></ng-content>
-                <age-toolbar-spacer></age-toolbar-spacer>
-            </mat-toolbar>
-        </div>
+            <ng-content></ng-content>
+            <age-toolbar-spacer></age-toolbar-spacer>
+        </age-toolbar>
     `,
     styles: [`
         :host {
@@ -79,22 +76,11 @@ import {AgePlayPauseStatus} from "../toolbar";
             height: 100%;
         }
 
-        .toolbar {
+        age-toolbar {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-        }
-
-        .toolbar > :nth-child(1) {
-            opacity: 0.65;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .toolbar > :nth-child(2) {
-            background: none;
         }
     `],
     providers: [
