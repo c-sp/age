@@ -23,8 +23,7 @@ import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
     template: `
         <button mat-button
                 [disabled]="disabled"
-                (tap)="click()"
-                (press)="click()">
+                (tap)="click()">
 
             <fa-icon [icon]="icon"></fa-icon>
 
