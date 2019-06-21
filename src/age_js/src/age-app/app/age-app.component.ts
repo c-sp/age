@@ -60,10 +60,6 @@ import {AgeCurrentRouteService} from "./routing";
         :host.focus-emulator age-app-emulator {
             height: 100%;
         }
-
-        :host.focus-library age-app-emulator {
-            height: 30%;
-        }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -49,6 +49,9 @@ export class AgeToolbarActionLocalRomComponent {
                 type: "local-rom-file",
                 localFile: files[0],
             });
+            // clear the value,
+            // so that the change-event is fired if the user selects the same file again
+            fileInput.value = "";
         }
     }
 }

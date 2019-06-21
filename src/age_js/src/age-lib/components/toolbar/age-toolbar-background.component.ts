@@ -24,6 +24,16 @@ import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
         <ng-content></ng-content>
     `,
     styles: [`
+        :host {
+            /*
+             calculate ".background" element dimensions based on this element's dimensions
+             (which in turn is based on it's content excluding the absolute positioned elements)
+              */
+            display: block;
+            /* align ".background" element relative to this one */
+            position: relative;
+        }
+
         .background {
             position: absolute;
             left: 0;
