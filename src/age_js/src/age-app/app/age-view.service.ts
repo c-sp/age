@@ -51,19 +51,21 @@ export class AgeViewService extends AgeSubscriptionSink {
         const events$ = combineLatest([
             //
             // Purpose of the breakpoints is to prevent the combined view
-            // (both emulator and library) on any viewport that is too small
-            // like e.g. mobile phones.
+            // (emulator and rom library both visible) on any viewport that is
+            // too small, e.g. mobile phones.
             //
-            // For a list of devices and their viewport have a look at:
+            // For a list of devices and their viewport have a look at
+            // Material Design's device metrics:
             // https://material.io/tools/devices/
             //
-            // According to that site the biggest mobile phones have a viewport
-            // of 480px.
-            // We thus choose 31em (496px @ font-size:16px) in each dimension
-            // as minimal requirement to display the combined view.
+            // These metrics suggest to use 4 "columns" for screens with
+            // a width of less than 480dp and to use 8 or more "columns" for
+            // screens wider than that.
+            // Using 480px (a CSS pixel is device independent just like dp)
+            // as the breakpoint for allowing the combined view seems sensible.
             //
-            breakpointObserver.observe("(min-width: 31em)"),
-            breakpointObserver.observe("(min-height: 31em)"),
+            breakpointObserver.observe("(min-width: 480px)"),
+            breakpointObserver.observe("(min-height: 480px)"),
             currentRouteService.currentRoute$,
             this._attributeChangeSubject.asObservable(),
         ]);
