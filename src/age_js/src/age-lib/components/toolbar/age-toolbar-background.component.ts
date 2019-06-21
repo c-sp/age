@@ -47,7 +47,7 @@ import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 export class AgeToolbarBackgroundComponent {
 
     private _bgStyle = {
-        opacity: 0.65,
+        opacity: 0.7,
     };
 
     get bgStyle(): object {

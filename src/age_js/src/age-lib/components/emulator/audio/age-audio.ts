@@ -52,6 +52,8 @@ export class AgeAudio {
                     // TODO handle or log error
                 },
             );
+        } else {
+            console.log("audioWorklet not available");
         }
     }
 

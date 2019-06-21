@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, NgZone, OnInit} from "@angular/core";
+import {ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnInit} from "@angular/core";
 import {BehaviorSubject, combineLatest, Observable, of} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {AgeEmulation, AgeEmulationService, IAgeTaskStatus, TAgeRomFile} from "../../emulation";
@@ -29,6 +29,7 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
              [ngStyle]="state.viewportStyle">
 
             <age-emulation *ngIf="state.emulation as emulation"
+                           (click)="toggleToolbar()"
                            [emulation]="emulation"
                            [pauseEmulation]="pauseEmulation"></age-emulation>
 
@@ -88,11 +89,16 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
         }
 
         age-task-status {
+            display: block;
             padding-top: 1em;
         }
 
         .rom-hint {
             padding-top: 3em;
+        }
+
+        :host.hide-toolbar age-toolbar-background {
+            display: none;
         }
     `],
     providers: [
@@ -104,13 +110,13 @@ export class AgeEmulatorContainerComponent implements OnInit {
 
     private readonly _romFileSubject = new BehaviorSubject<TAgeRomFile | undefined>(undefined);
     private _state$?: Observable<IState>;
+    private _toolbarVisible = true;
     private _hasEmulation = false;
     private _forcePause = false;
     private _isPaused = false;
 
     constructor(private readonly _hostElementRef: ElementRef,
                 private readonly _emulationService: AgeEmulationService,
-                private readonly _changeDetectorRef: ChangeDetectorRef,
                 private readonly _ngZone: NgZone) {
     }
 
@@ -119,7 +125,9 @@ export class AgeEmulatorContainerComponent implements OnInit {
             switchMap(romFile => !romFile ? of(undefined) : this._emulationService.newEmulation$(romFile)),
             // if a new rom file has been loaded, clear the previous "is-paused" flag
             tap(emuStatus => {
-                if (emuStatus && emuStatus.emulation) {
+                this._hasEmulation = !!(emuStatus && emuStatus.emulation);
+                this._toolbarVisible = !this._hasEmulation;
+                if (this._hasEmulation) {
                     this._isPaused = false;
                 }
             }),
@@ -142,7 +150,6 @@ export class AgeEmulatorContainerComponent implements OnInit {
             viewportStyle$,
         ]).pipe(
             map(values => {
-                this._changeDetectorRef.markForCheck();
                 const emuStatus = values[0];
                 return {
                     emulation: emuStatus && emuStatus.emulation,
@@ -150,13 +157,17 @@ export class AgeEmulatorContainerComponent implements OnInit {
                     viewportStyle: values[1],
                 };
             }),
-            tap(state => this._hasEmulation = !!state.emulation),
         );
     }
 
 
     get state$(): Observable<IState> | undefined {
         return this._state$;
+    }
+
+    @HostBinding("class.hide-toolbar")
+    get toolbarVisible(): boolean {
+        return !this._toolbarVisible;
     }
 
     get pauseEmulation(): boolean {
@@ -180,6 +191,10 @@ export class AgeEmulatorContainerComponent implements OnInit {
 
     @Input() set romFile(romFile: TAgeRomFile | undefined) {
         this._romFileSubject.next(romFile);
+    }
+
+    toggleToolbar(): void {
+        this._toolbarVisible = !this._toolbarVisible;
     }
 }
 
