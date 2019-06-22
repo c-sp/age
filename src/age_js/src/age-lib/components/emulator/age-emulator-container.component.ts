@@ -14,10 +14,19 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, NgZone, OnInit} from "@angular/core";
-import {BehaviorSubject, combineLatest, Observable, of} from "rxjs";
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    HostBinding,
+    Input,
+    NgZone,
+} from "@angular/core";
+import {BehaviorSubject, Observable, of, Subject} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
-import {AgeEmulation, AgeEmulationService, IAgeTaskStatus, TAgeRomFile} from "../../emulation";
+import {AgeSubscriptionSink} from "../../common";
+import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
 import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calculator";
 
@@ -25,41 +34,47 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
 @Component({
     selector: "age-emulator-container",
     template: `
-        <div *ngIf="(state$ | async) as state"
-             [ngStyle]="state.viewportStyle">
+        <div (click)="click($event)"
+             (keypress)="click($event)"
+             (mouseenter)="mouseEnterLeave($event)"
+             (mouseleave)="mouseEnterLeave($event)"
+             [ngStyle]="viewportStyle$ | async">
 
-            <age-emulation *ngIf="state.emulation as emulation"
-                           (click)="toggleToolbar()"
-                           [emulation]="emulation"
-                           [pauseEmulation]="pauseEmulation"></age-emulation>
+            <ng-container *ngIf="(emulationStatus$ | async) as emuStatus">
 
-            <div class="gui-overlay">
+                <age-emulation *ngIf="emuStatus.emulation as emulation"
+                               [emulation]="emulation"
+                               [pauseEmulation]="pauseEmulation"></age-emulation>
 
-                <age-toolbar-background>
-                    <mat-toolbar>
-                        <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
-                                                 (paused)="isPaused = $event"></age-toolbar-action-play>
+                <div class="gui-overlay">
 
-                        <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
+                    <age-toolbar-background>
+                        <mat-toolbar>
+                            <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
+                                                     (paused)="isPaused = $event"></age-toolbar-action-play>
 
-                        <ng-content></ng-content>
-                    </mat-toolbar>
-                </age-toolbar-background>
+                            <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
 
-                <ng-container *ngIf="!state.emulation">
+                            <ng-content></ng-content>
+                        </mat-toolbar>
+                    </age-toolbar-background>
 
-                    <age-task-status *ngIf="state.taskStatusList as statusList; else openRomHint"
-                                     [taskStatusList]="statusList"></age-task-status>
+                    <ng-container *ngIf="!emuStatus.emulation">
 
-                    <ng-template #openRomHint>
-                        <div class="rom-hint">
-                            please open a rom file
-                        </div>
-                    </ng-template>
+                        <age-task-status *ngIf="emuStatus.taskStatusList as statusList; else openRomHint"
+                                         [taskStatusList]="statusList"></age-task-status>
 
-                </ng-container>
+                        <ng-template #openRomHint>
+                            <div class="rom-hint">
+                                please open a rom file
+                            </div>
+                        </ng-template>
 
-            </div>
+                    </ng-container>
+
+                </div>
+
+            </ng-container>
 
         </div>
     `,
@@ -106,27 +121,34 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeEmulatorContainerComponent implements OnInit {
+export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
+
+    readonly emulationStatus$: Observable<Partial<IAgeEmulationStatus>>;
+    readonly viewportStyle$: Observable<object>;
 
     private readonly _romFileSubject = new BehaviorSubject<TAgeRomFile | undefined>(undefined);
-    private _state$?: Observable<IState>;
-    private _toolbarVisible = true;
+    private readonly _viewportHoverSubject = new Subject<MouseEvent>();
+    private readonly _viewportClickSubject = new Subject<MouseEvent | KeyboardEvent>();
+
+    private _showToolbar = true;
     private _hasEmulation = false;
     private _forcePause = false;
     private _isPaused = false;
 
-    constructor(private readonly _hostElementRef: ElementRef,
-                private readonly _emulationService: AgeEmulationService,
-                private readonly _ngZone: NgZone) {
-    }
+    constructor(hostElementRef: ElementRef,
+                emulationService: AgeEmulationService,
+                ngZone: NgZone,
+                changeDetectorRef: ChangeDetectorRef) {
+        super();
 
-    ngOnInit(): void {
-        const emulationStatus$ = this._romFileSubject.asObservable().pipe(
-            switchMap(romFile => !romFile ? of(undefined) : this._emulationService.newEmulation$(romFile)),
+        this.emulationStatus$ = this._romFileSubject.asObservable().pipe(
+            switchMap<TAgeRomFile | undefined, Observable<Partial<IAgeEmulationStatus>>>(
+                romFile => !romFile ? of({}) : emulationService.newEmulation$(romFile),
+            ),
             // if a new rom file has been loaded, clear the previous "is-paused" flag
             tap(emuStatus => {
-                this._hasEmulation = !!(emuStatus && emuStatus.emulation);
-                this._toolbarVisible = !this._hasEmulation;
+                this._hasEmulation = !!emuStatus.emulation;
+                // emulation ready -> clear "paused" flag
                 if (this._hasEmulation) {
                     this._isPaused = false;
                 }
@@ -135,39 +157,31 @@ export class AgeEmulatorContainerComponent implements OnInit {
             shareReplay(1),
         );
 
-        const viewportStyle$ = emulationViewport$(
-            this._hostElementRef,
-            emulationStatus$.pipe(
-                map(emuStatus => emuStatus && emuStatus.emulation && emuStatus.emulation.screenSize),
+        this.viewportStyle$ = emulationViewport$(
+            hostElementRef,
+            this.emulationStatus$.pipe(
+                map(emuStatus => emuStatus.emulation && emuStatus.emulation.screenSize),
             ),
-            this._ngZone,
+            ngZone,
         ).pipe(
             map(createViewportStyle),
         );
 
-        this._state$ = combineLatest([
-            emulationStatus$,
-            viewportStyle$,
-        ]).pipe(
-            map(values => {
-                const emuStatus = values[0];
-                return {
-                    emulation: emuStatus && emuStatus.emulation,
-                    taskStatusList: emuStatus && emuStatus.taskStatusList,
-                    viewportStyle: values[1],
-                };
-            }),
-        );
+        this.newSubscription = this._viewportHoverSubject.asObservable()
+            .pipe(
+                // show toolbar on mouseenter
+                map(mouseEvent => mouseEvent.type === "mouseenter"),
+            )
+            .subscribe(showToolbar => {
+                this._showToolbar = showToolbar;
+                changeDetectorRef.markForCheck();
+            });
     }
 
-
-    get state$(): Observable<IState> | undefined {
-        return this._state$;
-    }
 
     @HostBinding("class.hide-toolbar")
-    get toolbarVisible(): boolean {
-        return !this._toolbarVisible;
+    get hideToolbar(): boolean {
+        return !this._showToolbar && this._hasEmulation;
     }
 
     get pauseEmulation(): boolean {
@@ -181,6 +195,7 @@ export class AgeEmulatorContainerComponent implements OnInit {
         return this.pauseEmulation ? AgePlayPauseStatus.IS_PAUSED : AgePlayPauseStatus.IS_PLAYING;
     }
 
+
     @Input() set forcePause(forcePause: boolean) {
         this._forcePause = forcePause;
     }
@@ -193,16 +208,14 @@ export class AgeEmulatorContainerComponent implements OnInit {
         this._romFileSubject.next(romFile);
     }
 
-    toggleToolbar(): void {
-        this._toolbarVisible = !this._toolbarVisible;
+
+    mouseEnterLeave(mouseEvent: MouseEvent): void {
+        this._viewportHoverSubject.next(mouseEvent);
     }
-}
 
-
-interface IState {
-    readonly emulation?: AgeEmulation;
-    readonly taskStatusList?: ReadonlyArray<IAgeTaskStatus>;
-    readonly viewportStyle: object;
+    click(event: MouseEvent | KeyboardEvent): void {
+        this._viewportClickSubject.next(event);
+    }
 }
 
 
