@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+import {BreakpointObserver} from "@angular/cdk/layout";
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -23,21 +24,22 @@ import {
     Input,
     NgZone,
 } from "@angular/core";
-import {BehaviorSubject, Observable, of, Subject} from "rxjs";
+import {BehaviorSubject, Observable, of} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {AgeSubscriptionSink} from "../../common";
 import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
+import {AgeToolbarVisibility} from "../toolbar/age-toolbar-visibility";
 import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calculator";
 
 
 @Component({
     selector: "age-emulator-container",
     template: `
-        <div (click)="click($event)"
-             (keypress)="click($event)"
-             (mouseenter)="mouseEnterLeave($event)"
-             (mouseleave)="mouseEnterLeave($event)"
+        <div (click)="clickViewport()"
+             (keypress)="clickViewport()"
+             (mouseenter)="mouseEnterLeaveViewport($event)"
+             (mouseleave)="mouseEnterLeaveViewport($event)"
              [ngStyle]="viewportStyle$ | async">
 
             <ng-container *ngIf="(emulationStatus$ | async) as emuStatus">
@@ -127,8 +129,7 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
     readonly viewportStyle$: Observable<object>;
 
     private readonly _romFileSubject = new BehaviorSubject<TAgeRomFile | undefined>(undefined);
-    private readonly _viewportHoverSubject = new Subject<MouseEvent>();
-    private readonly _viewportClickSubject = new Subject<MouseEvent | KeyboardEvent>();
+    private readonly _toolbarVisibility: AgeToolbarVisibility;
 
     private _showToolbar = true;
     private _hasEmulation = false;
@@ -137,6 +138,7 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
 
     constructor(hostElementRef: ElementRef,
                 emulationService: AgeEmulationService,
+                breakpointObserver: BreakpointObserver,
                 ngZone: NgZone,
                 changeDetectorRef: ChangeDetectorRef) {
         super();
@@ -167,15 +169,12 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
             map(createViewportStyle),
         );
 
-        this.newSubscription = this._viewportHoverSubject.asObservable()
-            .pipe(
-                // show toolbar on mouseenter
-                map(mouseEvent => mouseEvent.type === "mouseenter"),
-            )
-            .subscribe(showToolbar => {
-                this._showToolbar = showToolbar;
-                changeDetectorRef.markForCheck();
-            });
+        this._toolbarVisibility = new AgeToolbarVisibility(breakpointObserver);
+
+        this.newSubscription = this._toolbarVisibility.toolbarVisible$.subscribe(showToolbar => {
+            this._showToolbar = showToolbar;
+            changeDetectorRef.markForCheck();
+        });
     }
 
 
@@ -209,12 +208,12 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
     }
 
 
-    mouseEnterLeave(mouseEvent: MouseEvent): void {
-        this._viewportHoverSubject.next(mouseEvent);
+    mouseEnterLeaveViewport(mouseEvent: MouseEvent): void {
+        this._toolbarVisibility.mouseEnterLeave(mouseEvent);
     }
 
-    click(event: MouseEvent | KeyboardEvent): void {
-        this._viewportClickSubject.next(event);
+    clickViewport(): void {
+        this._toolbarVisibility.click();
     }
 }
 
