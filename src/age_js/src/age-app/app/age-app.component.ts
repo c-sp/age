@@ -25,10 +25,10 @@ import {AgeCurrentRouteService} from "./routing";
     selector: "age-app-root",
     template: `
         <age-app-emulator [emulatorFocusState]="emulatorFocusState"
-                          [forcePause]="forcePause"
-                          [showRomLibraryAction]="showRomLibraryAction"></age-app-emulator>
+                          [forcePause]="showOnlyLibrary"
+                          [showRomLibraryAction]="showOnlyEmulator"></age-app-emulator>
 
-        <age-rom-library></age-rom-library>
+        <age-rom-library [showToolbar]="showOnlyLibrary"></age-rom-library>
     `,
     styles: [`
         :host {
@@ -69,7 +69,6 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
     private _emulatorComp?: AgeAppEmulatorComponent;
 
     private _emulatorFocusState = AgeEmulatorFocusState.DISABLED;
-    private _showRomLibraryAction = false;
     private _view = AgeView.COMBINED_FOCUS_EMULATOR;
 
     constructor(private readonly _currentRouteService: AgeCurrentRouteService,
@@ -81,7 +80,6 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
     ngOnInit(): void {
         this.newSubscription = this._viewService.viewChange$.subscribe(view => {
             this._view = view;
-            this._showRomLibraryAction = view === AgeView.ONLY_EMULATOR;
             this._emulatorFocusState = emulatorFocusStateFor(view);
             this._changeDetectorRef.markForCheck();
         });
@@ -99,27 +97,19 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
         return this._emulatorFocusState;
     }
 
-    get forcePause(): boolean {
-        return this._view === AgeView.ONLY_LIBRARY;
-    }
-
-    get showRomLibraryAction(): boolean {
-        return this._showRomLibraryAction;
-    }
-
-    @HostBinding("class.only-emulator") get cssOnlyEmulator() {
+    @HostBinding("class.only-emulator") get showOnlyEmulator() {
         return this._view === AgeView.ONLY_EMULATOR;
     }
 
-    @HostBinding("class.only-library") get cssOnlyLibrary() {
+    @HostBinding("class.only-library") get showOnlyLibrary() {
         return this._view === AgeView.ONLY_LIBRARY;
     }
 
-    @HostBinding("class.focus-emulator") get cssFocusEmulator() {
+    @HostBinding("class.focus-emulator") get focusEmulator() {
         return this._view === AgeView.COMBINED_FOCUS_EMULATOR;
     }
 
-    @HostBinding("class.focus-library") get cssFocusLibrary() {
+    @HostBinding("class.focus-library") get focusLibrary() {
         return this._view === AgeView.COMBINED_FOCUS_LIBRARY;
     }
 }

@@ -37,6 +37,10 @@ export class AgeNavigationService {
         this._navigateTo(romUrl ? [ROUTE_FRAGMENT_URL, romUrl] : [ROUTE_FRAGMENT_URL]);
     }
 
+    navigateToRoot(): void {
+        this._navigateTo([""]);
+    }
+
 
     private _navigateTo(commands: string[]): void {
         from(this._router.navigate(commands)).subscribe(/* we don't care for the result */);

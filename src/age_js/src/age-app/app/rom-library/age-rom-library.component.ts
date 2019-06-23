@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {faAngleLeft} from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import {AgeNavigationService} from "../routing";
 import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 
@@ -22,6 +23,14 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 @Component({
     selector: "age-rom-library",
     template: `
+        <mat-toolbar *ngIf="showToolbar"
+                     [color]="'primary'">
+
+            <age-toolbar-action [icon]="iconBackToEmulation"
+                                (clicked)="backToEmulation()"></age-toolbar-action>
+
+        </mat-toolbar>
+
         <age-rom-library-contents (romClicked)="runRom($event)"
                                   [justifyContent]="'center'"></age-rom-library-contents>
     `,
@@ -37,10 +46,18 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 })
 export class AgeRomLibraryComponent {
 
+    readonly iconBackToEmulation = faAngleLeft;
+
+    @Input() showToolbar = false;
+
     constructor(private readonly _navigationService: AgeNavigationService) {
     }
 
     runRom(onlineRom: IAgeOnlineRom) {
         this._navigationService.navigateToOpenRomUrl(onlineRom.romUrl);
+    }
+
+    backToEmulation(): void {
+        this._navigationService.navigateToRoot();
     }
 }
