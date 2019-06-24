@@ -14,15 +14,8 @@
 // limitations under the License.
 //
 
-import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    ElementRef,
-    HostBinding,
-    Input,
-    NgZone,
-} from "@angular/core";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, NgZone} from "@angular/core";
 import {BehaviorSubject, Observable, of} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {AgeBreakpointObserverService, AgeSubscriptionSink} from "../../common";
@@ -37,8 +30,7 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
     template: `
         <div (click)="clickViewport()"
              (keypress)="clickViewport()"
-             (mouseenter)="mouseEnterLeaveViewport($event)"
-             (mouseleave)="mouseEnterLeaveViewport($event)"
+             (mousemove)="mouseMoveViewport()"
              [ngStyle]="viewportStyle$ | async">
 
             <ng-container *ngIf="(emulationStatus$ | async) as emuStatus">
@@ -50,7 +42,7 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
 
                 <div class="gui-overlay">
 
-                    <age-toolbar-background>
+                    <age-toolbar-background [@showToolbar]="showToolbar">
                         <mat-toolbar>
                             <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
                                                      (paused)="isPaused = $event"></age-toolbar-action-play>
@@ -114,11 +106,23 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
         .rom-hint {
             padding-top: 3em;
         }
-
-        :host.hide-toolbar age-toolbar-background {
-            display: none;
-        }
     `],
+    animations: [
+        trigger("showToolbar", [
+            state("true", style({
+                opacity: "1",
+            })),
+            state("false", style({
+                opacity: "0",
+                display: "none",
+            })),
+            transition("* => true", [
+                style({display: "block"}),
+                animate("0.2s"),
+            ]),
+            transition("* => false", animate("0.6s")),
+        ]),
+    ],
     providers: [
         AgeEmulationService,
     ],
@@ -181,9 +185,8 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
     }
 
 
-    @HostBinding("class.hide-toolbar")
-    get hideToolbar(): boolean {
-        return !this._showToolbar && this._hasEmulation;
+    get showToolbar(): boolean {
+        return this._showToolbar || !this._hasEmulation;
     }
 
     get pauseEmulation(): boolean {
@@ -211,8 +214,8 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
     }
 
 
-    mouseEnterLeaveViewport(mouseEvent: MouseEvent): void {
-        this._toolbarVisibility.mouseEnterLeave(mouseEvent);
+    mouseMoveViewport(): void {
+        this._toolbarVisibility.mouseMove();
     }
 
     clickViewport(): void {

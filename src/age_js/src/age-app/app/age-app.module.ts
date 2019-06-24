@@ -18,6 +18,7 @@ import {HashLocationStrategy, LocationStrategy} from "@angular/common";
 import {NgModule} from "@angular/core";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {BrowserModule} from "@angular/platform-browser";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RouterModule} from "@angular/router";
 import {ServiceWorkerModule} from "@angular/service-worker";
 
@@ -33,6 +34,7 @@ import {AgeEmptyComponent, ROUTES} from "./routing";
 @NgModule({
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
 

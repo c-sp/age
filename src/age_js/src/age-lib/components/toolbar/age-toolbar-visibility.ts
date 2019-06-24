@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-import {Observable, Subject} from "rxjs";
-import {filter, map, switchMap, tap} from "rxjs/operators";
+import {merge, Observable, of, Subject} from "rxjs";
+import {delay, map, switchMap, tap} from "rxjs/operators";
 import {AgeBreakpointObserverService} from "../../common";
 
 
 export class AgeToolbarVisibility {
 
-    private readonly _mouseSubject = new Subject<MouseEvent>();
+    private readonly _mouseSubject = new Subject<{}>();
     private readonly _clickSubject = new Subject<{}>();
 
     constructor(private readonly _breakpointObserver: AgeBreakpointObserverService) {
@@ -41,13 +41,10 @@ export class AgeToolbarVisibility {
         return this._breakpointObserver.hasHoverAbility$.pipe(
             switchMap(hasHover => {
 
-                // user has hover ability => listen to mouse events
+                // user has hover ability => show on mouse-move-event
                 if (hasHover) {
                     return this._mouseSubject.asObservable().pipe(
-                        // filter mouse events by "mouseenter" and "mouseleave"
-                        filter(mouseEvent => ["mouseenter", "mouseleave"].indexOf(mouseEvent.type) >= 0),
-                        // toolbar is visible on "mouseenter"
-                        map(mouseEvent => mouseEvent.type === "mouseenter"),
+                        map(() => true),
                     );
                 }
 
@@ -56,14 +53,23 @@ export class AgeToolbarVisibility {
                     map(() => !toolbarVisible),
                 );
             }),
+
+            // auto-hide the toolbar after some delay
+            switchMap(showToolbar => showToolbar
+                // show the toolbar and schedule hiding it later
+                ? merge(of(true), of(false).pipe(delay(2000)))
+                // just hide the toolbar
+                : of(false),
+            ),
+
             // store the current value
             tap(visible => toolbarVisible = visible),
         );
     }
 
 
-    mouseEnterLeave(mouseEvent: MouseEvent): void {
-        this._mouseSubject.next(mouseEvent);
+    mouseMove(): void {
+        this._mouseSubject.next();
     }
 
     click(): void {
