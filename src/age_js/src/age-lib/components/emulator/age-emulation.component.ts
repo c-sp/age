@@ -62,6 +62,10 @@ export class AgeEmulationComponent extends AgeSubscriptionSink implements OnInit
             || {width: 1, height: 1};
     }
 
+    @Input() set audioVolume(volume: number) {
+        this._emulationWorker.audioVolume = volume;
+    }
+
     @Input() set emulation(emulation: AgeEmulation) {
         this._emulationWorker.emulation = emulation;
     }

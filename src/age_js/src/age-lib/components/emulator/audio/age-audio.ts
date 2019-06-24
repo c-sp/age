@@ -31,6 +31,7 @@ export class AgeAudio {
 
     private readonly _audioCtx: AudioContext;
     private _workletNode?: AudioWorkletNode;
+    private _volume = 0;
 
     constructor() {
         // tslint:disable-next-line:no-any
@@ -47,10 +48,10 @@ export class AgeAudio {
                     });
 
                     this._workletNode.connect(this._audioCtx.destination);
+                    this._workletNode.port.postMessage({volume: this._volume});
                 },
-                () => {
-                    // TODO handle or log error
-                },
+                // tslint:disable-next-line:no-any
+                (err: any) => console.error("audioWorklet.addModule() failure", err),
             );
         } else {
             console.log("audioWorklet not available");
@@ -74,12 +75,22 @@ export class AgeAudio {
         return this._audioCtx.sampleRate;
     }
 
+    set volume(volume: number) {
+        this._volume = volume;
+        if (this._workletNode) {
+            this._workletNode.port.postMessage({volume: this._volume});
+        }
+    }
+
     stream(buffer: Int16Array): void {
         if (this._workletNode) {
             this._workletNode.port.postMessage({
                 sampleRate: this._audioCtx.sampleRate,
                 samples: buffer,
             });
+            if (this._audioCtx.state !== "running") {
+                console.warn("AudioContext.state", this._audioCtx.state);
+            }
         }
     }
 }

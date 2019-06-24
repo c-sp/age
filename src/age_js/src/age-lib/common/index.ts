@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+export * from "./age-breakpoint-observer.service";
 export * from "./age-subscription-like";
 export * from "./age-subscription-sink";
 export * from "./misc";

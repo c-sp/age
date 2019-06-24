@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
-import {BreakpointObserver} from "@angular/cdk/layout";
 import {Injectable} from "@angular/core";
-import {AgeSubscriptionSink} from "age-lib";
+import {AgeBreakpointObserverService, AgeSubscriptionSink} from "age-lib";
 import {BehaviorSubject, combineLatest, Observable, Subject} from "rxjs";
 import {map, shareReplay} from "rxjs/operators";
 import {AgeCurrentRouteService} from "./routing";
@@ -44,7 +43,7 @@ export class AgeViewService extends AgeSubscriptionSink {
     private readonly _attributeChangeSubject = new BehaviorSubject<{}>({});
     private _focusElement: TAgeFocusElement = "library";
 
-    constructor(breakpointObserver: BreakpointObserver,
+    constructor(breakpointObserver: AgeBreakpointObserverService,
                 currentRouteService: AgeCurrentRouteService) {
         super();
 
@@ -64,8 +63,8 @@ export class AgeViewService extends AgeSubscriptionSink {
             // Using 480px (a CSS pixel is device independent just like dp)
             // as the breakpoint for allowing the combined view seems sensible.
             //
-            breakpointObserver.observe("(min-width: 480px)"),
-            breakpointObserver.observe("(min-height: 480px)"),
+            breakpointObserver.matches$("(min-width: 480px)"),
+            breakpointObserver.matches$("(min-height: 480px)"),
             currentRouteService.currentRoute$,
             this._attributeChangeSubject.asObservable(),
         ]);
@@ -73,8 +72,8 @@ export class AgeViewService extends AgeSubscriptionSink {
         this.newSubscription = events$
             .pipe(
                 map(values => {
-                    const widthSufficient = values[0].matches;
-                    const heightSufficient = values[1].matches;
+                    const widthSufficient = values[0];
+                    const heightSufficient = values[1];
                     const route = values[2];
 
                     // minimal view: either library or emulator

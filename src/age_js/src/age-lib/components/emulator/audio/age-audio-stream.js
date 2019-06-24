@@ -15,7 +15,6 @@
 //
 
 const BUFFER_MILLIS = 50;
-const GAIN = 0.2;
 
 
 class Int16Buffer {
@@ -26,11 +25,25 @@ class Int16Buffer {
         this._bufferSize = 0;
         this._minBufferSize = minBufferSize;
         this._buffering = true;
+        this._volume = 0.2;
+    }
+
+    setVolume(volume) {
+        this._volume = Math.min(1, Math.max(0, volume));
     }
 
     addSamples(buffer) {
+        // keep buffered data around the size of this._minBufferSize
+        // (don't let the buffer grow too big)
+        while (this._bufferSize > this._minBufferSize) {
+            this.shiftBuffer();
+        }
+
+        // add new buffer
         this._buffers.push(buffer);
         this._bufferSize += buffer.length;
+
+        // continue suspended audio output, if we have enough data now
         this._buffering = this._buffering && (this._bufferSize < this._minBufferSize);
     }
 
@@ -44,7 +57,7 @@ class Int16Buffer {
 
         } else {
             for (let outputIdx = 0, outputLength = outputChannels[0].length;
-                 this._bufferSize && (outputIdx < outputLength); ) {
+                 this._bufferSize && (outputIdx < outputLength);) {
 
                 const samplesLeft = (this._buffers[0].length - this._bufferOffset) / 2;
                 const samples = Math.min(samplesLeft, outputLength - outputIdx);
@@ -54,8 +67,8 @@ class Int16Buffer {
                      i < end;
                      i += 2, ++outputIdx) {
 
-                    outputChannels[0][outputIdx] = GAIN * this._buffers[0][i] / 32768;
-                    outputChannels[1][outputIdx] = GAIN * this._buffers[0][i + 1] / 32768;
+                    outputChannels[0][outputIdx] = this._volume * this._buffers[0][i] / 32768;
+                    outputChannels[1][outputIdx] = this._volume * this._buffers[0][i + 1] / 32768;
                 }
 
                 this._bufferOffset += values;
@@ -63,15 +76,19 @@ class Int16Buffer {
 
                 const diff = this._buffers[0].length - this._bufferOffset;
                 if (diff < 2) {
-                    this._bufferSize -= diff;
-                    this._bufferOffset = 0;
-                    this._buffers.shift();
+                    this.shiftBuffer();
                 }
             }
 
             // start buffering, if there are no samples left
             this._buffering = !this._bufferSize;
         }
+    }
+
+    shiftBuffer() {
+        this._bufferSize -= this._buffers[0].length - this._bufferOffset;
+        this._buffers.shift();
+        this._bufferOffset = 0;
     }
 }
 
@@ -93,6 +110,10 @@ class AgeAudioStream extends AudioWorkletProcessor {
 
         if (event.data.samples) {
             this.buffer.addSamples(event.data.samples);
+        }
+
+        if (typeof event.data.volume === 'number') {
+            this.buffer.setVolume(event.data.volume);
         }
     }
 

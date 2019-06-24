@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-import {BreakpointObserver} from "@angular/cdk/layout";
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -26,7 +25,7 @@ import {
 } from "@angular/core";
 import {BehaviorSubject, Observable, of} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
-import {AgeSubscriptionSink} from "../../common";
+import {AgeBreakpointObserverService, AgeSubscriptionSink} from "../../common";
 import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
 import {AgeToolbarVisibility} from "../toolbar/age-toolbar-visibility";
@@ -45,6 +44,7 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
             <ng-container *ngIf="(emulationStatus$ | async) as emuStatus">
 
                 <age-emulation *ngIf="emuStatus.emulation as emulation"
+                               [audioVolume]="audioVolume"
                                [emulation]="emulation"
                                [pauseEmulation]="pauseEmulation"></age-emulation>
 
@@ -55,7 +55,8 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
                             <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
                                                      (paused)="isPaused = $event"></age-toolbar-action-play>
 
-                            <age-toolbar-action-volume [isMuted]="false"></age-toolbar-action-volume>
+                            <age-toolbar-action-volume (volumeChange)="audioVolume = $event">
+                            </age-toolbar-action-volume>
 
                             <ng-content></ng-content>
                         </mat-toolbar>
@@ -128,6 +129,8 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
     readonly emulationStatus$: Observable<Partial<IAgeEmulationStatus>>;
     readonly viewportStyle$: Observable<object>;
 
+    audioVolume = 0;
+
     private readonly _romFileSubject = new BehaviorSubject<TAgeRomFile | undefined>(undefined);
     private readonly _toolbarVisibility: AgeToolbarVisibility;
 
@@ -138,7 +141,7 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
 
     constructor(hostElementRef: ElementRef,
                 emulationService: AgeEmulationService,
-                breakpointObserver: BreakpointObserver,
+                breakpointObserver: AgeBreakpointObserverService,
                 ngZone: NgZone,
                 changeDetectorRef: ChangeDetectorRef) {
         super();

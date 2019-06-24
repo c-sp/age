@@ -20,12 +20,16 @@ import {AgeGbKeyMap} from "../../settings";
 import {AgeAudio} from "./audio/age-audio";
 
 
+// TODO better handling of AudioContext creation
+//      (see also: https://hackernoon.com/unlocking-web-audio-the-smarter-way-8858218c0e09)
+
+
 export class AgeEmulationWorker extends AgeSubscriptionLike {
 
     private readonly _keyMap = new AgeGbKeyMap();
     private readonly _timerHandle: number;
     private _canvasCtx?: CanvasRenderingContext2D | null;
-    private _audio?: AgeAudio;
+    private _audio = new AgeAudio();
     private _emulation?: AgeEmulation;
     private _pauseEmulation = false;
 
@@ -34,7 +38,6 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
             window.clearInterval(this._timerHandle);
             if (this._audio) {
                 this._audio.close();
-                this._audio = undefined;
             }
         });
 
@@ -45,19 +48,16 @@ export class AgeEmulationWorker extends AgeSubscriptionLike {
     }
 
 
+    set audioVolume(volume: number) {
+        this._audio.volume = volume;
+    }
+
     get emulation(): AgeEmulation | undefined {
         return this._emulation;
     }
 
     set emulation(emulation: AgeEmulation | undefined) {
         this._emulation = emulation;
-        // init after the emulation has been set,
-        // because the latter is triggered by a user interaction which
-        // is required to create the AudioContext
-        // TODO might not work without previous user interaction, check if AudioContext is suspended?
-        if (!this._audio) {
-            this._audio = new AgeAudio();
-        }
     }
 
     set pauseEmulation(pauseEmulation: boolean) {

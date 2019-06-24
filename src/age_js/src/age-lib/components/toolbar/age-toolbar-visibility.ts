@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-import {BreakpointObserver} from "@angular/cdk/layout";
 import {Observable, Subject} from "rxjs";
 import {filter, map, switchMap, tap} from "rxjs/operators";
+import {AgeBreakpointObserverService} from "../../common";
 
 
 export class AgeToolbarVisibility {
@@ -24,7 +24,7 @@ export class AgeToolbarVisibility {
     private readonly _mouseSubject = new Subject<MouseEvent>();
     private readonly _clickSubject = new Subject<{}>();
 
-    constructor(private readonly _breakpointObserver: BreakpointObserver) {
+    constructor(private readonly _breakpointObserver: AgeBreakpointObserverService) {
     }
 
 
@@ -38,11 +38,11 @@ export class AgeToolbarVisibility {
         // so that devices without hover ability and browsers not
         // supporting the "hover" media query will fall back to
         // "click to show or hide the toolbar".
-        return this._breakpointObserver.observe("(hover: hover)").pipe(
-            switchMap(hasHoverState => {
+        return this._breakpointObserver.hasHoverAbility$.pipe(
+            switchMap(hasHover => {
 
                 // user has hover ability => listen to mouse events
-                if (hasHoverState.matches) {
+                if (hasHover) {
                     return this._mouseSubject.asObservable().pipe(
                         // filter mouse events by "mouseenter" and "mouseleave"
                         filter(mouseEvent => ["mouseenter", "mouseleave"].indexOf(mouseEvent.type) >= 0),
