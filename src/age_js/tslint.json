@@ -89,6 +89,9 @@
     // (override tslint:recommended)
     //  -> https://palantir.github.io/tslint/rules/no-any
     "no-any": true,
+    // functions marked async must contain an await or return statement
+    //  -> https://palantir.github.io/tslint/rules/no-async-without-await/
+    "no-async-without-await": true,
     // use "if (x)" instead of "if (x === true)"
     //  -> https://palantir.github.io/tslint/rules/no-boolean-literal-compare
     "no-boolean-literal-compare": true,
