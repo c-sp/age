@@ -15,10 +15,10 @@
 //
 
 import {animate, state, style, transition, trigger} from "@angular/animations";
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, NgZone} from "@angular/core";
+import {ChangeDetectionStrategy, Component, ElementRef, Input, NgZone} from "@angular/core";
 import {BehaviorSubject, Observable, of} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
-import {AgeBreakpointObserverService, AgeSubscriptionSink} from "../../common";
+import {AgeBreakpointObserverService} from "../../common";
 import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
 import {AgePlayPauseStatus} from "../toolbar";
 import {AgeToolbarVisibility} from "../toolbar/age-toolbar-visibility";
@@ -42,7 +42,7 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
 
                 <div class="gui-overlay">
 
-                    <age-toolbar-background [@showToolbar]="showToolbar">
+                    <age-toolbar-background [@showToolbar]="toolbarVisible$ | async">
                         <mat-toolbar>
                             <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
                                                      (paused)="isPaused = $event"></age-toolbar-action-play>
@@ -118,9 +118,9 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
             })),
             transition("* => true", [
                 style({display: "block"}),
-                animate("0.2s"),
+                animate("0.3s"),
             ]),
-            transition("* => false", animate("0.6s")),
+            transition("* => false", animate("0.3s")),
         ]),
     ],
     providers: [
@@ -128,17 +128,17 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
+export class AgeEmulatorContainerComponent {
 
     readonly emulationStatus$: Observable<Partial<IAgeEmulationStatus>>;
     readonly viewportStyle$: Observable<object>;
+    readonly toolbarVisible$: Observable<boolean>;
 
     audioVolume = 0;
 
     private readonly _romFileSubject = new BehaviorSubject<TAgeRomFile | undefined>(undefined);
     private readonly _toolbarVisibility: AgeToolbarVisibility;
 
-    private _showToolbar = true;
     private _hasEmulation = false;
     private _forcePause = false;
     private _isPaused = false;
@@ -146,18 +146,17 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
     constructor(hostElementRef: ElementRef,
                 emulationService: AgeEmulationService,
                 breakpointObserver: AgeBreakpointObserverService,
-                ngZone: NgZone,
-                changeDetectorRef: ChangeDetectorRef) {
-        super();
+                ngZone: NgZone) {
 
         this.emulationStatus$ = this._romFileSubject.asObservable().pipe(
             switchMap<TAgeRomFile | undefined, Observable<Partial<IAgeEmulationStatus>>>(
                 romFile => !romFile ? of({}) : emulationService.newEmulation$(romFile),
             ),
-            // if a new rom file has been loaded, clear the previous "is-paused" flag
             tap(emuStatus => {
                 this._hasEmulation = !!emuStatus.emulation;
-                // emulation ready -> clear "paused" flag
+                // show the toolbar as long as no emulation is ready
+                this._toolbarVisibility.setVisible(!this._hasEmulation);
+                // clear the "is-paused" flag, if the emulation is ready
                 if (this._hasEmulation) {
                     this._isPaused = false;
                 }
@@ -177,17 +176,9 @@ export class AgeEmulatorContainerComponent extends AgeSubscriptionSink {
         );
 
         this._toolbarVisibility = new AgeToolbarVisibility(breakpointObserver);
-
-        this.newSubscription = this._toolbarVisibility.toolbarVisible$.subscribe(showToolbar => {
-            this._showToolbar = showToolbar;
-            changeDetectorRef.markForCheck();
-        });
+        this.toolbarVisible$ = this._toolbarVisibility.toolbarVisible$;
     }
 
-
-    get showToolbar(): boolean {
-        return this._showToolbar || !this._hasEmulation;
-    }
 
     get pauseEmulation(): boolean {
         return this._forcePause || this._isPaused;
