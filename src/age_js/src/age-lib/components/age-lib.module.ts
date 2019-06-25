@@ -19,6 +19,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
 import {MatSliderModule} from "@angular/material/slider";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
@@ -40,6 +41,7 @@ import {
 
         FontAwesomeModule,
         MatButtonModule,
+        MatIconModule,
         MatSliderModule,
         MatToolbarModule,
     ],

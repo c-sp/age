@@ -16,20 +16,16 @@
 
 import {Injectable} from "@angular/core";
 import {AgeBreakpointObserverService, AgeSubscriptionSink} from "age-lib";
-import {BehaviorSubject, combineLatest, Observable, Subject} from "rxjs";
+import {combineLatest, Observable, Subject} from "rxjs";
 import {map, shareReplay} from "rxjs/operators";
-import {AgeCurrentRouteService} from "./routing";
+import {AgeCurrentRouteService} from "./common";
 
 
 export enum AgeView {
     ONLY_LIBRARY = "ONLY_LIBRARY",
     ONLY_EMULATOR = "ONLY_EMULATOR",
-    COMBINED_FOCUS_LIBRARY = "COMBINED_FOCUS_LIBRARY",
-    COMBINED_FOCUS_EMULATOR = "COMBINED_FOCUS_EMULATOR",
-    // TODO add EMULATOR_FULLSCREEN
+    COMBINED = "COMBINED",
 }
-
-export type TAgeFocusElement = "emulator" | "library";
 
 
 @Injectable({
@@ -39,9 +35,6 @@ export class AgeViewService extends AgeSubscriptionSink {
 
     private readonly _viewChangeSubject = new Subject<AgeView>();
     private readonly _viewChange$ = this._viewChangeSubject.asObservable().pipe(shareReplay(1));
-
-    private readonly _attributeChangeSubject = new BehaviorSubject<{}>({});
-    private _focusElement: TAgeFocusElement = "library";
 
     constructor(breakpointObserver: AgeBreakpointObserverService,
                 currentRouteService: AgeCurrentRouteService) {
@@ -66,7 +59,6 @@ export class AgeViewService extends AgeSubscriptionSink {
             breakpointObserver.matches$("(min-width: 480px)"),
             breakpointObserver.matches$("(min-height: 480px)"),
             currentRouteService.currentRoute$,
-            this._attributeChangeSubject.asObservable(),
         ]);
 
         this.newSubscription = events$
@@ -81,10 +73,8 @@ export class AgeViewService extends AgeSubscriptionSink {
                         return (route.route === "library") ? AgeView.ONLY_LIBRARY : AgeView.ONLY_EMULATOR;
                     }
 
-                    // combined view
-                    return (this._focusElement === "library")
-                        ? AgeView.COMBINED_FOCUS_LIBRARY
-                        : AgeView.COMBINED_FOCUS_EMULATOR;
+                    // combined view available
+                    return (route.route === "library") ? AgeView.COMBINED : AgeView.ONLY_EMULATOR;
                 }),
             )
             .subscribe(view => this._viewChangeSubject.next(view));
@@ -93,10 +83,5 @@ export class AgeViewService extends AgeSubscriptionSink {
 
     get viewChange$(): Observable<AgeView> {
         return this._viewChange$;
-    }
-
-    toggleFocusElement(): void {
-        this._focusElement = (this._focusElement === "library") ? "emulator" : "library";
-        this._attributeChangeSubject.next({});
     }
 }

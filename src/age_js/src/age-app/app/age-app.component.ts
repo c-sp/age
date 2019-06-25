@@ -15,20 +15,21 @@
 //
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit, ViewChild} from "@angular/core";
-import {AgeSubscriptionSink} from "age-lib";
+import {MatIconRegistry} from "@angular/material/icon";
+import {DomSanitizer} from "@angular/platform-browser";
+import {AgeSubscriptionSink, TAgeRomFile} from "age-lib";
 import {AgeView, AgeViewService} from "./age-view.service";
-import {AgeAppEmulatorComponent, AgeEmulatorFocusState} from "./emulator";
-import {AgeCurrentRouteService} from "./routing";
+import {AgeCurrentRouteService, registerIcons} from "./common";
+import {AgeAppEmulatorComponent} from "./emulator";
 
 
 @Component({
     selector: "age-app-root",
     template: `
-        <age-app-emulator [emulatorFocusState]="emulatorFocusState"
-                          [forcePause]="showOnlyLibrary"
-                          [showRomLibraryAction]="showOnlyEmulator"></age-app-emulator>
+        <age-app-emulator [forcePause]="showOnlyLibrary"></age-app-emulator>
 
-        <age-rom-library [showToolbar]="showOnlyLibrary"></age-rom-library>
+        <age-rom-library (openLocalRomFile)="openRomFile($event)"
+                         [mobileMode]="showOnlyLibrary"></age-rom-library>
     `,
     styles: [`
         :host {
@@ -56,10 +57,6 @@ import {AgeCurrentRouteService} from "./routing";
         :host.only-library age-app-emulator {
             display: none;
         }
-
-        :host.focus-emulator age-app-emulator {
-            height: 100%;
-        }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -67,35 +64,30 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
 
     @ViewChild(AgeAppEmulatorComponent, {static: true})
     private _emulatorComp?: AgeAppEmulatorComponent;
-
-    private _emulatorFocusState = AgeEmulatorFocusState.DISABLED;
-    private _view = AgeView.COMBINED_FOCUS_EMULATOR;
+    private _view = AgeView.COMBINED;
 
     constructor(private readonly _currentRouteService: AgeCurrentRouteService,
                 private readonly _viewService: AgeViewService,
-                private readonly _changeDetectorRef: ChangeDetectorRef) {
+                private readonly _changeDetectorRef: ChangeDetectorRef,
+                matIconRegistry: MatIconRegistry,
+                domSanitizer: DomSanitizer) {
         super();
+        registerIcons(matIconRegistry, domSanitizer);
     }
 
     ngOnInit(): void {
         this.newSubscription = this._viewService.viewChange$.subscribe(view => {
             this._view = view;
-            this._emulatorFocusState = emulatorFocusStateFor(view);
             this._changeDetectorRef.markForCheck();
         });
         this.newSubscription = this._currentRouteService.currentRoute$.subscribe(route => {
             const fileUrl = (route.route === "romUrl") && route.romUrl;
-            if (!fileUrl || !this._emulatorComp) {
-                return;
+            if (fileUrl) {
+                this.openRomFile({type: "rom-file-url", fileUrl});
             }
-            this._emulatorComp.openRomFile({type: "rom-file-url", fileUrl});
         });
     }
 
-
-    get emulatorFocusState(): AgeEmulatorFocusState {
-        return this._emulatorFocusState;
-    }
 
     @HostBinding("class.only-emulator") get showOnlyEmulator() {
         return this._view === AgeView.ONLY_EMULATOR;
@@ -105,25 +97,10 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
         return this._view === AgeView.ONLY_LIBRARY;
     }
 
-    @HostBinding("class.focus-emulator") get focusEmulator() {
-        return this._view === AgeView.COMBINED_FOCUS_EMULATOR;
-    }
 
-    @HostBinding("class.focus-library") get focusLibrary() {
-        return this._view === AgeView.COMBINED_FOCUS_LIBRARY;
-    }
-}
-
-
-function emulatorFocusStateFor(view: AgeView): AgeEmulatorFocusState {
-    switch (view) {
-        case AgeView.COMBINED_FOCUS_EMULATOR:
-            return AgeEmulatorFocusState.FOCUSED;
-
-        case AgeView.COMBINED_FOCUS_LIBRARY:
-            return AgeEmulatorFocusState.NOT_FOCUSED;
-
-        default:
-            return AgeEmulatorFocusState.DISABLED;
+    openRomFile(romFile: TAgeRomFile): void {
+        if (this._emulatorComp) {
+            this._emulatorComp.openRomFile(romFile);
+        }
     }
 }

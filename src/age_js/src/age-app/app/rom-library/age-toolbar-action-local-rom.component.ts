@@ -15,7 +15,8 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
-import {faFolderOpen} from "@fortawesome/free-solid-svg-icons/faFolderOpen";
+import {faDesktop} from "@fortawesome/free-solid-svg-icons/faDesktop";
+import {faMobileAlt} from "@fortawesome/free-solid-svg-icons/faMobileAlt";
 import {IAgeLocalRomFile} from "age-lib";
 
 
@@ -38,7 +39,7 @@ import {IAgeLocalRomFile} from "age-lib";
 })
 export class AgeToolbarActionLocalRomComponent {
 
-    readonly icon = faFolderOpen;
+    readonly icon = isMobileDevice() ? faMobileAlt : faDesktop;
 
     @Output() readonly openLocalRom = new EventEmitter<IAgeLocalRomFile>();
 
@@ -54,4 +55,11 @@ export class AgeToolbarActionLocalRomComponent {
             fileInput.value = "";
         }
     }
+}
+
+
+function isMobileDevice(): boolean {
+    // we need this only to show different icons for different device types
+    // so there is no need to be 100% accurate
+    return !!navigator.userAgent.match(/(iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini)/i);
 }

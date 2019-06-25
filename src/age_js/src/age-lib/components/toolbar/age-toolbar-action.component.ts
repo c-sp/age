@@ -23,9 +23,10 @@ import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
     template: `
         <button mat-button
                 [disabled]="disabled"
-                (tap)="click()">
+                (click)="click($event)">
 
-            <fa-icon [icon]="icon"></fa-icon>
+            <fa-icon *ngIf="icon" [icon]="icon"></fa-icon>
+            <mat-icon *ngIf="matIconName" [svgIcon]="matIconName"></mat-icon>
 
         </button>
     `,
@@ -35,10 +36,13 @@ export class AgeToolbarActionComponent {
 
     @Input() disabled = false;
     @Input() icon?: IconDefinition;
+    @Input() matIconName?: string;
 
     @Output() readonly clicked = new EventEmitter();
 
-    click(): void {
+    click(event: Event): void {
         this.clicked.emit();
+        // don't propagate any further as this might cause the toolbar to disappear
+        event.stopPropagation();
     }
 }

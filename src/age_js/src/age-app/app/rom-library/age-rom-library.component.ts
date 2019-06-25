@@ -14,32 +14,52 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
 import {faAngleLeft} from "@fortawesome/free-solid-svg-icons/faAngleLeft";
-import {AgeNavigationService} from "../routing";
+import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
+import {IAgeLocalRomFile} from "age-lib";
+import {AgeNavigationService} from "../common";
 import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 
 
 @Component({
     selector: "age-rom-library",
     template: `
-        <mat-toolbar *ngIf="showToolbar"
-                     [color]="'primary'">
+        <mat-toolbar [color]="'primary'">
 
-            <age-toolbar-action [icon]="iconBackToEmulation"
-                                (clicked)="backToEmulation()"></age-toolbar-action>
+            <age-toolbar-action (clicked)="navigateToRoot()"
+                                [icon]="iconBackToEmulation"
+                                [ngClass]="{'hidden': !mobileMode}"></age-toolbar-action>
 
+            <age-toolbar-spacer></age-toolbar-spacer>
+
+            <age-toolbar-action-local-rom (openLocalRom)="openLocalRom($event)"></age-toolbar-action-local-rom>
+
+            <age-toolbar-spacer></age-toolbar-spacer>
+
+            <age-toolbar-action (clicked)="navigateToRoot()"
+                                [icon]="iconCloseRomLibrary"
+                                [ngClass]="{'hidden': mobileMode}"></age-toolbar-action>
         </mat-toolbar>
 
-        <age-rom-library-contents (romClicked)="runRom($event)"
+        <age-rom-library-contents (romClicked)="openRomUrl($event)"
                                   [justifyContent]="'center'"></age-rom-library-contents>
     `,
     styles: [`
         :host {
             display: block;
-            max-width: 80em;
+            max-width: 60em;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        mat-toolbar {
+            position: sticky;
+            top: 0;
+        }
+
+        .hidden {
+            visibility: hidden;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,17 +67,26 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 export class AgeRomLibraryComponent {
 
     readonly iconBackToEmulation = faAngleLeft;
+    readonly iconCloseRomLibrary = faTimes;
 
-    @Input() showToolbar = false;
+    @Input() mobileMode = false;
+    @Output() readonly openLocalRomFile = new EventEmitter<IAgeLocalRomFile>();
 
     constructor(private readonly _navigationService: AgeNavigationService) {
     }
 
-    runRom(onlineRom: IAgeOnlineRom) {
+    openRomUrl(onlineRom: IAgeOnlineRom): void {
         this._navigationService.navigateToOpenRomUrl(onlineRom.romUrl);
     }
 
-    backToEmulation(): void {
+    navigateToRoot(): void {
         this._navigationService.navigateToRoot();
+    }
+
+    openLocalRom(localRom: IAgeLocalRomFile): void {
+        this.openLocalRomFile.emit(localRom);
+        if (this.mobileMode) {
+            this.navigateToRoot();
+        }
     }
 }

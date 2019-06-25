@@ -222,6 +222,11 @@ function createViewportStyle(viewport: IAgeViewport): object {
         top: cssPxString(viewport.top),
         width: cssPxString(viewport.width),
         height: cssPxString(viewport.height),
+        // For some reason the canvas element is always displayed with some margin/padding below,
+        // which triggers a vertical scrollbar.
+        // By applying the padding below, the scrollbar disappears.
+        // Having the emulator "screen" not touch the browser GUI looks nicer anyway ...
+        padding: "2px",
     };
 
     function cssPxString(value: number): string {

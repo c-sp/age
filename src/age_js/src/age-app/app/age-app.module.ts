@@ -16,6 +16,7 @@
 
 import {HashLocationStrategy, LocationStrategy} from "@angular/common";
 import {NgModule} from "@angular/core";
+import {MatIconModule} from "@angular/material/icon";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
@@ -26,9 +27,14 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 import {AgeAppComponent} from "./age-app.component";
-import {AgeAppEmulatorComponent, AgeToolbarActionLocalRomComponent} from "./emulator";
-import {AgeRomLibraryComponent, AgeRomLibraryContentsComponent, AgeRomLinkComponent} from "./rom-library";
-import {AgeEmptyComponent, ROUTES} from "./routing";
+import {AgeEmptyComponent, ROUTES} from "./common";
+import {AgeAppEmulatorComponent} from "./emulator";
+import {
+    AgeRomLibraryComponent,
+    AgeRomLibraryContentsComponent,
+    AgeRomLinkComponent,
+    AgeToolbarActionLocalRomComponent,
+} from "./rom-library";
 
 
 @NgModule({
@@ -39,6 +45,7 @@ import {AgeEmptyComponent, ROUTES} from "./routing";
         ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
 
         FontAwesomeModule,
+        MatIconModule,
         MatToolbarModule,
 
         AgeLibModule,

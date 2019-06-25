@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Christoph Sprenger
+// Copyright 2019 Christoph Sprenger
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,4 +14,18 @@
 // limitations under the License.
 //
 
-export * from "./age-app-emulator.component";
+import {MatIconRegistry} from "@angular/material/icon";
+import {DomSanitizer} from "@angular/platform-browser";
+
+
+export const AGE_ICON_NAME_CARTRIDGE = "age-cartridge";
+
+
+export function registerIcons(matIconRegistry: MatIconRegistry,
+                              domSanitizer: DomSanitizer): void {
+
+    matIconRegistry.addSvgIcon(
+        AGE_ICON_NAME_CARTRIDGE,
+        domSanitizer.bypassSecurityTrustResourceUrl("assets/cartridge.svg"),
+    );
+}

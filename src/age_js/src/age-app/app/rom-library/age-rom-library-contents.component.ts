@@ -52,12 +52,12 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
 
                 <img *ngIf="libraryItem.romScreenshotUrl"
                      [alt]="libraryItem.screenshotAlt"
-                     (tap)="romClicked.emit(libraryItem)"
+                     (click)="romClicked.emit(libraryItem)"
                      [src]="libraryItem.romScreenshotUrl"
                      [title]="libraryItem.clickTooltip">
 
                 <div class="details">
-                    <div (tap)="romClicked.emit(libraryItem)"
+                    <div (click)="romClicked.emit(libraryItem)"
                          (keypress)="romClicked.emit(libraryItem)"
                          [title]="libraryItem.clickTooltip">{{libraryItem.romTitle}}</div>
 
