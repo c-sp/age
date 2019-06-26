@@ -23,7 +23,10 @@ import {IAgeLocalRomFile} from "age-lib";
 @Component({
     selector: "age-toolbar-action-local-rom",
     template: `
-        <age-toolbar-action [icon]="icon" (clicked)="fileInput.click()"></age-toolbar-action>
+        <button mat-button (click)="fileInput.click()">
+            <fa-icon [icon]="deviceIcon"></fa-icon>
+        </button>
+
         <input #fileInput
                type="file"
                id="fileInput"
@@ -39,7 +42,7 @@ import {IAgeLocalRomFile} from "age-lib";
 })
 export class AgeToolbarActionLocalRomComponent {
 
-    readonly icon = isMobileDevice() ? faMobileAlt : faDesktop;
+    readonly deviceIcon = isMobileDevice() ? faMobileAlt : faDesktop;
 
     @Output() readonly openLocalRom = new EventEmitter<IAgeLocalRomFile>();
 

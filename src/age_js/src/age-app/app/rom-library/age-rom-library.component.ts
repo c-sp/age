@@ -18,7 +18,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@
 import {faAngleLeft} from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
 import {IAgeLocalRomFile} from "age-lib";
-import {AgeNavigationService} from "../common";
+import {AgeNavigationService} from "../routing";
 import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 
 
@@ -27,9 +27,9 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
     template: `
         <mat-toolbar [color]="'primary'">
 
-            <age-toolbar-action (clicked)="navigateToRoot()"
-                                [icon]="iconBackToEmulation"
-                                [ngClass]="{'hidden': !mobileMode}"></age-toolbar-action>
+            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': !mobileMode}">
+                <fa-icon [icon]="iconBackToEmulation"></fa-icon>
+            </a>
 
             <age-toolbar-spacer></age-toolbar-spacer>
 
@@ -37,9 +37,10 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 
             <age-toolbar-spacer></age-toolbar-spacer>
 
-            <age-toolbar-action (clicked)="navigateToRoot()"
-                                [icon]="iconCloseRomLibrary"
-                                [ngClass]="{'hidden': mobileMode}"></age-toolbar-action>
+            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': mobileMode}">
+                <fa-icon [icon]="iconCloseRomLibrary"></fa-icon>
+            </a>
+
         </mat-toolbar>
 
         <age-rom-library-contents (romClicked)="openRomUrl($event)"
@@ -72,21 +73,17 @@ export class AgeRomLibraryComponent {
     @Input() mobileMode = false;
     @Output() readonly openLocalRomFile = new EventEmitter<IAgeLocalRomFile>();
 
-    constructor(private readonly _navigationService: AgeNavigationService) {
+    constructor(readonly navigationService: AgeNavigationService) {
     }
 
     openRomUrl(onlineRom: IAgeOnlineRom): void {
-        this._navigationService.navigateToOpenRomUrl(onlineRom.romUrl);
-    }
-
-    navigateToRoot(): void {
-        this._navigationService.navigateToRoot();
+        this.navigationService.navigateToOpenRomUrl(onlineRom.romUrl);
     }
 
     openLocalRom(localRom: IAgeLocalRomFile): void {
         this.openLocalRomFile.emit(localRom);
         if (this.mobileMode) {
-            this.navigateToRoot();
+            this.navigationService.navigateToRoot();
         }
     }
 }

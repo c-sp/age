@@ -18,7 +18,7 @@ import {Injectable} from "@angular/core";
 import {AgeBreakpointObserverService, AgeSubscriptionSink} from "age-lib";
 import {combineLatest, Observable, Subject} from "rxjs";
 import {map, shareReplay} from "rxjs/operators";
-import {AgeCurrentRouteService} from "./common";
+import {AgeCurrentRouteService} from "./routing";
 
 
 export enum AgeView {

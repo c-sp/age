@@ -19,8 +19,9 @@ import {MatIconRegistry} from "@angular/material/icon";
 import {DomSanitizer} from "@angular/platform-browser";
 import {AgeSubscriptionSink, TAgeRomFile} from "age-lib";
 import {AgeView, AgeViewService} from "./age-view.service";
-import {AgeCurrentRouteService, registerIcons} from "./common";
+import {registerIcons} from "./common";
 import {AgeAppEmulatorComponent} from "./emulator";
+import {AgeCurrentRouteService} from "./routing";
 
 
 @Component({

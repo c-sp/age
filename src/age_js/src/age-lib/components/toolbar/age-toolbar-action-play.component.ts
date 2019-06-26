@@ -31,9 +31,13 @@ export enum AgePlayPauseStatus {
 @Component({
     selector: "age-toolbar-action-play",
     template: `
-        <age-toolbar-action [disabled]="disabled"
-                            [icon]="icon"
-                            (clicked)="paused.emit(!isPaused)"></age-toolbar-action>
+        <button mat-button
+                [disabled]="disabled"
+                (click)="paused.emit(!isPaused)">
+
+            <fa-icon [icon]="icon"></fa-icon>
+
+        </button>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

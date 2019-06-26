@@ -15,21 +15,52 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
+import {faEllipsisV} from "@fortawesome/free-solid-svg-icons/faEllipsisV";
+import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import {TAgeRomFile} from "age-lib";
 import {Observable, Subject} from "rxjs";
-import {AGE_ICON_NAME_CARTRIDGE, AgeNavigationService} from "../common";
+import {AGE_ICON_NAME_CARTRIDGE} from "../common";
+import {AgeNavigationService} from "../routing";
 
 
 @Component({
     selector: "age-app-emulator",
     template: `
+        <mat-menu #ageMenu="matMenu"
+                  [xPosition]="'before'">
+
+            <a mat-menu-item [routerLink]="navigationService.libraryUrl">
+                <mat-icon [svgIcon]="openRomIcon"></mat-icon>
+                open rom file
+            </a>
+
+            <button mat-menu-item>
+                <fa-icon [icon]="aboutAgeIcon"></fa-icon>
+                about AGE
+            </button>
+
+            <a mat-menu-item
+               href="https://gitlab.com/csprenger/AGE"
+               target="_blank"
+               rel="noopener nofollow noreferrer"
+               title="Link to the AGE git repository">
+
+                <fa-icon [icon]="ageRepoIcon"></fa-icon>
+                AGE repository
+            </a>
+
+        </mat-menu>
+
+
         <age-emulator-container [forcePause]="forcePause"
                                 [romFile]="romFile$ | async">
 
             <age-toolbar-spacer></age-toolbar-spacer>
 
-            <age-toolbar-action [matIconName]="romLibraryIconName"
-                                (clicked)="navigationService.navigateToLibrary()"></age-toolbar-action>
+            <button mat-button [matMenuTriggerFor]="ageMenu">
+                <fa-icon [icon]="menuIcon"></fa-icon>
+            </button>
 
         </age-emulator-container>
     `,
@@ -46,7 +77,10 @@ import {AGE_ICON_NAME_CARTRIDGE, AgeNavigationService} from "../common";
 })
 export class AgeAppEmulatorComponent {
 
-    readonly romLibraryIconName = AGE_ICON_NAME_CARTRIDGE;
+    readonly aboutAgeIcon = faInfoCircle;
+    readonly ageRepoIcon = faGitlab;
+    readonly menuIcon = faEllipsisV;
+    readonly openRomIcon = AGE_ICON_NAME_CARTRIDGE;
 
     @Input() forcePause = false;
 

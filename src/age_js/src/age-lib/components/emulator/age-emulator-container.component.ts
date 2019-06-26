@@ -20,56 +20,54 @@ import {BehaviorSubject, Observable, of} from "rxjs";
 import {map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {AgeBreakpointObserverService} from "../../common";
 import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
-import {AgePlayPauseStatus} from "../toolbar";
-import {AgeToolbarVisibility} from "../toolbar/age-toolbar-visibility";
+import {AgePlayPauseStatus, AgeToolbarVisibility} from "../toolbar";
 import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calculator";
 
 
 @Component({
     selector: "age-emulator-container",
     template: `
-        <div (click)="clickViewport()"
-             (keypress)="clickViewport()"
-             (mousemove)="mouseMoveViewport()"
+        <div *ngIf="(emulationStatus$ | async) as emuStatus"
              [ngStyle]="viewportStyle$ | async">
 
-            <ng-container *ngIf="(emulationStatus$ | async) as emuStatus">
+            <age-emulation *ngIf="emuStatus.emulation as emulation"
+                           [audioVolume]="audioVolume"
+                           (click)="clickEmulation()"
+                           [emulation]="emulation"
+                           (keypress)="clickEmulation()"
+                           (mousemove)="mouseMoveEmulation()"
+                           [pauseEmulation]="pauseEmulation"></age-emulation>
 
-                <age-emulation *ngIf="emuStatus.emulation as emulation"
-                               [audioVolume]="audioVolume"
-                               [emulation]="emulation"
-                               [pauseEmulation]="pauseEmulation"></age-emulation>
+            <div class="gui-overlay">
 
-                <div class="gui-overlay">
+                <age-toolbar-background [@showToolbar]="toolbarVisible$ | async">
+                    <mat-toolbar>
 
-                    <age-toolbar-background [@showToolbar]="toolbarVisible$ | async">
-                        <mat-toolbar>
-                            <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
-                                                     (paused)="isPaused = $event"></age-toolbar-action-play>
+                        <age-toolbar-action-play [playPauseStatus]="playPauseStatus"
+                                                 (paused)="isPaused = $event"></age-toolbar-action-play>
 
-                            <age-toolbar-action-volume (volumeChange)="audioVolume = $event">
-                            </age-toolbar-action-volume>
+                        <age-toolbar-action-volume (volumeChange)="audioVolume = $event">
+                        </age-toolbar-action-volume>
 
-                            <ng-content></ng-content>
-                        </mat-toolbar>
-                    </age-toolbar-background>
+                        <ng-content></ng-content>
 
-                    <ng-container *ngIf="!emuStatus.emulation">
+                    </mat-toolbar>
+                </age-toolbar-background>
 
-                        <age-task-status *ngIf="emuStatus.taskStatusList as statusList; else openRomHint"
-                                         [taskStatusList]="statusList"></age-task-status>
+                <ng-container *ngIf="!emuStatus.emulation">
 
-                        <ng-template #openRomHint>
-                            <div class="rom-hint">
-                                please open a rom file
-                            </div>
-                        </ng-template>
+                    <age-task-status *ngIf="emuStatus.taskStatusList as statusList; else openRomHint"
+                                     [taskStatusList]="statusList"></age-task-status>
 
-                    </ng-container>
+                    <ng-template #openRomHint>
+                        <div class="rom-hint">
+                            please open a rom file
+                        </div>
+                    </ng-template>
 
-                </div>
+                </ng-container>
 
-            </ng-container>
+            </div>
 
         </div>
     `,
@@ -205,11 +203,11 @@ export class AgeEmulatorContainerComponent {
     }
 
 
-    mouseMoveViewport(): void {
+    mouseMoveEmulation(): void {
         this._toolbarVisibility.mouseMove();
     }
 
-    clickViewport(): void {
+    clickEmulation(): void {
         this._toolbarVisibility.click();
     }
 }

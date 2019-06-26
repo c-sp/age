@@ -24,8 +24,9 @@ import {AgeBreakpointObserverService} from "../../common";
 @Component({
     selector: "age-toolbar-action-volume",
     template: `
-        <age-toolbar-action (clicked)="toggleMute()"
-                            [icon]="icon"></age-toolbar-action>
+        <button mat-button (click)="toggleMute()">
+            <fa-icon [icon]="icon"></fa-icon>
+        </button>
 
         <age-toolbar-background *ngIf="breakpointObserver.hasHoverAbility$ | async">
             <mat-slider (input)="volume = $event.value"

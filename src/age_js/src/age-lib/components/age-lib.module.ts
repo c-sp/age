@@ -25,7 +25,6 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeEmulationComponent, AgeEmulatorContainerComponent, AgeTaskStatusComponent} from "./emulator";
 import {
-    AgeToolbarActionComponent,
     AgeToolbarActionPlayComponent,
     AgeToolbarActionVolumeComponent,
     AgeToolbarBackgroundComponent,
@@ -50,14 +49,12 @@ import {
         AgeEmulatorContainerComponent,
         AgeTaskStatusComponent,
 
-        AgeToolbarActionComponent,
         AgeToolbarActionPlayComponent,
         AgeToolbarActionVolumeComponent,
         AgeToolbarBackgroundComponent,
         AgeToolbarSpacerComponent,
     ],
     exports: [
-        AgeToolbarActionComponent,
         AgeToolbarSpacerComponent,
         AgeEmulatorContainerComponent,
     ],

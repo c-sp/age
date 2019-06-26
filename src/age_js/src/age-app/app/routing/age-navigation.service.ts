@@ -25,13 +25,12 @@ import {ROUTE_FRAGMENT_LIBRARY, ROUTE_FRAGMENT_URL} from "./age-routes";
 })
 export class AgeNavigationService {
 
+    readonly rootUrl = "/";
+    readonly libraryUrl = `/${ROUTE_FRAGMENT_LIBRARY}`;
+
     constructor(private readonly _router: Router) {
     }
 
-
-    navigateToLibrary(): void {
-        this._navigateTo([ROUTE_FRAGMENT_LIBRARY]);
-    }
 
     navigateToOpenRomUrl(romUrl?: string): void {
         this._navigateTo(romUrl ? [ROUTE_FRAGMENT_URL, romUrl] : [ROUTE_FRAGMENT_URL]);
