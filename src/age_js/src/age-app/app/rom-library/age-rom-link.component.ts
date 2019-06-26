@@ -15,9 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
-import {faGithub} from "@fortawesome/free-brands-svg-icons/faGithub";
-import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
+import {AgeIconsService} from "age-lib";
 
 
 @Component({
@@ -34,8 +32,8 @@ import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
         </a>
 
         <ng-template #contents>
-            <fa-icon *ngIf="icon" [icon]="icon"></fa-icon>
-            <ng-content *ngIf="!icon"></ng-content>
+            <mat-icon *ngIf="iconName" [svgIcon]="iconName"></mat-icon>
+            <ng-content *ngIf="!iconName"></ng-content>
         </ng-template>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,17 +43,19 @@ export class AgeRomLinkComponent {
     @Input() linkTooltip?: string;
 
     private _autoIcon = false;
-    private _icon?: IconDefinition;
+    private _iconName?: string;
     private _linkUrl?: string;
 
+    constructor(private readonly _icons: AgeIconsService) {
+    }
 
     @Input() set autoIcon(autoIcon: boolean) {
         this._autoIcon = autoIcon;
         this._updateIcon();
     }
 
-    get icon(): IconDefinition | undefined {
-        return this._icon;
+    get iconName(): string | undefined {
+        return this._iconName;
     }
 
     get linkUrl(): string | undefined {
@@ -73,15 +73,15 @@ export class AgeRomLinkComponent {
         switch (linkHostname) {
 
             case "github.com":
-                this._icon = faGithub;
+                this._iconName = this._icons.faGithub;
                 break;
 
             case "gitlab.com":
-                this._icon = faGitlab;
+                this._iconName = this._icons.faGitlab;
                 break;
 
             default:
-                this._icon = undefined;
+                this._iconName = undefined;
                 break;
         }
     }

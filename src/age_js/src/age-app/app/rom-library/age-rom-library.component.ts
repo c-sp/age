@@ -15,9 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
-import {faAngleLeft} from "@fortawesome/free-solid-svg-icons/faAngleLeft";
-import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
-import {IAgeLocalRomFile} from "age-lib";
+import {AgeIconsService, IAgeLocalRomFile} from "age-lib";
 import {AgeNavigationService} from "../routing";
 import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 
@@ -28,17 +26,15 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
         <mat-toolbar [color]="'primary'">
 
             <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': !mobileMode}">
-                <fa-icon [icon]="iconBackToEmulation"></fa-icon>
+                <mat-icon [svgIcon]="icons.faAngleLeft"></mat-icon>
             </a>
-
             <age-toolbar-spacer></age-toolbar-spacer>
 
             <age-toolbar-action-local-rom (openLocalRom)="openLocalRom($event)"></age-toolbar-action-local-rom>
 
             <age-toolbar-spacer></age-toolbar-spacer>
-
             <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': mobileMode}">
-                <fa-icon [icon]="iconCloseRomLibrary"></fa-icon>
+                <mat-icon [svgIcon]="icons.faTimes"></mat-icon>
             </a>
 
         </mat-toolbar>
@@ -67,13 +63,11 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 })
 export class AgeRomLibraryComponent {
 
-    readonly iconBackToEmulation = faAngleLeft;
-    readonly iconCloseRomLibrary = faTimes;
-
     @Input() mobileMode = false;
     @Output() readonly openLocalRomFile = new EventEmitter<IAgeLocalRomFile>();
 
-    constructor(readonly navigationService: AgeNavigationService) {
+    constructor(readonly navigationService: AgeNavigationService,
+                readonly icons: AgeIconsService) {
     }
 
     openRomUrl(onlineRom: IAgeOnlineRom): void {

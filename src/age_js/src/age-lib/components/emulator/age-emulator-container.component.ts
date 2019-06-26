@@ -89,7 +89,6 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
             top: 0;
             left: 0;
             right: 0;
-            text-align: center;
         }
 
         mat-toolbar {
@@ -103,6 +102,7 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
 
         .rom-hint {
             padding-top: 3em;
+            text-align: center;
         }
     `],
     animations: [
@@ -224,7 +224,7 @@ function createViewportStyle(viewport: IAgeViewport): object {
         // which triggers a vertical scrollbar.
         // By applying the padding below, the scrollbar disappears.
         // Having the emulator "screen" not touch the browser GUI looks nicer anyway ...
-        padding: "2px",
+        padding: "3px",
     };
 
     function cssPxString(value: number): string {

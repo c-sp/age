@@ -15,10 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
-import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
-import {faPause} from "@fortawesome/free-solid-svg-icons/faPause";
-import {faPlay} from "@fortawesome/free-solid-svg-icons/faPlay";
-import {assertNever} from "../../common";
+import {AgeIconsService, assertNever} from "../../common";
 
 
 export enum AgePlayPauseStatus {
@@ -35,7 +32,7 @@ export enum AgePlayPauseStatus {
                 [disabled]="disabled"
                 (click)="paused.emit(!isPaused)">
 
-            <fa-icon [icon]="icon"></fa-icon>
+            <mat-icon [svgIcon]="iconName"></mat-icon>
 
         </button>
     `,
@@ -48,12 +45,15 @@ export class AgeToolbarActionPlayComponent {
     private _disabled = false;
     private _isPaused = false;
 
+    constructor(private readonly _icons: AgeIconsService) {
+    }
+
     get disabled(): boolean {
         return this._disabled;
     }
 
-    get icon(): IconDefinition {
-        return this.isPaused ? faPlay : faPause;
+    get iconName(): string {
+        return this.isPaused ? this._icons.faPlay : this._icons.faPause;
     }
 
     get isPaused(): boolean {

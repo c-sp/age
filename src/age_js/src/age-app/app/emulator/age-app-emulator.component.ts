@@ -15,12 +15,8 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
-import {faEllipsisV} from "@fortawesome/free-solid-svg-icons/faEllipsisV";
-import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import {TAgeRomFile} from "age-lib";
+import {AgeIconsService, TAgeRomFile} from "age-lib";
 import {Observable, Subject} from "rxjs";
-import {AGE_ICON_NAME_CARTRIDGE} from "../common";
 import {AgeNavigationService} from "../routing";
 
 
@@ -31,12 +27,12 @@ import {AgeNavigationService} from "../routing";
                   [xPosition]="'before'">
 
             <a mat-menu-item [routerLink]="navigationService.libraryUrl">
-                <mat-icon [svgIcon]="openRomIcon"></mat-icon>
+                <mat-icon [svgIcon]="icons.ageCartridge"></mat-icon>
                 open rom file
             </a>
 
             <button mat-menu-item>
-                <fa-icon [icon]="aboutAgeIcon"></fa-icon>
+                <mat-icon [svgIcon]="icons.faInfoCircle"></mat-icon>
                 about AGE
             </button>
 
@@ -46,7 +42,7 @@ import {AgeNavigationService} from "../routing";
                rel="noopener nofollow noreferrer"
                title="Link to the AGE git repository">
 
-                <fa-icon [icon]="ageRepoIcon"></fa-icon>
+                <mat-icon [svgIcon]="icons.faGitlab"></mat-icon>
                 AGE repository
             </a>
 
@@ -59,7 +55,7 @@ import {AgeNavigationService} from "../routing";
             <age-toolbar-spacer></age-toolbar-spacer>
 
             <button mat-button [matMenuTriggerFor]="ageMenu">
-                <fa-icon [icon]="menuIcon"></fa-icon>
+                <mat-icon [svgIcon]="icons.faEllipsisV"></mat-icon>
             </button>
 
         </age-emulator-container>
@@ -77,17 +73,13 @@ import {AgeNavigationService} from "../routing";
 })
 export class AgeAppEmulatorComponent {
 
-    readonly aboutAgeIcon = faInfoCircle;
-    readonly ageRepoIcon = faGitlab;
-    readonly menuIcon = faEllipsisV;
-    readonly openRomIcon = AGE_ICON_NAME_CARTRIDGE;
-
     @Input() forcePause = false;
 
     private readonly _romFileSubject = new Subject<TAgeRomFile>();
     private readonly _romFile$ = this._romFileSubject.asObservable();
 
-    constructor(readonly navigationService: AgeNavigationService) {
+    constructor(readonly icons: AgeIconsService,
+                readonly navigationService: AgeNavigationService) {
     }
 
     get romFile$(): Observable<TAgeRomFile> {

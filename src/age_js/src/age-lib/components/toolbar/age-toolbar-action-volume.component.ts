@@ -15,17 +15,14 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
-import {faVolumeMute} from "@fortawesome/free-solid-svg-icons/faVolumeMute";
-import {faVolumeUp} from "@fortawesome/free-solid-svg-icons/faVolumeUp";
-import {AgeBreakpointObserverService} from "../../common";
+import {AgeBreakpointObserverService, AgeIconsService} from "../../common";
 
 
 @Component({
     selector: "age-toolbar-action-volume",
     template: `
         <button mat-button (click)="toggleMute()">
-            <fa-icon [icon]="icon"></fa-icon>
+            <mat-icon [svgIcon]="iconName"></mat-icon>
         </button>
 
         <age-toolbar-background *ngIf="breakpointObserver.hasHoverAbility$ | async">
@@ -68,7 +65,8 @@ export class AgeToolbarActionVolumeComponent implements OnInit {
     private _volume = this.defaultVolume;
     private _volumeMuted = this._volume;
 
-    constructor(readonly breakpointObserver: AgeBreakpointObserverService) {
+    constructor(readonly breakpointObserver: AgeBreakpointObserverService,
+                private readonly _icons: AgeIconsService) {
     }
 
     ngOnInit(): void {
@@ -76,8 +74,8 @@ export class AgeToolbarActionVolumeComponent implements OnInit {
     }
 
 
-    get icon(): IconDefinition {
-        return this.isMuted ? faVolumeMute : faVolumeUp;
+    get iconName(): string {
+        return this.isMuted ? this._icons.faVolumeMute : this._icons.faVolumeUp;
     }
 
     get isMuted(): boolean {

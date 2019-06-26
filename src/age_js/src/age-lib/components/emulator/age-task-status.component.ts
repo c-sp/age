@@ -15,43 +15,61 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
-import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
-import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
-import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
+import {AgeIconsService} from "../../common";
 import {IAgeTaskStatus, TAgeTaskId} from "../../emulation";
 
 
 @Component({
     selector: "age-task-status",
     template: `
-        <div *ngFor="let status of taskStatusList; trackBy: trackByTaskId">
+        <table>
+            <tr *ngFor="let status of taskStatusList; trackBy: trackByTaskId">
 
-            <ng-container [ngSwitch]="status.taskStatus">
-                <fa-icon *ngSwitchCase="'working'" [icon]="iconWorking" [spin]="true"></fa-icon>
-                <fa-icon *ngSwitchCase="'success'" [icon]="iconSuccess"></fa-icon>
-                <fa-icon *ngSwitchCase="'cancelled'" [icon]="iconCancelled"></fa-icon>
-                <fa-icon *ngSwitchDefault [icon]="iconError"></fa-icon>
-            </ng-container>
+                <td [ngSwitch]="status.taskStatus">
+                    <mat-icon *ngSwitchCase="'working'" [svgIcon]="icons.faCog" class="rotate"></mat-icon>
+                    <mat-icon *ngSwitchCase="'success'" [svgIcon]="icons.faCheck"></mat-icon>
+                    <mat-icon *ngSwitchCase="'cancelled'" [svgIcon]="icons.faTimes"></mat-icon>
+                    <mat-icon *ngSwitchDefault [svgIcon]="icons.faExclamationCircle"></mat-icon>
+                </td>
 
-            {{status.taskDescription}}
-        </div>
+                <td>{{status.taskDescription}}</td>
+            </tr>
+        </table>
     `,
     styles: [`
-        fa-icon {
-            margin-right: 0.5em;
+        table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        tr > :nth-child(1) {
+            padding-right: 0.5em;
+        }
+
+        .rotate {
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+            animation-name: rotate;
+            animation-timing-function: linear;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeTaskStatusComponent {
 
-    readonly iconWorking = faCog;
-    readonly iconSuccess = faCheck;
-    readonly iconCancelled = faTimes;
-    readonly iconError = faExclamationCircle;
-
     @Input() taskStatusList: ReadonlyArray<IAgeTaskStatus> = [];
+
+    constructor(readonly icons: AgeIconsService) {
+    }
 
     trackByTaskId(_index: number, taskStatus: IAgeTaskStatus): TAgeTaskId {
         return taskStatus.taskId;

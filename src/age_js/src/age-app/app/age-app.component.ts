@@ -15,11 +15,8 @@
 //
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit, ViewChild} from "@angular/core";
-import {MatIconRegistry} from "@angular/material/icon";
-import {DomSanitizer} from "@angular/platform-browser";
 import {AgeSubscriptionSink, TAgeRomFile} from "age-lib";
 import {AgeView, AgeViewService} from "./age-view.service";
-import {registerIcons} from "./common";
 import {AgeAppEmulatorComponent} from "./emulator";
 import {AgeCurrentRouteService} from "./routing";
 
@@ -69,11 +66,8 @@ export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
 
     constructor(private readonly _currentRouteService: AgeCurrentRouteService,
                 private readonly _viewService: AgeViewService,
-                private readonly _changeDetectorRef: ChangeDetectorRef,
-                matIconRegistry: MatIconRegistry,
-                domSanitizer: DomSanitizer) {
+                private readonly _changeDetectorRef: ChangeDetectorRef) {
         super();
-        registerIcons(matIconRegistry, domSanitizer);
     }
 
     ngOnInit(): void {

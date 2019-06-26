@@ -24,8 +24,6 @@ import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RouterModule} from "@angular/router";
 import {ServiceWorkerModule} from "@angular/service-worker";
-
-import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
 import {AgeAppComponent} from "./age-app.component";
@@ -46,7 +44,6 @@ import {AgeEmptyComponent, ROUTES} from "./routing";
         RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
 
-        FontAwesomeModule,
         MatButtonModule,
         MatIconModule,
         MatMenuModule,

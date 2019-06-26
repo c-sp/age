@@ -15,8 +15,7 @@
 //
 
 import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output} from "@angular/core";
-import {faFileCode} from "@fortawesome/free-solid-svg-icons/faFileCode";
-import {faHome} from "@fortawesome/free-solid-svg-icons/faHome";
+import {AgeIconsService} from "age-lib";
 import {Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
 
@@ -72,14 +71,14 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
                     <age-rom-link *ngIf="libraryItem.romSiteUrl as romSiteUrl"
                                   [linkUrl]="romSiteUrl"
                                   [linkTooltip]="libraryItem.romSiteLinkTooltip">
-                        <fa-icon [icon]="homepageIcon"></fa-icon>
+                        <mat-icon [svgIcon]="icons.faHome"></mat-icon>
                     </age-rom-link>
 
                     <age-rom-link *ngIf="libraryItem.romSourceUrl as romSourceUrl"
                                   [autoIcon]="true"
                                   [linkUrl]="romSourceUrl"
                                   [linkTooltip]="libraryItem.romSourceLinkTooltip">
-                        <fa-icon [icon]="sourceIcon"></fa-icon>
+                        <mat-icon [svgIcon]="icons.faFileCode"></mat-icon>
                     </age-rom-link>
                 </div>
 
@@ -124,8 +123,8 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
         }
 
         .details > age-rom-link {
-            font-size: 1.5em;
-            line-height: 1.6em;
+            display: inline-block;
+            padding-top: 0.5em;
             margin-left: 0.3em;
             margin-right: 0.3em;
         }
@@ -133,9 +132,6 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeRomLibraryContentsComponent {
-
-    readonly homepageIcon = faHome;
-    readonly sourceIcon = faFileCode;
 
     readonly onlineRoms$: Observable<ReadonlyArray<IAgeRomLibraryItem>> = of(onlineRoms()).pipe(
         map<IAgeOnlineRom[], IAgeRomLibraryItem[]>(onlineRomList => onlineRomList.map(onlineRom => {
@@ -153,6 +149,9 @@ export class AgeRomLibraryContentsComponent {
     @Output() readonly romClicked = new EventEmitter<IAgeOnlineRom>();
 
     @Input() @HostBinding("style.justifyContent") justifyContent: "normal" | "center" = "normal";
+
+    constructor(readonly icons: AgeIconsService) {
+    }
 
     trackByTitle(_index: number, libraryItem: IAgeRomLibraryItem): string {
         return libraryItem.romTitle;
