@@ -14,18 +14,18 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Inject, ViewChild} from "@angular/core";
-import {ActivatedRouteSnapshot, NavigationEnd, Router, UrlSegment} from "@angular/router";
-import {AgeBreakpointObserverService, AgeSubscriptionSink, IAgeLocalRomFile, TAgeRomFile} from "age-lib";
-import {combineLatest, Observable, Subject} from "rxjs";
-import {filter, map, tap} from "rxjs/operators";
-import {IAgeViewMode, ROUTE_FRAGMENT_URL, viewMode$} from "./common";
-import {AgeAppEmulatorComponent} from "./emulator";
-import {OPEN_LOCAL_ROM_FILE_SUBJECT} from "./rom-library";
+import {ChangeDetectionStrategy, Component, Inject, ViewChild} from '@angular/core';
+import {ActivatedRouteSnapshot, NavigationEnd, Router, UrlSegment} from '@angular/router';
+import {AgeBreakpointObserverService, AgeSubscriptionSink, IAgeLocalRomFile, TAgeRomFile} from 'age-lib';
+import {combineLatest, Observable, Subject} from 'rxjs';
+import {filter, map, tap} from 'rxjs/operators';
+import {IAgeViewMode, ROUTE_FRAGMENT_URL, viewMode$} from './common';
+import {AgeAppEmulatorComponent} from './emulator';
+import {OPEN_LOCAL_ROM_FILE_SUBJECT} from './rom-library';
 
 
 @Component({
-    selector: "age-app-root",
+    selector: 'age-app-root',
     template: `
         <ng-container *ngIf="(emuState$ | async) as emuState">
 
@@ -98,7 +98,7 @@ export class AgeAppComponent extends AgeSubscriptionSink {
             tap(urlSegments => {
                 if ((urlSegments.length > 1) && (urlSegments[0] === ROUTE_FRAGMENT_URL)) {
                     const fileUrl = urlSegments[1];
-                    this.openRomFile({type: "rom-file-url", fileUrl});
+                    this.openRomFile({type: 'rom-file-url', fileUrl});
                 }
             }),
         );

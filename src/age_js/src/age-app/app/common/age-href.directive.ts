@@ -14,24 +14,24 @@
 // limitations under the License.
 //
 
-import {Directive, ElementRef, Input, OnInit, Renderer2} from "@angular/core";
+import {Directive, ElementRef, Input, OnInit, Renderer2} from '@angular/core';
 
 
 @Directive({
-    selector: "a[age-href]",
+    selector: 'a[age-href]',
 })
 export class AgeHrefDirective implements OnInit {
 
     // tslint:disable-next-line:no-input-rename
-    @Input("age-href") ageHref?: string;
+    @Input('age-href') ageHref?: string;
 
     constructor(private readonly _renderer: Renderer2,
                 private readonly _elementRef: ElementRef) {
     }
 
     ngOnInit(): void {
-        this._renderer.setProperty(this._elementRef.nativeElement, "href", this.ageHref || "");
-        this._renderer.setProperty(this._elementRef.nativeElement, "target", "_blank");
-        this._renderer.setProperty(this._elementRef.nativeElement, "rel", "noopener nofollow noreferrer");
+        this._renderer.setProperty(this._elementRef.nativeElement, 'href', this.ageHref || '');
+        this._renderer.setProperty(this._elementRef.nativeElement, 'target', '_blank');
+        this._renderer.setProperty(this._elementRef.nativeElement, 'rel', 'noopener nofollow noreferrer');
     }
 }

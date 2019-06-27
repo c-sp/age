@@ -14,15 +14,15 @@
 // limitations under the License.
 //
 
-import {HttpClient} from "@angular/common/http";
-import {Injectable} from "@angular/core";
-import {combineLatest, merge, Observable, of} from "rxjs";
-import {map} from "rxjs/operators";
-import {AgeEmulation} from "./age-emulation";
-import {AgeGbEmulatorInstance} from "./age-gb-emulator-instance";
-import {AgeRomFileLoader, TAgeRomFile} from "./age-rom-file-loader";
-import {AgeTaskStatusHandler, IAgeTaskStatus} from "./age-task-status-handler";
-import {AgeWasmModuleLoader} from "./age-wasm-module-loader";
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {combineLatest, merge, Observable, of} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {AgeEmulation} from './age-emulation';
+import {AgeGbEmulatorInstance} from './age-gb-emulator-instance';
+import {AgeRomFileLoader, TAgeRomFile} from './age-rom-file-loader';
+import {AgeTaskStatusHandler, IAgeTaskStatus} from './age-task-status-handler';
+import {AgeWasmModuleLoader} from './age-wasm-module-loader';
 
 
 export interface IAgeEmulationStatus {

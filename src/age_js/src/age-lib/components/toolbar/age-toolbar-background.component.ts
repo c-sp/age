@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 
 @Component({
-    selector: "age-toolbar-background",
+    selector: 'age-toolbar-background',
     template: `
         <div class="mat-toolbar background" [ngStyle]="bgStyle"></div>
         <ng-content></ng-content>

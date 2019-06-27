@@ -14,25 +14,25 @@
 // limitations under the License.
 //
 
-import {Injectable} from "@angular/core";
-import {Router} from "@angular/router";
-import {from} from "rxjs";
+import {Injectable} from '@angular/core';
+import {Router} from '@angular/router';
+import {from} from 'rxjs';
 
 
-export const ROUTE_FRAGMENT_ABOUT_AGE = "about";
-export const ROUTE_FRAGMENT_LIBRARY = "library";
-export const ROUTE_FRAGMENT_URL = "url";
-export const ROUTE_PARAM_ROM_URL = "romUrl";
+export const ROUTE_FRAGMENT_ABOUT_AGE = 'about';
+export const ROUTE_FRAGMENT_LIBRARY = 'library';
+export const ROUTE_FRAGMENT_URL = 'url';
+export const ROUTE_PARAM_ROM_URL = 'romUrl';
 
 
 @Injectable({
-    providedIn: "root",
+    providedIn: 'root',
 })
 export class AgeNavigationService {
 
     readonly aboutAgeUrl = `/${ROUTE_FRAGMENT_ABOUT_AGE}`;
     readonly libraryUrl = `/${ROUTE_FRAGMENT_LIBRARY}`;
-    readonly rootUrl = "/";
+    readonly rootUrl = '/';
 
     constructor(private readonly _router: Router) {
     }
@@ -43,7 +43,7 @@ export class AgeNavigationService {
     }
 
     navigateToRoot(): void {
-        this._navigateTo([""]);
+        this._navigateTo(['']);
     }
 
 

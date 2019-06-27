@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {HttpClient} from "@angular/common/http";
-import {combineLatest, from, Observable, of} from "rxjs";
-import {map, shareReplay, switchMap} from "rxjs/operators";
-import {AgeTaskStatusHandler} from "./age-task-status-handler";
-import {IAgeGbEmulatorModule} from "./age-wasm-module";
+import {HttpClient} from '@angular/common/http';
+import {combineLatest, from, Observable, of} from 'rxjs';
+import {map, shareReplay, switchMap} from 'rxjs/operators';
+import {AgeTaskStatusHandler} from './age-task-status-handler';
+import {IAgeGbEmulatorModule} from './age-wasm-module';
 
 
 export class AgeWasmModuleLoader {
@@ -29,8 +29,8 @@ export class AgeWasmModuleLoader {
 
     constructor(httpClient: HttpClient) {
         // tslint:disable-next-line:no-any
-        const javaScript$ = from(import(/* webpackIgnore: true */ "./assets/age_wasm.js" as any));
-        const wasmBinary$ = httpClient.get("assets/age_wasm.wasm", {responseType: "arraybuffer"});
+        const javaScript$ = from(import(/* webpackIgnore: true */ './assets/age_wasm.js' as any));
+        const wasmBinary$ = httpClient.get('assets/age_wasm.wasm', {responseType: 'arraybuffer'});
 
         // For each file to be loaded:
         //      Share a single subscription and cache the loaded file
@@ -55,8 +55,8 @@ export class AgeWasmModuleLoader {
             switchMap(() => combineLatest([
                 // TODO if the dynamic import observable is cancelled by failing to load the WASM binary,
                 //      strange things happen ...
-                taskStatusHandler.addTask$("loading WASM JavaScript", this._javaScript$),
-                taskStatusHandler.addTask$("loading WASM binary", this._wasmBinary$),
+                taskStatusHandler.addTask$('loading WASM JavaScript', this._javaScript$),
+                taskStatusHandler.addTask$('loading WASM binary', this._wasmBinary$),
             ])),
 
             // Once the JavaScript and WASM Code has been loaded,
@@ -74,11 +74,11 @@ export class AgeWasmModuleLoader {
                     });
                 });
                 return taskStatusHandler.addTask$(
-                    "initializing WASM binary",
+                    'initializing WASM binary',
                     from(wasmModulePromise).pipe(
                         map(() => {
                             if (!wasmModule) {
-                                throw new Error("WASM Module not initialized");
+                                throw new Error('WASM Module not initialized');
                             }
                             return wasmModule;
                         }),

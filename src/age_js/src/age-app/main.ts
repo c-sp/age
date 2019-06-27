@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {enableProdMode} from "@angular/core";
-import {platformBrowserDynamic} from "@angular/platform-browser-dynamic";
-import {environment} from "../environments/environment";
+import {enableProdMode} from '@angular/core';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {environment} from '../environments/environment';
 
-import {AgeAppModule} from "./app/age-app.module";
+import {AgeAppModule} from './app/age-app.module';
 
 if (environment.production) {
     enableProdMode();

@@ -14,27 +14,27 @@
 // limitations under the License.
 //
 
-import {Injectable} from "@angular/core";
-import {MatIconRegistry} from "@angular/material/icon";
-import {DomSanitizer} from "@angular/platform-browser";
-import {IconDefinition} from "@fortawesome/fontawesome-svg-core";
-import {faGithub} from "@fortawesome/free-brands-svg-icons/faGithub";
-import {faGitlab} from "@fortawesome/free-brands-svg-icons/faGitlab";
-import {faAngleLeft} from "@fortawesome/free-solid-svg-icons/faAngleLeft";
-import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
-import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
-import {faDesktop} from "@fortawesome/free-solid-svg-icons/faDesktop";
-import {faEllipsisV} from "@fortawesome/free-solid-svg-icons/faEllipsisV";
-import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
-import {faFileCode} from "@fortawesome/free-solid-svg-icons/faFileCode";
-import {faHome} from "@fortawesome/free-solid-svg-icons/faHome";
-import {faInfoCircle} from "@fortawesome/free-solid-svg-icons/faInfoCircle";
-import {faMobileAlt} from "@fortawesome/free-solid-svg-icons/faMobileAlt";
-import {faPause} from "@fortawesome/free-solid-svg-icons/faPause";
-import {faPlay} from "@fortawesome/free-solid-svg-icons/faPlay";
-import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
-import {faVolumeMute} from "@fortawesome/free-solid-svg-icons/faVolumeMute";
-import {faVolumeUp} from "@fortawesome/free-solid-svg-icons/faVolumeUp";
+import {Injectable} from '@angular/core';
+import {MatIconRegistry} from '@angular/material/icon';
+import {DomSanitizer} from '@angular/platform-browser';
+import {IconDefinition} from '@fortawesome/fontawesome-svg-core';
+import {faGithub} from '@fortawesome/free-brands-svg-icons/faGithub';
+import {faGitlab} from '@fortawesome/free-brands-svg-icons/faGitlab';
+import {faAngleLeft} from '@fortawesome/free-solid-svg-icons/faAngleLeft';
+import {faCheck} from '@fortawesome/free-solid-svg-icons/faCheck';
+import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
+import {faDesktop} from '@fortawesome/free-solid-svg-icons/faDesktop';
+import {faEllipsisV} from '@fortawesome/free-solid-svg-icons/faEllipsisV';
+import {faExclamationCircle} from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
+import {faFileCode} from '@fortawesome/free-solid-svg-icons/faFileCode';
+import {faHome} from '@fortawesome/free-solid-svg-icons/faHome';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons/faInfoCircle';
+import {faMobileAlt} from '@fortawesome/free-solid-svg-icons/faMobileAlt';
+import {faPause} from '@fortawesome/free-solid-svg-icons/faPause';
+import {faPlay} from '@fortawesome/free-solid-svg-icons/faPlay';
+import {faTimes} from '@fortawesome/free-solid-svg-icons/faTimes';
+import {faVolumeMute} from '@fortawesome/free-solid-svg-icons/faVolumeMute';
+import {faVolumeUp} from '@fortawesome/free-solid-svg-icons/faVolumeUp';
 
 
 /**
@@ -48,11 +48,11 @@ import {faVolumeUp} from "@fortawesome/free-solid-svg-icons/faVolumeUp";
  * so that they can easily be used with `<mat-icon [svgIcon]='icon_name'></mat-icon>`.
  */
 @Injectable({
-    providedIn: "root",
+    providedIn: 'root',
 })
 export class AgeIconsService {
 
-    readonly ageCartridge = this._registerIconUrl("age-cartridge", "assets/cartridge.svg");
+    readonly ageCartridge = this._registerIconUrl('age-cartridge', 'assets/cartridge.svg');
 
     readonly faAngleLeft = this._registerFaIcon(faAngleLeft);
     readonly faCog = this._registerFaIcon(faCog);

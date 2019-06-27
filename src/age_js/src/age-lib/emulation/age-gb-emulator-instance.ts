@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-import {AgeGbButton} from "../settings";
-import {AgeScreenBuffer, AgeScreenSize, IAgeEmulatorInstance} from "./age-emulation";
-import {IAgeGbEmulatorModule} from "./age-wasm-module";
+import {AgeGbButton} from '../settings';
+import {AgeScreenBuffer, AgeScreenSize, IAgeEmulatorInstance} from './age-emulation';
+import {IAgeGbEmulatorModule} from './age-wasm-module';
 
 
 export class AgeGbEmulatorInstance implements IAgeEmulatorInstance {
@@ -39,7 +39,7 @@ export class AgeGbEmulatorInstance implements IAgeEmulatorInstance {
     }
 
     getRomName(): string {
-        let romName = "";
+        let romName = '';
 
         for (let i = this._gbEmulator._gb_get_rom_name(), end = i + 32; i < end; ++i) {
             // the rom name is null terminated and made of ascii chars
@@ -51,7 +51,7 @@ export class AgeGbEmulatorInstance implements IAgeEmulatorInstance {
         }
 
         // some rom names seem to be padded with underscores: trim them
-        while (romName.endsWith("_")) {
+        while (romName.endsWith('_')) {
             romName = romName.substr(0, romName.length - 1);
         }
 

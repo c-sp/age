@@ -14,4 +14,4 @@
 // limitations under the License.
 //
 
-export * from "./age-keymap";
+export * from './age-keymap';

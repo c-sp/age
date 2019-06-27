@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-import {OnDestroy} from "@angular/core";
-import {SubscriptionLike} from "rxjs";
+import {OnDestroy} from '@angular/core';
+import {SubscriptionLike} from 'rxjs';
 
 
 export class AgeSubscriptionSink implements OnDestroy {

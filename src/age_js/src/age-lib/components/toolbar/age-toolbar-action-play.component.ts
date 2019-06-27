@@ -14,19 +14,19 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
-import {AgeIconsService, assertNever} from "../../common";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {AgeIconsService, assertNever} from '../../common';
 
 
 export enum AgePlayPauseStatus {
-    DISABLED = "DISABLED",
-    IS_PLAYING = "IS_PLAYING",
-    IS_PAUSED = "IS_PAUSED",
+    DISABLED = 'DISABLED',
+    IS_PLAYING = 'IS_PLAYING',
+    IS_PAUSED = 'IS_PAUSED',
 }
 
 
 @Component({
-    selector: "age-toolbar-action-play",
+    selector: 'age-toolbar-action-play',
     template: `
         <button mat-button
                 [disabled]="disabled"

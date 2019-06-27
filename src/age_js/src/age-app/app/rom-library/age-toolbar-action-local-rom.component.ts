@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Output} from "@angular/core";
-import {AgeIconsService, IAgeLocalRomFile} from "age-lib";
+import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
+import {AgeIconsService, IAgeLocalRomFile} from 'age-lib';
 
 
 @Component({
-    selector: "age-toolbar-action-local-rom",
+    selector: 'age-toolbar-action-local-rom',
     template: `
         <button mat-button (click)="fileInput.click()">
             <mat-icon [svgIcon]="deviceIcon"></mat-icon>
@@ -58,12 +58,12 @@ export class AgeToolbarActionLocalRomComponent {
         const files = fileInput.files;
         if (files && files.length) {
             this.openLocalRom.emit({
-                type: "local-rom-file",
+                type: 'local-rom-file',
                 localFile: files[0],
             });
             // clear the value,
             // so that the change-event is fired if the user selects the same file again
-            fileInput.value = "";
+            fileInput.value = '';
         }
     }
 }

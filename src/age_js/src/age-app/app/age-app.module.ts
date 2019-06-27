@@ -14,20 +14,20 @@
 // limitations under the License.
 //
 
-import {HashLocationStrategy, LocationStrategy} from "@angular/common";
-import {NgModule} from "@angular/core";
-import {MatButtonModule} from "@angular/material/button";
-import {MatIconModule} from "@angular/material/icon";
-import {MatMenuModule} from "@angular/material/menu";
-import {MatToolbarModule} from "@angular/material/toolbar";
-import {BrowserModule} from "@angular/platform-browser";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {Route, RouterModule, Routes} from "@angular/router";
-import {ServiceWorkerModule} from "@angular/service-worker";
-import {AgeLibModule} from "age-lib";
-import {environment} from "../../environments/environment";
-import {AgeAboutComponent} from "./about";
-import {AgeAppComponent} from "./age-app.component";
+import {HashLocationStrategy, LocationStrategy} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {Route, RouterModule, Routes} from '@angular/router';
+import {ServiceWorkerModule} from '@angular/service-worker';
+import {AgeLibModule} from 'age-lib';
+import {environment} from '../../environments/environment';
+import {AgeAboutComponent} from './about';
+import {AgeAppComponent} from './age-app.component';
 import {
     AgeEmptyComponent,
     AgeHrefDirective,
@@ -35,19 +35,19 @@ import {
     ROUTE_FRAGMENT_LIBRARY,
     ROUTE_FRAGMENT_URL,
     ROUTE_PARAM_ROM_URL,
-} from "./common";
-import {AgeAppEmulatorComponent} from "./emulator";
+} from './common';
+import {AgeAppEmulatorComponent} from './emulator';
 import {
     AgeRomLibraryComponent,
     AgeRomLibraryContentsComponent,
     AgeRomLinkComponent,
     AgeToolbarActionLocalRomComponent,
-} from "./rom-library";
+} from './rom-library';
 
 
 const REDIRECT_TO_ROOT: Route = {
-    path: "**",
-    redirectTo: "",
+    path: '**',
+    redirectTo: '',
 };
 
 const ROUTES: Routes = [
@@ -85,7 +85,7 @@ const ROUTES: Routes = [
         BrowserModule,
         BrowserAnimationsModule,
         RouterModule.forRoot(ROUTES),
-        ServiceWorkerModule.register("ngsw-worker.js", {enabled: environment.production}),
+        ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
 
         MatButtonModule,
         MatIconModule,

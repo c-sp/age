@@ -14,18 +14,18 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Inject, InjectionToken, Output} from "@angular/core";
-import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from "age-lib";
-import {Observable, Subject} from "rxjs";
-import {AgeNavigationService, IAgeViewMode, viewMode$} from "../common";
-import {IAgeOnlineRom} from "./age-rom-library-contents.component";
+import {ChangeDetectionStrategy, Component, EventEmitter, Inject, InjectionToken, Output} from '@angular/core';
+import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from 'age-lib';
+import {Observable, Subject} from 'rxjs';
+import {AgeNavigationService, IAgeViewMode, viewMode$} from '../common';
+import {IAgeOnlineRom} from './age-rom-library-contents.component';
 
 
-export const OPEN_LOCAL_ROM_FILE_SUBJECT = new InjectionToken<Subject<IAgeLocalRomFile>>("OpenLocalRomFileSubject");
+export const OPEN_LOCAL_ROM_FILE_SUBJECT = new InjectionToken<Subject<IAgeLocalRomFile>>('OpenLocalRomFileSubject');
 
 
 @Component({
-    selector: "age-rom-library",
+    selector: 'age-rom-library',
     template: `
         <mat-toolbar *ngIf="(viewMode$ | async) as viewMode"
                      [color]="'primary'">

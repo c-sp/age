@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-import {IncomingHttpHeaders} from "http";
-import {request, RequestOptions} from "https";
-import {Observable, of} from "rxjs";
-import {switchMap} from "rxjs/operators";
-import {parse} from "url";
+import {IncomingHttpHeaders} from 'http';
+import {request, RequestOptions} from 'https';
+import {Observable, of} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
+import {parse} from 'url';
 
 
 export interface IHttpsResponse {
@@ -33,10 +33,10 @@ export function simpleHttpsRequest$(options: RequestOptions): Observable<IHttpsR
             res => {
                 // read response
                 const buffers = new Array<Buffer>();
-                res.on("data", data => buffers.push(data));
+                res.on('data', data => buffers.push(data));
 
                 // forward response to subscriber
-                res.on("end", () => {
+                res.on('end', () => {
                     const data = Buffer.concat(buffers);
                     subscriber.next({
                         statusCode: res.statusCode,
@@ -49,7 +49,7 @@ export function simpleHttpsRequest$(options: RequestOptions): Observable<IHttpsR
 
         // on error notify subscriber
         req.on(
-            "error",
+            'error',
             err => subscriber.error(err),
         );
 
@@ -76,7 +76,7 @@ export function httpRequest$(options: RequestOptions): Observable<IHttpsResponse
             if ((statusCode >= 300) && (statusCode < 400)) {
                 const redirectLocation = httpsResponse.headers.location;
                 if (!redirectLocation) {
-                    throw new Error("redirect without location header");
+                    throw new Error('redirect without location header');
                 }
 
                 // the location header might contain just the path without the hostname

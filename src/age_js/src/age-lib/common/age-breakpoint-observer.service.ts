@@ -14,21 +14,21 @@
 // limitations under the License.
 //
 
-import {BreakpointObserver} from "@angular/cdk/layout";
-import {Injectable} from "@angular/core";
-import {Observable} from "rxjs";
-import {map, shareReplay} from "rxjs/operators";
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {map, shareReplay} from 'rxjs/operators';
 
 
 @Injectable({
-    providedIn: "root",
+    providedIn: 'root',
 })
 export class AgeBreakpointObserverService {
 
     readonly hasHoverAbility$: Observable<boolean>;
 
     constructor(private readonly _breakpointObserver: BreakpointObserver) {
-        this.hasHoverAbility$ = this.matches$("(hover: hover)").pipe(
+        this.hasHoverAbility$ = this.matches$('(hover: hover)').pipe(
             // cache and share the result as this media query is used quite often
             shareReplay(1),
         );
