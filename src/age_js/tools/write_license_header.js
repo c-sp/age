@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Christoph Sprenger
+// Copyright 2019 Christoph Sprenger
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ async function get_files_to_check() {
         });
     }
 
-    const cwd = path.resolve(__dirname, '..');
+    const cwd = path.resolve(__dirname, '..', '..');
     const git_ls_files = child_process.execSync('git ls-files -co --exclude-standard', {cwd});
     const ls_files = git_ls_files.toString().trim().split('\n').sort();
 
