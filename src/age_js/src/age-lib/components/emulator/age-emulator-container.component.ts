@@ -77,11 +77,12 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
             display: block;
             position: relative;
             /*
-             minimal dimensions we need to display components like the toolbar in a sensible way
-             (we choose 320px as 320dp is the minimal screen width of mobile phones)
+             minimal width we need to display components like the toolbar in a sensible way
+             (we choose 320px as 320dp is the minimal screen width of mobile phones and it allows
+             the toolbar to contain 4 visible buttons)
               */
-            min-height: 320px;
             min-width: 320px;
+            min-height: 320px;
         }
 
         .gui-overlay {

@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Christoph Sprenger
+// Copyright 2019 Christoph Sprenger
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,4 @@
 // limitations under the License.
 //
 
-export * from "./age-current-route.service";
-export * from "./age-empty.component";
-export * from "./age-navigation.service";
-export * from "./age-routes";
+export * from "./age-about.component";

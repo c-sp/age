@@ -284,7 +284,7 @@
       // prefix
       "age",
       // case
-      "camelCase"
+      "kebab-case"
     ],
     // we have different import rules
     //  -> http://codelyzer.com/rules/import-destructuring-spacing/

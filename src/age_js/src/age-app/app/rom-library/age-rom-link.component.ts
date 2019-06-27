@@ -23,9 +23,7 @@ import {AgeIconsService} from "age-lib";
     template: `
         <a *ngIf="linkUrl; else contents"
            class="age-ui-clickable"
-           [href]="linkUrl"
-           rel="noopener nofollow noreferrer"
-           target="_blank"
+           [age-href]="linkUrl"
            [title]="linkTooltip || ''">
 
             <ng-container *ngTemplateOutlet="contents"></ng-container>

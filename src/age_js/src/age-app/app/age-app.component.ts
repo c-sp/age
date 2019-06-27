@@ -8,26 +8,38 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// diHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, OnInit, ViewChild} from "@angular/core";
-import {AgeSubscriptionSink, TAgeRomFile} from "age-lib";
-import {AgeView, AgeViewService} from "./age-view.service";
+import {ChangeDetectionStrategy, Component, Inject, ViewChild} from "@angular/core";
+import {ActivatedRouteSnapshot, NavigationEnd, Router, UrlSegment} from "@angular/router";
+import {AgeBreakpointObserverService, AgeSubscriptionSink, IAgeLocalRomFile, TAgeRomFile} from "age-lib";
+import {combineLatest, Observable, Subject} from "rxjs";
+import {filter, map, tap} from "rxjs/operators";
+import {IAgeViewMode, ROUTE_FRAGMENT_URL, viewMode$} from "./common";
 import {AgeAppEmulatorComponent} from "./emulator";
-import {AgeCurrentRouteService} from "./routing";
+import {OPEN_LOCAL_ROM_FILE_SUBJECT} from "./rom-library";
 
 
 @Component({
     selector: "age-app-root",
     template: `
-        <age-app-emulator [forcePause]="showOnlyLibrary"></age-app-emulator>
+        <ng-container *ngIf="(emuState$ | async) as emuState">
 
-        <age-rom-library (openLocalRomFile)="openRomFile($event)"
-                         [mobileMode]="showOnlyLibrary"></age-rom-library>
+            <!--
+             keep the emulation component alive even if it is not visible so that the user
+             can always come back to it (e.g. after browsing the rom library)
+              -->
+            <age-app-emulator [forcePause]="emuState.hide"
+                              [ngClass]="{
+                                            'display-none': emuState.hide,
+                                            'full-height': emuState.fullHeight
+                                         }"></age-app-emulator>
+
+            <router-outlet></router-outlet>
+        </ng-container>
     `,
     styles: [`
         :host {
@@ -37,65 +49,102 @@ import {AgeCurrentRouteService} from "./routing";
         }
 
         age-app-emulator {
-            /*
-             inner elements nicht have a min-height we should take into account
-             when setting any height
-              */
+            /* size the emulator based on it's contents minimal size */
             min-height: min-content;
         }
 
-        :host.only-emulator age-app-emulator {
+        .full-height {
             height: 100%;
         }
 
-        :host.only-emulator age-rom-library {
-            display: none;
-        }
-
-        :host.only-library age-app-emulator {
+        .display-none {
             display: none;
         }
     `],
+    providers: [
+        {
+            provide: OPEN_LOCAL_ROM_FILE_SUBJECT,
+            useValue: new Subject<IAgeLocalRomFile>(),
+        },
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeAppComponent extends AgeSubscriptionSink implements OnInit {
+export class AgeAppComponent extends AgeSubscriptionSink {
 
-    @ViewChild(AgeAppEmulatorComponent, {static: true})
+    readonly emuState$: Observable<IEmulationState>;
+
+    @ViewChild(AgeAppEmulatorComponent, {static: false})
     private _emulatorComp?: AgeAppEmulatorComponent;
-    private _view = AgeView.COMBINED;
 
-    constructor(private readonly _currentRouteService: AgeCurrentRouteService,
-                private readonly _viewService: AgeViewService,
-                private readonly _changeDetectorRef: ChangeDetectorRef) {
+    constructor(breakpointObserverService: AgeBreakpointObserverService,
+                router: Router,
+                @Inject(OPEN_LOCAL_ROM_FILE_SUBJECT) localRomFileSubject: Subject<IAgeLocalRomFile>) {
         super();
+
+        // TODO too late, initial route not parsed
+        const openRomUrl$ = router.events.pipe(
+            // only after successful navigation
+            filter(event => event instanceof NavigationEnd),
+
+            // get current route snapshot
+            map(() => router.routerState.snapshot.root),
+
+            // we collect all UrlSegments instead of just looking at the routeConfig
+            // as the latter might contain "**" (redirected route)
+            map(getUrlSegments),
+
+            // open rom url
+            tap(urlSegments => {
+                if ((urlSegments.length > 1) && (urlSegments[0] === ROUTE_FRAGMENT_URL)) {
+                    const fileUrl = urlSegments[1];
+                    this.openRomFile({type: "rom-file-url", fileUrl});
+                }
+            }),
+        );
+
+        const _viewMode$ = viewMode$(breakpointObserverService);
+
+        this.emuState$ = combineLatest([_viewMode$, openRomUrl$]).pipe(
+            map<[IAgeViewMode, string[]], IEmulationState>(values => {
+                const viewMode = values[0];
+                const urlSegments = values[1];
+
+                const hasChildComponent = !!urlSegments.length && (urlSegments[0] !== ROUTE_FRAGMENT_URL);
+                return {
+                    hide: hasChildComponent && viewMode.useMobileView,
+                    fullHeight: !hasChildComponent,
+                };
+            }),
+        );
+
+        this.newSubscription = localRomFileSubject.asObservable().subscribe(
+            localRomFile => this.openRomFile(localRomFile),
+        );
     }
-
-    ngOnInit(): void {
-        this.newSubscription = this._viewService.viewChange$.subscribe(view => {
-            this._view = view;
-            this._changeDetectorRef.markForCheck();
-        });
-        this.newSubscription = this._currentRouteService.currentRoute$.subscribe(route => {
-            const fileUrl = (route.route === "romUrl") && route.romUrl;
-            if (fileUrl) {
-                this.openRomFile({type: "rom-file-url", fileUrl});
-            }
-        });
-    }
-
-
-    @HostBinding("class.only-emulator") get showOnlyEmulator() {
-        return this._view === AgeView.ONLY_EMULATOR;
-    }
-
-    @HostBinding("class.only-library") get showOnlyLibrary() {
-        return this._view === AgeView.ONLY_LIBRARY;
-    }
-
 
     openRomFile(romFile: TAgeRomFile): void {
         if (this._emulatorComp) {
             this._emulatorComp.openRomFile(romFile);
         }
     }
+}
+
+
+interface IEmulationState {
+    readonly hide: boolean;
+    readonly fullHeight: boolean;
+}
+
+
+function getUrlSegments(routeSnapshot: ActivatedRouteSnapshot | null): string[] {
+    const urlSegments = new Array<UrlSegment>();
+
+    while (routeSnapshot) {
+        urlSegments.push(...routeSnapshot.url);
+        routeSnapshot = routeSnapshot.firstChild;
+    }
+
+    return urlSegments
+        .filter(urlSegment => !!urlSegment.path)
+        .map(urlSegment => urlSegment.path);
 }

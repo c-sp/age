@@ -14,26 +14,32 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from "@angular/core";
-import {AgeIconsService, IAgeLocalRomFile} from "age-lib";
-import {AgeNavigationService} from "../routing";
+import {ChangeDetectionStrategy, Component, EventEmitter, Inject, InjectionToken, Output} from "@angular/core";
+import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from "age-lib";
+import {Observable, Subject} from "rxjs";
+import {AgeNavigationService, IAgeViewMode, viewMode$} from "../common";
 import {IAgeOnlineRom} from "./age-rom-library-contents.component";
+
+
+export const OPEN_LOCAL_ROM_FILE_SUBJECT = new InjectionToken<Subject<IAgeLocalRomFile>>("OpenLocalRomFileSubject");
 
 
 @Component({
     selector: "age-rom-library",
     template: `
-        <mat-toolbar [color]="'primary'">
+        <mat-toolbar *ngIf="(viewMode$ | async) as viewMode"
+                     [color]="'primary'">
 
-            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': !mobileMode}">
+            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': !viewMode.useMobileView}">
                 <mat-icon [svgIcon]="icons.faAngleLeft"></mat-icon>
             </a>
             <age-toolbar-spacer></age-toolbar-spacer>
 
-            <age-toolbar-action-local-rom (openLocalRom)="openLocalRom($event)"></age-toolbar-action-local-rom>
+            <age-toolbar-action-local-rom (openLocalRom)="openLocalRom($event, viewMode)">
+            </age-toolbar-action-local-rom>
 
             <age-toolbar-spacer></age-toolbar-spacer>
-            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': mobileMode}">
+            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': viewMode.useMobileView}">
                 <mat-icon [svgIcon]="icons.faTimes"></mat-icon>
             </a>
 
@@ -63,20 +69,26 @@ import {IAgeOnlineRom} from "./age-rom-library-contents.component";
 })
 export class AgeRomLibraryComponent {
 
-    @Input() mobileMode = false;
+    readonly viewMode$: Observable<IAgeViewMode>;
+
     @Output() readonly openLocalRomFile = new EventEmitter<IAgeLocalRomFile>();
 
     constructor(readonly navigationService: AgeNavigationService,
-                readonly icons: AgeIconsService) {
+                readonly icons: AgeIconsService,
+                @Inject(OPEN_LOCAL_ROM_FILE_SUBJECT) private readonly _localRomFileSubject: Subject<IAgeLocalRomFile>,
+                breakpointObserverService: AgeBreakpointObserverService) {
+
+        this.viewMode$ = viewMode$(breakpointObserverService);
     }
 
     openRomUrl(onlineRom: IAgeOnlineRom): void {
         this.navigationService.navigateToOpenRomUrl(onlineRom.romUrl);
     }
 
-    openLocalRom(localRom: IAgeLocalRomFile): void {
-        this.openLocalRomFile.emit(localRom);
-        if (this.mobileMode) {
+    openLocalRom(localRom: IAgeLocalRomFile, viewMode: IAgeViewMode): void {
+        this._localRomFileSubject.next(localRom);
+        // navigate to the emulation, if it's not yet visible
+        if (viewMode.useMobileView) {
             this.navigationService.navigateToRoot();
         }
     }

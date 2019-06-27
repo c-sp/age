@@ -17,7 +17,7 @@
 import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
 import {AgeIconsService, TAgeRomFile} from "age-lib";
 import {Observable, Subject} from "rxjs";
-import {AgeNavigationService} from "../routing";
+import {AgeNavigationService} from "../common";
 
 
 @Component({
@@ -31,15 +31,13 @@ import {AgeNavigationService} from "../routing";
                 open rom file
             </a>
 
-            <button mat-menu-item>
+            <a mat-menu-item [routerLink]="navigationService.aboutAgeUrl">
                 <mat-icon [svgIcon]="icons.faInfoCircle"></mat-icon>
                 about AGE
-            </button>
+            </a>
 
             <a mat-menu-item
-               href="https://gitlab.com/csprenger/AGE"
-               target="_blank"
-               rel="noopener nofollow noreferrer"
+               [age-href]="'https://gitlab.com/csprenger/AGE'"
                title="Link to the AGE git repository">
 
                 <mat-icon [svgIcon]="icons.faGitlab"></mat-icon>

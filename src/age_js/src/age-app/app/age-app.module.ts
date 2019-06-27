@@ -22,11 +22,20 @@ import {MatMenuModule} from "@angular/material/menu";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {RouterModule} from "@angular/router";
+import {Route, RouterModule, Routes} from "@angular/router";
 import {ServiceWorkerModule} from "@angular/service-worker";
 import {AgeLibModule} from "age-lib";
 import {environment} from "../../environments/environment";
+import {AgeAboutComponent} from "./about";
 import {AgeAppComponent} from "./age-app.component";
+import {
+    AgeEmptyComponent,
+    AgeHrefDirective,
+    ROUTE_FRAGMENT_ABOUT_AGE,
+    ROUTE_FRAGMENT_LIBRARY,
+    ROUTE_FRAGMENT_URL,
+    ROUTE_PARAM_ROM_URL,
+} from "./common";
 import {AgeAppEmulatorComponent} from "./emulator";
 import {
     AgeRomLibraryComponent,
@@ -34,7 +43,41 @@ import {
     AgeRomLinkComponent,
     AgeToolbarActionLocalRomComponent,
 } from "./rom-library";
-import {AgeEmptyComponent, ROUTES} from "./routing";
+
+
+const REDIRECT_TO_ROOT: Route = {
+    path: "**",
+    redirectTo: "",
+};
+
+const ROUTES: Routes = [
+    {
+        path: ROUTE_FRAGMENT_ABOUT_AGE,
+        component: AgeAboutComponent,
+        // redirect all child routes
+        children: [REDIRECT_TO_ROOT],
+    },
+    {
+        path: ROUTE_FRAGMENT_LIBRARY,
+        component: AgeRomLibraryComponent,
+        // redirect all child routes
+        children: [REDIRECT_TO_ROOT],
+    },
+    {
+        path: ROUTE_FRAGMENT_URL,
+        component: AgeEmptyComponent,
+        children: [
+            {
+                path: `:${ROUTE_PARAM_ROM_URL}`,
+                component: AgeEmptyComponent,
+                // redirect all child routes
+                children: [REDIRECT_TO_ROOT],
+            },
+        ],
+    },
+    // redirect all other routes to "/"
+    REDIRECT_TO_ROOT,
+];
 
 
 @NgModule({
@@ -52,14 +95,17 @@ import {AgeEmptyComponent, ROUTES} from "./routing";
         AgeLibModule,
     ],
     declarations: [
+        AgeAboutComponent,
+
+        AgeEmptyComponent,
+        AgeHrefDirective,
         AgeAppEmulatorComponent,
-        AgeToolbarActionLocalRomComponent,
 
         AgeRomLibraryComponent,
         AgeRomLibraryContentsComponent,
         AgeRomLinkComponent,
+        AgeToolbarActionLocalRomComponent,
 
-        AgeEmptyComponent,
         AgeAppComponent,
     ],
     providers: [

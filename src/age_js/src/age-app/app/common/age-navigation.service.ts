@@ -17,7 +17,12 @@
 import {Injectable} from "@angular/core";
 import {Router} from "@angular/router";
 import {from} from "rxjs";
-import {ROUTE_FRAGMENT_LIBRARY, ROUTE_FRAGMENT_URL} from "./age-routes";
+
+
+export const ROUTE_FRAGMENT_ABOUT_AGE = "about";
+export const ROUTE_FRAGMENT_LIBRARY = "library";
+export const ROUTE_FRAGMENT_URL = "url";
+export const ROUTE_PARAM_ROM_URL = "romUrl";
 
 
 @Injectable({
@@ -25,8 +30,9 @@ import {ROUTE_FRAGMENT_LIBRARY, ROUTE_FRAGMENT_URL} from "./age-routes";
 })
 export class AgeNavigationService {
 
-    readonly rootUrl = "/";
+    readonly aboutAgeUrl = `/${ROUTE_FRAGMENT_ABOUT_AGE}`;
     readonly libraryUrl = `/${ROUTE_FRAGMENT_LIBRARY}`;
+    readonly rootUrl = "/";
 
     constructor(private readonly _router: Router) {
     }
