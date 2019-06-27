@@ -14,18 +14,18 @@
 // limitations under the License.
 //
 
-import {animate, state, style, transition, trigger} from "@angular/animations";
-import {ChangeDetectionStrategy, Component, ElementRef, Input, NgZone} from "@angular/core";
-import {BehaviorSubject, Observable, of} from "rxjs";
-import {map, shareReplay, switchMap, tap} from "rxjs/operators";
-import {AgeBreakpointObserverService} from "../../common";
-import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from "../../emulation";
-import {AgePlayPauseStatus, AgeToolbarVisibility} from "../toolbar";
-import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calculator";
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {ChangeDetectionStrategy, Component, ElementRef, Input, NgZone} from '@angular/core';
+import {BehaviorSubject, Observable, of} from 'rxjs';
+import {map, shareReplay, switchMap, tap} from 'rxjs/operators';
+import {AgeBreakpointObserverService} from '../../common';
+import {AgeEmulationService, IAgeEmulationStatus, TAgeRomFile} from '../../emulation';
+import {AgePlayPauseStatus, AgeToolbarVisibility} from '../toolbar';
+import {emulationViewport$, IAgeViewport} from './age-emulation-viewport-calculator';
 
 
 @Component({
-    selector: "age-emulator-container",
+    selector: 'age-emulator-container',
     template: `
         <div *ngIf="(emulationStatus$ | async) as emuStatus"
              [ngStyle]="viewportStyle$ | async">
@@ -107,19 +107,19 @@ import {emulationViewport$, IAgeViewport} from "./age-emulation-viewport-calcula
         }
     `],
     animations: [
-        trigger("showToolbar", [
-            state("true", style({
-                opacity: "1",
+        trigger('showToolbar', [
+            state('true', style({
+                opacity: '1',
             })),
-            state("false", style({
-                opacity: "0",
-                display: "none",
+            state('false', style({
+                opacity: '0',
+                display: 'none',
             })),
-            transition("* => true", [
-                style({display: "block"}),
-                animate("0.3s"),
+            transition('* => true', [
+                style({display: 'block'}),
+                animate('0.3s'),
             ]),
-            transition("* => false", animate("0.3s")),
+            transition('* => false', animate('0.3s')),
         ]),
     ],
     providers: [
@@ -216,7 +216,7 @@ export class AgeEmulatorContainerComponent {
 
 function createViewportStyle(viewport: IAgeViewport): object {
     return {
-        position: "absolute",
+        position: 'absolute',
         left: cssPxString(viewport.left),
         top: cssPxString(viewport.top),
         width: cssPxString(viewport.width),
@@ -225,10 +225,10 @@ function createViewportStyle(viewport: IAgeViewport): object {
         // which triggers a vertical scrollbar.
         // By applying the padding below, the scrollbar disappears.
         // Having the emulator "screen" not touch the browser GUI looks nicer anyway ...
-        padding: "3px",
+        padding: '3px',
     };
 
     function cssPxString(value: number): string {
-        return (value === 0) ? "0" : `${value}px`;
+        return (value === 0) ? '0' : `${value}px`;
     }
 }

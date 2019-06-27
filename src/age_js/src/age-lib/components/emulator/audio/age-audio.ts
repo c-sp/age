@@ -25,7 +25,7 @@
 //  https://github.com/GoogleChromeLabs/audioworklet-polyfill
 //
 
-import {from} from "rxjs";
+import {from} from 'rxjs';
 
 export class AgeAudio {
 
@@ -39,9 +39,9 @@ export class AgeAudio {
         const audioCtx = this._audioCtx = new _AudioContext();
 
         if (audioCtx.audioWorklet) {
-            audioCtx.audioWorklet.addModule("assets/age-audio-stream.js").then(
+            audioCtx.audioWorklet.addModule('assets/age-audio-stream.js').then(
                 () => {
-                    this._workletNode = new AudioWorkletNode(this._audioCtx, "age-audio-stream", {
+                    this._workletNode = new AudioWorkletNode(this._audioCtx, 'age-audio-stream', {
                         numberOfInputs: 1,
                         numberOfOutputs: 1,
                         outputChannelCount: [2],
@@ -51,10 +51,10 @@ export class AgeAudio {
                     this._workletNode.port.postMessage({volume: this._volume});
                 },
                 // tslint:disable-next-line:no-any
-                (err: any) => console.error("audioWorklet.addModule() failure", err),
+                (err: any) => console.error('audioWorklet.addModule() failure', err),
             );
         } else {
-            console.log("audioWorklet not available");
+            console.log('audioWorklet not available');
         }
     }
 
@@ -64,7 +64,7 @@ export class AgeAudio {
                 // no-op
             },
             err => {
-                console.error("error closing audio context", err);
+                console.error('error closing audio context', err);
             },
         );
     }
@@ -88,8 +88,8 @@ export class AgeAudio {
                 sampleRate: this._audioCtx.sampleRate,
                 samples: buffer,
             });
-            if (this._audioCtx.state !== "running") {
-                console.warn("AudioContext.state", this._audioCtx.state);
+            if (this._audioCtx.state !== 'running') {
+                console.warn('AudioContext.state', this._audioCtx.state);
             }
         }
     }

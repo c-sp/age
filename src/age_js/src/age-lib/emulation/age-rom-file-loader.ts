@@ -14,21 +14,21 @@
 // limitations under the License.
 //
 
-import {HttpClient, HttpErrorResponse} from "@angular/common/http";
-import * as fileType from "file-type";
-import * as JSZip from "jszip";
-import {from, Observable, of} from "rxjs";
-import {catchError, map, switchMap} from "rxjs/operators";
-import {AgeTaskStatusHandler} from "./age-task-status-handler";
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import * as fileType from 'file-type';
+import * as JSZip from 'jszip';
+import {from, Observable, of} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {AgeTaskStatusHandler} from './age-task-status-handler';
 
 
 export interface IAgeLocalRomFile {
-    readonly type: "local-rom-file";
+    readonly type: 'local-rom-file';
     readonly localFile: File;
 }
 
 export interface IAgeRomFileUrl {
-    readonly type: "rom-file-url";
+    readonly type: 'rom-file-url';
     readonly fileUrl: string;
 }
 
@@ -42,7 +42,7 @@ export class AgeRomFileLoader {
     }
 
     loadRomFile$(romFileToLoad: TAgeRomFile): Observable<ArrayBuffer> {
-        const romFile$ = (romFileToLoad.type === "local-rom-file")
+        const romFile$ = (romFileToLoad.type === 'local-rom-file')
             ? this._loadLocalRomFile$(romFileToLoad.localFile)
             : this._loadRomFileUrl$(romFileToLoad.fileUrl);
 
@@ -71,7 +71,7 @@ export class AgeRomFileLoader {
         //      (should be necessary only when loading is cancelled)
         return of(true).pipe(
             // add the task after subscribe() has been called
-            switchMap(() => this._taskStatusHandler.addTask$("reading rom file", from(readRomPromise))),
+            switchMap(() => this._taskStatusHandler.addTask$('reading rom file', from(readRomPromise))),
         );
     }
 
@@ -80,8 +80,8 @@ export class AgeRomFileLoader {
         const loadRom$ = this._httpClient.get(
             romFileUrl,
             {
-                responseType: "arraybuffer",
-                observe: "response",
+                responseType: 'arraybuffer',
+                observe: 'response',
             },
         ).pipe(
             map(httpResponse => {
@@ -100,7 +100,7 @@ export class AgeRomFileLoader {
         return of(true).pipe(
             // add the task after subscribe() has been called
             switchMap(() => this._taskStatusHandler.addTask$(
-                isCorsRetry ? "downloading rom file (CORS Anywhere)" : "downloading rom file",
+                isCorsRetry ? 'downloading rom file (CORS Anywhere)' : 'downloading rom file',
                 loadRom$,
             )),
 
@@ -121,14 +121,14 @@ export class AgeRomFileLoader {
     private _extractRomFile$(romFile: ArrayBuffer): Observable<ArrayBuffer> {
         // If this is no zip file, there is nothing to extract
         const type = fileType(new Uint8Array(romFile));
-        if (!type || (type.ext !== "zip")) {
+        if (!type || (type.ext !== 'zip')) {
             return of(romFile);
         }
 
         // If this is a zip file, look for a rom file within that zip file.
         // (fun fact: Gameboy roms are sometimes identified as MP3 files)
         return this._taskStatusHandler.addTask$(
-            "extracting rom file from zip archive",
+            'extracting rom file from zip archive',
             from(extractRomFile(romFile)),
         );
     }
@@ -141,7 +141,7 @@ async function extractRomFile(zipFile: ArrayBuffer) {
     // get a list of all rom files within that archive
     const files = zip.file(/.*(\.gb)|(\.gbc)$/i);
     if (!files || !files.length) {
-        throw Error("no Gameboy rom file found");
+        throw Error('no Gameboy rom file found');
     }
 
     // for deterministic rom file loading we sort the files
@@ -149,5 +149,5 @@ async function extractRomFile(zipFile: ArrayBuffer) {
     files.sort((a, b) => a.name.localeCompare(b.name));
 
     // extract the first file
-    return files[0].async("arraybuffer");
+    return files[0].async('arraybuffer');
 }

@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-import {merge, Observable, of, Subject} from "rxjs";
-import {delay, distinctUntilChanged, map, switchMap, tap} from "rxjs/operators";
-import {AgeBreakpointObserverService} from "../../common";
+import {merge, Observable, of, Subject} from 'rxjs';
+import {delay, distinctUntilChanged, map, switchMap, tap} from 'rxjs/operators';
+import {AgeBreakpointObserverService} from '../../common';
 
 
 export class AgeToolbarVisibility {

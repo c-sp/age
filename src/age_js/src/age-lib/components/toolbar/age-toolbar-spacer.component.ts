@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 
 
 @Component({
-    selector: "age-toolbar-spacer",
+    selector: 'age-toolbar-spacer',
     template: ``,
     styles: [`
         :host {

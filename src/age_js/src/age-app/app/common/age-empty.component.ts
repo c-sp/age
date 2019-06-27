@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 
 
 @Component({
-    selector: "age-empty",
-    template: "",
+    selector: 'age-empty',
+    template: ``,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgeEmptyComponent {

@@ -193,6 +193,13 @@
     // any function or method that returns a promise should be marked async
     //  -> https://palantir.github.io/tslint/rules/promise-function-async/
     "promise-function-async": true,
+    // use single quotation marks
+    // (overrides tslint:recommended)
+    //  -> https://palantir.github.io/tslint/rules/quotemark/
+    "quotemark": [
+      true,
+      "single"
+    ],
     // prefer "return undefined" over "return" in value-returning functions
     //  -> https://palantir.github.io/tslint/rules/return-undefined
     "return-undefined": true,

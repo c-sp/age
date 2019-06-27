@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {SubscriptionLike} from "rxjs";
+import {SubscriptionLike} from 'rxjs';
 
 
 export class AgeSubscriptionLike implements SubscriptionLike {

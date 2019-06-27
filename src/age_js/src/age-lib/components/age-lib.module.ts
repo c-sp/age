@@ -14,21 +14,21 @@
 // limitations under the License.
 //
 
-import {CommonModule} from "@angular/common";
-import {HttpClientModule} from "@angular/common/http";
-import {NgModule} from "@angular/core";
-import {FormsModule} from "@angular/forms";
-import {MatButtonModule} from "@angular/material/button";
-import {MatIconModule} from "@angular/material/icon";
-import {MatSliderModule} from "@angular/material/slider";
-import {MatToolbarModule} from "@angular/material/toolbar";
-import {AgeEmulationComponent, AgeEmulatorContainerComponent, AgeTaskStatusComponent} from "./emulator";
+import {CommonModule} from '@angular/common';
+import {HttpClientModule} from '@angular/common/http';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatSliderModule} from '@angular/material/slider';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {AgeEmulationComponent, AgeEmulatorContainerComponent, AgeTaskStatusComponent} from './emulator';
 import {
     AgeToolbarActionPlayComponent,
     AgeToolbarActionVolumeComponent,
     AgeToolbarBackgroundComponent,
     AgeToolbarSpacerComponent,
-} from "./toolbar";
+} from './toolbar';
 
 
 @NgModule({

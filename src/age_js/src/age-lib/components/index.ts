@@ -14,6 +14,6 @@
 // limitations under the License.
 //
 
-export {AgeEmulatorContainerComponent} from "./emulator";
-export {AgeToolbarSpacerComponent} from "./toolbar";
-export {AgeLibModule} from "./age-lib.module";
+export {AgeEmulatorContainerComponent} from './emulator';
+export {AgeToolbarSpacerComponent} from './toolbar';
+export {AgeLibModule} from './age-lib.module';

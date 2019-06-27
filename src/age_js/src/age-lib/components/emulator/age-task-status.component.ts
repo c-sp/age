@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {AgeIconsService} from "../../common";
-import {IAgeTaskStatus, TAgeTaskId} from "../../emulation";
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {AgeIconsService} from '../../common';
+import {IAgeTaskStatus, TAgeTaskId} from '../../emulation';
 
 
 @Component({
-    selector: "age-task-status",
+    selector: 'age-task-status',
     template: `
         <table>
             <tr *ngFor="let status of taskStatusList; trackBy: trackByTaskId">

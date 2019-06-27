@@ -14,15 +14,15 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {AgeBreakpointObserverService, AgeIconsService} from "age-lib";
-import {Observable} from "rxjs";
-import {VERSION_INFO} from "../../../environments/version";
-import {AgeNavigationService, IAgeViewMode, viewMode$} from "../common";
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {AgeBreakpointObserverService, AgeIconsService} from 'age-lib';
+import {Observable} from 'rxjs';
+import {VERSION_INFO} from '../../../environments/version';
+import {AgeNavigationService, IAgeViewMode, viewMode$} from '../common';
 
 
 @Component({
-    selector: "age-about",
+    selector: 'age-about',
     template: `
         <mat-toolbar *ngIf="(viewMode$ | async) as viewMode"
                      [color]="'primary'">

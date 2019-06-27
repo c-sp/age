@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {AgeIconsService, TAgeRomFile} from "age-lib";
-import {Observable, Subject} from "rxjs";
-import {AgeNavigationService} from "../common";
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {AgeIconsService, TAgeRomFile} from 'age-lib';
+import {Observable, Subject} from 'rxjs';
+import {AgeNavigationService} from '../common';
 
 
 @Component({
-    selector: "age-app-emulator",
+    selector: 'age-app-emulator',
     template: `
         <mat-menu #ageMenu="matMenu"
                   [xPosition]="'before'">

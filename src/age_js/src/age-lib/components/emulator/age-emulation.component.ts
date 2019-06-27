@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, OnInit, ViewChild} from "@angular/core";
-import {AgeSubscriptionSink} from "../../common";
-import {AgeEmulation, AgeScreenSize} from "../../emulation";
-import {AgeEmulationWorker} from "./age-emulation-worker";
+import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
+import {AgeSubscriptionSink} from '../../common';
+import {AgeEmulation, AgeScreenSize} from '../../emulation';
+import {AgeEmulationWorker} from './age-emulation-worker';
 
 
 @Component({
-    selector: "age-emulation",
+    selector: 'age-emulation',
     template: `
         <canvas #canvas
                 [width]="screenSize.width"
@@ -44,7 +44,7 @@ import {AgeEmulationWorker} from "./age-emulation-worker";
 export class AgeEmulationComponent extends AgeSubscriptionSink implements OnInit {
 
     private readonly _emulationWorker = new AgeEmulationWorker();
-    @ViewChild("canvas", {static: true}) private _canvas?: ElementRef;
+    @ViewChild('canvas', {static: true}) private _canvas?: ElementRef;
 
     constructor() {
         super();
@@ -53,7 +53,7 @@ export class AgeEmulationComponent extends AgeSubscriptionSink implements OnInit
 
     ngOnInit(): void {
         const canvas: HTMLCanvasElement | undefined = this._canvas && this._canvas.nativeElement;
-        this._emulationWorker.canvasCtx = canvas && canvas.getContext("2d", {alpha: false});
+        this._emulationWorker.canvasCtx = canvas && canvas.getContext('2d', {alpha: false});
     }
 
 
@@ -75,11 +75,11 @@ export class AgeEmulationComponent extends AgeSubscriptionSink implements OnInit
     }
 
 
-    @HostListener("document:keydown", ["$event"]) handleKeyDown(event: KeyboardEvent) {
+    @HostListener('document:keydown', ['$event']) handleKeyDown(event: KeyboardEvent) {
         this._emulationWorker.handleKeyDown(event);
     }
 
-    @HostListener("document:keyup", ["$event"]) handleKeyUp(event: KeyboardEvent) {
+    @HostListener('document:keyup', ['$event']) handleKeyUp(event: KeyboardEvent) {
         this._emulationWorker.handleKeyUp(event);
     }
 }

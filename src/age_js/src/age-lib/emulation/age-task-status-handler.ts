@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {BehaviorSubject, Observable, Subscriber} from "rxjs";
-import {tap} from "rxjs/operators";
+import {BehaviorSubject, Observable, Subscriber} from 'rxjs';
+import {tap} from 'rxjs/operators';
 
 
-export type TAgeTaskStatus = "working" | "success" | "failure" | "cancelled";
+export type TAgeTaskStatus = 'working' | 'success' | 'failure' | 'cancelled';
 export type TAgeTaskId = number;
 // tslint:disable-next-line:no-any
 export type TAgeTaskError = any;
@@ -48,7 +48,7 @@ export class AgeTaskStatusHandler {
     }
 
 
-    addTask(taskDescription: string, initialStatus: TAgeTaskStatus = "working"): TAgeTaskId {
+    addTask(taskDescription: string, initialStatus: TAgeTaskStatus = 'working'): TAgeTaskId {
         const taskId = this._nextTaskId++;
 
         this._taskStatusList.push({
@@ -67,8 +67,8 @@ export class AgeTaskStatusHandler {
         const setCancelled = () => {
             // only working tasks can be cancelled
             const status = this._getTaskStatus(taskId);
-            if ((status && status.taskStatus) === "working") {
-                this._setTaskStatus(taskId, "cancelled");
+            if ((status && status.taskStatus) === 'working') {
+                this._setTaskStatus(taskId, 'cancelled');
             }
         };
 
@@ -78,8 +78,8 @@ export class AgeTaskStatusHandler {
                     // we use "next" instead of "complete" to detect task success the moment
                     // tap() is reached instead of the moment of observable completion
                     // (the latter might never occur, e.g. if a subsequent operator throws an error)
-                    next: () => this._setTaskStatus(taskId, "success"),
-                    error: err => this._setTaskStatus(taskId, "failure", err),
+                    next: () => this._setTaskStatus(taskId, 'success'),
+                    error: err => this._setTaskStatus(taskId, 'failure', err),
                 }),
             )
             // to detect task cancellation we have to add a teardown logic to the subscriber

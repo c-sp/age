@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-import {AgeSubscriptionLike} from "../../common";
-import {AgeEmulation} from "../../emulation";
-import {AgeGbKeyMap} from "../../settings";
-import {AgeAudio} from "./audio/age-audio";
+import {AgeSubscriptionLike} from '../../common';
+import {AgeEmulation} from '../../emulation';
+import {AgeGbKeyMap} from '../../settings';
+import {AgeAudio} from './audio/age-audio';
 
 
 // TODO better handling of AudioContext creation

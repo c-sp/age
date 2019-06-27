@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-export * from "./age-emulation.service";
-export * from "./age-emulation";
+export * from './age-emulation.service';
+export * from './age-emulation';
 
-export {IAgeLocalRomFile, IAgeRomFileUrl, TAgeRomFile} from "./age-rom-file-loader";
+export {IAgeLocalRomFile, IAgeRomFileUrl, TAgeRomFile} from './age-rom-file-loader';
 
-export {IAgeTaskStatus, TAgeTaskId, TAgeTaskStatus, TAgeTaskError} from "./age-task-status-handler";
+export {IAgeTaskStatus, TAgeTaskId, TAgeTaskStatus, TAgeTaskError} from './age-task-status-handler';

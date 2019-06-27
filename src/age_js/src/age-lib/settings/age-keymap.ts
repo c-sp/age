@@ -29,14 +29,14 @@ export enum AgeGbButton {
 export class AgeGbKeyMap {
 
     private _keyMap: { [key: string]: AgeGbButton } = {
-        "ArrowRight": AgeGbButton.GB_BUTTON_RIGHT,
-        "ArrowLeft": AgeGbButton.GB_BUTTON_LEFT,
-        "ArrowUp": AgeGbButton.GB_BUTTON_UP,
-        "ArrowDown": AgeGbButton.GB_BUTTON_DOWN,
-        "a": AgeGbButton.GB_BUTTON_A,
-        "s": AgeGbButton.GB_BUTTON_B,
-        "Enter": AgeGbButton.GB_BUTTON_SELECT,
-        " ": AgeGbButton.GB_BUTTON_START,
+        'ArrowRight': AgeGbButton.GB_BUTTON_RIGHT,
+        'ArrowLeft': AgeGbButton.GB_BUTTON_LEFT,
+        'ArrowUp': AgeGbButton.GB_BUTTON_UP,
+        'ArrowDown': AgeGbButton.GB_BUTTON_DOWN,
+        'a': AgeGbButton.GB_BUTTON_A,
+        's': AgeGbButton.GB_BUTTON_B,
+        'Enter': AgeGbButton.GB_BUTTON_SELECT,
+        ' ': AgeGbButton.GB_BUTTON_START,
     };
 
     getButtonForKey(key: string): AgeGbButton | undefined {

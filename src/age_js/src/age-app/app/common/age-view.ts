@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-import {AgeBreakpointObserverService} from "age-lib";
-import {combineLatest, Observable} from "rxjs";
-import {map} from "rxjs/operators";
+import {AgeBreakpointObserverService} from 'age-lib';
+import {combineLatest, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 
 export interface IAgeViewMode {
@@ -41,8 +41,8 @@ export function viewMode$(breakpointObserverService: AgeBreakpointObserverServic
         // Using 480px (a CSS pixel is device independent just like dp)
         // as the breakpoint for allowing the combined view seems sensible.
         //
-        breakpointObserverService.matches$("(min-width: 480px)"),
-        breakpointObserverService.matches$("(min-height: 480px)"),
+        breakpointObserverService.matches$('(min-width: 480px)'),
+        breakpointObserverService.matches$('(min-height: 480px)'),
     ]).pipe(
         map<[boolean, boolean], IAgeViewMode>(values => {
             const widthSufficient = values[0];

@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, Input} from "@angular/core";
-import {AgeIconsService} from "age-lib";
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {AgeIconsService} from 'age-lib';
 
 
 @Component({
-    selector: "age-rom-link",
+    selector: 'age-rom-link',
     template: `
         <a *ngIf="linkUrl; else contents"
            class="age-ui-clickable"
@@ -57,7 +57,7 @@ export class AgeRomLinkComponent {
     }
 
     get linkUrl(): string | undefined {
-        return this._linkUrl || "";
+        return this._linkUrl || '';
     }
 
     @Input() set linkUrl(linkUrl: string | undefined) {
@@ -67,14 +67,14 @@ export class AgeRomLinkComponent {
 
 
     private _updateIcon() {
-        const linkHostname = (this._autoIcon && this._linkUrl) ? new URL(this._linkUrl).hostname : "";
+        const linkHostname = (this._autoIcon && this._linkUrl) ? new URL(this._linkUrl).hostname : '';
         switch (linkHostname) {
 
-            case "github.com":
+            case 'github.com':
                 this._iconName = this._icons.faGithub;
                 break;
 
-            case "gitlab.com":
+            case 'gitlab.com':
                 this._iconName = this._icons.faGitlab;
                 break;
 

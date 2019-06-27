@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
-import {AgeBreakpointObserverService, AgeIconsService} from "../../common";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {AgeBreakpointObserverService, AgeIconsService} from '../../common';
 
 
 @Component({
-    selector: "age-toolbar-action-volume",
+    selector: 'age-toolbar-action-volume',
     template: `
         <button mat-button (click)="toggleMute()">
             <mat-icon [svgIcon]="iconName"></mat-icon>

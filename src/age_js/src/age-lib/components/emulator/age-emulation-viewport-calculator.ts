@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import {ElementRef, NgZone} from "@angular/core";
-import ResizeObserver from "resize-observer-polyfill";
-import {combineLatest, Observable, Subscriber} from "rxjs";
-import {map} from "rxjs/operators";
-import {AgeScreenSize} from "../../emulation";
+import {ElementRef, NgZone} from '@angular/core';
+import ResizeObserver from 'resize-observer-polyfill';
+import {combineLatest, Observable, Subscriber} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {AgeScreenSize} from '../../emulation';
 
 
 export interface IAgeViewport {
