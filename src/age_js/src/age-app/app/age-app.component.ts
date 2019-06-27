@@ -8,174 +8,143 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// diHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, ElementRef, HostListener, Input, ViewChild} from "@angular/core";
-import {faCheck} from "@fortawesome/free-solid-svg-icons/faCheck";
-import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
-import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
-import {faTimes} from "@fortawesome/free-solid-svg-icons/faTimes";
-import {faTimesCircle} from "@fortawesome/free-solid-svg-icons/faTimesCircle";
-import {
-    AgeEmulationFactoryService,
-    AgeEmulationRunner,
-    AgeTaskStatusHandlerService,
-    IAgeEmulationRuntimeInfo,
-    ITaskStatus,
-    TAgeRomFile,
-    TTaskId,
-} from "age-lib";
-import {Observable} from "rxjs";
-import {TitleBarButton} from "./title-bar/age-title-bar.component";
+import {ChangeDetectionStrategy, Component, Inject, ViewChild} from "@angular/core";
+import {ActivatedRouteSnapshot, NavigationEnd, Router, UrlSegment} from "@angular/router";
+import {AgeBreakpointObserverService, AgeSubscriptionSink, IAgeLocalRomFile, TAgeRomFile} from "age-lib";
+import {combineLatest, Observable, Subject} from "rxjs";
+import {filter, map, tap} from "rxjs/operators";
+import {IAgeViewMode, ROUTE_FRAGMENT_URL, viewMode$} from "./common";
+import {AgeAppEmulatorComponent} from "./emulator";
+import {OPEN_LOCAL_ROM_FILE_SUBJECT} from "./rom-library";
 
 
 @Component({
     selector: "age-app-root",
     template: `
-        <age-title-bar [runtimeInfo]="emulationRuntimeInfo"
-                       (buttonClicked)="toggleDialog($event)"></age-title-bar>
+        <ng-container *ngIf="(emuState$ | async) as emuState">
 
-        <div #dialogDiv>
-            <div *ngIf="showDialog" class="dialog">
+            <!--
+             keep the emulation component alive even if it is not visible so that the user
+             can always come back to it (e.g. after browsing the rom library)
+              -->
+            <age-app-emulator [forcePause]="emuState.hide"
+                              [ngClass]="{
+                                            'display-none': emuState.hide,
+                                            'full-height': emuState.fullHeight
+                                         }"></age-app-emulator>
 
-                <age-info *ngIf="showDialog === TitleBarButton.INFO"></age-info>
-
-                <age-open-rom *ngIf="showDialog === TitleBarButton.OPEN_ROM"
-                              (openRom)="openRom($event)"></age-open-rom>
-
-                <fa-icon [icon]="faTimesCircle" class="close-dialog-icon age-ui-clickable"
-                         title="Close this dialog"
-                         (click)="closeDialogs()"></fa-icon>
-            </div>
-        </div>
-
-        <age-splash-screen *ngIf="!emulationRunner$"></age-splash-screen>
-
-        <div *ngIf="(taskStatusList$ | async) as statusList"
-             class="status-list">
-            <div *ngFor="let status of statusList; trackBy: trackByTaskId">
-
-                <ng-container [ngSwitch]="status.taskStatus">
-                    <fa-icon *ngSwitchCase="'working'" [icon]="faCog" [spin]="true"></fa-icon>
-                    <fa-icon *ngSwitchCase="'success'" [icon]="faCheck"></fa-icon>
-                    <fa-icon *ngSwitchCase="'cancelled'" [icon]="faTimes"></fa-icon>
-                    <fa-icon *ngSwitchDefault [icon]="faExclamationCircle" class="age-ui-error"></fa-icon>
-                </ng-container>
-
-                {{status.taskDescription}}
-            </div>
-        </div>
-
-        <age-emulator *ngIf="(emulationRunner$ | async) as emuRunner"
-                      [emulationRunner]="emuRunner"
-                      (updateRuntimeInfo)="emulationRuntimeInfo = $event"></age-emulator>
+            <router-outlet></router-outlet>
+        </ng-container>
     `,
     styles: [`
         :host {
-            display: flex;
+            display: block;
             height: 100%;
-            flex-direction: column;
+            overflow: auto;
         }
 
-        .dialog {
-            position: absolute;
-            left: 50%;
-            max-width: 30em;
-            transform: translateX(-50%) translateY(.5em);
-            z-index: 10000;
+        age-app-emulator {
+            /* size the emulator based on it's contents minimal size */
+            min-height: min-content;
         }
 
-        .dialog > fa-icon {
-            position: absolute;
-            top: .25em;
-            right: .25em;
+        .full-height {
+            height: 100%;
         }
 
-        age-splash-screen {
-            margin-top: 3em;
-            margin-bottom: 3em;
-        }
-
-        .status-list {
-            margin-top: 3em;
-            text-align: center;
-            font-size: smaller;
-        }
-
-        .status-list > fa-icon {
-            margin-right: 0.5em;
-        }
-
-        age-emulator {
-            flex: 1 1;
-            margin: .2em;
+        .display-none {
+            display: none;
         }
     `],
     providers: [
-        AgeTaskStatusHandlerService,
-        AgeEmulationFactoryService,
+        {
+            provide: OPEN_LOCAL_ROM_FILE_SUBJECT,
+            useValue: new Subject<IAgeLocalRomFile>(),
+        },
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeAppComponent {
+export class AgeAppComponent extends AgeSubscriptionSink {
 
-    readonly faCheck = faCheck;
-    readonly faCog = faCog;
-    readonly faTimes = faTimes;
-    readonly faExclamationCircle = faExclamationCircle;
+    readonly emuState$: Observable<IEmulationState>;
 
-    readonly TitleBarButton = TitleBarButton;
-    readonly faTimesCircle = faTimesCircle;
-    readonly taskStatusList$: Observable<ReadonlyArray<ITaskStatus> | undefined>;
+    @ViewChild(AgeAppEmulatorComponent, {static: false})
+    private _emulatorComp?: AgeAppEmulatorComponent;
 
-    @Input() emulationRuntimeInfo?: IAgeEmulationRuntimeInfo;
-    @Input() showDialog?: TitleBarButton;
+    constructor(breakpointObserverService: AgeBreakpointObserverService,
+                router: Router,
+                @Inject(OPEN_LOCAL_ROM_FILE_SUBJECT) localRomFileSubject: Subject<IAgeLocalRomFile>) {
+        super();
 
-    @ViewChild("dialogDiv", {static: false}) private _dialogDiv?: ElementRef;
+        // TODO too late, initial route not parsed
+        const openRomUrl$ = router.events.pipe(
+            // only after successful navigation
+            filter(event => event instanceof NavigationEnd),
 
-    private _emulationRunner$?: Observable<AgeEmulationRunner>;
-    private _ignoreCloseDialogs = false;
+            // get current route snapshot
+            map(() => router.routerState.snapshot.root),
 
-    constructor(private readonly _emulationFactory: AgeEmulationFactoryService,
-                statusHandler: AgeTaskStatusHandlerService) {
+            // we collect all UrlSegments instead of just looking at the routeConfig
+            // as the latter might contain "**" (redirected route)
+            map(getUrlSegments),
 
-        this.taskStatusList$ = statusHandler.taskStatusList$;
+            // open rom url
+            tap(urlSegments => {
+                if ((urlSegments.length > 1) && (urlSegments[0] === ROUTE_FRAGMENT_URL)) {
+                    const fileUrl = urlSegments[1];
+                    this.openRomFile({type: "rom-file-url", fileUrl});
+                }
+            }),
+        );
+
+        const _viewMode$ = viewMode$(breakpointObserverService);
+
+        this.emuState$ = combineLatest([_viewMode$, openRomUrl$]).pipe(
+            map<[IAgeViewMode, string[]], IEmulationState>(values => {
+                const viewMode = values[0];
+                const urlSegments = values[1];
+
+                const hasChildComponent = !!urlSegments.length && (urlSegments[0] !== ROUTE_FRAGMENT_URL);
+                return {
+                    hide: hasChildComponent && viewMode.useMobileView,
+                    fullHeight: !hasChildComponent,
+                };
+            }),
+        );
+
+        this.newSubscription = localRomFileSubject.asObservable().subscribe(
+            localRomFile => this.openRomFile(localRomFile),
+        );
     }
 
-
-    get emulationRunner$(): Observable<AgeEmulationRunner> | undefined {
-        return this._emulationRunner$;
-    }
-
-    openRom(romFileToLoad: TAgeRomFile): void {
-        this._emulationRunner$ = this._emulationFactory.newEmulation$(romFileToLoad);
-        this.closeDialogs();
-    }
-
-    toggleDialog(button: TitleBarButton): void {
-        if (this.showDialog !== button) {
-            this.showDialog = button;
-            this._ignoreCloseDialogs = true; // the same click triggers an immediate "closeDialogs"
+    openRomFile(romFile: TAgeRomFile): void {
+        if (this._emulatorComp) {
+            this._emulatorComp.openRomFile(romFile);
         }
-        // we rely on the immediate "closeDialogs" to close the dialog
+    }
+}
+
+
+interface IEmulationState {
+    readonly hide: boolean;
+    readonly fullHeight: boolean;
+}
+
+
+function getUrlSegments(routeSnapshot: ActivatedRouteSnapshot | null): string[] {
+    const urlSegments = new Array<UrlSegment>();
+
+    while (routeSnapshot) {
+        urlSegments.push(...routeSnapshot.url);
+        routeSnapshot = routeSnapshot.firstChild;
     }
 
-    @HostListener("click", ["$event"])
-    @HostListener("keypress", ["$event"])
-    closeDialogs(event?: Event): void {
-        const eventContainsDialog = event && this._dialogDiv && this._dialogDiv.nativeElement.contains(event.target);
-
-        if (!event || (!eventContainsDialog && !this._ignoreCloseDialogs)) {
-            this.showDialog = undefined;
-        }
-        this._ignoreCloseDialogs = false;
-    }
-
-    trackByTaskId(_index: number, taskStatus: ITaskStatus): TTaskId {
-        return taskStatus.taskId;
-    }
+    return urlSegments
+        .filter(urlSegment => !!urlSegment.path)
+        .map(urlSegment => urlSegment.path);
 }

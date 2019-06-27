@@ -14,7 +14,4 @@
 // limitations under the License.
 //
 
-export * from "./common";
-export * from "./components";
-export * from "./emulation";
-export * from "./settings";
+export * from "./age-app-emulator.component";

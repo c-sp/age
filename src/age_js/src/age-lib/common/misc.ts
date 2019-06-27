@@ -14,7 +14,10 @@
 // limitations under the License.
 //
 
-export * from "./common";
-export * from "./components";
-export * from "./emulation";
-export * from "./settings";
+
+/**
+ * @see https://www.typescriptlang.org/docs/handbook/advanced-types.html#exhaustiveness-checking
+ */
+export function assertNever(x: never): never {
+    throw new Error(`unexpected value: ${x}`);
+}

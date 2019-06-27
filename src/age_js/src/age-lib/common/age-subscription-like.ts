@@ -14,7 +14,24 @@
 // limitations under the License.
 //
 
-export * from "./common";
-export * from "./components";
-export * from "./emulation";
-export * from "./settings";
+import {SubscriptionLike} from "rxjs";
+
+
+export class AgeSubscriptionLike implements SubscriptionLike {
+
+    private _closed = false;
+
+    constructor(private readonly _unsubscribe?: () => void) {
+    }
+
+    get closed(): boolean {
+        return this._closed;
+    }
+
+    unsubscribe(): void {
+        if (!this.closed && !!this._unsubscribe) {
+            this._unsubscribe();
+        }
+        this._closed = true;
+    }
+}

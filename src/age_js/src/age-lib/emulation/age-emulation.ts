@@ -14,9 +14,6 @@
 // limitations under the License.
 //
 
-import {AgeGbButton} from "../settings";
-import {IEmGbModule} from "./age-wasm-module";
-
 
 export class AgeScreenBuffer {
 
@@ -25,14 +22,14 @@ export class AgeScreenBuffer {
     }
 }
 
-export class AgeRect {
+export class AgeScreenSize {
 
     constructor(readonly width: number,
                 readonly height: number) {
     }
 }
 
-export interface IAgeEmulation {
+export interface IAgeEmulatorInstance {
 
     getCyclesPerSecond(): number;
 
@@ -40,7 +37,7 @@ export interface IAgeEmulation {
 
     getRomName(): string;
 
-    getScreenSize(): AgeRect;
+    getScreenSize(): AgeScreenSize;
 
     getScreenBuffer(): AgeScreenBuffer;
 
@@ -54,73 +51,120 @@ export interface IAgeEmulation {
 }
 
 
-export class AgeGbEmulation implements IAgeEmulation {
+export class AgeEmulation {
 
-    constructor(private readonly _emGbModule: IEmGbModule,
-                romFileContents: ArrayBuffer) {
+    readonly screenSize: AgeScreenSize;
 
-        const romArray = new Uint8Array(romFileContents, 0, romFileContents.byteLength);
-        const bufferPtr = this._emGbModule._gb_allocate_rom_buffer(romArray.length);
-        this._emGbModule.HEAPU8.set(romArray, bufferPtr);
-        this._emGbModule._gb_new_emulator();
+    private _lastEmuTime: number;
+    private _screenBuffer: AgeScreenBuffer;
+    private _audioBuffer: Int16Array;
+    private _infoGenerator: AgeEmulationInfoGenerator;
+
+    constructor(private readonly _emulation: IAgeEmulatorInstance) {
+        this.screenSize = this._emulation.getScreenSize();
+        this._lastEmuTime = performance.now();
+        this._screenBuffer = this._emulation.getScreenBuffer();
+        this._audioBuffer = this._emulation.getAudioBuffer();
+        this._infoGenerator = new AgeEmulationInfoGenerator(this._emulation);
     }
 
-    getCyclesPerSecond(): number {
-        return this._emGbModule._gb_get_cycles_per_second();
+    get screenBuffer(): AgeScreenBuffer {
+        return this._screenBuffer;
     }
 
-    getEmulatedCycles(): number {
-        return this._emGbModule._gb_get_emulated_cycles();
+    get audioBuffer(): Int16Array {
+        return this._audioBuffer;
     }
 
-    getRomName(): string {
-        let romName = "";
+    get info(): IAgeEmulationInfo {
+        return this._infoGenerator.emulationInfo;
+    }
 
-        for (let i = this._emGbModule._gb_get_rom_name(), end = i + 32; i < end; ++i) {
-            // the rom name is null terminated and made of ascii chars
-            const code = this._emGbModule.HEAPU8[i];
-            if (!code) {
-                break;
-            }
-            romName += String.fromCharCode(code);
+    /**
+     * Run the emulation for a number of emulated cycles equivalent to the time between the last call to
+     * {@link emulate()} and the current time.
+     *
+     * @returns true if the emulated screen has changed, false otherwise
+     */
+    emulate(sampleRate: number): boolean {
+        const now = performance.now();
+        const millisElapsed = now - this._lastEmuTime;
+        this._lastEmuTime = now;
+
+        // calculate the number of cycles to emulate based on the elapsed time
+        // (limit cycles to not freeze the browser in case of performance issues)
+        const cyclesPerSecond = this._emulation.getCyclesPerSecond();
+        const maxCyclesToEmulate = cyclesPerSecond / 20;
+        const cyclesToEmulate = Math.min(maxCyclesToEmulate, cyclesPerSecond * millisElapsed / 1000);
+
+        // emulate
+        const pNow = performance.now();
+        const newFrame = this._emulation.emulateCycles(cyclesToEmulate, sampleRate);
+        const emuMillis = performance.now() - pNow;
+
+        // update buffers and emulation info
+        this._audioBuffer = this._emulation.getAudioBuffer();
+        if (newFrame) {
+            this._screenBuffer = this._emulation.getScreenBuffer();
         }
+        this._infoGenerator.checkForUpdate(now, emuMillis);
 
-        // some rom names seem to be padded with underscores: trim them
-        while (romName.endsWith("_")) {
-            romName = romName.substr(0, romName.length - 1);
+        return newFrame;
+    }
+
+    buttonDown(button: number): void {
+        this._emulation.buttonDown(button);
+    }
+
+    buttonUp(button: number): void {
+        this._emulation.buttonUp(button);
+    }
+}
+
+
+export interface IAgeEmulationInfo {
+    readonly romName: string;
+    readonly emulatedSeconds?: number;
+    readonly emulationSpeed?: number;
+    readonly emulationMaxSpeed?: number;
+}
+
+class AgeEmulationInfoGenerator {
+
+    private _emulationInfo: IAgeEmulationInfo;
+    private _lastInfoTime = performance.now();
+    private _lastEmulatedCycles = 0;
+    private _emuMillis = 0;
+
+    constructor(private readonly _emulation: IAgeEmulatorInstance) {
+        this._emulationInfo = {
+            romName: this._emulation.getRomName(),
+        };
+    }
+
+    get emulationInfo(): IAgeEmulationInfo {
+        return this._emulationInfo;
+    }
+
+    checkForUpdate(now: number, emuMillis: number): void {
+        this._emuMillis += emuMillis;
+        const elapsedMillis = now - this._lastInfoTime;
+
+        if (elapsedMillis > 500) {
+            const cyclesPerSecond = this._emulation.getCyclesPerSecond();
+            const emulatedCycles = this._emulation.getEmulatedCycles();
+            const elapsedCycles = emulatedCycles - this._lastEmulatedCycles;
+
+            this._emulationInfo = {
+                ...this._emulationInfo,
+                emulatedSeconds: emulatedCycles / cyclesPerSecond,
+                emulationSpeed: elapsedCycles * 1000 / elapsedMillis / cyclesPerSecond,
+                emulationMaxSpeed: elapsedCycles * 1000 / Math.max(1, this._emuMillis) / cyclesPerSecond,
+            };
+
+            this._lastInfoTime = now;
+            this._lastEmulatedCycles = emulatedCycles;
+            this._emuMillis = 0;
         }
-
-        return romName;
-    }
-
-    getScreenSize(): AgeRect {
-        return new AgeRect(
-            this._emGbModule._gb_get_screen_width(),
-            this._emGbModule._gb_get_screen_height(),
-        );
-    }
-
-    getScreenBuffer(): AgeScreenBuffer {
-        const screenBuffer = this._emGbModule._gb_get_screen_front_buffer();
-        return new AgeScreenBuffer(this._emGbModule.HEAPU8, screenBuffer);
-    }
-
-    emulateCycles(cyclesToEmulate: number, sampleRate: number): boolean {
-        return this._emGbModule._gb_emulate(cyclesToEmulate, sampleRate);
-    }
-
-    buttonDown(button: AgeGbButton): void {
-        this._emGbModule._gb_set_buttons_down(button);
-    }
-
-    buttonUp(button: AgeGbButton): void {
-        this._emGbModule._gb_set_buttons_up(button);
-    }
-
-    getAudioBuffer(): Int16Array {
-        const bufferOffsetBytes = this._emGbModule._gb_get_audio_buffer();
-        const bufferSizeBytes = this._emGbModule._gb_get_audio_buffer_size() * 4;
-        const bufferEndBytes = bufferOffsetBytes + bufferSizeBytes;
-        return this._emGbModule.HEAP16.slice(bufferOffsetBytes / 2, bufferEndBytes / 2);
     }
 }

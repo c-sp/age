@@ -14,7 +14,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/age-js",
-            "baseHref": "age-js", // we have a base-href !== '/' for gitlab.io => simulate it for testing
+            "baseHref": "/age-js/", // we have a base-href !== '/' for gitlab.io => simulate it for testing
             "index": "src/age-app/index.html",
             "main": "src/age-app/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -28,13 +28,16 @@
               },
               {
                 "glob": "age-audio-stream.js",
-                "input": "src/age-lib/emulator/audio",
+                "input": "src/age-lib/components/emulator/audio",
                 "output": "./assets"
               }
             ],
             "styles": [
+              "node_modules/@angular/material/prebuilt-themes/purple-green.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/hammerjs/hammer.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -126,7 +129,7 @@
               "src/assets",
               {
                 "glob": "age-audio-stream.js",
-                "input": "src/age-lib/emulator/audio",
+                "input": "src/age-lib/components/emulator/audio",
                 "output": "./assets"
               }
             ]

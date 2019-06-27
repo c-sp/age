@@ -15,13 +15,13 @@
 //
 
 
-export interface IEmModule {
+export interface IAgeWasmModule {
 
     HEAPU8: Uint8Array;
     HEAP16: Int16Array;
 }
 
-export interface IEmGbModule extends IEmModule {
+export interface IAgeGbEmulatorModule extends IAgeWasmModule {
 
     _gb_allocate_rom_buffer(romSize: number): number;
     _gb_new_emulator(): void;
