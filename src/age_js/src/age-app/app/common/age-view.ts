@@ -19,8 +19,13 @@ import {combineLatest, Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 
 
+export const MOBILE_WIDTH_PX = 480;
+export const MOBILE_HEIGHT_PX = 580;
+
 export interface IAgeViewMode {
-    readonly useMobileView: boolean;
+    readonly mobileWidth: boolean;
+    readonly mobileHeight: boolean;
+    readonly mobileView: boolean;
 }
 
 let VIEW_MODE$: Observable<IAgeViewMode> | undefined;
@@ -46,13 +51,17 @@ export function _viewMode$(breakpointObserverService: AgeBreakpointObserverServi
         // Using 480px (a CSS pixel is device independent just like dp)
         // as the breakpoint for allowing the combined view seems sensible.
         //
-        breakpointObserverService.matches$('(min-width: 480px)'),
-        breakpointObserverService.matches$('(min-height: 480px)'),
+        breakpointObserverService.matches$(`(min-width: ${MOBILE_WIDTH_PX}px)`),
+        breakpointObserverService.matches$(`(min-height: ${MOBILE_HEIGHT_PX}px)`),
     ]).pipe(
         map<[boolean, boolean], IAgeViewMode>(values => {
-            const widthSufficient = values[0];
-            const heightSufficient = values[1];
-            return {useMobileView: !widthSufficient || !heightSufficient};
+            const mobileWidth = !values[0];
+            const mobileHeight = !values[1];
+            return {
+                mobileWidth,
+                mobileHeight,
+                mobileView: mobileWidth || mobileHeight,
+            };
         }),
         // cache the result for all subscriptions
         shareReplay(1),

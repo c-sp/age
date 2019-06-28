@@ -27,7 +27,7 @@ import {AgeNavigationService, IAgeViewMode, viewMode$} from '../../common';
         <mat-toolbar *ngIf="(viewMode$ | async) as viewMode"
                      [color]="'primary'">
 
-            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': !viewMode.useMobileView}">
+            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': !viewMode.mobileView}">
                 <mat-icon [svgIcon]="icons.faAngleLeft"></mat-icon>
             </a>
 
@@ -35,7 +35,7 @@ import {AgeNavigationService, IAgeViewMode, viewMode$} from '../../common';
             <span>about AGE</span>
             <age-toolbar-spacer></age-toolbar-spacer>
 
-            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': viewMode.useMobileView}">
+            <a mat-button [routerLink]="navigationService.rootUrl" [ngClass]="{'hidden': viewMode.mobileView}">
                 <mat-icon [svgIcon]="icons.faTimes"></mat-icon>
             </a>
 

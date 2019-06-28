@@ -89,7 +89,7 @@ export class AgeAppComponent {
                 const urlSegments = values[1];
                 const hasChildComponent = !!urlSegments.length && (urlSegments[0] !== ROUTE_FRAGMENT_ROM_URL);
                 return {
-                    hide: hasChildComponent && viewMode.useMobileView,
+                    hide: hasChildComponent && viewMode.mobileView,
                     fullHeight: !hasChildComponent,
                 };
             }),
