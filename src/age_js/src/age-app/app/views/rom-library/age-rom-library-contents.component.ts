@@ -42,6 +42,8 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
 }
 
 
+// TODO use router link for loading rom urls: [routerLink]="['url', romUrl]"
+
 @Component({
     selector: 'age-rom-library-contents',
     template: `

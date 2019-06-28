@@ -21,7 +21,7 @@ import {from} from 'rxjs';
 
 export const ROUTE_FRAGMENT_ABOUT_AGE = 'about';
 export const ROUTE_FRAGMENT_LIBRARY = 'library';
-export const ROUTE_FRAGMENT_URL = 'url';
+export const ROUTE_FRAGMENT_ROM_URL = 'rom-url';
 export const ROUTE_PARAM_ROM_URL = 'romUrl';
 
 
@@ -39,7 +39,7 @@ export class AgeNavigationService {
 
 
     navigateToOpenRomUrl(romUrl?: string): void {
-        this._navigateTo(romUrl ? [ROUTE_FRAGMENT_URL, romUrl] : [ROUTE_FRAGMENT_URL]);
+        this._navigateTo(romUrl ? [ROUTE_FRAGMENT_ROM_URL, romUrl] : [ROUTE_FRAGMENT_ROM_URL]);
     }
 
     navigateToRoot(): void {

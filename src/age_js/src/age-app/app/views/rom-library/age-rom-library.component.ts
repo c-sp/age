@@ -14,14 +14,11 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, Inject, InjectionToken, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Output} from '@angular/core';
 import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from 'age-lib';
-import {Observable, Subject} from 'rxjs';
-import {AgeNavigationService, IAgeViewMode, viewMode$} from '../common';
+import {Observable} from 'rxjs';
+import {AgeNavigationService, AgeRomFileService, IAgeViewMode, viewMode$} from '../../common';
 import {IAgeOnlineRom} from './age-rom-library-contents.component';
-
-
-export const OPEN_LOCAL_ROM_FILE_SUBJECT = new InjectionToken<Subject<IAgeLocalRomFile>>('OpenLocalRomFileSubject');
 
 
 @Component({
@@ -75,7 +72,7 @@ export class AgeRomLibraryComponent {
 
     constructor(readonly navigationService: AgeNavigationService,
                 readonly icons: AgeIconsService,
-                @Inject(OPEN_LOCAL_ROM_FILE_SUBJECT) private readonly _localRomFileSubject: Subject<IAgeLocalRomFile>,
+                private readonly _romFileService: AgeRomFileService,
                 breakpointObserverService: AgeBreakpointObserverService) {
 
         this.viewMode$ = viewMode$(breakpointObserverService);
@@ -86,7 +83,7 @@ export class AgeRomLibraryComponent {
     }
 
     openLocalRom(localRom: IAgeLocalRomFile, viewMode: IAgeViewMode): void {
-        this._localRomFileSubject.next(localRom);
+        this._romFileService.openRomFile(localRom);
         // navigate to the emulation, if it's not yet visible
         if (viewMode.useMobileView) {
             this.navigationService.navigateToRoot();

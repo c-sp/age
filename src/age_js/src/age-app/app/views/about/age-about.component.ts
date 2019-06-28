@@ -17,8 +17,8 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {AgeBreakpointObserverService, AgeIconsService} from 'age-lib';
 import {Observable} from 'rxjs';
-import {VERSION_INFO} from '../../../environments/version';
-import {AgeNavigationService, IAgeViewMode, viewMode$} from '../common';
+import {VERSION_INFO} from '../../../../environments/version';
+import {AgeNavigationService, IAgeViewMode, viewMode$} from '../../common';
 
 
 @Component({

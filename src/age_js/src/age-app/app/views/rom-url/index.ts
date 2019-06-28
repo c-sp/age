@@ -14,4 +14,4 @@
 // limitations under the License.
 //
 
-export * from './age-app-emulator.component';
+export * from './age-rom-url.component';
