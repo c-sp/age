@@ -16,15 +16,20 @@
 
 import {AgeBreakpointObserverService} from 'age-lib';
 import {combineLatest, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, shareReplay} from 'rxjs/operators';
 
 
 export interface IAgeViewMode {
     readonly useMobileView: boolean;
 }
 
+let VIEW_MODE$: Observable<IAgeViewMode> | undefined;
 
 export function viewMode$(breakpointObserverService: AgeBreakpointObserverService): Observable<IAgeViewMode> {
+    return VIEW_MODE$ || (VIEW_MODE$ = _viewMode$(breakpointObserverService));
+}
+
+export function _viewMode$(breakpointObserverService: AgeBreakpointObserverService): Observable<IAgeViewMode> {
     return combineLatest([
         //
         // Purpose of the breakpoints is to prevent the combined view
@@ -49,5 +54,7 @@ export function viewMode$(breakpointObserverService: AgeBreakpointObserverServic
             const heightSufficient = values[1];
             return {useMobileView: !widthSufficient || !heightSufficient};
         }),
+        // cache the result for all subscriptions
+        shareReplay(1),
     );
 }
