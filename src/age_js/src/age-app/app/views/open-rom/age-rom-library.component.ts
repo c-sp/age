@@ -45,7 +45,7 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
 // TODO use router link for loading rom urls: [routerLink]="['url', romUrl]"
 
 @Component({
-    selector: 'age-rom-library-contents',
+    selector: 'age-rom-library',
     template: `
         <ng-container *ngIf="(onlineRoms$ | async) as libraryItems">
             <div *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle"
@@ -133,7 +133,7 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeRomLibraryContentsComponent {
+export class AgeRomLibraryComponent {
 
     readonly onlineRoms$: Observable<ReadonlyArray<IAgeRomLibraryItem>> = of(onlineRoms()).pipe(
         map<IAgeOnlineRom[], IAgeRomLibraryItem[]>(onlineRomList => onlineRomList.map(onlineRom => {

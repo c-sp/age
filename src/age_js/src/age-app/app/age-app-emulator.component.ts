@@ -25,7 +25,7 @@ import {AgeNavigationService, AgeRomFileService} from './common';
         <mat-menu #ageMenu="matMenu"
                   [xPosition]="'before'">
 
-            <a mat-menu-item [routerLink]="navigationService.libraryUrl">
+            <a mat-menu-item [routerLink]="navigationService.openRomUrl">
                 <mat-icon [svgIcon]="icons.ageCartridge"></mat-icon>
                 open rom file
             </a>

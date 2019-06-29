@@ -15,7 +15,7 @@
 //
 
 export * from './about';
-export * from './rom-library';
+export * from './open-rom';
 export * from './rom-url';
 
 export * from './age-routes';

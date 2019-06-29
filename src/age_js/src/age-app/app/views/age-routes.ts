@@ -15,9 +15,14 @@
 //
 
 import {Route, Routes} from '@angular/router';
-import {ROUTE_FRAGMENT_ABOUT_AGE, ROUTE_FRAGMENT_LIBRARY, ROUTE_FRAGMENT_ROM_URL, ROUTE_PARAM_ROM_URL} from '../common';
+import {
+    ROUTE_FRAGMENT_ABOUT_AGE,
+    ROUTE_FRAGMENT_OPEN_ROM,
+    ROUTE_FRAGMENT_ROM_URL,
+    ROUTE_PARAM_ROM_URL,
+} from '../common';
 import {AgeAboutComponent} from './about';
-import {AgeRomLibraryComponent} from './rom-library';
+import {AgeOpenRomComponent} from './open-rom';
 import {AgeRomUrlComponent} from './rom-url';
 
 
@@ -35,8 +40,8 @@ export const ROUTES: Routes = [
         children: [REDIRECT_TO_ROOT],
     },
     {
-        path: ROUTE_FRAGMENT_LIBRARY,
-        component: AgeRomLibraryComponent,
+        path: ROUTE_FRAGMENT_OPEN_ROM,
+        component: AgeOpenRomComponent,
         // redirect all child routes
         children: [REDIRECT_TO_ROOT],
     },

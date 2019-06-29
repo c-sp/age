@@ -19,11 +19,11 @@ import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from 'a
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, viewMode$} from '../../common';
-import {IAgeOnlineRom} from './age-rom-library-contents.component';
+import {IAgeOnlineRom} from './age-rom-library.component';
 
 
 @Component({
-    selector: 'age-rom-library',
+    selector: 'age-open-rom',
     template: `
         <mat-toolbar *ngIf="(viewMode$ | async) as viewMode"
                      [color]="'primary'">
@@ -104,8 +104,8 @@ import {IAgeOnlineRom} from './age-rom-library-contents.component';
 
         </mat-toolbar>
 
-        <age-rom-library-contents (romClicked)="openRomUrl($event)"
-                                  [justifyContent]="'center'"></age-rom-library-contents>
+        <age-rom-library (romClicked)="openRomUrl($event)"
+                         [justifyContent]="'center'"></age-rom-library>
     `,
     styles: [`
         :host {
@@ -138,7 +138,7 @@ import {IAgeOnlineRom} from './age-rom-library-contents.component';
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeRomLibraryComponent {
+export class AgeOpenRomComponent {
 
     readonly viewMode$: Observable<IToolbarViewMode>;
     readonly ToolbarMode = ToolbarMode;

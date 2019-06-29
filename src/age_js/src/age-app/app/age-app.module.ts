@@ -33,8 +33,8 @@ import {AgeAppComponent} from './age-app.component';
 import {AgeHrefDirective} from './common';
 import {
     AgeAboutComponent,
+    AgeOpenRomComponent,
     AgeRomLibraryComponent,
-    AgeRomLibraryContentsComponent,
     AgeRomLinkComponent,
     AgeRomUrlComponent,
     AgeToolbarActionLocalRomComponent,
@@ -63,8 +63,8 @@ import {
 
         AgeAboutComponent,
 
+        AgeOpenRomComponent,
         AgeRomLibraryComponent,
-        AgeRomLibraryContentsComponent,
         AgeRomLinkComponent,
         AgeToolbarActionLocalRomComponent,
 

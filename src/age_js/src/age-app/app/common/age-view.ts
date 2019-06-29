@@ -38,7 +38,7 @@ export function _viewMode$(breakpointObserverService: AgeBreakpointObserverServi
     return combineLatest([
         //
         // Purpose of the breakpoints is to prevent the combined view
-        // (emulator and rom library both visible) on any viewport that is
+        // (current route including current emulation) on any viewport that is
         // too small, e.g. mobile phones.
         //
         // For a list of devices and their viewport have a look at
