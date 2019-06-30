@@ -25,7 +25,6 @@ export const ROUTE_FRAGMENT_ROM_URL = 'rom-url';
 export const ROUTE_PARAM_ROM_URL = 'romUrl';
 
 
-
 @Injectable({
     providedIn: 'root',
 })
@@ -38,15 +37,14 @@ export class AgeNavigationService {
     constructor(private readonly _router: Router) {
     }
 
-
-    navigateToOpenRomUrl(romUrl?: string): void {
-        this._navigateTo(romUrl ? [ROUTE_FRAGMENT_ROM_URL, romUrl] : [ROUTE_FRAGMENT_ROM_URL]);
-    }
-
     navigateToRoot(): void {
         this._navigateTo(['']);
     }
 
+    // noinspection JSMethodCanBeStatic
+    romUrlRouterLink(romUrl: string): string[] {
+        return ['/', ROUTE_FRAGMENT_ROM_URL, romUrl];
+    }
 
     private _navigateTo(commands: string[]): void {
         from(this._router.navigate(commands)).subscribe(/* we don't care for the result */);

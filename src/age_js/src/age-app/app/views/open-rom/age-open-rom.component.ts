@@ -19,7 +19,6 @@ import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from 'a
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, viewMode$} from '../../common';
-import {IAgeOnlineRom} from './age-rom-library.component';
 
 
 @Component({
@@ -104,8 +103,7 @@ import {IAgeOnlineRom} from './age-rom-library.component';
 
         </mat-toolbar>
 
-        <age-rom-library (romClicked)="openRomUrl($event)"
-                         [justifyContent]="'center'"></age-rom-library>
+        <age-rom-library [justifyContent]="'center'"></age-rom-library>
     `,
     styles: [`
         :host {
@@ -176,10 +174,6 @@ export class AgeOpenRomComponent {
         this.libraryFilter = '';
         this.romFileUrl = '';
         this._toolbarModeSubject.next(toolbarMode);
-    }
-
-    openRomUrl(onlineRom: IAgeOnlineRom): void {
-        this.navigationService.navigateToOpenRomUrl(onlineRom.romUrl);
     }
 
     openLocalRom(localRom: IAgeLocalRomFile, viewMode: IAgeViewMode): void {

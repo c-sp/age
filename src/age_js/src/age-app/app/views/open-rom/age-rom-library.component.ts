@@ -14,35 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostBinding, Input} from '@angular/core';
 import {AgeIconsService} from 'age-lib';
 import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {AgeNavigationService} from '../../common';
 
-
-export type TAgeRomType = 'demo' | 'game';
-
-export interface IAgeOnlineRom {
-    readonly romType: TAgeRomType;
-    readonly romTitle: string; // this is the primary key
-    readonly romAuthors: string;
-    readonly romUrl: string;
-    readonly romScreenshotUrl?: string;
-    readonly romAuthorsUrl?: string;
-    readonly romSiteUrl?: string;
-    readonly romSourceUrl?: string;
-}
-
-interface IAgeRomLibraryItem extends IAgeOnlineRom {
-    readonly screenshotAlt: string;
-    readonly clickTooltip: string;
-    readonly authorsLinkTooltip: string;
-    readonly romSiteLinkTooltip: string;
-    readonly romSourceLinkTooltip: string;
-}
-
-
-// TODO use router link for loading rom urls: [routerLink]="['url', romUrl]"
 
 @Component({
     selector: 'age-rom-library',
@@ -51,38 +28,35 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
             <div *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle"
                  class="library-item">
 
-                <img *ngIf="libraryItem.romScreenshotUrl"
-                     [alt]="libraryItem.screenshotAlt"
-                     (click)="romClicked.emit(libraryItem)"
-                     [src]="libraryItem.romScreenshotUrl"
-                     [title]="libraryItem.clickTooltip">
+                <a [routerLink]="libraryItem.loadRomRouterLink">
+                    <img *ngIf="libraryItem.romScreenshotUrl"
+                         [alt]="libraryItem.screenshotAlt"
+                         [src]="libraryItem.romScreenshotUrl"
+                         [title]="libraryItem.clickTooltip">
 
-                <div class="details">
-                    <div (click)="romClicked.emit(libraryItem)"
-                         (keypress)="romClicked.emit(libraryItem)"
-                         [title]="libraryItem.clickTooltip">{{libraryItem.romTitle}}</div>
+                    <h3 [title]="libraryItem.clickTooltip">{{libraryItem.romTitle}}</h3>
+                </a>
 
-                    <div>
-                        by
-                        <age-rom-link [linkUrl]="libraryItem.romAuthorsUrl"
-                                      [linkTooltip]="libraryItem.authorsLinkTooltip">
-                            {{libraryItem.romAuthors}}
-                        </age-rom-link>
-                    </div>
-
-                    <age-rom-link *ngIf="libraryItem.romSiteUrl as romSiteUrl"
-                                  [linkUrl]="romSiteUrl"
-                                  [linkTooltip]="libraryItem.romSiteLinkTooltip">
-                        <mat-icon [svgIcon]="icons.faHome"></mat-icon>
-                    </age-rom-link>
-
-                    <age-rom-link *ngIf="libraryItem.romSourceUrl as romSourceUrl"
-                                  [autoIcon]="true"
-                                  [linkUrl]="romSourceUrl"
-                                  [linkTooltip]="libraryItem.romSourceLinkTooltip">
-                        <mat-icon [svgIcon]="icons.faFileCode"></mat-icon>
+                <div>
+                    by
+                    <age-rom-link [linkUrl]="libraryItem.romAuthorsUrl"
+                                  [linkTooltip]="libraryItem.authorsLinkTooltip">
+                        {{libraryItem.romAuthors}}
                     </age-rom-link>
                 </div>
+
+                <age-rom-link *ngIf="libraryItem.romSiteUrl as romSiteUrl"
+                              [linkUrl]="romSiteUrl"
+                              [linkTooltip]="libraryItem.romSiteLinkTooltip">
+                    <mat-icon [svgIcon]="icons.faHome"></mat-icon>
+                </age-rom-link>
+
+                <age-rom-link *ngIf="libraryItem.romSourceUrl as romSourceUrl"
+                              [autoIcon]="true"
+                              [linkUrl]="romSourceUrl"
+                              [linkTooltip]="libraryItem.romSourceLinkTooltip">
+                    <mat-icon [svgIcon]="icons.faFileCode"></mat-icon>
+                </age-rom-link>
 
             </div>
         </ng-container>
@@ -100,35 +74,35 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
             padding: 1em;
             width: 14em;
             text-align: center;
+            white-space: nowrap;
         }
 
-        .library-item > img {
-            cursor: pointer;
+        .library-item > a {
+            text-decoration: none;
+            color: currentColor;
+        }
+
+        .library-item > a > img {
             object-fit: contain;
             width: 12em;
             max-height: 12em;
         }
 
-        .details {
-            line-height: 1.6em;
-        }
-
-        .details > div {
-            white-space: nowrap;
+        .library-item > a > h3 {
+            margin-block-start: 0.25em;
+            margin-block-end: 0.25em;
             text-overflow: ellipsis;
             overflow: hidden;
         }
 
-        .details > :nth-child(1) {
-            cursor: pointer;
-            font-weight: bold;
+        .library-item > div {
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
 
-        .details > age-rom-link {
+        age-rom-link {
             display: inline-block;
-            padding-top: 0.5em;
-            margin-left: 0.3em;
-            margin-right: 0.3em;
+            margin: 0.3em;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -140,6 +114,7 @@ export class AgeRomLibraryComponent {
             return {
                 ...onlineRom,
                 screenshotAlt: `${onlineRom.romTitle} screenshot`,
+                loadRomRouterLink: this.navigationService.romUrlRouterLink(onlineRom.romUrl),
                 clickTooltip: `run ${onlineRom.romTitle}`,
                 authorsLinkTooltip: `${onlineRom.romAuthors} website`,
                 romSiteLinkTooltip: `${onlineRom.romTitle} website`,
@@ -148,11 +123,10 @@ export class AgeRomLibraryComponent {
         })),
     );
 
-    @Output() readonly romClicked = new EventEmitter<IAgeOnlineRom>();
-
     @Input() @HostBinding('style.justifyContent') justifyContent: 'normal' | 'center' = 'normal';
 
-    constructor(readonly icons: AgeIconsService) {
+    constructor(readonly icons: AgeIconsService,
+                readonly navigationService: AgeNavigationService) {
     }
 
     trackByTitle(_index: number, libraryItem: IAgeRomLibraryItem): string {
@@ -160,6 +134,28 @@ export class AgeRomLibraryComponent {
     }
 }
 
+
+type TAgeRomType = 'demo' | 'game';
+
+interface IAgeOnlineRom {
+    readonly romType: TAgeRomType;
+    readonly romTitle: string; // this is the primary key
+    readonly romAuthors: string;
+    readonly romUrl: string;
+    readonly romScreenshotUrl?: string;
+    readonly romAuthorsUrl?: string;
+    readonly romSiteUrl?: string;
+    readonly romSourceUrl?: string;
+}
+
+interface IAgeRomLibraryItem extends IAgeOnlineRom {
+    readonly screenshotAlt: string;
+    readonly loadRomRouterLink: string[];
+    readonly clickTooltip: string;
+    readonly authorsLinkTooltip: string;
+    readonly romSiteLinkTooltip: string;
+    readonly romSourceLinkTooltip: string;
+}
 
 function onlineRoms(): IAgeOnlineRom[] {
     const roms: IAgeOnlineRom[] = [
