@@ -21,44 +21,56 @@ import {map} from 'rxjs/operators';
 import {AgeNavigationService} from '../../common';
 
 
+// TODO check IAgeRomLibraryItem attribute usage
+
 @Component({
     selector: 'age-rom-library',
     template: `
         <ng-container *ngIf="(onlineRoms$ | async) as libraryItems">
-            <div *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle"
-                 class="library-item">
 
-                <a [routerLink]="libraryItem.loadRomRouterLink">
-                    <img *ngIf="libraryItem.romScreenshotUrl"
-                         [alt]="libraryItem.screenshotAlt"
-                         [src]="libraryItem.romScreenshotUrl"
-                         [title]="libraryItem.clickTooltip">
+            <mat-card *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle">
+                <mat-card-header>
+                    <mat-card-title>{{libraryItem.romTitle}}</mat-card-title>
+                </mat-card-header>
 
-                    <h3 [title]="libraryItem.clickTooltip">{{libraryItem.romTitle}}</h3>
-                </a>
+                <img *ngIf="libraryItem.romScreenshotUrl"
+                     mat-card-image
+                     [alt]="libraryItem.screenshotAlt"
+                     [src]="libraryItem.romScreenshotUrl">
 
-                <div>
+                <mat-card-content>
                     by
-                    <age-rom-link [linkUrl]="libraryItem.romAuthorsUrl"
-                                  [linkTooltip]="libraryItem.authorsLinkTooltip">
+                    <a class="age-ui-clickable"
+                       [age-href]="libraryItem.romAuthorsUrl"
+                       [title]="libraryItem.authorsLinkTooltip">
                         {{libraryItem.romAuthors}}
-                    </age-rom-link>
-                </div>
+                    </a>
+                </mat-card-content>
 
-                <age-rom-link *ngIf="libraryItem.romSiteUrl as romSiteUrl"
-                              [linkUrl]="romSiteUrl"
-                              [linkTooltip]="libraryItem.romSiteLinkTooltip">
-                    <mat-icon [svgIcon]="icons.faHome"></mat-icon>
-                </age-rom-link>
+                <mat-card-actions>
 
-                <age-rom-link *ngIf="libraryItem.romSourceUrl as romSourceUrl"
-                              [autoIcon]="true"
-                              [linkUrl]="romSourceUrl"
-                              [linkTooltip]="libraryItem.romSourceLinkTooltip">
-                    <mat-icon [svgIcon]="icons.faFileCode"></mat-icon>
-                </age-rom-link>
+                    <a mat-button [title]="libraryItem.clickTooltip">
+                        <mat-icon [svgIcon]="icons.faPlay"></mat-icon>
+                    </a>
 
-            </div>
+                    <a *ngIf="libraryItem.romSiteUrl as romSiteUrl"
+                       mat-button
+                       [age-href]="romSiteUrl"
+                       [title]="libraryItem.romSiteLinkTooltip">
+                        <mat-icon [svgIcon]="icons.faHome"></mat-icon>
+                    </a>
+
+                    <a *ngIf="libraryItem.romSourceUrl as romSourceUrl"
+                       mat-button
+                       [age-href]="romSourceUrl"
+                       [title]="libraryItem.romSourceLinkTooltip">
+                        <mat-icon [svgIcon]="libraryItem.romSourceIconName"></mat-icon>
+                    </a>
+
+                </mat-card-actions>
+
+            </mat-card>
+
         </ng-container>
     `,
     styles: [`
@@ -69,40 +81,9 @@ import {AgeNavigationService} from '../../common';
             align-items: center;
         }
 
-        .library-item {
-            cursor: default;
-            padding: 1em;
-            width: 14em;
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .library-item > a {
-            text-decoration: none;
-            color: currentColor;
-        }
-
-        .library-item > a > img {
-            object-fit: contain;
-            width: 12em;
-            max-height: 12em;
-        }
-
-        .library-item > a > h3 {
-            margin-block-start: 0.25em;
-            margin-block-end: 0.25em;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
-        .library-item > div {
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
-        age-rom-link {
-            display: inline-block;
-            margin: 0.3em;
+        mat-card {
+            /* width required for 3 mat-card-actions */
+            width: 240px;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,9 +97,10 @@ export class AgeRomLibraryComponent {
                 screenshotAlt: `${onlineRom.romTitle} screenshot`,
                 loadRomRouterLink: this.navigationService.romUrlRouterLink(onlineRom.romUrl),
                 clickTooltip: `run ${onlineRom.romTitle}`,
-                authorsLinkTooltip: `${onlineRom.romAuthors} website`,
-                romSiteLinkTooltip: `${onlineRom.romTitle} website`,
+                authorsLinkTooltip: `${onlineRom.romAuthors} on pouet.net`,
+                romSiteLinkTooltip: `${onlineRom.romTitle} on pouet.net`,
                 romSourceLinkTooltip: `${onlineRom.romTitle} source code`,
+                romSourceIconName: this._sourceLinkIconName(onlineRom.romSourceUrl),
             };
         })),
     );
@@ -131,6 +113,23 @@ export class AgeRomLibraryComponent {
 
     trackByTitle(_index: number, libraryItem: IAgeRomLibraryItem): string {
         return libraryItem.romTitle;
+    }
+
+    private _sourceLinkIconName(url?: string): string | undefined {
+        if (!url) {
+            return undefined;
+        }
+        switch (new URL(url).hostname) {
+
+            case 'github.com':
+                return this.icons.faGithub;
+
+            case 'gitlab.com':
+                return this.icons.faGitlab;
+
+            default:
+                return this.icons.faFileCode;
+        }
     }
 }
 
@@ -155,6 +154,7 @@ interface IAgeRomLibraryItem extends IAgeOnlineRom {
     readonly authorsLinkTooltip: string;
     readonly romSiteLinkTooltip: string;
     readonly romSourceLinkTooltip: string;
+    readonly romSourceIconName?: string;
 }
 
 function onlineRoms(): IAgeOnlineRom[] {
