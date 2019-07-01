@@ -41,6 +41,10 @@ export class AgeNavigationService {
         this._navigateTo(['']);
     }
 
+    navigateToRomUrl(romUrl: string): void {
+        this._navigateTo([ROUTE_FRAGMENT_ROM_URL, romUrl]);
+    }
+
     // noinspection JSMethodCanBeStatic
     romUrlRouterLink(romUrl: string): string[] {
         return ['/', ROUTE_FRAGMENT_ROM_URL, romUrl];

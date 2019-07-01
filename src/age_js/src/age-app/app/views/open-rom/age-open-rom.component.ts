@@ -93,6 +93,7 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
                     <mat-form-field>
                         <mat-label>rom file url</mat-label>
                         <input matInput
+                               (keydown.enter)="openRomFileUrl()"
                                name="romFileUrl"
                                [(ngModel)]="romFileUrl">
                     </mat-form-field>
@@ -191,6 +192,16 @@ export class AgeOpenRomComponent {
         this.libraryFilter = '';
         this.romFileUrl = '';
         this._toolbarModeSubject.next(toolbarMode);
+    }
+
+    openRomFileUrl(): void {
+        let romFileUrl = this.romFileUrl;
+        if (romFileUrl) {
+            if (!romFileUrl.startsWith('http://') && !romFileUrl.startsWith('https://')) {
+                romFileUrl = `http://${romFileUrl}`;
+            }
+            this.navigationService.navigateToRomUrl(romFileUrl);
+        }
     }
 
     openLocalRom(localRom: IAgeLocalRomFile, viewMode: IAgeViewMode): void {
