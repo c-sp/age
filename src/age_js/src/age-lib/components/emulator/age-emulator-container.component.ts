@@ -225,7 +225,7 @@ function createViewportStyle(viewport: IAgeViewport): object {
         // which triggers a vertical scrollbar.
         // By applying the padding below, the scrollbar disappears.
         // Having the emulator "screen" not touch the browser GUI looks nicer anyway ...
-        padding: '3px',
+        // padding: '3px',
     };
 
     function cssPxString(value: number): string {

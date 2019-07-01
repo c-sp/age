@@ -29,6 +29,9 @@ import {AgeEmulationWorker} from './age-emulation-worker';
     `,
     styles: [`
         :host {
+            display: block;
+            background-color: black;
+            padding: 8px;
             /* prevent flickering scrollbar on rapid resize */
             overflow: hidden;
         }
