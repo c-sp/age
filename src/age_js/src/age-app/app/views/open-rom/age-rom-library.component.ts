@@ -14,14 +14,12 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component, HostBinding, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {AgeIconsService} from 'age-lib';
 import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AgeNavigationService} from '../../common';
 
-
-// TODO check IAgeRomLibraryItem attribute usage
 
 @Component({
     selector: 'age-rom-library',
@@ -29,27 +27,32 @@ import {AgeNavigationService} from '../../common';
         <ng-container *ngIf="(onlineRoms$ | async) as libraryItems">
 
             <mat-card *ngFor="let libraryItem of libraryItems; trackBy: trackByTitle">
-                <mat-card-header>
-                    <mat-card-title>{{libraryItem.romTitle}}</mat-card-title>
-                </mat-card-header>
 
-                <img *ngIf="libraryItem.romScreenshotUrl"
-                     mat-card-image
-                     [alt]="libraryItem.screenshotAlt"
-                     [src]="libraryItem.romScreenshotUrl">
+                <a class="age-ui-clickable"
+                   [routerLink]="libraryItem.loadRomRouterLink"
+                   [title]="libraryItem.clickTooltip">
+                    <img *ngIf="libraryItem.romScreenshotUrl"
+                         mat-card-image
+                         [alt]="libraryItem.screenshotAlt"
+                         [src]="libraryItem.romScreenshotUrl">
+                </a>
 
-                <mat-card-content>
+                <mat-card-title>{{libraryItem.romTitle}}</mat-card-title>
+
+                <mat-card-subtitle>
                     by
                     <a class="age-ui-clickable"
                        [age-href]="libraryItem.romAuthorsUrl"
                        [title]="libraryItem.authorsLinkTooltip">
                         {{libraryItem.romAuthors}}
                     </a>
-                </mat-card-content>
+                </mat-card-subtitle>
 
                 <mat-card-actions>
 
-                    <a mat-button [title]="libraryItem.clickTooltip">
+                    <a mat-button
+                       [routerLink]="libraryItem.loadRomRouterLink"
+                       [title]="libraryItem.clickTooltip">
                         <mat-icon [svgIcon]="icons.faPlay"></mat-icon>
                     </a>
 
@@ -75,15 +78,15 @@ import {AgeNavigationService} from '../../common';
     `,
     styles: [`
         :host {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: center;
+            display: grid;
+            justify-content: center;
+            grid-gap: 16px 16px;
+            /* width required for 3 mat-card-actions */
+            grid-template-columns: repeat(auto-fit, 240px);
         }
 
-        mat-card {
-            /* width required for 3 mat-card-actions */
-            width: 240px;
+        mat-card-actions {
+            white-space: nowrap;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -104,8 +107,6 @@ export class AgeRomLibraryComponent {
             };
         })),
     );
-
-    @Input() @HostBinding('style.justifyContent') justifyContent: 'normal' | 'center' = 'normal';
 
     constructor(readonly icons: AgeIconsService,
                 readonly navigationService: AgeNavigationService) {

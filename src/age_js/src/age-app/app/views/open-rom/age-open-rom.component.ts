@@ -109,12 +109,12 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
         </mat-toolbar>
 
-        <age-rom-library [justifyContent]="'center'"></age-rom-library>
+        <age-rom-library></age-rom-library>
     `,
     styles: [`
         :host {
             display: block;
-            max-width: 60em;
+            max-width: calc(240px * 4 + 16px * 5); /* rom library with 4 columns */
             margin-left: auto;
             margin-right: auto;
         }
@@ -128,6 +128,7 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
             position: sticky;
             top: 0;
             min-height: min-content;
+            z-index: 1;
         }
 
         .toolbar-contents {
@@ -143,6 +144,11 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
         mat-form-field {
             width: 100%;
+        }
+
+        age-rom-library {
+            margin-top: 1em;
+            margin-bottom: 4em;
         }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush,
