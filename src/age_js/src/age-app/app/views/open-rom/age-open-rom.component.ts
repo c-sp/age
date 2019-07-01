@@ -109,7 +109,7 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
         </mat-toolbar>
 
-        <age-rom-library></age-rom-library>
+        <age-rom-library [filter]="libraryFilter"></age-rom-library>
     `,
     styles: [`
         :host {
