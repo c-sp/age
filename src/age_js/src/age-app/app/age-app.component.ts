@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, HostBinding} from '@angular/core';
 import {ActivatedRouteSnapshot, NavigationEnd, Router, UrlSegment} from '@angular/router';
 import {AgeBreakpointObserverService} from 'age-lib';
 import {combineLatest, Observable} from 'rxjs';
@@ -68,6 +68,8 @@ import {AgeRomFileService, IAgeViewMode, ROUTE_FRAGMENT_ROM_URL, viewMode$} from
 export class AgeAppComponent {
 
     readonly emuState$: Observable<IEmulationState>;
+
+    @HostBinding('class.mat-app-background') readonly useMaterialThemeBackground = true;
 
     constructor(breakpointObserverService: AgeBreakpointObserverService,
                 router: Router) {
