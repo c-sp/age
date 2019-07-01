@@ -27,6 +27,12 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
         <mat-toolbar *ngIf="(viewMode$ | async) as viewMode"
                      [color]="'primary'">
 
+            <div class="hidden">
+                <mat-form-field style="width: 0">
+                    <input matInput>
+                </mat-form-field>
+            </div>
+
             <a *ngIf="viewMode.showLeftAngle"
                mat-button
                [routerLink]="navigationService.rootUrl">
@@ -111,6 +117,11 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
             max-width: 60em;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        .hidden {
+            /* let the toolbar have the correct height when no input element is visible */
+            width: 0;
         }
 
         mat-toolbar {
