@@ -15,9 +15,8 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {AgeIconsService, TAgeRomFile} from 'age-lib';
-import {Observable, Subject} from 'rxjs';
-import {AgeNavigationService} from '../common';
+import {AgeIconsService} from 'age-lib';
+import {AgeNavigationService, AgeRomFileService} from './common';
 
 
 @Component({
@@ -26,7 +25,7 @@ import {AgeNavigationService} from '../common';
         <mat-menu #ageMenu="matMenu"
                   [xPosition]="'before'">
 
-            <a mat-menu-item [routerLink]="navigationService.libraryUrl">
+            <a mat-menu-item [routerLink]="navigationService.openRomUrl">
                 <mat-icon [svgIcon]="icons.ageCartridge"></mat-icon>
                 open rom file
             </a>
@@ -48,7 +47,7 @@ import {AgeNavigationService} from '../common';
 
 
         <age-emulator-container [forcePause]="forcePause"
-                                [romFile]="romFile$ | async">
+                                [romFile]="romFileService.openRomFile$ | async">
 
             <age-toolbar-spacer></age-toolbar-spacer>
 
@@ -73,18 +72,8 @@ export class AgeAppEmulatorComponent {
 
     @Input() forcePause = false;
 
-    private readonly _romFileSubject = new Subject<TAgeRomFile>();
-    private readonly _romFile$ = this._romFileSubject.asObservable();
-
     constructor(readonly icons: AgeIconsService,
-                readonly navigationService: AgeNavigationService) {
-    }
-
-    get romFile$(): Observable<TAgeRomFile> {
-        return this._romFile$;
-    }
-
-    openRomFile(romFile: TAgeRomFile): void {
-        this._romFileSubject.next(romFile);
+                readonly navigationService: AgeNavigationService,
+                readonly romFileService: AgeRomFileService) {
     }
 }

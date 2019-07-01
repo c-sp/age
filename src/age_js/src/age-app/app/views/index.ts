@@ -14,13 +14,8 @@
 // limitations under the License.
 //
 
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+export * from './about';
+export * from './open-rom';
+export * from './rom-url';
 
-
-@Component({
-    selector: 'age-empty',
-    template: ``,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class AgeEmptyComponent {
-}
+export * from './age-routes';

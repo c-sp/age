@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-export * from './age-empty.component';
 export * from './age-href.directive';
 export * from './age-navigation.service';
+export * from './age-rom-file.service';
 export * from './age-view';

@@ -20,8 +20,8 @@ import {from} from 'rxjs';
 
 
 export const ROUTE_FRAGMENT_ABOUT_AGE = 'about';
-export const ROUTE_FRAGMENT_LIBRARY = 'library';
-export const ROUTE_FRAGMENT_URL = 'url';
+export const ROUTE_FRAGMENT_OPEN_ROM = 'open-rom';
+export const ROUTE_FRAGMENT_ROM_URL = 'rom-url';
 export const ROUTE_PARAM_ROM_URL = 'romUrl';
 
 
@@ -31,21 +31,24 @@ export const ROUTE_PARAM_ROM_URL = 'romUrl';
 export class AgeNavigationService {
 
     readonly aboutAgeUrl = `/${ROUTE_FRAGMENT_ABOUT_AGE}`;
-    readonly libraryUrl = `/${ROUTE_FRAGMENT_LIBRARY}`;
+    readonly openRomUrl = `/${ROUTE_FRAGMENT_OPEN_ROM}`;
     readonly rootUrl = '/';
 
     constructor(private readonly _router: Router) {
-    }
-
-
-    navigateToOpenRomUrl(romUrl?: string): void {
-        this._navigateTo(romUrl ? [ROUTE_FRAGMENT_URL, romUrl] : [ROUTE_FRAGMENT_URL]);
     }
 
     navigateToRoot(): void {
         this._navigateTo(['']);
     }
 
+    navigateToRomUrl(romUrl: string): void {
+        this._navigateTo([ROUTE_FRAGMENT_ROM_URL, romUrl]);
+    }
+
+    // noinspection JSMethodCanBeStatic
+    romUrlRouterLink(romUrl: string): string[] {
+        return ['/', ROUTE_FRAGMENT_ROM_URL, romUrl];
+    }
 
     private _navigateTo(commands: string[]): void {
         from(this._router.navigate(commands)).subscribe(/* we don't care for the result */);

@@ -16,97 +16,62 @@
 
 import {HashLocationStrategy, LocationStrategy} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {Route, RouterModule, Routes} from '@angular/router';
+import {RouterModule} from '@angular/router';
 import {ServiceWorkerModule} from '@angular/service-worker';
 import {AgeLibModule} from 'age-lib';
 import {environment} from '../../environments/environment';
-import {AgeAboutComponent} from './about';
+import {AgeAppEmulatorComponent} from './age-app-emulator.component';
 import {AgeAppComponent} from './age-app.component';
+import {AgeHrefDirective} from './common';
 import {
-    AgeEmptyComponent,
-    AgeHrefDirective,
-    ROUTE_FRAGMENT_ABOUT_AGE,
-    ROUTE_FRAGMENT_LIBRARY,
-    ROUTE_FRAGMENT_URL,
-    ROUTE_PARAM_ROM_URL,
-} from './common';
-import {AgeAppEmulatorComponent} from './emulator';
-import {
+    AgeAboutComponent,
+    AgeOpenRomComponent,
     AgeRomLibraryComponent,
-    AgeRomLibraryContentsComponent,
-    AgeRomLinkComponent,
+    AgeRomUrlComponent,
     AgeToolbarActionLocalRomComponent,
-} from './rom-library';
-
-
-const REDIRECT_TO_ROOT: Route = {
-    path: '**',
-    redirectTo: '',
-};
-
-const ROUTES: Routes = [
-    {
-        path: ROUTE_FRAGMENT_ABOUT_AGE,
-        component: AgeAboutComponent,
-        // redirect all child routes
-        children: [REDIRECT_TO_ROOT],
-    },
-    {
-        path: ROUTE_FRAGMENT_LIBRARY,
-        component: AgeRomLibraryComponent,
-        // redirect all child routes
-        children: [REDIRECT_TO_ROOT],
-    },
-    {
-        path: ROUTE_FRAGMENT_URL,
-        component: AgeEmptyComponent,
-        children: [
-            {
-                path: `:${ROUTE_PARAM_ROM_URL}`,
-                component: AgeEmptyComponent,
-                // redirect all child routes
-                children: [REDIRECT_TO_ROOT],
-            },
-        ],
-    },
-    // redirect all other routes to "/"
-    REDIRECT_TO_ROOT,
-];
+    ROUTES,
+} from './views';
 
 
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
+        FormsModule, // [(ngModel)]
         RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
 
         MatButtonModule,
+        MatCardModule,
         MatIconModule,
+        MatInputModule,
         MatMenuModule,
         MatToolbarModule,
 
         AgeLibModule,
     ],
     declarations: [
+        AgeHrefDirective,
+
         AgeAboutComponent,
 
-        AgeEmptyComponent,
-        AgeHrefDirective,
-        AgeAppEmulatorComponent,
-
+        AgeOpenRomComponent,
         AgeRomLibraryComponent,
-        AgeRomLibraryContentsComponent,
-        AgeRomLinkComponent,
         AgeToolbarActionLocalRomComponent,
 
+        AgeRomUrlComponent,
+
         AgeAppComponent,
+        AgeAppEmulatorComponent,
     ],
     providers: [
         {

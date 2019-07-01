@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
+export * from './age-open-rom.component';
 export * from './age-rom-library.component';
-export * from './age-rom-library-contents.component';
-export * from './age-rom-link.component';
 export * from './age-toolbar-action-local-rom.component';

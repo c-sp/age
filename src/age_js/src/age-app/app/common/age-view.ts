@@ -16,19 +16,29 @@
 
 import {AgeBreakpointObserverService} from 'age-lib';
 import {combineLatest, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, shareReplay} from 'rxjs/operators';
 
+
+export const MOBILE_WIDTH_PX = 480;
+export const MOBILE_HEIGHT_PX = 580;
 
 export interface IAgeViewMode {
-    readonly useMobileView: boolean;
+    readonly mobileWidth: boolean;
+    readonly mobileHeight: boolean;
+    readonly mobileView: boolean;
 }
 
+let VIEW_MODE$: Observable<IAgeViewMode> | undefined;
 
 export function viewMode$(breakpointObserverService: AgeBreakpointObserverService): Observable<IAgeViewMode> {
+    return VIEW_MODE$ || (VIEW_MODE$ = _viewMode$(breakpointObserverService));
+}
+
+export function _viewMode$(breakpointObserverService: AgeBreakpointObserverService): Observable<IAgeViewMode> {
     return combineLatest([
         //
         // Purpose of the breakpoints is to prevent the combined view
-        // (emulator and rom library both visible) on any viewport that is
+        // (current route including current emulation) on any viewport that is
         // too small, e.g. mobile phones.
         //
         // For a list of devices and their viewport have a look at
@@ -41,13 +51,19 @@ export function viewMode$(breakpointObserverService: AgeBreakpointObserverServic
         // Using 480px (a CSS pixel is device independent just like dp)
         // as the breakpoint for allowing the combined view seems sensible.
         //
-        breakpointObserverService.matches$('(min-width: 480px)'),
-        breakpointObserverService.matches$('(min-height: 480px)'),
+        breakpointObserverService.matches$(`(min-width: ${MOBILE_WIDTH_PX}px)`),
+        breakpointObserverService.matches$(`(min-height: ${MOBILE_HEIGHT_PX}px)`),
     ]).pipe(
         map<[boolean, boolean], IAgeViewMode>(values => {
-            const widthSufficient = values[0];
-            const heightSufficient = values[1];
-            return {useMobileView: !widthSufficient || !heightSufficient};
+            const mobileWidth = !values[0];
+            const mobileHeight = !values[1];
+            return {
+                mobileWidth,
+                mobileHeight,
+                mobileView: mobileWidth || mobileHeight,
+            };
         }),
+        // cache the result for all subscriptions
+        shareReplay(1),
     );
 }
