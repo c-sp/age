@@ -15,11 +15,17 @@
 //
 
 import {HttpClient} from '@angular/common/http';
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, OnInit, Output} from '@angular/core';
 import {AgeIconsService} from 'age-lib';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AgeNavigationService} from '../../common';
+
+
+export interface IAgeRomCount {
+    readonly totalRoms: number;
+    readonly currentRoms: number;
+}
 
 
 @Component({
@@ -95,6 +101,8 @@ import {AgeNavigationService} from '../../common';
 })
 export class AgeRomLibraryComponent implements OnInit {
 
+    @Output() readonly romCount = new BehaviorSubject<IAgeRomCount>({totalRoms: 0, currentRoms: 0});
+
     private readonly _filterSubject = new BehaviorSubject<string>('');
     private _filteredRoms$?: Observable<ReadonlyArray<IAgeRomLibraryItem>>;
 
@@ -146,9 +154,12 @@ export class AgeRomLibraryComponent implements OnInit {
                 const roms = values[0];
                 const filter = values[1];
 
-                return !filter
+                const result = !filter
                     ? roms
                     : roms.filter(rom => rom.filterString.indexOf(filter.toLocaleLowerCase()) >= 0);
+
+                this.romCount.next({totalRoms: roms.length, currentRoms: result.length});
+                return result;
             }),
         );
     }
