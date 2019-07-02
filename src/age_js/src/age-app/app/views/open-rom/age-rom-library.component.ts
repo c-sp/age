@@ -14,9 +14,10 @@
 // limitations under the License.
 //
 
+import {HttpClient} from '@angular/common/http';
 import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {AgeIconsService} from 'age-lib';
-import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AgeNavigationService} from '../../common';
 
@@ -98,30 +99,43 @@ export class AgeRomLibraryComponent implements OnInit {
     private _filteredRoms$?: Observable<ReadonlyArray<IAgeRomLibraryItem>>;
 
     constructor(readonly icons: AgeIconsService,
-                readonly navigationService: AgeNavigationService) {
+                readonly navigationService: AgeNavigationService,
+                private readonly _httpClient: HttpClient) {
     }
 
     ngOnInit(): void {
-        const roms$: Observable<IAgeRomLibraryItem[]> = of(onlineRoms()).pipe(
-            map(roms => roms.map(rom => {
-                const filterString = newFilterString(
-                    rom.romType,
-                    rom.romTitle,
-                    rom.romAuthors,
-                );
-                return {
-                    ...rom,
-                    filterString,
-                    screenshotAlt: `${rom.romTitle} screenshot`,
-                    loadRomRouterLink: this.navigationService.romUrlRouterLink(rom.romUrl),
-                    clickTooltip: `run ${rom.romTitle}`,
-                    authorsLinkTooltip: `${rom.romAuthors} on pouet.net`,
-                    romSiteLinkTooltip: `${rom.romTitle} on pouet.net`,
-                    romSourceLinkTooltip: `${rom.romTitle} source code`,
-                    romSourceIconName: this._sourceLinkIconName(rom.romSourceUrl),
-                };
-            })),
-        );
+        const roms$: Observable<IAgeRomLibraryItem[]> = this._httpClient
+            .get(
+                'assets/rom-library.json',
+                {
+                    observe: 'body',
+                    responseType: 'json',
+                },
+            )
+            .pipe(
+                map(romLibraryJson => (romLibraryJson as IAgeRomLibraryContents).roms),
+                map(roms => roms.slice().sort(
+                    (aRom: IAgeOnlineRom, bRom: IAgeOnlineRom) => aRom.romTitle.localeCompare(bRom.romTitle),
+                )),
+                map(roms => roms.map(rom => {
+                    const filterString = newFilterString(
+                        rom.romType,
+                        rom.romTitle,
+                        rom.romAuthors,
+                    );
+                    return {
+                        ...rom,
+                        filterString,
+                        screenshotAlt: `${rom.romTitle} screenshot`,
+                        loadRomRouterLink: this.navigationService.romUrlRouterLink(rom.romUrl),
+                        clickTooltip: `run ${rom.romTitle}`,
+                        authorsLinkTooltip: `${rom.romAuthors} on pouet.net`,
+                        romSiteLinkTooltip: `${rom.romTitle} on pouet.net`,
+                        romSourceLinkTooltip: `${rom.romTitle} source code`,
+                        romSourceIconName: this._sourceLinkIconName(rom.romSourceUrl),
+                    };
+                })),
+            );
 
         this._filteredRoms$ = combineLatest([
             roms$,
@@ -171,6 +185,10 @@ export class AgeRomLibraryComponent implements OnInit {
 }
 
 
+interface IAgeRomLibraryContents {
+    readonly roms: ReadonlyArray<IAgeOnlineRom>;
+}
+
 type TAgeRomType = 'demo' | 'game';
 
 interface IAgeOnlineRom {
@@ -205,97 +223,4 @@ function newFilterString(...values: Array<string | undefined>): string {
         // join using '\n' as this character is not part of the filter-string
         //  => we won't filter across value boundaries
         .join('\n');
-}
-
-function onlineRoms(): IAgeOnlineRom[] {
-    const roms: IAgeOnlineRom[] = [
-        {
-            romType: 'demo',
-            romTitle: 'Back To Color',
-            romAuthors: 'SkyLyrac',
-            romUrl: 'https://github.com/AntonioND/back-to-color/archive/v1.1.zip',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00063/00063691.png',
-            romAuthorsUrl: 'https://www.pouet.net/user.php?who=98359',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=63691',
-            romSourceUrl: 'https://github.com/AntonioND/back-to-color',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Cenotaph',
-            romAuthors: 'Dual Crew & Shining [DCS]',
-            romUrl: 'https://gameboy.modermodemet.se/files/DCS-CTPH.ZIP',
-            romScreenshotUrl: 'https://content.pouet.net/files/screenshots/00059/00059139.jpg',
-            romAuthorsUrl: 'https://www.pouet.net/groups.php?which=468',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=59139',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Cute Demo CGB',
-            romAuthors: 'Mills',
-            romUrl: 'https://github.com/mills32/CUTE_DEMO/raw/master/0_rom/CUTEDEMO.gbc',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00073/00073290.png',
-            romAuthorsUrl: 'https://www.pouet.net/user.php?who=98229',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=73290',
-            romSourceUrl: 'https://github.com/mills32/CUTE_DEMO',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Demotronic',
-            romAuthors: '1.000.000 boys [1MB]',
-            romUrl: 'https://gameboy.modermodemet.se/files/MB-DTRNC.ZIP',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00007/00007175.gif',
-            romAuthorsUrl: 'https://www.pouet.net/groups.php?which=1237',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=7175',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'It Came from Planet Zilog',
-            romAuthors: 'phantasy',
-            romUrl: 'https://gameboy.modermodemet.se/files/PHT-PZ.ZIP',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00065/00065345.gif',
-            romAuthorsUrl: 'https://www.pouet.net/groups.php?which=754',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=65345',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Mental Respirator',
-            romAuthors: 'phantasy',
-            romUrl: 'http://gameboy.modermodemet.se/files/PHT-MR.ZIP',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00016/00016402.gif',
-            romAuthorsUrl: 'https://www.pouet.net/groups.php?which=754',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=16402',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Oh!',
-            romAuthors: 'Snorpung',
-            romUrl: 'https://www.nordloef.com/gbdemos/oh.zip',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00054/00054175.jpg',
-            romAuthorsUrl: 'https://www.pouet.net/groups.php?which=10735',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=54175',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Pickpocket',
-            romAuthors: 'inka',
-            romUrl: 'https://www.izik.se/files/demos/inka-PP.zip',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00005/00005681.gif',
-            romAuthorsUrl: 'https://www.pouet.net/groups.php?which=1328',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=5681',
-        },
-        {
-            romType: 'demo',
-            romTitle: 'Roboto',
-            romAuthors: 'naavis',
-            romUrl: 'https://naavis.untergrund.net/skrolliparty2017/naavis_roboto_skrolli-party.gb',
-            romScreenshotUrl: 'https://www.pouet.net/content/files/screenshots/00069/00069944.jpg',
-            romAuthorsUrl: 'https://www.pouet.net/user.php?who=97913',
-            romSiteUrl: 'https://www.pouet.net/prod.php?which=69944',
-            romSourceUrl: 'https://github.com/naavis/roboto-demo',
-        },
-    ];
-
-    return roms.sort(
-        (aRom: IAgeOnlineRom, bRom: IAgeOnlineRom) => aRom.romTitle.localeCompare(bRom.romTitle),
-    );
 }
