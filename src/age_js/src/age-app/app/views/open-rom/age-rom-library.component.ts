@@ -32,8 +32,7 @@ import {AgeNavigationService} from '../../common';
                 <a class="age-ui-clickable"
                    [routerLink]="rom.loadRomRouterLink"
                    [title]="rom.clickTooltip">
-                    <img *ngIf="rom.romScreenshotUrl"
-                         mat-card-image
+                    <img mat-card-image
                          [alt]="rom.screenshotAlt"
                          [src]="rom.romScreenshotUrl">
                 </a>
@@ -43,11 +42,13 @@ import {AgeNavigationService} from '../../common';
                 <mat-card-subtitle>
                     {{rom.romType}}<br>
                     by
-                    <a class="age-ui-clickable"
+                    <a *ngIf="rom.romAuthorsUrl"
+                       class="age-ui-clickable"
                        [age-href]="rom.romAuthorsUrl"
                        [title]="rom.authorsLinkTooltip">
                         {{rom.romAuthors}}
                     </a>
+                    <ng-container *ngIf="!rom.romAuthorsUrl">{{rom.romAuthors}}</ng-container>
                 </mat-card-subtitle>
 
                 <mat-card-actions>
@@ -58,9 +59,8 @@ import {AgeNavigationService} from '../../common';
                         <mat-icon [svgIcon]="icons.faPlay"></mat-icon>
                     </a>
 
-                    <a *ngIf="rom.romSiteUrl as romSiteUrl"
-                       mat-button
-                       [age-href]="romSiteUrl"
+                    <a mat-button
+                       [age-href]="rom.romSiteUrl"
                        [title]="rom.romSiteLinkTooltip">
                         <mat-icon [svgIcon]="icons.faHome"></mat-icon>
                     </a>
@@ -119,15 +119,16 @@ export class AgeRomLibraryComponent implements OnInit {
                 )),
                 map(roms => roms.map(rom => {
                     const filterString = newFilterString(
-                        rom.romType,
+                        ...rom.romTypes,
                         rom.romTitle,
                         rom.romAuthors,
                     );
                     return {
                         ...rom,
                         filterString,
+                        romType: rom.romTypes.join(', '),
                         screenshotAlt: `${rom.romTitle} screenshot`,
-                        loadRomRouterLink: this.navigationService.romUrlRouterLink(rom.romUrl),
+                        loadRomRouterLink: this.navigationService.romUrlRouterLink(rom.romFileUrl),
                         clickTooltip: `run ${rom.romTitle}`,
                         authorsLinkTooltip: `${rom.romAuthors} on pouet.net`,
                         romSiteLinkTooltip: `${rom.romTitle} on pouet.net`,
@@ -189,21 +190,22 @@ interface IAgeRomLibraryContents {
     readonly roms: ReadonlyArray<IAgeOnlineRom>;
 }
 
-type TAgeRomType = 'demo' | 'game';
+type TAgeRomType = 'demo' | 'game' | 'intro' | 'invitation';
 
 interface IAgeOnlineRom {
-    readonly romType: TAgeRomType;
+    readonly romTypes: ReadonlyArray<TAgeRomType>;
     readonly romTitle: string; // this is the primary key
     readonly romAuthors: string;
-    readonly romUrl: string;
-    readonly romScreenshotUrl?: string;
+    readonly romFileUrl: string;
+    readonly romScreenshotUrl: string;
     readonly romAuthorsUrl?: string;
-    readonly romSiteUrl?: string;
+    readonly romSiteUrl: string;
     readonly romSourceUrl?: string;
 }
 
 interface IAgeRomLibraryItem extends IAgeOnlineRom {
     readonly filterString: string;
+    readonly romType: string;
     readonly screenshotAlt: string;
     readonly loadRomRouterLink: string[];
     readonly clickTooltip: string;

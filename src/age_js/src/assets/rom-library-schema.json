@@ -26,12 +26,17 @@
     "rom": {
       "type": "object",
       "properties": {
-        "romType": {
-          "type": "string",
-          "enum": [
-            "demo",
-            "game"
-          ],
+        "romTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "demo",
+              "game",
+              "intro",
+              "invitation"
+            ]
+          },
           "description": "the type of this rom"
         },
         "romTitle": {
@@ -39,7 +44,7 @@
           "minLength": 1,
           "description": "this rom's title (must be unique across all roms)"
         },
-        "romUrl": {
+        "romFileUrl": {
           "$ref": "#/definitions/httpsUrl",
           "description": "the rom file's URL"
         },
@@ -66,10 +71,12 @@
         }
       },
       "required": [
-        "romType",
+        "romTypes",
         "romTitle",
-        "romUrl",
-        "romAuthors"
+        "romFileUrl",
+        "romAuthors",
+        "romScreenshotUrl",
+        "romSiteUrl"
       ],
       "additionalProperties": false
     }
