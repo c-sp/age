@@ -68,12 +68,15 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
 
             <div *ngIf="viewMode.toolbar === ToolbarMode.SEARCH_LIBRARY"
+                 cdkTrapFocus
+                 [cdkTrapFocusAutoCapture]="true"
                  class="toolbar-contents">
 
                 <form>
                     <mat-form-field>
                         <mat-label>search library</mat-label>
                         <input matInput
+                               cdkFocusInitial
                                name="libraryFilter"
                                [(ngModel)]="libraryFilter">
                     </mat-form-field>
@@ -87,12 +90,15 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
 
             <div *ngIf="viewMode.toolbar === ToolbarMode.ENTER_ROM_FILE_URL"
+                 cdkTrapFocus
+                 [cdkTrapFocusAutoCapture]="true"
                  class="toolbar-contents">
 
                 <form>
                     <mat-form-field>
                         <mat-label>rom file url</mat-label>
                         <input matInput
+                               cdkFocusInitial
                                (keydown.enter)="openRomFileUrl()"
                                name="romFileUrl"
                                [(ngModel)]="romFileUrl">
