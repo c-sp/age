@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+import {A11yModule} from '@angular/cdk/a11y';
 import {HashLocationStrategy, LocationStrategy} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
@@ -50,6 +51,7 @@ import {
         RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
 
+        A11yModule,
         MatButtonModule,
         MatCardModule,
         MatIconModule,

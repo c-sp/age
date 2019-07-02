@@ -6,7 +6,7 @@
     "ng": "ng",
     "http-serve-dist": "cd ./dist && serve",
     "build": "npm run generate-files && ng build --prod",
-    "build:analyze": "npm run build -- --stats-json && webpack-bundle-analyzer dist/age-js/stats.json",
+    "build:analyze": "npm run build -- --stats-json && webpack-bundle-analyzer dist/age-js/stats-es2015.json",
     "start:dev": "npm run generate-files && ng serve",
     "start:prod": "npm run build && npm run gzip-directory && npm run http-serve-dist",
     "test": "ng test",

@@ -19,6 +19,7 @@ import {AgeBreakpointObserverService, AgeIconsService, IAgeLocalRomFile} from 'a
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, viewMode$} from '../../common';
+import {IAgeRomCount} from './age-rom-library.component';
 
 
 @Component({
@@ -68,12 +69,15 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
 
             <div *ngIf="viewMode.toolbar === ToolbarMode.SEARCH_LIBRARY"
+                 cdkTrapFocus
+                 [cdkTrapFocusAutoCapture]="true"
                  class="toolbar-contents">
 
                 <form>
-                    <mat-form-field>
+                    <mat-form-field [hintLabel]="romCountHint">
                         <mat-label>search library</mat-label>
                         <input matInput
+                               cdkFocusInitial
                                name="libraryFilter"
                                [(ngModel)]="libraryFilter">
                     </mat-form-field>
@@ -87,12 +91,15 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
 
             <div *ngIf="viewMode.toolbar === ToolbarMode.ENTER_ROM_FILE_URL"
+                 cdkTrapFocus
+                 [cdkTrapFocusAutoCapture]="true"
                  class="toolbar-contents">
 
                 <form>
                     <mat-form-field>
                         <mat-label>rom file url</mat-label>
                         <input matInput
+                               cdkFocusInitial
                                (keydown.enter)="openRomFileUrl()"
                                name="romFileUrl"
                                [(ngModel)]="romFileUrl">
@@ -110,7 +117,8 @@ import {AgeNavigationService, AgeRomFileService, IAgeViewMode, MOBILE_WIDTH_PX, 
 
         </mat-toolbar>
 
-        <age-rom-library [filter]="libraryFilter"></age-rom-library>
+        <age-rom-library [filter]="libraryFilter"
+                         (romCount)="updateRomCountHint($event)"></age-rom-library>
     `,
     styles: [`
         :host {
@@ -163,6 +171,7 @@ export class AgeOpenRomComponent {
     @Input() romFileUrl?: string;
 
     private readonly _toolbarModeSubject = new BehaviorSubject<ToolbarMode>(ToolbarMode.DEFAULT);
+    private _romCountHint = '0 roms';
 
     constructor(readonly navigationService: AgeNavigationService,
                 readonly icons: AgeIconsService,
@@ -188,6 +197,11 @@ export class AgeOpenRomComponent {
         );
     }
 
+
+    get romCountHint(): string {
+        return this._romCountHint;
+    }
+
     setToolbarMode(toolbarMode: ToolbarMode): void {
         this.libraryFilter = '';
         this.romFileUrl = '';
@@ -210,6 +224,10 @@ export class AgeOpenRomComponent {
         if (viewMode.mobileView) {
             this.navigationService.navigateToRoot();
         }
+    }
+
+    updateRomCountHint(romCount: IAgeRomCount): void {
+        this._romCountHint = `${romCount.currentRoms} of ${romCount.totalRoms} roms`;
     }
 }
 
