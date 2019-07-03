@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+import {HttpErrorResponse} from '@angular/common/http';
 import {BehaviorSubject, Observable, Subscriber} from 'rxjs';
 import {tap} from 'rxjs/operators';
 
@@ -79,7 +80,7 @@ export class AgeTaskStatusHandler {
                     // tap() is reached instead of the moment of observable completion
                     // (the latter might never occur, e.g. if a subsequent operator throws an error)
                     next: () => this._setTaskStatus(taskId, 'success'),
-                    error: err => this._setTaskStatus(taskId, 'failure', err),
+                    error: err => this._setTaskStatus(taskId, 'failure', getErrorText(err)),
                 }),
             )
             // to detect task cancellation we have to add a teardown logic to the subscriber
@@ -115,4 +116,13 @@ export class AgeTaskStatusHandler {
         // emit a new array instance so that Angular's change detection recognises the new status
         this._taskStatusListSubject.next(this._taskStatusList.slice());
     }
+}
+
+
+// tslint:disable-next-line:no-any
+function getErrorText(err: any): string {
+    if (err instanceof HttpErrorResponse) {
+        return (err.status === 0) ? `${err.statusText}, could be CORS related` : err.statusText;
+    }
+    return `${err}`;
 }
