@@ -1,10 +1,10 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true
   },
   "compilerOptions": {
-    "outDir": "../../out-tsc/app",
+    "outDir": "../out-tsc/app",
     "paths": {
       "age-lib": [
         "src/age-lib/index.ts"
@@ -18,10 +18,10 @@
     "types": []
   },
   "include": [
-    "**/*.ts",
-    "../polyfills.ts"
+    "**/*.ts"
   ],
   "exclude": [
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "test.ts"
   ]
 }
