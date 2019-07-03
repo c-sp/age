@@ -15,24 +15,26 @@
 //
 
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {AgeIconsService} from '../../common';
-import {IAgeTaskStatus, TAgeTaskId} from '../../emulation';
+import {AgeIconsService, assertNever} from '../../common';
+import {IAgeTaskStatus, TAgeTaskId, TAgeTaskStatus} from '../../emulation';
 
 
 @Component({
     selector: 'age-task-status',
     template: `
         <table>
-            <tr *ngFor="let status of taskStatusList; trackBy: trackByTaskId">
+            <tr *ngFor="let status of statusList; trackBy: trackByTaskId">
 
-                <td [ngSwitch]="status.taskStatus">
-                    <mat-icon *ngSwitchCase="'working'" [svgIcon]="icons.faCog" class="rotate"></mat-icon>
-                    <mat-icon *ngSwitchCase="'success'" [svgIcon]="icons.faCheck"></mat-icon>
-                    <mat-icon *ngSwitchCase="'cancelled'" [svgIcon]="icons.faTimes"></mat-icon>
-                    <mat-icon *ngSwitchDefault [svgIcon]="icons.faExclamationCircle"></mat-icon>
+                <td>
+                    <mat-icon [svgIcon]="status.iconName"
+                              [ngClass]="{'rotate': status.rotateIcon}"></mat-icon>
                 </td>
 
-                <td>{{status.taskDescription}}</td>
+                <td class="label">
+                    <div>{{status.label}}</div>
+                    <span class="mat-small">{{status.hint | slice:0:100}}</span>
+                </td>
+
             </tr>
         </table>
     `,
@@ -44,6 +46,10 @@ import {IAgeTaskStatus, TAgeTaskId} from '../../emulation';
 
         tr > :nth-child(1) {
             padding-right: 0.5em;
+        }
+
+        tr > :nth-child(2) {
+            padding: 0.25em;
         }
 
         .rotate {
@@ -66,12 +72,57 @@ import {IAgeTaskStatus, TAgeTaskId} from '../../emulation';
 })
 export class AgeTaskStatusComponent {
 
-    @Input() taskStatusList: ReadonlyArray<IAgeTaskStatus> = [];
+    private _statusList = new Array<IStatus>();
 
     constructor(readonly icons: AgeIconsService) {
     }
 
-    trackByTaskId(_index: number, taskStatus: IAgeTaskStatus): TAgeTaskId {
-        return taskStatus.taskId;
+
+    get statusList(): ReadonlyArray<IStatus> {
+        return this._statusList;
     }
+
+    @Input() set taskStatusList(taskStatusList: ReadonlyArray<IAgeTaskStatus>) {
+        this._statusList = taskStatusList.map<IStatus>(taskStatus => {
+            return {
+                taskId: taskStatus.taskId,
+                iconName: this._iconName(taskStatus.taskStatus),
+                rotateIcon: taskStatus.taskStatus === 'working',
+                label: taskStatus.taskDescription,
+
+                hint: (taskStatus.taskStatus === 'failure')
+                    ? taskStatus.taskError && taskStatus.taskError.toString()
+                    : taskStatus.taskStatus,
+            };
+        });
+    }
+
+    trackByTaskId(_index: number, status: IStatus): TAgeTaskId {
+        return status.taskId;
+    }
+
+
+    private _iconName(taskStatus: TAgeTaskStatus): string {
+        switch (taskStatus) {
+            case 'working':
+                return this.icons.faCog;
+            case 'success':
+                return this.icons.faCheck;
+            case 'cancelled':
+                return this.icons.faTimes;
+            case 'failure':
+                return this.icons.faExclamationCircle;
+            default:
+                return assertNever(taskStatus);
+        }
+    }
+}
+
+
+interface IStatus {
+    readonly taskId: TAgeTaskId;
+    readonly iconName: string;
+    readonly rotateIcon: boolean;
+    readonly label: string;
+    readonly hint: string;
 }

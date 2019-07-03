@@ -16,8 +16,8 @@
 
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {combineLatest, merge, Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {combineLatest, Observable, of} from 'rxjs';
+import {catchError, map, startWith} from 'rxjs/operators';
 import {AgeEmulation} from './age-emulation';
 import {AgeGbEmulatorInstance} from './age-gb-emulator-instance';
 import {AgeRomFileLoader, TAgeRomFile} from './age-rom-file-loader';
@@ -64,7 +64,13 @@ export class AgeEmulationService {
         // combine the current loading task status and the final emulation into one result
         return combineLatest([
             taskStatusHandler.taskStatusList$,
-            merge(of(undefined), emulation$), // emit undefined until the emulation is ready
+            emulation$.pipe(
+                // emit undefined until the emulation is ready
+                startWith(undefined),
+                // swallow any error as errors are propagated by taskStatusList$
+                // (not swallowing the error may prevent other tasks from being marked "cancelled")
+                catchError(() => of(undefined)),
+            ),
         ]).pipe(
             map(values => {
                 return {
