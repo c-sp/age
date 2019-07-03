@@ -12,6 +12,13 @@
       "items": {
         "$ref": "#/definitions/rom"
       }
+    },
+    "buggy_roms": {
+      "type": "array",
+      "description": "roms AGE is not capable of emulating correctly",
+      "items": {
+        "$ref": "#/definitions/rom"
+      }
     }
   },
   "required": [

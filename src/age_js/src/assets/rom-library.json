@@ -16,17 +16,6 @@
       "romTypes": [
         "demo"
       ],
-      "romTitle": "Alt Too",
-      "romFileUrl": "https://gameboy.modermodemet.se/files/CNCD-AT.ZIP",
-      "romAuthors": "Carillon & Cyberiad",
-      "romScreenshotUrl": "https://content.pouet.net/files/screenshots/00004/00004944.gif",
-      "romSiteUrl": "https://www.pouet.net/prod.php?which=4944",
-      "romAuthorsUrl": "https://www.pouet.net/groups.php?which=59"
-    },
-    {
-      "romTypes": [
-        "demo"
-      ],
       "romTitle": "Back To Color",
       "romFileUrl": "https://github.com/AntonioND/back-to-color/archive/v1.1.zip",
       "romAuthors": "SkyLyrac",
@@ -34,16 +23,6 @@
       "romSiteUrl": "https://www.pouet.net/prod.php?which=63691",
       "romAuthorsUrl": "https://www.pouet.net/user.php?who=98359",
       "romSourceUrl": "https://github.com/AntonioND/back-to-color"
-    },
-    {
-      "romTypes": [
-        "demo"
-      ],
-      "romTitle": "Bad Apple!!",
-      "romFileUrl": "https://eldred.fr/badapple_gbafixed.zip",
-      "romAuthors": "Bookworm (fix by ISSOtm)",
-      "romScreenshotUrl": "https://content.pouet.net/files/screenshots/00076/00076911.png",
-      "romSiteUrl": "https://www.pouet.net/prod.php?which=76911"
     },
     {
       "romTypes": [
@@ -477,6 +456,29 @@
       "romScreenshotUrl": "https://content.pouet.net/files/screenshots/00003/00003347.gif",
       "romSiteUrl": "https://www.pouet.net/prod.php?which=3347",
       "romAuthorsUrl": "https://www.pouet.net/groups.php?which=1264"
+    }
+  ],
+  "buggy_roms": [
+    {
+      "romTypes": [
+        "demo"
+      ],
+      "romTitle": "Alt Too",
+      "romFileUrl": "https://gameboy.modermodemet.se/files/CNCD-AT.ZIP",
+      "romAuthors": "Carillon & Cyberiad",
+      "romScreenshotUrl": "https://content.pouet.net/files/screenshots/00004/00004944.gif",
+      "romSiteUrl": "https://www.pouet.net/prod.php?which=4944",
+      "romAuthorsUrl": "https://www.pouet.net/groups.php?which=59"
+    },
+    {
+      "romTypes": [
+        "demo"
+      ],
+      "romTitle": "Bad Apple!!",
+      "romFileUrl": "https://eldred.fr/badapple_gbafixed.zip",
+      "romAuthors": "Bookworm (fix by ISSOtm)",
+      "romScreenshotUrl": "https://content.pouet.net/files/screenshots/00076/00076911.png",
+      "romSiteUrl": "https://www.pouet.net/prod.php?which=76911"
     }
   ]
 }
