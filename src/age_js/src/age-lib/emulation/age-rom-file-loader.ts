@@ -139,7 +139,7 @@ async function extractRomFile(zipFile: ArrayBuffer) {
     const zip = await JSZip.loadAsync(zipFile);
 
     // get a list of all rom files within that archive
-    const files = zip.file(/.*(\.gb)|(\.gbc)$/i);
+    const files = zip.file(/.*(\.gb)|(\.gbc)|(\.cgb)$/i);
     if (!files || !files.length) {
         throw Error('no Gameboy rom file found');
     }
