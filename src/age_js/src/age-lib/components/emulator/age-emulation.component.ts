@@ -31,7 +31,8 @@ import {AgeEmulationWorker} from './age-emulation-worker';
         :host {
             display: block;
             background-color: black;
-            padding: 8px;
+            /* the padding is quite strange, somehow the canvas triggers a scrollbar with padding-bottom > 0 */
+            padding: 8px 8px 0;
             /* prevent flickering scrollbar on rapid resize */
             overflow: hidden;
         }
