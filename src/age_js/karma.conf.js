@@ -17,7 +17,7 @@ module.exports = function (config) {
             clearContext: false // leave Jasmine Spec Runner output visible in browser
         },
         coverageIstanbulReporter: {
-            dir: require('path').join(__dirname, '../coverage/age-js'),
+            dir: require('path').join(__dirname, './coverage/age-js'),
             reports: ['html', 'lcovonly', 'text-summary'],
             fixWebpackSourcePaths: true
         },
@@ -27,6 +27,7 @@ module.exports = function (config) {
         logLevel: config.LOG_INFO,
         autoWatch: true,
         browsers: ['ChromeHeadless', 'FirefoxHeadless'],
-        singleRun: false
+        singleRun: false,
+        restartOnFileChange: true
     });
 };

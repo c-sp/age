@@ -15,7 +15,6 @@
 //
 
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import * as fileType from 'file-type';
 import * as JSZip from 'jszip';
 import {from, Observable, of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
@@ -119,27 +118,45 @@ export class AgeRomFileLoader {
 
 
     private _extractRomFile$(romFile: ArrayBuffer): Observable<ArrayBuffer> {
-        // If this is no zip file, there is nothing to extract
-        const type = fileType(new Uint8Array(romFile));
-        if (!type || (type.ext !== 'zip')) {
-            return of(romFile);
-        }
+        // I had too many issues with https://github.com/sindresorhus/file-type
+        // inside a browser for detecting zip files.
+        // Instead we rely on JSZip for detecting a zip file and treat a file
+        // as unzipped rom file if JSZip fails.
+        return from(tryOpenZipFile(romFile)).pipe(
 
-        // If this is a zip file, look for a rom file within that zip file.
-        // (fun fact: Gameboy roms are sometimes identified as MP3 files)
-        return this._taskStatusHandler.addTask$(
-            'extracting rom file from zip archive',
-            from(extractRomFile(romFile)),
+            switchMap(jsZip => {
+                // If this is no zip file, there is nothing to extract
+                if (!jsZip) {
+                    return of(romFile);
+                }
+
+                // If this is a zip file, look for a rom file within that zip file.
+                // (fun fact: Gameboy roms are sometimes identified as MP3 files)
+                return this._taskStatusHandler.addTask$(
+                    'extracting rom file from zip archive',
+                    from(extractRomFile(jsZip)),
+                );
+            }),
         );
     }
 }
 
 
-async function extractRomFile(zipFile: ArrayBuffer) {
-    const zip = await JSZip.loadAsync(zipFile);
+async function tryOpenZipFile(file: ArrayBuffer): Promise<JSZip | undefined> {
+    let jsZip: JSZip;
+    try {
+        jsZip = await JSZip.loadAsync(file);
 
+    } catch (err) {
+        // this is no valid zip file
+        return undefined;
+    }
+    return jsZip;
+}
+
+async function extractRomFile(jsZip: JSZip): Promise<ArrayBuffer> {
     // get a list of all rom files within that archive
-    const files = zip.file(/.*(\.gb)|(\.gbc)|(\.cgb)$/i);
+    const files = jsZip.file(/.*(\.gb)|(\.gbc)|(\.cgb)$/i);
     if (!files || !files.length) {
         throw Error('no Gameboy rom file found');
     }

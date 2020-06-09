@@ -1,15 +1,21 @@
+
+![AGE build](docs/age-build.png)
+
+
+# old readme (to be adjusted)
+
 [![build status](/../badges/master/build.svg)](https://gitlab.com/csprenger/age/commits/master)
 
 **[You can now run AGE in your browser!](https://csprenger.gitlab.io/AGE/)**
 *(it is still an early prototype though)*
 
-# AGE - Another Gameboy Emulator
+### AGE - Another Gameboy Emulator
 
 AGE is a [Gameboy](https://en.wikipedia.org/wiki/Game_Boy)
 [emulator](https://en.wikipedia.org/wiki/Emulator)
 aiming for accuracy over performance.
 
-## Features
+#### Features
 
 - run **Gameboy** and **Gameboy Color** roms
 - improve **visual quality** with configurable image filters
@@ -28,7 +34,7 @@ aiming for accuracy over performance.
 The AGE desktop GUI stores all settings and savegames in a subdirectory called
 `.age_emulator` in the user's home directory.
 
-## Project structure
+#### Project structure
 
 The AGE project is structured as follows:
 

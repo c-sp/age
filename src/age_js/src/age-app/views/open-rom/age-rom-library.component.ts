@@ -38,9 +38,9 @@ export interface IAgeRomCount {
                 <a class="age-ui-clickable"
                    [routerLink]="rom.loadRomRouterLink"
                    [title]="rom.clickTooltip">
-                    <img mat-card-image
+                    <!--img mat-card-image
                          [alt]="rom.screenshotAlt"
-                         [src]="rom.romScreenshotUrl">
+                         [src]="rom.romScreenshotUrl"-->
                 </a>
 
                 <mat-card-title>{{rom.romTitle}}</mat-card-title>

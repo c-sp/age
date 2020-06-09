@@ -9,4 +9,13 @@
 last 2 versions
 Firefox ESR
 not dead
-not IE 9-11 # For IE 9-11 support, remove 'not'.
+
+# skip browsers not supporting ES2015 and WebAssembly
+# (this keeps Angular from creating ES5 bundles)
+not and_uc <=12.12
+not Baidu <=7.12
+not Edge <81
+not IE <=11
+not kaios <=2.5
+not op_mini all
+not op_mob <=46

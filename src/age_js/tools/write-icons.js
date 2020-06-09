@@ -19,25 +19,20 @@ const path = require('path');
 const sharp = require('sharp'); // https://github.com/lovell/sharp
 
 
-// icon sizes based on:
-// https://sympli.io/blog/2017/02/15/heres-everything-you-need-to-know-about-favicons-in-2017/
-// https://developers.google.com/web/fundamentals/web-app-manifest/
-
-const icon_sizes = [
-    16, 32, 96,         // browser/taskbar/desktop icon
-    120, 152, 167, 180, // apple icons
-    192, 512            // Android (scaled by Chrome)
-];
+/**
+ * icon sizes as defined in ngsw-config.json
+ */
+const icon_sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
 // icon paths
 
-const svg_path = path.resolve('./src/assets/icon.svg');
+const svg_path = path.resolve('./src/assets/icons/icon.svg');
 if (!fs.existsSync(svg_path)) {
     throw new Error(`${svg_path} does not exist`);
 }
 
 function png_path(size) {
-    return path.resolve(`./src/assets/icon-${size}x${size}.png`);
+    return path.resolve(`./src/assets/icons/icon-${size}x${size}.png`);
 }
 
 

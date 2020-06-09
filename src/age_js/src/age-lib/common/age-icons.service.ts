@@ -54,7 +54,7 @@ import {faVolumeUp} from '@fortawesome/free-solid-svg-icons/faVolumeUp';
 })
 export class AgeIconsService {
 
-    readonly ageCartridge = this._registerIconUrl('age-cartridge', 'assets/cartridge.svg');
+    readonly ageCartridge = this._registerIconUrl('age-cartridge', 'assets/icons/cartridge.svg');
 
     readonly faAngleLeft = this._registerFaIcon(faAngleLeft);
     readonly faCog = this._registerFaIcon(faCog);
@@ -89,7 +89,7 @@ export class AgeIconsService {
 
     private _registerFaIcon(iconDefinition: IconDefinition): string {
         const svgPath = iconDefinition.icon[4];
-        if (!svgPath.match(/[0-9.\-\sa-zA-Z]+/)) {
+        if (Array.isArray(svgPath) || !svgPath.match(/[0-9.\-\sa-zA-Z]+/)) {
             throw new Error(`FA icon "${iconDefinition.iconName}": invalid SVG path`);
         }
         const width = iconDefinition.icon[0];

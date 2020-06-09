@@ -4,28 +4,25 @@
   "newProjectRoot": "projects",
   "projects": {
     "age-js": {
+      "projectType": "application",
+      "schematics": {},
       "root": "",
       "sourceRoot": "src",
-      "projectType": "application",
       "prefix": "app",
-      "schematics": {},
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/age-js",
-            "baseHref": "/age-js/", // we have a base-href !== '/' for gitlab.io => simulate it for testing
-            "index": "src/age-app/index.html",
-            "main": "src/age-app/main.ts",
+            "baseHref": "/age-js/",
+            "index": "src/index.html",
+            "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
-            "tsConfig": "src/tsconfig.app.json",
+            "tsConfig": "tsconfig.app.json",
+            "aot": true,
             "assets": [
               "src/assets",
-              {
-                "glob": "manifest.webmanifest",
-                "input": "src/age-app",
-                "output": "./"
-              },
+              "src/manifest.webmanifest",
               {
                 "glob": "age-audio-stream.js",
                 "input": "src/age-lib/components/emulator/audio",
@@ -34,11 +31,8 @@
             ],
             "styles": [
               "node_modules/@angular/material/prebuilt-themes/purple-green.css"
-              // "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
             ],
-            "scripts": [
-              "node_modules/hammerjs/hammer.min.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -53,7 +47,6 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -62,10 +55,15 @@
                   "type": "initial",
                   "maximumWarning": "2mb",
                   "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
                 }
               ],
               "serviceWorker": true,
-              "ngswConfigPath": "src/age-app/ngsw-config.json"
+              "ngswConfigPath": "ngsw-config.json"
             }
           }
         },
@@ -85,54 +83,38 @@
           "options": {
             "browserTarget": "age-js:build"
           }
-        }
-      }
-    },
-    "lint": {
-      "root": "",
-      "sourceRoot": "src",
-      "projectType": "library",
-      "prefix": "lib",
-      "schematics": {},
-      "architect": {
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
-      }
-    },
-    "test": {
-      "root": "",
-      "sourceRoot": "src",
-      "projectType": "library",
-      "prefix": "lib",
-      "schematics": {},
-      "architect": {
+        },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
-            "tsConfig": "src/tsconfig.spec.json",
-            "karmaConfig": "src/karma.conf.js",
-            "styles": [
-            ],
-            "scripts": [],
+            "tsConfig": "tsconfig.spec.json",
+            "karmaConfig": "karma.conf.js",
             "assets": [
               "src/assets",
+              "src/manifest.webmanifest",
               {
                 "glob": "age-audio-stream.js",
                 "input": "src/age-lib/components/emulator/audio",
                 "output": "./assets"
               }
+            ],
+            "styles": [
+              "node_modules/@angular/material/prebuilt-themes/purple-green.css"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "tsconfig.app.json",
+              "tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
             ]
           }
         }

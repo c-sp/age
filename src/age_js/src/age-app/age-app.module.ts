@@ -29,7 +29,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterModule} from '@angular/router';
 import {ServiceWorkerModule} from '@angular/service-worker';
 import {AgeLibModule} from 'age-lib';
-import {environment} from '../../environments/environment';
+import {environment} from '../environments/environment';
 import {AgeAppEmulatorComponent} from './age-app-emulator.component';
 import {AgeAppComponent} from './age-app.component';
 import {AgeHrefDirective} from './common';
@@ -45,13 +45,13 @@ import {
 
 @NgModule({
     imports: [
+        A11yModule,
         BrowserModule,
         BrowserAnimationsModule,
         FormsModule, // [(ngModel)]
         RouterModule.forRoot(ROUTES),
         ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production}),
 
-        A11yModule,
         MatButtonModule,
         MatCardModule,
         MatIconModule,
