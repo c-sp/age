@@ -4,7 +4,7 @@
 ## Structure
 
 AGE source code is structured into _groups_ of coherent code.
-While code within a _group_ may be tightly coupled,
+While code inside a _group_ may be tightly coupled,
 code of different _groups_ is only loosely coupled (if at all).
 Loose coupling is achieved by including shared C++ header files found at
 `include`.
@@ -14,16 +14,16 @@ The following _groups_ exist:
 * **`age_common`** contains basic code used throughout the AGE project,
     like for example AGE-specific data types.
     This _group_ does not require any library beside the
-    [C++14 STL](https://en.cppreference.com/w/cpp).
+    [C++14 STL](https://en.cppreference.com/w/cpp/14).
 * **[`age_emulator_gb`](/src/age_emulator_gb)** contains the actual gameboy
     emulation code.
     This _group_ does not require any library beside the
-    [C++14 STL](https://en.cppreference.com/w/cpp).
+    [C++14 STL](https://en.cppreference.com/w/cpp/14).
 * **`age_js`** contains the
     [AGE browser application](https://csprenger.gitlab.io/AGE/) written in
     [TypeScript](https://www.typescriptlang.org/index.html) and using
     [Angular](https://angular.io).
-    This _group_ requires the `age_wasm` binaries to run the emulator within
+    This _group_ requires the `age_wasm` binaries to run the emulator inside
     the browser.
 * **`age_qt_emu_test`** contains an emulator test runner created with
     [Qt](https://www.qt.io/).
@@ -51,13 +51,13 @@ Do not violate the **single responsibility principle**.
 ### Includes
 
 1. **Use include guards** in every header file.
-    Use the file's name converted to "screaming snake case" for it's include
+    Use the file's name converted to upper snake case for it's include
     guard,
     e.g. use the include guard `AGE_FOO_HPP` for a file named `age_foo.hpp`.
 1. **Do not include more than a file needs.**
     Code required just for cpp files must not bloat header files.
 1. **Include everything a file needs.**
-    Don't rely on transitive includes or the include order in cpp files.
+    Don't rely on transitive includes or include order in cpp files.
 
 ### Data Types
 
@@ -87,7 +87,7 @@ Do not violate the **single responsibility principle**.
     Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic).
     `signed` integer overflow being undefined
     [enables several compiler optimizations](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
-    (`unsigned` overflow being well defined may prevent compiler optimizations
+    (`unsigned` overflow being well-defined may prevent compiler optimizations
     though).
 
 AGE code uses `unsigned` only for values representing the emulated hardware

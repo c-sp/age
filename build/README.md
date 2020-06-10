@@ -11,7 +11,7 @@
     development.
 * **`wasm`** contains the [CMake](https://cmake.org/) configuration for
     building the AGE [WebAssembly](https://webassembly.org/) artifacts used
-    to run the emulator within a browser.
+    to run the emulator inside a browser.
 
 ## AGE build script
 

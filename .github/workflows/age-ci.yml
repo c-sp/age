@@ -1,0 +1,38 @@
+name: age-ci
+
+on: push
+
+jobs:
+  build-qt:
+    name: build AGE Qt
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/jurplel/install-qt-action
+      - name: Cache Qt
+        id: cache-qt
+          uses: actions/cache@v1
+          with:
+            path: ../Qt
+            key: ${{ runner.os }}-QtCache-5.12.8
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.8'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: build AGE
+        run: build/age_ci.sh qt release
+
+
+  build-wasm:
+    name: build AGE WebAssembly binaries
+    runs-on: ubuntu-latest
+    container:
+      image: trzeci/emscripten:1.39.17-upstream
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: build binaries
+        run: build/age_ci.sh wasm Release

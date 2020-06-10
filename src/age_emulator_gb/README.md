@@ -1,7 +1,7 @@
 
 *This is still a draft*
 
-*Until now Gameboy test rom analysis has been documented within the code.
+*Until now Gameboy test rom analysis has been documented inside the code files.
 To make the results more accessible,
 from now on I will document my test rom findings in this readme.*
 
