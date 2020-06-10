@@ -21,8 +21,11 @@ jobs:
           version: '5.12.8'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
+      - name: checkout code
+        uses: actions/checkout@v2
+
       - name: build AGE
-        run: pwd && ls -lsah && build/age_ci.sh qt release
+        run: build/age_ci.sh qt release
 
 
   build-wasm:
