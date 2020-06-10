@@ -1,4 +1,4 @@
-![](https://github.com/c-sp/AGE/workflows/age%20ci/badge.svg)
+![](https://github.com/c-sp/AGE/workflows/AGE%20CI/badge.svg)
 
 # AGE - Another Gameboy Emulator
 
@@ -14,7 +14,7 @@ The AGE Web Application is written in
 (compiled with [Emscripten](https://emscripten.org)).
 
 
-## Desktop Application Features
+## AGE Desktop Application Features
 
 - run **Gameboy** and **Gameboy Color** roms
 - improve **visual quality** with configurable image filters

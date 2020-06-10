@@ -1,4 +1,4 @@
-name: age-ci
+name: AGE CI
 
 on: push
 
@@ -20,6 +20,11 @@ jobs:
         with:
           version: '5.12.8'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: install libpulse
+        run: |
+          sudo apt-get update
+          sudo apt-get install libpulse
 
       - name: checkout code
         uses: actions/checkout@v2
