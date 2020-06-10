@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build-qt:
-    name: build AGE Qt
+    name: build Qt applications
     runs-on: ubuntu-latest
     steps:
       # https://github.com/jurplel/install-qt-action
@@ -22,11 +22,11 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: build AGE
-        run: build/age_ci.sh qt release
+        run: pwd && ls -lsah && build/age_ci.sh qt release
 
 
   build-wasm:
-    name: build AGE WebAssembly binaries
+    name: build WebAssembly binaries
     runs-on: ubuntu-latest
     container:
       image: trzeci/emscripten:1.39.17-upstream
