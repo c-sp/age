@@ -10,10 +10,10 @@ jobs:
       # https://github.com/jurplel/install-qt-action
       - name: Cache Qt
         id: cache-qt
-          uses: actions/cache@v1
-          with:
-            path: ../Qt
-            key: ${{ runner.os }}-QtCache-5.12.8
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-5.12.8
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
