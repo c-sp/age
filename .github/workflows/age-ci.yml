@@ -4,7 +4,7 @@ on: push
 
 env:
   ARTIFACT_NAME: age-artifacts
-  ARTIFACT_PATH: artifacts
+  ARTIFACT_PATH: build/artifacts
 
 jobs:
 
