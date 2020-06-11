@@ -42,8 +42,8 @@ jobs:
       - name: upload Qt artifact
         uses: actions/upload-artifact@v1
         with:
-          name: $ARTIFACT_NAME
-          path: $ARTIFACT_PATH
+          name: ${{ ARTIFACT_NAME }}
+          path: ${{ ARTIFACT_PATH }}
 
   build-wasm:
     name: build WebAssembly binaries
@@ -60,8 +60,8 @@ jobs:
       - name: upload WebAssembly artifact
         uses: actions/upload-artifact@v1
         with:
-          name: $ARTIFACT_NAME
-          path: $ARTIFACT_PATH
+          name: ${{ ARTIFACT_NAME }}
+          path: ${{ ARTIFACT_PATH }}
 
 
   build-js:
@@ -77,5 +77,5 @@ jobs:
       - name: upload JavaScript artifact
         uses: actions/upload-artifact@v1
         with:
-          name: $ARTIFACT_NAME
-          path: $ARTIFACT_PATH
+          name: ${{ ARTIFACT_NAME }}
+          path: ${{ ARTIFACT_PATH }}
