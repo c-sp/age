@@ -2,7 +2,13 @@ name: AGE CI
 
 on: push
 
+env:
+  ARTIFACT_NAME: age-artifacts
+  ARTIFACT_PATH: artifacts
+
 jobs:
+
+
   build-qt:
     name: build Qt applications
     runs-on: ubuntu-latest
@@ -33,6 +39,11 @@ jobs:
       - name: build AGE
         run: build/age_ci.sh qt release
 
+      - name: upload Qt artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: $ARTIFACT_NAME
+          path: $ARTIFACT_PATH
 
   build-wasm:
     name: build WebAssembly binaries
@@ -45,3 +56,26 @@ jobs:
 
       - name: build binaries
         run: build/age_ci.sh wasm Release
+
+      - name: upload WebAssembly artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: $ARTIFACT_NAME
+          path: $ARTIFACT_PATH
+
+
+  build-js:
+    name: build Web App
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: build Web App
+        run: build/age_ci.sh js build --progress=false --base-href /AGE/
+
+      - name: upload JavaScript artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: $ARTIFACT_NAME
+          path: $ARTIFACT_PATH
