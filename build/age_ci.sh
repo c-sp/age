@@ -123,8 +123,8 @@ age_js()
     cd "$AGE_JS_DIR"
     echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
 
-    # always run npm install to make sure node_modules exists and is up to date
-    npm install
+    # make sure node_modules exists and is up to date
+    npm ci
 
     # run the requested NG command
     npm run ${CMD} -- ${PARAMS}

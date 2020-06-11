@@ -71,6 +71,14 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v2
 
+      - name: npm cache
+        id: cache-npm
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('src/age_js/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
       - name: build Web App
         run: build/age_ci.sh js build --progress=false --base-href /AGE/
 
