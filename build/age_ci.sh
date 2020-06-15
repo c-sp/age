@@ -19,12 +19,10 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_BUILD"
     echo "    $0 $CMD_JS $JS_TEST"
     echo "    $0 $CMD_JS $JS_LINT"
-    echo "    $0 $CMD_ASSEMBLE_PAGES <gitlab-pages-subdir>"
-    echo "    $0 $CMD_COLLECT_PAGES <gitlab-pages-subdir>"
     echo "  tests:"
-    echo "    $0 $CMD_TEST $TESTS_BLARGG <path-to-mooneye-tests>"
-    echo "    $0 $CMD_TEST $TESTS_GAMBATTE <path-to-gambatte-tests>"
-    echo "    $0 $CMD_TEST $TESTS_MOONEYE <path-to-mooneye-tests>"
+    echo "    $0 $CMD_TEST $TESTS_BLARGG"
+    echo "    $0 $CMD_TEST $TESTS_GAMBATTE"
+    echo "    $0 $CMD_TEST $TESTS_MOONEYE_GB"
     echo "  miscellaneous:"
     echo "    $0 $CMD_DOXYGEN"
     exit 1
@@ -32,10 +30,14 @@ print_usage_and_exit()
 
 out_dir()
 {
-    echo "$BUILD_DIR/$AGE_ARTIFACTS_SUBDIR/$1"
+    if ! [ -n "$1" ]; then
+        echo "out-dir not specified"
+        exit 1
+    fi
+    echo "$BUILD_DIR/artifacts/$1"
 }
 
-age_js_dir()
+age_js_src_dir()
 {
     AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
     echo "$AGE_JS_DIR"
@@ -119,7 +121,7 @@ age_js()
         *) print_usage_and_exit ;;
     esac
 
-    AGE_JS_DIR=$(age_js_dir)
+    AGE_JS_DIR=$(age_js_src_dir)
     cd "$AGE_JS_DIR"
     echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
 
@@ -137,64 +139,6 @@ age_js()
         echo "compressing contents of $OUT_DIR"
         npm run gzip-directory "$OUT_DIR"
     fi
-}
-
-assemble_pages()
-{
-    # exit if the output path has not been specified
-    if ! [ -n "$1" ]; then
-        print_usage_and_exit
-    fi
-
-    PAGES_DIR=`cd "$BUILD_DIR/.." && pwd -P`
-    PAGES_DIR="$PAGES_DIR/$1"
-    ASSETS_DIR="$PAGES_DIR/assets"
-
-    WASM_DIR="$(out_dir wasm)"
-    JS_DIR="$(out_dir js)"
-
-    # remove previous pages
-    if [ -e "$PAGES_DIR" ]; then
-        rm -rf "$PAGES_DIR"
-    fi
-
-    # create the directory and change to it
-    mkdir -p "$PAGES_DIR"
-    echo "assembling pages in \"$PAGES_DIR\" (assets in \"$ASSETS_DIR\")"
-
-    # copy artifacts
-    cp -r "$JS_DIR/"* "$PAGES_DIR"
-    cp "$WASM_DIR/age_wasm.js" "$ASSETS_DIR"
-    cp "$WASM_DIR/age_wasm.wasm" "$ASSETS_DIR"
-}
-
-collect_pages()
-{
-    # exit if the output path has not been specified
-    if ! [ -n "$1" ]; then
-        print_usage_and_exit
-    fi
-
-    AGE_JS_DIR=$(age_js_dir)
-    TOOLS_DIR="$AGE_JS_DIR/tools"
-
-    PAGES_DIR=`cd "$BUILD_DIR/.." && pwd -P`
-    PAGES_DIR="$PAGES_DIR/$1"
-
-    # remove previous pages
-    if [ -e "$PAGES_DIR" ]; then
-        rm -rf "$PAGES_DIR"
-    fi
-
-    # create the pages directory
-    mkdir -p "$PAGES_DIR"
-
-    # always run npm install to make sure node_modules exists and is up to date
-    cd "$AGE_JS_DIR" && npm install
-
-    # collect pages for all branches
-    echo "collecting pages in \"$PAGES_DIR\""
-    cd "$TOOLS_DIR" && npx ts-node collect-pages.ts "$PAGES_DIR"
 }
 
 run_doxygen()
@@ -221,14 +165,9 @@ run_tests()
     case $1 in
         ${TESTS_BLARGG}) ;;
         ${TESTS_GAMBATTE}) ;;
-        ${TESTS_MOONEYE}) ;;
+        ${TESTS_MOONEYE_GB}) ;;
         *) print_usage_and_exit ;;
     esac
-
-    # exit if the test file path has not been specified
-    if ! [ -n "$2" ]; then
-        print_usage_and_exit
-    fi
 
     # the executable file must exist
     TEST_EXEC="$(out_dir qt)/age_qt_emu_test/age_qt_emu_test"
@@ -238,8 +177,18 @@ run_tests()
         exit 1
     fi
 
+    # check test suite path
+    SUITE_DIR="$(out_dir test-suites)/$1"
+    if ! [ -e "$SUITE_DIR" ]; then
+        echo "test suite not found at: $SUITE_DIR"
+        echo "downloading test suites zip file"
+        switch_to_out_dir test-suites
+        wget https://github.com/c-sp/gameboy-test-roms/releases/download/v1.1/gameboy-test-roms-v1.1.zip
+        unzip gameboy-test-roms-v1.1.zip
+    fi
+
     # run the tests
-    ${TEST_EXEC} --ignore-list "$BUILD_DIR/tests_to_ignore.txt" $@
+    ${TEST_EXEC} --ignore-list "$BUILD_DIR/tests_to_ignore.txt" $1 $SUITE_DIR
 }
 
 
@@ -262,13 +211,11 @@ JS_LINT=lint
 
 TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
-TESTS_MOONEYE=mooneye
+TESTS_MOONEYE_GB=mooneye-gb
 
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_JS=js
-CMD_ASSEMBLE_PAGES=assemble-pages
-CMD_COLLECT_PAGES=collect-pages
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -276,12 +223,6 @@ CMD_TEST=test
 # (used to determine the target directories of builds)
 BUILD_DIR=`dirname $0`
 BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
-
-# set the artifacts subdirectory,
-# if it has not been set yet (e.g. as environment variable)
-if ! [ -n "$AGE_ARTIFACTS_SUBDIR" ]; then
-    AGE_ARTIFACTS_SUBDIR=artifacts
-fi
 
 # get the number of CPU cores
 # (used for e.g. make)
