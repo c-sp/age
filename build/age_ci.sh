@@ -170,6 +170,7 @@ run_tests()
     esac
 
     # the executable file must exist
+    ls -lsahR "$BUILD_DIR"
     TEST_EXEC="$(out_dir qt)/age_qt_emu_test/age_qt_emu_test"
     if ! [ -x "$TEST_EXEC" ]; then
         echo "The AGE test executable could not be found at:"
