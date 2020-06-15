@@ -104,7 +104,7 @@ jobs:
       - name: install libQt5Core
         run: |
           sudo apt-get update
-          sudo apt-get install libQt5Core
+          sudo apt-get install libqt5core5a
 
       - name: checkout code
         uses: actions/checkout@v2
@@ -127,7 +127,7 @@ jobs:
       - name: install libQt5Core
         run: |
           sudo apt-get update
-          sudo apt-get install libQt5Core
+          sudo apt-get install libqt5core5a
 
       - name: checkout code
         uses: actions/checkout@v2
@@ -150,7 +150,7 @@ jobs:
       - name: install libQt5Core
         run: |
           sudo apt-get update
-          sudo apt-get install libQt5Core
+          sudo apt-get install libqt5core5a
 
       - name: checkout code
         uses: actions/checkout@v2
