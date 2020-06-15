@@ -113,8 +113,8 @@ jobs:
       - name: download artifacts
         uses: actions/download-artifact@v1
         with:
-          name: ${{ env.ARTIFACTS_NAME }}
-          path: ${{ env.ARTIFACTS_PATH }}
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
 
       - name: run tests
         run: build/age_ci.sh test blargg
@@ -131,8 +131,8 @@ jobs:
       - name: download artifacts
         uses: actions/download-artifact@v1
         with:
-          name: ${{ env.ARTIFACTS_NAME }}
-          path: ${{ env.ARTIFACTS_PATH }}
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
 
       - name: run tests
         run: build/age_ci.sh test gambatte
@@ -149,8 +149,8 @@ jobs:
       - name: download artifacts
         uses: actions/download-artifact@v1
         with:
-          name: ${{ env.ARTIFACTS_NAME }}
-          path: ${{ env.ARTIFACTS_PATH }}
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
 
       - name: run tests
         run: build/age_ci.sh test mooneye-gb
