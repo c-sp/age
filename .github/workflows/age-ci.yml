@@ -25,12 +25,11 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache-5.12.8
+          key: ${{ runner.os }}-QtCache
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '5.12.8'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: checkout code
