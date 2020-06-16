@@ -162,10 +162,18 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [build-qt]
     steps:
-      - name: install Qt libraries
-        run: |
-          sudo apt-get update
-          sudo apt-get install libqt5core5a libqt5gui5
+      - name: cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-Qt-cache-5.12.8
+
+      - name: install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.8'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: checkout code
         uses: actions/checkout@v2
