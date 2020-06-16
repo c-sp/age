@@ -3,6 +3,10 @@ name: AGE CI
 on: push
 
 env:
+  ARTIFACT_NAME: age-artifacts
+  ARTIFACT_PATH: build/artifacts
+
+jobs:
   #
   # Ubuntu, Qt & install-qt-action
   #
@@ -18,12 +22,6 @@ env:
   #  => use Ubuntu 20.04 for more recent Qt version,
   #     & install compatible Qt version with install-qt-action
   #
-  RUNS_ON: ubuntu-20.04
-  ARTIFACT_NAME: age-artifacts
-  ARTIFACT_PATH: build/artifacts
-
-jobs:
-
 
 
   ###############################################################################
@@ -34,7 +32,7 @@ jobs:
 
   build-qt:
     name: build Qt applications
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: ubuntu-20.04
     steps:
       # https://github.com/jurplel/install-qt-action
       - name: cache Qt
@@ -65,7 +63,7 @@ jobs:
 
   build-wasm:
     name: build WebAssembly binaries
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: ubuntu-20.04
     container:
       image: trzeci/emscripten:1.39.17-upstream
     steps:
@@ -84,7 +82,7 @@ jobs:
 
   build-js:
     name: build Web App
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: ubuntu-20.04
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -115,7 +113,7 @@ jobs:
 
   test-blargg:
     name: run Blargg's test suite
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: ubuntu-20.04
     needs: [build-qt]
     steps:
       - name: install Qt libraries
@@ -138,7 +136,7 @@ jobs:
 
   test-gambatte:
     name: run Gambatte test suite
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: ubuntu-20.04
     needs: [build-qt]
     steps:
       - name: install Qt libraries
@@ -161,7 +159,7 @@ jobs:
 
   test-mooneye-gb:
     name: run Mooneye GB test suite
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: ubuntu-20.04
     needs: [build-qt]
     steps:
       - name: install Qt libraries
