@@ -24,6 +24,9 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_clock.hpp"
+#include "age_gb_core.hpp"
 #include "age_gb_bus.hpp"
 
 
@@ -39,14 +42,15 @@ class gb_cpu
 
 public:
 
-    void emulate_instruction();
-
-    gb_cpu(gb_core &core, gb_bus &bus);
+    gb_cpu(const gb_device &device, gb_clock &clock, gb_core &core, gb_bus &bus);
 
     gb_test_info get_test_info() const;
+    void emulate_instruction();
 
 private:
 
+    const gb_device &m_device;
+    gb_clock &m_clock;
     gb_core &m_core;
     gb_bus &m_bus;
 

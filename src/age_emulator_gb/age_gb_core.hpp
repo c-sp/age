@@ -28,11 +28,8 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#ifdef AGE_DEBUG
-#define AGE_GB_CYCLE_LOG(x) AGE_LOG("cycle " << m_core.get_oscillation_cycle() << ": " << x)
-#else
-#define AGE_GB_CYCLE_LOG(x)
-#endif
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_clock.hpp"
 
 
 
@@ -70,47 +67,21 @@ enum class gb_event : uint8_t
 
 
 
-constexpr int gb_no_cycle = -1;
-constexpr int gb_machine_cycles_per_second = 4194304;
-
-
-
-//! \todo remove this once it's no longer used (no negative cycle numbers!)
-#define AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset) \
-    if (value != gb_no_cycle) \
-    { \
-        /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
-        AGE_ASSERT(offset >= gb_machine_cycles_per_second); \
-        AGE_ASSERT(0 == (offset & (gb_machine_cycles_per_second - 1))); \
-        value -= offset; \
-    } \
-    else (void)0 // no-op to force semicolon when using this macro
-
-#define AGE_GB_SET_BACK_CYCLES(value, offset) \
-    AGE_ASSERT((value == gb_no_cycle) || (value >= offset)); \
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(value, offset)
-
-
-
 class gb_core
 {
+    AGE_DISABLE_COPY(gb_core);
+
 public:
 
-    int get_oscillation_cycle() const;
-    int8_t get_machine_cycles_per_cpu_cycle() const;
-    bool is_double_speed() const;
-    bool is_cgb() const; //!< get_mode() == gb_mode::cgb
-    bool is_cgb_hardware() const; //!< get_mode() != gb_mode::dmg
-    gb_mode get_mode() const;
+    gb_core(const gb_device &device, gb_clock &clock);
+
     gb_state get_state() const;
 
-    void oscillate_cpu_cycle();
-    void oscillate_2_cycles();
-    void insert_event(int oscillation_cycle_offset, gb_event event);
+    void insert_event(int clock_cycle_offset, gb_event event);
     void remove_event(gb_event event);
     gb_event poll_event();
     int get_event_cycle(gb_event event) const;
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
     void start_dma();
     void finish_dma();
@@ -132,8 +103,6 @@ public:
     void write_ie(uint8_t value);
     void write_if(uint8_t value);
 
-    gb_core(gb_mode mode);
-
 
 
 private:
@@ -149,7 +118,7 @@ private:
         gb_event poll_event(int current_cycle);
         void insert_event(int for_cycle, gb_event event);
 
-        void set_back_cycles(int offset);
+        void set_back_clock(int offset);
 
     private:
 
@@ -162,18 +131,15 @@ private:
 
     void check_halt_mode();
 
+    const gb_device &m_device;
+    gb_clock &m_clock;
+
     gb_events m_events;
-
-    const gb_mode m_mode;
     gb_state m_state = gb_state::cpu_active;
-
-    int m_oscillation_cycle = 0;
-    int8_t m_machine_cycles_per_cpu_cycle = 4;
 
     bool m_halt = false;
     bool m_ei = false;
     bool m_ime = false;
-    bool m_double_speed = false;
 
     uint8_t m_key1 = 0x7E;
     uint8_t m_if = 0xE0;

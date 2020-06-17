@@ -40,7 +40,9 @@ utils/bootrom_dumper.gb
 
 ###   Gameboy hardware not supported by AGE
 
+acceptance/boot_div2-S.gb            # SGB not supported
 acceptance/boot_div-dmg0.gb          # DMG0 not supported
+acceptance/boot_div-S.gb             # SGB not supported
 acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
 acceptance/boot_hwio-S.gb            # SGB not supported
 acceptance/boot_regs-dmg0.gb         # DMG0 not supported
@@ -48,12 +50,11 @@ acceptance/boot_regs-mgb.gb          # MGB not supported
 acceptance/boot_regs-sgb.gb          # SGB not supported
 acceptance/boot_regs-sgb2.gb         # SGB not supported
 madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
-misc/boot_regs-A.gb                  # GBA not supported by AGE
+misc/boot_div-A.gb                   # GBA not supported
+misc/boot_regs-A.gb                  # GBA not supported
 
 ###   failing tests
 
-acceptance/boot_div-S.gb
-acceptance/boot_div2-S.gb
 acceptance/ppu/hblank_ly_scx_timing-GS.gb
 acceptance/ppu/intr_2_0_timing.gb
 acceptance/ppu/intr_2_mode0_timing.gb
@@ -68,7 +69,6 @@ emulator-only/mbc2/bits_ramg.gb
 emulator-only/mbc2/bits_romb.gb
 emulator-only/mbc2/ram.gb
 manual-only/sprite_priority.gb
-misc/boot_div-A.gb
 misc/boot_div-cgb0.gb
 misc/boot_div-cgbABCDE.gb
 misc/ppu/vblank_stat_intr-C.gb
@@ -183,6 +183,7 @@ dma/hdma_transition_halt_late_unhalt_scx1_1_cgb04c_out00.gbc
 dma/hdma_transition_halt_m0unhalt_ldaaimm_scx1_cgb04c_out02.gbc
 dma/hdma_transition_oamdma_1_cgb04c_out509E529C.gbc
 dma/hdma_transition_oamdma_2_cgb04c_out67.gbc
+dma/hdma_transition_speedchange_7fffstop_inc_cgb04c_out02.gbc
 dma/hdma_transition_speedchange_hdmalen00_hdma5_scx1_cgb04c_out80.gbc
 dma/hdma_transition_speedchange_hdmalen01_hdma5_scx1_cgb04c_out81.gbc
 dma/hdma_transition_speedchange_hdmalen01_hdmadst10_scx1_cgb04c_out00.gbc

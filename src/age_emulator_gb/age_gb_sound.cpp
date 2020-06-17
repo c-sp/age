@@ -21,7 +21,7 @@
 #include "age_gb_sound.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -54,10 +54,10 @@ constexpr const age::uint8_array<0x10> cgb_wave_ram =
 
 
 
-#define SAMPLE_COUNT(cycle) ((cycle) >> 1)
-#define CORE_SAMPLE_COUNT SAMPLE_COUNT(m_core.get_oscillation_cycle())
+#define SAMPLE_COUNT(clock_cycles) ((clock_cycles) >> 1)
+#define CURRENT_SCLK SAMPLE_COUNT(m_clock.get_clock_cycle())
 
-#define ASSERT_UPDATED AGE_ASSERT(m_sample_count == CORE_SAMPLE_COUNT)
+#define ASSERT_UPDATED AGE_ASSERT(m_sclk == CURRENT_SCLK)
 
 
 
@@ -78,7 +78,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
     if (m_c3.active())
     {
         update_state();
-        if (!m_is_cgb && !m_c3.wave_ram_just_read())
+        if (!m_cgb && !m_c3.wave_ram_just_read())
         {
             return 0xFF;
         }
@@ -99,7 +99,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
     if (m_c3.active())
     {
         update_state();
-        if (!m_is_cgb && !m_c3.wave_ram_just_read())
+        if (!m_cgb && !m_c3.wave_ram_just_read())
         {
             return;
         }
@@ -114,35 +114,35 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
 
 void age::gb_sound::update_state()
 {
-    int sample_count = CORE_SAMPLE_COUNT;
+    int current_sclk = CURRENT_SCLK;
 
-    while (sample_count >= m_sample_next_apu_event)
+    while (current_sclk >= m_sclk_next_apu_event)
     {
-        generate_samples(m_sample_next_apu_event);
+        generate_samples(m_sclk_next_apu_event);
         int samples = apu_event();
-        m_sample_next_apu_event += samples;
+        m_sclk_next_apu_event += samples;
     }
 
-    generate_samples(sample_count);
-    AGE_ASSERT(m_sample_count < m_sample_next_apu_event);
+    generate_samples(current_sclk);
+    AGE_ASSERT(m_sclk < m_sclk_next_apu_event);
 }
 
 
 
-void age::gb_sound::set_back_cycles()
+void age::gb_sound::set_back_clock()
 {
     // update_state() must have been called before
-    // (with m_core.set_back_cycle() already having been called,
-    // there is no way we can assert that)
+    // (with m_clock.set_back_clock() already called there is no way we can
+    // assert that though)
 
-    AGE_ASSERT(m_sample_count >= CORE_SAMPLE_COUNT);
-    int sample_diff = m_sample_count - CORE_SAMPLE_COUNT;
+    AGE_ASSERT(m_sclk >= CURRENT_SCLK);
+    int sample_diff = m_sclk - CURRENT_SCLK;
 
-    m_sample_count -= sample_diff;
-    m_sample_next_apu_event -= sample_diff;
+    m_sclk -= sample_diff;
+    m_sclk_next_apu_event -= sample_diff;
 
-    AGE_ASSERT((m_sample_next_apu_event % gb_apu_event_samples) == 0);
-    AGE_ASSERT(m_sample_count < m_sample_next_apu_event);
+    AGE_ASSERT((m_sclk_next_apu_event % gb_apu_event_samples) == 0);
+    AGE_ASSERT(m_sclk < m_sclk_next_apu_event);
 }
 
 
@@ -172,7 +172,7 @@ bool age::gb_sound::inc_period() const
             || (
                 (m_next_frame_sequencer_step == 6)
                 && !m_delayed_disable_c1
-                && (m_sample_next_apu_event - m_sample_count <= 2)
+                && (m_sclk_next_apu_event - m_sclk <= 2)
                 );
 }
 
@@ -186,7 +186,7 @@ int age::gb_sound::apu_event()
     // no frame sequencer activity if the APU is switched off
     if (!m_master_on)
     {
-        LOG("ignored at sample " << m_sample_count << ": APU off");
+        LOG("ignored at sample " << m_sclk << ": APU off");
         return gb_apu_event_samples;
     }
 
@@ -194,7 +194,7 @@ int age::gb_sound::apu_event()
     // (triggered by switching on the APU at specific cycles)
     if (m_skip_frame_sequencer_step)
     {
-        LOG("skipping step at sample " << m_sample_count);
+        LOG("skipping step at sample " << m_sclk);
         AGE_ASSERT(!m_delayed_disable_c1);
         AGE_ASSERT(m_next_frame_sequencer_step == 7);
         m_next_frame_sequencer_step = 0;
@@ -205,7 +205,7 @@ int age::gb_sound::apu_event()
     // delayed disabling of channel 1 due to frequency sweep overflow
     if (m_delayed_disable_c1)
     {
-        LOG("delayed disable c1 at sample " << m_sample_count);
+        LOG("delayed disable c1 at sample " << m_sclk);
         m_c1.deactivate();
         m_delayed_disable_c1 = false;
         return gb_apu_event_samples - gb_frequency_sweep_check_delay;
@@ -213,7 +213,7 @@ int age::gb_sound::apu_event()
 
     // perform next frame sequencer step
     LOG("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
-        << " at sample " << m_sample_count
+        << " at sample " << m_sclk
         << " (disable c1: " << m_delayed_disable_c1 << ")");
 
     int samples = gb_apu_event_samples;
@@ -257,16 +257,16 @@ int age::gb_sound::apu_event()
 
 
 
-void age::gb_sound::generate_samples(int sample_count)
+void age::gb_sound::generate_samples(int for_sclk)
 {
-    AGE_ASSERT(sample_count >= m_sample_count);
+    AGE_ASSERT(for_sclk >= m_sclk);
 
-    int samples_to_generate = sample_count - m_sample_count;
+    int samples_to_generate = for_sclk - m_sclk;
     if (samples_to_generate <= 0)
     {
         return;
     }
-    m_sample_count = sample_count;
+    m_sclk = for_sclk;
 
     // allocate silence
     AGE_ASSERT(m_samples.size() <= int_max);
@@ -310,20 +310,22 @@ void age::gb_sound::set_wave_ram_byte(unsigned offset, uint8_t value)
 //
 //---------------------------------------------------------
 
-age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
-    : m_core(core),
-      m_is_cgb(m_core.is_cgb()),
-      m_samples(samples),
-      m_sample_count(CORE_SAMPLE_COUNT)
+age::gb_sound::gb_sound(const gb_clock &clock,
+                        bool cgb_features,
+                        pcm_vector &samples)
+    : m_samples(samples),
+      m_clock(clock),
+      m_cgb(cgb_features),
+      m_sclk(CURRENT_SCLK)
 {
     // initialize frame sequencer
     // (see test rom analysis)
-    int fs_steps = m_sample_count / gb_apu_event_samples;
-    m_sample_next_apu_event = (fs_steps + 1) * gb_apu_event_samples;
-    m_next_frame_sequencer_step = m_is_cgb ? 0 : 1;
+    int fs_steps = m_sclk / gb_apu_event_samples;
+    m_sclk_next_apu_event = (fs_steps + 1) * gb_apu_event_samples;
+    m_next_frame_sequencer_step = m_cgb ? 0 : 1;
 
     // initialize wave ram
-    const uint8_array<0x10> &src = m_is_cgb ? cgb_wave_ram : dmg_wave_ram;
+    const uint8_array<0x10> &src = m_cgb ? cgb_wave_ram : dmg_wave_ram;
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
 
     // initialize channel 1
@@ -336,14 +338,14 @@ age::gb_sound::gb_sound(const gb_core &core, pcm_vector &samples)
     // the duty waveform reaches position 5
     // and that each waveform step takes 126 samples
     // (see test rom analysis)
-    int duty_pos5_sample = SAMPLE_COUNT(m_is_cgb ? 9500 : 44508);
-    AGE_ASSERT(m_sample_count < duty_pos5_sample);
+    int duty_pos5_sample = SAMPLE_COUNT(m_cgb ? 9500 : 44508);
+    AGE_ASSERT(m_sclk < duty_pos5_sample);
 
-    int sample_diff = duty_pos5_sample - m_sample_count;
+    int sample_diff = duty_pos5_sample - m_sclk;
     int sample_offset = sample_diff % 126;
     int index = 4 - (sample_diff / 126);
 
-    LOG("channel 1 init (cgb " << m_is_cgb << "): "
+    LOG("channel 1 init (cgb " << m_cgb << "): "
         << "sample_diff " << sample_diff
         << ", sample_offset " << sample_offset
         << ", index " << index << "(" << (index & 7) << ")"

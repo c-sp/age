@@ -21,7 +21,7 @@
 #include "age_gb_bus.hpp"
 
 #if 0
-#define LOG(x) if (m_core.get_oscillation_cycle() < 150000) { AGE_GB_CYCLE_LOG(x); }
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -81,31 +81,35 @@ constexpr const age::uint8_array<0x80> cgb_FF80_dump =
 //
 //---------------------------------------------------------
 
-age::gb_bus::gb_bus(gb_core &core,
+age::gb_bus::gb_bus(const gb_device &device,
+                    gb_clock &clock,
+                    gb_core &core,
                     gb_memory &memory,
                     gb_sound &sound,
                     gb_lcd &lcd,
                     gb_timer &timer,
                     gb_joypad &joypad,
                     gb_serial &serial)
-    : m_core(core),
+    : m_device(device),
+      m_clock(clock),
+      m_core(core),
       m_memory(memory),
       m_sound(sound),
       m_lcd(lcd),
       m_timer(timer),
       m_joypad(joypad),
       m_serial(serial),
-      m_oam_dma_byte(m_core.is_cgb() ? 0x00 : 0xFF)
+      m_oam_dma_byte(m_device.is_cgb() ? 0x00 : 0xFF)
 {
     // clear high ram
     std::fill(begin(m_high_ram), end(m_high_ram), 0);
 
     // init 0xFF80 - 0xFFFE
-    const uint8_array<0x80> &src = m_core.is_cgb() ? cgb_FF80_dump : dmg_FF80_dump;
+    const uint8_array<0x80> &src = m_device.is_cgb() ? cgb_FF80_dump : dmg_FF80_dump;
     std::copy(begin(src), end(src), begin(m_high_ram) + 0x180);
 
     // init 0xFEA0 - 0xFEFF
-    if (m_core.is_cgb())
+    if (m_device.is_cgb())
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -235,7 +239,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         }
 
         // CGB ports
-        if (m_core.is_cgb())
+        if (m_device.is_cgb())
         {
             switch (address)
             {
@@ -258,7 +262,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         }
 
         // CGB ports when running a DMG rom
-        else if (m_core.is_cgb_hardware())
+        else if (m_device.is_cgb_hardware())
         {
             switch (address)
             {
@@ -384,7 +388,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         }
 
         // CGB ports
-        if (m_core.is_cgb())
+        if (m_device.is_cgb())
         {
             switch (address)
             {
@@ -409,7 +413,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         }
 
         // CGB ports when running a DMG rom
-        else if (m_core.is_cgb_hardware())
+        else if (m_device.is_cgb_hardware())
         {
             switch (address)
             {
@@ -467,7 +471,7 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::start_oam_dma:
-                m_oam_dma_last_cycle = m_core.get_oscillation_cycle();
+                m_oam_dma_last_cycle = m_clock.get_clock_cycle();
                 m_oam_dma_active = true;
                 //
                 // verified by mooneye-gb tests
@@ -505,7 +509,7 @@ void age::gb_bus::handle_dma()
 {
     // during HDMA/GDMA the CPU is halted, so we just copy
     // the required bytes in one go and increase the
-    // oscillation counter accordingly
+    // clock accordingly
 
     // calculate remaining DMA length
     uint8_t dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
@@ -560,13 +564,13 @@ void age::gb_bus::handle_dma()
         uint16_t dest = 0x8000 + (m_dma_destination & 0x1FFF);
         handle_events();
         write_byte(dest, byte);
-        m_core.oscillate_2_cycles();
+        m_clock.tick_2_clock_cycles();
 
         ++m_dma_source;
         ++m_dma_destination;
     }
 
-    m_core.oscillate_cpu_cycle();
+    m_clock.tick_machine_cycle();
 
     // update HDMA5
     uint8_t remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
@@ -574,7 +578,7 @@ void age::gb_bus::handle_dma()
     {
         LOG("DMA finished");
         m_lcd.set_hdma_active(false);
-        AGE_ASSERT(m_core.get_event_cycle(gb_event::start_hdma) == gb_no_cycle);
+        AGE_ASSERT(m_core.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle);
     }
     m_hdma5 = (m_hdma5 & gb_hdma_start) + remaining_dma_length;
 
@@ -584,9 +588,9 @@ void age::gb_bus::handle_dma()
 
 
 
-void age::gb_bus::set_back_cycles(int offset)
+void age::gb_bus::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CYCLES(m_oam_dma_last_cycle, offset);
+    AGE_GB_SET_BACK_CLOCK(m_oam_dma_last_cycle, clock_cycle_offset);
 }
 
 
@@ -628,8 +632,8 @@ void age::gb_bus::write_dma(uint8_t value)
     //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
     //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
     //
-    int factor = m_core.is_cgb() ? 1 : 2;
-    m_core.insert_event(m_core.get_machine_cycles_per_cpu_cycle() * factor, gb_event::start_oam_dma);
+    int factor = m_device.is_cgb() ? 1 : 2;
+    m_core.insert_event(m_clock.get_machine_cycle_clocks() * factor, gb_event::start_oam_dma);
 }
 
 void age::gb_bus::write_hdma5(uint8_t value)
@@ -674,7 +678,7 @@ void age::gb_bus::write_hdma5(uint8_t value)
             //      dma/hdma_late_disable_scx5_ds_1_out0
             //      dma/hdma_late_disable_scx5_ds_2_out1
             //
-            if (m_core.get_event_cycle(gb_event::start_hdma) > m_core.get_oscillation_cycle())
+            if (m_core.get_event_cycle(gb_event::start_hdma) > m_clock.get_clock_cycle())
             {
                 m_core.remove_event(gb_event::start_hdma);
             }
@@ -691,11 +695,11 @@ void age::gb_bus::handle_oam_dma()
 {
     AGE_ASSERT(m_oam_dma_active);
 
-    int oscillation_cycle = m_core.get_oscillation_cycle();
-    int cycles_elapsed = oscillation_cycle - m_oam_dma_last_cycle;
-    cycles_elapsed &= ~(m_core.get_machine_cycles_per_cpu_cycle() - 1);
+    int current_clk = m_clock.get_clock_cycle();
+    int cycles_elapsed = current_clk - m_oam_dma_last_cycle;
+    cycles_elapsed &= ~(m_clock.get_machine_cycle_clocks() - 1);
     m_oam_dma_last_cycle += cycles_elapsed;
-    cycles_elapsed <<= m_core.is_double_speed() ? 1 : 0;
+    cycles_elapsed <<= m_clock.is_double_speed() ? 1 : 0;
 
     AGE_ASSERT((cycles_elapsed & 3) == 0);
     int bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
@@ -711,6 +715,6 @@ void age::gb_bus::handle_oam_dma()
     if (m_oam_dma_offset >= 160)
     {
         m_oam_dma_active = false;
-        m_oam_dma_last_cycle = gb_no_cycle;
+        m_oam_dma_last_cycle = gb_no_clock_cycle;
     }
 }

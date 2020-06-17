@@ -23,6 +23,7 @@
 
 #include <age_types.hpp>
 
+#include "common/age_gb_clock.hpp"
 #include "age_gb_core.hpp"
 
 
@@ -36,20 +37,20 @@ class gb_common_counter
 
 public:
 
-    gb_common_counter(const gb_core &core);
+    gb_common_counter(const gb_clock &clock);
 
     int get_current_value() const;
-    int get_cycle_offset(int for_counter_offset) const;
+    int get_clock_offset(int for_counter_offset) const;
 
     void reset();
     void switch_double_speed_mode();
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
-    const gb_core &m_core;
+    const gb_clock &m_clock;
     int m_counter_origin = 0;
-    int8_t m_cycle_shift = 2;
+    int8_t m_clock_shift = 2;
 };
 
 
@@ -61,7 +62,7 @@ public:
     gb_tima_counter(gb_common_counter &counter);
 
     int get_current_value() const;
-    int get_cycle_offset(int for_tima_offset) const;
+    int get_clock_offset(int for_tima_offset) const;
     int get_trigger_bit(uint8_t for_tac) const;
     int get_past_tima_counter(uint8_t for_tima) const;
 
@@ -85,6 +86,8 @@ class gb_timer
 
 public:
 
+    gb_timer(const gb_clock &clock, gb_core &core);
+
     uint8_t read_div() const;
     uint8_t read_tima();
     uint8_t read_tma() const;
@@ -97,17 +100,16 @@ public:
 
     void timer_overflow();
     void switch_double_speed_mode();
-    void set_back_cycles(int offset);
-
-    gb_timer(gb_core &core);
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
     int check_for_early_increment(int new_increment_bit);
     void schedule_timer_overflow();
 
+    const gb_clock &m_clock;
     gb_core &m_core;
-    gb_common_counter m_counter = {m_core};
+    gb_common_counter m_counter = {m_clock};
     gb_tima_counter m_tima_counter = {m_counter};
     int m_last_overflow_counter = 0;
     bool m_tima_running = false;

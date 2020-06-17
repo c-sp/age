@@ -58,7 +58,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-#define INC_CYCLES m_core.oscillate_cpu_cycle()
+#define TICK_MACHINE_CYCLE m_clock.tick_machine_cycle()
 
 
 
@@ -109,7 +109,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     { \
         m_bus.handle_events(); \
         destination = m_bus.read_byte((address) & 0xFFFF); \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
@@ -117,7 +117,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     { \
         m_bus.handle_events(); \
         m_bus.write_byte((address) & 0xFFFF, (value) & 0xFF); \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
@@ -176,27 +176,27 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // ----- jumps
 
-// RST (16 cycles)
+// RST
 #define RST(opcode) \
     { \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
         PUSH_PC; \
         m_pc = opcode & 0x38; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// JP (16 cycles)
+// JP
 #define JP \
     { \
         int low, high; \
         POP_BYTE_AT_PC(low); \
         POP_BYTE_AT_PC(high); \
         m_pc = (low + (high << 8)) & 0xFFFF; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// JP <cond> (16 cycles if jumped, 12 cycles if not)
+// JP <cond>
 #define JP_IF(condition) \
     if (condition) \
     { \
@@ -205,12 +205,12 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     else \
     { \
         m_pc += 2; \
-        INC_CYCLES; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// CALL (24 cycles)
+// CALL
 #define CALL \
     { \
         int ret_pc = m_pc + 2; \
@@ -220,7 +220,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// CALL <cond> (24 cycles if jumped, 12 cycles if not)
+// CALL <cond>
 #define CALL_IF(condition) \
     if (condition) \
     { \
@@ -229,26 +229,26 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     else \
     { \
         m_pc += 2; \
-        INC_CYCLES; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// RET (16 cycles)
+// RET
 #define RET \
     { \
         int low, high; \
         POP_BYTE(low); \
         POP_BYTE(high); \
         m_pc = (low + (high << 8)) & 0xFFFF; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// RET <cond> (20 cycles if jumped, 8 cycles if not)
+// RET <cond>
 #define RET_IF(condition) \
     { \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
         if (condition) \
         { \
             RET; \
@@ -256,17 +256,17 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// JR (12 cycles)
+// JR
 #define JR \
     { \
         int offset; \
         POP_SIGNED_BYTE_AT_PC(offset); \
         m_pc = (offset + m_pc) & 0xFFFF; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// JR <cond> (12 cycles if jumped, 8 cycles if not)
+// JR <cond>
 #define JR_IF(condition) \
     if (condition) \
     { \
@@ -275,7 +275,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     else \
     { \
         ++m_pc; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
@@ -283,7 +283,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // ----- increment & decrement
 
-// INC 8 bit value (4 cycles, 12 cycles if value incremented in memory)
+// INC 8 bit value
 // carry = unmodified, subtract = cleared, zero & half calculated
 #define INC_8BIT(value) \
     { \
@@ -310,7 +310,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// DEC 8 bit value (4 cycles, 12 cycles if value incremented in memory)
+// DEC 8 bit value
 // carry = unmodified, subtract = set, zero & half calculated
 #define DEC(value) \
     { \
@@ -338,13 +338,13 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// INC & DEC 16 bit value (8 cycles)
+// INC & DEC 16 bit value
 #define ADD_TO_BYTES(high, low, value) \
     { \
         int tmp = low + value; \
         low = tmp & 0xFF; \
         high = (high + (tmp >> 8)) & 0xFF; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
@@ -355,7 +355,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 // ----- arithmetic
 
-// ADD & ADC 8 bit value (4 cycles, 8 cycles if value read from memory)
+// ADD & ADC 8 bit value
 // subtract = cleared, carry & zero & half calculated
 #define ADD(value) \
     { \
@@ -392,7 +392,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// ADD to HL (8 cycles)
+// ADD to HL
 // subtract = cleared, zero = unaffected, carry & half calculated
 #define ADD_TO_HL(high, low) \
     { \
@@ -403,11 +403,11 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
         m_carry_indicator = m_h + m_hcs_operand + (tmp >> 8); \
         m_h = m_carry_indicator & 0xFF; \
         m_l = tmp & 0xFF; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// ADD signed value to SP (16 cycles)
+// ADD signed value to SP
 // zero = subtract = cleared, carry & half calculated
 #define ADD_SP \
     { \
@@ -424,12 +424,12 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 #define ADD_TO_SP \
     { \
         ADD_SP; \
-        INC_CYCLES; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// SUB & SBC 8 bit value (4 cycles, 8 cycles if value read from memory)
+// SUB & SBC 8 bit value
 // subtract = set, carry & zero & half calculated
 #define SUB(value) \
     { \
@@ -466,7 +466,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// AND 8 bit value (4 cycles, 8 cycles if value read from memory)
+// AND 8 bit value
 // carry = subtract = cleared, half = set, zero calculated
 #define AND(value) \
     { \
@@ -485,7 +485,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// XOR 8 bit value (4 cycles, 8 cycles if value read from memory)
+// XOR 8 bit value
 // carry = subtract = half = cleared, zero calculated
 #define XOR(value) \
     { \
@@ -503,7 +503,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// OR 8 bit value (4 cycles, 8 cycles if value read from memory)
+// OR 8 bit value
 // carry = subtract = half = cleared, zero calculated
 #define OR(value) \
     { \
@@ -521,7 +521,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// CP 8 bit value (4 cycles, 8 cycles if value read from memory)
+// CP 8 bit value
 // subtract = set, carry & half & zero calculated
 #define CP(value) \
     { \
@@ -554,7 +554,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
     } \
     (void)0 // no-op to force semicolon when using this macro
 
-// LD HL, SP + n (12 cycles)
+// LD HL, SP + n
 // flags set according to ADD SP, n
 #define LD_HL_SP_ADD \
     { \
@@ -563,7 +563,7 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
         m_h = (m_sp >> 8) & 0xFF; \
         m_l = m_sp & 0xFF; \
         m_sp = sp_bak; \
-        INC_CYCLES; \
+        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
@@ -825,15 +825,20 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 //
 //---------------------------------------------------------
 
-age::gb_cpu::gb_cpu(gb_core &core, gb_bus &bus)
-    : m_core(core),
+age::gb_cpu::gb_cpu(const gb_device &device,
+                    gb_clock &clock,
+                    gb_core &core,
+                    gb_bus &bus)
+    : m_device(device),
+      m_clock(clock),
+      m_core(core),
       m_bus(bus)
 {
     // reset registers (writing m_regs)
     m_pc = 0x0100;
     m_sp = 0xFFFE;
 
-    if (!m_core.is_cgb_hardware())
+    if (!m_device.is_cgb_hardware())
     {
         m_a = 0x01;
         LOAD_FLAGS_FROM(0xB0);
@@ -864,7 +869,7 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 {
     gb_test_info result;
 
-    result.m_mode = m_core.get_mode();
+    result.m_cart_mode = m_device.get_cart_mode();
     result.m_mooneye_debug_op = m_mooneye_debug_op;
 
     result.m_a = m_a;
@@ -901,19 +906,19 @@ void age::gb_cpu::emulate_instruction()
     //
     if (m_core.must_service_interrupt())
     {
-        INC_CYCLES;
-        INC_CYCLES;
+        TICK_MACHINE_CYCLE;
+        TICK_MACHINE_CYCLE;
         PUSH_BYTE(m_pc >> 8); // if this writes IE, the interrupt may be cancelled
         uint16_t new_pc = m_core.get_interrupt_to_service();
         PUSH_BYTE(m_pc & 0xFF); // writing IE here will not cancel the interrupt
-        INC_CYCLES;
+        TICK_MACHINE_CYCLE;
         m_pc = new_pc;
         return;
     }
 
     // no event handling necessary here, done in emulator's main loop
     uint8_t opcode = m_bus.read_byte(m_pc);
-    INC_CYCLES;
+    TICK_MACHINE_CYCLE;
 
     m_pc += m_pc_increment;
     m_pc_increment = 1;
@@ -944,35 +949,35 @@ void age::gb_cpu::emulate_instruction()
         case 0x35: DEC_MEM_HL; break;
         case 0x3D: DEC_REG(m_a); break;
 
-        case 0x03: INC_BYTES(m_b, m_c); break; // INC BC (8 cycles)
-        case 0x13: INC_BYTES(m_d, m_e); break; // INC DE (8 cycles)
-        case 0x23: INC_BYTES(m_h, m_l); break; // INC HL (8 cycles)
-        case 0x33: ++m_sp; INC_CYCLES; break; // INC SP (8 cycles)
+        case 0x03: INC_BYTES(m_b, m_c); break; // INC BC
+        case 0x13: INC_BYTES(m_d, m_e); break; // INC DE
+        case 0x23: INC_BYTES(m_h, m_l); break; // INC HL
+        case 0x33: ++m_sp; TICK_MACHINE_CYCLE; break; // INC SP
 
-        case 0x0B: DEC_BYTES(m_b, m_c); break; // DEC BC (8 cycles)
-        case 0x1B: DEC_BYTES(m_d, m_e); break; // DEC DE (8 cycles)
-        case 0x2B: DEC_BYTES(m_h, m_l); break; // DEC HL (8 cycles)
-        case 0x3B: --m_sp; INC_CYCLES; break; // DEC SP (8 cycles)
+        case 0x0B: DEC_BYTES(m_b, m_c); break; // DEC BC
+        case 0x1B: DEC_BYTES(m_d, m_e); break; // DEC DE
+        case 0x2B: DEC_BYTES(m_h, m_l); break; // DEC HL
+        case 0x3B: --m_sp; TICK_MACHINE_CYCLE; break; // DEC SP
 
             // loads
 
-        case 0x06: POP_BYTE_AT_PC(m_b); break; // LD B, x (8 cycles)
-        case 0x0E: POP_BYTE_AT_PC(m_c); break; // LD C, x (8 cycles)
-        case 0x16: POP_BYTE_AT_PC(m_d); break; // LD D, x (8 cycles)
-        case 0x1E: POP_BYTE_AT_PC(m_e); break; // LD E, x (8 cycles)
-        case 0x26: POP_BYTE_AT_PC(m_h); break; // LD H, x (8 cycles)
-        case 0x2E: POP_BYTE_AT_PC(m_l); break; // LD L, x (8 cycles)
-        case 0x36: LD_IMM8_MEM_HL; break;      // LD [HL], x (12 cycles)
-        case 0x3E: POP_BYTE_AT_PC(m_a); break; // LD A, x (8 cycles)
+        case 0x06: POP_BYTE_AT_PC(m_b); break; // LD B, x
+        case 0x0E: POP_BYTE_AT_PC(m_c); break; // LD C, x
+        case 0x16: POP_BYTE_AT_PC(m_d); break; // LD D, x
+        case 0x1E: POP_BYTE_AT_PC(m_e); break; // LD E, x
+        case 0x26: POP_BYTE_AT_PC(m_h); break; // LD H, x
+        case 0x2E: POP_BYTE_AT_PC(m_l); break; // LD L, x
+        case 0x36: LD_IMM8_MEM_HL; break;      // LD [HL], x
+        case 0x3E: POP_BYTE_AT_PC(m_a); break; // LD A, x
 
-        case 0x40: m_mooneye_debug_op = true; break; // LD B, B (4 cycles)
-        case 0x41: m_b = m_c; break; // LD B, C (4 cycles)
-        case 0x42: m_b = m_d; break; // LD B, D (4 cycles)
-        case 0x43: m_b = m_e; break; // LD B, E (4 cycles)
-        case 0x44: m_b = m_h; break; // LD B, H (4 cycles)
-        case 0x45: m_b = m_l; break; // LD B, L (4 cycles)
-        case 0x46: READ_BYTE(m_b, LOAD_HL); break; // LD B, [HL] (8 cycles)
-        case 0x47: m_b = m_a; break; // LD B, A (4 cycles)
+        case 0x40: m_mooneye_debug_op = true; break; // LD B, B
+        case 0x41: m_b = m_c; break; // LD B, C
+        case 0x42: m_b = m_d; break; // LD B, D
+        case 0x43: m_b = m_e; break; // LD B, E
+        case 0x44: m_b = m_h; break; // LD B, H
+        case 0x45: m_b = m_l; break; // LD B, L
+        case 0x46: READ_BYTE(m_b, LOAD_HL); break; // LD B, [HL]
+        case 0x47: m_b = m_a; break; // LD B, A
 
         case 0x48: m_c = m_b; break;
         case 0x49: break;
@@ -1019,13 +1024,13 @@ void age::gb_cpu::emulate_instruction()
         case 0x6E: READ_BYTE(m_l, LOAD_HL); break;
         case 0x6F: m_l = m_a; break;
 
-        case 0x70: WRITE_BYTE(LOAD_HL, m_b); break; // LD [HL], B (8 cycles)
-        case 0x71: WRITE_BYTE(LOAD_HL, m_c); break; // LD [HL], C (8 cycles)
-        case 0x72: WRITE_BYTE(LOAD_HL, m_d); break; // LD [HL], D (8 cycles)
-        case 0x73: WRITE_BYTE(LOAD_HL, m_e); break; // LD [HL], E (8 cycles)
-        case 0x74: WRITE_BYTE(LOAD_HL, m_h); break; // LD [HL], H (8 cycles)
-        case 0x75: WRITE_BYTE(LOAD_HL, m_l); break; // LD [HL], L (8 cycles)
-        case 0x77: WRITE_BYTE(LOAD_HL, m_a); break; // LD [HL], A (8 cycles)
+        case 0x70: WRITE_BYTE(LOAD_HL, m_b); break; // LD [HL], B
+        case 0x71: WRITE_BYTE(LOAD_HL, m_c); break; // LD [HL], C
+        case 0x72: WRITE_BYTE(LOAD_HL, m_d); break; // LD [HL], D
+        case 0x73: WRITE_BYTE(LOAD_HL, m_e); break; // LD [HL], E
+        case 0x74: WRITE_BYTE(LOAD_HL, m_h); break; // LD [HL], H
+        case 0x75: WRITE_BYTE(LOAD_HL, m_l); break; // LD [HL], L
+        case 0x77: WRITE_BYTE(LOAD_HL, m_a); break; // LD [HL], A
 
         case 0x78: m_a = m_b; break;
         case 0x79: m_a = m_c; break;
@@ -1042,7 +1047,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x1A: READ_BYTE(m_a, LOAD_DE); break;  // LD A, [DE]
 
         case 0xF8: LD_HL_SP_ADD; break; // LD HL, SP + x
-        case 0xF9: m_sp = LOAD_HL & 0xFFFF; INC_CYCLES; break; // LD SP, HL (8 cycles)
+        case 0xF9: m_sp = LOAD_HL & 0xFFFF; TICK_MACHINE_CYCLE; break; // LD SP, HL
         case 0x08: { int address; POP_WORD_AT_PC(address); WRITE_WORD(address, m_sp); } break; // LD [xx], SP
 
         case 0xE0: { uint8_t offset; POP_BYTE_AT_PC(offset); WRITE_BYTE(0xFF00 + offset, m_a); } break; // LDH [x], A
@@ -1056,10 +1061,10 @@ void age::gb_cpu::emulate_instruction()
         case 0x2A: { int hl = LOAD_HL; READ_BYTE(m_a, hl); ++hl; STORE_HL(hl); } break;  // LDI A, [HL]
         case 0x3A: { int hl = LOAD_HL; READ_BYTE(m_a, hl); --hl; STORE_HL(hl); } break;  // LDD A, [HL]
 
-        case 0x01: POP_BYTE_AT_PC(m_c); POP_BYTE_AT_PC(m_b); break; // LD BC, xx (12 cycles)
-        case 0x11: POP_BYTE_AT_PC(m_e); POP_BYTE_AT_PC(m_d); break; // LD DE, xx (12 cycles)
-        case 0x21: POP_BYTE_AT_PC(m_l); POP_BYTE_AT_PC(m_h); break; // LD HL, xx (12 cycles)
-        case 0x31: { int h, l; POP_BYTE_AT_PC(l); POP_BYTE_AT_PC(h); m_sp = (l + (h << 8)) & 0xFFFF; } break; // LD AF, xx (12 cycles)
+        case 0x01: POP_BYTE_AT_PC(m_c); POP_BYTE_AT_PC(m_b); break; // LD BC, xx
+        case 0x11: POP_BYTE_AT_PC(m_e); POP_BYTE_AT_PC(m_d); break; // LD DE, xx
+        case 0x21: POP_BYTE_AT_PC(m_l); POP_BYTE_AT_PC(m_h); break; // LD HL, xx
+        case 0x31: { int h, l; POP_BYTE_AT_PC(l); POP_BYTE_AT_PC(h); m_sp = (l + (h << 8)) & 0xFFFF; } break; // LD AF, xx
 
             // arithmetic
 
@@ -1188,15 +1193,15 @@ void age::gb_cpu::emulate_instruction()
 
             // stack (push & pop)
 
-        case 0xC5: INC_CYCLES; PUSH_BYTE(m_b); PUSH_BYTE(m_c); break; // PUSH BC (16 cycles)
-        case 0xD5: INC_CYCLES; PUSH_BYTE(m_d); PUSH_BYTE(m_e); break; // PUSH DE (16 cycles)
-        case 0xE5: INC_CYCLES; PUSH_BYTE(m_h); PUSH_BYTE(m_l); break; // PUSH HL (16 cycles)
-        case 0xF5: INC_CYCLES; PUSH_BYTE(m_a); { uint8_t f; STORE_FLAGS_TO(f); PUSH_BYTE(f); } break; // PUSH AF (16 cycles)
+        case 0xC5: TICK_MACHINE_CYCLE; PUSH_BYTE(m_b); PUSH_BYTE(m_c); break; // PUSH BC
+        case 0xD5: TICK_MACHINE_CYCLE; PUSH_BYTE(m_d); PUSH_BYTE(m_e); break; // PUSH DE
+        case 0xE5: TICK_MACHINE_CYCLE; PUSH_BYTE(m_h); PUSH_BYTE(m_l); break; // PUSH HL
+        case 0xF5: TICK_MACHINE_CYCLE; PUSH_BYTE(m_a); { uint8_t f; STORE_FLAGS_TO(f); PUSH_BYTE(f); } break; // PUSH AF
 
-        case 0xC1: POP_BYTE(m_c); POP_BYTE(m_b); break; // POP BC (12 cycles)
-        case 0xD1: POP_BYTE(m_e); POP_BYTE(m_d); break; // POP DE (12 cycles)
-        case 0xE1: POP_BYTE(m_l); POP_BYTE(m_h); break; // POP HL (12 cycles)
-        case 0xF1: { uint8_t f; POP_BYTE(f); LOAD_FLAGS_FROM(f); } POP_BYTE(m_a); break; // POP AF (12 cycles)
+        case 0xC1: POP_BYTE(m_c); POP_BYTE(m_b); break; // POP BC
+        case 0xD1: POP_BYTE(m_e); POP_BYTE(m_d); break; // POP DE
+        case 0xE1: POP_BYTE(m_l); POP_BYTE(m_h); break; // POP HL
+        case 0xF1: { uint8_t f; POP_BYTE(f); LOAD_FLAGS_FROM(f); } POP_BYTE(m_a); break; // POP AF
 
             // misc
 
@@ -1210,7 +1215,7 @@ void age::gb_cpu::emulate_instruction()
         case 0x2F: m_a = ~m_a; m_hcs_flags = gb_hcs_subtract; m_hcs_operand = 1; break; // CPL
         case 0x37: m_carry_indicator = 0x100; m_hcs_flags = m_hcs_operand = 0; break;   // SCF
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
-        case 0x76: m_pc_increment = (m_core.halt() && !m_core.is_cgb()) ? 0 : 1; break;        // HALT
+        case 0x76: m_pc_increment = (m_core.halt() && !m_device.is_cgb()) ? 0 : 1; break;        // HALT
         case 0xF3: m_core.di(); break; // DI
         case 0xFB: m_core.ei_delayed(); break; // EI
 

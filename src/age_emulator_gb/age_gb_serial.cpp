@@ -17,7 +17,7 @@
 #include "age_gb_serial.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -25,15 +25,33 @@
 namespace age
 {
 
-// DMG: 256 cycles for "bit in"
-// DMG: 256 cycles for "bit out"
-// DMG: 512 cycles for fully transferring one bit (8192 Bits/s)
+// DMG: 256 clock cycles for "bit in"
+// DMG: 256 clock cycles for "bit out"
+// DMG: 512 clock cycles for fully transferring one bit (8192 Bits/s)
 constexpr int gb_sio_shift_clock_bit = 1 << 8;
 
 constexpr uint8_t gb_sc_start_transfer = 0x80;
 constexpr uint8_t gb_sc_shift_clock_switch = 0x02;
 constexpr uint8_t gb_sc_terminal_selection = 0x01;
 
+}
+
+
+
+//---------------------------------------------------------
+//
+//   constructor
+//
+//---------------------------------------------------------
+
+age::gb_serial::gb_serial(const gb_device &device,
+                          const gb_clock &clock,
+                          gb_core &core)
+    : m_device(device),
+      m_clock(clock),
+      m_core(core)
+{
+    write_sc(0);
 }
 
 
@@ -67,7 +85,7 @@ age::uint8_t age::gb_serial::read_sc() const
     uint8_t result = m_sc & 0x03;
 
     // unused bits are always high
-    result |= m_core.is_cgb() ? 0x7C : 0x7E;
+    result |= m_device.is_cgb() ? 0x7C : 0x7E;
 
     // serial transfer currently in progress?
     result |= (m_sio_state == gb_sio_state::no_transfer) ? 0 : gb_sc_start_transfer;
@@ -98,8 +116,8 @@ void age::gb_serial::write_sc(uint8_t value)
         if ((value & gb_sc_terminal_selection) != 0)
         {
             m_sio_state = gb_sio_state::transfer_internal_clock;
-            auto cycles_until_finished = transfer_init(value);
-            m_core.insert_event(cycles_until_finished, gb_event::serial_transfer_finished);
+            auto clks_until_finished = transfer_init(value);
+            m_core.insert_event(clks_until_finished, gb_event::serial_transfer_finished);
         }
 
         //
@@ -139,7 +157,7 @@ void age::gb_serial::finish_transfer()
 {
     LOG("serial transfer finished");
     m_sio_state = gb_sio_state::no_transfer;
-    m_sio_last_receive_cycle = gb_no_cycle;
+    m_sio_last_receive_clk = gb_no_clock_cycle;
 
     // since there is no counterpart for serial transfer we always receive 0xFF
     m_sb = 0xFF;
@@ -148,9 +166,9 @@ void age::gb_serial::finish_transfer()
     m_core.request_interrupt(gb_interrupt::serial);
 }
 
-void age::gb_serial::set_back_cycles(int offset)
+void age::gb_serial::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CYCLES(m_sio_last_receive_cycle, offset);
+    AGE_GB_SET_BACK_CLOCK(m_sio_last_receive_clk, clock_cycle_offset);
 }
 
 
@@ -163,14 +181,13 @@ void age::gb_serial::set_back_cycles(int offset)
 
 int age::gb_serial::transfer_init(uint8_t value)
 {
-    bool high_frequency = m_core.is_cgb() && ((value & gb_sc_shift_clock_switch) != 0);
+    bool high_frequency = m_device.is_cgb() && ((value & gb_sc_shift_clock_switch) != 0);
 
     int shift_clock_bit = high_frequency ? gb_sio_shift_clock_bit >> 5 : gb_sio_shift_clock_bit;
-    shift_clock_bit = m_core.is_double_speed() ? shift_clock_bit >> 1 : shift_clock_bit;
+    shift_clock_bit = m_clock.is_double_speed() ? shift_clock_bit >> 1 : shift_clock_bit;
 
-    int cycles_per_bit = shift_clock_bit << 1;
-
-    auto current_cycle = m_core.get_oscillation_cycle();
+    int clks_per_bit = shift_clock_bit << 1;
+    auto current_clk = m_clock.get_clock_cycle();
 
     //
     // verified by mooneye-gb tests
@@ -178,24 +195,24 @@ int age::gb_serial::transfer_init(uint8_t value)
     // The serial transfer clock is divided from the main clock,
     // thus the transfer does not start immediately.
     // Side note: when boot_sclk_align-dmgABCmgb starts the transfer
-    //            bit 8 of the cycle counter is not set.
+    //            bit 8 of the clock cycle counter is not set.
     //
     //      acceptance/serial/boot_sclk_align-dmgABCmgb
     //
-    int cycles_into_sio_clock = current_cycle % cycles_per_bit;
+    int clks_into_sio_clock = current_clk % clks_per_bit;
 
     //
     // verified by gambatte tests
     //
-    // Starting the serial transfer while bit 8 of the cycle counter (DMG)
-    // is set will extend the transfer duration by half the cycles
+    // Starting the serial transfer while bit 8 of the clock cycle counter (DMG)
+    // is set will extend the transfer duration by half the clock cycles
     // required to transfer a single bit.
     //
     // My guess: Sending and receiving a single bit is done on different edges
-    //           of the sio clock (DMG: cycle counter bit 8 going low/high).
+    //           of the sio clock (DMG: clock cycle counter bit 8 going low/high).
     //           We must transmit bit 7 before shifting a new bit 0 into the register,
     //           otherwise bit 7 is lost.
-    //           If receiving a bit is triggered by cycle counter bit 8 going low,
+    //           If receiving a bit is triggered by clock cycle counter bit 8 going low,
     //           starting a transfer with bit 8 being high would trigger a receive
     //           before the first transmission and thus lose bit 7.
     //           In this case it makes sense to skip the first receive which results
@@ -206,16 +223,16 @@ int age::gb_serial::transfer_init(uint8_t value)
     //      serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0
     //      serial/nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8
     //
-    int extended_cycles = ((current_cycle & shift_clock_bit) != 0) ? cycles_per_bit / 2 : 0;
+    int extended_clks = ((current_clk & shift_clock_bit) != 0) ? clks_per_bit / 2 : 0;
 
-    LOG("starting serial transfer, " << cycles_into_sio_clock << " cycles into sio clock, " << extended_cycles << " cycles extended");
-    int cycles_until_finished = 8 * cycles_per_bit - cycles_into_sio_clock + extended_cycles;
+    LOG("starting serial transfer, " << clks_into_sio_clock << " clocks into sio clock, " << extended_clks << " clocks extended");
+    int clks_until_finished = 8 * clks_per_bit - clks_into_sio_clock + extended_clks;
 
-    m_sio_cycles_per_bit = cycles_per_bit;
-    m_sio_last_receive_cycle = current_cycle + cycles_until_finished - 8 * cycles_per_bit;
-    AGE_ASSERT(m_sio_last_receive_cycle <= current_cycle);
+    m_sio_clks_per_bit = clks_per_bit;
+    m_sio_last_receive_clk = current_clk + clks_until_finished - 8 * clks_per_bit;
+    AGE_ASSERT(m_sio_last_receive_clk <= current_clk);
 
-    return cycles_until_finished;
+    return clks_until_finished;
 }
 
 
@@ -223,11 +240,11 @@ int age::gb_serial::transfer_init(uint8_t value)
 void age::gb_serial::transfer_update_sb()
 {
     AGE_ASSERT(m_sio_state == gb_sio_state::transfer_internal_clock);
-    AGE_ASSERT(m_sio_cycles_per_bit > 0);
-    AGE_ASSERT(m_sio_last_receive_cycle <= m_core.get_oscillation_cycle());
+    AGE_ASSERT(m_sio_clks_per_bit > 0);
+    AGE_ASSERT(m_sio_last_receive_clk <= m_clock.get_clock_cycle());
 
-    int cycles_elapsed = m_core.get_oscillation_cycle() - m_sio_last_receive_cycle;
-    int shifts = cycles_elapsed / m_sio_cycles_per_bit;
+    int clks_elapsed = m_clock.get_clock_cycle() - m_sio_last_receive_clk;
+    int shifts = clks_elapsed / m_sio_clks_per_bit;
     AGE_ASSERT(shifts < 8);
 
     if (shifts > 0)
@@ -237,20 +254,6 @@ void age::gb_serial::transfer_update_sb()
         LOG("transfer in progress: updating SB from " << AGE_LOG_HEX(m_sb) << " to " << AGE_LOG_HEX(tmp) << " (" << shifts << " shifts)");
         m_sb = tmp & 0xFF;
 
-        m_sio_last_receive_cycle += shifts * m_sio_cycles_per_bit;
+        m_sio_last_receive_clk += shifts * m_sio_clks_per_bit;
     }
-}
-
-
-
-//---------------------------------------------------------
-//
-//   object creation
-//
-//---------------------------------------------------------
-
-age::gb_serial::gb_serial(gb_core &core)
-    : m_core(core)
-{
-    write_sc(0);
 }

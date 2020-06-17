@@ -21,7 +21,7 @@
 #include "age_gb_core.hpp"
 
 #if 0
-#define LOG(x) AGE_LOG("cycle " << m_oscillation_cycle << ": " << x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -48,68 +48,14 @@ constexpr const age::uint8_array<17> gb_interrupt_pc_lookup =
  }};
 
 
-age::gb_core::gb_core(gb_mode mode)
-    : m_mode(mode)
+
+age::gb_core::gb_core(const gb_device &device, gb_clock &clock)
+    : m_device(device),
+      m_clock(clock)
 {
-    //
-    // verified by gambatte tests
-    //
-    // adjust the initial oscillation cycle
-    // (due to the Gameboy playing the nintendo intro, thus we're not
-    // starting with cycle 0 at PC 0x0100)
-    //
-    //      div/start_inc_1_cgb_out1E
-    //      div/start_inc_2_cgb_out1F
-    //      div/start_inc_1_dmg08_outAB
-    //      div/start_inc_2_dmg08_outAC
-    //
-    //      tima/tc00_start_1_outF0
-    //      tima/tc00_start_2_outF1
-    //
-    if (is_cgb())
-    {
-        m_oscillation_cycle = 0x1F * 0x100;
-        m_oscillation_cycle -= 96;
-    }
-    else
-    {
-        m_oscillation_cycle = 0xAC * 0x100;
-        m_oscillation_cycle -= 52;
-    }
 }
 
 
-
-int age::gb_core::get_oscillation_cycle() const
-{
-    AGE_ASSERT(m_oscillation_cycle != gb_no_cycle);
-    return m_oscillation_cycle;
-}
-
-age::int8_t age::gb_core::get_machine_cycles_per_cpu_cycle() const
-{
-    return m_machine_cycles_per_cpu_cycle;
-}
-
-bool age::gb_core::is_double_speed() const
-{
-    return m_double_speed;
-}
-
-bool age::gb_core::is_cgb() const
-{
-    return m_mode == gb_mode::cgb;
-}
-
-bool age::gb_core::is_cgb_hardware() const
-{
-    return m_mode != gb_mode::dmg;
-}
-
-age::gb_mode age::gb_core::get_mode() const
-{
-    return m_mode;
-}
 
 age::gb_state age::gb_core::get_state() const
 {
@@ -118,31 +64,21 @@ age::gb_state age::gb_core::get_state() const
 
 
 
-void age::gb_core::oscillate_cpu_cycle()
+void age::gb_core::insert_event(int clock_cycle_offset, gb_event event)
 {
-    m_oscillation_cycle += m_machine_cycles_per_cpu_cycle;
-}
-
-void age::gb_core::oscillate_2_cycles()
-{
-    m_oscillation_cycle += 2;
-}
-
-void age::gb_core::insert_event(int cycle_offset, gb_event event)
-{
-    AGE_ASSERT(cycle_offset >= 0);
-    AGE_ASSERT(int_max - cycle_offset >= m_oscillation_cycle);
-    m_events.insert_event(m_oscillation_cycle + cycle_offset, event);
+    AGE_ASSERT(clock_cycle_offset >= 0);
+    AGE_ASSERT(int_max - clock_cycle_offset >= m_clock.get_clock_cycle());
+    m_events.insert_event(m_clock.get_clock_cycle() + clock_cycle_offset, event);
 }
 
 void age::gb_core::remove_event(gb_event event)
 {
-    m_events.insert_event(gb_no_cycle, event);
+    m_events.insert_event(gb_no_clock_cycle, event);
 }
 
 age::gb_event age::gb_core::poll_event()
 {
-    return m_events.poll_event(m_oscillation_cycle);
+    return m_events.poll_event(m_clock.get_clock_cycle());
 }
 
 int age::gb_core::get_event_cycle(gb_event event) const
@@ -150,10 +86,9 @@ int age::gb_core::get_event_cycle(gb_event event) const
     return m_events.get_event_cycle(event);
 }
 
-void age::gb_core::set_back_cycles(int offset)
+void age::gb_core::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CYCLES(m_oscillation_cycle, offset);
-    m_events.set_back_cycles(offset);
+    m_events.set_back_clock(clock_cycle_offset);
 }
 
 
@@ -219,12 +154,12 @@ bool age::gb_core::halt()
 void age::gb_core::stop()
 {
     AGE_ASSERT(m_state == gb_state::cpu_active);
-    if (is_cgb() && ((m_key1 & 0x01) > 0))
+    if (m_device.is_cgb() && ((m_key1 & 0x01) > 0))
     {
         m_key1 ^= 0x81;
     }
-    m_double_speed = (m_key1 & 0x80) > 0;
-    m_machine_cycles_per_cpu_cycle = m_double_speed ? 2 : 4;
+    const bool double_speed = (m_key1 & 0x80) > 0;
+    m_clock.set_double_speed(double_speed);
     LOG("double speed " << m_double_speed << ", machine cycles per cpu cycle " << m_machine_cycles_per_cpu_cycle);
     insert_event(0, gb_event::switch_double_speed);
 }
@@ -259,7 +194,8 @@ bool age::gb_core::must_service_interrupt()
 
 age::uint8_t age::gb_core::get_interrupt_to_service()
 {
-    AGE_ASSERT(m_state == gb_state::cpu_active);
+    //! \todo this does not work with Gambatte tests (sometimes m_state == dma)
+    // AGE_ASSERT(m_state == gb_state::cpu_active);
 
     uint8_t interrupt = m_ie & m_if & 0x1F;
     if (interrupt > 0)
@@ -345,9 +281,9 @@ void age::gb_core::check_halt_mode()
         // for CGB, unhalting on interrupt takes an additional 4 cycles
         // (however, some gambatte tests check this indirectly by relying
         // on interrupts during a halt)
-        if (is_cgb())
+        if (m_device.is_cgb())
         {
-            oscillate_cpu_cycle();
+            m_clock.tick_machine_cycle();
         }
 
         LOG("halt state terminated");
@@ -366,7 +302,7 @@ age::gb_core::gb_events::gb_events()
 {
     std::for_each(begin(m_event_cycle), end(m_event_cycle), [&](auto &elem)
     {
-        elem = gb_no_cycle;
+        elem = gb_no_clock_cycle;
     });
 }
 
@@ -386,7 +322,7 @@ age::gb_event age::gb_core::gb_events::poll_event(int current_cycle)
         {
             result = itr->second;
             m_events.erase(itr);
-            m_event_cycle[to_integral(result)] = gb_no_cycle;
+            m_event_cycle[to_integral(result)] = gb_no_clock_cycle;
         }
     }
 
@@ -398,7 +334,7 @@ void age::gb_core::gb_events::insert_event(int for_cycle, gb_event event)
     auto event_id = to_integral(event);
 
     auto old_cycle = m_event_cycle[event_id];
-    if (old_cycle != gb_no_cycle)
+    if (old_cycle != gb_no_clock_cycle)
     {
         auto range = m_events.equal_range(old_cycle);
         for (auto itr = range.first; itr != range.second; ++itr)
@@ -411,14 +347,14 @@ void age::gb_core::gb_events::insert_event(int for_cycle, gb_event event)
         }
     }
 
-    if (for_cycle != gb_no_cycle)
+    if (for_cycle != gb_no_clock_cycle)
     {
         m_events.insert(std::pair<int, gb_event>(for_cycle, event));
     }
     m_event_cycle[event_id] = for_cycle;
 }
 
-void age::gb_core::gb_events::set_back_cycles(int offset)
+void age::gb_core::gb_events::set_back_clock(int clock_cycle_offset)
 {
     // find all scheduled events
     std::vector<gb_event> events_to_adjust;
@@ -432,7 +368,7 @@ void age::gb_core::gb_events::set_back_cycles(int offset)
     {
         auto idx = to_integral(event);
         auto event_cycle = m_event_cycle[idx];
-        AGE_GB_SET_BACK_CYCLES(event_cycle, offset);
+        AGE_GB_SET_BACK_CLOCK(event_cycle, clock_cycle_offset);
         insert_event(event_cycle, event);
     });
 }

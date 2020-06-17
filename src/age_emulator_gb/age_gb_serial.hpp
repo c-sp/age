@@ -23,6 +23,8 @@
 
 #include <age_types.hpp>
 
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_clock.hpp"
 #include "age_gb_core.hpp"
 
 
@@ -52,19 +54,21 @@ public:
     void write_sc(uint8_t value);
 
     void finish_transfer();
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
-    gb_serial(gb_core &core);
+    gb_serial(const gb_device &device, const gb_clock &clock, gb_core &core);
 
 private:
 
     int transfer_init(uint8_t value);
     void transfer_update_sb();
 
+    const gb_device &m_device;
+    const gb_clock &m_clock;
     gb_core &m_core;
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
-    int m_sio_cycles_per_bit = 0;
-    int m_sio_last_receive_cycle = gb_no_cycle;
+    int m_sio_clks_per_bit = 0;
+    int m_sio_last_receive_clk = gb_no_clock_cycle;
 
     uint8_t m_sb = 0;
     uint8_t m_sc = 0;

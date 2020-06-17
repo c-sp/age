@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) AGE_LOG(x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -49,9 +49,8 @@ constexpr const age::uint8_array<0x40> cgb_objp_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
-    : gb_lcd_ppu(core, memory, dmg_green),
-      m_cgb(core.is_cgb()),
+age::gb_lcd::gb_lcd(const gb_device &device, const gb_clock &clock, gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
+    : gb_lcd_ppu(device, clock, core, memory, dmg_green),
       m_core(core),
       m_screen_buffer(frame_handler)
 {
@@ -60,7 +59,7 @@ age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame
     std::copy(begin(cgb_objp_dump), end(cgb_objp_dump), begin(m_palette) + 0x40);
 
     write_bgp(0xFC);
-    if (m_cgb)
+    if (m_device.is_cgb())
     {
         for (unsigned i = 0; i < gb_num_palette_colors; ++i)
         {
@@ -74,8 +73,8 @@ age::gb_lcd::gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame
     }
 
     // init event handling and precalculated values
-    m_next_event_cycle = m_core.get_oscillation_cycle();
-    if (m_cgb)
+    m_next_event_cycle = m_clock.get_clock_cycle();
+    if (m_device.is_cgb())
     {
         next_step(get_next_scanline_cycle_offset(m_next_event_cycle), &mode1_start_line);
     }
@@ -117,11 +116,11 @@ bool age::gb_lcd::is_oam_readable() const
     //      oam_access/preread_ds_1_out0
     //      oam_access/preread_ds_2_out3
     //
-    if (m_lcd_enabled && !m_core.is_double_speed())
+    if (m_lcd_enabled && !m_clock.is_double_speed())
     {
         if (get_scanline() < gb_screen_height)
         {
-            int current_cycle = m_core.get_oscillation_cycle();
+            int current_cycle = m_clock.get_clock_cycle();
             int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
             result &= next_scanline_offset > 4;
         }
@@ -145,13 +144,13 @@ bool age::gb_lcd::is_oam_writable() const
     //      oam_access/prewrite_ds_1_out1
     //      oam_access/prewrite_ds_2_out0
     //
-    if (m_lcd_enabled && m_cgb)
+    if (m_lcd_enabled && m_device.is_cgb())
     {
         if (get_scanline() < gb_screen_height)
         {
-            int current_cycle = m_core.get_oscillation_cycle();
+            int current_cycle = m_clock.get_clock_cycle();
             int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
-            result &= next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle();
+            result &= next_scanline_offset > m_clock.get_machine_cycle_clocks();
         }
     }
     return result;
@@ -166,7 +165,7 @@ bool age::gb_lcd::is_hdma_active() const
 
 void age::gb_lcd::emulate()
 {
-    int current_cycle = m_core.get_oscillation_cycle();
+    int current_cycle = m_clock.get_clock_cycle();
     emulate(current_cycle);
 }
 
@@ -188,10 +187,10 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
     if (!m_hdma_active && hdma_active)
     {
         int mode = m_stat & gb_stat_modes;
-        int next_scanline_offset = m_lcd_enabled ? get_next_scanline_cycle_offset(m_core.get_oscillation_cycle()) : int_max;
+        int next_scanline_offset = m_lcd_enabled ? get_next_scanline_cycle_offset(m_clock.get_clock_cycle()) : int_max;
         AGE_ASSERT(next_scanline_offset >= 0);
 
-        if ((mode == 0) && (next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle()))
+        if ((mode == 0) && (next_scanline_offset > m_clock.get_machine_cycle_clocks()))
         {
             m_core.insert_event(0, gb_event::start_hdma);
         }
@@ -202,13 +201,13 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
 
 
 
-void age::gb_lcd::set_back_cycles(int offset)
+void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 {
-    gb_lyc_interrupter::set_back_cycles(offset);
-    AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
+    gb_lyc_interrupter::set_back_clock(clock_cycle_offset);
+    AGE_GB_SET_BACK_CLOCK(m_next_event_cycle, clock_cycle_offset);
 
     // overflow may happen, but that's okay (we use this only for subtraction, never for comparison)
-    AGE_GB_SET_BACK_CYCLES_OVERFLOW(m_last_cycle_m3_finished, offset);
+    AGE_GB_SET_BACK_CLOCK(m_last_cycle_m3_finished, clock_cycle_offset);
 }
 
 
@@ -223,7 +222,7 @@ void age::gb_lcd::set_back_cycles(int offset)
 
 void age::gb_lcd::emulate(int to_cycle)
 {
-    while ((m_next_event_cycle != gb_no_cycle) && (to_cycle >= m_next_event_cycle))
+    while ((m_next_event_cycle != gb_no_clock_cycle) && (to_cycle >= m_next_event_cycle))
     {
         AGE_ASSERT(m_next_event != nullptr);
         m_next_event(*this);
@@ -232,7 +231,7 @@ void age::gb_lcd::emulate(int to_cycle)
 
 void age::gb_lcd::next_step(int cycle_offset, std::function<void(gb_lcd&)> step)
 {
-    AGE_ASSERT(m_next_event_cycle != gb_no_cycle);
+    AGE_ASSERT(m_next_event_cycle != gb_no_clock_cycle);
     AGE_ASSERT(cycle_offset >= 0);
 
     m_next_event_cycle += cycle_offset;
@@ -335,7 +334,7 @@ void age::gb_lcd::mode0_next_event()
     //
     else
     {
-        int offset = get_next_scanline_cycle_offset(m_next_event_cycle) - m_core.get_machine_cycles_per_cpu_cycle();
+        int offset = get_next_scanline_cycle_offset(m_next_event_cycle) - m_clock.get_machine_cycle_clocks();
         next_step(offset, &mode2_early_interrupt);
     }
 }
@@ -431,7 +430,7 @@ void age::gb_lcd::mode1_last_cycles_mode0(gb_lcd &lcd)
     //      ly0/lycint152_ly0stat_ds_2_outC1
     //      ly0/lycint152_ly0stat_ds_3_outC2
     //
-    if (!lcd.m_core.is_double_speed())
+    if (!lcd.m_clock.is_double_speed())
     {
         --lcd.m_stat;
     }
@@ -558,7 +557,7 @@ void age::gb_lcd::mode3_start(gb_lcd &lcd)
     lcd.scanline_init(first_scanline_pixel);
 
     // next step
-    int offset = lcd.m_core.is_double_speed() ? 6 : 3;
+    int offset = lcd.m_clock.is_double_speed() ? 6 : 3;
     lcd.next_step(offset, &mode3_render);
 }
 
@@ -585,8 +584,8 @@ void age::gb_lcd::mode3_render(gb_lcd &lcd)
 
             if (lcd.m_hdma_active)
             {
-                int cycle = lcd.m_core.get_oscillation_cycle();
-                int offset = lcd.m_next_event_cycle + (lcd.m_core.is_double_speed() ? 1 : 2);
+                int cycle = lcd.m_clock.get_clock_cycle();
+                int offset = lcd.m_next_event_cycle + (lcd.m_clock.is_double_speed() ? 1 : 2);
                 offset = std::max(offset - cycle, 0);
                 LOG("scheduling HDMA event, offset " << offset);
                 lcd.m_core.insert_event(offset, gb_event::start_hdma);

@@ -19,7 +19,7 @@
 #include "age_gb_timer.hpp"
 
 #if 0
-#define COUNTER_LOG(x) AGE_GB_CYCLE_LOG(x)
+#define COUNTER_LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define COUNTER_LOG(x)
 #endif
@@ -38,28 +38,28 @@
 //
 //---------------------------------------------------------
 
-age::gb_common_counter::gb_common_counter(const gb_core &core)
-    : m_core(core)
+age::gb_common_counter::gb_common_counter(const gb_clock &clock)
+    : m_clock(clock)
 {
 }
 
 int age::gb_common_counter::get_current_value() const
 {
-    int counter = m_core.get_oscillation_cycle() >> m_cycle_shift;
+    int counter = m_clock.get_clock_cycle() >> m_clock_shift;
     counter -= m_counter_origin;
     return counter;
 }
 
-int age::gb_common_counter::get_cycle_offset(int for_counter_offset) const
+int age::gb_common_counter::get_clock_offset(int for_counter_offset) const
 {
     AGE_ASSERT(for_counter_offset > 0);
 
-    int cycle = m_core.get_oscillation_cycle();
+    int clk = m_clock.get_clock_cycle();
 
-    int counter = cycle >> m_cycle_shift;
+    int counter = clk >> m_clock_shift;
     counter += for_counter_offset;
 
-    int offset = (counter << m_cycle_shift) - cycle;
+    int offset = (counter << m_clock_shift) - clk;
     return offset;
 }
 
@@ -67,7 +67,7 @@ int age::gb_common_counter::get_cycle_offset(int for_counter_offset) const
 
 void age::gb_common_counter::reset()
 {
-    m_counter_origin = m_core.get_oscillation_cycle() >> m_cycle_shift;
+    m_counter_origin = m_clock.get_clock_cycle() >> m_clock_shift;
     COUNTER_LOG("DIV/TIMA counter reset, offset is " << m_counter_origin);
 }
 
@@ -75,19 +75,19 @@ void age::gb_common_counter::switch_double_speed_mode()
 {
     // preserve the current counter value during speed change
     int counter = get_current_value();
-    COUNTER_LOG("switching between speed modes, counter = " << counter << ", shift = " << m_cycle_shift);
+    COUNTER_LOG("switching between speed modes, counter = " << counter << ", shift = " << m_clock_shift);
 
-    m_cycle_shift = m_core.is_double_speed() ? 1 : 2;
+    m_clock_shift = m_clock.is_double_speed() ? 1 : 2;
     reset();
     m_counter_origin -= counter;
 
-    COUNTER_LOG("switched between speed modes, counter = " << get_current_value() << ", shift = " << m_cycle_shift);
+    COUNTER_LOG("switched between speed modes, counter = " << get_current_value() << ", shift = " << m_clock_shift);
 }
 
-void age::gb_common_counter::set_back_cycles(int offset)
+void age::gb_common_counter::set_back_clock(int clock_cycle_offset)
 {
-    AGE_ASSERT(0 == (offset & (m_cycle_shift - 1)));
-    int counter_offset = offset >> m_cycle_shift;
+    AGE_ASSERT(0 == (clock_cycle_offset & (m_clock_shift - 1)));
+    int counter_offset = clock_cycle_offset >> m_clock_shift;
     m_counter_origin -= counter_offset;
 }
 
@@ -111,7 +111,7 @@ int age::gb_tima_counter::get_current_value() const
     return tima;
 }
 
-int age::gb_tima_counter::get_cycle_offset(int for_tima_offset) const
+int age::gb_tima_counter::get_clock_offset(int for_tima_offset) const
 {
     AGE_ASSERT(for_tima_offset > 0);
 
@@ -120,8 +120,8 @@ int age::gb_tima_counter::get_cycle_offset(int for_tima_offset) const
     tima += for_tima_offset;
     int counter_offset = (tima << m_counter_shift) - counter;
 
-    int cycle_offset = m_counter.get_cycle_offset(counter_offset);
-    return cycle_offset;
+    int clock_offset = m_counter.get_clock_offset(counter_offset);
+    return clock_offset;
 }
 
 int age::gb_tima_counter::get_trigger_bit(uint8_t for_tac) const
@@ -174,11 +174,11 @@ age::int8_t age::gb_tima_counter::calculate_counter_shift(uint8_t for_tac)
     // calculate the number of bits the counter value has to
     // be shifted to get the TIMA value
     //
-    //  00 (4096 Hz):      machine_cycle >> 10  ( / 1024)
-    //  01 (262144 Hz):    machine_cycle >> 4   ( / 16)
-    //  10 (65536 Hz):     machine_cycle >> 6   ( / 64)
-    //  11 (16384 Hz):     machine_cycle >> 8   ( / 256)
-    //  internal counter:  machine_cycle >> 2
+    //  00 (4096 Hz):      clock cycle >> 10  ( / 1024)
+    //  01 (262144 Hz):    clock cycle >> 4   ( / 16)
+    //  10 (65536 Hz):     clock cycle >> 6   ( / 64)
+    //  11 (16384 Hz):     clock cycle >> 8   ( / 256)
+    //  internal counter:  clock cycle >> 2   ( / 4)
     //
     //  (the above numbers are valid only when running at single speed)
     int counter_shift = ((for_tac - 1) & 0x03) << 1;

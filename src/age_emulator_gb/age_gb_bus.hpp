@@ -23,6 +23,9 @@
 
 #include <age_types.hpp>
 
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_clock.hpp"
+#include "age_gb_core.hpp"
 #include "age_gb_memory.hpp"
 #include "age_gb_sound.hpp"
 #include "age_gb_lcd.hpp"
@@ -127,7 +130,7 @@ class gb_bus
 
 public:
 
-    gb_bus(gb_core &core, gb_memory &memory, gb_sound &sound, gb_lcd &lcd, gb_timer &timer, gb_joypad &joypad, gb_serial &serial);
+    gb_bus(const gb_device &device, gb_clock &clock, gb_core &core, gb_memory &memory, gb_sound &sound, gb_lcd &lcd, gb_timer &timer, gb_joypad &joypad, gb_serial &serial);
 
     uint8_t read_byte(uint16_t address);
     void write_byte(uint16_t address, uint8_t byte);
@@ -135,7 +138,7 @@ public:
     void handle_events();
     void handle_dma();
 
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
@@ -144,6 +147,8 @@ private:
 
     void handle_oam_dma();
 
+    const gb_device &m_device;
+    gb_clock &m_clock;
     gb_core &m_core;
     gb_memory &m_memory;
     gb_sound &m_sound;
@@ -163,7 +168,7 @@ private:
     bool m_oam_dma_active = false;
     int m_oam_dma_address = 0;
     int m_oam_dma_offset = 0;
-    int m_oam_dma_last_cycle = gb_no_cycle;
+    int m_oam_dma_last_cycle = gb_no_clock_cycle;
 
     uint8_t m_hdma5 = 0xFF;
     int m_dma_source = 0;

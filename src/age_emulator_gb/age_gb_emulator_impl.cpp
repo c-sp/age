@@ -17,7 +17,7 @@
 #include "age_gb_emulator_impl.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -57,12 +57,12 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 
     // make sure we have some headroom since we usually emulate
     // a few more cycles than requested
-    constexpr int cycle_limit = int_max - gb_machine_cycles_per_second;
-    constexpr int cycle_setback_limit = 2 * gb_machine_cycles_per_second;
+    constexpr int cycle_limit = int_max - gb_clock_cycles_per_second;
+    constexpr int cycle_setback_limit = 2 * gb_clock_cycles_per_second;
 
     // calculate the number of cycles to emulate based on the current
     // cycle and the cycle limit
-    int starting_cycle = m_core.get_oscillation_cycle();
+    int starting_cycle = m_clock.get_clock_cycle();
     AGE_ASSERT(starting_cycle < cycle_setback_limit);
 
     int cycle_to_go = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
@@ -70,13 +70,13 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     // emulate until we reach the calculated cycle
     // (depending on CPU instruction length or running DMA
     // we usually emulate a little bit past that cycle)
-    while (m_core.get_oscillation_cycle() < cycle_to_go)
+    while (m_clock.get_clock_cycle() < cycle_to_go)
     {
         m_bus.handle_events(); // may change the current gb_state
         switch (m_core.get_state())
         {
             case gb_state::halted:
-                m_core.oscillate_cpu_cycle();
+                m_clock.tick_machine_cycle();
                 break;
 
             case gb_state::cpu_active:
@@ -84,7 +84,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
                 break;
 
             case gb_state::dma:
-                AGE_ASSERT(m_core.is_cgb());
+                AGE_ASSERT(m_device.is_cgb());
                 m_bus.handle_dma();
                 m_core.finish_dma();
                 break;
@@ -95,7 +95,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     m_sound.update_state();
 
     // calculate the cycles actually emulated
-    int current_cycle = m_core.get_oscillation_cycle();
+    int current_cycle = m_clock.get_clock_cycle();
     int cycles_emulated = current_cycle - starting_cycle;
     AGE_ASSERT(cycles_emulated >= 0);
 
@@ -104,27 +104,28 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     // cycle counter from overflowing
     if (current_cycle >= cycle_setback_limit)
     {
-        AGE_ASSERT(cycle_setback_limit >= 2 * gb_machine_cycles_per_second);
+        AGE_ASSERT(cycle_setback_limit >= 2 * gb_clock_cycles_per_second);
 
         // keep a minimum of cycles to prevent negative cycle values
         // (which should still work but is kind of unintuitive)
-        int cycles_to_keep = gb_machine_cycles_per_second
-                + (current_cycle % gb_machine_cycles_per_second);
+        int cycles_to_keep = gb_clock_cycles_per_second
+                + (current_cycle % gb_clock_cycles_per_second);
 
-        int offset = current_cycle - cycles_to_keep;
-        AGE_ASSERT(offset > 0);
-        AGE_ASSERT(offset < current_cycle);
+        int clock_cycle_offset = current_cycle - cycles_to_keep;
+        AGE_ASSERT(clock_cycle_offset > 0);
+        AGE_ASSERT(clock_cycle_offset < current_cycle);
 
         LOG("set back cycles: " << current_cycle
             << " -> " << cycles_to_keep
             << " (-" << offset << ")");
 
-        m_core.set_back_cycles(offset);
-        m_sound.set_back_cycles();
-        m_lcd.set_back_cycles(offset);
-        m_timer.set_back_cycles(offset);
-        m_serial.set_back_cycles(offset);
-        m_bus.set_back_cycles(offset);
+        m_clock.set_back_clock(clock_cycle_offset);
+        m_core.set_back_clock(clock_cycle_offset);
+        m_sound.set_back_clock();
+        m_lcd.set_back_clock(clock_cycle_offset);
+        m_timer.set_back_clock(clock_cycle_offset);
+        m_serial.set_back_clock(clock_cycle_offset);
+        m_bus.set_back_clock(clock_cycle_offset);
     }
 
     return cycles_emulated;
@@ -150,14 +151,17 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
                                         bool dmg_green,
                                         pcm_vector &pcm_vec,
                                         screen_buffer &screen_buf)
-    : m_memory(rom, hardware),
-      m_core(m_memory.get_mode()),
-      m_sound(m_core, pcm_vec),
-      m_lcd(m_core, m_memory, screen_buf, dmg_green),
-      m_timer(m_core),
-      m_joypad(m_core),
-      m_serial(m_core),
-      m_bus(m_core, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
-      m_cpu(m_core, m_bus)
+    : m_memory(rom),
+      m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
+      m_clock(m_device),
+      m_core(m_device, m_clock),
+      m_sound(m_clock, m_device.is_cgb(), pcm_vec),
+      m_lcd(m_device, m_clock, m_core, m_memory, screen_buf, dmg_green),
+      m_timer(m_clock, m_core),
+      m_joypad(m_device, m_core),
+      m_serial(m_device, m_clock, m_core),
+      m_bus(m_device, m_clock, m_core, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
+      m_cpu(m_device, m_clock, m_core, m_bus)
 {
+    m_memory.init_vram(m_device.is_cgb_hardware());
 }

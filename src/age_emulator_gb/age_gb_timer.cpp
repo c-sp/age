@@ -19,7 +19,7 @@
 #include "age_gb_timer.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -41,9 +41,10 @@ constexpr uint8_t gb_tac_start_timer = 0x04;
 //
 //---------------------------------------------------------
 
-age::gb_timer::gb_timer(gb_core &core)
-    : m_core(core),
-      m_counter(core)
+age::gb_timer::gb_timer(const gb_clock &clock, gb_core &core)
+    : m_clock(clock),
+      m_core(core),
+      m_counter(clock)
 {
     write_tac(0);
 }
@@ -91,7 +92,7 @@ age::uint8_t age::gb_timer::read_tima()
                 << ", current counter is " << m_counter.get_current_value());
 
             // verified by mooneye-gb:
-            //  loading the TIMA with TMA is delayed by 4 cycles during
+            //  loading the TIMA with TMA is delayed by 4 clock cycles during
             //  which the TIMA is zero
             //
             //      acceptance/timer/tima_reload
@@ -160,7 +161,7 @@ void age::gb_timer::write_tima(uint8_t value)
 
         // verified by mooneye-gb:
         //  the write is ignored if the last TIMA increment happened
-        //  one cycle before
+        //  one machine cycle before
         //
         //      acceptance/timer/tima_write_reloading
         //
@@ -316,9 +317,9 @@ void age::gb_timer::switch_double_speed_mode()
     }
 }
 
-void age::gb_timer::set_back_cycles(int offset)
+void age::gb_timer::set_back_clock(int clock_cycle_offset)
 {
-    m_counter.set_back_cycles(offset);
+    m_counter.set_back_clock(clock_cycle_offset);
 }
 
 
@@ -372,7 +373,7 @@ void age::gb_timer::schedule_timer_overflow()
 
     // calculate the cycle offset
     int tima_offset = 0x100 - tima;
-    int cycle_offset = m_tima_counter.get_cycle_offset(tima_offset);
+    int clk_offset = m_tima_counter.get_clock_offset(tima_offset);
 
     // verified by gambatte tests:
     //  the interrupt seems to be raised with a delay
@@ -382,8 +383,8 @@ void age::gb_timer::schedule_timer_overflow()
     //      tima/tc01_1stopstart_offset2_irq_1
     //
     //! \todo this delay seems odd, but I cannot find any test rom disproving it and some gambatte tests do not work without it
-    cycle_offset += m_core.get_machine_cycles_per_cpu_cycle();
+    clk_offset += m_clock.get_machine_cycle_clocks();
 
     LOG("scheduling timer overflow event, cycle offset " << cycle_offset);
-    m_core.insert_event(cycle_offset, gb_event::timer_overflow);
+    m_core.insert_event(clk_offset, gb_event::timer_overflow);
 }

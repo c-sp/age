@@ -11,6 +11,7 @@ include($$PWD/../age.pri)
 
 
 SOURCES += \
+    ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
     ../../../src/age_emulator_gb/age_gb_bus.cpp \
     ../../../src/age_emulator_gb/age_gb_core.cpp \
     ../../../src/age_emulator_gb/age_gb_cpu.cpp \
@@ -29,10 +30,11 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_sound_io_ports.cpp \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.cpp \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
-    ../../../src/age_emulator_gb/age_gb_timer_utils.cpp
+    ../../../src/age_emulator_gb/age_gb_timer_utils.cpp \
+    ../../../src/age_emulator_gb/common/age_gb_device.cpp
 
 HEADERS += \
-    ../../../src/include/emulator/age_gb_emulator.hpp \
+    ../../../src/age_emulator_gb/common/age_gb_clock.hpp \
     ../../../src/age_emulator_gb/age_gb.hpp \
     ../../../src/age_emulator_gb/age_gb_bus.hpp \
     ../../../src/age_emulator_gb/age_gb_core.hpp \
@@ -45,6 +47,8 @@ HEADERS += \
     ../../../src/age_emulator_gb/age_gb_sound.hpp \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.hpp \
     ../../../src/age_emulator_gb/age_gb_timer.hpp \
+    ../../../src/age_emulator_gb/common/age_gb_device.hpp \
+    ../../../src/include/emulator/age_gb_emulator.hpp \
     ../../../src/include/emulator/age_gb_types.hpp
 
 unix {
