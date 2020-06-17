@@ -18,17 +18,9 @@
 
 #include "age_gb_timer.hpp"
 
-#if 0
-#define COUNTER_LOG(x) AGE_GB_CLOCK_LOG(x)
-#else
-#define COUNTER_LOG(x)
-#endif
+#define CLOG_DIV(log) AGE_GB_CLOG(AGE_GB_CLOG_DIV)(log)
 
-#if 0
-#define TIMA_LOG(x) AGE_LOG(x)
-#else
-#define TIMA_LOG(x)
-#endif
+
 
 
 
@@ -68,20 +60,17 @@ int age::gb_common_counter::get_clock_offset(int for_counter_offset) const
 void age::gb_common_counter::reset()
 {
     m_counter_origin = m_clock.get_clock_cycle() >> m_clock_shift;
-    COUNTER_LOG("DIV/TIMA counter reset, offset is " << m_counter_origin);
+    CLOG_DIV("reset DIV counter, origin=" << AGE_LOG_HEX(m_counter_origin));
 }
 
 void age::gb_common_counter::switch_double_speed_mode()
 {
     // preserve the current counter value during speed change
     int counter = get_current_value();
-    COUNTER_LOG("switching between speed modes, counter = " << counter << ", shift = " << m_clock_shift);
 
     m_clock_shift = m_clock.is_double_speed() ? 1 : 2;
     reset();
     m_counter_origin -= counter;
-
-    COUNTER_LOG("switched between speed modes, counter = " << get_current_value() << ", shift = " << m_clock_shift);
 }
 
 void age::gb_common_counter::set_back_clock(int clock_cycle_offset)
@@ -153,8 +142,6 @@ void age::gb_tima_counter::set_tima(int tima)
     // the counter goes low)
     m_tima_origin = m_counter.get_current_value() >> m_counter_shift;
     m_tima_origin -= tima;
-
-    TIMA_LOG("tima origin set to " << AGE_LOG_HEX(m_tima_origin));
 }
 
 

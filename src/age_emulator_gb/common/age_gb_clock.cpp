@@ -20,28 +20,22 @@
 
 age::gb_clock::gb_clock(const gb_device &device)
 {
-    //
-    // verified by gambatte tests
-    //
-    // adjust the initial clock cycle
-    // (due to the Gameboy playing the nintendo intro we're not starting with
-    // cycle 0 at PC 0x0100)
-    //
-    //      div/start_inc_1_cgb_out1E
-    //      div/start_inc_2_cgb_out1F
-    //      div/start_inc_1_dmg08_outAB
-    //      div/start_inc_2_dmg08_outAC
-    //
-    //      tima/tc00_start_1_outF0
-    //      tima/tc00_start_2_outF1
-    //
-    if (device.is_cgb())
+    if (device.is_cgb_hardware())
     {
+        // Gambatte tests:
+        // div/start_inc_1_cgb_out1E
+        // div/start_inc_2_cgb_out1F
         m_clock_cycle = 0x1F * 0x100;
         m_clock_cycle -= 96;
     }
     else
     {
+        // Mooneye GB tests:
+        // acceptance/boot_div-dmgABCmgb
+        //
+        // Gambatte tests:
+        // div/start_inc_1_dmg08_outAB
+        // div/start_inc_2_dmg08_outAC
         m_clock_cycle = 0xAC * 0x100;
         m_clock_cycle -= 52;
     }
@@ -57,7 +51,6 @@ int age::gb_clock::get_clock_cycle() const
 
 age::int8_t age::gb_clock::get_machine_cycle_clocks() const
 {
-    AGE_ASSERT((m_machine_cycle_clocks == 2) || (m_machine_cycle_clocks == 4));
     return m_machine_cycle_clocks;
 }
 

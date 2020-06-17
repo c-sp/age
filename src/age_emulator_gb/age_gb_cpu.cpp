@@ -107,17 +107,17 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 
 #define READ_BYTE(destination, address) \
     { \
+        TICK_MACHINE_CYCLE; \
         m_bus.handle_events(); \
         destination = m_bus.read_byte((address) & 0xFFFF); \
-        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
 #define WRITE_BYTE(address, value) \
     { \
+        TICK_MACHINE_CYCLE; \
         m_bus.handle_events(); \
         m_bus.write_byte((address) & 0xFFFF, (value) & 0xFF); \
-        TICK_MACHINE_CYCLE; \
     } \
     (void)0 // no-op to force semicolon when using this macro
 
@@ -916,10 +916,10 @@ void age::gb_cpu::emulate_instruction()
         return;
     }
 
-    // no event handling necessary here, done in emulator's main loop
+    // As described in GB-CTR the Gameboy's CPU prefetches opcodes.
+    // We emulate this behaviour by reading the opcode without incrementing
+    // the clock.
     uint8_t opcode = m_bus.read_byte(m_pc);
-    TICK_MACHINE_CYCLE;
-
     m_pc += m_pc_increment;
     m_pc_increment = 1;
 
@@ -1568,4 +1568,5 @@ void age::gb_cpu::emulate_instruction()
             break;
         }
     }
+    TICK_MACHINE_CYCLE;
 }
