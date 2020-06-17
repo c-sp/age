@@ -24,6 +24,44 @@
 namespace
 {
 
+int test_seconds(const QString &test_result)
+{
+    // see https://github.com/c-sp/gameboy-test-roms
+    if (test_result == "cgb_cpu_instrs")
+    {
+        return 30;
+    }
+    if (test_result == "dmg_cpu_instrs")
+    {
+        return 54;
+    }
+    if (test_result == "cgb_instr_timing")
+    {
+        return 1;
+    }
+    if (test_result == "dmg_instr_timing")
+    {
+        return 1;
+    }
+    if (test_result == "cgb_mem_timing")
+    {
+        return 4;
+    }
+    if (test_result == "dmg_mem_timing")
+    {
+        return 4;
+    }
+    if (test_result == "cgb_sound")
+    {
+        return 37;
+    }
+    if (test_result == "dmg_sound")
+    {
+        return 36;
+    }
+    return 0;
+}
+
 age::test_method blargg_test(const QString &test_file_name, QString &result_file_name, bool for_dmg)
 {
     // blargg test results are always checked by screenshot comparison
@@ -33,31 +71,19 @@ age::test_method blargg_test(const QString &test_file_name, QString &result_file
     QFileInfo test_file_info(test_file_name);
 
     QString test_file_base_name = test_file_info.completeBaseName();
-    QStringList result_file_filter(
-                QString(test_file_base_name.startsWith(prefix, Qt::CaseInsensitive) ? "" : prefix)
-                .append(test_file_base_name)
-                .append("_?*s.png")
-                );
+    QString result_png_name = QString(test_file_base_name.startsWith(prefix, Qt::CaseInsensitive) ? "" : prefix)
+            .append(test_file_base_name)
+            .append(".png");
+    QStringList result_file_filter(result_png_name);
 
     // we expect to find at most one result screenshot
     QFileInfoList file_infos = test_file_info.absoluteDir().entryInfoList(result_file_filter);
     if (file_infos.length() == 1)
     {
         QFileInfo result_file_info = file_infos[0];
-
-        // parse the number of seconds to emulate
-        QString base_name = result_file_info.completeBaseName();
-        int last_underscore = base_name.lastIndexOf('_');
-        QString seconds_string = base_name.mid(
-                    last_underscore + 1,
-                    base_name.length() - last_underscore - 2
-                    );
-        bool parsed = false;
-        int seconds = seconds_string.toInt(&parsed);
-
-        if (parsed)
+        int seconds = test_seconds(result_file_info.completeBaseName());
+        if (seconds > 0)
         {
-            seconds = qMax(1, seconds);
             result_file_name = result_file_info.absoluteFilePath();
             return age::screenshot_test_png(for_dmg, false, seconds * 1000);
         }

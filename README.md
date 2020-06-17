@@ -1,21 +1,20 @@
+![](https://github.com/c-sp/AGE/workflows/AGE%20CI/badge.svg)
 
-![AGE build](docs/age-build.png)
+# AGE - Another Gameboy Emulator
+
+AGE is a Gameboy emulator for Linux/Windows PCs and for your Browser.
+
+The AGE desktop application is written in
+[C++14](https://en.cppreference.com/w/cpp/14) and built with
+[Qt](https://www.qt.io/).
+The AGE Web Application is written in
+[TypeScript](https://www.typescriptlang.org/) and makes use of
+[Angular](https://angular.io) and
+[WebAssembly](https://webassembly.org/)
+(compiled with [Emscripten](https://emscripten.org)).
 
 
-# old readme (to be adjusted)
-
-[![build status](/../badges/master/build.svg)](https://gitlab.com/csprenger/age/commits/master)
-
-**[You can now run AGE in your browser!](https://csprenger.gitlab.io/AGE/)**
-*(it is still an early prototype though)*
-
-### AGE - Another Gameboy Emulator
-
-AGE is a [Gameboy](https://en.wikipedia.org/wiki/Game_Boy)
-[emulator](https://en.wikipedia.org/wiki/Emulator)
-aiming for accuracy over performance.
-
-#### Features
+## AGE Desktop Application Features
 
 - run **Gameboy** and **Gameboy Color** roms
 - improve **visual quality** with configurable image filters
@@ -28,15 +27,11 @@ aiming for accuracy over performance.
 - automatically store and load **savegames**
     (if supported by the respective Gameboy rom)
 - configure **buttons** and **hotkeys** as you like
-- compile for **Windows** and **Linux**
-    (and maybe macOS? I did not try it yet ...)
 
-The AGE desktop GUI stores all settings and savegames in a subdirectory called
-`.age_emulator` in the user's home directory.
+The AGE Desktop Application stores all settings and savegames in a subdirectory
+called `.age_emulator` in the user's home directory.
 
-#### Project structure
 
-The AGE project is structured as follows:
+## Building AGE
 
-* [src](/src) contains the actual AGE source code.
-* [build](/build) is used to separate build related files from the source code.
+![AGE build](docs/age-build.png)

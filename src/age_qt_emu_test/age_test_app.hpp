@@ -23,6 +23,7 @@
 
 #include <atomic>
 
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QObject>
 #include <QRegExp>
@@ -45,9 +46,21 @@ namespace age
 enum class test_type : int
 {
     blargg_test,
+    gambatte_test,
     mooneye_test,
-    gambatte_test
 };
+
+constexpr const char *blargg = "blargg";
+constexpr const char *mooneye_gb = "mooneye-gb";
+constexpr const char *gambatte = "gambatte";
+
+
+
+void print_list(const QString &first_line, const QStringList &message_list);
+
+bool remove_ignored_files(const QString &ignore_list_path,
+                          test_type category,
+                          QSet<QString> &files);
 
 
 
@@ -115,14 +128,12 @@ private:
 
     bool find_files(QSet<QString> &files) const;
     void find_files(const QFileInfo &file_info, QSet<QString> &files) const;
-    bool ignore_files(QSet<QString> &files) const;
     int schedule_test(const QString &file_name, test_method method, const QString &result_file_name = {});
 
     void exit_app_on_finish();
 
     QString test_message(const QString &test_file, const QString &message) const;
     QString number_of_tests_message(QString message, int number_of_tests, int total) const;
-    void print_list(const QString &first_line, const QStringList &message_list) const;
     static int percent(int value, int total);
 
     const QRegExp m_test_file_pattern;
@@ -136,6 +147,7 @@ private:
     QStringList m_pass_messages;
     QStringList m_fail_messages;
     QStringList m_no_test_method_found;
+    QElapsedTimer m_timer;
 };
 
 

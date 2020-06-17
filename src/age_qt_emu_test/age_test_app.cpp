@@ -18,7 +18,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
-#include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 
 #include "age_test_app.hpp"
@@ -73,7 +73,7 @@ void age::test_application::schedule_tests()
     }
 
     // filter test files to ignore
-    else if (!ignore_files(files))
+    else if (!remove_ignored_files(m_ignore_file, m_type, files))
     {
         fprintf(stderr, "could not read ignore list from file %s\n", qPrintable(m_ignore_file));
         QCoreApplication::exit(EXIT_FAILURE);
@@ -89,6 +89,8 @@ void age::test_application::schedule_tests()
     // schedule tests
     else
     {
+        m_timer.start();
+
         for (QString file : files)
         {
             QString result_file;
@@ -237,81 +239,6 @@ void age::test_application::find_files(const QFileInfo &file_info, QSet<QString>
 
 
 
-bool age::test_application::ignore_files(QSet<QString> &files) const
-{
-    QStringList files_to_ignore;
-    bool success = true;
-
-    // try reading the ignore list
-    if (!m_ignore_file.isEmpty())
-    {
-        // terminate with an error, if we cannot open the file for reading
-        QFile file(m_ignore_file);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            success = false;
-        }
-
-        // read the ignore list
-        else
-        {
-            qInfo("reading ignore list from file %s", qPrintable(file.fileName()));
-
-            QTextStream stream(&file);
-            while (!stream.atEnd())
-            {
-                QString line = stream.readLine();
-                line = line.trimmed();
-
-                // ignore empty lines and lines beginning with a '#'
-                if (!line.isEmpty() && !line.startsWith('#'))
-                {
-                    // trim end-of-line comments
-                    auto idx = line.indexOf('#');
-                    if (idx >= 0)
-                    {
-                        line = line.left(idx).trimmed();
-                    }
-
-                    files_to_ignore.append(line);
-                }
-            }
-
-            int entries = files_to_ignore.size();
-            qInfo("ignore list contains %d %s", entries, ((entries == 1) ? "entry" : "entries"));
-        }
-    }
-
-    // remove ignored files, if there was no error reading the ignore list
-    QStringList ignored_files;
-    if (!files_to_ignore.isEmpty() && success)
-    {
-        QMutableSetIterator<QString> itr(files);
-        while (itr.hasNext())
-        {
-            QString file = itr.next();
-            // check each ignore list entry for this file
-            for (QString to_ignore : files_to_ignore)
-            {
-                if (file.contains(to_ignore))
-                {
-                    itr.remove();
-                    ignored_files.append(file);
-                    break;
-                }
-            }
-        }
-    }
-
-    // tell the user about ignored files
-    ignored_files.sort();
-    print_list("ignoring the following file(s):", ignored_files);
-
-    return success;
-}
-
-
-
 int age::test_application::schedule_test(const QString &file_name, test_method method, const QString &result_file_name)
 {
     int result = 0;
@@ -339,6 +266,8 @@ void age::test_application::exit_app_on_finish()
     // if all tests finished, we can exit the application
     if (m_tests_running <= 0)
     {
+        qint64 ms = m_timer.elapsed();
+
         int tests_executed = m_pass_messages.size() + m_fail_messages.size();
         int tests = tests_executed + m_no_test_method_found.size();
 
@@ -350,7 +279,7 @@ void age::test_application::exit_app_on_finish()
         m_no_test_method_found.sort(Qt::CaseInsensitive);
 
         // print a test summary
-        print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
+        // print_list(number_of_tests_message("passed", m_pass_messages.size(), tests), m_pass_messages);
         print_list(number_of_tests_message("failed", m_fail_messages.size(), tests), m_fail_messages);
         print_list(number_of_tests_message("failed with unknown type", m_no_test_method_found.size(), tests), m_no_test_method_found);
 
@@ -367,6 +296,10 @@ void age::test_application::exit_app_on_finish()
         {
             m_test_performance->print_summary();
         }
+
+        qint64 seconds = ms / 1000;
+        seconds = (seconds < 1) ? 1 : seconds;
+        qInfo("\nrunning tests took ~%lld second(s)\n", seconds);
 
         // calculate the return code and trigger exiting the application
         bool success = m_fail_messages.isEmpty() && m_no_test_method_found.isEmpty();
@@ -392,18 +325,6 @@ QString age::test_application::number_of_tests_message(QString message, int numb
            << " (" << percent(number_of_tests, total) << "%):";
 
     return result;
-}
-
-void age::test_application::print_list(const QString &first_line, const QStringList &message_list) const
-{
-    if (!message_list.isEmpty())
-    {
-        qInfo("%s", qPrintable(first_line));
-        for (QString message : message_list)
-        {
-            qInfo("    %s", qPrintable(message));
-        }
-    }
 }
 
 int age::test_application::percent(int value, int total)

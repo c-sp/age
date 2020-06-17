@@ -15,9 +15,24 @@
 //
 
 #include <QFile>
-#include <QElapsedTimer>
 
 #include "age_test_app.hpp"
+
+
+
+
+
+void age::print_list(const QString &first_line, const QStringList &message_list)
+{
+    if (!message_list.isEmpty())
+    {
+        qInfo("%s", qPrintable(first_line));
+        for (QString message : message_list)
+        {
+            qInfo("    %s", qPrintable(message));
+        }
+    }
+}
 
 
 

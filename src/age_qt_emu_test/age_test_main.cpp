@@ -37,15 +37,15 @@ age::optional<age::test_type> parse_test_type(const QString &type_string)
 {
     age::optional<age::test_type> result;
 
-    if (type_string.compare("blargg") == 0)
+    if (type_string.compare(age::blargg) == 0)
     {
         result.set(age::test_type::blargg_test);
     }
-    else if (type_string.compare("mooneye") == 0)
+    else if (type_string.compare(age::mooneye_gb) == 0)
     {
         result.set(age::test_type::mooneye_test);
     }
-    else if (type_string.compare("gambatte") == 0)
+    else if (type_string.compare(age::gambatte) == 0)
     {
         result.set(age::test_type::gambatte_test);
     }
@@ -98,8 +98,7 @@ void prepare_parser(QCommandLineParser &parser)
 [[ noreturn ]] void exit_with_failure(const QCommandLineParser &parser,
                                       const QString &error_message)
 {
-    fprintf(stderr, "%s", qPrintable(error_message));
-    fprintf(stderr, "\n");
+    fprintf(stderr, "%s\n", qPrintable(error_message));
     fprintf(stdout, "%s", qPrintable(parser.helpText()));
     ::exit(EXIT_FAILURE);
 }
