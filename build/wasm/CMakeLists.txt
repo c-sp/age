@@ -41,6 +41,8 @@ set (SOURCES_AGE_COMMON
 )
 
 set (SOURCES_AGE_EMULATOR_GB
+    ${DIR_AGE_EMULATOR_GB}/common/age_gb_clock.cpp
+    ${DIR_AGE_EMULATOR_GB}/common/age_gb_device.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_bus.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_core.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_cpu.cpp
