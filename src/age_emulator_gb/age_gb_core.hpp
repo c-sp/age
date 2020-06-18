@@ -36,15 +36,6 @@
 namespace age
 {
 
-enum class gb_interrupt : uint8_t
-{
-    joypad = 0x10,
-    serial = 0x08,
-    timer = 0x04,
-    lcd = 0x02,
-    vblank = 0x01
-};
-
 enum class gb_state
 {
     halted = 0,
@@ -75,33 +66,20 @@ public:
 
     gb_core(const gb_device &device, gb_clock &clock);
 
-    gb_state get_state() const;
-
     void insert_event(int clock_cycle_offset, gb_event event);
     void remove_event(gb_event event);
     gb_event poll_event();
     int get_event_cycle(gb_event event) const;
     void set_back_clock(int clock_cycle_offset);
 
+    bool ongoing_dma() const;
     void start_dma();
     void finish_dma();
 
-    void request_interrupt(gb_interrupt interrupt);
-    void ei_delayed();
-    void ei_now();
-    void di();
-    bool halt();
     void stop();
-    bool must_service_interrupt();
-    uint8_t get_interrupt_to_service();
 
     uint8_t read_key1() const;
-    uint8_t read_ie() const;
-    uint8_t read_if() const;
-
     void write_key1(uint8_t value);
-    void write_ie(uint8_t value);
-    void write_if(uint8_t value);
 
 
 
@@ -127,23 +105,12 @@ private:
         std::array<int, to_integral(gb_event::none)> m_event_cycle;
     };
 
-
-
-    void check_halt_mode();
-
     const gb_device &m_device;
     gb_clock &m_clock;
 
     gb_events m_events;
-    gb_state m_state = gb_state::cpu_active;
-
-    bool m_halt = false;
-    bool m_ei = false;
-    bool m_ime = false;
-
+    bool m_ongoing_dma = false;
     uint8_t m_key1 = 0x7E;
-    uint8_t m_if = 0xE0;
-    uint8_t m_ie = 0;
 };
 
 } // namespace age

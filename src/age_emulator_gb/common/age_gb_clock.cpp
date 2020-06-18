@@ -16,6 +16,12 @@
 
 #include "age_gb_clock.hpp"
 
+#if AGE_GB_CLOG_CLOCK
+#define CLOG(log) AGE_LOG("clock " << get_clock_cycle() << ": " << log)
+#else
+#define CLOG(log)
+#endif
+
 
 
 age::gb_clock::gb_clock(const gb_device &device)
@@ -39,6 +45,7 @@ age::gb_clock::gb_clock(const gb_device &device)
         m_clock_cycle = 0xAC * 0x100;
         m_clock_cycle -= 52;
     }
+    CLOG("clock initialized");
 }
 
 
@@ -78,5 +85,6 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
 
 void age::gb_clock::set_double_speed(bool is_double_speed)
 {
+    CLOG("double speed " << is_double_speed);
     m_machine_cycle_clocks = is_double_speed ? 2 : 4;
 }

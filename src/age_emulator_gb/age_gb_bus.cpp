@@ -83,6 +83,7 @@ constexpr const age::uint8_array<0x80> cgb_FF80_dump =
 
 age::gb_bus::gb_bus(const gb_device &device,
                     gb_clock &clock,
+                    gb_interrupt_ports &interrupts,
                     gb_core &core,
                     gb_memory &memory,
                     gb_sound &sound,
@@ -92,6 +93,7 @@ age::gb_bus::gb_bus(const gb_device &device,
                     gb_serial &serial)
     : m_device(device),
       m_clock(clock),
+      m_interrupts(interrupts),
       m_core(core),
       m_memory(memory),
       m_sound(sound),
@@ -162,7 +164,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     // 0xFEA0 - 0xFFFF : high ram & IE
     else if ((address & 0x0180) != 0x0100)
     {
-        result = (to_integral(gb_io_port::ie) == address) ? m_core.read_ie() : m_high_ram[address - 0xFE00];
+        result = (to_integral(gb_io_port::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
     }
     // 0xFF00 - 0xFF7F : i/o ports & wave ram
     else
@@ -179,7 +181,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             case to_integral(gb_io_port::tma): result = m_timer.read_tma(); break;
             case to_integral(gb_io_port::tac): result = m_timer.read_tac(); break;
 
-            case to_integral(gb_io_port::if_): result = m_core.read_if(); break;
+            case to_integral(gb_io_port::if_): result = m_interrupts.read_if(); break;
 
             case to_integral(gb_io_port::nr10): result = m_sound.read_nr10(); break;
             case to_integral(gb_io_port::nr11): result = m_sound.read_nr11(); break;
@@ -235,7 +237,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             case to_integral(gb_io_port::wy): result = m_lcd.read_wy(); break;
             case to_integral(gb_io_port::wx): result = m_lcd.read_wx(); break;
 
-            case to_integral(gb_io_port::ie): result = m_core.read_ie(); break;
+            case to_integral(gb_io_port::ie): result = m_interrupts.read_ie(); break;
         }
 
         // CGB ports
@@ -309,7 +311,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     {
         if (to_integral(gb_io_port::ie) == address)
         {
-            m_core.write_ie(byte);
+            m_interrupts.write_ie(byte);
         }
         else
         {
@@ -330,7 +332,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_integral(gb_io_port::tma): m_timer.write_tma(byte); break;
             case to_integral(gb_io_port::tac): m_timer.write_tac(byte); break;
 
-            case to_integral(gb_io_port::if_): m_core.write_if(byte); break;
+            case to_integral(gb_io_port::if_): m_interrupts.write_if(byte); break;
 
             case to_integral(gb_io_port::nr10): m_sound.write_nr10(byte); break;
             case to_integral(gb_io_port::nr11): m_sound.write_nr11(byte); break;
@@ -463,7 +465,7 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::lcd_late_lyc_interrupt:
-                m_core.request_interrupt(gb_interrupt::lcd);
+                m_interrupts.trigger_interrupt(gb_interrupt::lcd);
                 break;
 
             case gb_event::start_hdma:

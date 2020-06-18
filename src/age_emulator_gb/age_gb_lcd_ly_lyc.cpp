@@ -43,10 +43,12 @@
 
 age::gb_ly_counter::gb_ly_counter(const gb_device &device,
                                   const gb_clock &clock,
-                                  gb_core &core)
+                                  gb_core &core,
+                                  gb_interrupt_trigger &interrupts)
     : m_device(device),
       m_clock(clock),
-      m_core(core)
+      m_core(core),
+      m_interrupts(interrupts)
 {
     //
     // verified by gambatte tests
@@ -74,7 +76,7 @@ age::gb_ly_counter::gb_ly_counter(const gb_device &device,
         m_next_scanline_cycle = m_clock.get_clock_cycle() + 60;
     }
 
-    m_core.request_interrupt(gb_interrupt::vblank);
+    m_interrupts.trigger_interrupt(gb_interrupt::vblank);
 }
 
 
@@ -441,7 +443,7 @@ void age::gb_lyc_handler::set_stat(uint8_t value, int mode, bool lcd_enabled)
         LOG((raise_lcd_interrupt ? "" : "NOT ") << "triggering LYC interrupt, next_scanline_offset " << next_scanline_offset);
         if (raise_lcd_interrupt)
         {
-            m_core.request_interrupt(gb_interrupt::lcd);
+            m_interrupts.trigger_interrupt(gb_interrupt::lcd);
         }
     }
 
@@ -559,7 +561,7 @@ void age::gb_lyc_handler::set_lyc(uint8_t value, int mode, bool lcd_enabled)
             }
             else
             {
-                m_core.request_interrupt(gb_interrupt::lcd);
+                m_interrupts.trigger_interrupt(gb_interrupt::lcd);
             }
         }
     }
@@ -632,7 +634,7 @@ void age::gb_lyc_interrupter::lyc_event()
 
     if (interrupt)
     {
-        m_core.request_interrupt(gb_interrupt::lcd);
+        m_interrupts.trigger_interrupt(gb_interrupt::lcd);
     }
 
     // switch to new value, if necessary

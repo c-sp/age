@@ -46,9 +46,11 @@ constexpr uint8_t gb_sc_terminal_selection = 0x01;
 
 age::gb_serial::gb_serial(const gb_device &device,
                           const gb_clock &clock,
+                          gb_interrupt_trigger &interrupts,
                           gb_core &core)
     : m_device(device),
       m_clock(clock),
+      m_interrupts(interrupts),
       m_core(core)
 {
     write_sc(0);
@@ -163,7 +165,7 @@ void age::gb_serial::finish_transfer()
     m_sb = 0xFF;
 
     LOG("request serial transfer interrupt");
-    m_core.request_interrupt(gb_interrupt::serial);
+    m_interrupts.trigger_interrupt(gb_interrupt::serial);
 }
 
 void age::gb_serial::set_back_clock(int clock_cycle_offset)

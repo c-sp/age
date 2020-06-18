@@ -26,40 +26,12 @@
 #define LOG(x)
 #endif
 
-constexpr const age::uint8_array<17> gb_interrupt_pc_lookup =
-{{
-     0,
-     0x40,
-     0x48,
-     0,
-     0x50,
-     0,
-     0,
-     0,
-     0x58,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0x60,
- }};
-
 
 
 age::gb_core::gb_core(const gb_device &device, gb_clock &clock)
     : m_device(device),
       m_clock(clock)
 {
-}
-
-
-
-age::gb_state age::gb_core::get_state() const
-{
-    return m_state;
 }
 
 
@@ -93,67 +65,25 @@ void age::gb_core::set_back_clock(int clock_cycle_offset)
 
 
 
+bool age::gb_core::ongoing_dma() const
+{
+    return m_ongoing_dma;
+}
+
 void age::gb_core::start_dma()
 {
-    m_state = gb_state::dma;
+    m_ongoing_dma = true;
 }
 
 void age::gb_core::finish_dma()
 {
-    m_state = m_halt ? gb_state::halted : gb_state::cpu_active;
+    m_ongoing_dma = false;
 }
 
 
-
-void age::gb_core::request_interrupt(gb_interrupt interrupt)
-{
-    m_if |= to_integral(interrupt);
-    check_halt_mode();
-    LOG("interrupt requested: " << AGE_LOG_DEC(to_integral(interrupt)));
-}
-
-void age::gb_core::ei_delayed()
-{
-    AGE_ASSERT(m_state == gb_state::cpu_active);
-    m_ei = !m_ime;
-    LOG("ei " << m_ei << ", ime " << m_ime);
-}
-
-void age::gb_core::ei_now()
-{
-    AGE_ASSERT(m_state == gb_state::cpu_active);
-    m_ei = false;
-    m_ime = true;
-    LOG("ei " << m_ei << ", ime " << m_ime);
-}
-
-void age::gb_core::di()
-{
-    AGE_ASSERT(m_state == gb_state::cpu_active);
-    m_ei = false;
-    m_ime = false;
-    LOG("ei " << m_ei << ", ime " << m_ime);
-}
-
-bool age::gb_core::halt()
-{
-    // demotronic demo:
-    //   - ie > 0
-    //   - if = ime = 0
-    //   - halt pauses, until interrupt would occur (if & ie > 0)
-    //   - however, the interrupt is not serviced because ime = 0
-    //  => special halt treatment only for m_ei = 0?
-    AGE_ASSERT(m_state == gb_state::cpu_active);
-    LOG("halted");
-    m_halt = true;
-    m_state = gb_state::halted;
-    check_halt_mode();
-    return !m_ime && !m_halt;
-}
 
 void age::gb_core::stop()
 {
-    AGE_ASSERT(m_state == gb_state::cpu_active);
     if (m_device.is_cgb() && ((m_key1 & 0x01) > 0))
     {
         m_key1 ^= 0x81;
@@ -164,60 +94,6 @@ void age::gb_core::stop()
     insert_event(0, gb_event::switch_double_speed);
 }
 
-bool age::gb_core::must_service_interrupt()
-{
-    AGE_ASSERT(m_state == gb_state::cpu_active);
-    bool result = false;
-
-    // we assume that m_ime is false, if m_ei is true
-    if (m_ei)
-    {
-        m_ime = true;
-        m_ei = false;
-        LOG("ei " << m_ei << ", ime " << m_ime);
-    }
-    else if (m_ime)
-    {
-        int interrupt = m_ie & m_if & 0x1F;
-        result = (interrupt > 0);
-
-        if (result)
-        {
-            LOG("noticed interrupt " << AGE_LOG_HEX(interrupt));
-            AGE_ASSERT(!m_halt); // should have been terminated by write_iX() call already
-            m_ime = false; // disable interrupts
-        }
-    }
-
-    return result;
-}
-
-age::uint8_t age::gb_core::get_interrupt_to_service()
-{
-    //! \todo this does not work with Gambatte tests (sometimes m_state == dma)
-    // AGE_ASSERT(m_state == gb_state::cpu_active);
-
-    uint8_t interrupt = m_ie & m_if & 0x1F;
-    if (interrupt > 0)
-    {
-        // lower interrupt bits have higher priority
-        interrupt &= ~(interrupt - 1); // get lowest interrupt bit that is set
-        m_if &= ~interrupt; // clear interrupt bit
-
-        AGE_ASSERT(   (interrupt == 0x01)
-                   || (interrupt == 0x02)
-                   || (interrupt == 0x04)
-                   || (interrupt == 0x08)
-                   || (interrupt == 0x10));
-
-        interrupt = gb_interrupt_pc_lookup[interrupt];
-
-        AGE_ASSERT(interrupt > 0);
-    }
-
-    return interrupt;
-}
-
 
 
 age::uint8_t age::gb_core::read_key1() const
@@ -225,69 +101,10 @@ age::uint8_t age::gb_core::read_key1() const
     return m_key1;
 }
 
-age::uint8_t age::gb_core::read_if() const
-{
-    LOG(AGE_LOG_HEX(m_if));
-    return m_if;
-}
-
-age::uint8_t age::gb_core::read_ie() const
-{
-    return m_ie;
-}
-
-
-
 void age::gb_core::write_key1(uint8_t value)
 {
     LOG(AGE_LOG_HEX(value));
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
-}
-
-void age::gb_core::write_if(uint8_t value)
-{
-    LOG(AGE_LOG_HEX(value));
-    m_if = value | 0xE0;
-    check_halt_mode();
-}
-
-void age::gb_core::write_ie(uint8_t value)
-{
-    LOG(AGE_LOG_HEX(value));
-    m_ie = value;
-    check_halt_mode();
-}
-
-
-
-//---------------------------------------------------------
-//
-//   private methods
-//
-//---------------------------------------------------------
-
-void age::gb_core::check_halt_mode()
-{
-    // terminate halt state once ie & if > 0, even if ime is cleared
-    if (m_halt && ((m_if & m_ie & 0x1F) > 0))
-    {
-        m_halt = false;
-        if (m_state == gb_state::halted)
-        {
-            m_state = gb_state::cpu_active;
-        }
-
-        // seen in gambatte source code, no other source found on this yet:
-        // for CGB, unhalting on interrupt takes an additional 4 cycles
-        // (however, some gambatte tests check this indirectly by relying
-        // on interrupts during a halt)
-        if (m_device.is_cgb())
-        {
-            m_clock.tick_machine_cycle();
-        }
-
-        LOG("halt state terminated");
-    }
 }
 
 

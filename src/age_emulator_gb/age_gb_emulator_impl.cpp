@@ -72,22 +72,21 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     // we usually emulate a little bit past that cycle)
     while (m_clock.get_clock_cycle() < cycle_to_go)
     {
-        m_bus.handle_events(); // may change the current gb_state
-        switch (m_core.get_state())
+        m_bus.handle_events(); // may change the current "halted" state
+
+        if (m_core.ongoing_dma())
         {
-            case gb_state::halted:
-                m_clock.tick_machine_cycle();
-                break;
-
-            case gb_state::cpu_active:
-                m_cpu.emulate_instruction();
-                break;
-
-            case gb_state::dma:
-                AGE_ASSERT(m_device.is_cgb());
-                m_bus.handle_dma();
-                m_core.finish_dma();
-                break;
+            AGE_ASSERT(m_device.is_cgb());
+            m_bus.handle_dma();
+            m_core.finish_dma();
+        }
+        else if (m_interrupts.halted())
+        {
+            m_clock.tick_machine_cycle();
+        }
+        else
+        {
+            m_cpu.emulate();
         }
     }
 
@@ -154,14 +153,15 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
     : m_memory(rom),
       m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
       m_clock(m_device),
+      m_interrupts(m_device, m_clock),
       m_core(m_device, m_clock),
       m_sound(m_clock, m_device.is_cgb(), pcm_vec),
-      m_lcd(m_device, m_clock, m_core, m_memory, screen_buf, dmg_green),
-      m_timer(m_clock, m_core),
-      m_joypad(m_device, m_core),
-      m_serial(m_device, m_clock, m_core),
-      m_bus(m_device, m_clock, m_core, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
-      m_cpu(m_device, m_clock, m_core, m_bus)
+      m_lcd(m_device, m_clock, m_core, m_interrupts, m_memory, screen_buf, dmg_green),
+      m_timer(m_clock, m_interrupts, m_core),
+      m_joypad(m_device, m_interrupts),
+      m_serial(m_device, m_clock, m_interrupts, m_core),
+      m_bus(m_device, m_clock, m_interrupts, m_core, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
+      m_cpu(m_device, m_clock, m_interrupts, m_core, m_bus)
 {
     m_memory.init_vram(m_device.is_cgb_hardware());
 }

@@ -28,44 +28,11 @@
 
 
 
-#define AGE_GB_CLOG_DIV 1
-
-#define _CONCAT(a, ...) a ## __VA_ARGS__
-#define AGE_GB_CLOG(type) _CONCAT(AGE_GB_CLOG_, type)
-#define AGE_GB_CLOG_(log)
-#define AGE_GB_CLOG_0(log)
-#define AGE_GB_CLOG_1(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << ": " << log)
-
-#ifdef AGE_DEBUG
-#define AGE_GB_CLOCK_LOG(x) AGE_LOG("clock " << m_clock.get_clock_cycle() << ": " << x)
-#else
-#define AGE_GB_CLOCK_LOG(x)
-#endif
-
-
-
 namespace age
 {
 
 constexpr int gb_no_clock_cycle = -1;
 constexpr int gb_clock_cycles_per_second = 4194304;
-
-//! \todo remove this once it's no longer used (no negative cycle numbers!)
-#define AGE_GB_SET_BACK_CLOCK_OVERFLOW(value, offset) \
-    if (value != gb_no_clock_cycle) \
-    { \
-        /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
-        AGE_ASSERT(offset >= gb_clock_cycles_per_second); \
-        AGE_ASSERT(0 == (offset & (gb_clock_cycles_per_second - 1))); \
-        value -= offset; \
-    } \
-    else (void)0 // no-op to force semicolon when using this macro
-
-#define AGE_GB_SET_BACK_CLOCK(value, offset) \
-    AGE_ASSERT((value == gb_no_clock_cycle) || (value >= offset)); \
-    AGE_GB_SET_BACK_CLOCK_OVERFLOW(value, offset)
-
-
 
 class gb_clock
 {
@@ -90,6 +57,41 @@ private:
 };
 
 } // namespace age
+
+
+
+//! \todo remove this once it's no longer used (no negative cycle numbers!)
+#define AGE_GB_SET_BACK_CLOCK_OVERFLOW(value, offset) \
+    if (value != gb_no_clock_cycle) \
+    { \
+        /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
+        AGE_ASSERT(offset >= gb_clock_cycles_per_second); \
+        AGE_ASSERT(0 == (offset & (gb_clock_cycles_per_second - 1))); \
+        value -= offset; \
+    } \
+    else (void)0 // no-op to force semicolon when using this macro
+
+#define AGE_GB_SET_BACK_CLOCK(value, offset) \
+    AGE_ASSERT((value == gb_no_clock_cycle) || (value >= offset)); \
+    AGE_GB_SET_BACK_CLOCK_OVERFLOW(value, offset)
+
+
+
+#define AGE_GB_CLOG_CLOCK 1
+#define AGE_GB_CLOG_DIV 0
+#define AGE_GB_CLOG_INTERRUPTS 1
+
+#define _CONCAT(a, ...) a ## __VA_ARGS__
+#define AGE_GB_CLOG(type) _CONCAT(AGE_GB_CLOG_, type)
+#define AGE_GB_CLOG_0(log)
+#define AGE_GB_CLOG_1(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << ": " << log)
+
+//! \todo replacae AGE_GB_CLOCK_LOG with AGE_GB_CLOG
+#ifdef AGE_DEBUG
+#define AGE_GB_CLOCK_LOG(x) AGE_LOG("clock " << m_clock.get_clock_cycle() << ": " << x)
+#else
+#define AGE_GB_CLOCK_LOG(x)
+#endif
 
 
 

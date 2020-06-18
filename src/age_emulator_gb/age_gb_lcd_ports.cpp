@@ -384,7 +384,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                         && (next_scanline_offset == 4))
                 {
                     LOG("raising LCD interrupt for mode 2");
-                    m_core.request_interrupt(gb_interrupt::lcd);
+                    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
                 }
                 break;
             }
@@ -507,7 +507,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                         && (next_scanline_offset == gb_cycles_per_scanline))
                 {
                     LOG("raising CGB LCD interrupt for mode 2");
-                    m_core.request_interrupt(gb_interrupt::lcd);
+                    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
                 }
                 break;
             }
@@ -516,7 +516,7 @@ void age::gb_lcd::write_stat(uint8_t value)
         // raise LCD interrupt, if required
         if (raise_lcd_interrupt)
         {
-            m_core.request_interrupt(gb_interrupt::lcd);
+            m_interrupts.trigger_interrupt(gb_interrupt::lcd);
         }
 
         //

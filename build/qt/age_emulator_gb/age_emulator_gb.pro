@@ -11,6 +11,7 @@ include($$PWD/../age.pri)
 
 
 SOURCES += \
+    ../../../src/age_emulator_gb/age_gb_cpu_opcodes.cpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
     ../../../src/age_emulator_gb/age_gb_bus.cpp \
     ../../../src/age_emulator_gb/age_gb_core.cpp \
@@ -31,7 +32,8 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.cpp \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
     ../../../src/age_emulator_gb/age_gb_timer_utils.cpp \
-    ../../../src/age_emulator_gb/common/age_gb_device.cpp
+    ../../../src/age_emulator_gb/common/age_gb_device.cpp \
+    ../../../src/age_emulator_gb/common/age_gb_interrupts.cpp
 
 HEADERS += \
     ../../../src/age_emulator_gb/common/age_gb_clock.hpp \
@@ -48,6 +50,7 @@ HEADERS += \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.hpp \
     ../../../src/age_emulator_gb/age_gb_timer.hpp \
     ../../../src/age_emulator_gb/common/age_gb_device.hpp \
+    ../../../src/age_emulator_gb/common/age_gb_interrupts.hpp \
     ../../../src/include/emulator/age_gb_emulator.hpp \
     ../../../src/include/emulator/age_gb_types.hpp
 

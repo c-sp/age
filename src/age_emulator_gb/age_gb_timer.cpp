@@ -43,8 +43,9 @@ constexpr uint8_t gb_tac_start_timer = 0x04;
 //
 //---------------------------------------------------------
 
-age::gb_timer::gb_timer(const gb_clock &clock, gb_core &core)
+age::gb_timer::gb_timer(const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_core &core)
     : m_clock(clock),
+      m_interrupts(interrupts),
       m_core(core),
       m_counter(clock)
 {
@@ -307,7 +308,7 @@ void age::gb_timer::timer_overflow()
 
     // trigger the timer interrupt and schedule
     // the next timer overflow event
-    m_core.request_interrupt(gb_interrupt::timer);
+    m_interrupts.trigger_interrupt(gb_interrupt::timer);
     schedule_timer_overflow();
 }
 
@@ -360,7 +361,7 @@ int age::gb_timer::check_for_early_increment(int new_increment_bit)
         AGE_ASSERT(tima <= 0x100);
         if (tima == 0x100)
         {
-            m_core.request_interrupt(gb_interrupt::timer);
+            m_interrupts.trigger_interrupt(gb_interrupt::timer);
         }
     }
 

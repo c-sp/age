@@ -46,7 +46,9 @@ void gb_emulate(gb_emulator &emulator, qint64 cycles_to_emulate);
 test_method screenshot_test_png(bool force_dmg, bool dmg_green, qint64 millis_to_emulate);
 
 
-test_method mooneye_test_method(const QString &file_name);
+test_method mooneye_dmg_test(const QString &file_name);
+
+test_method mooneye_cgb_test(const QString &file_name);
 
 
 test_method blargg_dmg_test(const QString &file_name, QString &result_file_name);

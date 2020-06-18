@@ -24,7 +24,7 @@
 #include <age_types.hpp>
 
 #include "common/age_gb_device.hpp"
-#include "age_gb_core.hpp"
+#include "common/age_gb_interrupts.hpp"
 
 
 
@@ -37,7 +37,7 @@ class gb_joypad
 
 public:
 
-    gb_joypad(const gb_device &device, gb_core &core);
+    gb_joypad(const gb_device &device, gb_interrupt_trigger &interrupts);
 
     uint8_t read_p1() const;
     void write_p1(uint8_t byte);
@@ -46,7 +46,7 @@ public:
 
 private:
 
-    gb_core &m_core;
+    gb_interrupt_trigger &m_interrupts;
     uint8_t m_p1;
     uint8_t m_p14 = 0x0F;
     uint8_t m_p15 = 0x0F;

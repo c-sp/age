@@ -49,9 +49,10 @@ constexpr const age::uint8_array<0x40> cgb_objp_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd::gb_lcd(const gb_device &device, const gb_clock &clock, gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
-    : gb_lcd_ppu(device, clock, core, memory, dmg_green),
+age::gb_lcd::gb_lcd(const gb_device &device, const gb_clock &clock, gb_core &core, gb_interrupt_trigger &interrupts, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
+    : gb_lcd_ppu(device, clock, core, interrupts, memory, dmg_green),
       m_core(core),
+      m_interrupts(interrupts),
       m_screen_buffer(frame_handler)
 {
     // initialize color palettes
@@ -300,7 +301,7 @@ void age::gb_lcd::mode0_interrupt()
                  && (get_ly() == m_lyc_mode0_int)))
     {
         LOG("triggering mode 0 interrupt");
-        m_core.request_interrupt(gb_interrupt::lcd);
+        m_interrupts.trigger_interrupt(gb_interrupt::lcd);
     }
     m_stat_mode0_int = m_stat;
     m_lyc_mode0_int = get_lyc();
@@ -358,11 +359,11 @@ void age::gb_lcd::mode1_start_line(gb_lcd &lcd)
     if (lcd.get_scanline() == (gb_screen_height - 1))
     {
         ++lcd.m_stat;
-        lcd.m_core.request_interrupt(gb_interrupt::vblank);
+        lcd.m_interrupts.trigger_interrupt(gb_interrupt::vblank);
 
         if (lcd.m_allow_mode1_interrupt && !lcd.m_skip_next_mode1_interrupt)
         {
-            lcd.m_core.request_interrupt(gb_interrupt::lcd);
+            lcd.m_interrupts.trigger_interrupt(gb_interrupt::lcd);
         }
         lcd.m_skip_next_mode1_interrupt = false;
     }
@@ -462,7 +463,7 @@ void age::gb_lcd::mode2_start_ly0(gb_lcd &lcd)
     // (do this after next_line() was called)
     if (lcd.m_allow_mode2_ly0_interrupt_int && !lcd.is_interruptable_coincidence())
     {
-        lcd.m_core.request_interrupt(gb_interrupt::lcd);
+        lcd.m_interrupts.trigger_interrupt(gb_interrupt::lcd);
     }
     lcd.m_allow_mode2_ly0_interrupt_int = lcd.m_allow_mode2_ly0_interrupt;
 }
@@ -486,7 +487,7 @@ void age::gb_lcd::mode2_early_interrupt(gb_lcd &lcd)
     //
     if (lcd.m_allow_mode2_interrupt && !lcd.is_interruptable_coincidence())
     {
-        lcd.m_core.request_interrupt(gb_interrupt::lcd);
+        lcd.m_interrupts.trigger_interrupt(gb_interrupt::lcd);
     }
 
     // execute the actual mode 2 actions after the interrupt was triggered

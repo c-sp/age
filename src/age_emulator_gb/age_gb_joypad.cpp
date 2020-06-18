@@ -62,7 +62,7 @@ void age::gb_joypad::write_p1(uint8_t byte)
     int raise_interrupt = (m_p1 ^ byte) & 0x0F;
     if (raise_interrupt > 0)
     {
-        m_core.request_interrupt(gb_interrupt::joypad);
+        m_interrupts.trigger_interrupt(gb_interrupt::joypad);
     }
 
     // save new value
@@ -99,8 +99,9 @@ void age::gb_joypad::set_buttons_down(int buttons)
 
 
 
-age::gb_joypad::gb_joypad(const gb_device &device, gb_core &core)
-    : m_core(core),
+age::gb_joypad::gb_joypad(const gb_device &device,
+                          gb_interrupt_trigger &interrupts)
+    : m_interrupts(interrupts),
       m_p1(device.is_cgb_hardware() ? 0xFF : 0xCF)
 {
 }

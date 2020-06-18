@@ -24,6 +24,7 @@
 #include <age_types.hpp>
 
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_interrupts.hpp"
 #include "age_gb_core.hpp"
 
 
@@ -86,7 +87,7 @@ class gb_timer
 
 public:
 
-    gb_timer(const gb_clock &clock, gb_core &core);
+    gb_timer(const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_core &core);
 
     uint8_t read_div() const;
     uint8_t read_tima();
@@ -108,6 +109,7 @@ private:
     void schedule_timer_overflow();
 
     const gb_clock &m_clock;
+    gb_interrupt_trigger &m_interrupts;
     gb_core &m_core;
     gb_common_counter m_counter = {m_clock};
     gb_tima_counter m_tima_counter = {m_counter};

@@ -26,6 +26,7 @@
 
 #include "common/age_gb_device.hpp"
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_interrupts.hpp"
 
 #include "age_gb_bus.hpp"
 #include "age_gb_core.hpp"
@@ -69,6 +70,7 @@ private:
     gb_memory m_memory;
     gb_device m_device;
     gb_clock m_clock;
+    gb_interrupt_dispatcher m_interrupts;
     gb_core m_core;
     gb_sound m_sound;
     gb_lcd m_lcd;

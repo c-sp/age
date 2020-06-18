@@ -20,26 +20,35 @@
 
 
 
-age::test_method age::mooneye_test_method(const QString &file_name)
+namespace {
+
+age::test_method mooneye_test(const QString &file_name, bool for_dmg)
 {
-    // this method is based on mooneye-gb/src/acceptance_tests/fixture.rs
-    return [=](const uint8_vector &test_rom, const uint8_vector&)
+    // filter CGB tests
+    if (for_dmg)
     {
-        // CGB mooneye-gb test roms are identified by their file name
-        age::gb_hardware hardware = age::gb_hardware::dmg;
-
-        if (file_name.endsWith(".gb", Qt::CaseInsensitive))
-        {
-            QString no_extension = file_name.left(file_name.length() - 3);
-
-            if (no_extension.contains("-cgb", Qt::CaseInsensitive) || no_extension.endsWith("-c", Qt::CaseInsensitive))
-            {
-                hardware = age::gb_hardware::cgb;
-            }
+        if (file_name.contains("-cgb") || file_name.contains("-C")) {
+            return {};
         }
+    }
+    // filter DMG tests
+    else
+    {
+        if (file_name.contains("-dmg") || file_name.contains("-G")) {
+            return {};
+        }
+    }
 
+    age::gb_hardware hardware = for_dmg
+            ? age::gb_hardware::dmg
+            : age::gb_hardware::cgb;
+
+    return [=](const age::uint8_vector &test_rom, const age::uint8_vector&)
+    {
         // create emulator
         QSharedPointer<age::gb_emulator> emulator = QSharedPointer<age::gb_emulator>(new age::gb_emulator(test_rom, hardware));
+
+        // based on mooneye-gb/src/acceptance_tests/fixture.rs
 
         // run the test
         int cycles_per_step = emulator->get_cycles_per_second() >> 8;
@@ -57,7 +66,7 @@ age::test_method age::mooneye_test_method(const QString &file_name)
 
         // evaluate the test result
         // (a passed test is signalled by a part of the Fibonacci Sequence)
-        gb_test_info info = emulator->get_test_info();
+        age::gb_test_info info = emulator->get_test_info();
         bool pass = (3 == info.m_b)
                 && (5 == info.m_c)
                 && (8 == info.m_d)
@@ -69,4 +78,18 @@ age::test_method age::mooneye_test_method(const QString &file_name)
         // return an error message, if the test failed
         return create_gb_test_result(*emulator, pass ? "" : "failed");
     };
+}
+
+}
+
+
+
+age::test_method age::mooneye_dmg_test(const QString &file_name)
+{
+    return mooneye_test(file_name, true);
+}
+
+age::test_method age::mooneye_cgb_test(const QString &file_name)
+{
+    return mooneye_test(file_name, false);
 }

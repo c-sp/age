@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#ifndef AGE_GB_MACHINE_TYPE_HPP
-#define AGE_GB_MACHINE_TYPE_HPP
+#ifndef AGE_GB_DEVICE_HPP
+#define AGE_GB_DEVICE_HPP
 
 //!
 //! \file
@@ -47,4 +47,4 @@ private:
 
 
 
-#endif // AGE_GB_MACHINE_TYPE_HPP
+#endif // AGE_GB_DEVICE_HPP
