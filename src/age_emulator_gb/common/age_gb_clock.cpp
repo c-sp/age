@@ -46,6 +46,7 @@ age::gb_clock::gb_clock(const gb_device &device)
         m_clock_cycle -= 52;
     }
     CLOG("clock initialized");
+    AGE_ASSERT((m_clock_cycle % 4) == 0);
 }
 
 
@@ -83,8 +84,33 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
     AGE_GB_SET_BACK_CLOCK(m_clock_cycle, clock_cycle_offset);
 }
 
-void age::gb_clock::set_double_speed(bool is_double_speed)
+
+
+bool age::gb_clock::trigger_speed_change()
 {
-    CLOG("double speed " << is_double_speed);
-    m_machine_cycle_clocks = is_double_speed ? 2 : 4;
+    if ((m_key1 & 0x01) == 0)
+    {
+        // no speed change requested
+        return false;
+    }
+
+    // toggle double speed
+    m_key1 ^= 0x81;
+    const bool double_speed = (m_key1 & 0x80) > 0;
+    m_machine_cycle_clocks = double_speed ? 2 : 4;
+
+    CLOG("double speed " << (double_speed ? "activated" : "deactivated"));
+    return true;
+}
+
+age::uint8_t age::gb_clock::read_key1() const
+{
+    CLOG("read key1 = " << AGE_LOG_HEX8(m_key1));
+    return m_key1;
+}
+
+void age::gb_clock::write_key1(uint8_t value)
+{
+    m_key1 = (m_key1 & 0xFE) | (value & 0x01);
+    CLOG("write key1 = " << AGE_LOG_HEX8(m_key1));
 }

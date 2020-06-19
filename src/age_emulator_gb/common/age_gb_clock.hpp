@@ -34,12 +34,18 @@ namespace age
 constexpr int gb_no_clock_cycle = -1;
 constexpr int gb_clock_cycles_per_second = 4194304;
 
+
+
 class gb_clock
 {
 public:
 
     gb_clock(const gb_device &device);
 
+    //! \brief Get the current 4Mhz cycle.
+    //!
+    //! This clock runs at 4Mhz regardless of the current
+    //! Gameboy Color speed setting.
     int get_clock_cycle() const;
     int8_t get_machine_cycle_clocks() const;
     bool is_double_speed() const;
@@ -48,12 +54,15 @@ public:
     void tick_2_clock_cycles();
     void set_back_clock(int clock_cycle_offset);
 
-    void set_double_speed(bool is_double_speed);
+    bool trigger_speed_change();
+    uint8_t read_key1() const;
+    void write_key1(uint8_t value);
 
 private:
 
     int m_clock_cycle = 0;
     int8_t m_machine_cycle_clocks = 4;
+    uint8_t m_key1 = 0x7E;
 };
 
 } // namespace age

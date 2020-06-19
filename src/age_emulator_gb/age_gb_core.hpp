@@ -36,13 +36,6 @@
 namespace age
 {
 
-enum class gb_state
-{
-    halted = 0,
-    cpu_active = 1,
-    dma = 2
-};
-
 enum class gb_event : uint8_t
 {
     switch_double_speed = 0,
@@ -72,17 +65,6 @@ public:
     int get_event_cycle(gb_event event) const;
     void set_back_clock(int clock_cycle_offset);
 
-    bool ongoing_dma() const;
-    void start_dma();
-    void finish_dma();
-
-    void stop();
-
-    uint8_t read_key1() const;
-    void write_key1(uint8_t value);
-
-
-
 private:
 
     class gb_events
@@ -109,8 +91,6 @@ private:
     gb_clock &m_clock;
 
     gb_events m_events;
-    bool m_ongoing_dma = false;
-    uint8_t m_key1 = 0x7E;
 };
 
 } // namespace age

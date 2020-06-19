@@ -65,50 +65,6 @@ void age::gb_core::set_back_clock(int clock_cycle_offset)
 
 
 
-bool age::gb_core::ongoing_dma() const
-{
-    return m_ongoing_dma;
-}
-
-void age::gb_core::start_dma()
-{
-    m_ongoing_dma = true;
-}
-
-void age::gb_core::finish_dma()
-{
-    m_ongoing_dma = false;
-}
-
-
-
-void age::gb_core::stop()
-{
-    if (m_device.is_cgb() && ((m_key1 & 0x01) > 0))
-    {
-        m_key1 ^= 0x81;
-    }
-    const bool double_speed = (m_key1 & 0x80) > 0;
-    m_clock.set_double_speed(double_speed);
-    LOG("double speed " << m_double_speed << ", machine cycles per cpu cycle " << m_machine_cycles_per_cpu_cycle);
-    insert_event(0, gb_event::switch_double_speed);
-}
-
-
-
-age::uint8_t age::gb_core::read_key1() const
-{
-    return m_key1;
-}
-
-void age::gb_core::write_key1(uint8_t value)
-{
-    LOG(AGE_LOG_HEX(value));
-    m_key1 = (m_key1 & 0xFE) | (value & 0x01);
-}
-
-
-
 //---------------------------------------------------------
 //
 //   gb_events class

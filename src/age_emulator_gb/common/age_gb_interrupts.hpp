@@ -60,9 +60,14 @@ protected:
     void check_halt_mode();
 
     gb_clock &m_clock;
-    uint8_t m_if = 0xE0;
+    uint8_t m_if = 0xE1;
     uint8_t m_ie = 0;
+    bool m_ime = false;
     bool m_halted = false;
+
+    //! Due to delayed interrupt enabling by EI m_ime can change
+    //! even after m_halted has been set.
+    bool m_ime_on_halt = false;
 };
 
 
@@ -88,19 +93,14 @@ public:
 
     using gb_interrupt_ports::gb_interrupt_ports;
 
-    bool interrupts_enabled() const;
-    void enable_interrupts();
-    void disable_interrupts();
+    bool get_ime() const;
+    void set_ime(bool ime);
 
     int next_interrupt_bit() const;
     void interrupt_dispatched(int interrupt_bit);
 
     bool halted() const;
-    bool halt();
-
-private:
-
-    bool m_ime = false;
+    void halt();
 };
 
 } // namespace age

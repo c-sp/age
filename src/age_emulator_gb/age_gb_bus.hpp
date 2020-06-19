@@ -138,6 +138,7 @@ public:
 
     void handle_events();
     void handle_dma();
+    bool during_dma() const;
 
     void set_back_clock(int clock_cycle_offset);
 
@@ -175,6 +176,7 @@ private:
     uint8_t m_hdma5 = 0xFF;
     int m_dma_source = 0;
     int m_dma_destination = 0;
+    bool m_during_dma = false;
 };
 
 } // namespace age

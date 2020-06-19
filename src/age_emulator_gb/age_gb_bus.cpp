@@ -245,7 +245,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::key1): result = m_core.read_key1(); break;
+                case to_integral(gb_io_port::key1): result = m_clock.read_key1(); break;
                 case to_integral(gb_io_port::vbk): result = m_memory.read_vbk(); break;
                 case to_integral(gb_io_port::hdma5): result = m_hdma5; break;
                 case to_integral(gb_io_port::rp): result = m_rp; break;
@@ -394,7 +394,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::key1): m_core.write_key1(byte); break;
+                case to_integral(gb_io_port::key1): m_clock.write_key1(byte); break;
                 case to_integral(gb_io_port::vbk): m_memory.write_vbk(byte); break;
                 case to_integral(gb_io_port::hdma1): m_dma_source = (m_dma_source & 0xFF) + (byte << 8); break;
                 case to_integral(gb_io_port::hdma2): m_dma_source = (m_dma_source & 0xFF00) + (byte & 0xF0); break;
@@ -469,7 +469,7 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::start_hdma:
-                m_core.start_dma();
+                m_during_dma = true;
                 break;
 
             case gb_event::start_oam_dma:
@@ -586,6 +586,14 @@ void age::gb_bus::handle_dma()
 
     AGE_ASSERT((m_dma_source & 0xF) == 0);
     AGE_ASSERT((m_dma_destination & 0xF) == 0);
+    m_during_dma = false;
+}
+
+
+
+bool age::gb_bus::during_dma() const
+{
+    return m_during_dma;
 }
 
 
@@ -653,7 +661,7 @@ void age::gb_bus::write_hdma5(uint8_t value)
         // HDMA not running: start GDMA
         if (!m_lcd.is_hdma_active())
         {
-            m_core.start_dma();
+            m_during_dma = true;
             LOG("GDMA activated");
         }
         // HDMA running: stop it

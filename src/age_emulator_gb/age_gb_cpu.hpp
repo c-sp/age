@@ -52,7 +52,8 @@ private:
 
     void set_flags(int from_value);
     void push_byte(int byte);
-    void emulate_opcode(uint8_t opcode);
+    uint8_t read_byte(int address);
+    void execute_prefetched();
 
     const gb_device &m_device;
     gb_clock &m_clock;
@@ -80,7 +81,7 @@ private:
     uint8_t m_h = 0;
     uint8_t m_l = 0;
 
-    uint8_t m_pc_increment = 1; //!< used for HALT emulation
+    uint8_t m_prefetched_opcode = 0;
     bool m_delayed_ei = false; //!< used for EI emulation
     bool m_mooneye_debug_op = false; //!< used to indicate the finishing of a mooneye-gb test
 };

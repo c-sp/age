@@ -22,7 +22,7 @@
 
 
 
-namespace age
+namespace
 {
 
 constexpr uint8_t gb_zero_flag = 0x80;
@@ -837,6 +837,13 @@ void age::gb_cpu::push_byte(int byte)
     PUSH_BYTE(byte);
 }
 
+age::uint8_t age::gb_cpu::read_byte(int address)
+{
+    uint8_t result;
+    READ_BYTE(result, address);
+    return result;
+}
+
 
 
 
@@ -847,12 +854,18 @@ void age::gb_cpu::push_byte(int byte)
 //
 //---------------------------------------------------------
 
-void age::gb_cpu::emulate_opcode(uint8_t opcode)
+void age::gb_cpu::execute_prefetched()
 {
+    // Let PC point to the byte after the prefetched opcode.
+    // HALT may undo this PC increment after prefetching the next opcode.
+    m_pc++;
+    int pc_halt_modifier = 0;
+
+    int opcode = m_prefetched_opcode;
     switch (opcode)
     {
         default:
-            --m_pc; // stay here
+            --m_pc; // invalid opcode, stay here
             break;
 
         // increment & decrement
@@ -1108,7 +1121,7 @@ void age::gb_cpu::emulate_opcode(uint8_t opcode)
 
         case 0xD9: // RETI
             RET;
-            m_interrupts.enable_interrupts();
+            m_interrupts.set_ime(true);
             CLOG_INTERRUPTS("interrupts enabled");
             break;
 
@@ -1143,23 +1156,38 @@ void age::gb_cpu::emulate_opcode(uint8_t opcode)
         case 0x1F: RRA; break;
 
         case 0x00: break; // NOP
-        case 0x10: m_core.stop(); break; // STOP
+
+        case 0x10: // STOP
+            if (m_device.is_cgb()) // only with CGB features activated
+            {
+                bool switch_double_speed = m_clock.trigger_speed_change();
+                if (switch_double_speed)
+                {
+                    m_core.insert_event(0, gb_event::switch_double_speed);
+                }
+            }
+            break;
+
         case 0x2F: m_a = ~m_a; m_hcs_flags = gb_hcs_subtract; m_hcs_operand = 1; break; // CPL
         case 0x37: m_carry_indicator = 0x100; m_hcs_flags = m_hcs_operand = 0; break;   // SCF
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
 
         case 0x76: // HALT
-            m_pc_increment = m_interrupts.halt() ? 0 : 1;
-            CLOG_INTERRUPTS("HALT, next byte read twice = " << (1 - m_pc_increment));
+            m_interrupts.halt();
+            if (!m_interrupts.halted() && !m_interrupts.get_ime())
+            {
+                pc_halt_modifier = -1;
+                CLOG_INTERRUPTS("\"HALT bug\", not incrementing PC");
+            }
             break;
 
         case 0xF3: // DI
-            m_interrupts.disable_interrupts();
-            CLOG_INTERRUPTS("interrupts disabled");
+            m_interrupts.set_ime(false);
+            m_delayed_ei = false;
             break;
 
         case 0xFB: // EI
-            m_delayed_ei = !m_interrupts.interrupts_enabled();
+            m_delayed_ei = !m_interrupts.get_ime();
             break;
 
         case 0x27: // DAA
@@ -1511,5 +1539,7 @@ void age::gb_cpu::emulate_opcode(uint8_t opcode)
             break;
         }
     }
-    TICK_MACHINE_CYCLE;
+
+    READ_BYTE(m_prefetched_opcode, m_pc);
+    m_pc = (m_pc + pc_halt_modifier) & 0xFFFF;
 }

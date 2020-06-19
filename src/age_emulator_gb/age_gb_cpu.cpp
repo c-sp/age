@@ -62,6 +62,7 @@ age::gb_cpu::gb_cpu(const gb_device &device,
     // reset registers (writing m_regs)
     m_pc = 0x0100;
     m_sp = 0xFFFE;
+    m_prefetched_opcode = m_bus.read_byte(m_pc);
 
     if (!m_device.is_cgb_hardware())
     {
@@ -116,14 +117,23 @@ void age::gb_cpu::emulate()
     // has been executed
     if (m_delayed_ei)
     {
-        AGE_ASSERT(!m_interrupts.interrupts_enabled());
-        m_interrupts.enable_interrupts();
-        m_delayed_ei = false;
-        CLOG_INTERRUPTS("allow interrupts after the next CPU instruction");
+        AGE_ASSERT(!m_interrupts.get_ime());
+        CLOG_INTERRUPTS("may enable interrupts after this CPU instruction");
+        execute_prefetched();
+
+        // enable interrupts only if this instruction was no DI
+        if (m_delayed_ei)
+        {
+            m_interrupts.set_ime(true);
+            m_delayed_ei = false;
+        }
+
+        // we're done here
+        return;
     }
 
     // look for any interrupt to dispatch
-    else if (m_interrupts.next_interrupt_bit())
+    if (m_interrupts.next_interrupt_bit())
     {
         CLOG_INTERRUPTS("dispatching interrupt, PC = " << AGE_LOG_HEX16(m_pc));
 
@@ -141,7 +151,8 @@ void age::gb_cpu::emulate()
         push_byte(m_pc >> 8);
 
         int intr_bit = m_interrupts.next_interrupt_bit();
-        AGE_ASSERT(   (intr_bit == 0x01)
+        AGE_ASSERT(   (intr_bit == 0x00)
+                   || (intr_bit == 0x01)
                    || (intr_bit == 0x02)
                    || (intr_bit == 0x04)
                    || (intr_bit == 0x08)
@@ -152,20 +163,16 @@ void age::gb_cpu::emulate()
         push_byte(m_pc);
         m_interrupts.interrupt_dispatched(intr_bit);
 
-        m_clock.tick_machine_cycle();
         m_pc = interrupt_pc_lookup[intr_bit];
+        m_prefetched_opcode = read_byte(m_pc);
 
         CLOG_INTERRUPTS("interrupt " << AGE_LOG_HEX8(intr_bit)
-                        << " dispatched to " << AGE_LOG_HEX(m_pc));
+                        << " dispatched to " << AGE_LOG_HEX16(m_pc));
+
+        // we're done here
         return;
     }
 
-    // As described in GB-CTR the Gameboy's CPU prefetches opcodes.
-    // We emulate this behaviour by reading the opcode without incrementing
-    // the clock.
-    uint8_t opcode = m_bus.read_byte(m_pc);
-    m_pc += m_pc_increment;
-    m_pc_increment = 1;
-
-    emulate_opcode(opcode);
+    // just execute the next instruction
+    execute_prefetched();
 }

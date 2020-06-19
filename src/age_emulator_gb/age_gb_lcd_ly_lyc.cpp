@@ -75,8 +75,6 @@ age::gb_ly_counter::gb_ly_counter(const gb_device &device,
         m_mode1_ly0 = true;
         m_next_scanline_cycle = m_clock.get_clock_cycle() + 60;
     }
-
-    m_interrupts.trigger_interrupt(gb_interrupt::vblank);
 }
 
 

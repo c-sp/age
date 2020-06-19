@@ -74,11 +74,10 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     {
         m_bus.handle_events(); // may change the current "halted" state
 
-        if (m_core.ongoing_dma())
+        if (m_bus.during_dma())
         {
             AGE_ASSERT(m_device.is_cgb());
             m_bus.handle_dma();
-            m_core.finish_dma();
         }
         else if (m_interrupts.halted())
         {
