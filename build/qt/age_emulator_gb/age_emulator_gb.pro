@@ -33,6 +33,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
     ../../../src/age_emulator_gb/age_gb_timer_utils.cpp \
     ../../../src/age_emulator_gb/common/age_gb_device.cpp \
+    ../../../src/age_emulator_gb/common/age_gb_events.cpp \
     ../../../src/age_emulator_gb/common/age_gb_interrupts.cpp
 
 HEADERS += \
@@ -50,6 +51,7 @@ HEADERS += \
     ../../../src/age_emulator_gb/age_gb_sound_utilities.hpp \
     ../../../src/age_emulator_gb/age_gb_timer.hpp \
     ../../../src/age_emulator_gb/common/age_gb_device.hpp \
+    ../../../src/age_emulator_gb/common/age_gb_events.hpp \
     ../../../src/age_emulator_gb/common/age_gb_interrupts.hpp \
     ../../../src/include/emulator/age_gb_emulator.hpp \
     ../../../src/include/emulator/age_gb_types.hpp

@@ -63,6 +63,7 @@ void age::gb_interrupt_trigger::check_halt_mode()
         // Leaving HALT mode adds some delay on CGB hardware
         // if HALT mode was started with IME=1.
         //! \todo we need some test roms for this
+        //! \todo move this to gb_cpu?
         //
         // Indirectly tested:
         //

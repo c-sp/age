@@ -30,24 +30,12 @@
 
 #include "common/age_gb_device.hpp"
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_events.hpp"
 
 
 
 namespace age
 {
-
-enum class gb_event : uint8_t
-{
-    switch_double_speed = 0,
-    timer_overflow = 1,
-    lcd_lyc_check = 2,
-    lcd_late_lyc_interrupt = 3,
-    start_hdma = 4,
-    start_oam_dma = 5,
-    serial_transfer_finished = 6,
-
-    none = 7 // must always be the last value
-};
 
 
 

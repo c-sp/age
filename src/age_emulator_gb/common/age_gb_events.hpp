@@ -14,37 +14,72 @@
 // limitations under the License.
 //
 
-#ifndef AGE_GB_DEVICE_HPP
-#define AGE_GB_DEVICE_HPP
+#ifndef AGE_GB_EVENTS_HPP
+#define AGE_GB_EVENTS_HPP
 
 //!
 //! \file
 //!
 
-#include <emulator/age_gb_types.hpp>
+#include <age_types.hpp>
+
+#include "age_gb_clock.hpp"
 
 
 
 namespace age
 {
 
-class gb_device
+enum class gb_event : uint8_t
 {
+    switch_double_speed = 0,
+    timer_overflow = 1,
+    lcd_lyc_check = 2,
+    lcd_late_lyc_interrupt = 3,
+    start_hdma = 4,
+    start_oam_dma = 5,
+    serial_transfer_finished = 6,
+
+    none = 7 // must be the last value
+};
+
+
+
+class gb_events
+{
+    AGE_DISABLE_COPY(gb_events);
 public:
 
-    gb_device(uint8_t rom_byte_0x143, gb_hardware hardware);
+    gb_events(const gb_clock &clock);
 
-    gb_cart_mode get_cart_mode() const;
-    bool is_cgb() const; //!< get_cart_mode() == gb_cart_mode::cgb
-    bool is_cgb_hardware() const; //!< get_cart_mode() != gb_cart_mode::dmg
+    void schedule_event(gb_event event, int event_clock_cycle);
+    void remove_event(gb_event event);
+    int get_event_cycle(gb_event event) const;
+    gb_event poll_event();
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
-    const gb_cart_mode m_cart_mode;
+    union scheduled_event
+    {
+        struct
+        {
+            gb_event m_event;
+            int m_clock_cycle;
+        } m_struct;
+        int64_t m_int;
+    };
+
+    const gb_clock &m_clock;
+
+    std::array<int, to_integral(gb_event::none)> m_active_events;
+
+    static_assert(sizeof(int) == 4, "gb_events requires int to be exactly 32 bits wide");
+    std::vector<scheduled_event> m_events;
 };
 
 } // namespace age
 
 
 
-#endif // AGE_GB_DEVICE_HPP
+#endif // AGE_GB_EVENTS_HPP

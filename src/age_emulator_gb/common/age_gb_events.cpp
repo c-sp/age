@@ -14,59 +14,101 @@
 // limitations under the License.
 //
 
-#include "age_gb_device.hpp"
+#include <algorithm>
+
+#include "age_gb_events.hpp"
 
 
 
-namespace {
-
-age::gb_cart_mode calculate_cart_mode(const uint8_t rom_byte_0x143,
-                                      const age::gb_hardware hardware)
+age::gb_events::gb_events(const gb_clock &clock)
+    : m_clock(clock)
 {
-    const bool cgb_flag = rom_byte_0x143 >= 0x80;
-    switch (hardware)
+}
+
+
+
+void age::gb_events::schedule_event(gb_event event, int event_clock_cycle)
+{
+    AGE_ASSERT(event_clock_cycle >= m_clock.get_clock_cycle());
+    AGE_ASSERT(event != gb_event::none);
+
+    scheduled_event ev{{.m_event = event, .m_clock_cycle = event_clock_cycle}};
+
+    //! \todo optimize this, the vector is sorted
+    m_events.push_back(ev);
+    // sort descending so that we can pop_back() the next event
+    std::sort(
+        m_events.begin(),
+        m_events.end(),
+        [](const scheduled_event &a, const scheduled_event &b){
+            return a.m_int > b.m_int;
+        }
+    );
+}
+
+
+
+void age::gb_events::remove_event(gb_event event)
+{
+    // is the event scheduled?
+    uint8_t idx = to_integral(event);
+    if (m_active_events[idx] == gb_no_clock_cycle)
     {
-        case age::gb_hardware::dmg:
-            return age::gb_cart_mode::dmg;
-
-        case age::gb_hardware::cgb:
-            return cgb_flag
-                    ? age::gb_cart_mode::cgb
-                    : age::gb_cart_mode::dmg_on_cgb;
-
-        default:
-            // auto-detect hardware
-            return cgb_flag
-                    ? age::gb_cart_mode::cgb
-                    : age::gb_cart_mode::dmg;
+        return;
     }
 
-    // no CGB
-    return age::gb_cart_mode::dmg;
+    // remove scheduled event
+    for (auto it = m_events.begin(); it != m_events.end(); ++it)
+    {
+        if (it->m_struct.m_event == event)
+        {
+            m_events.erase(it);
+            break;
+        }
+    }
+    m_active_events[idx] = gb_no_clock_cycle;
 }
 
-}
 
 
-
-age::gb_device::gb_device(const uint8_t rom_byte_0x143,
-                          const gb_hardware hardware)
-
-    : m_cart_mode(calculate_cart_mode(rom_byte_0x143, hardware))
+int age::gb_events::get_event_cycle(gb_event event) const
 {
+    return m_active_events[to_integral(event)];
 }
 
-age::gb_cart_mode age::gb_device::get_cart_mode() const
+
+
+age::gb_event age::gb_events::poll_event()
 {
-    return m_cart_mode;
+    // no event scheduled
+    if (!m_events.size())
+    {
+        return gb_event::none;
+    }
+
+    // check event clock cycle
+    int current_clk = m_clock.get_clock_cycle();
+    if (current_clk < m_events.back().m_struct.m_clock_cycle)
+    {
+        return gb_event::none;
+    }
+
+    // poll event
+    gb_event event = m_events.back().m_struct.m_event;
+    m_events.pop_back();
+    return event;
 }
 
-bool age::gb_device::is_cgb() const
-{
-    return m_cart_mode == gb_cart_mode::cgb;
-}
 
-bool age::gb_device::is_cgb_hardware() const
+
+void age::gb_events::set_back_clock(int clock_cycle_offset)
 {
-    return m_cart_mode != gb_cart_mode::dmg;
+    for (auto it = m_events.begin(); it != m_events.end(); ++it)
+    {
+        AGE_GB_SET_BACK_CLOCK(it->m_struct.m_clock_cycle, clock_cycle_offset);
+    }
+    for (auto it = m_active_events.begin(); it != m_active_events.end(); ++it)
+    {
+        AGE_GB_SET_BACK_CLOCK(*it, clock_cycle_offset);
+    }
 }
