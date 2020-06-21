@@ -30,7 +30,7 @@
 namespace age
 {
 
-enum class gb_event : uint8_t
+enum class gb_event : int
 {
     switch_double_speed = 0,
     timer_overflow = 1,
@@ -52,7 +52,7 @@ public:
 
     gb_events(const gb_clock &clock);
 
-    void schedule_event(gb_event event, int event_clock_cycle);
+    void schedule_event(gb_event event, int clock_cycle_offset);
     void remove_event(gb_event event);
     int get_event_cycle(gb_event event) const;
     gb_event poll_event();

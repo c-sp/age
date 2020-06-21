@@ -18,24 +18,51 @@
 
 #include "age_gb_events.hpp"
 
+#define CLOG_EVENTS(log) AGE_GB_CLOG(AGE_GB_CLOG_EVENTS)(log)
+
 
 
 age::gb_events::gb_events(const gb_clock &clock)
     : m_clock(clock)
 {
+    std::for_each(begin(m_active_events), end(m_active_events), [&](auto &it)
+    {
+        it = gb_no_clock_cycle;
+    });
 }
 
 
 
-void age::gb_events::schedule_event(gb_event event, int event_clock_cycle)
+void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
 {
-    AGE_ASSERT(event_clock_cycle >= m_clock.get_clock_cycle());
+    AGE_ASSERT(clock_cycle_offset >= 0);
     AGE_ASSERT(event != gb_event::none);
 
-    scheduled_event ev{{.m_event = event, .m_clock_cycle = event_clock_cycle}};
+    int ev_idx = to_integral(event);
+    int ev_cycle = m_clock.get_clock_cycle() + clock_cycle_offset;
 
     //! \todo optimize this, the vector is sorted
-    m_events.push_back(ev);
+
+    // event already scheduled?
+    if (m_active_events[ev_idx] != gb_no_clock_cycle)
+    {
+        for (auto it = m_events.begin(); it != m_events.end(); ++it)
+        {
+            if (it->m_struct.m_event == event)
+            {
+                it->m_struct.m_clock_cycle = ev_cycle;
+                break;
+            }
+        }
+    }
+
+    // schedule new event
+    else
+    {
+        scheduled_event ev{{.m_event = event, .m_clock_cycle = ev_cycle}};
+        m_events.push_back(ev);
+    }
+
     // sort descending so that we can pop_back() the next event
     std::sort(
         m_events.begin(),
@@ -44,6 +71,9 @@ void age::gb_events::schedule_event(gb_event event, int event_clock_cycle)
             return a.m_int > b.m_int;
         }
     );
+    m_active_events[ev_idx] = ev_cycle;
+    CLOG_EVENTS("event " << to_integral(event) << " scheduled ("
+                << m_events.size() << " events scheduled total)");
 }
 
 
@@ -67,6 +97,8 @@ void age::gb_events::remove_event(gb_event event)
         }
     }
     m_active_events[idx] = gb_no_clock_cycle;
+    CLOG_EVENTS("event " << to_integral(event) << " removed ("
+                << m_events.size() << " events still scheduled)");
 }
 
 
@@ -96,6 +128,10 @@ age::gb_event age::gb_events::poll_event()
     // poll event
     gb_event event = m_events.back().m_struct.m_event;
     m_events.pop_back();
+    m_active_events[to_integral(event)] = gb_no_clock_cycle;
+
+    CLOG_EVENTS("event " << to_integral(event) << " polled ("
+                << m_events.size() << " events still scheduled)");
     return event;
 }
 

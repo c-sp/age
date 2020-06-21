@@ -14,7 +14,6 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_cpu_opcodes.cpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
     ../../../src/age_emulator_gb/age_gb_bus.cpp \
-    ../../../src/age_emulator_gb/age_gb_core.cpp \
     ../../../src/age_emulator_gb/age_gb_cpu.cpp \
     ../../../src/age_emulator_gb/age_gb_emulator.cpp \
     ../../../src/age_emulator_gb/age_gb_emulator_impl.cpp \
@@ -40,7 +39,6 @@ HEADERS += \
     ../../../src/age_emulator_gb/common/age_gb_clock.hpp \
     ../../../src/age_emulator_gb/age_gb.hpp \
     ../../../src/age_emulator_gb/age_gb_bus.hpp \
-    ../../../src/age_emulator_gb/age_gb_core.hpp \
     ../../../src/age_emulator_gb/age_gb_cpu.hpp \
     ../../../src/age_emulator_gb/age_gb_emulator_impl.hpp \
     ../../../src/age_emulator_gb/age_gb_joypad.hpp \

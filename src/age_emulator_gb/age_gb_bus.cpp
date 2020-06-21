@@ -84,7 +84,7 @@ constexpr const age::uint8_array<0x80> cgb_FF80_dump =
 age::gb_bus::gb_bus(const gb_device &device,
                     gb_clock &clock,
                     gb_interrupt_ports &interrupts,
-                    gb_core &core,
+                    gb_events &events,
                     gb_memory &memory,
                     gb_sound &sound,
                     gb_lcd &lcd,
@@ -94,7 +94,7 @@ age::gb_bus::gb_bus(const gb_device &device,
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
-      m_core(core),
+      m_events(events),
       m_memory(memory),
       m_sound(sound),
       m_lcd(lcd),
@@ -448,7 +448,7 @@ void age::gb_bus::handle_events()
 
     // handle outstanding events
     gb_event event;
-    while ((event = m_core.poll_event()) != gb_event::none)
+    while ((event = m_events.poll_event()) != gb_event::none)
     {
         switch (event)
         {
@@ -580,7 +580,7 @@ void age::gb_bus::handle_dma()
     {
         LOG("DMA finished");
         m_lcd.set_hdma_active(false);
-        AGE_ASSERT(m_core.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle);
+        AGE_ASSERT(m_events.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle);
     }
     m_hdma5 = (m_hdma5 & gb_hdma_start) + remaining_dma_length;
 
@@ -643,7 +643,7 @@ void age::gb_bus::write_dma(uint8_t value)
     //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
     //
     int factor = m_device.is_cgb() ? 1 : 2;
-    m_core.insert_event(m_clock.get_machine_cycle_clocks() * factor, gb_event::start_oam_dma);
+    m_events.schedule_event(gb_event::start_oam_dma, m_clock.get_machine_cycle_clocks() * factor);
 }
 
 void age::gb_bus::write_hdma5(uint8_t value)
@@ -688,9 +688,9 @@ void age::gb_bus::write_hdma5(uint8_t value)
             //      dma/hdma_late_disable_scx5_ds_1_out0
             //      dma/hdma_late_disable_scx5_ds_2_out1
             //
-            if (m_core.get_event_cycle(gb_event::start_hdma) > m_clock.get_clock_cycle())
+            if (m_events.get_event_cycle(gb_event::start_hdma) > m_clock.get_clock_cycle())
             {
-                m_core.remove_event(gb_event::start_hdma);
+                m_events.remove_event(gb_event::start_hdma);
             }
             LOG("HDMA deactivated");
         }

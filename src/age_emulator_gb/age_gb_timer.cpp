@@ -43,10 +43,10 @@ constexpr uint8_t gb_tac_start_timer = 0x04;
 //
 //---------------------------------------------------------
 
-age::gb_timer::gb_timer(const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_core &core)
+age::gb_timer::gb_timer(const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_events &events)
     : m_clock(clock),
       m_interrupts(interrupts),
-      m_core(core),
+      m_events(events),
       m_counter(clock)
 {
     write_tac(0);
@@ -249,7 +249,7 @@ void age::gb_timer::write_tac(uint8_t value)
     else
     {
         LOG("cancelling timer overflow event");
-        m_core.remove_event(gb_event::timer_overflow);
+        m_events.remove_event(gb_event::timer_overflow);
     }
 }
 
@@ -393,5 +393,5 @@ void age::gb_timer::schedule_timer_overflow()
     clk_offset += m_clock.get_machine_cycle_clocks();
 
     LOG("scheduling timer overflow event, cycle offset " << cycle_offset);
-    m_core.insert_event(clk_offset, gb_event::timer_overflow);
+    m_events.schedule_event(gb_event::timer_overflow, clk_offset);
 }

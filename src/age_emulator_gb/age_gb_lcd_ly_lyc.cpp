@@ -43,11 +43,11 @@
 
 age::gb_ly_counter::gb_ly_counter(const gb_device &device,
                                   const gb_clock &clock,
-                                  gb_core &core,
+                                  gb_events &events,
                                   gb_interrupt_trigger &interrupts)
     : m_device(device),
       m_clock(clock),
-      m_core(core),
+      m_events(events),
       m_interrupts(interrupts)
 {
     //
@@ -555,7 +555,7 @@ void age::gb_lyc_handler::set_lyc(uint8_t value, int mode, bool lcd_enabled)
             if (m_device.is_cgb() && !m_clock.is_double_speed())
             {
                 LOG("delaying immediate LCD interrupt");
-                m_core.insert_event(5, gb_event::lcd_late_lyc_interrupt);
+                m_events.schedule_event(gb_event::lcd_late_lyc_interrupt, 5);
             }
             else
             {
@@ -912,11 +912,11 @@ void age::gb_lyc_interrupter::schedule_next_event(int next_event_cycle)
         int current_cycle = m_clock.get_clock_cycle();
         AGE_ASSERT(current_cycle < m_next_event_cycle);
         int cycle_offset = m_next_event_cycle - current_cycle;
-        m_core.insert_event(cycle_offset, gb_event::lcd_lyc_check);
+        m_events.schedule_event(gb_event::lcd_lyc_check, cycle_offset);
     }
     else
     {
-        m_core.remove_event(gb_event::lcd_lyc_check);
+        m_events.remove_event(gb_event::lcd_lyc_check);
     }
 }
 

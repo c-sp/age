@@ -94,7 +94,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
             //
             if (m_hdma_active)
             {
-                m_core.insert_event(0, gb_event::start_hdma);
+                m_events.schedule_event(gb_event::start_hdma, 0);
             }
         }
 

@@ -51,12 +51,12 @@ constexpr const age::uint8_array<17> interrupt_pc_lookup =
 age::gb_cpu::gb_cpu(const gb_device &device,
                     gb_clock &clock,
                     gb_interrupt_dispatcher &interrupts,
-                    gb_core &core,
+                    gb_events &events,
                     gb_bus &bus)
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
-      m_core(core),
+      m_events(events),
       m_bus(bus)
 {
     // reset registers (writing m_regs)

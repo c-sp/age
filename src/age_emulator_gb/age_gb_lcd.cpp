@@ -49,9 +49,9 @@ constexpr const age::uint8_array<0x40> cgb_objp_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd::gb_lcd(const gb_device &device, const gb_clock &clock, gb_core &core, gb_interrupt_trigger &interrupts, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
-    : gb_lcd_ppu(device, clock, core, interrupts, memory, dmg_green),
-      m_core(core),
+age::gb_lcd::gb_lcd(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green)
+    : gb_lcd_ppu(device, clock, events, interrupts, memory, dmg_green),
+      m_events(events),
       m_interrupts(interrupts),
       m_screen_buffer(frame_handler)
 {
@@ -193,7 +193,7 @@ void age::gb_lcd::set_hdma_active(bool hdma_active)
 
         if ((mode == 0) && (next_scanline_offset > m_clock.get_machine_cycle_clocks()))
         {
-            m_core.insert_event(0, gb_event::start_hdma);
+            m_events.schedule_event(gb_event::start_hdma, 0);
         }
     }
 
@@ -589,7 +589,7 @@ void age::gb_lcd::mode3_render(gb_lcd &lcd)
                 int offset = lcd.m_next_event_cycle + (lcd.m_clock.is_double_speed() ? 1 : 2);
                 offset = std::max(offset - cycle, 0);
                 LOG("scheduling HDMA event, offset " << offset);
-                lcd.m_core.insert_event(offset, gb_event::start_hdma);
+                lcd.m_events.schedule_event(gb_event::start_hdma, offset);
             }
         }
         if (lcd.scanline_mode0_interrupt())

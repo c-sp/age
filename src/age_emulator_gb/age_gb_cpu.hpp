@@ -24,10 +24,10 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#include "common/age_gb_device.hpp"
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
-#include "age_gb_core.hpp"
 #include "age_gb_bus.hpp"
 
 
@@ -43,7 +43,7 @@ class gb_cpu
 
 public:
 
-    gb_cpu(const gb_device &device, gb_clock &clock, gb_interrupt_dispatcher &interrupts, gb_core &core, gb_bus &bus);
+    gb_cpu(const gb_device &device, gb_clock &clock, gb_interrupt_dispatcher &interrupts, gb_events &events, gb_bus &bus);
 
     gb_test_info get_test_info() const;
     void emulate();
@@ -58,7 +58,7 @@ private:
     const gb_device &m_device;
     gb_clock &m_clock;
     gb_interrupt_dispatcher &m_interrupts;
-    gb_core &m_core;
+    gb_events &m_events;
     gb_bus &m_bus;
 
     // The following values store the results of arithmetic/logical

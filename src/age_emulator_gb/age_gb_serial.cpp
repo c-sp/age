@@ -47,11 +47,11 @@ constexpr uint8_t gb_sc_terminal_selection = 0x01;
 age::gb_serial::gb_serial(const gb_device &device,
                           const gb_clock &clock,
                           gb_interrupt_trigger &interrupts,
-                          gb_core &core)
+                          gb_events &events)
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
-      m_core(core)
+      m_events(events)
 {
     write_sc(0);
 }
@@ -119,7 +119,7 @@ void age::gb_serial::write_sc(uint8_t value)
         {
             m_sio_state = gb_sio_state::transfer_internal_clock;
             auto clks_until_finished = transfer_init(value);
-            m_core.insert_event(clks_until_finished, gb_event::serial_transfer_finished);
+            m_events.schedule_event(gb_event::serial_transfer_finished, clks_until_finished);
         }
 
         //
@@ -134,7 +134,7 @@ void age::gb_serial::write_sc(uint8_t value)
         else
         {
             m_sio_state = gb_sio_state::transfer_external_clock;
-            m_core.remove_event(gb_event::serial_transfer_finished);
+            m_events.remove_event(gb_event::serial_transfer_finished);
         }
     }
 
@@ -149,7 +149,7 @@ void age::gb_serial::write_sc(uint8_t value)
     else
     {
         m_sio_state = gb_sio_state::no_transfer;
-        m_core.remove_event(gb_event::serial_transfer_finished);
+        m_events.remove_event(gb_event::serial_transfer_finished);
     }
 }
 

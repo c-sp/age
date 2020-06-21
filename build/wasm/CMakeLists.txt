@@ -46,7 +46,6 @@ set (SOURCES_AGE_EMULATOR_GB
     ${DIR_AGE_EMULATOR_GB}/common/age_gb_events.cpp
     ${DIR_AGE_EMULATOR_GB}/common/age_gb_interrupts.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_bus.cpp
-    ${DIR_AGE_EMULATOR_GB}/age_gb_core.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_cpu.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_cpu_opcodes.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_emulator.cpp

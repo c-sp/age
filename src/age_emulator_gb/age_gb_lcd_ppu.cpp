@@ -67,8 +67,8 @@ constexpr const age::uint8_array<0xA0> dmg_oam_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd_ppu::gb_lcd_ppu(const gb_device &device, const gb_clock &clock, gb_core &core, gb_interrupt_trigger &interrupts, const gb_memory &memory, bool dmg_green)
-    : gb_lyc_interrupter(device, clock, core, interrupts),
+age::gb_lcd_ppu::gb_lcd_ppu(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, bool dmg_green)
+    : gb_lyc_interrupter(device, clock, events, interrupts),
       m_device(device),
       m_clock(clock),
       m_dmg_green(dmg_green),

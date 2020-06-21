@@ -1163,7 +1163,7 @@ void age::gb_cpu::execute_prefetched()
                 bool switch_double_speed = m_clock.trigger_speed_change();
                 if (switch_double_speed)
                 {
-                    m_core.insert_event(0, gb_event::switch_double_speed);
+                    m_events.schedule_event(gb_event::switch_double_speed, 0);
                 }
             }
             break;

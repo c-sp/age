@@ -118,7 +118,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
             << " (-" << offset << ")");
 
         m_clock.set_back_clock(clock_cycle_offset);
-        m_core.set_back_clock(clock_cycle_offset);
+        m_events.set_back_clock(clock_cycle_offset);
         m_sound.set_back_clock();
         m_lcd.set_back_clock(clock_cycle_offset);
         m_timer.set_back_clock(clock_cycle_offset);
@@ -153,14 +153,14 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
       m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
       m_clock(m_device),
       m_interrupts(m_device, m_clock),
-      m_core(m_device, m_clock),
+      m_events(m_clock),
       m_sound(m_clock, m_device.is_cgb(), pcm_vec),
-      m_lcd(m_device, m_clock, m_core, m_interrupts, m_memory, screen_buf, dmg_green),
-      m_timer(m_clock, m_interrupts, m_core),
+      m_lcd(m_device, m_clock, m_events, m_interrupts, m_memory, screen_buf, dmg_green),
+      m_timer(m_clock, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
-      m_serial(m_device, m_clock, m_interrupts, m_core),
-      m_bus(m_device, m_clock, m_interrupts, m_core, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
-      m_cpu(m_device, m_clock, m_interrupts, m_core, m_bus)
+      m_serial(m_device, m_clock, m_interrupts, m_events),
+      m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
+      m_cpu(m_device, m_clock, m_interrupts, m_events, m_bus)
 {
     m_memory.init_vram(m_device.is_cgb_hardware());
 }

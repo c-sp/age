@@ -28,10 +28,10 @@
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
-#include "common/age_gb_device.hpp"
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
-#include "age_gb_core.hpp"
 #include "age_gb_memory.hpp"
 
 
@@ -77,7 +77,7 @@ class gb_ly_counter
 
 public:
 
-    gb_ly_counter(const gb_device &device, const gb_clock &clock, gb_core &core, gb_interrupt_trigger &interrupts);
+    gb_ly_counter(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts);
 
     uint8_t get_ly_port(bool lcd_enabled) const;
     uint8_t get_ly() const;
@@ -95,7 +95,7 @@ protected:
 
     const gb_device &m_device;
     const gb_clock &m_clock;
-    gb_core &m_core;
+    gb_events &m_events;
     gb_interrupt_trigger &m_interrupts;
 
 private:
@@ -184,7 +184,7 @@ class gb_lcd_ppu : public gb_lyc_interrupter
 {
 public:
 
-    gb_lcd_ppu(const gb_device &device, const gb_clock &clock, gb_core &core, gb_interrupt_trigger &interrupts, const gb_memory &memory, bool dmg_green);
+    gb_lcd_ppu(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, bool dmg_green);
 
     uint8_t read_lcdc() const;
     uint8_t read_scx() const;
@@ -359,7 +359,7 @@ class gb_lcd : private gb_lcd_ppu
 {
 public:
 
-    gb_lcd(const gb_device &device, const gb_clock &clock, gb_core &core, gb_interrupt_trigger &interrupts, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green);
+    gb_lcd(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green);
 
     using gb_lcd_ppu::read_lcdc;
     using gb_lcd_ppu::read_scx;
@@ -435,7 +435,7 @@ private:
     static void mode3_render(gb_lcd &lcd);
 
     // common stuff
-    gb_core &m_core;
+    gb_events &m_events;
     gb_interrupt_trigger &m_interrupts;
     screen_buffer &m_screen_buffer;
     uint8_array<gb_num_palette_colors * 2> m_palette; // 2 bytes per color

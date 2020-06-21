@@ -27,8 +27,8 @@
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
-#include "common/age_gb_device.hpp"
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
 #include "age_gb_sound_utilities.hpp"
 
 

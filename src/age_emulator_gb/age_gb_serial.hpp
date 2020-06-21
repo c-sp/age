@@ -23,10 +23,10 @@
 
 #include <age_types.hpp>
 
-#include "common/age_gb_device.hpp"
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
-#include "age_gb_core.hpp"
 
 
 
@@ -57,7 +57,7 @@ public:
     void finish_transfer();
     void set_back_clock(int clock_cycle_offset);
 
-    gb_serial(const gb_device &device, const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_core &core);
+    gb_serial(const gb_device &device, const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_events &events);
 
 private:
 
@@ -67,7 +67,7 @@ private:
     const gb_device &m_device;
     const gb_clock &m_clock;
     gb_interrupt_trigger &m_interrupts;
-    gb_core &m_core;
+    gb_events &m_events;
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
     int m_sio_clks_per_bit = 0;
     int m_sio_last_receive_clk = gb_no_clock_cycle;
