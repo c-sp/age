@@ -31,6 +31,7 @@
 
 #include "age_gb_bus.hpp"
 #include "age_gb_cpu.hpp"
+#include "age_gb_div.hpp"
 #include "age_gb_joypad.hpp"
 #include "age_gb_lcd.hpp"
 #include "age_gb_memory.hpp"
@@ -72,6 +73,7 @@ private:
     gb_clock m_clock;
     gb_interrupt_dispatcher m_interrupts;
     gb_events m_events;
+    gb_div m_div;
     gb_sound m_sound;
     gb_lcd m_lcd;
     gb_timer m_timer;

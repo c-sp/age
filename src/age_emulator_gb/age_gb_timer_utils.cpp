@@ -18,8 +18,6 @@
 
 #include "age_gb_timer.hpp"
 
-#define CLOG_DIV(log) AGE_GB_CLOG(AGE_GB_CLOG_DIV)(log)
-
 
 
 
@@ -60,7 +58,6 @@ int age::gb_common_counter::get_clock_offset(int for_counter_offset) const
 void age::gb_common_counter::reset()
 {
     m_counter_origin = m_clock.get_clock_cycle() >> m_clock_shift;
-    CLOG_DIV("reset DIV counter, origin=" << AGE_LOG_HEX(m_counter_origin));
 }
 
 void age::gb_common_counter::switch_double_speed_mode()

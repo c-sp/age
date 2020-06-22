@@ -36,10 +36,12 @@ constexpr uint8_t sc_terminal_selection = 0x01;
 
 age::gb_serial::gb_serial(const gb_device &device,
                           const gb_clock &clock,
+                          const gb_div &div,
                           gb_interrupt_trigger &interrupts,
                           gb_events &events)
     : m_device(device),
       m_clock(clock),
+      m_div(div),
       m_interrupts(interrupts),
       m_events(events)
 {
@@ -169,13 +171,20 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
             ? (shift_clock_bit >> 1)
             : shift_clock_bit;
 
-    // calculate the first transferred bit's clock cycle
-    auto current_clk = m_clock.get_clock_cycle();
-    int clks_first_switch = shift_clock_bit - (current_clk % shift_clock_bit);
-    int clks_until_finished = clks_first_switch + 15 * shift_clock_bit;
-
     // the number of clocks per transferred bit
     int clks_per_bit = shift_clock_bit << 1;
+
+    // calculate the number of cycles until first bit flip
+    // (div-aligned)
+    auto current_clk = m_clock.get_clock_cycle();
+    int clk_div_aligned = current_clk + m_div.get_div_offset();
+    int clks_first_switch = shift_clock_bit - (clk_div_aligned % shift_clock_bit);
+    int clks_until_finished = clks_first_switch + 15 * shift_clock_bit;
+
+    AGE_ASSERT(clks_first_switch > 0);
+    AGE_ASSERT(clks_first_switch <= shift_clock_bit);
+    AGE_ASSERT(clks_until_finished > 0);
+    AGE_ASSERT(clks_until_finished <= 8 * clks_per_bit);
 
     CLOG("starting serial transfer, "
          << clks_per_bit << " clocks per bit, "

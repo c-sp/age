@@ -89,7 +89,6 @@ public:
 
     gb_timer(const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_events &events);
 
-    uint8_t read_div() const;
     uint8_t read_tima();
     uint8_t read_tma() const;
     uint8_t read_tac() const;

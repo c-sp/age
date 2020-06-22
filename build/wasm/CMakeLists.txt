@@ -48,6 +48,7 @@ set (SOURCES_AGE_EMULATOR_GB
     ${DIR_AGE_EMULATOR_GB}/age_gb_bus.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_cpu.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_cpu_opcodes.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_div.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_emulator.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_emulator_impl.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_joypad.cpp

@@ -1,5 +1,5 @@
 
-Gambatte test rom start_wait_read_sb_1_dmg08_cgb04c_out7F:
+Gambatte test rom serial/start_wait_read_sb_1_dmg08_cgb04c_out7F:
 ```
                    11824: write SB 0x00 (0), old SB was: 0xFF (255)
 10 1110 0100 0100  11844: write SC 0x81 (129)
@@ -27,7 +27,7 @@ Gambatte test rom start_wait_read_sb_1_dmg08_cgb04c_out7F:
 11 1110 0000 0000  15872: interrupt requested: 0x08 (8)
 ```
 
-Gambatte test rom start_wait_read_sb_2_dmg08_cgb04c_outFF:
+Gambatte test rom serial/start_wait_read_sb_2_dmg08_cgb04c_outFF:
 ```
                    11824: write SB 0x00 (0), old SB was: 0xFF (255)
 10 1110 0100 0100  11844: write SC 0x81 (129)
@@ -58,7 +58,7 @@ Gambatte test rom start_wait_read_sb_2_dmg08_cgb04c_outFF:
 
 ## Serial transfer duration
 
-Gambatte test rom nopx1_start_wait_read_if_1_dmg08_cgb04c_outE0:
+Gambatte test rom serial/nopx1_start_wait_read_if_1_dmg08_cgb04c_outE0:
 ```
                    12008: write SB 0x00 (0), old SB was: 0xFF (255)
 10 1110 1111 1100  12028: write SC 0x81 (129)
@@ -88,7 +88,7 @@ Gambatte test rom nopx1_start_wait_read_if_1_dmg08_cgb04c_outE0:
     => serial transfer finished 3844 clock cycles after write to SC
 ```
 
-Gambatte test rom nopx1_start_wait_read_if_2_dmg08_cgb04c_outE8:
+Gambatte test rom serial/nopx1_start_wait_read_if_2_dmg08_cgb04c_outE8:
 ```
                    12008: write SB 0x00 (0), old SB was: 0xFF (255)
 10 1110 1111 1100  12028: write SC 0x81 (129)
@@ -118,7 +118,7 @@ Gambatte test rom nopx1_start_wait_read_if_2_dmg08_cgb04c_outE8:
     => serial transfer finished 3844 clock cycles after write to SC
 ```
 
-Gambatte test rom nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0:
+Gambatte test rom serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0:
 
 ```
                    12012: write SB 0x00 (0), old SB was: 0xFF (255)
@@ -149,7 +149,7 @@ Gambatte test rom nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0:
     => serial transfer finished 4096 clock cycles after write to SC
 ```
 
-Gambatte test rom nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8:
+Gambatte test rom serial/nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8:
 ```
                    12012: write SB 0x00 (0), old SB was: 0xFF (255)
 10 1111 0000 0000  12032: write SC 0x81 (129)
@@ -178,3 +178,10 @@ Gambatte test rom nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8:
 
     => serial transfer finished 4096 clock cycles after write to SC
 ```
+
+
+## `DIV`-aligned serial transfer
+
+Gambatte test rom serial/div_write_start_wait_read_if_1_dmg08_cgb04c_outE0.gbc
+
+Gambatte test rom serial/div_write_start_wait_read_if_2_dmg08_cgb04c_outE8.gbc

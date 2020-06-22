@@ -12,6 +12,7 @@ include($$PWD/../age.pri)
 
 SOURCES += \
     ../../../src/age_emulator_gb/age_gb_cpu_opcodes.cpp \
+    ../../../src/age_emulator_gb/age_gb_div.cpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
     ../../../src/age_emulator_gb/age_gb_bus.cpp \
     ../../../src/age_emulator_gb/age_gb_cpu.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/common/age_gb_interrupts.cpp
 
 HEADERS += \
+    ../../../src/age_emulator_gb/age_gb_div.hpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.hpp \
     ../../../src/age_emulator_gb/age_gb.hpp \
     ../../../src/age_emulator_gb/age_gb_bus.hpp \

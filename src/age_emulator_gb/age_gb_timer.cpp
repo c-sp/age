@@ -18,8 +18,6 @@
 
 #include "age_gb_timer.hpp"
 
-#define CLOG_DIV(log) AGE_GB_CLOG(AGE_GB_CLOG_DIV)(log)
-
 #if 0
 #define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
@@ -116,13 +114,6 @@ age::uint8_t age::gb_timer::read_tima()
     // return the current TIMA value
     LOG("reading tima " << AGE_LOG_HEX(m_tima));
     return m_tima;
-}
-
-age::uint8_t age::gb_timer::read_div() const
-{
-    auto result = (m_counter.get_current_value() >> 6) & 0xFF;
-    CLOG_DIV("read DIV " AGE_LOG_HEX8(result));
-    return result;
 }
 
 
@@ -255,8 +246,6 @@ void age::gb_timer::write_tac(uint8_t value)
 
 void age::gb_timer::write_div(uint8_t)
 {
-    CLOG_DIV("writing DIV");
-
     // verified by mooneye-gb tests:
     //  writing to DIV resets the internal counter that is used
     //  for incrementing DIV and TIMA

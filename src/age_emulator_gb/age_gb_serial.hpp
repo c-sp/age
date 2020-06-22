@@ -28,6 +28,8 @@
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 
+#include "age_gb_div.hpp"
+
 
 
 namespace age
@@ -48,6 +50,12 @@ class gb_serial
 
 public:
 
+    gb_serial(const gb_device &device,
+              const gb_clock &clock,
+              const gb_div &div,
+              gb_interrupt_trigger &interrupts,
+              gb_events &events);
+
     uint8_t read_sb();
     uint8_t read_sc() const;
 
@@ -57,8 +65,6 @@ public:
     void update_state();
     void set_back_clock(int clock_cycle_offset);
 
-    gb_serial(const gb_device &device, const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_events &events);
-
 private:
 
     void start_transfer(uint8_t value_sc);
@@ -66,6 +72,7 @@ private:
 
     const gb_device &m_device;
     const gb_clock &m_clock;
+    const gb_div &m_div;
     gb_interrupt_trigger &m_interrupts;
     gb_events &m_events;
 

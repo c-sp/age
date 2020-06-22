@@ -27,12 +27,14 @@
 #include "common/age_gb_device.hpp"
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
-#include "age_gb_memory.hpp"
-#include "age_gb_sound.hpp"
-#include "age_gb_lcd.hpp"
-#include "age_gb_timer.hpp"
+
+#include "age_gb_div.hpp"
 #include "age_gb_joypad.hpp"
+#include "age_gb_lcd.hpp"
+#include "age_gb_memory.hpp"
 #include "age_gb_serial.hpp"
+#include "age_gb_sound.hpp"
+#include "age_gb_timer.hpp"
 
 
 
@@ -131,7 +133,7 @@ class gb_bus
 
 public:
 
-    gb_bus(const gb_device &device, gb_clock &clock, gb_interrupt_ports &interrupts, gb_events &events, gb_memory &memory, gb_sound &sound, gb_lcd &lcd, gb_timer &timer, gb_joypad &joypad, gb_serial &serial);
+    gb_bus(const gb_device &device, gb_clock &clock, gb_interrupt_ports &interrupts, gb_events &events, gb_memory &memory, gb_div &div, gb_sound &sound, gb_lcd &lcd, gb_timer &timer, gb_joypad &joypad, gb_serial &serial);
 
     uint8_t read_byte(uint16_t address);
     void write_byte(uint16_t address, uint8_t byte);
@@ -154,6 +156,7 @@ private:
     gb_interrupt_ports &m_interrupts;
     gb_events &m_events;
     gb_memory &m_memory;
+    gb_div &m_div;
     gb_sound &m_sound;
     gb_lcd &m_lcd;
     gb_timer &m_timer;

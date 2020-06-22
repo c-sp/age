@@ -86,6 +86,7 @@ age::gb_bus::gb_bus(const gb_device &device,
                     gb_interrupt_ports &interrupts,
                     gb_events &events,
                     gb_memory &memory,
+                    gb_div &div,
                     gb_sound &sound,
                     gb_lcd &lcd,
                     gb_timer &timer,
@@ -96,6 +97,7 @@ age::gb_bus::gb_bus(const gb_device &device,
       m_interrupts(interrupts),
       m_events(events),
       m_memory(memory),
+      m_div(div),
       m_sound(sound),
       m_lcd(lcd),
       m_timer(timer),
@@ -176,7 +178,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             case to_integral(gb_io_port::sb): result = m_serial.read_sb(); break;
             case to_integral(gb_io_port::sc): result = m_serial.read_sc(); break;
 
-            case to_integral(gb_io_port::div): result = m_timer.read_div(); break;
+            case to_integral(gb_io_port::div): result = m_div.read_div(); break;
             case to_integral(gb_io_port::tima): result = m_timer.read_tima(); break;
             case to_integral(gb_io_port::tma): result = m_timer.read_tma(); break;
             case to_integral(gb_io_port::tac): result = m_timer.read_tac(); break;
@@ -327,7 +329,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_integral(gb_io_port::sb): m_serial.write_sb(byte); break;
             case to_integral(gb_io_port::sc): m_serial.write_sc(byte); break;
 
-            case to_integral(gb_io_port::div): m_timer.write_div(byte); break;
+            case to_integral(gb_io_port::div): m_div.write_div(); m_timer.write_div(byte); break;
             case to_integral(gb_io_port::tima): m_timer.write_tima(byte); break;
             case to_integral(gb_io_port::tma): m_timer.write_tma(byte); break;
             case to_integral(gb_io_port::tac): m_timer.write_tac(byte); break;
