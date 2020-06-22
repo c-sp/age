@@ -160,7 +160,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_interrupts, m_events),
       m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
-      m_cpu(m_device, m_clock, m_interrupts, m_events, m_bus)
+      m_cpu(m_device, m_clock, m_interrupts, m_timer, m_bus)
 {
     m_memory.init_vram(m_device.is_cgb_hardware());
 }

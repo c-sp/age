@@ -42,8 +42,7 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt)
     m_if |= to_integral(interrupt);
 
     CLOG_INTERRUPTS("interrupt requested: "
-                    << AGE_LOG_HEX8(to_integral(interrupt))
-                    << " (the actual interrupt might have occurred earlier)");
+                    << AGE_LOG_HEX8(to_integral(interrupt)));
 
     // might clear HALT mode
     check_halt_mode();

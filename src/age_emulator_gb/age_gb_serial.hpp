@@ -54,23 +54,25 @@ public:
     void write_sb(uint8_t value);
     void write_sc(uint8_t value);
 
-    void finish_transfer();
+    void update_state();
     void set_back_clock(int clock_cycle_offset);
 
     gb_serial(const gb_device &device, const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_events &events);
 
 private:
 
-    int transfer_init(uint8_t value);
-    void transfer_update_sb();
+    void start_transfer(uint8_t value_sc);
+    void stop_transfer(gb_sio_state new_state);
 
     const gb_device &m_device;
     const gb_clock &m_clock;
     gb_interrupt_trigger &m_interrupts;
     gb_events &m_events;
+
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
     int m_sio_clks_per_bit = 0;
-    int m_sio_last_receive_clk = gb_no_clock_cycle;
+    int m_sio_clk_first_bit = gb_no_clock_cycle;
+    uint8_t m_sio_initial_sb = 0;
 
     uint8_t m_sb = 0;
     uint8_t m_sc = 0;

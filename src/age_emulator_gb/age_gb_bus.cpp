@@ -452,10 +452,6 @@ void age::gb_bus::handle_events()
     {
         switch (event)
         {
-            case gb_event::switch_double_speed:
-                m_timer.switch_double_speed_mode();
-                break;
-
             case gb_event::timer_overflow:
                 m_timer.timer_overflow();
                 break;
@@ -489,7 +485,7 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::serial_transfer_finished:
-                m_serial.finish_transfer();
+                m_serial.update_state();
                 break;
 
             default:

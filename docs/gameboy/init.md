@@ -6,8 +6,8 @@ usual entry point for Gameboy Roms.
 Before that the Gameboy boot rom has been running which is responsible for
 showing the scrolling Nintendo logo and playing the famous sound effect.
 
-Because of that several parts of a Gameboy emulator have to be initialized
-accordingly. Examples:
+Several parts of a Gameboy emulator have to be initialized accordingly.
+Examples are:
 * the clock cycle at `PC = 0x0100` is not zero (or any equivalent value)
 * the sound circuit has already been used
 
