@@ -18,6 +18,7 @@
 
 #include "age_gb_cpu.hpp"
 
+#define CLOG_CPU(log) AGE_GB_CLOG(AGE_GB_CLOG_CPU)(log)
 #define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_INTERRUPTS)(log)
 
 
@@ -865,7 +866,12 @@ void age::gb_cpu::execute_prefetched()
     switch (opcode)
     {
         default:
-            --m_pc; // invalid opcode, stay here
+            // invalid opcode, stay here and freeze CPU
+            --m_pc;
+            m_cpu_state |= gb_cpu_state_frozen;
+            CLOG_CPU("invalid opcode " << AGE_LOG_HEX8(opcode)
+                     << " at PC = " << AGE_LOG_HEX16(m_pc)
+                     << ", CPU frozen");
             break;
 
         // increment & decrement
@@ -1183,11 +1189,14 @@ void age::gb_cpu::execute_prefetched()
 
         case 0xF3: // DI
             m_interrupts.set_ime(false);
-            m_delayed_ei = false;
+            m_cpu_state &= ~gb_cpu_state_ei;
             break;
 
         case 0xFB: // EI
-            m_delayed_ei = !m_interrupts.get_ime();
+            if (!m_interrupts.get_ime())
+            {
+                m_cpu_state |= gb_cpu_state_ei;
+            }
             break;
 
         case 0x27: // DAA

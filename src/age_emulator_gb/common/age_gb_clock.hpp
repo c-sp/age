@@ -87,6 +87,7 @@ private:
 
 
 #define AGE_GB_CLOG_CLOCK 0
+#define AGE_GB_CLOG_CPU 1
 #define AGE_GB_CLOG_DIV 1
 #define AGE_GB_CLOG_EVENTS 0
 #define AGE_GB_CLOG_INTERRUPTS 1
@@ -95,11 +96,11 @@ private:
 #define _CONCAT(a, ...) a ## __VA_ARGS__
 #define AGE_GB_CLOG(type) _CONCAT(AGE_GB_CLOG_, type)
 #define AGE_GB_CLOG_0(log)
-#define AGE_GB_CLOG_1(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << ": " << log)
+#define AGE_GB_CLOG_1(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log)
 
 //! \todo replacae AGE_GB_CLOCK_LOG with AGE_GB_CLOG
 #ifdef AGE_DEBUG
-#define AGE_GB_CLOCK_LOG(x) AGE_LOG("clock " << m_clock.get_clock_cycle() << ": " << x)
+#define AGE_GB_CLOCK_LOG(x) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << x)
 #else
 #define AGE_GB_CLOCK_LOG(x)
 #endif

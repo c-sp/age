@@ -2,9 +2,9 @@
 # Interrupt dispatching
 
 
-## Interrupts can be triggered manually
+## Interrupt dispatching can be triggered manually
 
-Writing to `0xFFFF (IE)` and `0xFF0F (IF)` can trigger interrupts.
+Writing to `0xFFFF (IE)` and `0xFF0F (IF)` can trigger interrupt dispatching.
 
 TODO add Mooneye GB test rom logs:
 `acceptance/if_ie_registers`
@@ -20,8 +20,9 @@ TODO add Mooneye GB test rom logs:
 
 ## `EI` timing
 
-With interrupts disabled `EI` will enable interrupt dispatching after the
-next instruction has been executed.
+`EI` will enable interrupt dispatching after the next instruction has been
+executed,
+if interrupt dispatching is currently disabled.
 
 TODO add Mooneye GB test rom logs:
 `acceptance/ei_timing`

@@ -45,9 +45,14 @@ age::uint8_t age::gb_div::read_div() const
     return result;
 }
 
-void age::gb_div::write_div()
+int age::gb_div::write_div()
 {
+    int old_offset = m_div_offset;
+
     int div_internal = m_clock.get_clock_cycle() & 0xFFFF;
     m_div_offset = 0x10000 - div_internal;
-    CLOG("reset DIV, new offset is " << AGE_LOG_HEX16(m_div_offset));
+    CLOG("reset DIV, changing offset from " << AGE_LOG_HEX16(old_offset)
+         << " to " AGE_LOG_HEX16(m_div_offset));
+
+    return old_offset;
 }

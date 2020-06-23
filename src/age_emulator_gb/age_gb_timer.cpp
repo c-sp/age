@@ -381,6 +381,6 @@ void age::gb_timer::schedule_timer_overflow()
     //! \todo this delay seems odd, but I cannot find any test rom disproving it and some gambatte tests do not work without it
     clk_offset += m_clock.get_machine_cycle_clocks();
 
-    LOG("scheduling timer overflow event, cycle offset " << cycle_offset);
+    LOG("scheduling timer overflow event, cycle offset " << clk_offset);
     m_events.schedule_event(gb_event::timer_overflow, clk_offset);
 }

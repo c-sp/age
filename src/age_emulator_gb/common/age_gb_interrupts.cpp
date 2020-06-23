@@ -145,7 +145,7 @@ bool age::gb_interrupt_dispatcher::get_ime() const
 void age::gb_interrupt_dispatcher::set_ime(bool ime)
 {
     m_ime = ime;
-    CLOG_INTERRUPTS("interrupts " << (ime ? "enabled" : "disabled"));
+    CLOG_INTERRUPTS("interrupt dispatching " << (ime ? "enabled" : "disabled"));
 }
 
 
@@ -168,7 +168,7 @@ void age::gb_interrupt_dispatcher::interrupt_dispatched(int interrupt_bit)
     m_if &= ~interrupt_bit;
     m_ime = false;
     CLOG_INTERRUPTS("clearing IF interrupt bit " << AGE_LOG_HEX8(interrupt_bit)
-                    << ", interrupts disabled");
+                    << ", interrupt dispatching disabled");
 }
 
 
@@ -184,7 +184,7 @@ void age::gb_interrupt_dispatcher::halt()
 
     m_halted = true;
     m_ime_on_halt = m_ime;
-    CLOG_INTERRUPTS("halted");
+    CLOG_INTERRUPTS("halted (ime = " << m_ime_on_halt << ")");
 
     // a pending interrupt will terminate HALT immediately
     check_halt_mode();

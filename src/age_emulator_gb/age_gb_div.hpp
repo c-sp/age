@@ -41,7 +41,7 @@ public:
     int get_div_offset() const;
 
     uint8_t read_div() const;
-    void write_div();
+    int write_div();
 
 private:
 

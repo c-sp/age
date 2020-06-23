@@ -35,6 +35,9 @@
 namespace age
 {
 
+constexpr int8_t gb_cpu_state_ei = 0x01;
+constexpr int8_t gb_cpu_state_frozen = 0x02;
+
 
 
 class gb_cpu
@@ -49,6 +52,9 @@ public:
     void emulate();
 
 private:
+
+    void dispatch_interrupt();
+    void handle_state();
 
     void set_flags(int from_value);
     void push_byte(int byte);
@@ -82,7 +88,8 @@ private:
     uint8_t m_l = 0;
 
     uint8_t m_prefetched_opcode = 0;
-    bool m_delayed_ei = false; //!< used for EI emulation
+    int8_t m_cpu_state = 0;
+
     bool m_mooneye_debug_op = false; //!< used to indicate the finishing of a mooneye-gb test
 };
 

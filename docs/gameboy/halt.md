@@ -2,7 +2,7 @@
 # `HALT` behavior
 
 
-## Interrupts disabled
+## Interrupt dispatching disabled
 
 Gambatte test rom `halt/noime_ifandie_halt_lda_3c_dmg08_cgb04c_out3F`:
 ```
@@ -11,7 +11,7 @@ Gambatte test rom `halt/noime_ifandie_halt_lda_3c_dmg08_cgb04c_out3F`:
         ldh (0xFF), a  ; IE = 0x11
 
         halt  ; The next opcode (0x3E) has been prefetched by now.
-              ; Interrupts are currently disabled
+              ; Interrupt dispatching is currently disabled
               ;  => PC is not incremented and still points to byte 0x3E.
 
 3E 3C   ld a, 0x3C  ; The prefetched opcode (0x3E) is executed.
@@ -31,7 +31,7 @@ Gambatte test rom `halt/noime_ifandie_halt_sra_dmg08_cgb04c_outF1`:
         ldh (0xFF), a  ; IE = 0x11
 
         halt  ; The next opcode (0xCB) has been prefetched by now.
-              ; Interrupts are currently disabled
+              ; Interrupt dispatching is currently disabled
               ;  => PC is not incremented and still points to byte 0xCB.
 
 CB 2F   sra a  ; The prefetched opcode (0xCB) is executed.
@@ -44,7 +44,7 @@ CB CB   set 1, e  ; e = 0x03
 ```
 
 
-## Interrupts disabled, `EI`
+## Interrupt dispatching disabled, `EI`
 
 Gambatte test rom `halt/ifandie_ei_halt_sra_dmg08_cgb04c_out0A`:
 ```
@@ -52,14 +52,14 @@ Gambatte test rom `halt/ifandie_ei_halt_sra_dmg08_cgb04c_out0A`:
         ldh (0x0F), a  ; IF = 0x11
         ldh (0xFF), a  ; IE = 0x11
 
-        ei  ; Interrupts are enabled after the next instruction
+        ei  ; Interrupt dispatching is enabled after the next instruction
             ; has been executed.
 
         halt  ; The next opcode (0x3C) has been prefetched by now.
-              ; Interrupts are currently disabled
+              ; Interrupt dispatching is currently disabled
               ;  => PC is not incremented and still points to byte 0x3C.
 
-        ; Interrupts are enabled before the next instruction (inc a)
+        ; Interrupt dispatching is enabled before the next instruction (inc a)
         ; is executed.
         ; The V-Blank interrupt is dispatched and PC = 0x40.
         ; Opcode 0x3C (inc a) remains prefetched.

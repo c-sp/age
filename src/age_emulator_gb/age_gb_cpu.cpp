@@ -44,6 +44,29 @@ constexpr const age::uint8_array<17> interrupt_pc_lookup =
      0x60,
  }};
 
+#ifdef AGE_DEBUG
+constexpr const std::array<const char*, 17> interrupt_name =
+{{
+     "",
+     "v-blank",
+     "lcd",
+     "",
+     "timer",
+     "",
+     "",
+     "",
+     "serial transfer",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "joypad",
+ }};
+#endif
+
 }
 
 
@@ -113,66 +136,90 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 
 void age::gb_cpu::emulate()
 {
-    // allow interrupt dispatching after the next CPU instruction
-    // has been executed
-    if (m_delayed_ei)
+    // special treatments: EI & CPU freeze
+    if (m_cpu_state)
     {
-        AGE_ASSERT(!m_interrupts.get_ime());
-        CLOG_INTERRUPTS("may enable interrupts after this CPU instruction");
-        execute_prefetched();
-
-        // enable interrupts only if this instruction was no DI
-        if (m_delayed_ei)
-        {
-            m_interrupts.set_ime(true);
-            m_delayed_ei = false;
-        }
-
-        // we're done here
+        handle_state();
         return;
     }
 
     // look for any interrupt to dispatch
     if (m_interrupts.next_interrupt_bit())
     {
-        CLOG_INTERRUPTS("dispatching interrupt, PC = " << AGE_LOG_HEX16(m_pc));
-
-        m_clock.tick_machine_cycle();
-        m_clock.tick_machine_cycle();
-
-        // Writing IE or IF during interrupt dispatching may influence the
-        // interrupt being dispatched.
-        // IE can be (indirectly) written by setting SP to 0x0000 or 0x0001
-        // before the interrupt is handled.
-        // For writing IF set SP to 0xFF11 or 0xFF10.
-
-        // Writing IE here will influence interrupt dispatching.
-        // Writing IF here will influence interrupt dispatching.
-        push_byte(m_pc >> 8);
-
-        int intr_bit = m_interrupts.next_interrupt_bit();
-        AGE_ASSERT(   (intr_bit == 0x00)
-                   || (intr_bit == 0x01)
-                   || (intr_bit == 0x02)
-                   || (intr_bit == 0x04)
-                   || (intr_bit == 0x08)
-                   || (intr_bit == 0x10));
-
-        // Pushing the lower PC byte happens before clearing the interrupt's
-        // IF bit (checked by pushing to IF).
-        push_byte(m_pc);
-        m_interrupts.interrupt_dispatched(intr_bit);
-
-        m_pc = interrupt_pc_lookup[intr_bit];
-        m_prefetched_opcode = read_byte(m_pc);
-
-        CLOG_INTERRUPTS("interrupt " << AGE_LOG_HEX8(intr_bit)
-                        << " dispatched to " << AGE_LOG_HEX16(m_pc));
-
-        // we're done here
+        dispatch_interrupt();
         return;
     }
 
     // just execute the next instruction
     execute_prefetched();
+}
+
+
+
+void age::gb_cpu::handle_state()
+{
+    // CPU frozen
+    if (m_cpu_state & gb_cpu_state_frozen)
+    {
+        m_clock.tick_machine_cycle();
+        return;
+    }
+
+    // EI - delayed interrupts enabling
+    if (m_cpu_state & gb_cpu_state_ei)
+    {
+        AGE_ASSERT(!m_interrupts.get_ime());
+        CLOG_INTERRUPTS("enable interrupt dispatching after this CPU instruction");
+        execute_prefetched();
+
+        // enable interrupts only if this instruction was no DI
+        if (m_cpu_state & gb_cpu_state_ei)
+        {
+            m_interrupts.set_ime(true);
+            m_cpu_state &= ~gb_cpu_state_ei;
+        }
+
+        // we're done here
+        return;
+    }
+}
+
+
+
+void age::gb_cpu::dispatch_interrupt()
+{
+    CLOG_INTERRUPTS("dispatching interrupt, current PC = " << AGE_LOG_HEX16(m_pc));
+
+    m_clock.tick_machine_cycle();
+    m_clock.tick_machine_cycle();
+
+    // Writing IE or IF during interrupt dispatching may influence the
+    // interrupt being dispatched.
+    // IE can be (indirectly) written by setting SP to 0x0000 or 0x0001
+    // before the interrupt is handled.
+    // For writing IF set SP to 0xFF11 or 0xFF10.
+
+    // Writing IE here will influence interrupt dispatching.
+    // Writing IF here will influence interrupt dispatching.
+    push_byte(m_pc >> 8);
+
+    int intr_bit = m_interrupts.next_interrupt_bit();
+    AGE_ASSERT(   (intr_bit == 0x00)
+               || (intr_bit == 0x01)
+               || (intr_bit == 0x02)
+               || (intr_bit == 0x04)
+               || (intr_bit == 0x08)
+               || (intr_bit == 0x10));
+
+    // Pushing the lower PC byte happens before clearing the interrupt's
+    // IF bit (checked by pushing to IF).
+    push_byte(m_pc);
+    m_interrupts.interrupt_dispatched(intr_bit);
+
+    m_pc = interrupt_pc_lookup[intr_bit];
+    m_prefetched_opcode = read_byte(m_pc);
+
+    CLOG_INTERRUPTS("interrupt " << AGE_LOG_HEX8(intr_bit)
+                    << " (" << interrupt_name[intr_bit] << ")"
+                    << " dispatched to " << AGE_LOG_HEX16(m_pc));
 }

@@ -329,7 +329,14 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_integral(gb_io_port::sb): m_serial.write_sb(byte); break;
             case to_integral(gb_io_port::sc): m_serial.write_sc(byte); break;
 
-            case to_integral(gb_io_port::div): m_div.write_div(); m_timer.write_div(byte); break;
+            case to_integral(gb_io_port::div):
+            {
+                int old_div_offset = m_div.write_div();
+                m_serial.on_div_reset(old_div_offset);
+                m_timer.write_div(byte);
+            }
+            break;
+
             case to_integral(gb_io_port::tima): m_timer.write_tima(byte); break;
             case to_integral(gb_io_port::tma): m_timer.write_tma(byte); break;
             case to_integral(gb_io_port::tac): m_timer.write_tac(byte); break;
