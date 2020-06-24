@@ -234,20 +234,21 @@ void age::gb_timer::update_state()
     int clk_adjust = (tima - m_tima) << m_clk_shift;
     set_clk_timer_zero(m_clk_timer_zero + clk_adjust);
 
+    // calculate clock cycle of last overflow
+    int clk_last_inc = clk_current - (clks_tima & ((1 << m_clk_shift) - 1));
+    int incs_since_overflow = m_tima - m_tma;
+    m_clk_last_overflow = clk_last_inc - (incs_since_overflow << m_clk_shift);
+    AGE_ASSERT(m_clk_last_overflow <= clk_current);
+
     CLOG("timer overflow:");
+    CLOG("    * overflow on clock cycle " << m_clk_last_overflow);
     CLOG("    * TIMA = " << AGE_LOG_HEX(tima));
     CLOG("    * setting TIMA = " << AGE_LOG_HEX8(m_tima)
          << " (TMA = " << AGE_LOG_HEX8(m_tma) << ")");
     CLOG("    * next overflow on clock cycle "
          << (m_clk_timer_zero + (0x100 << m_clk_shift)));
 
-    // trigger interrupt
     m_interrupts.trigger_interrupt(gb_interrupt::timer);
-
-    // calculate clock cycle of last overflow
-    int clk_last_inc = clk_current - (clks_tima & ((1 << m_clk_shift) - 1));
-    int incs_since_overflow = m_tima - m_tma;
-    m_clk_last_overflow = clk_last_inc - (incs_since_overflow << m_clk_shift);
 }
 
 
@@ -318,10 +319,10 @@ void age::gb_timer::set_back_clock(int clock_cycle_offset)
 
 int age::gb_timer::get_clock_shift(int tac) const
 {
-    // 00 (4096 Hz):   clock cycle >> 10  (1024 clock cycles)
-    // 01 (262144 Hz): clock cycle >> 4   (16 clock cycles)
-    // 10 (65536 Hz):  clock cycle >> 6   (64 clock cycles)
-    // 11 (16384 Hz):  clock cycle >> 8   (256 clock cycles)
+    // 00   (4096 Hz): clock cycle >> 10 (1024 clock cycles)
+    // 01 (262144 Hz): clock cycle >>  4   (16 clock cycles)
+    // 10  (65536 Hz): clock cycle >>  6   (64 clock cycles)
+    // 11  (16384 Hz): clock cycle >>  8  (256 clock cycles)
     int clock_shift = 4 + (((tac - 1) & 0x03) << 1);
 
     // CGB double speed => faster increments
@@ -340,8 +341,7 @@ void age::gb_timer::set_clk_timer_zero(int new_clk_timer_zero)
     AGE_ASSERT(new_clk_timer_zero != gb_no_clock_cycle);
     m_clk_timer_zero = new_clk_timer_zero;
 
-    int clks_per_inc = 1 << m_clk_shift;
-    int clk_overflow = m_clk_timer_zero + 0x100 * clks_per_inc;
+    int clk_overflow = m_clk_timer_zero + (0x100 << m_clk_shift);
     AGE_ASSERT(clk_overflow >= m_clock.get_clock_cycle());
 
     int clks_until_overflow = clk_overflow - m_clock.get_clock_cycle();
