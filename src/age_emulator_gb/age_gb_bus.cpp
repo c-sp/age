@@ -333,7 +333,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             {
                 int old_div_offset = m_div.write_div();
                 m_serial.on_div_reset(old_div_offset);
-                m_timer.write_div(byte);
+                m_timer.on_div_reset(old_div_offset);
             }
             break;
 
@@ -462,7 +462,7 @@ void age::gb_bus::handle_events()
         switch (event)
         {
             case gb_event::timer_overflow:
-                m_timer.timer_overflow();
+                m_timer.update_state();
                 break;
 
             case gb_event::lcd_lyc_check:

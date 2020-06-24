@@ -1166,11 +1166,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x10: // STOP
             if (m_device.is_cgb()) // only with CGB features activated
             {
-                bool switch_double_speed = m_clock.trigger_speed_change();
-                if (switch_double_speed)
-                {
-                    m_timer.switch_double_speed_mode();
-                }
+                m_clock.trigger_speed_change();
             }
             break;
 

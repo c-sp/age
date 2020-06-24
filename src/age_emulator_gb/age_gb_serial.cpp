@@ -300,13 +300,13 @@ void age::gb_serial::on_div_reset(int old_div_offset)
     clk_finished += clk_adjust;
     AGE_ASSERT(clk_finished >= current_clk);
 
-    CLOG("serial transfer during DIV reset:");
-    CLOG("    * old clock bits " << AGE_LOG_HEX16(old_clock));
-    CLOG("    * new clock bits " << AGE_LOG_HEX16(new_clock));
+    CLOG("serial transfer at DIV reset:");
+    CLOG("    * old clock bits " << AGE_LOG_HEX16(old_clock & 0xFFFF));
+    CLOG("    * new clock bits " << AGE_LOG_HEX16(new_clock & 0xFFFF));
     CLOG("    * next bit change (old) in " << old_next_change << " clock cycles");
     CLOG("    * next bit change (new) in " << new_next_change << " clock cycles");
-    CLOG("    * adjusting remaining clock cycles by " << clk_adjust);
-    CLOG("    * finishes on clock cycle " << clk_finished);
+    CLOG("    * +/- remaining clock cycles: " << clk_adjust);
+    CLOG("    * finish on clock cycle " << clk_finished);
 
     m_sio_clk_started += clk_adjust;
     m_events.schedule_event(gb_event::serial_transfer_finished, clk_finished - current_clk);

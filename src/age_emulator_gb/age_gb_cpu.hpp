@@ -46,7 +46,10 @@ class gb_cpu
 
 public:
 
-    gb_cpu(const gb_device &device, gb_clock &clock, gb_interrupt_dispatcher &interrupts, gb_timer &timer, gb_bus &bus);
+    gb_cpu(const gb_device &device,
+           gb_clock &clock,
+           gb_interrupt_dispatcher &interrupts,
+           gb_bus &bus);
 
     gb_test_info get_test_info() const;
     void emulate();
@@ -64,7 +67,6 @@ private:
     const gb_device &m_device;
     gb_clock &m_clock;
     gb_interrupt_dispatcher &m_interrupts;
-    gb_timer &m_timer;
     gb_bus &m_bus;
 
     // The following values store the results of arithmetic/logical

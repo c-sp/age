@@ -27,59 +27,12 @@
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 
+#include "age_gb_div.hpp"
+
 
 
 namespace age
 {
-
-class gb_common_counter
-{
-    AGE_DISABLE_COPY(gb_common_counter);
-
-public:
-
-    gb_common_counter(const gb_clock &clock);
-
-    int get_current_value() const;
-    int get_clock_offset(int for_counter_offset) const;
-
-    void reset();
-    void switch_double_speed_mode();
-    void set_back_clock(int clock_cycle_offset);
-
-private:
-
-    const gb_clock &m_clock;
-    int m_counter_origin = 0;
-    int8_t m_clock_shift = 2;
-};
-
-
-
-class gb_tima_counter
-{
-public:
-
-    gb_tima_counter(gb_common_counter &counter);
-
-    int get_current_value() const;
-    int get_clock_offset(int for_tima_offset) const;
-    int get_trigger_bit(uint8_t for_tac) const;
-    int get_past_tima_counter(uint8_t for_tima) const;
-
-    void set_tima(int tima);
-    void set_frequency(uint8_t tac);
-
-private:
-
-    static int8_t calculate_counter_shift(uint8_t for_tac);
-
-    const gb_common_counter &m_counter;
-    int m_tima_origin = 0;
-    int8_t m_counter_shift = 2;
-};
-
-
 
 class gb_timer
 {
@@ -87,37 +40,43 @@ class gb_timer
 
 public:
 
-    gb_timer(const gb_clock &clock, gb_interrupt_trigger &interrupts, gb_events &events);
+    gb_timer(const gb_clock &clock,
+             const gb_div &div,
+             gb_interrupt_trigger &interrupts,
+             gb_events &events);
 
     uint8_t read_tima();
     uint8_t read_tma() const;
     uint8_t read_tac() const;
 
-    void write_div(uint8_t value);
     void write_tima(uint8_t value);
     void write_tma(uint8_t value);
     void write_tac(uint8_t value);
 
-    void timer_overflow();
-    void switch_double_speed_mode();
+    void update_state();
+    void on_div_reset(int old_div_offset);
     void set_back_clock(int clock_cycle_offset);
 
 private:
 
-    int check_for_early_increment(int new_increment_bit);
-    void schedule_timer_overflow();
+    int get_clock_shift(int tac) const;
+    void set_clk_timer_zero(int new_clk_timer_zero);
+    void set_tima(int tima);
+    void start_timer();
+    void stop_timer();
 
     const gb_clock &m_clock;
+    const gb_div &m_div;
     gb_interrupt_trigger &m_interrupts;
     gb_events &m_events;
-    gb_common_counter m_counter = {m_clock};
-    gb_tima_counter m_tima_counter = {m_counter};
-    int m_last_overflow_counter = 0;
-    bool m_tima_running = false;
+
+    int m_clk_shift = 0;
+    int m_clk_timer_zero = gb_no_clock_cycle;
+    int m_clk_last_overflow = gb_no_clock_cycle;
 
     uint8_t m_tima = 0;
     uint8_t m_tma = 0;
-    uint8_t m_tac = 0;
+    uint8_t m_tac = 0xF8;
 };
 
 } // namespace age

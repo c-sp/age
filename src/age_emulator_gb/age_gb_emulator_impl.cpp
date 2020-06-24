@@ -102,6 +102,9 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     // cycle counter from overflowing
     if (current_cycle >= cycle_setback_limit)
     {
+        // update timer clock values
+        m_timer.update_state();
+
         AGE_ASSERT(cycle_setback_limit >= 2 * gb_clock_cycles_per_second);
 
         // keep a minimum of cycles to prevent negative cycle values
@@ -157,11 +160,11 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
       m_div(m_clock),
       m_sound(m_clock, m_device.is_cgb(), pcm_vec),
       m_lcd(m_device, m_clock, m_events, m_interrupts, m_memory, screen_buf, dmg_green),
-      m_timer(m_clock, m_interrupts, m_events),
+      m_timer(m_clock, m_div, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_div, m_interrupts, m_events),
       m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_div, m_sound, m_lcd, m_timer, m_joypad, m_serial),
-      m_cpu(m_device, m_clock, m_interrupts, m_timer, m_bus)
+      m_cpu(m_device, m_clock, m_interrupts, m_bus)
 {
     m_memory.init_vram(m_device.is_cgb_hardware());
 }

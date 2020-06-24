@@ -74,12 +74,10 @@ constexpr const std::array<const char*, 17> interrupt_name =
 age::gb_cpu::gb_cpu(const gb_device &device,
                     gb_clock &clock,
                     gb_interrupt_dispatcher &interrupts,
-                    gb_timer &timer,
                     gb_bus &bus)
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
-      m_timer(timer),
       m_bus(bus)
 {
     // reset registers (writing m_regs)
