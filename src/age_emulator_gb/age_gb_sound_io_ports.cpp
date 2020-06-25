@@ -17,7 +17,7 @@
 #include "age_gb_sound.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG(x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -152,13 +152,13 @@ void age::gb_sound::write_nr52(uint8_t value)
     // sound switched on
     else if (!m_master_on && new_master_on)
     {
-        update_state(); // m_sample_count updated
+        update_state(); // m_sclk updated
 
         m_delayed_disable_c1 = false;
 
         // delay frame sequencer step 0
         // (see test rom analysis)
-        m_skip_frame_sequencer_step = (m_sample_count + 2) & 0x800;
+        m_skip_frame_sequencer_step = (m_sclk + 2) & 0x800;
         m_next_frame_sequencer_step = m_skip_frame_sequencer_step ? 7 : 0;
     }
 
@@ -201,7 +201,7 @@ void age::gb_sound::write_nr11(uint8_t value)
     update_state();
 
     // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
+    if (m_master_on || !m_cgb)
     {
         m_c1.write_nrX1(value);
     }
@@ -251,7 +251,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
     if (m_master_on)
     {
-        update_state(); // m_sample_count & m_sample_next_apu_event updated
+        update_state(); // m_sclk & m_sclk_next_apu_event updated
         m_c1.set_high_frequency_bits(value);
         m_c1.init_length_counter(value, LC_IMMEDIATE_DECREMENT);
 
@@ -262,9 +262,9 @@ void age::gb_sound::write_nr14(uint8_t value)
             // one frequency sweep step is skipped if the next frame sequencer
             // step 2 or 6 is near
             // (see test rom analysis)
-            int samples = m_sample_next_apu_event - m_sample_count;
+            int samples = m_sclk_next_apu_event - m_sclk;
             bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
-                    && (samples <= (m_is_cgb ? 4 : 2));
+                    && (samples <= (m_cgb ? 4 : 2));
 
             bool deactivated = m_c1.init_frequency_sweep(skip_sweep_step);
             deactivated |= m_c1.init_volume_envelope(inc_period());
@@ -299,7 +299,7 @@ void age::gb_sound::write_nr21(uint8_t value)
     update_state();
 
     // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
+    if (m_master_on || !m_cgb)
     {
         m_c2.write_nrX1(value);
     }
@@ -400,7 +400,7 @@ void age::gb_sound::write_nr31(uint8_t value)
         << ", master " << m_master_on);
 
     // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
+    if (m_master_on || !m_cgb)
     {
         update_state();
         m_c3.write_nrX1(value);
@@ -455,7 +455,7 @@ void age::gb_sound::write_nr34(uint8_t value)
 
             // DMG: if we're about to read a wave sample,
             // wave pattern memory will be "scrambled"
-            if (!m_is_cgb && m_c3.next_sample_reads_wave_ram())
+            if (!m_cgb && m_c3.next_sample_reads_wave_ram())
             {
                 unsigned index = (m_c3.get_wave_pattern_index() + 1) & 31;
                 index >>= 1;
@@ -498,7 +498,7 @@ void age::gb_sound::write_nr41(uint8_t value)
         << ", master " << m_master_on);
 
     // length counter always writable for DMG
-    if (m_master_on || !m_is_cgb)
+    if (m_master_on || !m_cgb)
     {
         update_state();
         m_c4.write_nrX1(value);

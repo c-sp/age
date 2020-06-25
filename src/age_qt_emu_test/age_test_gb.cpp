@@ -28,17 +28,17 @@ age::test_result age::create_gb_test_result(const gb_emulator &emulator, const Q
     result.m_cycles_emulated = emulator.get_emulated_cycles();
     result.m_error_message = error_message;
 
-    switch (emulator.get_test_info().m_mode)
+    switch (emulator.get_test_info().m_cart_mode)
     {
-        case gb_mode::dmg:
+        case gb_cart_mode::dmg:
             result.m_additional_message = "(DMG)";
             break;
 
-        case gb_mode::dmg_on_cgb:
+        case gb_cart_mode::dmg_on_cgb:
             result.m_additional_message = "(DMG on CGB)";
             break;
 
-        case gb_mode::cgb:
+        case gb_cart_mode::cgb:
             result.m_additional_message = "(CGB)";
             break;
     }

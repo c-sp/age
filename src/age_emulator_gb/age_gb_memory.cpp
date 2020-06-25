@@ -52,11 +52,6 @@ constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
 //
 //---------------------------------------------------------
 
-age::gb_mode age::gb_memory::get_mode() const
-{
-    return m_mode;
-}
-
 const age::uint8_t* age::gb_memory::get_video_ram() const
 {
     return m_memory.data() + m_video_ram_offset;

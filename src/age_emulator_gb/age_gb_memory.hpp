@@ -25,7 +25,6 @@
 #include <string>
 
 #include <age_types.hpp>
-#include <emulator/age_gb_types.hpp>
 
 
 
@@ -40,6 +39,8 @@ constexpr int gb_video_ram_bank_size = 0x2000;
 constexpr int gb_internal_ram_size = 8 * gb_internal_ram_bank_size;
 constexpr int gb_video_ram_size = 2 * gb_video_ram_bank_size;
 
+constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
+
 
 
 class gb_memory
@@ -48,7 +49,10 @@ class gb_memory
 
 public:
 
-    gb_mode get_mode() const;
+    gb_memory(const uint8_vector &cart_rom);
+
+    void init_vram(bool for_cgb_hardware);
+
     const uint8_t* get_video_ram() const;
     std::string get_cartridge_title() const;
 
@@ -62,8 +66,6 @@ public:
     void write_byte(uint16_t address, uint8_t value);
     void write_svbk(uint8_t value);
     void write_vbk(uint8_t value);
-
-    gb_memory(const uint8_vector &cart_rom, gb_hardware hardware);
 
 
 
@@ -108,7 +110,6 @@ private:
     const int16_t m_num_cart_rom_banks;
     const int16_t m_num_cart_ram_banks;
     const bool m_has_battery;
-    const gb_mode m_mode;
     uint8_t m_svbk = 0xF8;
     uint8_t m_vbk = 0xF8;
 

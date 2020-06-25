@@ -89,6 +89,7 @@ void age::test_application::schedule_tests()
     // schedule tests
     else
     {
+        qInfo("thread pool has up to %d thread(s)", m_thread_pool.maxThreadCount());
         m_timer.start();
 
         for (QString file : files)
@@ -107,7 +108,9 @@ void age::test_application::schedule_tests()
                     break;
 
                 case test_type::mooneye_test:
-                    method = mooneye_test_method(file);
+                    method = mooneye_dmg_test(file);
+                    scheduled += schedule_test(file, method);
+                    method = mooneye_cgb_test(file);
                     scheduled += schedule_test(file, method);
                     break;
 
@@ -124,9 +127,6 @@ void age::test_application::schedule_tests()
                 m_no_test_method_found.append(file);
             }
         }
-
-        qInfo("scheduled %d test(s) for execution", m_tests_running);
-        qInfo("thread pool has %d thread(s)", m_thread_pool.maxThreadCount());
 
         // if we did not schedule any tests, exist immediately
         exit_app_on_finish();

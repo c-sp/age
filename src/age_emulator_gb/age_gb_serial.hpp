@@ -23,7 +23,12 @@
 
 #include <age_types.hpp>
 
-#include "age_gb_core.hpp"
+#include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_events.hpp"
+#include "common/age_gb_interrupts.hpp"
+
+#include "age_gb_div.hpp"
 
 
 
@@ -45,26 +50,37 @@ class gb_serial
 
 public:
 
+    gb_serial(const gb_device &device,
+              const gb_clock &clock,
+              const gb_div &div,
+              gb_interrupt_trigger &interrupts,
+              gb_events &events);
+
     uint8_t read_sb();
     uint8_t read_sc() const;
 
     void write_sb(uint8_t value);
     void write_sc(uint8_t value);
 
-    void finish_transfer();
-    void set_back_cycles(int offset);
-
-    gb_serial(gb_core &core);
+    void update_state();
+    void on_div_reset(int old_div_offset);
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
-    int transfer_init(uint8_t value);
-    void transfer_update_sb();
+    void start_transfer(uint8_t value_sc);
+    void stop_transfer(gb_sio_state new_state);
 
-    gb_core &m_core;
+    const gb_device &m_device;
+    const gb_clock &m_clock;
+    const gb_div &m_div;
+    gb_interrupt_trigger &m_interrupts;
+    gb_events &m_events;
+
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
-    int m_sio_cycles_per_bit = 0;
-    int m_sio_last_receive_cycle = gb_no_cycle;
+    int m_sio_clk_started = gb_no_clock_cycle;
+    int m_sio_clock_shift = 0;
+    uint8_t m_sio_initial_sb = 0;
 
     uint8_t m_sb = 0;
     uint8_t m_sc = 0;

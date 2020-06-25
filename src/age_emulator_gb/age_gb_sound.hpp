@@ -27,7 +27,8 @@
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
-#include "age_gb_core.hpp"
+#include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
 #include "age_gb_sound_utilities.hpp"
 
 
@@ -59,7 +60,7 @@ class gb_sound
 
 public:
 
-    gb_sound(const gb_core &core, pcm_vector &samples);
+    gb_sound(const gb_clock &clock, bool cgb_features, pcm_vector &samples);
 
     uint8_t read_nr10() const;
     uint8_t read_nr11() const;
@@ -109,7 +110,7 @@ public:
     void write_wave_ram(unsigned offset, uint8_t value);
 
     void update_state();
-    void set_back_cycles();
+    void set_back_clock();
 
 
 
@@ -117,16 +118,15 @@ private:
 
     bool inc_period() const;
     int apu_event();
-    void generate_samples(int sample_count);
+    void generate_samples(int for_sclk);
     void set_wave_ram_byte(unsigned offset, uint8_t value);
 
-    const gb_core &m_core;
-    const bool m_is_cgb;
-
     pcm_vector &m_samples;
-    int m_sample_count = 0;
 
-    int m_sample_next_apu_event = 0;
+    const gb_clock &m_clock;
+    const bool m_cgb;
+    int m_sclk = 0;
+    int m_sclk_next_apu_event = 0;
     int8_t m_next_frame_sequencer_step = 0;
     bool m_delayed_disable_c1 = false;
     bool m_skip_frame_sequencer_step = false;

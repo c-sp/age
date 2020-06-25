@@ -24,9 +24,14 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
+#include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_events.hpp"
+#include "common/age_gb_interrupts.hpp"
+
 #include "age_gb_bus.hpp"
-#include "age_gb_core.hpp"
 #include "age_gb_cpu.hpp"
+#include "age_gb_div.hpp"
 #include "age_gb_joypad.hpp"
 #include "age_gb_lcd.hpp"
 #include "age_gb_memory.hpp"
@@ -64,7 +69,11 @@ public:
 private:
 
     gb_memory m_memory;
-    gb_core m_core;
+    gb_device m_device;
+    gb_clock m_clock;
+    gb_interrupt_dispatcher m_interrupts;
+    gb_events m_events;
+    gb_div m_div;
     gb_sound m_sound;
     gb_lcd m_lcd;
     gb_timer m_timer;

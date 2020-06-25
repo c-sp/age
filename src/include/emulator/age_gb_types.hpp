@@ -45,9 +45,9 @@ enum class gb_hardware
 
 
 //!
-//! \brief The operating mode defined by configured hardware and rom capabilities.
+//! \brief The operating mode derived from hardware and cartridge capabilities.
 //!
-enum class gb_mode
+enum class gb_cart_mode
 {
     dmg,
     dmg_on_cgb,
@@ -63,7 +63,7 @@ enum class gb_mode
 //!
 struct gb_test_info
 {
-    gb_mode m_mode;
+    gb_cart_mode m_cart_mode;
     bool m_mooneye_debug_op;
 
     uint8_t m_a = 0;

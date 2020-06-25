@@ -14,46 +14,37 @@
 // limitations under the License.
 //
 
-#ifndef AGE_GB_JOYPAD_HPP
-#define AGE_GB_JOYPAD_HPP
+#ifndef AGE_GB_DEVICE_HPP
+#define AGE_GB_DEVICE_HPP
 
 //!
 //! \file
 //!
 
-#include <age_types.hpp>
-
-#include "common/age_gb_device.hpp"
-#include "common/age_gb_interrupts.hpp"
+#include <emulator/age_gb_types.hpp>
 
 
 
 namespace age
 {
 
-class gb_joypad
+class gb_device
 {
-    AGE_DISABLE_COPY(gb_joypad);
-
 public:
 
-    gb_joypad(const gb_device &device, gb_interrupt_trigger &interrupts);
+    gb_device(uint8_t rom_byte_0x143, gb_hardware hardware);
 
-    uint8_t read_p1() const;
-    void write_p1(uint8_t byte);
-    void set_buttons_down(int buttons);
-    void set_buttons_up(int buttons);
+    gb_cart_mode get_cart_mode() const;
+    bool is_cgb() const; //!< get_cart_mode() == gb_cart_mode::cgb
+    bool is_cgb_hardware() const; //!< get_cart_mode() != gb_cart_mode::dmg
 
 private:
 
-    gb_interrupt_trigger &m_interrupts;
-    uint8_t m_p1;
-    uint8_t m_p14 = 0x0F;
-    uint8_t m_p15 = 0x0F;
+    const gb_cart_mode m_cart_mode;
 };
 
 } // namespace age
 
 
 
-#endif // AGE_GB_JOYPAD_HPP
+#endif // AGE_GB_DEVICE_HPP

@@ -13,6 +13,9 @@ The AGE Web Application is written in
 [WebAssembly](https://webassembly.org/)
 (compiled with [Emscripten](https://emscripten.org)).
 
+[AGE documentation](docs/README.md)
+is still in an early stage and mostly made of test rom analyses.
+
 
 ## AGE Desktop Application Features
 

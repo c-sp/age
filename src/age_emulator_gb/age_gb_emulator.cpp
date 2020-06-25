@@ -21,7 +21,7 @@
 namespace age
 {
 
-constexpr int gb_sampling_rate = gb_machine_cycles_per_second >> 1;
+constexpr int gb_sampling_rate = gb_clock_cycles_per_second >> 1;
 
 }
 
@@ -85,7 +85,7 @@ std::string age::gb_emulator::inner_get_emulator_title() const
 //---------------------------------------------------------
 
 age::gb_emulator::gb_emulator(const uint8_vector &rom, gb_hardware hardware, bool dmg_green)
-    : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_machine_cycles_per_second),
+    : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_clock_cycles_per_second),
       m_impl(new gb_emulator_impl(rom, hardware, dmg_green, get_pcm_vector(), get_screen_buffer()))
 {
 }

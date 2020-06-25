@@ -19,7 +19,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG("ly " << AGE_LOG_DEC(get_ly()) << ", " << x)
+#define LOG(x) AGE_GB_CLOCK_LOG("ly " << AGE_LOG_DEC(get_ly()) << ", " << x)
 #else
 #define LOG(x)
 #endif
@@ -57,7 +57,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         if (lcd_enabled)
         {
             switch_on();
-            m_next_event_cycle = m_core.get_oscillation_cycle();
+            m_next_event_cycle = m_clock.get_clock_cycle();
             m_last_cycle_m3_finished = 0;
             m_skip_next_mode1_interrupt = false;
 
@@ -77,7 +77,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
             //
             m_stat &= ~gb_stat_modes;
 
-            m_next_event_cycle = gb_no_cycle;
+            m_next_event_cycle = gb_no_clock_cycle;
             m_next_event = nullptr;
 
             pixel_vector &back_buffer = m_screen_buffer.get_back_buffer();
@@ -94,7 +94,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
             //
             if (m_hdma_active)
             {
-                m_core.insert_event(0, gb_event::start_hdma);
+                m_events.schedule_event(gb_event::start_hdma, 0);
             }
         }
 
@@ -129,13 +129,13 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         //      window/late_disable_early_scx03_wx0f_1_dmg08_cgb_out0
         //      window/late_disable_early_scx03_wx0f_2_dmg08_cgb_out3
         //
-        if (m_cgb)
+        if (m_device.is_cgb())
         {
             constexpr uint8_t not_delayed_bits = gb_lcdc_bg_win_data | gb_lcdc_win_enable;
             uint8_t not_delayed = (old_lcdc & ~not_delayed_bits) | (value & not_delayed_bits);
             gb_lcd_ppu::write_lcdc(not_delayed);
 
-            emulate(m_core.get_oscillation_cycle() + 1);
+            emulate(m_clock.get_clock_cycle() + 1);
         }
     }
 
@@ -200,7 +200,7 @@ void age::gb_lcd::write_stat(uint8_t value)
         uint8_t bits_set = ~old_stat & value;
         LOG("cleared bits " << AGE_LOG_HEX(bits_cleared) << ", set bits " << AGE_LOG_HEX(bits_set));
 
-        int current_cycle = m_core.get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
 
         //
@@ -244,7 +244,7 @@ void age::gb_lcd::write_stat(uint8_t value)
         //
         if ((scanline == 153) && (next_scanline_offset <= 4))
         {
-            bool allow_mode1_interrupt = (((m_cgb && !m_core.is_double_speed()) ? old_stat : m_stat) & gb_stat_interrupt_mode1) > 0;
+            bool allow_mode1_interrupt = (((m_device.is_cgb() && !m_clock.is_double_speed()) ? old_stat : m_stat) & gb_stat_interrupt_mode1) > 0;
             m_allow_mode2_ly0_interrupt_int = ((m_stat & gb_stat_interrupt_mode2) > 0) && !allow_mode1_interrupt;
         }
 
@@ -292,7 +292,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      miscmstatirq/m0statwirq_trigger_ff_f7_dmg08_cgb_out0
                 //      miscmstatirq/m0statwirq_trigger_ff_ff_dmg08_cgb_out0
                 //
-                raise_lcd_interrupt = m_cgb ? ((bits_set & gb_stat_interrupt_mode0) > 0) : ((old_stat & gb_stat_interrupt_mode0) == 0);
+                raise_lcd_interrupt = m_device.is_cgb() ? ((bits_set & gb_stat_interrupt_mode0) > 0) : ((old_stat & gb_stat_interrupt_mode0) == 0);
                 //
                 // The LCD interrupt will not be triggered for mode 0
                 // replacing mode 2 (LY 0) after enabling the LCD.
@@ -321,7 +321,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      m0enable/late_enable_ds_1_out3
                 //      m0enable/late_enable_ds_2_out1
                 //
-                raise_lcd_interrupt &= !m_cgb || (next_scanline_offset > m_core.get_machine_cycles_per_cpu_cycle());
+                raise_lcd_interrupt &= !m_device.is_cgb() || (next_scanline_offset > m_clock.get_machine_cycle_clocks());
                 //
                 // The mode 0 interrupt is not raised before it
                 // would be raised automatically after mode 3
@@ -343,7 +343,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      m1/m1irq_m0disable_ds_1_out3
                 //      m1/m1irq_m0disable_ds_2_out1
                 //
-                m_skip_next_mode1_interrupt = m_cgb && !m_core.is_double_speed()
+                m_skip_next_mode1_interrupt = m_device.is_cgb() && !m_clock.is_double_speed()
                         && ((bits_cleared & gb_stat_interrupt_mode0) > 0)
                         && (scanline == gb_screen_height - 1)
                         && (next_scanline_offset <= 4);
@@ -379,12 +379,12 @@ void age::gb_lcd::write_stat(uint8_t value)
                 LOG("next_scanline_offset " << next_scanline_offset);
                 if (((bits_set & gb_stat_interrupt_mode2) > 0)
                         && (scanline < gb_screen_height - 1)
-                        && (((m_cgb ? value : old_stat) & gb_stat_interrupt_mode0) == 0)
-                        && (m_cgb || !is_interruptable_coincidence())
+                        && (((m_device.is_cgb() ? value : old_stat) & gb_stat_interrupt_mode0) == 0)
+                        && (m_device.is_cgb() || !is_interruptable_coincidence())
                         && (next_scanline_offset == 4))
                 {
                     LOG("raising LCD interrupt for mode 2");
-                    m_core.request_interrupt(gb_interrupt::lcd);
+                    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
                 }
                 break;
             }
@@ -424,7 +424,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      miscmstatirq/m1statwirq_trigger_ff_ef_dmg08_cgb_out0
                 //      miscmstatirq/m1statwirq_trigger_ff_ff_dmg08_cgb_out0
                 //
-                raise_lcd_interrupt = m_cgb ? ((bits_set & gb_stat_interrupt_mode1) > 0) : ((old_stat & gb_stat_interrupt_mode1) == 0);
+                raise_lcd_interrupt = m_device.is_cgb() ? ((bits_set & gb_stat_interrupt_mode1) > 0) : ((old_stat & gb_stat_interrupt_mode1) == 0);
                 //
                 // If an LYC interrupt was possible just when this write occurs,
                 // (LY == LYC and the STAT LYC interrupt flag was set), no LCD
@@ -444,7 +444,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      miscmstatirq/m1statwirq_trigger_ly94_lyc94_40_50_ds_1_outE0
                 //      miscmstatirq/m1statwirq_trigger_ly94_lyc94_40_50_ds_2_outE2
                 //
-                raise_lcd_interrupt &= !lyc || (m_cgb && (next_scanline_offset <= (m_core.is_double_speed() ? 0 : 4)));
+                raise_lcd_interrupt &= !lyc || (m_device.is_cgb() && (next_scanline_offset <= (m_clock.is_double_speed() ? 0 : 4)));
                 //
                 // For scanline 153 on a CGB not running at double speed, the mode 1
                 // interrupt is not triggered immediately, if this scanline does not
@@ -456,7 +456,7 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      m1/m1irq_late_enable_ds_1_out2
                 //      m1/m1irq_late_enable_ds_2_out0
                 //
-                raise_lcd_interrupt &= !m_cgb || (scanline != 153) || m_core.is_double_speed() || (next_scanline_offset > 4);
+                raise_lcd_interrupt &= !m_device.is_cgb() || (scanline != 153) || m_clock.is_double_speed() || (next_scanline_offset > 4);
                 LOG((raise_lcd_interrupt ? "" : "NOT ") << "raising " << (m_cgb ? "CGB" : "DMG") << " LCD interrupt for mode 1");
                 break;
             }
@@ -502,12 +502,12 @@ void age::gb_lcd::write_stat(uint8_t value)
                 //      m2enable/late_enable_m0disable_ds_2_out0
                 //
                 if (((bits_set & gb_stat_interrupt_mode2) > 0)
-                        && m_core.is_double_speed()
+                        && m_clock.is_double_speed()
                         && ((value & gb_stat_interrupt_mode0) == 0)
                         && (next_scanline_offset == gb_cycles_per_scanline))
                 {
                     LOG("raising CGB LCD interrupt for mode 2");
-                    m_core.request_interrupt(gb_interrupt::lcd);
+                    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
                 }
                 break;
             }
@@ -516,7 +516,7 @@ void age::gb_lcd::write_stat(uint8_t value)
         // raise LCD interrupt, if required
         if (raise_lcd_interrupt)
         {
-            m_core.request_interrupt(gb_interrupt::lcd);
+            m_interrupts.trigger_interrupt(gb_interrupt::lcd);
         }
 
         //
@@ -548,7 +548,7 @@ void age::gb_lcd::write_stat(uint8_t value)
         // If the interrupt just happened (mode0_interrupt_offset == 0),
         // it does of course not make any sense to delay any change.
         //
-        if (m_cgb && (mode0_interrupt_offset > 0) && (mode0_interrupt_offset <= (m_core.is_double_speed() ? 1 : 2)))
+        if (m_device.is_cgb() && (mode0_interrupt_offset > 0) && (mode0_interrupt_offset <= (m_clock.is_double_speed() ? 1 : 2)))
         {
             LOG("delaying mode 0 stat change");
             m_stat_mode0_int = old_stat | bits_set;
@@ -577,9 +577,9 @@ void age::gb_lcd::write_scx(uint8_t value)
     //      scx_during_m3/scx_0360c0/scx_during_m3_ds_3
     //      scx_during_m3/scx_0360c0/scx_during_m3_ds_4
     //
-    if (m_cgb)
+    if (m_device.is_cgb())
     {
-        emulate(m_core.get_oscillation_cycle() + 1);
+        emulate(m_clock.get_clock_cycle() + 1);
     }
 
     gb_lcd_ppu::write_scx(value);
@@ -603,9 +603,9 @@ void age::gb_lcd::write_scy(uint8_t value)
     //      scy/scy_during_m3_ds_6
     //      scy/scy_during_m3_ds_7
     //
-    if (m_cgb)
+    if (m_device.is_cgb())
     {
-        emulate(m_core.get_oscillation_cycle() + 1);
+        emulate(m_clock.get_clock_cycle() + 1);
     }
 
     gb_lcd_ppu::write_scy(value);
@@ -628,7 +628,7 @@ void age::gb_lcd::write_wx(uint8_t value)
     //      window/late_wx_ds_2_out3
     //
     LOG(AGE_LOG_HEX(value));
-    emulate(m_core.get_oscillation_cycle() + 1);
+    emulate(m_clock.get_clock_cycle() + 1);
     gb_lcd_ppu::write_wx(value);
 }
 
@@ -645,12 +645,9 @@ void age::gb_lcd::write_wy(uint8_t value)
     //      window/late_wy_ffto2_ly2_scx5_1_dmg08_cgb_out3
     //
     LOG(AGE_LOG_HEX(value));
-    emulate(m_core.get_oscillation_cycle() + 1);
+    emulate(m_clock.get_clock_cycle() + 1);
     gb_lcd_ppu::write_wy(value);
     write_late_wy();
-
-//    uint offset = m_cgb ? 5 : 2;
-//    m_core.insert_event(offset, gb_event::lcd_late_wy_change);
 }
 
 
@@ -765,7 +762,7 @@ void age::gb_lcd::write_lyc(uint8_t value)
         int mode0_interrupt_offset = get_mode0_interrupt_cycle_offset();
         LOG("mode0_interrupt_offset " << mode0_interrupt_offset);
 
-        int min_offset = m_cgb ? (m_core.is_double_speed() ? 2 : 6) : 1;
+        int min_offset = m_device.is_cgb() ? (m_clock.is_double_speed() ? 2 : 6) : 1;
         LOG("min_offset " << min_offset);
 
         if ((mode0_interrupt_offset > 0) && (mode0_interrupt_offset <= min_offset))
@@ -830,26 +827,26 @@ void age::gb_lcd::write_obp1(uint8_t value)
 
 age::uint8_t age::gb_lcd::read_bcps() const
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     return m_bcps;
 }
 
 age::uint8_t age::gb_lcd::read_bcpd() const
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     uint8_t result = is_cgb_palette_accessible() ? m_palette[m_bcps & 0x3F] : 0xFF;
     return result;
 }
 
 age::uint8_t age::gb_lcd::read_ocps() const
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     return m_ocps;
 }
 
 age::uint8_t age::gb_lcd::read_ocpd() const
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     uint8_t result = is_cgb_palette_accessible() ? m_palette[0x40 + (m_ocps & 0x3F)] : 0xFF;
     return result;
 }
@@ -858,13 +855,13 @@ age::uint8_t age::gb_lcd::read_ocpd() const
 
 void age::gb_lcd::write_bcps(uint8_t value)
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     m_bcps = value | 0x40;
 }
 
 void age::gb_lcd::write_bcpd(uint8_t value)
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     if (is_cgb_palette_accessible())
     {
         m_palette[m_bcps & 0x3F] = value;
@@ -882,13 +879,13 @@ void age::gb_lcd::write_bcpd(uint8_t value)
 
 void age::gb_lcd::write_ocps(uint8_t value)
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     m_ocps = value | 0x40;
 }
 
 void age::gb_lcd::write_ocpd(uint8_t value)
 {
-    AGE_ASSERT(m_cgb);
+    AGE_ASSERT(m_device.is_cgb());
     if (is_cgb_palette_accessible())
     {
         m_palette[0x40 + (m_ocps & 0x3F)] = value;
@@ -926,8 +923,8 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
     bool allowed = true;
     if (m_lcd_enabled)
     {
-        bool double_speed = m_core.is_double_speed();
-        int current_cycle = m_core.get_oscillation_cycle();
+        bool double_speed = m_clock.is_double_speed();
+        int current_cycle = m_clock.get_clock_cycle();
 
         int mode = m_stat & gb_stat_modes;
         allowed = mode != 3;
@@ -971,7 +968,7 @@ bool age::gb_lcd::is_cgb_palette_accessible() const
         AGE_ASSERT(m_last_cycle_m3_finished >= 0);
         AGE_ASSERT(m_last_cycle_m3_finished <= current_cycle);
         int m3_cycle_diff = current_cycle - m_last_cycle_m3_finished;
-        int min_cycle_diff = m_core.get_machine_cycles_per_cpu_cycle();
+        int min_cycle_diff = m_clock.get_machine_cycle_clocks();
         allowed &= m3_cycle_diff >= min_cycle_diff;
 
         //

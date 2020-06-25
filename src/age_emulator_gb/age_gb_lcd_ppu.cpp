@@ -21,19 +21,19 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) AGE_GB_CYCLE_LOG("x_current " << m_x_current << ", " << m_tile_offset << ", ly " << AGE_LOG_DEC(get_ly()) << ": " << x)
+#define LOG(x) AGE_GB_CLOCK_LOG("x_current " << m_x_current << ", " << m_tile_offset << ", ly " << AGE_LOG_DEC(get_ly()) << ": " << x)
 #else
 #define LOG(x)
 #endif
 
 #if 0
-#define LOG_FETCH(x) AGE_LOG(x)
+#define LOG_FETCH(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG_FETCH(x)
 #endif
 
 #if 0
-#define LOG_PLOT(x) AGE_LOG(x)
+#define LOG_PLOT(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG_PLOT(x)
 #endif
@@ -67,11 +67,11 @@ constexpr const age::uint8_array<0xA0> dmg_oam_dump =
 //
 //---------------------------------------------------------
 
-age::gb_lcd_ppu::gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_green)
-    : gb_lyc_interrupter(core),
-      m_cgb(core.is_cgb()),
+age::gb_lcd_ppu::gb_lcd_ppu(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, bool dmg_green)
+    : gb_lyc_interrupter(device, clock, events, interrupts),
+      m_device(device),
+      m_clock(clock),
       m_dmg_green(dmg_green),
-      m_core(core),
       m_memory(memory)
 {
     // init caches
@@ -79,7 +79,7 @@ age::gb_lcd_ppu::gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_gre
     calculate_xflip(m_xflip_cache);
 
     // init object attribute memory
-    if (m_cgb)
+    if (m_device.is_cgb())
     {
         std::fill(begin(m_oam), end(m_oam), 0);
     }
@@ -149,7 +149,7 @@ int age::gb_lcd_ppu::get_mode0_interrupt_cycle_offset() const
     // if the cycle offset to the upcoming mode 0 interrupt is
     // irrelevant (basically if it's more than a handful of
     // cycles away), we just return some negative number
-    int result = (get_scanline() >= gb_screen_height) ? gb_no_cycle : m_x_m0_int - m_x_current;
+    int result = (get_scanline() >= gb_screen_height) ? gb_no_clock_cycle : m_x_m0_int - m_x_current;
     return result;
 }
 
@@ -164,7 +164,7 @@ void age::gb_lcd_ppu::create_classic_palette(unsigned index, uint8_t colors)
 {
     AGE_ASSERT(index < m_colors.size() - 4);
 
-    if (!m_cgb)
+    if (!m_device.is_cgb())
     {
         for (unsigned max = index + 4; index < max; ++index)
         {
@@ -197,7 +197,7 @@ void age::gb_lcd_ppu::create_classic_palette(unsigned index, uint8_t colors)
 
 void age::gb_lcd_ppu::update_color(unsigned index, uint8_t high_byte, uint8_t low_byte)
 {
-    AGE_ASSERT(m_cgb && (index < 64));
+    AGE_ASSERT(m_device.is_cgb() && (index < 64));
 
     // we rely on integer promotion to 32 bit int for the following calculation
     int gb_color = (high_byte << 8) + low_byte;
@@ -219,7 +219,7 @@ void age::gb_lcd_ppu::update_color(unsigned index, uint8_t high_byte, uint8_t lo
 
 void age::gb_lcd_ppu::white_screen(pixel_vector &screen)
 {
-    pixel p = (m_cgb || !m_dmg_green) ? pixel(255, 255, 255) : pixel(152, 192, 15);
+    pixel p = (m_device.is_cgb() || !m_dmg_green) ? pixel(255, 255, 255) : pixel(152, 192, 15);
     std::fill(begin(screen), end(screen), p);
 }
 
@@ -408,7 +408,7 @@ void age::gb_lcd_ppu::plot_await_scx_match(gb_lcd_ppu &ppu)
         //      scx_during_m3/scx_0761c0/scx_during_m3_3
         //      scx_during_m3/scx_0761c0/scx_during_m3_4
         //
-        ppu.m_tile_map_offset = ppu.m_cgb ? 0 : 1;
+        ppu.m_tile_map_offset = ppu.m_device.is_cgb() ? 0 : 1;
 
         //
         // On a DMG the first pixel is plotted 12 cycles after
@@ -421,7 +421,7 @@ void age::gb_lcd_ppu::plot_await_scx_match(gb_lcd_ppu &ppu)
         //      dmgpalette_during_m3/dmgpalette_during_m3_5
         //
         ppu.m_next_plot_step = &plot_await_data;
-        if (ppu.m_cgb)
+        if (ppu.m_device.is_cgb())
         {
             plot_await_data(ppu);
         }
@@ -538,8 +538,8 @@ void age::gb_lcd_ppu::plot_await_data(gb_lcd_ppu &ppu)
             //      vram_m3/postread_scx5_1_dmg08_cgb_out3
             //      vram_m3/postread_scx5_2_dmg08_cgb_out0
             //
-            ppu.m_x_m0 = ppu.m_sprite_at_167 ? (ppu.m_core.is_double_speed() ? 167 : 167 + 1 - ppu.m_tile_map_offset)
-                                             : (ppu.m_core.is_double_speed() ? 167 : 166 + 1 - ppu.m_tile_map_offset);
+            ppu.m_x_m0 = ppu.m_sprite_at_167 ? (ppu.m_clock.is_double_speed() ? 167 : 167 + 1 - ppu.m_tile_map_offset)
+                                             : (ppu.m_clock.is_double_speed() ? 167 : 166 + 1 - ppu.m_tile_map_offset);
             AGE_ASSERT((ppu.m_x_m0 >= 166)
                        && (ppu.m_x_m0 <= 168));
             //
@@ -557,7 +557,7 @@ void age::gb_lcd_ppu::plot_await_data(gb_lcd_ppu &ppu)
             //      m0int_m0stat/m0int_m0stat_scx5_ds_2_out2
             //
             ppu.m_x_m0_int = ppu.m_sprite_at_167 ? 167
-                                                 : (ppu.m_core.is_double_speed() ? 167 : ppu.m_x_m0 + 1);
+                                                 : (ppu.m_clock.is_double_speed() ? 167 : ppu.m_x_m0 + 1);
             AGE_ASSERT((ppu.m_x_m0_int >= 167)
                        && (ppu.m_x_m0_int <= 169));
             //
@@ -1157,7 +1157,7 @@ void age::gb_lcd_ppu::window_set_next_step(std::function<void(gb_lcd_ppu&)> next
     //
     //      window/late_disable_1_dmg08_out3_cgb_out0
     //
-    if (m_cgb && !m_win_enabled && (m_tile_offset == 8))
+    if (m_device.is_cgb() && !m_win_enabled && (m_tile_offset == 8))
     {
         m_window_started = false;
         m_plotting_window = false;
@@ -1212,8 +1212,8 @@ void age::gb_lcd_ppu::gb_sprite::fetch_tile_byte2(const gb_lcd_ppu &ppu)
 
 void age::gb_lcd_ppu::gb_sprite::create_tile(const gb_lcd_ppu &ppu)
 {
-    uint8_t palette_offset = 0x20 + (ppu.m_cgb ? ((m_tile_attributes << 2) & (0x07 << 2))
-                                               : (m_tile_attributes & 0x10));
+    uint8_t palette_offset = 0x20 + (ppu.m_device.is_cgb() ? ((m_tile_attributes << 2) & (0x07 << 2))
+                                                           : (m_tile_attributes & 0x10));
 
     // flip horizontally, if requested
     if ((m_tile_attributes & gb_tile_attribute_x_flip) > 0) // attribute: horizontal flip

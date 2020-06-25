@@ -18,372 +18,230 @@
 
 #include "age_gb_timer.hpp"
 
-#if 0
-#define LOG(x) AGE_GB_CYCLE_LOG(x)
-#else
-#define LOG(x)
-#endif
+#define CLOG(log) AGE_GB_CLOG(AGE_GB_CLOG_TIMER)(log)
 
-namespace age
+namespace
 {
-
-constexpr uint8_t gb_tac_start_timer = 0x04;
-
+constexpr uint8_t tac_start_timer = 0x04;
 }
 
 
 
-
-
-//---------------------------------------------------------
-//
-//   constructor
-//
-//---------------------------------------------------------
-
-age::gb_timer::gb_timer(gb_core &core)
-    : m_core(core),
-      m_counter(core)
+age::gb_timer::gb_timer(const gb_clock &clock,
+                        const gb_div &div,
+                        gb_interrupt_trigger &interrupts,
+                        gb_events &events)
+    : m_clock(clock),
+      m_div(div),
+      m_interrupts(interrupts),
+      m_events(events)
 {
-    write_tac(0);
+}
+
+int age::gb_timer::get_clock_shift(int tac) const
+{
+    // 00   (4096 Hz): clock cycle >> 10 (1024 clock cycles)
+    // 01 (262144 Hz): clock cycle >>  4   (16 clock cycles)
+    // 10  (65536 Hz): clock cycle >>  6   (64 clock cycles)
+    // 11  (16384 Hz): clock cycle >>  8  (256 clock cycles)
+    int clock_shift = 4 + (((tac - 1) & 0x03) << 1);
+
+    // CGB double speed => faster increments
+    clock_shift -= m_clock.is_double_speed();
+
+    AGE_ASSERT(clock_shift <= 10);
+    AGE_ASSERT(clock_shift >= 3); // CGB double speed: up to 524288 Hz
+
+    return clock_shift;
 }
 
 
 
 //---------------------------------------------------------
 //
-//   i/o port reads
+//   read timer i/o ports
 //
 //---------------------------------------------------------
 
 age::uint8_t age::gb_timer::read_tma() const
 {
+    CLOG("read TMA " << AGE_LOG_HEX8(m_tma));
     return m_tma;
 }
 
+
+
 age::uint8_t age::gb_timer::read_tac() const
 {
+    CLOG("read TAC " << AGE_LOG_HEX8(m_tac));
     return m_tac;
 }
 
+
+
 age::uint8_t age::gb_timer::read_tima()
 {
-    // if the timer is running we have to calculate the current TIMA value
-    if (m_tima_running)
+    if (m_clk_timer_zero != gb_no_clock_cycle)
     {
-        // get the current TIMA value based on the counter
-        int tima = m_tima_counter.get_current_value();
+        // calculate current TIMA value
+        update_timer_state();
 
-        // handle overflow(s)
-        if (tima >= 0x100)
+        // If there was a timer overflow on this very clock cycle,
+        // TIMA equals zero.
+        //
+        // Mooneye GB tests:
+        //      acceptance/timer/tima_reload
+        if (m_clk_last_overflow == m_clock.get_clock_cycle())
         {
-            tima = (tima - 0x100) % (0x100 - m_tma);
-            tima += m_tma;
-
-            AGE_ASSERT(tima < 0x100);
-            AGE_ASSERT(tima >= m_tma); // only valid on overflow
-
-            // propagate changes to m_tima_counter
-            m_tima_counter.set_tima(tima);
-
-            m_last_overflow_counter = m_tima_counter.get_past_tima_counter(m_tma);
-            LOG("last overflow counter is " << m_last_overflow_counter
-                << ", current counter is " << m_counter.get_current_value());
-
-            // verified by mooneye-gb:
-            //  loading the TIMA with TMA is delayed by 4 cycles during
-            //  which the TIMA is zero
-            //
-            //      acceptance/timer/tima_reload
-            //
-            if ((tima == m_tma) && (m_last_overflow_counter == m_counter.get_current_value()))
-            {
-                // do NOT propagate this to m_tima_counter since it
-                // is just a temporary value
-                tima = 0;
-            }
+            CLOG("read TIMA 0 due to recent timer overflow");
+            return 0;
         }
-
-        // save the current TIMA value
-        AGE_ASSERT(tima < 0x100);
-        m_tima = tima & 0xFF;
     }
 
-    // return the current TIMA value
-    LOG("reading tima " << AGE_LOG_HEX(m_tima));
+    CLOG("read TIMA " << AGE_LOG_HEX8(m_tima));
     return m_tima;
-}
-
-age::uint8_t age::gb_timer::read_div() const
-{
-    return (m_counter.get_current_value() >> 6) & 0xFF;
 }
 
 
 
 //---------------------------------------------------------
 //
-//   i/o port writes.
+//   write timer i/o ports
 //
 //---------------------------------------------------------
 
 void age::gb_timer::write_tma(uint8_t value)
 {
-    if (m_tima_running)
-    {
-        // check for pending TIMA overflows
-        read_tima();
+    CLOG("write TMA " << AGE_LOG_HEX8(value));
 
-        // verified by mooneye-gb:
-        //  the new TMA value is used immediately, if the TIMA
-        //  is currently being reloaded.
+    if (m_clk_timer_zero != gb_no_clock_cycle)
+    {
+        update_timer_state(); // update with old TMA
+
+        // The new TMA is used immediately if a timer overflow
+        // occurred at most one machine cycle ago.
         //
+        // Mooneye GB tests:
         //      acceptance/timer/tma_write_reloading
-        //
-        if ((m_counter.get_current_value() - m_last_overflow_counter) <= 1)
+        if (m_clk_last_overflow != gb_no_clock_cycle)
         {
-            m_tima_counter.set_tima(value);
-            schedule_timer_overflow();
+            AGE_ASSERT(m_clk_last_overflow <= m_clock.get_clock_cycle());
+            int clks = m_clock.get_clock_cycle() - m_clk_last_overflow;
+
+            if (clks <= m_clock.get_machine_cycle_clocks())
+            {
+                CLOG("    * copied to TIMA due to recent timer overflow");
+                m_tima = value;
+                start_timer();
+            }
         }
     }
 
     m_tma = value;
-    LOG("tma set to " << AGE_LOG_HEX(m_tma));
 }
 
-void age::gb_timer::write_tima(uint8_t value)
-{
-    if (m_tima_running)
-    {
-        // check for pending TIMA overflows
-        read_tima();
 
-        // verified by mooneye-gb:
-        //  the write is ignored if the last TIMA increment happened
-        //  one cycle before
-        //
-        //      acceptance/timer/tima_write_reloading
-        //
-        if ((m_counter.get_current_value() - m_last_overflow_counter) != 1)
-        {
-            m_tima_counter.set_tima(value);
-            schedule_timer_overflow();
-            LOG("tima set to " << AGE_LOG_HEX(value));
-        }
-    }
-
-    // if the timer is not running, just store the value
-    else
-    {
-        m_tima = value;
-        LOG("tima set to " << AGE_LOG_HEX(m_tima));
-    }
-}
 
 void age::gb_timer::write_tac(uint8_t value)
 {
-    // verified by mooneye-gb & gambatte tests:
-    //  A TIMA increment occurs when bit X of the counter goes low.
-    //  Deactivating the timer while bit X is set has the same effect.
-    //
-    //      acceptance/timer/rapid_toggle
-    //
-    //      tima/tc00_late_stop_inc_1_outFE
-    //      tima/tc00_late_stop_inc_2_outFF
-    //      tima/tc00_late_stop_irq_2_outE4
-    //      tima/tc00_late_stop_irq_1_outE0
-    //      tima/tc00_late_stop_of_1_outFF
-    //      tima/tc00_late_stop_of_2_outFE
-    //
-    // verified by gambatte test:
-    //  When changing the timer frequency so that the "old" timer
-    //  was incremented when bit X went low and the "new" timer
-    //  is incremented when bit Y goes low, an immediate increment
-    //  will happen for bit X currently being high and bit Y
-    //  currently being low.
-    //
-    //      tima/tc00_tc01_late_tc00_of_2
-    //
-
-    bool new_tima_running = (value & gb_tac_start_timer) > 0;
-    int tima = m_tima;
-
-    if (m_tima_running)
-    {
-        // deactivating the timer might trigger a TIMA increment
-        if (!new_tima_running)
-        {
-            check_for_early_increment(0);
-            read_tima(); // make sure m_tima is up to date
-        }
-        // changing the frequency might trigger a TIME increment
-        else
-        {
-            int new_increment_bit = m_tima_counter.get_trigger_bit(value);
-            tima = check_for_early_increment(new_increment_bit);
-        }
-    }
-
-    // update timer configuration
+    CLOG("write TAC " << AGE_LOG_HEX8(value));
     m_tac = value | 0xF8;
-    LOG("tac set to " << AGE_LOG_HEX(m_tac));
+    bool start_new_timer = m_tac & tac_start_timer;
 
-    m_tima_counter.set_frequency(m_tac);
-    m_tima_running = new_tima_running;
-
-    // if the timer is (still/now) running, propagate the current
-    // TIMA value and schedule the timer overflow event
-    if (m_tima_running)
+    // timer not active => maybe start it?
+    if (m_clk_timer_zero == gb_no_clock_cycle)
     {
-        AGE_ASSERT(tima <= 0x100);
-        m_tima_counter.set_tima(tima);
-        schedule_timer_overflow();
-    }
-    // if the timer is not running, cancel the timer overflow event
-    else
-    {
-        LOG("cancelling timer overflow event");
-        m_core.remove_event(gb_event::timer_overflow);
-    }
-}
-
-void age::gb_timer::write_div(uint8_t)
-{
-    // verified by mooneye-gb tests:
-    //  writing to DIV resets the internal counter that is used
-    //  for incrementing DIV and TIMA
-    //
-    //      acceptance/timer/div_write
-    //
-
-    if (!m_tima_running)
-    {
-        m_counter.reset();
-    }
-    else
-    {
-        // verified by mooneye-gb tests:
-        //  A TIMA increment occurrs when bit X of the counter goes low.
-        //  Resetting the counter while bit X is set has the same effect
-        //  since all bits are cleared.
-        //
-        //      acceptance/timer/tim00_div_trigger
-        //      acceptance/timer/tim01_div_trigger
-        //      acceptance/timer/tim10_div_trigger
-        //      acceptance/timer/tim11_div_trigger
-        //
-        int tima = check_for_early_increment(0);
-        AGE_ASSERT(tima <= 0x100);
-
-        // reset the counter and propagate the reset to m_tima_counter
-        // (preserve the current TIMA value)
-        m_counter.reset();
-        m_tima_counter.set_tima(tima);
-
-        // re-schedule the timer overflow event
-        // (which may occur immediately if TIMA was incremented)
-        schedule_timer_overflow();
-    }
-}
-
-
-
-//---------------------------------------------------------
-//
-//   Timer utility methods
-//
-//---------------------------------------------------------
-
-void age::gb_timer::timer_overflow()
-{
-    AGE_ASSERT(m_tima_running);
-
-    // trigger the timer interrupt and schedule
-    // the next timer overflow event
-    m_core.request_interrupt(gb_interrupt::timer);
-    schedule_timer_overflow();
-}
-
-void age::gb_timer::switch_double_speed_mode()
-{
-    // change the counter's speed
-    m_counter.switch_double_speed_mode();
-
-    // re-schedule the timer overflow event if the timer is running
-    if (m_tima_running)
-    {
-        schedule_timer_overflow();
-    }
-}
-
-void age::gb_timer::set_back_cycles(int offset)
-{
-    m_counter.set_back_cycles(offset);
-}
-
-
-
-//---------------------------------------------------------
-//
-//   private methods
-//
-//---------------------------------------------------------
-
-int age::gb_timer::check_for_early_increment(int new_increment_bit)
-{
-    AGE_ASSERT(m_tima_running);
-
-    // calculate the current TIMA value
-    int tima = read_tima();
-
-    // check for early increment
-    // (the bit must change from high to low for that)
-    int current_increment_bit = m_tima_counter.get_trigger_bit(m_tac);
-    current_increment_bit &= ~new_increment_bit;
-
-    AGE_ASSERT(current_increment_bit <= 1);
-    AGE_ASSERT(new_increment_bit <= 1);
-
-    if (current_increment_bit > 0)
-    {
-        ++tima;
-        m_tima_counter.set_tima(tima);
-
-        // trigger the interrupt on overflow
-        AGE_ASSERT(tima <= 0x100);
-        if (tima == 0x100)
+        if (start_new_timer)
         {
-            m_core.request_interrupt(gb_interrupt::timer);
+            start_timer();
         }
+        return;
     }
 
-    // m_tima has to be updated after the overflow
-    return tima;
+    // timer active and to be stopped?
+    if (!start_new_timer)
+    {
+        update_timer_state(); // update TIMA
+        stop_timer();
+        return;
+    }
+
+    // timer stays active,
+    // the frequency may change though
+
+    // When the increment triggering bit goes low due to
+    // a timer frequency change,
+    // the timer will be immediately incremented.
+    //
+    // Gambatte tests:
+    //      tima/tc00_tc01_late_tc00_of_2
+
+    int div_clock = m_clock.get_clock_cycle() + m_div.get_div_offset();
+
+    int old_trigger_bit = 1 << (m_clock_shift - 1);
+    int old_bit = div_clock & old_trigger_bit;
+
+    int new_trigger_bit = 1 << (get_clock_shift(m_tac) - 1);
+    int new_bit = div_clock & new_trigger_bit;
+
+    if (old_bit && !new_bit)
+    {
+        // simulate immediate increment
+        CLOG("immediate TIMA increment by frequency change");
+        m_clk_timer_zero -= old_trigger_bit << 1;
+    }
+
+    // update current TIMA
+    // (including possible immediate increment, see above)
+    update_timer_state();
+
+    // restart timer
+    // (required actually only if update_timer_state() did not overflow)
+    start_timer();
 }
 
 
 
-void age::gb_timer::schedule_timer_overflow()
+void age::gb_timer::write_tima(uint8_t value)
 {
-    AGE_ASSERT(m_tima_running);
+    CLOG("write TIMA " << AGE_LOG_HEX8(value));
 
-    // calculate the current TIMA value
-    int tima = read_tima();
+    // timer not active => just write the value
+    if (m_clk_timer_zero == gb_no_clock_cycle)
+    {
+        m_tima = value;
+        return;
+    }
 
-    // calculate the cycle offset
-    int tima_offset = 0x100 - tima;
-    int cycle_offset = m_tima_counter.get_cycle_offset(tima_offset);
+    // update active timer
+    update_timer_state();
 
-    // verified by gambatte tests:
-    //  the interrupt seems to be raised with a delay
-    //  of one CPU cycle
+    // TIMA write is ignored if the last timer overflow occurred
+    // occurred one machine cycle ago.
     //
-    //      tima/tc01_1stopstart_offset1_irq_2
-    //      tima/tc01_1stopstart_offset2_irq_1
-    //
-    //! \todo this delay seems odd, but I cannot find any test rom disproving it and some gambatte tests do not work without it
-    cycle_offset += m_core.get_machine_cycles_per_cpu_cycle();
+    // Mooneye GB tests:
+    //      acceptance/timer/tima_write_reloading
+    int clk_current = m_clock.get_clock_cycle();
+    int clk_ignore = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
+    if (clk_current == clk_ignore)
+    {
+        CLOG("    * ignored due to recent timer overflow");
+        return;
+    }
 
-    LOG("scheduling timer overflow event, cycle offset " << cycle_offset);
-    m_core.insert_event(cycle_offset, gb_event::timer_overflow);
+    // Writing TIMA at the exact clock cycle it overflows prevents
+    // the interrupt from being triggered.
+    //
+    // Gambatte tests:
+    //      tima/tc01_late_tima_irq_1_dmg08_cgb04c_outE0
+    //      tima/tc01_late_tima_irq_2_dmg08_cgb04c_outE4
+    if (m_clk_last_overflow == clk_current)
+    {
+        // allow scheduling the timer interrupt event for the
+        // next timer overflow
+        m_clk_last_overflow = gb_no_clock_cycle;
+    }
+
+    m_tima = value;
+    start_timer();
 }

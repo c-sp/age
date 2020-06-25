@@ -28,7 +28,10 @@
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
-#include "age_gb_core.hpp"
+#include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
+#include "common/age_gb_events.hpp"
+#include "common/age_gb_interrupts.hpp"
 #include "age_gb_memory.hpp"
 
 
@@ -74,7 +77,7 @@ class gb_ly_counter
 
 public:
 
-    gb_ly_counter(gb_core &core);
+    gb_ly_counter(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts);
 
     uint8_t get_ly_port(bool lcd_enabled) const;
     uint8_t get_ly() const;
@@ -86,16 +89,18 @@ public:
     void next_line();
     void mode1_ly0();
 
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
 protected:
 
-    gb_core *const m_core;
-    const bool m_cgb;
+    const gb_device &m_device;
+    const gb_clock &m_clock;
+    gb_events &m_events;
+    gb_interrupt_trigger &m_interrupts;
 
 private:
 
-    int m_next_scanline_cycle = gb_no_cycle;
+    int m_next_scanline_cycle = gb_no_clock_cycle;
     uint8_t m_scanline = 0;
     bool m_mode1_ly0 = false;
 };
@@ -157,7 +162,7 @@ public:
     void set_lyc(uint8_t value, int mode, bool lcd_enabled);
     void lyc_event();
 
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
@@ -179,7 +184,7 @@ class gb_lcd_ppu : public gb_lyc_interrupter
 {
 public:
 
-    gb_lcd_ppu(gb_core &core, const gb_memory &memory, bool dmg_green);
+    gb_lcd_ppu(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, bool dmg_green);
 
     uint8_t read_lcdc() const;
     uint8_t read_scx() const;
@@ -208,6 +213,11 @@ public:
     bool scanline_finished() const;
     bool scanline_flag_mode0() const;
     bool scanline_mode0_interrupt() const;
+
+protected:
+
+    const gb_device &m_device;
+    const gb_clock &m_clock;
 
 private:
 
@@ -283,9 +293,7 @@ private:
     void window_set_next_step(std::function<void(gb_lcd_ppu&)> next_step);
 
     // common stuff
-    const bool m_cgb;
     const bool m_dmg_green;
-    gb_core &m_core;
     const gb_memory &m_memory;
     uint8_array<0xA0> m_oam;
     std::function<void(gb_lcd_ppu&)> m_next_fetch_step = nullptr;
@@ -351,7 +359,7 @@ class gb_lcd : private gb_lcd_ppu
 {
 public:
 
-    gb_lcd(gb_core &core, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green);
+    gb_lcd(const gb_device &device, const gb_clock &clock, gb_events &events, gb_interrupt_trigger &interrupts, const gb_memory &memory, screen_buffer &frame_handler, bool dmg_green);
 
     using gb_lcd_ppu::read_lcdc;
     using gb_lcd_ppu::read_scx;
@@ -398,7 +406,7 @@ public:
     void emulate();
     void set_hdma_active(bool hdma_active);
 
-    void set_back_cycles(int offset);
+    void set_back_clock(int clock_cycle_offset);
 
 private:
 
@@ -427,12 +435,12 @@ private:
     static void mode3_render(gb_lcd &lcd);
 
     // common stuff
-    const bool m_cgb;
-    gb_core &m_core;
+    gb_events &m_events;
+    gb_interrupt_trigger &m_interrupts;
     screen_buffer &m_screen_buffer;
     uint8_array<gb_num_palette_colors * 2> m_palette; // 2 bytes per color
     std::function<void(gb_lcd&)> m_next_event = nullptr;
-    int m_next_event_cycle = gb_no_cycle;
+    int m_next_event_cycle = gb_no_clock_cycle;
     int m_last_cycle_m3_finished = 0;
     bool m_hdma_active = false;
 

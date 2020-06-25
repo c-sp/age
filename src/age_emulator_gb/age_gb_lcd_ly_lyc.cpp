@@ -21,7 +21,7 @@
 #include "age_gb_lcd.hpp"
 
 #if 0
-#define LOG(x) AGE_LOG("cycle " << m_core->get_oscillation_cycle() << ": " << x)
+#define LOG(x) AGE_GB_CLOCK_LOG(x)
 #else
 #define LOG(x)
 #endif
@@ -36,14 +36,19 @@
 //
 //---------------------------------------------------------
 
-#define GB_ASSERT_LCD_ON AGE_ASSERT(m_next_scanline_cycle != gb_no_cycle)
+#define GB_ASSERT_LCD_ON AGE_ASSERT(m_next_scanline_cycle != gb_no_clock_cycle)
 #define GB_LY_ASSERT_CONSISTENCY AGE_ASSERT(!m_mode1_ly0 || (m_scanline == 153))
 
 
 
-age::gb_ly_counter::gb_ly_counter(gb_core &core)
-    : m_core(&core),
-      m_cgb(m_core->is_cgb())
+age::gb_ly_counter::gb_ly_counter(const gb_device &device,
+                                  const gb_clock &clock,
+                                  gb_events &events,
+                                  gb_interrupt_trigger &interrupts)
+    : m_device(device),
+      m_clock(clock),
+      m_events(events),
+      m_interrupts(interrupts)
 {
     //
     // verified by gambatte tests
@@ -59,19 +64,17 @@ age::gb_ly_counter::gb_ly_counter(gb_core &core)
     //      lycint_lycirq/lycint_lycirq_2_dmg08_cgb_out3
     //      display_startstate/irq_dmg08_cgb_outE1
     //
-    if (m_core->is_cgb())
+    if (m_device.is_cgb())
     {
         m_scanline = 144;
-        m_next_scanline_cycle = m_core->get_oscillation_cycle() + gb_cycles_per_scanline - 164;
+        m_next_scanline_cycle = m_clock.get_clock_cycle() + gb_cycles_per_scanline - 164;
     }
     else
     {
         m_scanline = 153;
         m_mode1_ly0 = true;
-        m_next_scanline_cycle = m_core->get_oscillation_cycle() + 60;
+        m_next_scanline_cycle = m_clock.get_clock_cycle() + 60;
     }
-
-    m_core->request_interrupt(gb_interrupt::vblank);
 }
 
 
@@ -106,9 +109,9 @@ age::uint8_t age::gb_ly_counter::get_ly_port(bool lcd_enabled) const
         //      ly0/lycint152_ly153_ds_4_out99
         //      ly0/lycint152_ly153_ds_5_out00
         //
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
-        bool double_speed = m_core->is_double_speed();
+        bool double_speed = m_clock.is_double_speed();
 
         if (result == 153)
         {
@@ -157,7 +160,7 @@ void age::gb_ly_counter::switch_off()
     GB_ASSERT_LCD_ON;
     GB_LY_ASSERT_CONSISTENCY;
 
-    m_next_scanline_cycle = gb_no_cycle;
+    m_next_scanline_cycle = gb_no_clock_cycle;
     m_scanline = 0;
     m_mode1_ly0 = false;
 
@@ -166,10 +169,10 @@ void age::gb_ly_counter::switch_off()
 
 void age::gb_ly_counter::switch_on()
 {
-    AGE_ASSERT(m_next_scanline_cycle == gb_no_cycle);
+    AGE_ASSERT(m_next_scanline_cycle == gb_no_clock_cycle);
     AGE_ASSERT(m_scanline == 0);
 
-    m_next_scanline_cycle = m_core->get_oscillation_cycle() + gb_cycles_per_scanline;
+    m_next_scanline_cycle = m_clock.get_clock_cycle() + gb_cycles_per_scanline;
 
     LOG("LY counter restarted");
 }
@@ -178,7 +181,7 @@ void age::gb_ly_counter::next_line()
 {
     GB_ASSERT_LCD_ON;
     GB_LY_ASSERT_CONSISTENCY;
-    AGE_ASSERT(m_core->get_oscillation_cycle() >= m_next_scanline_cycle);
+    AGE_ASSERT(m_clock.get_clock_cycle() >= m_next_scanline_cycle);
 
     // LCD operation switching to the first scanline
     if (m_mode1_ly0)
@@ -207,9 +210,9 @@ void age::gb_ly_counter::mode1_ly0()
 
 
 
-void age::gb_ly_counter::set_back_cycles(int offset)
+void age::gb_ly_counter::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CYCLES(m_next_scanline_cycle, offset);
+    AGE_GB_SET_BACK_CLOCK(m_next_scanline_cycle, clock_cycle_offset);
 }
 
 
@@ -227,10 +230,10 @@ void age::gb_ly_counter::set_back_cycles(int offset)
 //
 //---------------------------------------------------------
 
-// Assert that the cycle offset to the next LY change is bigger than 0. This is true only
-// if all events for the current oscillation cycle have been processed. Thus we can only
-// assert this on port reads & writes.
-#define GB_LYC_ASSERT_LY_OFFSET AGE_ASSERT(get_next_scanline_cycle_offset(m_core->get_oscillation_cycle()) > 0)
+// Assert that the cycle offset to the next LY change is bigger than 0.
+// This is true only if all events for the current clock cycle have been processed.
+// Thus we can only assert this on port reads & writes.
+#define GB_LYC_ASSERT_LY_OFFSET AGE_ASSERT(get_next_scanline_cycle_offset(m_clock.get_clock_cycle()) > 0)
 
 
 
@@ -281,7 +284,7 @@ age::uint8_t age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
         //
 
         auto scanline = get_scanline();
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
 
         // next_scanline_cycles contains the number of cycles left until
         // the next LY switch
@@ -299,7 +302,7 @@ age::uint8_t age::gb_lyc_handler::get_stat_coincidence(bool lcd_enabled) const
             }
         }
 
-        coincidence = next_ly_cycles > (m_core->is_double_speed() ? 0 : 4);
+        coincidence = next_ly_cycles > (m_clock.is_double_speed() ? 0 : 4);
         coincidence &= (scanline == m_lyc);
         //LOG("LY " << scanline << ", LYC " << AGE_LOG_DEC(m_lyc) << " -> " << coincidence << ", next_ly_cycles " << next_ly_cycles);
     }
@@ -333,7 +336,7 @@ void age::gb_lyc_handler::set_stat(uint8_t value, int mode, bool lcd_enabled)
     if (lcd_enabled)
     {
         GB_LYC_ASSERT_LY_OFFSET;
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
 
         //
@@ -344,7 +347,7 @@ void age::gb_lyc_handler::set_stat(uint8_t value, int mode, bool lcd_enabled)
         //
         auto scanline = get_scanline();
         uint8_t ly = get_ly();
-        if ((scanline == 153) && m_core->is_double_speed() && (next_scanline_offset > gb_cycles_per_scanline - 8))
+        if ((scanline == 153) && m_clock.is_double_speed() && (next_scanline_offset > gb_cycles_per_scanline - 8))
         {
             ly = 153;
         }
@@ -381,8 +384,8 @@ void age::gb_lyc_handler::set_stat(uint8_t value, int mode, bool lcd_enabled)
         //      miscmstatirq/lycstatwirq_trigger_ff_ff_dmg08_cgb_out0
         //
         bool raise_lcd_interrupt = (ly == m_lyc)
-                && (m_cgb ? ((value & gb_stat_interrupt_coincidence) > 0) && !m_stat_coincidence_interrupt
-                          : !m_stat_coincidence_interrupt);
+                && (m_device.is_cgb() ? ((value & gb_stat_interrupt_coincidence) > 0) && !m_stat_coincidence_interrupt
+                                      : !m_stat_coincidence_interrupt);
         //
         // If the above conditions are met but a vblank interrupt was possible
         // the the time of writing, no LCD interrupt is triggered.
@@ -433,12 +436,12 @@ void age::gb_lyc_handler::set_stat(uint8_t value, int mode, bool lcd_enabled)
         //      lycEnable/late_ff41_enable_ds_1_out3
         //      lycEnable/late_ff41_enable_ds_2_out1
         //
-        raise_lcd_interrupt &= !m_cgb || m_core->is_double_speed() || (next_scanline_offset > 4);
+        raise_lcd_interrupt &= !m_device.is_cgb() || m_clock.is_double_speed() || (next_scanline_offset > 4);
 
         LOG((raise_lcd_interrupt ? "" : "NOT ") << "triggering LYC interrupt, next_scanline_offset " << next_scanline_offset);
         if (raise_lcd_interrupt)
         {
-            m_core->request_interrupt(gb_interrupt::lcd);
+            m_interrupts.trigger_interrupt(gb_interrupt::lcd);
         }
     }
 
@@ -455,10 +458,10 @@ void age::gb_lyc_handler::set_lyc(uint8_t value, int mode, bool lcd_enabled)
 
     if (lcd_enabled && m_stat_coincidence_interrupt)
     {
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_scanline_offset = get_next_scanline_cycle_offset(current_cycle);
         auto scanline = get_scanline();
-        int min_scanline_offset = m_cgb && !m_core->is_double_speed() ? 8 : 4;
+        int min_scanline_offset = m_device.is_cgb() && !m_clock.is_double_speed() ? 8 : 4;
 
         //
         // verified by gambatte tests
@@ -530,7 +533,7 @@ void age::gb_lyc_handler::set_lyc(uint8_t value, int mode, bool lcd_enabled)
             //      lycEnable/lyc153_late_ff45_enable_4_dmg08_outE2_cgb_outE0
             //      lycEnable/lyc153_late_ff45_enable_ds_4_oute2
             //
-            else if (m_cgb && !m_core->is_double_speed())
+            else if (m_device.is_cgb() && !m_clock.is_double_speed())
             {
                 raise_lcd_interrupt &= next_scanline_offset < gb_cycles_per_scanline;
             }
@@ -549,14 +552,14 @@ void age::gb_lyc_handler::set_lyc(uint8_t value, int mode, bool lcd_enabled)
             //      lycEnable/lyc_ff45_trigger_delay_ds_1_out0
             //      lycEnable/lyc_ff45_trigger_delay_ds_2_out2
             //
-            if (m_cgb && !m_core->is_double_speed())
+            if (m_device.is_cgb() && !m_clock.is_double_speed())
             {
                 LOG("delaying immediate LCD interrupt");
-                m_core->insert_event(5, gb_event::lcd_late_lyc_interrupt);
+                m_events.schedule_event(gb_event::lcd_late_lyc_interrupt, 5);
             }
             else
             {
-                m_core->request_interrupt(gb_interrupt::lcd);
+                m_interrupts.trigger_interrupt(gb_interrupt::lcd);
             }
         }
     }
@@ -588,7 +591,7 @@ bool age::gb_lyc_handler::get_stat_mode1_interrupt() const
 //
 //---------------------------------------------------------
 
-#define GB_LYC_INT_ASSERT_LCD_ON AGE_ASSERT(get_next_scanline_cycle_offset(m_core->get_oscillation_cycle()) <= gb_cycles_per_scanline)
+#define GB_LYC_INT_ASSERT_LCD_ON AGE_ASSERT(get_next_scanline_cycle_offset(m_clock.get_clock_cycle()) <= gb_cycles_per_scanline)
 
 
 
@@ -629,7 +632,7 @@ void age::gb_lyc_interrupter::lyc_event()
 
     if (interrupt)
     {
-        m_core->request_interrupt(gb_interrupt::lcd);
+        m_interrupts.trigger_interrupt(gb_interrupt::lcd);
     }
 
     // switch to new value, if necessary
@@ -695,13 +698,13 @@ void age::gb_lyc_interrupter::set_stat(uint8_t value, int mode, bool lcd_enabled
         // we need that event at least to copy the new value
         schedule_next_event(new_next_event_cycle);
 
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_event_offset = m_next_event_cycle - current_cycle;
         AGE_ASSERT(m_next_event_cycle > current_cycle);
         AGE_ASSERT(next_event_offset > 0);
 
         bool delayed = next_event_offset <= 4;
-        if (m_cgb)
+        if (m_device.is_cgb())
         {
             //
             // verified by gambatte tests
@@ -726,7 +729,7 @@ void age::gb_lyc_interrupter::set_stat(uint8_t value, int mode, bool lcd_enabled
             //      lycEnable/lyc0_m1disable_ds_1_outE2
             //      lycEnable/lyc0_m1disable_ds_2_outE0
             //
-            delayed &= !m_core->is_double_speed();
+            delayed &= !m_clock.is_double_speed();
         }
         else
         {
@@ -749,7 +752,7 @@ void age::gb_lyc_interrupter::set_stat(uint8_t value, int mode, bool lcd_enabled
         {
             m_stat_coincidence_interrupt_int = get_stat_coincidence_interrupt();
         }
-        if (!delayed || !m_cgb)
+        if (!delayed || !m_device.is_cgb())
         {
             //
             // verified by gambatte tests
@@ -793,7 +796,7 @@ void age::gb_lyc_interrupter::set_lyc(uint8_t value, int mode, bool lcd_enabled)
         // we need that event at least to copy the new value
         schedule_next_event(new_next_event_cycle);
 
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_event_offset = m_next_event_cycle - current_cycle;
         AGE_ASSERT(m_next_event_cycle > current_cycle);
         AGE_ASSERT(next_event_offset > 0);
@@ -815,7 +818,7 @@ void age::gb_lyc_interrupter::set_lyc(uint8_t value, int mode, bool lcd_enabled)
         bool delayed = false;
         if (m_next_event_cycle != next_event_cycle)
         {
-            delayed = m_cgb && !m_core->is_double_speed() && (next_event_offset <= 4);
+            delayed = m_device.is_cgb() && !m_clock.is_double_speed() && (next_event_offset <= 4);
         }
         //
         //  - when trying to move the LYC interrupt to a scanline LY+1 that
@@ -843,7 +846,7 @@ void age::gb_lyc_interrupter::set_lyc(uint8_t value, int mode, bool lcd_enabled)
         //
         else if ((value != 0) && (old_lyc == get_ly()))
         {
-            int offset = (m_cgb && !m_core->is_double_speed()) ? 8 : 4;
+            int offset = (m_device.is_cgb() && !m_clock.is_double_speed()) ? 8 : 4;
             delayed = (next_event_offset <= offset) && (next_event_offset > offset - 4);
         }
 
@@ -857,12 +860,12 @@ void age::gb_lyc_interrupter::set_lyc(uint8_t value, int mode, bool lcd_enabled)
 
 
 
-void age::gb_lyc_interrupter::set_back_cycles(int offset)
+void age::gb_lyc_interrupter::set_back_clock(int clock_cycle_offset)
 {
-    gb_ly_counter::set_back_cycles(offset);
+    gb_ly_counter::set_back_clock(clock_cycle_offset);
     if (m_next_event_cycle != int_max)
     {
-        AGE_GB_SET_BACK_CYCLES(m_next_event_cycle, offset);
+        AGE_GB_SET_BACK_CLOCK(m_next_event_cycle, clock_cycle_offset);
     }
 }
 
@@ -874,7 +877,7 @@ int age::gb_lyc_interrupter::calculate_next_event_cycle(bool stat_coincidence_in
 
     if (stat_coincidence_interrupt && (for_lyc < 154))
     {
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         int next_scanline_cycle_offset = get_next_scanline_cycle_offset(current_cycle);
         int remaining_lines = (154 - 1 - get_scanline()) * gb_cycles_per_scanline;
         int next_frame = current_cycle + next_scanline_cycle_offset + remaining_lines;
@@ -906,14 +909,14 @@ void age::gb_lyc_interrupter::schedule_next_event(int next_event_cycle)
 
     if (m_next_event_cycle != int_max)
     {
-        int current_cycle = m_core->get_oscillation_cycle();
+        int current_cycle = m_clock.get_clock_cycle();
         AGE_ASSERT(current_cycle < m_next_event_cycle);
         int cycle_offset = m_next_event_cycle - current_cycle;
-        m_core->insert_event(cycle_offset, gb_event::lcd_lyc_check);
+        m_events.schedule_event(gb_event::lcd_lyc_check, cycle_offset);
     }
     else
     {
-        m_core->remove_event(gb_event::lcd_lyc_check);
+        m_events.remove_event(gb_event::lcd_lyc_check);
     }
 }
 
