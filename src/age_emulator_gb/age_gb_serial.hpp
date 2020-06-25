@@ -78,8 +78,8 @@ private:
     gb_events &m_events;
 
     gb_sio_state m_sio_state = gb_sio_state::no_transfer;
-    int m_sio_clk_cycles_per_bit = 0;
     int m_sio_clk_started = gb_no_clock_cycle;
+    int m_sio_clock_shift = 0;
     uint8_t m_sio_initial_sb = 0;
 
     uint8_t m_sb = 0;

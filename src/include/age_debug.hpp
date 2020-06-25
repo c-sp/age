@@ -94,10 +94,11 @@ private:
 
 
 #define AGE_ASSERT(x) assert(x)
+
+#define AGE_ASSERT_ONE_BIT_SET(x) AGE_ASSERT( (x > 0) && (((x) & (x - 1)) == 0) );
+
 #define AGE_LOG(x) (age::concurrent_cout() << age::age_log_time() <<  " " << x).log_line()
-
 #define AGE_LOG_QUOTED(x) std::quoted(x)
-
 #define AGE_LOG_DEC(x) static_cast<int64_t>(x)
 
 #define _AGE_LOG_HEX(x, width) \
@@ -115,6 +116,7 @@ private:
 #else // #ifdef AGE_DEBUG
 
 #define AGE_ASSERT(x)
+#define AGE_ASSERT_ONE_BIT_SET(x)
 #define AGE_LOG(x)
 #define AGE_LOG_DEC(x)
 #define AGE_LOG_HEX(x)

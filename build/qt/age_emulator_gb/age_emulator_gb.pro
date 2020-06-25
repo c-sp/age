@@ -15,6 +15,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_div.cpp \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
     ../../../src/age_emulator_gb/age_gb_timer_old.cpp \
+    ../../../src/age_emulator_gb/age_gb_timer_state.cpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
     ../../../src/age_emulator_gb/age_gb_bus.cpp \
     ../../../src/age_emulator_gb/age_gb_cpu.cpp \

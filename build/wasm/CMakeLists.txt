@@ -64,6 +64,7 @@ set (SOURCES_AGE_EMULATOR_GB
     ${DIR_AGE_EMULATOR_GB}/age_gb_sound_io_ports.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_sound_utilities.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_timer.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_timer_state.cpp
 )
 
 set (SOURCES_AGE_WASM

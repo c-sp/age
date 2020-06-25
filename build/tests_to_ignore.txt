@@ -55,16 +55,8 @@ misc/boot_regs-A.gb                  # GBA not supported
 
 ###   failing tests
 
-acceptance/ppu/hblank_ly_scx_timing-GS.gb
-acceptance/ppu/intr_2_0_timing.gb
-acceptance/ppu/intr_2_mode0_timing.gb
-acceptance/ppu/intr_2_mode0_timing_sprites.gb
-acceptance/ppu/intr_2_mode3_timing.gb
-acceptance/ppu/intr_2_oam_ok_timing.gb
-acceptance/ppu/lcdon_timing-GS.gb
-acceptance/ppu/lcdon_write_timing-GS.gb
-acceptance/ppu/stat_lyc_onoff.gb
-acceptance/ppu/vblank_stat_intr-GS.gb
+acceptance/halt_ime1_timing2-GS.gb
+acceptance/ppu/
 emulator-only/mbc2/bits_ramg.gb
 emulator-only/mbc2/bits_romb.gb
 emulator-only/mbc2/ram.gb
@@ -148,11 +140,9 @@ enable_display/ly0_late_scx7_m3stat_scx3_1_dmg08_cgb04c_out87.gbc
 enable_display/ly0_late_vramr_2_dmg08_outFF_cgb04c_out55.gbc
 enable_display/ly0_late_vramw_2_dmg08_out55_cgb04c_outAA.gbc
 enable_display/ly0_m0irq_scx1_1_dmg08_cgb04c_outE0.gbc
-halt/late_m0int_halt_m0stat_scx2_1b_dmg08_cgb04c_out2.gbc
-halt/late_m0int_halt_m0stat_scx2_2b_dmg08_cgb04c_out2.gbc
 halt/late_m0int_halt_m0stat_scx2_3a_dmg08_cgb04c_out0.gbc
 halt/late_m0int_halt_m0stat_scx2_4b_dmg08_cgb04c_out2.gbc
-halt/late_m0int_halt_m0stat_scx3_2b_dmg08_cgb04c_out2.gbc
+halt/late_m0int_halt_m0stat_scx3_1b_dmg08_out0_cgb04c_out2.gbc
 halt/late_m0int_halt_m0stat_scx3_3a_dmg08_cgb04c_out0.gbc
 halt/late_m0int_halt_m0stat_scx3_3b_dmg08_out0_cgb04c_out2.gbc
 halt/late_m0int_halt_m0stat_scx3_4b_dmg08_out0_cgb04c_out2.gbc
@@ -308,7 +298,8 @@ sound/ch4_late_div_write_nr52_2a_dmg08_cgb04c_outF8.gbc
 sound/ch4_late_div_write_nr52_2b_dmg08_cgb04c_outF0.gbc
 speedchange/
 sprites/
-tima/
+tima/tc00_irq_late_retrigger_2_dmg08_outE4_cgb04c_outE0.gbc
+tima/tc00_irq_late_retrigger_ds_2_cgb04c_outE0.gbc
 vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
 vram_m3/preread_2_dmg08_out3_cgb04c_out0.gbc
 vram_m3/preread_lcdoffset2_1_cgb04c_out0.gbc

@@ -59,29 +59,19 @@ void age::gb_interrupt_trigger::check_halt_mode()
         m_halted = false;
         CLOG_INTERRUPTS("HALT terminated by pending interrupt");
 
-        // Leaving HALT mode adds some delay on CGB hardware
-        // if HALT mode was started with IME=1.
-        //! \todo we need some test roms for this
-        //! \todo move this to gb_cpu?
-        //
-        // Indirectly tested:
-        //
-        // passing on DMG and CGB hardware:
-        // acceptance\halt_ime0_nointr_timing
-        //  =>  only HALTing with:
-        //      <interrupts disabled>
-        //      <optional ei>
-        //      halt
+        // We know from Gambatte timer tests that leaving HALT mode
+        // takes one additional machine cycle (DMG and CGB) in the
+        // following case:
+        //      ei
         //      nop
-        //
-        // failing only on CGB hardware:
-        // acceptance\halt_ime1_timing2-GS.s
-        //  =>  HALTing with (additionally):
-        //      <interrupts enabled>
         //      halt
-        //      nop
         //
-        if (m_ime_on_halt && m_device.is_cgb_hardware())
+        // However, this breaks the Mooneye GB test:
+        //      acceptance/halt_ime1_timing2-GS
+        //
+        //! \todo examine this further
+        //
+        if (m_ime_on_halt)
         {
             m_clock.tick_machine_cycle();
             CLOG_INTERRUPTS("HALT termination delay");

@@ -3,7 +3,7 @@
 
 For the sake of simplicity we only look at DMG serial transfer.
 On CGB serial transfer speed can be changed by `KEY1` and `SC` settings.
-However, this comes down to simply using different clock bits to calculate
+However, this just requires using different clock bits to calculate
 serial transfer state.
 
 

@@ -21,10 +21,8 @@
 namespace
 {
 
-// DMG: 256 clock cycles for "bit in"
-// DMG: 256 clock cycles for "bit out"
-// DMG: 512 clock cycles for fully transferring one bit (8192 Bits/s)
-constexpr int sio_clock_bit = 1 << 8;
+// DMG: 512 clock cycles for transferring one bit (8192 Bits/s)
+constexpr int sio_clock_shift = 9;
 
 constexpr uint8_t sc_start_transfer = 0x80;
 constexpr uint8_t sc_shift_clock_switch = 0x02;
@@ -143,8 +141,9 @@ void age::gb_serial::write_sc(uint8_t value)
 void age::gb_serial::start_transfer(uint8_t value_sc)
 {
     // A serial transfer is completed after a specific clock bit
-    // (DMG: clock bit 8) has changed for 16 times.
-    // The bit's initial state is irrelevant.
+    // (DMG: clock bit 7) has been going low for 16 times.
+    // A serial transfer thus consists of 16 steps triggered by
+    // that bit.
     //
     // Gambatte tests:
     //      serial/nopx1_start_wait_read_if_1_dmg08_cgb04c_outE0
@@ -152,46 +151,42 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     //      serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0
     //      serial/nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8
 
-    bool high_frequency = m_device.is_cgb() && ((value_sc & sc_shift_clock_switch) != 0);
+    bool fast_sio = m_device.is_cgb() && ((value_sc & sc_shift_clock_switch) != 0);
+    int clock_shift = fast_sio ? (sio_clock_shift - 5) : sio_clock_shift;
 
-    // identify the clock bit
-    int clock_bit = high_frequency
-            ? (sio_clock_bit >> 5)
-            : sio_clock_bit;
+    // adjust to CGB double speed
+    clock_shift -= m_clock.is_double_speed();
+    AGE_ASSERT(clock_shift >= 3);
+    AGE_ASSERT(clock_shift <= 9);
 
-    // adjust that clock bit to the current CGB speed
-    clock_bit = m_clock.is_double_speed()
-            ? (clock_bit >> 1)
-            : clock_bit;
+    // number of clock cycles per serial transfer step
+    int clks_per_step = 1 << (clock_shift - 1);
 
-    // the number of clock cycles per transferred bit
-    int clks_per_bit = clock_bit << 1;
-
-    // the number of clock cycles until the first bit change
-    // (div-aligned)
+    // div-aligned clock
     auto current_clk = m_clock.get_clock_cycle();
     int clk_div_aligned = current_clk + m_div.get_div_offset();
-    int clks_first_switch = clock_bit - (clk_div_aligned % clock_bit);
-    int clks_until_finished = clks_first_switch + 15 * clock_bit;
 
-    AGE_ASSERT(clks_first_switch > 0);
-    AGE_ASSERT(clks_first_switch <= clock_bit);
+    // number of clock cycles until first serial transfer step
+    int clks_into_step = clk_div_aligned & (clks_per_step - 1);
+    int clks_first_step = clks_per_step - clks_into_step;
+    int clks_until_finished = clks_first_step + (15 << (clock_shift - 1));
+
+    AGE_ASSERT(clks_first_step > 0);
+    AGE_ASSERT(clks_first_step <= clks_per_step);
     AGE_ASSERT(clks_until_finished > 0);
-    AGE_ASSERT(clks_until_finished <= 8 * clks_per_bit);
+    AGE_ASSERT(clks_until_finished <= 8 << clock_shift);
 
     CLOG("starting serial transfer:");
     CLOG("    * " << clks_per_bit << " clock cycles per transferred bit");
-    CLOG("    * " << clks_first_switch << " clock cycles until first clock bit change");
-    CLOG("    * div offset " << AGE_LOG_HEX16(m_div.get_div_offset()));
-    CLOG("    * finishes on clock cycle " << (current_clk + clks_until_finished));
+    CLOG("    * " << clks_first_switch << " clock cycles until first step");
+    CLOG("    * finishes in " << clks_until_finished << " clock cycles ("
+         << (current_clk + clks_until_finished) << ")");
 
     m_sio_state = gb_sio_state::transfer_internal_clock;
-    m_sio_clk_cycles_per_bit = clks_per_bit;
-    m_sio_clk_started = current_clk + clks_until_finished - 8 * clks_per_bit;
+    m_sio_clock_shift = clock_shift;
+    m_sio_clk_started = current_clk + clks_until_finished - (8 << clock_shift);
     m_sio_initial_sb = m_sb;
 
-    AGE_ASSERT(m_sio_clk_cycles_per_bit > 0);
-    AGE_ASSERT((m_sio_clk_cycles_per_bit & (m_sio_clk_cycles_per_bit - 1)) == 0);
     AGE_ASSERT(m_sio_clk_started <= current_clk);
     AGE_ASSERT(m_sio_clk_started != gb_no_clock_cycle);
 
@@ -212,9 +207,10 @@ void age::gb_serial::update_state()
 
     // calculate the number of shifts since the transfer was started
     int clks_elapsed = m_clock.get_clock_cycle() - m_sio_clk_started;
-    int shifts = clks_elapsed / m_sio_clk_cycles_per_bit;
+    int shifts = clks_elapsed >> m_sio_clock_shift;
 
-    // since there is no counterpart for serial transfer we always receive 0xFF
+    // Since there is no serial transfer counterpart
+    // we always receive 0xFF.
     int tmp = m_sio_initial_sb * 0x100 + 0xFF;
     tmp >>= 8 - std::min(shifts, 8);
     m_sb = tmp & 0xFF;
@@ -234,7 +230,7 @@ void age::gb_serial::update_state()
 void age::gb_serial::stop_transfer(gb_sio_state new_state)
 {
     m_sio_state = new_state;
-    m_sio_clk_cycles_per_bit = 0;
+    m_sio_clock_shift = 0;
     m_sio_clk_started = gb_no_clock_cycle;
     m_sio_initial_sb = 0;
     m_events.remove_event(gb_event::serial_transfer_finished);
@@ -266,13 +262,13 @@ void age::gb_serial::on_div_reset(int old_div_offset)
     }
     // ongoing transfer => calculate new timing
 
-    // identify the clock bit changing 16 times during serial transfer
-    int clock_bit = m_sio_clk_cycles_per_bit >> 1;
-    AGE_ASSERT(clock_bit > 0);
+    // number of clock cycles per serial transfer step
+    int clks_per_step = 1 << (m_sio_clock_shift - 1);
+    AGE_ASSERT(clks_per_step > 0);
 
     // identify the "trigger bit":
     // this clock bit goes low 16 times during serial transfer
-    int trigger_bit = clock_bit >> 1;
+    int trigger_bit = 1 << (m_sio_clock_shift - 2);
 
     // calculate old and new "serial io clock" as we have to compare them
     // to check for the "trigger bit" going low due to DIV reset
@@ -280,8 +276,8 @@ void age::gb_serial::on_div_reset(int old_div_offset)
     int old_clock = current_clk + old_div_offset;
     int new_clock = current_clk + m_div.get_div_offset();
 
-    int old_next_change = clock_bit - (old_clock & (clock_bit - 1));
-    int new_next_change = clock_bit - (new_clock & (clock_bit - 1));
+    int old_next_step = clks_per_step - (old_clock & (clks_per_step - 1));
+    int new_next_step = clks_per_step - (new_clock & (clks_per_step - 1));
 
     int old_trigger_bit = old_clock & trigger_bit;
     int new_trigger_bit = new_clock & trigger_bit;
@@ -290,21 +286,21 @@ void age::gb_serial::on_div_reset(int old_div_offset)
             // trigger bit goes low
             //      => immediate serial transfer step
             //      => serial transfer time shortened
-            ? -old_next_change
+            ? -old_next_step
             // trigger bit not going low
             //      => serial transfer takes longer
-            : new_next_change - old_next_change;
+            : new_next_step - old_next_step;
 
-    int clk_finished = m_sio_clk_started + 8 * m_sio_clk_cycles_per_bit;
+    int clk_finished = m_sio_clk_started + (8 << m_sio_clock_shift);
     AGE_ASSERT(clk_finished > current_clk);
     clk_finished += clk_adjust;
     AGE_ASSERT(clk_finished >= current_clk);
 
     CLOG("serial transfer at DIV reset:");
-    CLOG("    * old clock bits " << AGE_LOG_HEX16(old_clock & 0xFFFF));
-    CLOG("    * new clock bits " << AGE_LOG_HEX16(new_clock & 0xFFFF));
-    CLOG("    * next bit change (old) in " << old_next_change << " clock cycles");
-    CLOG("    * next bit change (new) in " << new_next_change << " clock cycles");
+    CLOG("    * old lower clock bits: " << AGE_LOG_HEX16(old_clock & 0xFFFF));
+    CLOG("    * new lower clock bits: " << AGE_LOG_HEX16(new_clock & 0xFFFF));
+    CLOG("    * next step (old) in " << old_next_step << " clock cycles");
+    CLOG("    * next step (new) in " << new_next_step << " clock cycles");
     CLOG("    * +/- remaining clock cycles: " << clk_adjust);
     CLOG("    * finish on clock cycle " << clk_finished);
 

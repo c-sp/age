@@ -461,8 +461,8 @@ void age::gb_bus::handle_events()
     {
         switch (event)
         {
-            case gb_event::timer_overflow:
-                m_timer.update_state();
+            case gb_event::timer_interrupt:
+                m_timer.trigger_interrupt();
                 break;
 
             case gb_event::lcd_lyc_check:

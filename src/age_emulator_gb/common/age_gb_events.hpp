@@ -32,7 +32,7 @@ namespace age
 
 enum class gb_event : int
 {
-    timer_overflow = 0,
+    timer_interrupt = 0,
     lcd_lyc_check = 1,
     lcd_late_lyc_interrupt = 2,
     start_hdma = 3,
