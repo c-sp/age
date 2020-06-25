@@ -18,6 +18,15 @@
 
 #define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_INTERRUPTS)(log)
 
+namespace
+{
+
+constexpr age::uint8_t serial_bit = to_integral(age::gb_interrupt::serial);
+constexpr age::uint8_t timer_bit = to_integral(age::gb_interrupt::timer);
+
+constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
+
+}
 
 
 
@@ -39,10 +48,28 @@ age::gb_interrupt_trigger::gb_interrupt_trigger(const gb_device &device,
 
 void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt)
 {
-    m_if |= to_integral(interrupt);
+    uint8_t intr_bit = to_integral(interrupt);
 
-    CLOG_INTERRUPTS("interrupt requested: "
-                    << AGE_LOG_HEX8(to_integral(interrupt)));
+    // During interrupt dispatch after the respectve IF flag has
+    // been cleared the CGB apparently denies that interrupt from being
+    // requested.
+    //
+    // Gambatte tests:
+    //      serial/start_wait_trigger_int8_read_if_1_dmg08_cgb04c_outE8
+    //      serial/start_wait_trigger_int8_read_if_2_dmg08_outE8_cgb04c_outE0
+    //      serial/start_wait_trigger_int8_read_if_ds_2_cgb04c_outE0
+    //      tima/tc00_irq_late_retrigger_1_dmg08_cgb04c_outE4
+    //      tima/tc00_irq_late_retrigger_2_dmg08_outE4_cgb04c_outE0
+    //      tima/tc00_irq_late_retrigger_ds_2_cgb04c_outE0
+    if ((intr_bit & m_during_dispatch & deny_retrigger) && m_device.is_cgb_hardware())
+    {
+        CLOG_INTERRUPTS("denying interrupt request: " << AGE_LOG_HEX8(intr_bit)
+                        << " (currently being dispatched)");
+        return;
+    }
+
+    CLOG_INTERRUPTS("interrupt requested: " << AGE_LOG_HEX8(intr_bit));
+    m_if |= intr_bit;
 
     // might clear HALT mode
     check_halt_mode();
@@ -140,7 +167,7 @@ void age::gb_interrupt_dispatcher::set_ime(bool ime)
 
 
 
-int age::gb_interrupt_dispatcher::next_interrupt_bit() const
+age::uint8_t age::gb_interrupt_dispatcher::next_interrupt_bit() const
 {
     if (!m_ime)
     {
@@ -153,12 +180,18 @@ int age::gb_interrupt_dispatcher::next_interrupt_bit() const
     return interrupts & ~(interrupts - 1);
 }
 
-void age::gb_interrupt_dispatcher::interrupt_dispatched(int interrupt_bit)
+void age::gb_interrupt_dispatcher::clear_interrupt_flag(uint8_t interrupt_bit)
 {
     m_if &= ~interrupt_bit;
+    m_during_dispatch = interrupt_bit;
+    CLOG_INTERRUPTS("clear IF flag " << AGE_LOG_HEX8(interrupt_bit));
+}
+
+void age::gb_interrupt_dispatcher::finish_dispatch()
+{
+    CLOG_INTERRUPTS("interrupt dispatching disabled");
     m_ime = false;
-    CLOG_INTERRUPTS("clearing IF interrupt bit " << AGE_LOG_HEX8(interrupt_bit)
-                    << ", interrupt dispatching disabled");
+    m_during_dispatch = 0;
 }
 
 

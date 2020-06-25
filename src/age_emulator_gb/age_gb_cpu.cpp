@@ -201,7 +201,7 @@ void age::gb_cpu::dispatch_interrupt()
     // Writing IF here will influence interrupt dispatching.
     push_byte(m_pc >> 8);
 
-    int intr_bit = m_interrupts.next_interrupt_bit();
+    uint8_t intr_bit = m_interrupts.next_interrupt_bit();
     AGE_ASSERT(   (intr_bit == 0x00)
                || (intr_bit == 0x01)
                || (intr_bit == 0x02)
@@ -212,10 +212,12 @@ void age::gb_cpu::dispatch_interrupt()
     // Pushing the lower PC byte happens before clearing the interrupt's
     // IF bit (checked by pushing to IF).
     push_byte(m_pc);
-    m_interrupts.interrupt_dispatched(intr_bit);
+    m_interrupts.clear_interrupt_flag(intr_bit);
 
     m_pc = interrupt_pc_lookup[intr_bit];
     m_prefetched_opcode = read_byte(m_pc);
+
+    m_interrupts.finish_dispatch();
 
     CLOG_INTERRUPTS("interrupt " << AGE_LOG_HEX8(intr_bit)
                     << " (" << interrupt_name[intr_bit] << ")"

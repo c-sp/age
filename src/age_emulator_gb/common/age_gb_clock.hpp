@@ -90,9 +90,9 @@ private:
 #define AGE_GB_CLOG_CPU 0
 #define AGE_GB_CLOG_DIV 0
 #define AGE_GB_CLOG_EVENTS 0
-#define AGE_GB_CLOG_INTERRUPTS 1
+#define AGE_GB_CLOG_INTERRUPTS 0
 #define AGE_GB_CLOG_SERIAL 0
-#define AGE_GB_CLOG_TIMER 1
+#define AGE_GB_CLOG_TIMER 0
 
 #define _CONCAT(a, ...) a ## __VA_ARGS__
 #define AGE_GB_CLOG(type) _CONCAT(AGE_GB_CLOG_, type)

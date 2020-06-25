@@ -62,6 +62,7 @@ protected:
     gb_clock &m_clock;
     uint8_t m_if = 0xE1;
     uint8_t m_ie = 0;
+    uint8_t m_during_dispatch = 0;
     bool m_ime = false;
     bool m_halted = false;
 
@@ -96,8 +97,9 @@ public:
     bool get_ime() const;
     void set_ime(bool ime);
 
-    int next_interrupt_bit() const;
-    void interrupt_dispatched(int interrupt_bit);
+    uint8_t next_interrupt_bit() const;
+    void clear_interrupt_flag(uint8_t interrupt_bit);
+    void finish_dispatch();
 
     bool halted() const;
     void halt();
