@@ -91,6 +91,7 @@ private:
 #define AGE_GB_CLOG_DIV 0
 #define AGE_GB_CLOG_EVENTS 0
 #define AGE_GB_CLOG_INTERRUPTS 0
+#define AGE_GB_CLOG_LCD 1
 #define AGE_GB_CLOG_SERIAL 0
 #define AGE_GB_CLOG_TIMER 0
 

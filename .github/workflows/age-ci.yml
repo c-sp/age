@@ -111,106 +111,106 @@ jobs:
   ##
   ###############################################################################
 
-  test-blargg:
-    name: run Blargg's test suite
-    runs-on: ubuntu-20.04
-    needs: [build-qt]
-    steps:
-#      - name: install Qt libraries
-#        run: |
-#          sudo apt-get update
-#          sudo apt-get install libqt5core5a libqt5gui5
-      - name: cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-Qt-cache-5.12.8
-
-      - name: install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: '5.12.8'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-
-      - name: checkout code
-        uses: actions/checkout@v2
-
-      - name: download artifacts
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
-
-      - name: run tests
-        run: build/age_ci.sh test blargg
-
-
-  test-gambatte:
-    name: run Gambatte test suite
-    runs-on: ubuntu-20.04
-    needs: [build-qt]
-    steps:
-#      - name: install Qt libraries
-#        run: |
-#          sudo apt-get update
-#          sudo apt-get install libqt5core5a libqt5gui5
-      - name: cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-Qt-cache-5.12.8
-
-      - name: install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: '5.12.8'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-
-      - name: checkout code
-        uses: actions/checkout@v2
-
-      - name: download artifacts
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
-
-      - name: run tests
-        run: build/age_ci.sh test gambatte
-
-
-  test-mooneye-gb:
-    name: run Mooneye GB test suite
-    runs-on: ubuntu-20.04
-    needs: [build-qt]
-    steps:
-#      - name: install Qt libraries
-#        run: |
-#          sudo apt-get update
-#          sudo apt-get install libqt5core5a libqt5gui5
-      - name: cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-Qt-cache-5.12.8
-
-      - name: install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: '5.12.8'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-
-      - name: checkout code
-        uses: actions/checkout@v2
-
-      - name: download artifacts
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
-
-      - name: run tests
-        run: build/age_ci.sh test mooneye-gb
+#  test-blargg:
+#    name: run Blargg's test suite
+#    runs-on: ubuntu-20.04
+#    needs: [build-qt]
+#    steps:
+##      - name: install Qt libraries
+##        run: |
+##          sudo apt-get update
+##          sudo apt-get install libqt5core5a libqt5gui5
+#      - name: cache Qt
+#        id: cache-qt
+#        uses: actions/cache@v1
+#        with:
+#          path: ../Qt
+#          key: ${{ runner.os }}-Qt-cache-5.12.8
+#
+#      - name: install Qt
+#        uses: jurplel/install-qt-action@v2
+#        with:
+#          version: '5.12.8'
+#          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+#
+#      - name: checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: download artifacts
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: ${{ env.ARTIFACT_NAME }}
+#          path: ${{ env.ARTIFACT_PATH }}
+#
+#      - name: run tests
+#        run: build/age_ci.sh test blargg
+#
+#
+#  test-gambatte:
+#    name: run Gambatte test suite
+#    runs-on: ubuntu-20.04
+#    needs: [build-qt]
+#    steps:
+##      - name: install Qt libraries
+##        run: |
+##          sudo apt-get update
+##          sudo apt-get install libqt5core5a libqt5gui5
+#      - name: cache Qt
+#        id: cache-qt
+#        uses: actions/cache@v1
+#        with:
+#          path: ../Qt
+#          key: ${{ runner.os }}-Qt-cache-5.12.8
+#
+#      - name: install Qt
+#        uses: jurplel/install-qt-action@v2
+#        with:
+#          version: '5.12.8'
+#          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+#
+#      - name: checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: download artifacts
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: ${{ env.ARTIFACT_NAME }}
+#          path: ${{ env.ARTIFACT_PATH }}
+#
+#      - name: run tests
+#        run: build/age_ci.sh test gambatte
+#
+#
+#  test-mooneye-gb:
+#    name: run Mooneye GB test suite
+#    runs-on: ubuntu-20.04
+#    needs: [build-qt]
+#    steps:
+##      - name: install Qt libraries
+##        run: |
+##          sudo apt-get update
+##          sudo apt-get install libqt5core5a libqt5gui5
+#      - name: cache Qt
+#        id: cache-qt
+#        uses: actions/cache@v1
+#        with:
+#          path: ../Qt
+#          key: ${{ runner.os }}-Qt-cache-5.12.8
+#
+#      - name: install Qt
+#        uses: jurplel/install-qt-action@v2
+#        with:
+#          version: '5.12.8'
+#          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+#
+#      - name: checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: download artifacts
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: ${{ env.ARTIFACT_NAME }}
+#          path: ${{ env.ARTIFACT_PATH }}
+#
+#      - name: run tests
+#        run: build/age_ci.sh test mooneye-gb

@@ -146,7 +146,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
 
     if ((address & 0xE000) == 0x8000)
     {
-        if (m_lcd.is_video_ram_accessible())
+        //if (m_lcd.is_video_ram_accessible())
         {
             result = m_memory.read_byte(address);
         }
@@ -158,7 +158,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
-        if (m_lcd.is_oam_readable() && !m_oam_dma_active)
+        //if (m_lcd.is_oam_readable() && !m_oam_dma_active)
         {
             result = m_lcd.get_oam()[address - 0xFE00];
         }
@@ -291,7 +291,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 {
     if ((address & 0xE000) == 0x8000)
     {
-        if (m_lcd.is_video_ram_accessible())
+        //if (m_lcd.is_video_ram_accessible())
         {
             m_memory.write_byte(address, byte);
         }
@@ -303,7 +303,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
-        if (m_lcd.is_oam_writable() && !m_oam_dma_active)
+        //if (m_lcd.is_oam_writable() && !m_oam_dma_active)
         {
             m_lcd.get_oam()[address - 0xFE00] = byte;
         }
@@ -448,29 +448,22 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 
 void age::gb_bus::handle_events()
 {
-    // emulate outstanding LCD events
-    //  - during mode 3 we do this more or less for every single cycle,
-    //    scheduling events for this would be too much effort
-    //  - do this before handling the LYC event, since the latter
-    //    requires an up-to-date LCD state
-    m_lcd.emulate();
-
     // handle outstanding events
     gb_event event;
     while ((event = m_events.poll_event()) != gb_event::none)
     {
         switch (event)
         {
+            case gb_event::lcd_interrupt:
+                m_lcd.update_state();
+                break;
+
+            case gb_event::serial_transfer_finished:
+                m_serial.update_state();
+                break;
+
             case gb_event::timer_interrupt:
                 m_timer.trigger_interrupt();
-                break;
-
-            case gb_event::lcd_lyc_check:
-                m_lcd.lyc_event();
-                break;
-
-            case gb_event::lcd_late_lyc_interrupt:
-                m_interrupts.trigger_interrupt(gb_interrupt::lcd);
                 break;
 
             case gb_event::start_hdma:
@@ -491,10 +484,6 @@ void age::gb_bus::handle_events()
                 //
                 m_oam_dma_address = (m_oam_dma_byte * 0x100) & ((m_oam_dma_byte > 0xDF) ? 0xDF00 : 0xFF00);
                 m_oam_dma_offset = 0;
-                break;
-
-            case gb_event::serial_transfer_finished:
-                m_serial.update_state();
                 break;
 
             default:
@@ -522,7 +511,7 @@ void age::gb_bus::handle_dma()
     uint8_t dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
 
     // calculate number of bytes to copy and update remaining DMA length
-    int bytes = m_lcd.is_hdma_active() ? 0x10 : dma_length * 0x10;
+    int bytes = m_hdma_active ? 0x10 : dma_length * 0x10;
     AGE_ASSERT(bytes <= 0x800);
     AGE_ASSERT((bytes & 0xF) == 0);
     LOG("DMA copying " << bytes << " bytes");
@@ -584,7 +573,7 @@ void age::gb_bus::handle_dma()
     if (remaining_dma_length == 0x7F)
     {
         LOG("DMA finished");
-        m_lcd.set_hdma_active(false);
+        m_hdma_active = false;
         AGE_ASSERT(m_events.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle);
     }
     m_hdma5 = (m_hdma5 & gb_hdma_start) + remaining_dma_length;
@@ -657,14 +646,14 @@ void age::gb_bus::write_hdma5(uint8_t value)
 
     if ((value & gb_hdma_start) > 0)
     {
-        m_lcd.set_hdma_active(true);
+        m_hdma_active = true;
         m_hdma5 |= gb_hdma_start;
         LOG("HDMA activated");
     }
     else
     {
         // HDMA not running: start GDMA
-        if (!m_lcd.is_hdma_active())
+        if (!m_hdma_active)
         {
             m_during_dma = true;
             LOG("GDMA activated");
@@ -672,7 +661,7 @@ void age::gb_bus::write_hdma5(uint8_t value)
         // HDMA running: stop it
         else
         {
-            m_lcd.set_hdma_active(false);
+            m_hdma_active = false;
 
             //
             // verified by gambatte tests
