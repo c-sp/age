@@ -20,6 +20,30 @@
 
 #include "age_gb_lcd.hpp"
 
+namespace {
+
+void calculate_xflip(age::uint8_array<256> &xflip)
+{
+    for (unsigned byte = 0; byte < 256; ++byte)
+    {
+        age::uint8_t flip_byte = 0;
+
+        for (unsigned bit = 0x01, flip_bit = 0x80;
+             bit < 0x100;
+             bit += bit, flip_bit >>= 1)
+        {
+            if ((byte & bit) > 0)
+            {
+                flip_byte |= flip_bit;
+            }
+        }
+
+        xflip[byte] = flip_byte;
+    }
+}
+
+}
+
 
 
 age::gb_lcd_renderer::gb_lcd_renderer(const gb_device &device,
@@ -31,6 +55,7 @@ age::gb_lcd_renderer::gb_lcd_renderer(const gb_device &device,
       m_screen_buffer(screen_buffer),
       m_dmg_green(dmg_green)
 {
+    calculate_xflip(m_xflip_cache);
 }
 
 
@@ -194,3 +219,45 @@ void age::gb_lcd_renderer::render_scanline(int ly,
         ++dst;
     }
 }
+
+
+
+//void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
+//                                          int tile_data_offset,
+//                                          const uint8_t *video_ram)
+//{
+//    tile_data_offset += (attributes & 0x08) * 0x400; // attribute: vram bank
+
+//    // read tile data
+//    uint8_t tile_byte1 = video_ram[tile_data_offset];
+//    uint8_t tile_byte2 = video_ram[tile_data_offset + 1];
+
+//    // horizontal flip
+//    if (attributes & 0x20)
+//    {
+//        tile_byte1 = m_xflip_cache[tile_byte1];
+//        tile_byte2 = m_xflip_cache[tile_byte2];
+//    }
+//    int index1 = (tile_byte1 & 0xF0) + ((tile_byte2 & 0xF0) >> 4);
+//    int index2 = ((tile_byte1 & 0x0F) << 4) + (tile_byte2 & 0x0F);
+//    index1 <<= 2;
+//    index2 <<= 2;
+
+//    // palette & color priority
+//    uint8_t palette = (attributes & 0x07) << 2;
+//    uint8_t priority = attributes & 0x80;
+
+//    // cache colors & priorities
+//    for (int index = 0; index < 2; ++index, index1 = index2)
+//    {
+//        for (int pixel_index = 0; pixel_index < 4; ++pixel_index)
+//        {
+//            pixel pix = m_colors[color_index];
+//            uint8_t color_index = dst->m_channels.m_a = m_tile_cache[index1 + pixel_index];
+//            dst->m_channels.m_a += priority;
+//            color_index += palette;
+//            AGE_ASSERT(color_index < gb_total_color_count);
+//            ++dst;
+//        }
+//    }
+//}

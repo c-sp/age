@@ -119,12 +119,14 @@ public:
 private:
 
     void render_scanline(int ly, const uint8_t *video_ram);
+    void render_bg_tile(int ly, const uint8_t *video_ram);
 
     const gb_device &m_device;
     const gb_memory &m_memory;
     screen_buffer &m_screen_buffer;
 
     uint8_array<0xA0> m_oam;
+    uint8_array<256> m_xflip_cache;
     pixel_vector m_colors{gb_total_color_count, pixel(0, 0, 0)};
     pixel_vector m_scanline{gb_screen_width + 16, pixel(0, 0, 0)};
 
