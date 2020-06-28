@@ -55,13 +55,13 @@ age::uint8_t age::gb_lcd::read_stat() {
 }
 
 age::uint8_t age::gb_lcd::read_scy() const {
-    CLOG("read SCY " << AGE_LOG_HEX8(m_scy));
-    return m_scy;
+    CLOG("read SCY " << AGE_LOG_HEX8(m_renderer.m_scy));
+    return m_renderer.m_scy;
 }
 
 age::uint8_t age::gb_lcd::read_scx() const {
-    CLOG("read SCX " << AGE_LOG_HEX8(m_scx));
-    return m_scx;
+    CLOG("read SCX " << AGE_LOG_HEX8(m_renderer.m_scx));
+    return m_renderer.m_scx;
 }
 
 age::uint8_t age::gb_lcd::read_ly() {
@@ -96,14 +96,14 @@ age::uint8_t age::gb_lcd::read_obp1() const
 
 age::uint8_t age::gb_lcd::read_wx() const
 {
-    CLOG("read WX " << AGE_LOG_HEX8(m_wx));
-    return m_wx;
+    CLOG("read WX " << AGE_LOG_HEX8(m_renderer.m_wx));
+    return m_renderer.m_wx;
 }
 
 age::uint8_t age::gb_lcd::read_wy() const
 {
-    CLOG("read WY " << AGE_LOG_HEX8(m_wy));
-    return m_wy;
+    CLOG("read WY " << AGE_LOG_HEX8(m_renderer.m_wy));
+    return m_renderer.m_wy;
 }
 
 age::uint8_t age::gb_lcd::read_bcps() const
@@ -179,14 +179,14 @@ void age::gb_lcd::write_scy(uint8_t value)
 {
     CLOG("write SCY " << AGE_LOG_HEX8(value));
     update_state();
-    m_scy = value;
+    m_renderer.m_scy = value;
 }
 
 void age::gb_lcd::write_scx(uint8_t value)
 {
     CLOG("write SCX " << AGE_LOG_HEX8(value));
     update_state();
-    m_scx = value;
+    m_renderer.m_scx = value;
 }
 
 
@@ -230,14 +230,14 @@ void age::gb_lcd::write_wy(uint8_t value)
 {
     CLOG("write WY " << AGE_LOG_HEX8(value));
     update_state();
-    m_wy = value;
+    m_renderer.m_wy = value;
 }
 
 void age::gb_lcd::write_wx(uint8_t value)
 {
     CLOG("write WX " << AGE_LOG_HEX8(value));
     update_state();
-    m_wx = value;
+    m_renderer.m_wx = value;
 }
 
 

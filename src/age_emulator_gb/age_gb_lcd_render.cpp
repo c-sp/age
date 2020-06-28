@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#include <algorithm> // std::fill
+
 #include <age_debug.hpp>
 
 #include "age_gb_lcd.hpp"
@@ -40,10 +42,19 @@ age::uint8_t* age::gb_lcd_renderer::get_oam()
 
 void age::gb_lcd_renderer::set_lcdc(int lcdc)
 {
+    m_lcdc = lcdc;
+
     m_bg_tile_map_offset = (lcdc & gb_lcdc_bg_map) ? 0x1C00 : 0x1800;
     m_win_tile_map_offset = (lcdc & gb_lcdc_win_map) ? 0x1C00 : 0x1800;
     m_tile_idx_offset = (lcdc & gb_lcdc_bg_win_data) ? 0 : -128;
     m_tile_data_offset = (lcdc & gb_lcdc_bg_win_data) ? 0x0000 : 0x0800;
+
+    if (m_device.is_cgb())
+    {
+        // CGB: if LCDC bit 0 is 0, sprites are always displayed above
+        // BG & window regardless of any priority flags
+        m_priority_mask = (lcdc & gb_lcdc_bg_enable) ? 0xFF : 0x00;
+    }
 }
 
 
@@ -88,8 +99,6 @@ void age::gb_lcd_renderer::create_dmg_palette(unsigned palette_idx, uint8_t colo
     }
 }
 
-
-
 void age::gb_lcd_renderer::update_color(unsigned color_idx, int gb_color)
 {
     AGE_ASSERT(m_device.is_cgb());
@@ -112,6 +121,12 @@ void age::gb_lcd_renderer::update_color(unsigned color_idx, int gb_color)
 
 
 
+void age::gb_lcd_renderer::new_frame()
+{
+    m_screen_buffer.switch_buffers();
+    m_rendered_scanlines = 0;
+}
+
 void age::gb_lcd_renderer::render(int until_scanline)
 {
     AGE_ASSERT(until_scanline >= m_rendered_scanlines);
@@ -125,15 +140,57 @@ void age::gb_lcd_renderer::render(int until_scanline)
     {
         return;
     }
-
-    //! \todo render scanlines
+    int ly = m_rendered_scanlines;
     m_rendered_scanlines += to_render;
+
+    // no need to allocate this for every scanline
+    const uint8_t *video_ram = m_memory.get_video_ram();
+
+    for ( ;ly < m_rendered_scanlines; ++ly)
+    {
+        render_scanline(ly, video_ram);
+    }
 }
 
 
 
-void age::gb_lcd_renderer::new_frame()
+void age::gb_lcd_renderer::render_scanline(int ly,
+                                           const uint8_t *video_ram)
 {
-    m_screen_buffer.switch_buffers();
-    m_rendered_scanlines = 0;
+    // BG & windows not visible
+    if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
+    {
+        pixel fill_color = m_colors[0];
+        fill_color.m_channels.m_a = 0x00; // sprites are prioritized
+        std::fill(m_scanline.begin(), m_scanline.end(), fill_color);
+    }
+
+    // render BG & window
+    else
+    {
+        //! \todo render BG
+        if (m_lcdc & gb_lcdc_win_enable)
+        {
+            //! \todo render window
+        }
+    }
+
+    // render sprites
+    if (m_lcdc & gb_lcdc_obj_enable)
+    {
+        //! \todo render sprites
+    }
+
+    // copy scanline
+    auto dst = &m_screen_buffer.get_back_buffer()[0] + ly * gb_screen_width;
+    auto src = &m_scanline[m_scx & 0b111]; // % 8
+
+    int32_t alpha = pixel{0, 0, 0, 255}.m_color;
+    for (int i = 0; i < gb_screen_width; ++i)
+    {
+        // replace priority information with alpha value
+        dst->m_color = src->m_color | alpha;
+        ++src;
+        ++dst;
+    }
 }

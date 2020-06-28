@@ -113,24 +113,38 @@ public:
     void create_dmg_palette(unsigned palette_idx, uint8_t colors);
     void update_color(unsigned color_idx, int gb_color);
 
-    void render(int until_scanline);
     void new_frame();
+    void render(int until_scanline);
 
 private:
+
+    void render_scanline(int ly, const uint8_t *video_ram);
 
     const gb_device &m_device;
     const gb_memory &m_memory;
     screen_buffer &m_screen_buffer;
 
     uint8_array<0xA0> m_oam;
-    pixel_vector m_colors = pixel_vector(gb_total_color_count, pixel(0, 0, 0));
+    pixel_vector m_colors{gb_total_color_count, pixel(0, 0, 0)};
+    pixel_vector m_scanline{gb_screen_width + 16, pixel(0, 0, 0)};
 
     int m_rendered_scanlines = 0;
+
     int m_bg_tile_map_offset = 0;
     int m_win_tile_map_offset = 0;
     int m_tile_idx_offset = 0;
     int m_tile_data_offset = 0;
+    uint8_t m_priority_mask = 0xFF;
+    uint8_t m_lcdc = 0;
+
     const bool m_dmg_green;
+
+public:
+
+    uint8_t m_scy = 0;
+    uint8_t m_scx = 0;
+    uint8_t m_wy = 0;
+    uint8_t m_wx = 0;
 };
 
 
@@ -194,14 +208,10 @@ private:
 
     uint8_t m_lcdc = 0;
     uint8_t m_stat = 0;
-    uint8_t m_scy = 0;
-    uint8_t m_scx = 0;
     uint8_t m_lyc = 0;
     uint8_t m_bgp = 0;
     uint8_t m_obp0 = 0;
     uint8_t m_obp1 = 0;
-    uint8_t m_wy = 0;
-    uint8_t m_wx = 0;
     uint8_t m_bcps = 0xC0;
     uint8_t m_ocps = 0xC1;
 };
