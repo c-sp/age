@@ -18,8 +18,6 @@
 
 #include "age_gb_events.hpp"
 
-#define CLOG_EVENTS(log) AGE_GB_CLOG(AGE_GB_CLOG_EVENTS)(log)
-
 
 
 age::gb_events::gb_events(const gb_clock &clock)
@@ -72,8 +70,8 @@ void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
         }
     );
     m_active_events[ev_idx] = ev_cycle;
-    CLOG_EVENTS("event " << to_integral(event) << " scheduled ("
-                << m_events.size() << " events scheduled total)");
+    AGE_GB_CLOG_EVENTS("event " << to_integral(event) << " scheduled ("
+                       << m_events.size() << " events scheduled total)");
 }
 
 
@@ -97,8 +95,8 @@ void age::gb_events::remove_event(gb_event event)
         }
     }
     m_active_events[idx] = gb_no_clock_cycle;
-    CLOG_EVENTS("event " << to_integral(event) << " removed ("
-                << m_events.size() << " events still scheduled)");
+    AGE_GB_CLOG_EVENTS("event " << to_integral(event) << " removed ("
+                       << m_events.size() << " events still scheduled)");
 }
 
 
@@ -130,8 +128,8 @@ age::gb_event age::gb_events::poll_event()
     m_events.pop_back();
     m_active_events[to_integral(event)] = gb_no_clock_cycle;
 
-    CLOG_EVENTS("event " << to_integral(event) << " polled ("
-                << m_events.size() << " events still scheduled)");
+    AGE_GB_CLOG_EVENTS("event " << to_integral(event) << " polled ("
+                       << m_events.size() << " events still scheduled)");
     return event;
 }
 

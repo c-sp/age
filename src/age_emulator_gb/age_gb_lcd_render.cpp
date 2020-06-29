@@ -22,6 +22,12 @@
 
 namespace {
 
+constexpr uint8_t bg_tile_palette = 0x07;
+constexpr uint8_t bg_tile_vram_bank = 0x08;
+constexpr uint8_t bg_tile_flip_x = 0x20;
+constexpr uint8_t bg_tile_flip_y = 0x40;
+constexpr uint8_t bg_tile_priority = 0x80;
+
 void calculate_xflip(age::uint8_array<256> &xflip)
 {
     for (unsigned byte = 0; byte < 256; ++byte)
@@ -51,11 +57,12 @@ age::gb_lcd_renderer::gb_lcd_renderer(const gb_device &device,
                                       screen_buffer &screen_buffer,
                                       bool dmg_green)
     : m_device(device),
-      m_memory(memory),
       m_screen_buffer(screen_buffer),
+      m_video_ram(memory.get_video_ram()),
       m_dmg_green(dmg_green)
 {
     calculate_xflip(m_xflip_cache);
+    set_lcdc(0x91);
 }
 
 
@@ -65,14 +72,20 @@ age::uint8_t* age::gb_lcd_renderer::get_oam()
     return &m_oam[0];
 }
 
+age::uint8_t age::gb_lcd_renderer::get_lcdc() const
+{
+    return m_lcdc;
+}
+
 void age::gb_lcd_renderer::set_lcdc(int lcdc)
 {
     m_lcdc = lcdc;
 
     m_bg_tile_map_offset = (lcdc & gb_lcdc_bg_map) ? 0x1C00 : 0x1800;
     m_win_tile_map_offset = (lcdc & gb_lcdc_win_map) ? 0x1C00 : 0x1800;
-    m_tile_idx_offset = (lcdc & gb_lcdc_bg_win_data) ? 0 : -128;
+
     m_tile_data_offset = (lcdc & gb_lcdc_bg_win_data) ? 0x0000 : 0x0800;
+    m_tile_xor = (lcdc & gb_lcdc_bg_win_data) ? 0 : 0x80;
 
     if (m_device.is_cgb())
     {
@@ -168,19 +181,16 @@ void age::gb_lcd_renderer::render(int until_scanline)
     int ly = m_rendered_scanlines;
     m_rendered_scanlines += to_render;
 
-    // no need to allocate this for every scanline
-    const uint8_t *video_ram = m_memory.get_video_ram();
-
+    // render scanlines
     for ( ;ly < m_rendered_scanlines; ++ly)
     {
-        render_scanline(ly, video_ram);
+        render_scanline(ly);
     }
 }
 
 
 
-void age::gb_lcd_renderer::render_scanline(int ly,
-                                           const uint8_t *video_ram)
+void age::gb_lcd_renderer::render_scanline(int ly)
 {
     // BG & windows not visible
     if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
@@ -193,7 +203,17 @@ void age::gb_lcd_renderer::render_scanline(int ly,
     // render BG & window
     else
     {
-        //! \todo render BG
+        int bg_y = m_scy + ly;
+        int tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0xF8) << 2);
+        int tile_line = bg_y & 0b111;
+        pixel *scanline = &m_scanline[0];
+
+        for (int tx = m_scx >> 3, max = tx + 11; tx < max; ++tx)
+        {
+            render_bg_tile(scanline, tile_vram_ofs + (tx & 0x1F), tile_line);
+            scanline += 8;
+        }
+
         if (m_lcdc & gb_lcdc_win_enable)
         {
             //! \todo render window
@@ -222,42 +242,54 @@ void age::gb_lcd_renderer::render_scanline(int ly,
 
 
 
-//void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
-//                                          int tile_data_offset,
-//                                          const uint8_t *video_ram)
-//{
-//    tile_data_offset += (attributes & 0x08) * 0x400; // attribute: vram bank
+void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
+                                          int tile_vram_ofs,
+                                          int tile_line)
+{
+    AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < gb_video_ram_bank_size));
+    AGE_ASSERT((tile_line >= 0) && (tile_line < 8));
 
-//    // read tile data
-//    uint8_t tile_byte1 = video_ram[tile_data_offset];
-//    uint8_t tile_byte2 = video_ram[tile_data_offset + 1];
+    int tile_data_idx = m_video_ram[tile_vram_ofs] ^ m_tile_xor; // bank 0
+    int attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1
 
-//    // horizontal flip
-//    if (attributes & 0x20)
-//    {
-//        tile_byte1 = m_xflip_cache[tile_byte1];
-//        tile_byte2 = m_xflip_cache[tile_byte2];
-//    }
-//    int index1 = (tile_byte1 & 0xF0) + ((tile_byte2 & 0xF0) >> 4);
-//    int index2 = ((tile_byte1 & 0x0F) << 4) + (tile_byte2 & 0x0F);
-//    index1 <<= 2;
-//    index2 <<= 2;
+    // y-flip
+    if (attributes & bg_tile_flip_y)
+    {
+        tile_line = 7 - tile_line;
+    }
 
-//    // palette & color priority
-//    uint8_t palette = (attributes & 0x07) << 2;
-//    uint8_t priority = attributes & 0x80;
+    // read tile data
+    int tile_data_ofs = tile_data_idx << 4; // 16 bytes per tile
+    tile_data_ofs += (attributes & bg_tile_vram_bank) << 10;
+    tile_data_ofs += tile_line << 1; // 2 bytes per line
 
-//    // cache colors & priorities
-//    for (int index = 0; index < 2; ++index, index1 = index2)
-//    {
-//        for (int pixel_index = 0; pixel_index < 4; ++pixel_index)
-//        {
-//            pixel pix = m_colors[color_index];
-//            uint8_t color_index = dst->m_channels.m_a = m_tile_cache[index1 + pixel_index];
-//            dst->m_channels.m_a += priority;
-//            color_index += palette;
-//            AGE_ASSERT(color_index < gb_total_color_count);
-//            ++dst;
-//        }
-//    }
-//}
+    int tile_byte1 = m_video_ram[tile_data_ofs];
+    int tile_byte2 = m_video_ram[tile_data_ofs + 1];
+
+    // x-flip
+    if (attributes & bg_tile_flip_x)
+    {
+        tile_byte1 = m_xflip_cache[tile_byte1];
+        tile_byte2 = m_xflip_cache[tile_byte2];
+    }
+
+    // bg priority
+    pixel *palette = &m_colors[(bg_tile_palette) << 2];
+    uint8_t priority = attributes & bg_tile_priority;
+
+    // render tile line
+    // (least significant bit in byte1)
+    tile_byte2 <<= 1;
+
+    for (int i = 0; i < 8; ++i)
+    {
+        int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
+        pixel color = palette[color_idx];
+        color.m_channels.m_a = color_idx + priority;
+        *dst = color;
+
+        ++dst;
+        tile_byte1 >>= 1;
+        tile_byte2 >>= 1;
+    }
+}

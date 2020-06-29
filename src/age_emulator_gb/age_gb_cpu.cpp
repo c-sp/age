@@ -18,8 +18,6 @@
 
 #include "age_gb_cpu.hpp"
 
-#define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_INTERRUPTS)(log)
-
 namespace
 {
 
@@ -167,7 +165,7 @@ void age::gb_cpu::handle_state()
     if (m_cpu_state & gb_cpu_state_ei)
     {
         AGE_ASSERT(!m_interrupts.get_ime());
-        CLOG_INTERRUPTS("enable interrupt dispatching after this CPU instruction");
+        AGE_GB_CLOG_IRQS("enable interrupt dispatching after this CPU instruction");
         execute_prefetched();
 
         // enable interrupts only if this instruction was no DI
@@ -186,7 +184,7 @@ void age::gb_cpu::handle_state()
 
 void age::gb_cpu::dispatch_interrupt()
 {
-    CLOG_INTERRUPTS("dispatching interrupt, current PC = " << AGE_LOG_HEX16(m_pc));
+    AGE_GB_CLOG_IRQS("dispatching interrupt, current PC = " << AGE_LOG_HEX16(m_pc));
 
     m_clock.tick_machine_cycle();
     m_clock.tick_machine_cycle();
@@ -219,7 +217,7 @@ void age::gb_cpu::dispatch_interrupt()
 
     m_interrupts.finish_dispatch();
 
-    CLOG_INTERRUPTS("interrupt " << AGE_LOG_HEX8(intr_bit)
-                    << " (" << interrupt_name[intr_bit] << ")"
-                    << " dispatched to " << AGE_LOG_HEX16(m_pc));
+    AGE_GB_CLOG_IRQS("interrupt " << AGE_LOG_HEX8(intr_bit)
+                     << " (" << interrupt_name[intr_bit] << ")"
+                     << " dispatched to " << AGE_LOG_HEX16(m_pc));
 }

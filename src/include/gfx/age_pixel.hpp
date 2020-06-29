@@ -80,7 +80,7 @@ struct pixel
             uint8_t m_b;
             uint8_t m_a;
         } m_channels;
-        int32_t m_color;
+        uint32_t m_color;
     };
 };
 

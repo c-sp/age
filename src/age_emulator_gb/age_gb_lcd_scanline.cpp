@@ -28,6 +28,11 @@ age::gb_lcd_scanline::gb_lcd_scanline(const gb_clock &clock)
 
 
 
+int age::gb_lcd_scanline::clk_frame_start() const
+{
+    return m_clk_frame_start;
+}
+
 int age::gb_lcd_scanline::current_ly() const
 {
     int scanline = current_scanline();

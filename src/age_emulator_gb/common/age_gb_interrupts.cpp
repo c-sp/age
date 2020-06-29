@@ -16,8 +16,6 @@
 
 #include "age_gb_interrupts.hpp"
 
-#define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_INTERRUPTS)(log)
-
 namespace
 {
 
@@ -63,12 +61,12 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt)
     //      tima/tc00_irq_late_retrigger_ds_2_cgb04c_outE0
     if ((intr_bit & m_during_dispatch & deny_retrigger) && m_device.is_cgb_hardware())
     {
-        CLOG_INTERRUPTS("denying interrupt request: " << AGE_LOG_HEX8(intr_bit)
-                        << " (currently being dispatched)");
+        AGE_GB_CLOG_IRQS("denying interrupt request: " << AGE_LOG_HEX8(intr_bit)
+                         << " (currently being dispatched)");
         return;
     }
 
-    CLOG_INTERRUPTS("interrupt requested: " << AGE_LOG_HEX8(intr_bit));
+    AGE_GB_CLOG_IRQS("interrupt requested: " << AGE_LOG_HEX8(intr_bit));
     m_if |= intr_bit;
 
     // might clear HALT mode
@@ -84,7 +82,7 @@ void age::gb_interrupt_trigger::check_halt_mode()
     if (m_halted && (m_if & m_ie & 0x1F))
     {
         m_halted = false;
-        CLOG_INTERRUPTS("HALT terminated by pending interrupt");
+        AGE_GB_CLOG_IRQS("HALT terminated by pending interrupt");
 
         // We know from Gambatte timer tests that leaving HALT mode
         // takes one additional machine cycle (DMG and CGB) in the
@@ -101,7 +99,7 @@ void age::gb_interrupt_trigger::check_halt_mode()
         if (m_ime_on_halt)
         {
             m_clock.tick_machine_cycle();
-            CLOG_INTERRUPTS("HALT termination delay");
+            AGE_GB_CLOG_IRQS("HALT termination delay");
         }
     }
 }
@@ -118,13 +116,13 @@ void age::gb_interrupt_trigger::check_halt_mode()
 
 age::uint8_t age::gb_interrupt_ports::read_if() const
 {
-    CLOG_INTERRUPTS("read IF " << AGE_LOG_HEX8(m_if));
+    AGE_GB_CLOG_IRQS("read IF " << AGE_LOG_HEX8(m_if));
     return m_if;
 }
 
 age::uint8_t age::gb_interrupt_ports::read_ie() const
 {
-    CLOG_INTERRUPTS("read IE " << AGE_LOG_HEX8(m_if));
+    AGE_GB_CLOG_IRQS("read IE " << AGE_LOG_HEX8(m_if));
     return m_ie;
 }
 
@@ -132,14 +130,14 @@ age::uint8_t age::gb_interrupt_ports::read_ie() const
 
 void age::gb_interrupt_ports::write_if(uint8_t value)
 {
-    CLOG_INTERRUPTS("write IF " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_IRQS("write IF " << AGE_LOG_HEX8(value));
     m_if = value | 0xE0;
     check_halt_mode();
 }
 
 void age::gb_interrupt_ports::write_ie(uint8_t value)
 {
-    CLOG_INTERRUPTS("write IE " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_IRQS("write IE " << AGE_LOG_HEX8(value));
     m_ie = value;
     check_halt_mode();
 }
@@ -162,7 +160,7 @@ bool age::gb_interrupt_dispatcher::get_ime() const
 void age::gb_interrupt_dispatcher::set_ime(bool ime)
 {
     m_ime = ime;
-    CLOG_INTERRUPTS("interrupt dispatching " << (ime ? "enabled" : "disabled"));
+    AGE_GB_CLOG_IRQS("interrupt dispatching " << (ime ? "enabled" : "disabled"));
 }
 
 
@@ -184,12 +182,12 @@ void age::gb_interrupt_dispatcher::clear_interrupt_flag(uint8_t interrupt_bit)
 {
     m_if &= ~interrupt_bit;
     m_during_dispatch = interrupt_bit;
-    CLOG_INTERRUPTS("clear IF flag " << AGE_LOG_HEX8(interrupt_bit));
+    AGE_GB_CLOG_IRQS("clear IF flag " << AGE_LOG_HEX8(interrupt_bit));
 }
 
 void age::gb_interrupt_dispatcher::finish_dispatch()
 {
-    CLOG_INTERRUPTS("interrupt dispatching disabled");
+    AGE_GB_CLOG_IRQS("interrupt dispatching disabled");
     m_ime = false;
     m_during_dispatch = 0;
 }
@@ -207,7 +205,7 @@ void age::gb_interrupt_dispatcher::halt()
 
     m_halted = true;
     m_ime_on_halt = m_ime;
-    CLOG_INTERRUPTS("halted (ime = " << m_ime_on_halt << ")");
+    AGE_GB_CLOG_IRQS("halted (ime = " << m_ime_on_halt << ")");
 
     // a pending interrupt will terminate HALT immediately
     check_halt_mode();

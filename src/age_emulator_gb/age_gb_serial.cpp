@@ -16,8 +16,6 @@
 
 #include "age_gb_serial.hpp"
 
-#define CLOG(log) AGE_GB_CLOG(AGE_GB_CLOG_SERIAL)(log)
-
 namespace
 {
 
@@ -61,7 +59,7 @@ age::uint8_t age::gb_serial::read_sb()
     //      serial/start_wait_read_sb_1_dmg08_cgb04c_out7F
     //      serial/start_wait_read_sb_2_dmg08_cgb04c_outFF
     update_state();
-    CLOG("read SB " << AGE_LOG_HEX8(m_sb));
+    AGE_GB_CLOG_SERIAL("read SB = " << AGE_LOG_HEX8(m_sb));
     return m_sb;
 }
 
@@ -75,7 +73,7 @@ age::uint8_t age::gb_serial::read_sc() const
     // serial transfer currently in progress?
     result |= (m_sio_state == gb_sio_state::no_transfer) ? 0 : sc_start_transfer;
 
-    CLOG("read SC " << AGE_LOG_HEX8(result));
+    AGE_GB_CLOG_SERIAL("read SC = " << AGE_LOG_HEX8(result));
     return result;
 }
 
@@ -83,11 +81,11 @@ age::uint8_t age::gb_serial::read_sc() const
 
 void age::gb_serial::write_sb(uint8_t value)
 {
-    CLOG("write SB " << AGE_LOG_HEX8(value)
-         << ", old SB was: " << AGE_LOG_HEX8(m_sb)
-         << ((m_sio_state == gb_sio_state::no_transfer)
-             ? ""
-             : ", write ignored: transfer in progress!"));
+    AGE_GB_CLOG_SERIAL("write SB = " << AGE_LOG_HEX8(value)
+                       << ", old SB was: " << AGE_LOG_HEX8(m_sb)
+                       << ((m_sio_state == gb_sio_state::no_transfer)
+                           ? ""
+                           : ", write ignored: transfer in progress!"));
 
     // serial transfer in progress -> writing prohibited
     m_sb = (m_sio_state == gb_sio_state::no_transfer) ? value : m_sb;
@@ -95,7 +93,7 @@ void age::gb_serial::write_sb(uint8_t value)
 
 void age::gb_serial::write_sc(uint8_t value)
 {
-    CLOG("write SC " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_SERIAL("write SC = " << AGE_LOG_HEX8(value));
     m_sc = value;
 
     // start serial transfer
@@ -176,11 +174,11 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     AGE_ASSERT(clks_until_finished > 0);
     AGE_ASSERT(clks_until_finished <= 8 << clock_shift);
 
-    CLOG("starting serial transfer:");
-    CLOG("    * " << clks_per_bit << " clock cycles per transferred bit");
-    CLOG("    * " << clks_first_switch << " clock cycles until first step");
-    CLOG("    * finishes in " << clks_until_finished << " clock cycles ("
-         << (current_clk + clks_until_finished) << ")");
+    AGE_GB_CLOG_SERIAL("starting serial transfer:");
+    AGE_GB_CLOG_SERIAL("    * " << clks_per_bit << " clock cycles per transferred bit");
+    AGE_GB_CLOG_SERIAL("    * " << clks_first_switch << " clock cycles until first step");
+    AGE_GB_CLOG_SERIAL("    * finishes in " << clks_until_finished << " clock cycles ("
+                       << (current_clk + clks_until_finished) << ")");
 
     m_sio_state = gb_sio_state::transfer_internal_clock;
     m_sio_clock_shift = clock_shift;
@@ -218,7 +216,7 @@ void age::gb_serial::update_state()
     // transfer finished?
     if (shifts >= 8)
     {
-        CLOG("serial transfer finished");
+        AGE_GB_CLOG_SERIAL("serial transfer finished");
         stop_transfer(gb_sio_state::no_transfer);
         AGE_ASSERT(m_sb == 0xFF);
         m_interrupts.trigger_interrupt(gb_interrupt::serial);
@@ -296,13 +294,13 @@ void age::gb_serial::on_div_reset(int old_div_offset)
     clk_finished += clk_adjust;
     AGE_ASSERT(clk_finished >= current_clk);
 
-    CLOG("serial transfer at DIV reset:");
-    CLOG("    * old lower clock bits: " << AGE_LOG_HEX16(old_clock & 0xFFFF));
-    CLOG("    * new lower clock bits: " << AGE_LOG_HEX16(new_clock & 0xFFFF));
-    CLOG("    * next step (old) in " << old_next_step << " clock cycles");
-    CLOG("    * next step (new) in " << new_next_step << " clock cycles");
-    CLOG("    * +/- remaining clock cycles: " << clk_adjust);
-    CLOG("    * finish on clock cycle " << clk_finished);
+    AGE_GB_CLOG_SERIAL("serial transfer at DIV reset:");
+    AGE_GB_CLOG_SERIAL("    * old lower clock bits: " << AGE_LOG_HEX16(old_clock & 0xFFFF));
+    AGE_GB_CLOG_SERIAL("    * new lower clock bits: " << AGE_LOG_HEX16(new_clock & 0xFFFF));
+    AGE_GB_CLOG_SERIAL("    * next step (old) in " << old_next_step << " clock cycles");
+    AGE_GB_CLOG_SERIAL("    * next step (new) in " << new_next_step << " clock cycles");
+    AGE_GB_CLOG_SERIAL("    * +/- remaining clock cycles: " << clk_adjust);
+    AGE_GB_CLOG_SERIAL("    * finish on clock cycle " << clk_finished);
 
     m_sio_clk_started += clk_adjust;
     m_events.schedule_event(gb_event::serial_transfer_finished, clk_finished - current_clk);

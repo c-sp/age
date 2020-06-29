@@ -19,7 +19,7 @@
 #include "age_gb_cpu.hpp"
 
 #define CLOG_CPU(log) AGE_GB_CLOG(AGE_GB_CLOG_CPU)(log)
-#define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_INTERRUPTS)(log)
+#define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_IRQS)(log)
 
 
 
@@ -869,9 +869,9 @@ void age::gb_cpu::execute_prefetched()
             // invalid opcode, stay here and freeze CPU
             --m_pc;
             m_cpu_state |= gb_cpu_state_frozen;
-            CLOG_CPU("invalid opcode " << AGE_LOG_HEX8(opcode)
-                     << " at PC = " << AGE_LOG_HEX16(m_pc)
-                     << ", CPU frozen");
+            AGE_GB_CLOG_CPU("invalid opcode " << AGE_LOG_HEX8(opcode)
+                            << " at PC = " << AGE_LOG_HEX16(m_pc)
+                            << ", CPU frozen");
             break;
 
         // increment & decrement
@@ -1128,7 +1128,7 @@ void age::gb_cpu::execute_prefetched()
         case 0xD9: // RETI
             RET;
             m_interrupts.set_ime(true);
-            CLOG_INTERRUPTS("interrupts enabled");
+            AGE_GB_CLOG_IRQS("interrupts enabled");
             break;
 
         case 0xC0: RET_IF(!ZERO_FLAGGED); break;
@@ -1179,7 +1179,7 @@ void age::gb_cpu::execute_prefetched()
             if (!m_interrupts.halted() && !m_interrupts.get_ime())
             {
                 pc_halt_modifier = -1;
-                CLOG_INTERRUPTS("\"HALT bug\", not incrementing PC");
+                AGE_GB_CLOG_IRQS("\"HALT bug\", not incrementing PC");
             }
             break;
 

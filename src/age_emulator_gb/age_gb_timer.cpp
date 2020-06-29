@@ -65,7 +65,7 @@ int age::gb_timer::get_clock_shift(int tac) const
 
 age::uint8_t age::gb_timer::read_tma() const
 {
-    CLOG("read TMA " << AGE_LOG_HEX8(m_tma));
+    AGE_GB_CLOG_TIMER("read TMA = " << AGE_LOG_HEX8(m_tma));
     return m_tma;
 }
 
@@ -73,7 +73,7 @@ age::uint8_t age::gb_timer::read_tma() const
 
 age::uint8_t age::gb_timer::read_tac() const
 {
-    CLOG("read TAC " << AGE_LOG_HEX8(m_tac));
+    AGE_GB_CLOG_TIMER("read TAC = " << AGE_LOG_HEX8(m_tac));
     return m_tac;
 }
 
@@ -93,12 +93,12 @@ age::uint8_t age::gb_timer::read_tima()
         //      acceptance/timer/tima_reload
         if (m_clk_last_overflow == m_clock.get_clock_cycle())
         {
-            CLOG("read TIMA 0 due to recent timer overflow");
+            AGE_GB_CLOG_TIMER("read TIMA 0 due to recent timer overflow");
             return 0;
         }
     }
 
-    CLOG("read TIMA " << AGE_LOG_HEX8(m_tima));
+    AGE_GB_CLOG_TIMER("read TIMA = " << AGE_LOG_HEX8(m_tima));
     return m_tima;
 }
 
@@ -112,7 +112,7 @@ age::uint8_t age::gb_timer::read_tima()
 
 void age::gb_timer::write_tma(uint8_t value)
 {
-    CLOG("write TMA " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_TIMER("write TMA = " << AGE_LOG_HEX8(value));
 
     if (m_clk_timer_zero != gb_no_clock_cycle)
     {
@@ -130,7 +130,7 @@ void age::gb_timer::write_tma(uint8_t value)
 
             if (clks <= m_clock.get_machine_cycle_clocks())
             {
-                CLOG("    * copied to TIMA due to recent timer overflow");
+                AGE_GB_CLOG_TIMER("    * copied to TIMA due to recent timer overflow");
                 m_tima = value;
                 start_timer();
             }
@@ -144,7 +144,7 @@ void age::gb_timer::write_tma(uint8_t value)
 
 void age::gb_timer::write_tac(uint8_t value)
 {
-    CLOG("write TAC " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_TIMER("write TAC = " << AGE_LOG_HEX8(value));
     m_tac = value | 0xF8;
     bool start_new_timer = m_tac & tac_start_timer;
 
@@ -187,7 +187,7 @@ void age::gb_timer::write_tac(uint8_t value)
     if (old_bit && !new_bit)
     {
         // simulate immediate increment
-        CLOG("immediate TIMA increment by frequency change");
+        AGE_GB_CLOG_TIMER("immediate TIMA increment by frequency change");
         m_clk_timer_zero -= old_trigger_bit << 1;
     }
 
@@ -204,7 +204,7 @@ void age::gb_timer::write_tac(uint8_t value)
 
 void age::gb_timer::write_tima(uint8_t value)
 {
-    CLOG("write TIMA " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_TIMER("write TIMA = " << AGE_LOG_HEX8(value));
 
     // timer not active => just write the value
     if (m_clk_timer_zero == gb_no_clock_cycle)
@@ -225,7 +225,7 @@ void age::gb_timer::write_tima(uint8_t value)
     int clk_ignore = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
     if (clk_current == clk_ignore)
     {
-        CLOG("    * ignored due to recent timer overflow");
+        AGE_GB_CLOG_TIMER("    * ignored due to recent timer overflow");
         return;
     }
 

@@ -66,6 +66,10 @@ constexpr unsigned gb_palette_count = 16;
 //! Every palette contains 4 colors.
 constexpr unsigned gb_total_color_count = gb_palette_count * 4;
 
+constexpr unsigned gb_palette_bgp = 0x00;
+constexpr unsigned gb_palette_obp0 = 0x20;
+constexpr unsigned gb_palette_obp1 = 0x30;
+
 //constexpr uint8_t gb_tile_attribute_x_flip = 0x20;
 //constexpr uint8_t gb_tile_attribute_y_flip = 0x40;
 //constexpr uint8_t gb_tile_attribute_priority = 0x80;
@@ -81,6 +85,7 @@ public:
 
     gb_lcd_scanline(const gb_clock &clock);
 
+    int clk_frame_start() const;
     int current_ly() const;
     int current_scanline() const;
 
@@ -109,6 +114,7 @@ public:
                     bool dmg_green);
 
     uint8_t* get_oam();
+    uint8_t get_lcdc() const;
     void set_lcdc(int lcdc);
     void create_dmg_palette(unsigned palette_idx, uint8_t colors);
     void update_color(unsigned color_idx, int gb_color);
@@ -118,14 +124,15 @@ public:
 
 private:
 
-    void render_scanline(int ly, const uint8_t *video_ram);
-    void render_bg_tile(int ly, const uint8_t *video_ram);
+    void render_scanline(int ly);
+    void render_bg_tile(pixel *dst, int tile_vram_ofs, int tile_line);
 
     const gb_device &m_device;
-    const gb_memory &m_memory;
     screen_buffer &m_screen_buffer;
 
     uint8_array<0xA0> m_oam;
+    const uint8_t *m_video_ram;
+
     uint8_array<256> m_xflip_cache;
     pixel_vector m_colors{gb_total_color_count, pixel(0, 0, 0)};
     pixel_vector m_scanline{gb_screen_width + 16, pixel(0, 0, 0)};
@@ -134,9 +141,11 @@ private:
 
     int m_bg_tile_map_offset = 0;
     int m_win_tile_map_offset = 0;
-    int m_tile_idx_offset = 0;
+
     int m_tile_data_offset = 0;
-    uint8_t m_priority_mask = 0xFF;
+    int m_tile_xor = 0;
+
+    uint8_t m_priority_mask = 0;
     uint8_t m_lcdc = 0;
 
     const bool m_dmg_green;
@@ -159,6 +168,8 @@ public:
     gb_lcd(const gb_device &device,
            const gb_clock &clock,
            const gb_memory &memory,
+           gb_events &events,
+           gb_interrupt_trigger &interrupts,
            screen_buffer &screen_buffer,
            bool dmg_green);
 
@@ -195,25 +206,30 @@ public:
 
     uint8_t* get_oam();
     void update_state();
+    void trigger_interrupt();
     void set_back_clock(int clock_cycle_offset);
 
 private:
 
     void update_color(unsigned color_idx);
+    void schedule_vblank_irq();
 
     const gb_device &m_device;
     const gb_clock &m_clock;
+    gb_events &m_events;
+    gb_interrupt_trigger &m_interrupts;
     gb_lcd_scanline m_scanline;
     gb_lcd_renderer m_renderer;
 
     uint8_array<gb_total_color_count * 2> m_cpd; // 2 bytes per color
 
-    uint8_t m_lcdc = 0;
+    int m_next_vblank_irq = gb_no_clock_cycle;
+
     uint8_t m_stat = 0;
     uint8_t m_lyc = 0;
-    uint8_t m_bgp = 0;
-    uint8_t m_obp0 = 0;
-    uint8_t m_obp1 = 0;
+    uint8_t m_bgp = 0xFC;
+    uint8_t m_obp0 = 0xFF;
+    uint8_t m_obp1 = 0xFF;
     uint8_t m_bcps = 0xC0;
     uint8_t m_ocps = 0xC1;
 };

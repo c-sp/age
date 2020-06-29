@@ -86,19 +86,57 @@ private:
 
 
 
-#define AGE_GB_CLOG_CLOCK 0
-#define AGE_GB_CLOG_CPU 0
-#define AGE_GB_CLOG_DIV 0
-#define AGE_GB_CLOG_EVENTS 0
-#define AGE_GB_CLOG_INTERRUPTS 0
-#define AGE_GB_CLOG_LCD 1
-#define AGE_GB_CLOG_SERIAL 0
-#define AGE_GB_CLOG_TIMER 0
+#define AGE_GB_CLOG(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log)
 
-#define _CONCAT(a, ...) a ## __VA_ARGS__
-#define AGE_GB_CLOG(type) _CONCAT(AGE_GB_CLOG_, type)
-#define AGE_GB_CLOG_0(log)
-#define AGE_GB_CLOG_1(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log)
+#if 1
+#define AGE_GB_CLOG_CLOCK(log) AGE_LOG("clock " << get_clock_cycle() << " - " << log)
+#else
+#define AGE_GB_CLOG_CLOCK(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_CPU(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_CPU(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_DIV(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_DIV(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_EVENTS(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_EVENTS(log)
+#endif
+
+#if 1
+#define AGE_GB_CLOG_IRQS(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_IRQS(log)
+#endif
+
+#if 1
+#define AGE_GB_CLOG_LCD(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_LCD(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_SERIAL(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_SERIAL(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_TIMER(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_TIMER(log)
+#endif
+
+
 
 //! \todo replacae AGE_GB_CLOCK_LOG with AGE_GB_CLOG
 #ifdef AGE_DEBUG
