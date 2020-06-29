@@ -125,7 +125,7 @@ public:
 private:
 
     void render_scanline(int ly);
-    void render_bg_tile(pixel *dst, int tile_vram_ofs, int tile_line);
+    pixel* render_bg_tile(pixel *dst, int tile_vram_ofs, int tile_line);
 
     const gb_device &m_device;
     screen_buffer &m_screen_buffer;

@@ -206,12 +206,11 @@ void age::gb_lcd_renderer::render_scanline(int ly)
         int bg_y = m_scy + ly;
         int tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0xF8) << 2);
         int tile_line = bg_y & 0b111;
-        pixel *scanline = &m_scanline[0];
+        pixel *pix = &m_scanline[0];
 
-        for (int tx = m_scx >> 3, max = tx + 11; tx < max; ++tx)
+        for (int tx = m_scx >> 3, max = tx + 21; tx < max; ++tx)
         {
-            render_bg_tile(scanline, tile_vram_ofs + (tx & 0x1F), tile_line);
-            scanline += 8;
+            pix = render_bg_tile(pix, tile_vram_ofs + (tx & 0x1F), tile_line);
         }
 
         if (m_lcdc & gb_lcdc_win_enable)
@@ -242,14 +241,14 @@ void age::gb_lcd_renderer::render_scanline(int ly)
 
 
 
-void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
-                                          int tile_vram_ofs,
-                                          int tile_line)
+age::pixel* age::gb_lcd_renderer::render_bg_tile(pixel *dst,
+                                                 int tile_vram_ofs,
+                                                 int tile_line)
 {
     AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < gb_video_ram_bank_size));
     AGE_ASSERT((tile_line >= 0) && (tile_line < 8));
 
-    int tile_data_idx = m_video_ram[tile_vram_ofs] ^ m_tile_xor; // bank 0
+    int tile_nr = m_video_ram[tile_vram_ofs] ^ m_tile_xor; // bank 0
     int attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1
 
     // y-flip
@@ -259,7 +258,7 @@ void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
     }
 
     // read tile data
-    int tile_data_ofs = tile_data_idx << 4; // 16 bytes per tile
+    int tile_data_ofs = tile_nr << 4; // 16 bytes per tile
     tile_data_ofs += (attributes & bg_tile_vram_bank) << 10;
     tile_data_ofs += tile_line << 1; // 2 bytes per line
 
@@ -267,14 +266,16 @@ void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
     int tile_byte2 = m_video_ram[tile_data_ofs + 1];
 
     // x-flip
-    if (attributes & bg_tile_flip_x)
+    // (we invert the x-flip for easier rendering:
+    // this way bit 0 is used for the leftmost pixel)
+    if (!(attributes & bg_tile_flip_x))
     {
         tile_byte1 = m_xflip_cache[tile_byte1];
         tile_byte2 = m_xflip_cache[tile_byte2];
     }
 
     // bg priority
-    pixel *palette = &m_colors[(bg_tile_palette) << 2];
+    pixel *palette = &m_colors[(attributes & bg_tile_palette) << 2];
     uint8_t priority = attributes & bg_tile_priority;
 
     // render tile line
@@ -292,4 +293,5 @@ void age::gb_lcd_renderer::render_bg_tile(pixel *dst,
         tile_byte1 >>= 1;
         tile_byte2 >>= 1;
     }
+    return dst;
 }
