@@ -22,7 +22,6 @@
 //!
 
 #include <age_types.hpp>
-#include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
 #include "common/age_gb_clock.hpp"
@@ -30,14 +29,12 @@
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 #include "age_gb_memory.hpp"
+#include "age_gb_lcd_render.hpp"
 
 
 
 namespace age
 {
-
-constexpr int16_t gb_screen_width = 160;
-constexpr int16_t gb_screen_height = 144;
 
 constexpr int gb_clock_cycles_per_scanline = 456;
 constexpr int gb_scanline_count = 154;
@@ -45,34 +42,12 @@ constexpr int gb_clock_cycles_per_frame = gb_scanline_count * gb_clock_cycles_pe
 //constexpr int gb_cycles_ly153 = 4;
 //constexpr int gb_cycles_mode2 = 80;
 
-constexpr uint8_t gb_lcdc_enable = 0x80;
-constexpr uint8_t gb_lcdc_win_map = 0x40;
-constexpr uint8_t gb_lcdc_win_enable = 0x20;
-constexpr uint8_t gb_lcdc_bg_win_data = 0x10;
-constexpr uint8_t gb_lcdc_bg_map = 0x08;
-constexpr uint8_t gb_lcdc_obj_size = 0x04;
-constexpr uint8_t gb_lcdc_obj_enable = 0x02;
-constexpr uint8_t gb_lcdc_bg_enable = 0x01;
-
-//constexpr uint8_t gb_stat_interrupt_coincidence = 0x40;
+//constexpr uint8_t gb_stat_interrupt_ly_match = 0x40;
 //constexpr uint8_t gb_stat_interrupt_mode2 = 0x20;
 //constexpr uint8_t gb_stat_interrupt_mode1 = 0x10;
 //constexpr uint8_t gb_stat_interrupt_mode0 = 0x08;
-//constexpr uint8_t gb_stat_coincidence = 0x04;
+constexpr uint8_t gb_stat_ly_match = 0x04;
 constexpr uint8_t gb_stat_modes = 0x03;
-
-//! The CGB has 8 palettes each for BG and OBJ.
-constexpr unsigned gb_palette_count = 16;
-//! Every palette contains 4 colors.
-constexpr unsigned gb_total_color_count = gb_palette_count * 4;
-
-constexpr unsigned gb_palette_bgp = 0x00;
-constexpr unsigned gb_palette_obp0 = 0x20;
-constexpr unsigned gb_palette_obp1 = 0x30;
-
-//constexpr uint8_t gb_tile_attribute_x_flip = 0x20;
-//constexpr uint8_t gb_tile_attribute_y_flip = 0x40;
-//constexpr uint8_t gb_tile_attribute_priority = 0x80;
 
 
 
@@ -88,6 +63,7 @@ public:
     int clk_frame_start() const;
     int current_ly() const;
     int current_scanline() const;
+    uint8_t stat_mode() const;
 
     void lcd_on();
     void lcd_off();
@@ -99,63 +75,7 @@ private:
 
     const gb_clock &m_clock;
     int m_clk_frame_start = gb_no_clock_cycle;
-};
-
-
-
-class gb_lcd_renderer
-{
-    AGE_DISABLE_COPY(gb_lcd_renderer);
-public:
-
-    gb_lcd_renderer(const gb_device &device,
-                    const gb_memory &memory,
-                    screen_buffer &screen_buffer,
-                    bool dmg_green);
-
-    uint8_t* get_oam();
-    uint8_t get_lcdc() const;
-    void set_lcdc(int lcdc);
-    void create_dmg_palette(unsigned palette_idx, uint8_t colors);
-    void update_color(unsigned color_idx, int gb_color);
-
-    void new_frame();
-    void render(int until_scanline);
-
-private:
-
-    void render_scanline(int ly);
-    pixel* render_bg_tile(pixel *dst, int tile_vram_ofs, int tile_line);
-
-    const gb_device &m_device;
-    screen_buffer &m_screen_buffer;
-
-    uint8_array<0xA0> m_oam;
-    const uint8_t *m_video_ram;
-
-    uint8_array<256> m_xflip_cache;
-    pixel_vector m_colors{gb_total_color_count, pixel(0, 0, 0)};
-    pixel_vector m_scanline{gb_screen_width + 16, pixel(0, 0, 0)};
-
-    int m_rendered_scanlines = 0;
-
-    int m_bg_tile_map_offset = 0;
-    int m_win_tile_map_offset = 0;
-
-    int m_tile_data_offset = 0;
-    int m_tile_xor = 0;
-
-    uint8_t m_priority_mask = 0;
-    uint8_t m_lcdc = 0;
-
-    const bool m_dmg_green;
-
-public:
-
-    uint8_t m_scy = 0;
-    uint8_t m_scx = 0;
-    uint8_t m_wy = 0;
-    uint8_t m_wx = 0;
+    int m_first_frame = false;
 };
 
 
@@ -211,7 +131,7 @@ public:
 
 private:
 
-    void update_color(unsigned color_idx);
+    uint8_t stat_lyc() const;
     void schedule_vblank_irq();
 
     const gb_device &m_device;
@@ -219,19 +139,13 @@ private:
     gb_events &m_events;
     gb_interrupt_trigger &m_interrupts;
     gb_lcd_scanline m_scanline;
-    gb_lcd_renderer m_renderer;
-
-    uint8_array<gb_total_color_count * 2> m_cpd; // 2 bytes per color
+    gb_lcd_palettes m_palettes;
+    gb_lcd_render m_render;
 
     int m_next_vblank_irq = gb_no_clock_cycle;
 
-    uint8_t m_stat = 0;
+    uint8_t m_stat = 0x80;
     uint8_t m_lyc = 0;
-    uint8_t m_bgp = 0xFC;
-    uint8_t m_obp0 = 0xFF;
-    uint8_t m_obp1 = 0xFF;
-    uint8_t m_bcps = 0xC0;
-    uint8_t m_ocps = 0xC1;
 };
 
 } // namespace age

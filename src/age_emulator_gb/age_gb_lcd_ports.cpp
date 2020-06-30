@@ -18,113 +18,103 @@
 
 #include "age_gb_lcd.hpp"
 
-namespace
-{
-
-age::uint8_t increment_cps(age::uint8_t cps)
-{
-    if (cps & 0x80)
-    {
-        uint8_t index = (cps + 1) & 0x3F;
-        cps &= 0xC0;
-        cps |= index;
-    }
-    return cps;
-}
-
-}
-
 
 
 age::uint8_t age::gb_lcd::read_lcdc() const {
-    AGE_GB_CLOG_LCD("read LCDC = " << AGE_LOG_HEX8(m_renderer.get_lcdc()));
-    return m_renderer.get_lcdc();
+    AGE_GB_CLOG_LCD_PORTS("read LCDC = " << AGE_LOG_HEX8(m_render.get_lcdc()));
+    return m_render.get_lcdc();
 }
 
 age::uint8_t age::gb_lcd::read_stat() {
-    AGE_GB_CLOG_LCD("read STAT = " << AGE_LOG_HEX8(m_stat));
-    return m_stat;
+    update_state();
+    uint8_t result = m_stat | stat_lyc() | m_scanline.stat_mode();
+    AGE_GB_CLOG_LCD_PORTS("read STAT = " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 age::uint8_t age::gb_lcd::read_scy() const {
-    AGE_GB_CLOG_LCD("read SCY = " << AGE_LOG_HEX8(m_renderer.m_scy));
-    return m_renderer.m_scy;
+    AGE_GB_CLOG_LCD_PORTS("read SCY = " << AGE_LOG_HEX8(m_render.m_scy));
+    return m_render.m_scy;
 }
 
 age::uint8_t age::gb_lcd::read_scx() const {
-    AGE_GB_CLOG_LCD("read SCX = " << AGE_LOG_HEX8(m_renderer.m_scx));
-    return m_renderer.m_scx;
+    AGE_GB_CLOG_LCD_PORTS("read SCX = " << AGE_LOG_HEX8(m_render.m_scx));
+    return m_render.m_scx;
 }
 
 age::uint8_t age::gb_lcd::read_ly() {
     update_state();
-    uint8_t ly = m_scanline.current_ly() & 0xFF;
-    AGE_GB_CLOG_LCD("read LY = " << AGE_LOG_HEX8(ly));
-    return ly;
+    auto ly = m_scanline.current_ly();
+    AGE_GB_CLOG_LCD_PORTS_LY("read LY = " << AGE_LOG_HEX8(ly));
+    return ly & 0xFF;
 }
 
 age::uint8_t age::gb_lcd::read_lyc() const {
-    AGE_GB_CLOG_LCD("read LYC = " << AGE_LOG_HEX8(m_lyc));
+    AGE_GB_CLOG_LCD_PORTS("read LYC = " << AGE_LOG_HEX8(m_lyc));
     return m_lyc;
 }
 
 age::uint8_t age::gb_lcd::read_bgp() const
 {
-    AGE_GB_CLOG_LCD("read BGP = " << AGE_LOG_HEX8(m_bgp));
-    return m_bgp;
+    auto result = m_palettes.read_bgp();
+    AGE_GB_CLOG_LCD_PORTS("read BGP = " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 age::uint8_t age::gb_lcd::read_obp0() const
 {
-    AGE_GB_CLOG_LCD("read OBP0 = " << AGE_LOG_HEX8(m_obp0));
-    return m_obp0;
+    auto result = m_palettes.read_obp0();
+    AGE_GB_CLOG_LCD_PORTS("read OBP0 = " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 age::uint8_t age::gb_lcd::read_obp1() const
 {
-    AGE_GB_CLOG_LCD("read OBP1 = " << AGE_LOG_HEX8(m_obp1));
-    return m_obp1;
+    auto result = m_palettes.read_obp1();
+    AGE_GB_CLOG_LCD_PORTS("read OBP1 = " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 age::uint8_t age::gb_lcd::read_wx() const
 {
-    AGE_GB_CLOG_LCD("read WX = " << AGE_LOG_HEX8(m_renderer.m_wx));
-    return m_renderer.m_wx;
+    AGE_GB_CLOG_LCD_PORTS("read WX = " << AGE_LOG_HEX8(m_render.m_wx));
+    return m_render.m_wx;
 }
 
 age::uint8_t age::gb_lcd::read_wy() const
 {
-    AGE_GB_CLOG_LCD("read WY = " << AGE_LOG_HEX8(m_renderer.m_wy));
-    return m_renderer.m_wy;
+    AGE_GB_CLOG_LCD_PORTS("read WY = " << AGE_LOG_HEX8(m_render.m_wy));
+    return m_render.m_wy;
 }
 
 age::uint8_t age::gb_lcd::read_bcps() const
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_GB_CLOG_LCD("read BCPS = " << AGE_LOG_HEX8(m_bcps));
-    return m_bcps;
+    auto result = m_palettes.read_bcps();
+    AGE_GB_CLOG_LCD_PORTS("read BCPS = " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 age::uint8_t age::gb_lcd::read_bcpd() const
 {
     AGE_ASSERT(m_device.is_cgb());
-    uint8_t result = m_cpd[m_bcps & 0x3F];
-    AGE_GB_CLOG_LCD("read BCPD = " << AGE_LOG_HEX8(result));
+    auto result = m_palettes.read_bcpd();
+    AGE_GB_CLOG_LCD_PORTS("read BCPD = " << AGE_LOG_HEX8(result));
     return result;
 }
 
 age::uint8_t age::gb_lcd::read_ocps() const
 {
     AGE_ASSERT(m_device.is_cgb());
-    AGE_GB_CLOG_LCD("read OCPS = " << AGE_LOG_HEX8(m_ocps));
-    return m_ocps;
+    auto result = m_palettes.read_ocps();
+    AGE_GB_CLOG_LCD_PORTS("read OCPS = " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 age::uint8_t age::gb_lcd::read_ocpd() const
 {
     AGE_ASSERT(m_device.is_cgb());
-    uint8_t result = m_cpd[m_ocps & 0x3F];
-    AGE_GB_CLOG_LCD("read OCPD = " << AGE_LOG_HEX8(result));
+    auto result = m_palettes.read_ocpd();
+    AGE_GB_CLOG_LCD_PORTS("read OCPD = " << AGE_LOG_HEX8(result));
     return result;
 }
 
@@ -132,37 +122,50 @@ age::uint8_t age::gb_lcd::read_ocpd() const
 
 void age::gb_lcd::write_lcdc(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write LCDC = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write LCDC = " << AGE_LOG_HEX8(value));
     update_state();
 
-    int diff = m_renderer.get_lcdc() ^ value;
-    m_renderer.set_lcdc(value);
+    int diff = m_render.get_lcdc() ^ value;
+    m_render.set_lcdc(value);
 
     if (!(diff & gb_lcdc_enable))
     {
         return;
     }
 
-    // LCD switched on/off
+    // LCD switched on
     if (value & gb_lcdc_enable)
     {
-        AGE_GB_CLOG_LCD("LCD switched on");
+        AGE_GB_CLOG_LCD_RENDER("LCD switched on");
+
+        // Clear STAT LY match flag as we calculate it dynamically
+        // when the LCD is switched on
+        // (the value was saved on LCD off).
+        m_stat &= ~gb_stat_ly_match;
+
         m_scanline.lcd_on();
-        m_renderer.new_frame();
+        m_render.new_frame();
         schedule_vblank_irq();
     }
+
+    // LCD switched off
     else
     {
-        AGE_GB_CLOG_LCD("LCD switched off");
+        AGE_GB_CLOG_LCD_RENDER("LCD switched off");
+
+        // The STAT LY match flag keeps it's current value.
+        // Gambatte tests:
+        //      enable_display/disable_display_regs_1_dmg08_cgb04c_out66e46666009266666666
+        m_stat |= stat_lyc();
 
         // switch frame buffers, if the current frame is finished
         // (otherwise it would be lost because we did not reach
         // the last v-blank scanline)
         if (m_scanline.current_scanline() >= gb_screen_height)
         {
-            AGE_GB_CLOG_LCD("    * switching frame buffers (scanline "
-                            << m_scanline.current_scanline() << ")");
-            m_renderer.new_frame();
+            AGE_GB_CLOG_LCD_RENDER("    * switching frame buffers (scanline "
+                                   << m_scanline.current_scanline() << ")");
+            m_render.new_frame();
         }
 
         m_events.remove_event(gb_event::lcd_interrupt);
@@ -175,32 +178,32 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
 void age::gb_lcd::write_stat(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write STAT = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write STAT = " << AGE_LOG_HEX8(value));
     update_state();
-    m_stat = value & ~gb_stat_modes;
+    m_stat = (value & ~(gb_stat_modes | gb_stat_ly_match)) | 0x80;
 }
 
 
 
 void age::gb_lcd::write_scy(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write SCY = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write SCY = " << AGE_LOG_HEX8(value));
     update_state();
-    m_renderer.m_scy = value;
+    m_render.m_scy = value;
 }
 
 void age::gb_lcd::write_scx(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write SCX = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write SCX = " << AGE_LOG_HEX8(value));
     update_state();
-    m_renderer.m_scx = value;
+    m_render.m_scx = value;
 }
 
 
 
 void age::gb_lcd::write_lyc(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write LYC = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write LYC = " << AGE_LOG_HEX8(value));
     update_state();
     m_lyc = value;
 }
@@ -209,78 +212,65 @@ void age::gb_lcd::write_lyc(uint8_t value)
 
 void age::gb_lcd::write_bgp(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write LYC = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write LYC = " << AGE_LOG_HEX8(value));
     update_state();
-    m_bgp = value;
-    m_renderer.create_dmg_palette(gb_palette_bgp, m_bgp);
+    m_palettes.write_bgp(value);
 }
 
 void age::gb_lcd::write_obp0(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write OBP0 = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write OBP0 = " << AGE_LOG_HEX8(value));
     update_state();
-    m_obp0 = value;
-    m_renderer.create_dmg_palette(gb_palette_obp0, m_obp0);
+    m_palettes.write_obp0(value);
 }
 
 void age::gb_lcd::write_obp1(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write OBP1 = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write OBP1 = " << AGE_LOG_HEX8(value));
     update_state();
-    m_obp1 = value;
-    m_renderer.create_dmg_palette(gb_palette_obp1, m_obp1);
+    m_palettes.write_obp1(value);
 }
 
 
 
 void age::gb_lcd::write_wy(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write WY = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write WY = " << AGE_LOG_HEX8(value));
     update_state();
-    m_renderer.m_wy = value;
+    m_render.m_wy = value;
 }
 
 void age::gb_lcd::write_wx(uint8_t value)
 {
-    AGE_GB_CLOG_LCD("write WX = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write WX = " << AGE_LOG_HEX8(value));
     update_state();
-    m_renderer.m_wx = value;
+    m_render.m_wx = value;
 }
 
 
 
 void age::gb_lcd::write_bcps(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_GB_CLOG_LCD("write BCPS = " << AGE_LOG_HEX8(value));
-    m_bcps = value | 0x40;
+    AGE_GB_CLOG_LCD_PORTS("write BCPS = " << AGE_LOG_HEX8(value));
+    m_palettes.write_bcps(value);
 }
 
 void age::gb_lcd::write_bcpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_GB_CLOG_LCD("write BCPD = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write BCPD = " << AGE_LOG_HEX8(value));
     update_state();
-
-    m_cpd[m_bcps & 0x3F] = value;
-    update_color((m_bcps & 0x3F) / 2);
-    m_bcps = increment_cps(m_bcps);
+    m_palettes.write_bcpd(value);
 }
 
 void age::gb_lcd::write_ocps(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_GB_CLOG_LCD("write OCPS = " << AGE_LOG_HEX8(value));
-    m_ocps = value | 0x40;
+    AGE_GB_CLOG_LCD_PORTS("write OCPS = " << AGE_LOG_HEX8(value));
+    m_palettes.write_ocps(value);
 }
 
 void age::gb_lcd::write_ocpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_GB_CLOG_LCD("write OCPD = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write OCPD = " << AGE_LOG_HEX8(value));
     update_state();
-
-    m_cpd[0x40 + (m_ocps & 0x3F)] = value;
-    update_color(0x20 + (m_ocps & 0x3F) / 2);
-    m_ocps = increment_cps(m_ocps);
+    m_palettes.write_ocpd(value);
 }

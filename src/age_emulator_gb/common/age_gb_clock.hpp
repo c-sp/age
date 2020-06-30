@@ -88,7 +88,7 @@ private:
 
 #define AGE_GB_CLOG(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log)
 
-#if 1
+#if 0
 #define AGE_GB_CLOG_CLOCK(log) AGE_LOG("clock " << get_clock_cycle() << " - " << log)
 #else
 #define AGE_GB_CLOG_CLOCK(log)
@@ -112,16 +112,36 @@ private:
 #define AGE_GB_CLOG_EVENTS(log)
 #endif
 
-#if 1
+#if 0
 #define AGE_GB_CLOG_IRQS(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_IRQS(log)
 #endif
 
-#if 1
-#define AGE_GB_CLOG_LCD(log) AGE_GB_CLOG(log)
+#if 0
+#define AGE_GB_CLOG_LCD_IRQ(log) AGE_GB_CLOG(log)
 #else
-#define AGE_GB_CLOG_LCD(log)
+#define AGE_GB_CLOG_LCD_IRQ(log)
+#endif
+
+#if 1
+#define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_LCD_PORTS(log)
+#endif
+
+// LY is read quite often (e.g. checking for v-blank) by some test roms
+//  => create an extra logging category for it
+#if 0
+#define AGE_GB_CLOG_LCD_PORTS_LY(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_LCD_PORTS_LY(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_LCD_RENDER(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_LCD_RENDER(log)
 #endif
 
 #if 0

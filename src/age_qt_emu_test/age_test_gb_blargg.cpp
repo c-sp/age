@@ -29,11 +29,11 @@ int test_seconds(const QString &test_result)
     // see https://github.com/c-sp/gameboy-test-roms
     if (test_result == "cgb_cpu_instrs")
     {
-        return 30;
+        return 31;
     }
     if (test_result == "dmg_cpu_instrs")
     {
-        return 54;
+        return 55;
     }
     if (test_result == "cgb_instr_timing")
     {

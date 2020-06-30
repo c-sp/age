@@ -54,6 +54,35 @@ int age::gb_lcd_scanline::current_scanline() const
     return clks / gb_clock_cycles_per_scanline;
 }
 
+age::uint8_t age::gb_lcd_scanline::stat_mode() const
+{
+    if (m_clk_frame_start == gb_no_clock_cycle)
+    {
+        return 0;
+    }
+
+    int clks_frame = m_clock.get_clock_cycle() - m_clk_frame_start;
+    int scanline = clks_frame / gb_clock_cycles_per_scanline;
+    int clks_scanline = clks_frame % gb_clock_cycles_per_scanline;
+
+    if (scanline >= gb_screen_height)
+    {
+        return 1;
+    }
+    if (clks_scanline < 80)
+    {
+        // LY 0 mode 2 is not flagged right after the LCD has been
+        // switched on (no sprites on this scanline then?).
+        //
+        // Gambatte tests:
+        //      enable_display/nextstat_1_dmg08_cgb04c_out84
+        //      enable_display/nextstat_2_dmg08_cgb04c_out87
+        return (m_first_frame && (scanline == 0)) ? 0 : 2;
+    }
+    //! \todo fix for pixel fifo
+    return (clks_scanline < 172) ? 3 : 0;
+}
+
 
 
 void age::gb_lcd_scanline::lcd_on()
@@ -66,6 +95,7 @@ void age::gb_lcd_scanline::lcd_on()
     // switch on LCD:
     // start new frame
     m_clk_frame_start = m_clock.get_clock_cycle();
+    m_first_frame = true;
 }
 
 void age::gb_lcd_scanline::lcd_off()
@@ -91,6 +121,7 @@ void age::gb_lcd_scanline::fast_forward_frames()
     {
         int frames = clks / gb_clock_cycles_per_frame;
         m_clk_frame_start += frames * gb_clock_cycles_per_frame;
+        m_first_frame = false;
     }
 }
 

@@ -52,14 +52,14 @@ void calculate_xflip(age::uint8_array<256> &xflip)
 
 
 
-age::gb_lcd_renderer::gb_lcd_renderer(const gb_device &device,
-                                      const gb_memory &memory,
-                                      screen_buffer &screen_buffer,
-                                      bool dmg_green)
+age::gb_lcd_render::gb_lcd_render(const gb_device &device,
+                                  const gb_lcd_palettes &palettes,
+                                  const uint8_t *video_ram,
+                                  screen_buffer &screen_buffer)
     : m_device(device),
+      m_palettes(palettes),
       m_screen_buffer(screen_buffer),
-      m_video_ram(memory.get_video_ram()),
-      m_dmg_green(dmg_green)
+      m_video_ram(video_ram)
 {
     calculate_xflip(m_xflip_cache);
     set_lcdc(0x91);
@@ -67,17 +67,17 @@ age::gb_lcd_renderer::gb_lcd_renderer(const gb_device &device,
 
 
 
-age::uint8_t* age::gb_lcd_renderer::get_oam()
+age::uint8_t* age::gb_lcd_render::get_oam()
 {
     return &m_oam[0];
 }
 
-age::uint8_t age::gb_lcd_renderer::get_lcdc() const
+age::uint8_t age::gb_lcd_render::get_lcdc() const
 {
     return m_lcdc;
 }
 
-void age::gb_lcd_renderer::set_lcdc(int lcdc)
+void age::gb_lcd_render::set_lcdc(int lcdc)
 {
     m_lcdc = lcdc;
 
@@ -97,75 +97,13 @@ void age::gb_lcd_renderer::set_lcdc(int lcdc)
 
 
 
-void age::gb_lcd_renderer::create_dmg_palette(unsigned palette_idx, uint8_t colors)
-{
-    if (m_device.is_cgb())
-    {
-        return;
-    }
-    AGE_ASSERT(palette_idx < m_colors.size() - 4);
-
-    // greenish Gameboy colors
-    // (taken from some googled gameboy photo)
-    if (m_dmg_green)
-    {
-        for (unsigned idx = palette_idx, max = palette_idx + 4; idx < max; ++idx)
-        {
-            switch (colors & 0x03)
-            {
-                case 0x00: m_colors[idx] = pixel(152, 192, 15); break;
-                case 0x01: m_colors[idx] = pixel(112, 152, 15); break;
-                case 0x02: m_colors[idx] = pixel(48, 96, 15); break;
-                case 0x03: m_colors[idx] = pixel(15, 56, 15); break;
-            }
-            colors >>= 2;
-        }
-        return;
-    }
-
-    // grayish Gameboy colors, used by test runner
-    for (unsigned idx = palette_idx, max = palette_idx + 4; idx < max; ++idx)
-    {
-        switch (colors & 0x03)
-        {
-            case 0x00: m_colors[idx] = pixel(255, 255, 255); break;
-            case 0x01: m_colors[idx] = pixel(170, 170, 170); break;
-            case 0x02: m_colors[idx] = pixel(85, 85, 85); break;
-            case 0x03: m_colors[idx] = pixel(0, 0, 0); break;
-        }
-        colors >>= 2;
-    }
-}
-
-void age::gb_lcd_renderer::update_color(unsigned color_idx, int gb_color)
-{
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_ASSERT(color_idx < m_colors.size());
-
-    // gb-color:   red:    bits 0-4
-    //             green:  bits 5-9
-    //             blue:   bits 10-14
-    int gb_r = gb_color & 0x1F;
-    int gb_g = (gb_color >> 5) & 0x1F;
-    int gb_b = (gb_color >> 10) & 0x1F;
-
-    // formula copied from gambatte (video.cpp)
-    int r = (gb_r * 13 + gb_g * 2 + gb_b) >> 1;
-    int g = (gb_g * 3 + gb_b) << 1;
-    int b = (gb_r * 3 + gb_g * 2 + gb_b * 11) >> 1;
-
-    m_colors[color_idx] = pixel(r, g, b);
-}
-
-
-
-void age::gb_lcd_renderer::new_frame()
+void age::gb_lcd_render::new_frame()
 {
     m_screen_buffer.switch_buffers();
     m_rendered_scanlines = 0;
 }
 
-void age::gb_lcd_renderer::render(int until_scanline)
+void age::gb_lcd_render::render(int until_scanline)
 {
     AGE_ASSERT(until_scanline >= m_rendered_scanlines);
     AGE_ASSERT(m_rendered_scanlines <= gb_screen_height);
@@ -190,12 +128,12 @@ void age::gb_lcd_renderer::render(int until_scanline)
 
 
 
-void age::gb_lcd_renderer::render_scanline(int ly)
+void age::gb_lcd_render::render_scanline(int ly)
 {
     // BG & windows not visible
     if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
     {
-        pixel fill_color = m_colors[0];
+        pixel fill_color = m_palettes.get_palette(gb_palette_bgp)[0];
         fill_color.m_channels.m_a = 0x00; // sprites are prioritized
         std::fill(m_scanline.begin(), m_scanline.end(), fill_color);
     }
@@ -241,9 +179,9 @@ void age::gb_lcd_renderer::render_scanline(int ly)
 
 
 
-age::pixel* age::gb_lcd_renderer::render_bg_tile(pixel *dst,
-                                                 int tile_vram_ofs,
-                                                 int tile_line)
+age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
+                                               int tile_vram_ofs,
+                                               int tile_line)
 {
     AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < gb_video_ram_bank_size));
     AGE_ASSERT((tile_line >= 0) && (tile_line < 8));
@@ -275,7 +213,7 @@ age::pixel* age::gb_lcd_renderer::render_bg_tile(pixel *dst,
     }
 
     // bg priority
-    pixel *palette = &m_colors[(attributes & bg_tile_palette) << 2];
+    const pixel *palette = m_palettes.get_palette(attributes & bg_tile_palette);
     uint8_t priority = attributes & bg_tile_priority;
 
     // render tile line

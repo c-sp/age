@@ -175,8 +175,8 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     AGE_ASSERT(clks_until_finished <= 8 << clock_shift);
 
     AGE_GB_CLOG_SERIAL("starting serial transfer:");
-    AGE_GB_CLOG_SERIAL("    * " << clks_per_bit << " clock cycles per transferred bit");
-    AGE_GB_CLOG_SERIAL("    * " << clks_first_switch << " clock cycles until first step");
+    AGE_GB_CLOG_SERIAL("    * " << clks_per_step << " clock cycles per transferred bit");
+    AGE_GB_CLOG_SERIAL("    * " << clks_first_step << " clock cycles until first step");
     AGE_GB_CLOG_SERIAL("    * finishes in " << clks_until_finished << " clock cycles ("
                        << (current_clk + clks_until_finished) << ")");
 

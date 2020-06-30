@@ -32,18 +32,15 @@ age::gb_lcd::gb_lcd(const gb_device &device,
       m_events(events),
       m_interrupts(interrupts),
       m_scanline(clock),
-      m_renderer(device, memory, screen_buffer, dmg_green)
+      m_palettes(device, dmg_green),
+      m_render(device, m_palettes, memory.get_video_ram(), screen_buffer)
 {
-    m_renderer.create_dmg_palette(gb_palette_bgp, m_bgp);
-    m_renderer.create_dmg_palette(gb_palette_obp0, m_obp0);
-    m_renderer.create_dmg_palette(gb_palette_obp1, m_obp1);
-
     schedule_vblank_irq();
 }
 
 age::uint8_t* age::gb_lcd::get_oam()
 {
-    return m_renderer.get_oam();
+    return m_render.get_oam();
 }
 
 
@@ -58,15 +55,15 @@ void age::gb_lcd::update_state()
     }
 
     // continue unfinished frame
-    m_renderer.render(scanline);
+    m_render.render(scanline);
 
     // start new frame?
     if (scanline > gb_scanline_count)
     {
-        AGE_GB_CLOG_LCD("switch frame buffers");
+        AGE_GB_CLOG_LCD_RENDER("switch frame buffers");
         m_scanline.fast_forward_frames();
-        m_renderer.new_frame();
-        m_renderer.render(m_scanline.current_scanline());
+        m_render.new_frame();
+        m_render.render(m_scanline.current_scanline());
     }
 }
 
@@ -90,19 +87,10 @@ void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 
 
 
-void age::gb_lcd::update_color(unsigned color_idx)
+age::uint8_t age::gb_lcd::stat_lyc() const
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_ASSERT(color_idx < m_cpd.size() / 2);
-
-    int low_byte = m_cpd[color_idx * 2];
-    int high_byte = m_cpd[color_idx * 2 + 1];
-    int gb_color = (high_byte << 8) + low_byte;
-
-    m_renderer.update_color(color_idx, gb_color);
+    return (m_scanline.current_ly() == m_lyc) ? gb_stat_ly_match : 0;
 }
-
-
 
 void age::gb_lcd::schedule_vblank_irq()
 {
@@ -130,7 +118,7 @@ void age::gb_lcd::schedule_vblank_irq()
     AGE_ASSERT(m_next_vblank_irq > clk_current);
     m_events.schedule_event(gb_event::lcd_interrupt, m_next_vblank_irq - clk_current);
 
-    AGE_GB_CLOG_LCD("next v-blank interrupt in "
-                    << (m_next_vblank_irq - m_clock.get_clock_cycle())
-                    << " cycles (" << m_next_vblank_irq << ")");
+    AGE_GB_CLOG_LCD_IRQ("next v-blank interrupt in "
+                        << (m_next_vblank_irq - m_clock.get_clock_cycle())
+                        << " cycles (" << m_next_vblank_irq << ")");
 }

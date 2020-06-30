@@ -19,6 +19,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_lcd_old_ports.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_old_ppu.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_older_render.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_palettes.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_ports.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_render.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_scanline.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
     ../../../src/age_emulator_gb/age_gb_div.hpp \
     ../../../src/age_emulator_gb/age_gb_lcd.hpp \
     ../../../src/age_emulator_gb/age_gb_lcd_old.hpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_render.hpp \
     ../../../src/age_emulator_gb/age_gb_timer.hpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.hpp \
     ../../../src/age_emulator_gb/age_gb.hpp \
