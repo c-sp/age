@@ -32,14 +32,15 @@ namespace age
 
 enum class gb_event : int
 {
-    lcd_interrupt = 0,
-    serial_transfer_finished = 1,
-    timer_interrupt = 2,
+    lcd_interrupt_vblank = 0,
+    lcd_interrupt_lyc = 1,
+    serial_transfer_finished = 2,
+    timer_interrupt = 3,
 
-    start_hdma = 3,
-    start_oam_dma = 4,
+    start_hdma = 4,
+    start_oam_dma = 5,
 
-    none = 5 // must be the last value
+    none = 6 // must be the last value
 };
 
 

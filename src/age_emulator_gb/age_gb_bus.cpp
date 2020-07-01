@@ -456,8 +456,12 @@ void age::gb_bus::handle_events()
     {
         switch (event)
         {
-            case gb_event::lcd_interrupt:
-                m_lcd.trigger_interrupts();
+            case gb_event::lcd_interrupt_vblank:
+                m_lcd.trigger_interrupt_vblank();
+                break;
+
+            case gb_event::lcd_interrupt_lyc:
+                m_lcd.trigger_interrupt_lyc();
                 break;
 
             case gb_event::serial_transfer_finished:

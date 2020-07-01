@@ -50,7 +50,7 @@ age::uint8_t age::gb_lcd_scanline::stat_flags() const
 {
     if (m_clk_frame_start == gb_no_clock_cycle)
     {
-        return 0;
+        return m_retained_ly_match;
     }
 
     int scanline, scanline_clks;
@@ -93,8 +93,9 @@ void age::gb_lcd_scanline::lcd_on()
     m_clk_frame_start = m_clock.get_clock_cycle() - 2;
     m_first_frame = true;
 
-    // Clear STAT LY match flag
-    // (retained when switching off the LCD).
+    // Clear STAT LY match flag as we now calculate it
+    // for each STAT read
+    // (bit was retained when switching off the LCD).
     m_retained_ly_match = 0;
 }
 
@@ -104,6 +105,10 @@ void age::gb_lcd_scanline::lcd_off()
     // Mooneye GB tests:
     //      acceptance/ppu/stat_lyc_onoff
     m_retained_ly_match = stat_flags() & gb_stat_ly_match;
+    AGE_GB_CLOG_LCD_PORTS("    * retained LY match: "
+                          << AGE_LOG_HEX8(m_retained_ly_match)
+                          << ", LYC " << AGE_LOG_HEX8(m_lyc)
+                          << ", scanline " << current_scanline());
 
     m_clk_frame_start = gb_no_clock_cycle;
     m_first_frame = false;

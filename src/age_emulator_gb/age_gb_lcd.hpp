@@ -39,13 +39,11 @@ namespace age
 constexpr int gb_clock_cycles_per_scanline = 456;
 constexpr int gb_scanline_count = 154;
 constexpr int gb_clock_cycles_per_frame = gb_scanline_count * gb_clock_cycles_per_scanline;
-//constexpr int gb_cycles_ly153 = 4;
-//constexpr int gb_cycles_mode2 = 80;
 
-//constexpr uint8_t gb_stat_interrupt_ly_match = 0x40;
-//constexpr uint8_t gb_stat_interrupt_mode2 = 0x20;
-//constexpr uint8_t gb_stat_interrupt_mode1 = 0x10;
-//constexpr uint8_t gb_stat_interrupt_mode0 = 0x08;
+constexpr uint8_t gb_stat_irq_ly_match = 0x40;
+//constexpr uint8_t gb_stat_irq_mode2 = 0x20;
+constexpr uint8_t gb_stat_irq_mode1 = 0x10;
+//constexpr uint8_t gb_stat_irq_mode0 = 0x08;
 constexpr uint8_t gb_stat_ly_match = 0x04;
 constexpr uint8_t gb_stat_modes = 0x03;
 
@@ -98,7 +96,11 @@ public:
                       gb_events &events,
                       gb_interrupt_trigger &interrupts);
 
-    void trigger_interrupts();
+    uint8_t read_stat() const;
+    void write_stat(uint8_t value);
+
+    void trigger_interrupt_vblank();
+    void trigger_interrupt_lyc();
     void set_back_clock(int clock_cycle_offset);
 
     void lcd_on();
@@ -107,9 +109,8 @@ public:
 
 private:
 
-    void check_vblank_irq();
-    void check_lyc_irq();
-    void schedule_irq_event();
+    static int add_total_frames(int clk_last, int clk_current);
+    void schedule_lyc_irq();
 
     const gb_clock &m_clock;
     const gb_lcd_scanline &m_scanline;
@@ -118,6 +119,8 @@ private:
 
     int m_clk_next_vblank_irq = gb_no_clock_cycle;
     int m_clk_next_lyc_irq = gb_no_clock_cycle;
+
+    uint8_t m_stat = 0x80;
 };
 
 
@@ -168,7 +171,8 @@ public:
 
     uint8_t* get_oam();
     void update_state();
-    void trigger_interrupts();
+    void trigger_interrupt_vblank();
+    void trigger_interrupt_lyc();
     void set_back_clock(int clock_cycle_offset);
 
 private:
@@ -179,8 +183,6 @@ private:
     gb_lcd_interrupts m_lcd_interrupts;
     gb_lcd_palettes m_palettes;
     gb_lcd_render m_render;
-
-    uint8_t m_stat = 0x80;
 };
 
 } // namespace age

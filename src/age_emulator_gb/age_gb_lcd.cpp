@@ -65,9 +65,14 @@ void age::gb_lcd::update_state()
     }
 }
 
-void age::gb_lcd::trigger_interrupts()
+void age::gb_lcd::trigger_interrupt_vblank()
 {
-    m_lcd_interrupts.trigger_interrupts();
+    m_lcd_interrupts.trigger_interrupt_vblank();
+}
+
+void age::gb_lcd::trigger_interrupt_lyc()
+{
+    m_lcd_interrupts.trigger_interrupt_lyc();
 }
 
 void age::gb_lcd::set_back_clock(int clock_cycle_offset)
