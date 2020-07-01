@@ -14,6 +14,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_cpu_opcodes.cpp \
     ../../../src/age_emulator_gb/age_gb_div.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_interrupts.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_old.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_old_ly_lyc.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_old_ports.cpp \

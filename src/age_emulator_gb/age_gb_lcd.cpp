@@ -29,13 +29,11 @@ age::gb_lcd::gb_lcd(const gb_device &device,
                     bool dmg_green)
     : m_device(device),
       m_clock(clock),
-      m_events(events),
-      m_interrupts(interrupts),
       m_scanline(clock),
+      m_lcd_interrupts(clock, m_scanline, events, interrupts),
       m_palettes(device, dmg_green),
       m_render(device, m_palettes, memory.get_video_ram(), screen_buffer)
 {
-    schedule_vblank_irq();
 }
 
 age::uint8_t* age::gb_lcd::get_oam()
@@ -67,58 +65,13 @@ void age::gb_lcd::update_state()
     }
 }
 
-void age::gb_lcd::trigger_interrupt()
+void age::gb_lcd::trigger_interrupts()
 {
-    AGE_ASSERT(m_next_vblank_irq != gb_no_clock_cycle);
-
-    // pending v-blank interrupt?
-    if (m_next_vblank_irq <= m_clock.get_clock_cycle())
-    {
-        m_interrupts.trigger_interrupt(gb_interrupt::vblank);
-        schedule_vblank_irq();
-    }
+    m_lcd_interrupts.trigger_interrupts();
 }
 
 void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 {
     m_scanline.set_back_clock(clock_cycle_offset);
-    AGE_GB_SET_BACK_CLOCK(m_next_vblank_irq, clock_cycle_offset);
-}
-
-
-
-age::uint8_t age::gb_lcd::stat_lyc() const
-{
-    return (m_scanline.current_ly() == m_lyc) ? gb_stat_ly_match : 0;
-}
-
-void age::gb_lcd::schedule_vblank_irq()
-{
-    int clk_current = m_clock.get_clock_cycle();
-
-    // first v-blank interrupt after the lcd was switched on
-    if (m_next_vblank_irq == gb_no_clock_cycle)
-    {
-        int clk_frame_start = m_scanline.clk_frame_start();
-        AGE_ASSERT(clk_frame_start != gb_no_clock_cycle);
-
-        m_next_vblank_irq = clk_frame_start
-                + gb_screen_height * gb_clock_cycles_per_scanline;
-    }
-
-    // follow up v-blank interrupt
-    else
-    {
-        int clk_diff = clk_current - m_next_vblank_irq;
-        int vblanks = 1 + clk_diff / gb_clock_cycles_per_frame;
-        m_next_vblank_irq += vblanks * gb_clock_cycles_per_frame;
-    }
-
-    // schedule interrupt
-    AGE_ASSERT(m_next_vblank_irq > clk_current);
-    m_events.schedule_event(gb_event::lcd_interrupt, m_next_vblank_irq - clk_current);
-
-    AGE_GB_CLOG_LCD_IRQ("next v-blank interrupt in "
-                        << (m_next_vblank_irq - m_clock.get_clock_cycle())
-                        << " cycles (" << m_next_vblank_irq << ")");
+    m_lcd_interrupts.set_back_clock(clock_cycle_offset);
 }

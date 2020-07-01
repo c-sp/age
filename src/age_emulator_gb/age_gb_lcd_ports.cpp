@@ -27,7 +27,7 @@ age::uint8_t age::gb_lcd::read_lcdc() const {
 
 age::uint8_t age::gb_lcd::read_stat() {
     update_state();
-    uint8_t result = m_stat | stat_lyc() | m_scanline.stat_mode();
+    uint8_t result = m_stat | m_scanline.stat_flags();
     AGE_GB_CLOG_LCD_PORTS("read STAT = " << AGE_LOG_HEX8(result));
     return result;
 }
@@ -46,12 +46,12 @@ age::uint8_t age::gb_lcd::read_ly() {
     update_state();
     auto ly = m_scanline.current_ly();
     AGE_GB_CLOG_LCD_PORTS_LY("read LY = " << AGE_LOG_HEX8(ly));
-    return ly & 0xFF;
+    return ly;
 }
 
 age::uint8_t age::gb_lcd::read_lyc() const {
-    AGE_GB_CLOG_LCD_PORTS("read LYC = " << AGE_LOG_HEX8(m_lyc));
-    return m_lyc;
+    AGE_GB_CLOG_LCD_PORTS("read LYC = " << AGE_LOG_HEX8(m_scanline.m_lyc));
+    return m_scanline.m_lyc;
 }
 
 age::uint8_t age::gb_lcd::read_bgp() const
@@ -136,27 +136,17 @@ void age::gb_lcd::write_lcdc(uint8_t value)
     // LCD switched on
     if (value & gb_lcdc_enable)
     {
-        AGE_GB_CLOG_LCD_RENDER("LCD switched on");
-
-        // Clear STAT LY match flag as we calculate it dynamically
-        // when the LCD is switched on
-        // (the value was saved on LCD off).
-        m_stat &= ~gb_stat_ly_match;
+        AGE_GB_CLOG_LCD_PORTS("    * LCD switched on");
 
         m_scanline.lcd_on();
+        m_lcd_interrupts.lcd_on();
         m_render.new_frame();
-        schedule_vblank_irq();
     }
 
     // LCD switched off
     else
     {
-        AGE_GB_CLOG_LCD_RENDER("LCD switched off");
-
-        // The STAT LY match flag keeps it's current value.
-        // Gambatte tests:
-        //      enable_display/disable_display_regs_1_dmg08_cgb04c_out66e46666009266666666
-        m_stat |= stat_lyc();
+        AGE_GB_CLOG_LCD_PORTS("    * LCD switched off");
 
         // switch frame buffers, if the current frame is finished
         // (otherwise it would be lost because we did not reach
@@ -168,9 +158,8 @@ void age::gb_lcd::write_lcdc(uint8_t value)
             m_render.new_frame();
         }
 
-        m_events.remove_event(gb_event::lcd_interrupt);
+        m_lcd_interrupts.lcd_off();
         m_scanline.lcd_off();
-        m_next_vblank_irq = gb_no_clock_cycle;
     }
 }
 
@@ -181,6 +170,7 @@ void age::gb_lcd::write_stat(uint8_t value)
     AGE_GB_CLOG_LCD_PORTS("write STAT = " << AGE_LOG_HEX8(value));
     update_state();
     m_stat = (value & ~(gb_stat_modes | gb_stat_ly_match)) | 0x80;
+    //! \todo update lcd irqs
 }
 
 
@@ -205,7 +195,8 @@ void age::gb_lcd::write_lyc(uint8_t value)
 {
     AGE_GB_CLOG_LCD_PORTS("write LYC = " << AGE_LOG_HEX8(value));
     update_state();
-    m_lyc = value;
+    m_scanline.m_lyc = value;
+    m_lcd_interrupts.lyc_update();
 }
 
 

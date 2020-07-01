@@ -457,7 +457,7 @@ void age::gb_bus::handle_events()
         switch (event)
         {
             case gb_event::lcd_interrupt:
-                m_lcd.trigger_interrupt();
+                m_lcd.trigger_interrupts();
                 break;
 
             case gb_event::serial_transfer_finished:

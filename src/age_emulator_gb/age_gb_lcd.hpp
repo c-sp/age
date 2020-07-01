@@ -61,21 +61,63 @@ public:
     gb_lcd_scanline(const gb_clock &clock);
 
     int clk_frame_start() const;
-    int current_ly() const;
     int current_scanline() const;
-    uint8_t stat_mode() const;
+
+    uint8_t stat_flags() const;
+    uint8_t current_ly() const;
 
     void lcd_on();
     void lcd_off();
-
     void fast_forward_frames();
     void set_back_clock(int clock_cycle_offset);
 
 private:
 
+    uint8_t stat_mode(int scanline, int scanline_clks) const;
+    void calculate_scanline(int &scanline, int &scanline_clks) const;
+
     const gb_clock &m_clock;
     int m_clk_frame_start = gb_no_clock_cycle;
     int m_first_frame = false;
+    uint8_t m_retained_ly_match = 0;
+
+public:
+
+    uint8_t m_lyc = 0;
+};
+
+
+
+class gb_lcd_interrupts
+{
+    AGE_DISABLE_COPY(gb_lcd_interrupts);
+public:
+
+    gb_lcd_interrupts(const gb_clock &clock,
+                      const gb_lcd_scanline &scanline,
+                      gb_events &events,
+                      gb_interrupt_trigger &interrupts);
+
+    void trigger_interrupts();
+    void set_back_clock(int clock_cycle_offset);
+
+    void lcd_on();
+    void lcd_off();
+    void lyc_update();
+
+private:
+
+    void check_vblank_irq();
+    void check_lyc_irq();
+    void schedule_irq_event();
+
+    const gb_clock &m_clock;
+    const gb_lcd_scanline &m_scanline;
+    gb_events &m_events;
+    gb_interrupt_trigger &m_interrupts;
+
+    int m_clk_next_vblank_irq = gb_no_clock_cycle;
+    int m_clk_next_lyc_irq = gb_no_clock_cycle;
 };
 
 
@@ -126,26 +168,19 @@ public:
 
     uint8_t* get_oam();
     void update_state();
-    void trigger_interrupt();
+    void trigger_interrupts();
     void set_back_clock(int clock_cycle_offset);
 
 private:
 
-    uint8_t stat_lyc() const;
-    void schedule_vblank_irq();
-
     const gb_device &m_device;
     const gb_clock &m_clock;
-    gb_events &m_events;
-    gb_interrupt_trigger &m_interrupts;
     gb_lcd_scanline m_scanline;
+    gb_lcd_interrupts m_lcd_interrupts;
     gb_lcd_palettes m_palettes;
     gb_lcd_render m_render;
 
-    int m_next_vblank_irq = gb_no_clock_cycle;
-
     uint8_t m_stat = 0x80;
-    uint8_t m_lyc = 0;
 };
 
 } // namespace age

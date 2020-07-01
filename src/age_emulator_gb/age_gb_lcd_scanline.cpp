@@ -33,54 +33,49 @@ int age::gb_lcd_scanline::clk_frame_start() const
     return m_clk_frame_start;
 }
 
-int age::gb_lcd_scanline::current_ly() const
-{
-    int scanline = current_scanline();
-    if (scanline == gb_scanline_lcd_off)
-    {
-        return 0;
-    }
-    return scanline & 0xFF;
-}
-
 int age::gb_lcd_scanline::current_scanline() const
 {
     if (m_clk_frame_start == gb_no_clock_cycle)
     {
         return gb_scanline_lcd_off;
     }
-
-    int clks = m_clock.get_clock_cycle() - m_clk_frame_start;
-    return clks / gb_clock_cycles_per_scanline;
+    int scanline, scanline_clks;
+    calculate_scanline(scanline, scanline_clks);
+    return scanline;
 }
 
-age::uint8_t age::gb_lcd_scanline::stat_mode() const
+
+
+age::uint8_t age::gb_lcd_scanline::stat_flags() const
 {
     if (m_clk_frame_start == gb_no_clock_cycle)
     {
         return 0;
     }
 
-    int clks_frame = m_clock.get_clock_cycle() - m_clk_frame_start;
-    int scanline = clks_frame / gb_clock_cycles_per_scanline;
-    int clks_scanline = clks_frame % gb_clock_cycles_per_scanline;
+    int scanline, scanline_clks;
+    calculate_scanline(scanline, scanline_clks);
 
-    if (scanline >= gb_screen_height)
+    //! \todo find a suitable test roms for LY-match timings (that does not depend on irqs?)
+    int clks_next_scanline = gb_clock_cycles_per_scanline - scanline_clks;
+    bool match_ly = clks_next_scanline > (m_clock.is_double_speed() ? 0 : 4);
+
+    uint8_t ly_match = ((m_lyc == scanline) && match_ly)
+            ? gb_stat_ly_match
+            : 0;
+
+    return ly_match | stat_mode(scanline, scanline_clks);
+}
+
+age::uint8_t age::gb_lcd_scanline::current_ly() const
+{
+    if (m_clk_frame_start == gb_no_clock_cycle)
     {
-        return 1;
+        return 0;
     }
-    if (clks_scanline < 80)
-    {
-        // LY 0 mode 2 is not flagged right after the LCD has been
-        // switched on (no sprites on this scanline then?).
-        //
-        // Gambatte tests:
-        //      enable_display/nextstat_1_dmg08_cgb04c_out84
-        //      enable_display/nextstat_2_dmg08_cgb04c_out87
-        return (m_first_frame && (scanline == 0)) ? 0 : 2;
-    }
-    //! \todo fix for pixel fifo
-    return (clks_scanline < 172) ? 3 : 0;
+    int scanline, scanline_clks;
+    calculate_scanline(scanline, scanline_clks);
+    return scanline & 0xFF;
 }
 
 
@@ -92,26 +87,31 @@ void age::gb_lcd_scanline::lcd_on()
     {
         return;
     }
+
     // switch on LCD:
-    // start new frame
-    m_clk_frame_start = m_clock.get_clock_cycle();
+    // start new frame with shortened first scanline
+    m_clk_frame_start = m_clock.get_clock_cycle() - 2;
     m_first_frame = true;
+
+    // Clear STAT LY match flag
+    // (retained when switching off the LCD).
+    m_retained_ly_match = 0;
 }
 
 void age::gb_lcd_scanline::lcd_off()
 {
+    // The STAT LY match flag is retained when switching off the LCD.
+    // Mooneye GB tests:
+    //      acceptance/ppu/stat_lyc_onoff
+    m_retained_ly_match = stat_flags() & gb_stat_ly_match;
+
     m_clk_frame_start = gb_no_clock_cycle;
+    m_first_frame = false;
 }
-
-
 
 void age::gb_lcd_scanline::fast_forward_frames()
 {
-    // LCD off
-    if (m_clk_frame_start == gb_no_clock_cycle)
-    {
-        return;
-    }
+    AGE_ASSERT(m_clk_frame_start != gb_no_clock_cycle);
 
     // check for new frame
     int clk_current = m_clock.get_clock_cycle();
@@ -128,4 +128,43 @@ void age::gb_lcd_scanline::fast_forward_frames()
 void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
 {
     AGE_GB_SET_BACK_CLOCK(m_clk_frame_start, clock_cycle_offset);
+}
+
+
+
+age::uint8_t age::gb_lcd_scanline::stat_mode(int scanline, int scanline_clks) const
+{
+    AGE_ASSERT(scanline != gb_scanline_lcd_off);
+
+    if (scanline >= gb_screen_height)
+    {
+        return 1;
+    }
+    // 80 cycles mode 0 (instead of mode 2) for the first
+    // scanline after switching on the LCD.
+    // Note that the first scanline after switching on the LCD
+    // is 2 4-Mhz-clock cycles shorter than usual.
+    if (m_first_frame && !scanline && (scanline_clks < 82))
+    {
+        return 0;
+    }
+    if (scanline_clks < 80)
+    {
+        return 2;
+    }
+    //! \todo fix for pixel fifo
+    return (scanline_clks < 172) ? 3 : 0;
+}
+
+void age::gb_lcd_scanline::calculate_scanline(int &scanline, int &scanline_clks) const
+{
+    AGE_ASSERT(m_clk_frame_start != gb_no_clock_cycle);
+    int clks = m_clock.get_clock_cycle() - m_clk_frame_start;
+
+    // We hope for the compiler to optimize the "/" and "%" operations,
+    // e.g. to make use of the remainder being a by-product of the
+    // division.
+    // On x86 this should be a single DIV instruction.
+    scanline = clks / gb_clock_cycles_per_scanline;
+    scanline_clks = clks % gb_clock_cycles_per_scanline;
 }
