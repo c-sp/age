@@ -46,7 +46,8 @@ void age::gb_lcd_interrupts::write_stat(uint8_t value)
 
     if (m_scanline.current_scanline() != gb_scanline_lcd_off)
     {
-        schedule_lyc_irq();
+        schedule_irq_lyc();
+        schedule_irq_mode2();
     }
 }
 
@@ -96,10 +97,16 @@ void age::gb_lcd_interrupts::trigger_interrupt_lyc()
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
 }
 
+void age::gb_lcd_interrupts::trigger_interrupt_mode2()
+{
+    //! \todo implement
+}
+
 void age::gb_lcd_interrupts::set_back_clock(int clock_cycle_offset)
 {
     AGE_GB_SET_BACK_CLOCK(m_clk_next_vblank_irq, clock_cycle_offset);
     AGE_GB_SET_BACK_CLOCK(m_clk_next_lyc_irq, clock_cycle_offset);
+    AGE_GB_SET_BACK_CLOCK(m_clk_next_mode2_irq, clock_cycle_offset);
 }
 
 
@@ -115,25 +122,28 @@ void age::gb_lcd_interrupts::lcd_on()
 
     AGE_ASSERT(m_clk_next_vblank_irq > clk_current);
     m_events.schedule_event(gb_event::lcd_interrupt_vblank, m_clk_next_vblank_irq - clk_current);
-    schedule_lyc_irq();
+
+    schedule_irq_lyc();
+    schedule_irq_mode2();
 }
 
 void age::gb_lcd_interrupts::lcd_off()
 {
     m_clk_next_vblank_irq = gb_no_clock_cycle;
     m_clk_next_lyc_irq = gb_no_clock_cycle;
+    m_clk_next_mode2_irq = gb_no_clock_cycle;
 
     m_events.remove_event(gb_event::lcd_interrupt_vblank);
     m_events.remove_event(gb_event::lcd_interrupt_lyc);
+    m_events.remove_event(gb_event::lcd_interrupt_mode2);
 }
 
 void age::gb_lcd_interrupts::lyc_update()
 {
-    if (m_scanline.current_scanline() == gb_scanline_lcd_off)
+    if (m_scanline.current_scanline() != gb_scanline_lcd_off)
     {
-        return;
+        schedule_irq_lyc();
     }
-    schedule_lyc_irq();
 }
 
 
@@ -148,7 +158,7 @@ int age::gb_lcd_interrupts::add_total_frames(int clk_last, int clk_current)
     return frames * gb_clock_cycles_per_frame;
 }
 
-void age::gb_lcd_interrupts::schedule_lyc_irq()
+void age::gb_lcd_interrupts::schedule_irq_lyc()
 {
     if (!(m_stat & gb_stat_irq_ly_match) || (m_scanline.m_lyc >= gb_scanline_count))
     {
@@ -171,4 +181,9 @@ void age::gb_lcd_interrupts::schedule_lyc_irq()
 
     AGE_ASSERT(m_clk_next_lyc_irq > clk_current);
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, m_clk_next_lyc_irq - clk_current);
+}
+
+void age::gb_lcd_interrupts::schedule_irq_mode2()
+{
+    //! \todo implement
 }

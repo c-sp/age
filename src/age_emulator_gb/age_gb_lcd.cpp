@@ -75,6 +75,11 @@ void age::gb_lcd::trigger_interrupt_lyc()
     m_lcd_interrupts.trigger_interrupt_lyc();
 }
 
+void age::gb_lcd::trigger_interrupt_mode2()
+{
+    m_lcd_interrupts.trigger_interrupt_mode2();
+}
+
 void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 {
     m_scanline.set_back_clock(clock_cycle_offset);

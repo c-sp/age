@@ -41,7 +41,7 @@ constexpr int gb_scanline_count = 154;
 constexpr int gb_clock_cycles_per_frame = gb_scanline_count * gb_clock_cycles_per_scanline;
 
 constexpr uint8_t gb_stat_irq_ly_match = 0x40;
-//constexpr uint8_t gb_stat_irq_mode2 = 0x20;
+constexpr uint8_t gb_stat_irq_mode2 = 0x20;
 constexpr uint8_t gb_stat_irq_mode1 = 0x10;
 //constexpr uint8_t gb_stat_irq_mode0 = 0x08;
 constexpr uint8_t gb_stat_ly_match = 0x04;
@@ -102,6 +102,7 @@ public:
 
     void trigger_interrupt_vblank();
     void trigger_interrupt_lyc();
+    void trigger_interrupt_mode2();
     void set_back_clock(int clock_cycle_offset);
 
     void lcd_on();
@@ -111,7 +112,8 @@ public:
 private:
 
     static int add_total_frames(int clk_last, int clk_current);
-    void schedule_lyc_irq();
+    void schedule_irq_lyc();
+    void schedule_irq_mode2();
 
     const gb_clock &m_clock;
     const gb_lcd_scanline &m_scanline;
@@ -120,6 +122,7 @@ private:
 
     int m_clk_next_vblank_irq = gb_no_clock_cycle;
     int m_clk_next_lyc_irq = gb_no_clock_cycle;
+    int m_clk_next_mode2_irq = gb_no_clock_cycle;
 
     uint8_t m_stat = 0x80;
 };
@@ -174,6 +177,7 @@ public:
     void update_state();
     void trigger_interrupt_vblank();
     void trigger_interrupt_lyc();
+    void trigger_interrupt_mode2();
     void set_back_clock(int clock_cycle_offset);
 
 private:
