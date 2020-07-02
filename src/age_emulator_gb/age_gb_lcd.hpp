@@ -72,6 +72,7 @@ public:
 private:
 
     uint8_t stat_mode(int scanline, int scanline_clks) const;
+    uint8_t stat_ly_match(int scanline, int scanline_clks) const;
     void calculate_scanline(int &scanline, int &scanline_clks) const;
 
     const gb_clock &m_clock;

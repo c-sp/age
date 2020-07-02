@@ -1128,7 +1128,6 @@ void age::gb_cpu::execute_prefetched()
         case 0xD9: // RETI
             RET;
             m_interrupts.set_ime(true);
-            AGE_GB_CLOG_IRQS("interrupts enabled");
             break;
 
         case 0xC0: RET_IF(!ZERO_FLAGGED); break;

@@ -43,53 +43,57 @@ age::uint8_t age::gb_lcd_interrupts::read_stat() const {
 void age::gb_lcd_interrupts::write_stat(uint8_t value)
 {
     m_stat = 0x80 | (value & ~(gb_stat_modes | gb_stat_ly_match));
-    schedule_lyc_irq();
+
+    if (m_scanline.current_scanline() != gb_scanline_lcd_off)
+    {
+        schedule_lyc_irq();
+    }
 }
 
 
 
 void age::gb_lcd_interrupts::trigger_interrupt_vblank()
 {
-    AGE_ASSERT(m_clk_next_vblank_irq != gb_no_clock_cycle);
-
     int clk_current = m_clock.get_clock_cycle();
-    if (m_clk_next_vblank_irq > clk_current)
-    {
-        return;
-    }
 
-    m_clk_next_vblank_irq += add_total_frames(m_clk_next_vblank_irq, clk_current);
-    int clk_diff = m_clk_next_vblank_irq - clk_current;
+    AGE_ASSERT(m_clk_next_vblank_irq != gb_no_clock_cycle);
+    AGE_ASSERT(m_clk_next_vblank_irq <= clk_current);
 
-    AGE_GB_CLOG_LCD_IRQ("next v-blank interrupt in " << clk_diff
-                        << " clock cycles (" << m_clk_next_vblank_irq << ")");
-
-    m_events.schedule_event(gb_event::lcd_interrupt_vblank, clk_diff);
     m_interrupts.trigger_interrupt(gb_interrupt::vblank);
     if (m_stat & gb_stat_irq_mode1)
     {
         m_interrupts.trigger_interrupt(gb_interrupt::lcd);
     }
+    AGE_GB_CLOG_IRQS("    * v-blank interrupt was scheduled for clock cycle "
+                     << m_clk_next_vblank_irq);
+
+    m_clk_next_vblank_irq += add_total_frames(m_clk_next_vblank_irq, clk_current);
+    int clk_diff = m_clk_next_vblank_irq - clk_current;
+
+    AGE_GB_CLOG_IRQS("    * next v-blank interrupt in " << clk_diff
+                     << " clock cycles (" << m_clk_next_vblank_irq << ")");
+
+    m_events.schedule_event(gb_event::lcd_interrupt_vblank, clk_diff);
 }
 
 void age::gb_lcd_interrupts::trigger_interrupt_lyc()
 {
-    AGE_ASSERT(m_clk_next_lyc_irq != gb_no_clock_cycle);
-
     int clk_current = m_clock.get_clock_cycle();
-    if (m_clk_next_lyc_irq > clk_current)
-    {
-        return;
-    }
+
+    AGE_ASSERT(m_clk_next_lyc_irq != gb_no_clock_cycle);
+    AGE_ASSERT(m_clk_next_lyc_irq <= clk_current);
+
+    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
+    AGE_GB_CLOG_IRQS("    * lcd interrupt (LYC) was scheduled for clock cycle "
+                     << m_clk_next_lyc_irq);
 
     m_clk_next_lyc_irq += add_total_frames(m_clk_next_lyc_irq, clk_current);
     int clk_diff = m_clk_next_lyc_irq - clk_current;
 
-    AGE_GB_CLOG_LCD_IRQ("next lyc interrupt in " << clk_diff
-                        << " clock cycles (" << m_clk_next_lyc_irq << ")");
+    AGE_GB_CLOG_IRQS("    * next LYC interrupt in " << clk_diff
+                     << " clock cycles (" << m_clk_next_lyc_irq << ")");
 
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
-    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
 }
 
 void age::gb_lcd_interrupts::set_back_clock(int clock_cycle_offset)
@@ -111,7 +115,6 @@ void age::gb_lcd_interrupts::lcd_on()
 
     AGE_ASSERT(m_clk_next_vblank_irq > clk_current);
     m_events.schedule_event(gb_event::lcd_interrupt_vblank, m_clk_next_vblank_irq - clk_current);
-
     schedule_lyc_irq();
 }
 
@@ -155,20 +158,17 @@ void age::gb_lcd_interrupts::schedule_lyc_irq()
     }
 
     // schedule next LYC irq
-    m_clk_next_lyc_irq = m_scanline.clk_frame_start()
-            + m_scanline.m_lyc * gb_clock_cycles_per_scanline;
+    int clk_frame_start = m_scanline.clk_frame_start();
+    AGE_ASSERT(clk_frame_start != gb_no_clock_cycle);
+
+    m_clk_next_lyc_irq = clk_frame_start + m_scanline.m_lyc * gb_clock_cycles_per_scanline;
 
     int clk_current = m_clock.get_clock_cycle();
     if (m_clk_next_lyc_irq <= clk_current)
     {
         m_clk_next_lyc_irq += gb_clock_cycles_per_frame;
     }
+
     AGE_ASSERT(m_clk_next_lyc_irq > clk_current);
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, m_clk_next_lyc_irq - clk_current);
-
-    // immediate LYC irq
-    if (m_scanline.m_lyc == m_scanline.current_scanline())
-    {
-        m_interrupts.trigger_interrupt(gb_interrupt::lcd);
-    }
 }

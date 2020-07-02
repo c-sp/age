@@ -159,8 +159,14 @@ bool age::gb_interrupt_dispatcher::get_ime() const
 
 void age::gb_interrupt_dispatcher::set_ime(bool ime)
 {
-    m_ime = ime;
+    if (ime == m_ime)
+    {
+        AGE_GB_CLOG_IRQS("(interrupt dispatching already "
+                         << (ime ? "enabled)" : "disabled)"));
+        return;
+    }
     AGE_GB_CLOG_IRQS("interrupt dispatching " << (ime ? "enabled" : "disabled"));
+    m_ime = ime;
 }
 
 

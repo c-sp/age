@@ -56,7 +56,7 @@ void age::gb_lcd::update_state()
     m_render.render(scanline);
 
     // start new frame?
-    if (scanline > gb_scanline_count)
+    if (scanline >= gb_scanline_count)
     {
         AGE_GB_CLOG_LCD_RENDER("switch frame buffers");
         m_scanline.fast_forward_frames();
