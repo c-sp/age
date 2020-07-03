@@ -130,6 +130,11 @@ void age::gb_lcd_render::render(int until_scanline)
 
 void age::gb_lcd_render::render_scanline(int ly)
 {
+    // We use the pixel alpha channel temporary for priority
+    // information.
+    // When the scanline is finshed, during copying to the
+    // screen buffer the alpha channel is restored to 0xFF.
+
     // BG & windows not visible
     if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
     {
@@ -142,18 +147,32 @@ void age::gb_lcd_render::render_scanline(int ly)
     else
     {
         int bg_y = m_scy + ly;
-        int tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0xF8) << 2);
+        int tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
         int tile_line = bg_y & 0b111;
-        pixel *pix = &m_scanline[0];
+        pixel *px = &m_scanline[8];
 
-        for (int tx = m_scx >> 3, max = tx + 21; tx < max; ++tx)
+        bool win_scanline = (m_lcdc & gb_lcdc_win_enable) && (m_wy <= ly);
+        int tiles = win_scanline
+                ? 1 + std::min<int>(20, std::max<int>(0, m_wx - 7) >> 3)
+                : 21;
+
+        for (int tx = m_scx >> 3, max = tx + tiles; tx < max; ++tx)
         {
-            pix = render_bg_tile(pix, tile_vram_ofs + (tx & 0x1F), tile_line);
+            px = render_bg_tile(px, tile_vram_ofs + (tx & 0b11111), tile_line);
         }
 
-        if (m_lcdc & gb_lcdc_win_enable)
+        // render window
+        if (win_scanline)
         {
-            //! \todo render window
+            int win_y = ly - m_wy;
+            tile_vram_ofs = m_win_tile_map_offset + ((win_y & 0b11111000) << 2);
+            tile_line = win_y & 0b111;
+            px = &m_scanline[8 + (m_scx & 0b111) + m_wx - 7];
+
+            for (int tx = 0, max = ((gb_screen_width + 7 - m_wx) >> 3) + 1; tx < max; ++tx)
+            {
+                px = render_bg_tile(px, tile_vram_ofs + tx, tile_line);
+            }
         }
     }
 
@@ -165,7 +184,7 @@ void age::gb_lcd_render::render_scanline(int ly)
 
     // copy scanline
     auto dst = &m_screen_buffer.get_back_buffer()[0] + ly * gb_screen_width;
-    auto src = &m_scanline[m_scx & 0b111]; // % 8
+    auto src = &m_scanline[8 + (m_scx & 0b111)]; // % 8
 
     int32_t alpha = pixel{0, 0, 0, 255}.m_color;
     for (int i = 0; i < gb_screen_width; ++i)
@@ -197,6 +216,7 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
 
     // read tile data
     int tile_data_ofs = tile_nr << 4; // 16 bytes per tile
+    tile_data_ofs += m_tile_data_offset;
     tile_data_ofs += (attributes & bg_tile_vram_bank) << 10;
     tile_data_ofs += tile_line << 1; // 2 bytes per line
 
