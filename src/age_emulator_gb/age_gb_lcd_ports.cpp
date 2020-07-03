@@ -27,7 +27,10 @@ age::uint8_t age::gb_lcd::read_lcdc() const {
 
 age::uint8_t age::gb_lcd::read_stat() {
     update_state();
-    uint8_t result = m_lcd_interrupts.read_stat();
+
+    uint8_t result = m_lcd_irqs.read_stat()
+            | m_scanline.get_stat_flags(m_render.m_scx);
+
     AGE_GB_CLOG_LCD_PORTS("read STAT = " << AGE_LOG_HEX8(result));
     return result;
 }
@@ -139,7 +142,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         AGE_GB_CLOG_LCD_PORTS("    * LCD switched on");
 
         m_scanline.lcd_on();
-        m_lcd_interrupts.lcd_on();
+        m_lcd_irqs.lcd_on(m_render.m_scx);
         m_render.new_frame();
     }
 
@@ -158,7 +161,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
             m_render.new_frame();
         }
 
-        m_lcd_interrupts.lcd_off();
+        m_lcd_irqs.lcd_off();
         m_scanline.lcd_off();
     }
 }
@@ -169,7 +172,7 @@ void age::gb_lcd::write_stat(uint8_t value)
 {
     AGE_GB_CLOG_LCD_PORTS("write STAT = " << AGE_LOG_HEX8(value));
     update_state();
-    m_lcd_interrupts.write_stat(value);
+    m_lcd_irqs.write_stat(value, m_render.m_scx);
 }
 
 
@@ -200,7 +203,7 @@ void age::gb_lcd::write_lyc(uint8_t value)
     }
     update_state();
     m_scanline.m_lyc = value;
-    m_lcd_interrupts.lyc_update();
+    m_lcd_irqs.lyc_update();
 }
 
 

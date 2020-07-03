@@ -112,13 +112,13 @@ private:
 #define AGE_GB_CLOG_EVENTS(log)
 #endif
 
-#if 1
+#if 0
 #define AGE_GB_CLOG_IRQS(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_IRQS(log)
 #endif
 
-#if 1
+#if 0
 #define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS(log)

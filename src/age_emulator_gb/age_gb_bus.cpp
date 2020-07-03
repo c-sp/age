@@ -457,11 +457,19 @@ void age::gb_bus::handle_events()
         switch (event)
         {
             case gb_event::lcd_interrupt_vblank:
-                m_lcd.trigger_interrupt_vblank();
+                m_lcd.trigger_irq_vblank();
                 break;
 
             case gb_event::lcd_interrupt_lyc:
-                m_lcd.trigger_interrupt_lyc();
+                m_lcd.trigger_irq_lyc();
+                break;
+
+            case gb_event::lcd_interrupt_mode2:
+                m_lcd.trigger_irq_mode2();
+                break;
+
+            case gb_event::lcd_interrupt_mode0:
+                m_lcd.trigger_irq_mode0();
                 break;
 
             case gb_event::serial_transfer_finished:

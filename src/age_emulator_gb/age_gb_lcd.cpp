@@ -22,7 +22,7 @@
 
 age::gb_lcd::gb_lcd(const gb_device &device,
                     const gb_clock &clock,
-                    const gb_memory &memory,
+                    const uint8_t *video_ram,
                     gb_events &events,
                     gb_interrupt_trigger &interrupts,
                     screen_buffer &screen_buffer,
@@ -30,9 +30,9 @@ age::gb_lcd::gb_lcd(const gb_device &device,
     : m_device(device),
       m_clock(clock),
       m_scanline(clock),
-      m_lcd_interrupts(clock, m_scanline, events, interrupts),
+      m_lcd_irqs(clock, m_scanline, events, interrupts),
       m_palettes(device, dmg_green),
-      m_render(device, m_palettes, memory.get_video_ram(), screen_buffer)
+      m_render(device, m_palettes, video_ram, screen_buffer)
 {
 }
 
@@ -65,23 +65,28 @@ void age::gb_lcd::update_state()
     }
 }
 
-void age::gb_lcd::trigger_interrupt_vblank()
+void age::gb_lcd::trigger_irq_vblank()
 {
-    m_lcd_interrupts.trigger_interrupt_vblank();
+    m_lcd_irqs.trigger_irq_vblank();
 }
 
-void age::gb_lcd::trigger_interrupt_lyc()
+void age::gb_lcd::trigger_irq_lyc()
 {
-    m_lcd_interrupts.trigger_interrupt_lyc();
+    m_lcd_irqs.trigger_irq_lyc();
 }
 
-void age::gb_lcd::trigger_interrupt_mode2()
+void age::gb_lcd::trigger_irq_mode2()
 {
-    m_lcd_interrupts.trigger_interrupt_mode2();
+    m_lcd_irqs.trigger_irq_mode2();
+}
+
+void age::gb_lcd::trigger_irq_mode0()
+{
+    m_lcd_irqs.trigger_irq_mode0(m_render.m_scx);
 }
 
 void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 {
     m_scanline.set_back_clock(clock_cycle_offset);
-    m_lcd_interrupts.set_back_clock(clock_cycle_offset);
+    m_lcd_irqs.set_back_clock(clock_cycle_offset);
 }

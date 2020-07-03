@@ -53,7 +53,7 @@ set (SOURCES_AGE_EMULATOR_GB
     ${DIR_AGE_EMULATOR_GB}/age_gb_emulator_impl.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_joypad.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd.cpp
-    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_interrupts.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_irqs.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_palettes.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_ports.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_render.cpp

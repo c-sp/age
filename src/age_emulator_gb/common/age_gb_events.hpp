@@ -35,13 +35,14 @@ enum class gb_event : int
     lcd_interrupt_vblank = 0,
     lcd_interrupt_lyc = 1,
     lcd_interrupt_mode2 = 2,
-    serial_transfer_finished = 3,
-    timer_interrupt = 4,
+    lcd_interrupt_mode0 = 3,
+    serial_transfer_finished = 4,
+    timer_interrupt = 5,
 
-    start_hdma = 5,
-    start_oam_dma = 6,
+    start_hdma = 6,
+    start_oam_dma = 7,
 
-    none = 7 // must be the last value
+    none = 8 // must be the last value
 };
 
 

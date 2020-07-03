@@ -183,7 +183,7 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
                                                int tile_vram_ofs,
                                                int tile_line)
 {
-    AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < gb_video_ram_bank_size));
+    AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < 0x2000));
     AGE_ASSERT((tile_line >= 0) && (tile_line < 8));
 
     int tile_nr = m_video_ram[tile_vram_ofs] ^ m_tile_xor; // bank 0

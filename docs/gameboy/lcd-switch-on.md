@@ -73,8 +73,8 @@ CGB double speed:
 
 ## Scanline clock cycles #2
 
-This can be confirmed using the following Gambatte test roms measuring `mode 0`
-to `mode 2` transitions.
+The above can be confirmed using the following Gambatte test roms measuring
+`mode 0` to `mode 2` transitions.
 With CGB double speed not active the STAT LY-match flag for LYC 0 is cleared `2`
 4-Mhz-clock cycle before scanline 0 finishes.
 
@@ -127,32 +127,3 @@ The second frame's V-Blank is signalled at
   https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m1stat_ds_1_cgb04c_out80.asm)
 * [enable_display/frame1_m1stat_ds_2_cgb04c_out81](
   https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m1stat_ds_2_cgb04c_out81.asm)
-
-
-## LY
-
-LY is incremented `2` 4-Mhz-clock cycles before the respective scanline is
-finished.
-LY 153 is shorter than usual.
-LY 0 starts early.
-
-* [enable_display/frame0_ly_count_1_dmg08_cgb04c_out99](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_ly_count_1_dmg08_cgb04c_out99.asm)
-* [enable_display/frame0_ly_count_2_dmg08_cgb04c_out9A](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_ly_count_2_dmg08_cgb04c_out9A.asm)
-* [enable_display/frame0_ly_count_ds_1_cgb04c_out99](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_ly_count_ds_1_cgb04c_out99.asm)
-* [enable_display/frame0_ly_count_ds_2_cgb04c_out9A](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_ly_count_ds_2_cgb04c_out9A.asm)
-
-LY 153 is visible for just one machine cycle when scanline 153 begins
-(two machine cycles for CGB double speed).
-
-* [enable_display/frame1_ly_count_1_dmg08_cgb04c_out99](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame1_ly_count_1_dmg08_cgb04c_out99.asm)
-* [enable_display/frame1_ly_count_2_dmg08_cgb04c_out9A](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame1_ly_count_2_dmg08_cgb04c_out9A.asm)
-* [enable_display/frame1_ly_count_ds_1_cgb04c_out99](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame1_ly_count_ds_1_cgb04c_out99.asm)
-* [enable_display/frame1_ly_count_ds_2_cgb04c_out9A](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame1_ly_count_ds_2_cgb04c_out9A.asm)
