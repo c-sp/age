@@ -161,7 +161,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         //! \todo if (m_lcd.is_oam_readable() && !m_oam_dma_active)
         if (!m_oam_dma_active)
         {
-            result = m_lcd.get_oam()[address - 0xFE00];
+            result = m_lcd.read_oam(address - 0xFE00);
         }
     }
     // 0xFEA0 - 0xFFFF : high ram & IE
@@ -307,7 +307,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         //! \todo if (m_lcd.is_oam_writable() && !m_oam_dma_active)
         if (!m_oam_dma_active)
         {
-            m_lcd.get_oam()[address - 0xFE00] = byte;
+            m_lcd.write_oam(address - 0xFE00, byte);
         }
     }
     // 0xFEA0 - 0xFFFF : high ram & IE
@@ -725,7 +725,7 @@ void age::gb_bus::handle_oam_dma()
     for (int i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
     {
         uint8_t byte = read_byte((m_oam_dma_address + i) & 0xFFFF);
-        m_lcd.get_oam()[i & 0xFFFF] = byte;
+        m_lcd.write_oam(i, byte);
     }
 
     m_oam_dma_offset += bytes;

@@ -95,6 +95,44 @@ private:
 
 
 
+union gb_sprite
+{
+    struct {
+        uint8_t m_y;
+        uint8_t m_x;
+        uint8_t m_tile_nr;
+        uint8_t m_attributes;
+        uint8_t m_oam_id;
+        uint8_t m_priority;
+        uint8_t m_palette_idx;
+    } m_data;
+    struct {
+        uint32_t m_oam;
+        uint32_t m_cache;
+    } m_cache;
+    uint64_t m_cache64;
+};
+
+static_assert(sizeof(gb_sprite) == 8, "expected gb_sprite size of 8 bytes");
+
+class gb_lcd_sprites
+{
+    AGE_DISABLE_COPY(gb_lcd_sprites);
+public:
+
+    gb_lcd_sprites();
+
+    uint8_t read_oam(int offset) const;
+    void write_oam(int offset, uint8_t value);
+
+private:
+
+    uint8_array<0xA0> m_oam;
+    bool m_dirty = true;
+};
+
+
+
 constexpr int16_t gb_screen_width = 160;
 constexpr int16_t gb_screen_height = 144;
 
@@ -114,10 +152,10 @@ public:
 
     gb_lcd_render(const gb_device &device,
                   const gb_lcd_palettes &palettes,
+                  const gb_lcd_sprites &sprites,
                   const uint8_t *video_ram,
                   screen_buffer &screen_buffer);
 
-    uint8_t* get_oam();
     uint8_t get_lcdc() const;
     void set_lcdc(int lcdc);
 
@@ -131,9 +169,9 @@ private:
 
     const gb_device &m_device;
     const gb_lcd_palettes &m_palettes;
+    const gb_lcd_sprites &m_sprites;
     screen_buffer &m_screen_buffer;
 
-    uint8_array<0xA0> m_oam;
     const uint8_t *m_video_ram;
     uint8_array<256> m_xflip_cache;
 
@@ -143,9 +181,11 @@ private:
     int m_bg_tile_map_offset = 0;
     int m_win_tile_map_offset = 0;
     int m_tile_data_offset = 0;
-    int m_tile_xor = 0;
-
+    uint8_t m_tile_xor = 0;
     uint8_t m_priority_mask = 0;
+    uint8_t m_wy_render = 0;
+    uint8_t m_wline = 0;
+
     uint8_t m_lcdc = 0;
 
 public:

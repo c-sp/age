@@ -58,6 +58,7 @@ set (SOURCES_AGE_EMULATOR_GB
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_ports.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_render.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_scanline.cpp
+    ${DIR_AGE_EMULATOR_GB}/age_gb_lcd_sprites.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_memory.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_memory_init.cpp
     ${DIR_AGE_EMULATOR_GB}/age_gb_serial.cpp

@@ -32,13 +32,21 @@ age::gb_lcd::gb_lcd(const gb_device &device,
       m_scanline(clock),
       m_lcd_irqs(clock, m_scanline, events, interrupts),
       m_palettes(device, dmg_green),
-      m_render(device, m_palettes, video_ram, screen_buffer)
+      m_sprites(),
+      m_render(device, m_palettes, m_sprites, video_ram, screen_buffer)
 {
 }
 
-age::uint8_t* age::gb_lcd::get_oam()
+
+
+age::uint8_t age::gb_lcd::read_oam(int offset) const
 {
-    return m_render.get_oam();
+    return m_sprites.read_oam(offset);
+}
+
+void age::gb_lcd::write_oam(int offset, uint8_t value)
+{
+    m_sprites.write_oam(offset, value);
 }
 
 

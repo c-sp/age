@@ -177,7 +177,9 @@ public:
     void write_ocps(uint8_t value);
     void write_ocpd(uint8_t value);
 
-    uint8_t* get_oam();
+    uint8_t read_oam(int offset) const;
+    void write_oam(int offset, uint8_t value);
+
     void update_state();
     void trigger_irq_vblank();
     void trigger_irq_lyc();
@@ -192,6 +194,7 @@ private:
     gb_lcd_scanline m_scanline;
     gb_lcd_irqs m_lcd_irqs;
     gb_lcd_palettes m_palettes;
+    gb_lcd_sprites m_sprites;
     gb_lcd_render m_render;
 };
 

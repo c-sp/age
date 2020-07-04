@@ -54,10 +54,12 @@ void calculate_xflip(age::uint8_array<256> &xflip)
 
 age::gb_lcd_render::gb_lcd_render(const gb_device &device,
                                   const gb_lcd_palettes &palettes,
+                                  const gb_lcd_sprites &sprites,
                                   const uint8_t *video_ram,
                                   screen_buffer &screen_buffer)
     : m_device(device),
       m_palettes(palettes),
+      m_sprites(sprites),
       m_screen_buffer(screen_buffer),
       m_video_ram(video_ram)
 {
@@ -66,11 +68,6 @@ age::gb_lcd_render::gb_lcd_render(const gb_device &device,
 }
 
 
-
-age::uint8_t* age::gb_lcd_render::get_oam()
-{
-    return &m_oam[0];
-}
 
 age::uint8_t age::gb_lcd_render::get_lcdc() const
 {
@@ -111,6 +108,13 @@ void age::gb_lcd_render::render(int until_scanline)
     int santized = std::min<int>(gb_screen_height, until_scanline);
     int to_render = santized - m_rendered_scanlines;
 
+    // init window variables
+    if (!m_rendered_scanlines)
+    {
+        m_wy_render = m_wy;
+        m_wline = 0;
+    }
+
     // new scanlines to render?
     if (to_render <= 0)
     {
@@ -134,6 +138,13 @@ void age::gb_lcd_render::render_scanline(int ly)
     // information.
     // When the scanline is finshed, during copying to the
     // screen buffer the alpha channel is restored to 0xFF.
+    //
+    // Priority bits:
+    //  0-2     BG color index
+    //  3-6     -
+    //  7       BG priority flag (OAM | CGB tile attribute)
+    //
+    //  => render sprite pixel only for priority <= 0x80
 
     // BG & windows not visible
     if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
@@ -151,8 +162,11 @@ void age::gb_lcd_render::render_scanline(int ly)
         int tile_line = bg_y & 0b111;
         pixel *px = &m_scanline[8];
 
-        bool win_scanline = (m_lcdc & gb_lcdc_win_enable) && (m_wy <= ly);
-        int tiles = win_scanline
+        bool window_visible = (m_lcdc & gb_lcdc_win_enable)
+                && (m_wy_render <= ly)
+                && (m_wx < 167);
+
+        int tiles = window_visible
                 ? 1 + std::min<int>(20, std::max<int>(0, m_wx - 7) >> 3)
                 : 21;
 
@@ -162,17 +176,18 @@ void age::gb_lcd_render::render_scanline(int ly)
         }
 
         // render window
-        if (win_scanline)
+        if (window_visible)
         {
-            int win_y = ly - m_wy;
-            tile_vram_ofs = m_win_tile_map_offset + ((win_y & 0b11111000) << 2);
-            tile_line = win_y & 0b111;
+            tile_vram_ofs = m_win_tile_map_offset + ((m_wline & 0b11111000) << 2);
+            tile_line = m_wline & 0b111;
             px = &m_scanline[8 + (m_scx & 0b111) + m_wx - 7];
 
             for (int tx = 0, max = ((gb_screen_width + 7 - m_wx) >> 3) + 1; tx < max; ++tx)
             {
                 px = render_bg_tile(px, tile_vram_ofs + tx, tile_line);
             }
+
+            ++m_wline;
         }
     }
 

@@ -24,6 +24,7 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_lcd_ports.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_render.cpp \
     ../../../src/age_emulator_gb/age_gb_lcd_scanline.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_sprites.cpp \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
     ../../../src/age_emulator_gb/age_gb_timer_state.cpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
