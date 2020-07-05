@@ -32,7 +32,7 @@
 namespace age
 {
 
-//! The CGB has 8 palettes each for BG and OBJ.
+//! The CGB has 8 palettes for BG and OBJ each.
 constexpr unsigned gb_palette_count = 16;
 //! Every palette contains 4 colors.
 constexpr unsigned gb_total_color_count = gb_palette_count * 4;
@@ -102,33 +102,32 @@ union gb_sprite
         uint8_t m_x;
         uint8_t m_tile_nr;
         uint8_t m_attributes;
-        uint8_t m_oam_id;
-        uint8_t m_priority;
-        uint8_t m_palette_idx;
-    } m_data;
-    struct {
-        uint32_t m_oam;
-        uint32_t m_cache;
-    } m_cache;
-    uint64_t m_cache64;
+    } m_oam;
+    uint32_t m_data;
 };
 
-static_assert(sizeof(gb_sprite) == 8, "expected gb_sprite size of 8 bytes");
+static_assert(sizeof(gb_sprite) == 4, "expected gb_sprite size of 4 bytes");
 
 class gb_lcd_sprites
 {
     AGE_DISABLE_COPY(gb_lcd_sprites);
 public:
 
-    gb_lcd_sprites();
+    gb_lcd_sprites(bool sprite_x_priority);
 
     uint8_t read_oam(int offset) const;
     void write_oam(int offset, uint8_t value);
 
+    void set_sprite_size(uint8_t sprite_size);
+
+    std::vector<gb_sprite> get_scanline_sprites(int scanline);
+
 private:
 
     uint8_array<0xA0> m_oam;
+    uint8_t m_sprite_size = 8;
     bool m_dirty = true;
+    const bool m_sprite_x_priority;
 };
 
 
@@ -152,7 +151,7 @@ public:
 
     gb_lcd_render(const gb_device &device,
                   const gb_lcd_palettes &palettes,
-                  const gb_lcd_sprites &sprites,
+                  gb_lcd_sprites &sprites,
                   const uint8_t *video_ram,
                   screen_buffer &screen_buffer);
 
@@ -165,11 +164,12 @@ public:
 private:
 
     void render_scanline(int ly);
-    pixel* render_bg_tile(pixel *dst, int tile_vram_ofs, int tile_line);
+    pixel* render_bg_tile(pixel *dst, int tile_line, int tile_vram_ofs);
+    void render_sprite_tile(pixel *dst, int tile_line, uint8_t tile_nr, uint8_t oam_attr);
 
     const gb_device &m_device;
     const gb_lcd_palettes &m_palettes;
-    const gb_lcd_sprites &m_sprites;
+    gb_lcd_sprites &m_sprites;
     screen_buffer &m_screen_buffer;
 
     const uint8_t *m_video_ram;

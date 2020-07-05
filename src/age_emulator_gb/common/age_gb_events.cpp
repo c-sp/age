@@ -23,9 +23,9 @@
 age::gb_events::gb_events(const gb_clock &clock)
     : m_clock(clock)
 {
-    std::for_each(begin(m_active_events), end(m_active_events), [&](auto &it)
+    std::for_each(begin(m_active_events), end(m_active_events), [&](auto &aev)
     {
-        it = gb_no_clock_cycle;
+        aev = gb_no_clock_cycle;
     });
 }
 
@@ -44,7 +44,7 @@ void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
     // event already scheduled?
     if (m_active_events[ev_idx] != gb_no_clock_cycle)
     {
-        for (auto it = m_events.begin(); it != m_events.end(); ++it)
+        for (auto it = begin(m_events); it != end(m_events); ++it)
         {
             if (it->m_struct.m_event == event)
             {
@@ -63,8 +63,8 @@ void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
 
     // sort descending so that we can pop_back() the next event
     std::sort(
-        m_events.begin(),
-        m_events.end(),
+        begin(m_events),
+        end(m_events),
         [](const scheduled_event &a, const scheduled_event &b){
             return a.m_int > b.m_int;
         }
@@ -86,7 +86,7 @@ void age::gb_events::remove_event(gb_event event)
     }
 
     // remove scheduled event
-    for (auto it = m_events.begin(); it != m_events.end(); ++it)
+    for (auto it = begin(m_events); it != end(m_events); ++it)
     {
         if (it->m_struct.m_event == event)
         {
@@ -137,11 +137,11 @@ age::gb_event age::gb_events::poll_event()
 
 void age::gb_events::set_back_clock(int clock_cycle_offset)
 {
-    for (auto it = m_events.begin(); it != m_events.end(); ++it)
+    for (auto it = begin(m_events); it != end(m_events); ++it)
     {
         AGE_GB_SET_BACK_CLOCK(it->m_struct.m_clock_cycle, clock_cycle_offset);
     }
-    for (auto it = m_active_events.begin(); it != m_active_events.end(); ++it)
+    for (auto it = begin(m_active_events); it != end(m_active_events); ++it)
     {
         AGE_GB_SET_BACK_CLOCK(*it, clock_cycle_offset);
     }

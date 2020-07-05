@@ -32,7 +32,7 @@ age::gb_lcd::gb_lcd(const gb_device &device,
       m_scanline(clock),
       m_lcd_irqs(clock, m_scanline, events, interrupts),
       m_palettes(device, dmg_green),
-      m_sprites(),
+      m_sprites(!m_device.is_cgb()), // use x-priority for DMG and DMG-on-CGB
       m_render(device, m_palettes, m_sprites, video_ram, screen_buffer)
 {
 }

@@ -20,7 +20,8 @@
 
 
 
-age::gb_lcd_sprites::gb_lcd_sprites()
+age::gb_lcd_sprites::gb_lcd_sprites(bool sprite_x_priority)
+    : m_sprite_x_priority(sprite_x_priority)
 {
 }
 
@@ -35,4 +36,41 @@ void age::gb_lcd_sprites::write_oam(int offset, uint8_t value)
 {
     m_oam[offset] = value;
     m_dirty = true;
+}
+
+void age::gb_lcd_sprites::set_sprite_size(uint8_t sprite_size)
+{
+    m_dirty |= (sprite_size != m_sprite_size);
+    m_sprite_size = sprite_size;
+}
+
+
+
+std::vector<age::gb_sprite> age::gb_lcd_sprites::get_scanline_sprites(int scanline)
+{
+    // find the first 10 sprites on this scanline
+    std::vector<gb_sprite> sprites;
+
+    for (auto it = begin(m_oam); it != end(m_oam); it += 4)
+    {
+        gb_sprite sprite = *(gb_sprite*)it; //! \todo ugly cast
+        int y_diff = scanline - sprite.m_oam.m_y - 8;
+        if ((y_diff < 0) || (y_diff >= m_sprite_size))
+        {
+            continue;
+        }
+
+        sprites.push_back(sprite);
+        if (sprites.size() >= 10)
+        {
+            break;
+        }
+    }
+
+    //! \todo sort sprites in non-CGB mode
+    if (m_sprite_x_priority)
+    {
+    }
+
+    return sprites;
 }
