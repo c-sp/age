@@ -32,6 +32,14 @@
 namespace age
 {
 
+constexpr uint8_t gb_tile_attrib_palette = 0x07;
+constexpr uint8_t gb_tile_attrib_vram_bank = 0x08;
+constexpr uint8_t gb_tile_attrib_flip_x = 0x20;
+constexpr uint8_t gb_tile_attrib_flip_y = 0x40;
+constexpr uint8_t gb_tile_attrib_priority = 0x80;
+
+
+
 //! The CGB has 8 palettes for BG and OBJ each.
 constexpr unsigned gb_palette_count = 16;
 //! Every palette contains 4 colors.
@@ -97,37 +105,51 @@ private:
 
 union gb_sprite
 {
+    uint64_t m_value;
+    struct {
+        uint32_t m_oam;
+        uint32_t m_custom;
+    } m_parts;
     struct {
         uint8_t m_y;
         uint8_t m_x;
         uint8_t m_tile_nr;
         uint8_t m_attributes;
-    } m_oam;
-    uint32_t m_data;
+        uint8_t m_sprite_id;
+        uint8_t m_palette_idx;
+    } m_data;
 };
 
-static_assert(sizeof(gb_sprite) == 4, "expected gb_sprite size of 4 bytes");
+static_assert(sizeof(gb_sprite) == 8, "expected gb_sprite size of 8 bytes");
 
 class gb_lcd_sprites
 {
     AGE_DISABLE_COPY(gb_lcd_sprites);
 public:
 
-    gb_lcd_sprites(bool sprite_x_priority);
+    gb_lcd_sprites(bool cgb_features);
 
     uint8_t read_oam(int offset) const;
     void write_oam(int offset, uint8_t value);
 
+    uint8_t get_tile_nr_mask() const;
+    uint8_t get_sprite_size() const;
     void set_sprite_size(uint8_t sprite_size);
 
     std::vector<gb_sprite> get_scanline_sprites(int scanline);
 
 private:
 
-    uint8_array<0xA0> m_oam;
+    union {
+        uint8_t m_byte[160];
+        uint32_t m_sprite[40];
+    } m_oam;
+
     uint8_t m_sprite_size = 8;
-    bool m_dirty = true;
-    const bool m_sprite_x_priority;
+    uint8_t m_tile_nr_mask = 0xFF;
+
+    const bool m_cgb_features;
+    const uint8_t m_attribute_mask;
 };
 
 
@@ -165,7 +187,7 @@ private:
 
     void render_scanline(int ly);
     pixel* render_bg_tile(pixel *dst, int tile_line, int tile_vram_ofs);
-    void render_sprite_tile(pixel *dst, int tile_line, uint8_t tile_nr, uint8_t oam_attr);
+    void render_sprite_tile(pixel *dst, int tile_line, const gb_sprite &sprite);
 
     const gb_device &m_device;
     const gb_lcd_palettes &m_palettes;
@@ -175,14 +197,15 @@ private:
     const uint8_t *m_video_ram;
     uint8_array<256> m_xflip_cache;
 
-    pixel_vector m_scanline{gb_screen_width + 16, pixel(0, 0, 0)};
+    // 160px + 3 tiles (8px + scx + last window/sprite tile)
+    pixel_vector m_scanline{gb_screen_width + 24, pixel(0, 0, 0)};
     int m_rendered_scanlines = 0;
 
     int m_bg_tile_map_offset = 0;
     int m_win_tile_map_offset = 0;
     int m_tile_data_offset = 0;
     uint8_t m_tile_xor = 0;
-    uint8_t m_priority_mask = 0;
+    uint8_t m_priority_mask = 0xFF;
     uint8_t m_wy_render = 0;
     uint8_t m_wline = 0;
 

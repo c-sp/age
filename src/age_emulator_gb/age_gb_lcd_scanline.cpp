@@ -20,10 +20,19 @@
 
 
 
-age::gb_lcd_scanline::gb_lcd_scanline(const gb_clock &clock)
+age::gb_lcd_scanline::gb_lcd_scanline(const gb_device &device,
+                                      const gb_clock &clock)
     : m_clock(clock)
 {
     m_clk_frame_start = m_clock.get_clock_cycle();
+//    if (device.is_cgb())
+//    {
+//        m_clk_frame_start = m_clock.get_clock_cycle() + 4396 - gb_clock_cycles_per_frame;
+//    }
+//    else
+//    {
+//        m_clk_frame_start = m_clock.get_clock_cycle() + 56 - gb_clock_cycles_per_frame;
+//    }
 }
 
 

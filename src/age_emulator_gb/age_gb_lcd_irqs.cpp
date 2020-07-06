@@ -46,7 +46,20 @@ age::gb_lcd_irqs::gb_lcd_irqs(const gb_clock &clock,
       m_events(events),
       m_interrupts(interrupts)
 {
-    lcd_on(0); // schedule inital irq events
+    int clk_current = m_clock.get_clock_cycle();
+    int clk_frame_start = m_scanline.clk_frame_start();
+    AGE_ASSERT(clk_frame_start != gb_no_clock_cycle);
+    AGE_ASSERT(clk_frame_start <= clk_current);
+
+    m_clk_next_irq_vblank = clk_frame_start
+            + gb_screen_height * gb_clock_cycles_per_scanline;
+    if (m_clk_next_irq_vblank < clk_current)
+    {
+        m_clk_next_irq_vblank = add_total_frames(m_clk_next_irq_vblank, clk_current);
+    }
+    AGE_ASSERT(m_clk_next_irq_vblank > clk_current);
+
+    m_events.schedule_event(gb_event::lcd_interrupt_vblank, m_clk_next_irq_vblank - clk_current);
 }
 
 

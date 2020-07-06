@@ -22,12 +22,6 @@
 
 namespace {
 
-constexpr uint8_t bg_tile_palette = 0x07;
-constexpr uint8_t bg_tile_vram_bank = 0x08;
-constexpr uint8_t bg_tile_flip_x = 0x20;
-constexpr uint8_t bg_tile_flip_y = 0x40;
-constexpr uint8_t bg_tile_priority = 0x80;
-
 void calculate_xflip(age::uint8_array<256> &xflip)
 {
     for (unsigned byte = 0; byte < 256; ++byte)
@@ -77,6 +71,8 @@ age::uint8_t age::gb_lcd_render::get_lcdc() const
 void age::gb_lcd_render::set_lcdc(int lcdc)
 {
     m_lcdc = lcdc;
+
+    m_sprites.set_sprite_size((lcdc & gb_lcdc_obj_size) ? 16 : 8);
 
     m_bg_tile_map_offset = (lcdc & gb_lcdc_bg_map) ? 0x1C00 : 0x1800;
     m_win_tile_map_offset = (lcdc & gb_lcdc_win_map) ? 0x1C00 : 0x1800;
@@ -153,7 +149,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
     if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
     {
         pixel fill_color = m_palettes.get_palette(gb_palette_bgp)[0];
-        fill_color.m_channels.m_a = 0x00; // sprites are prioritized
+        fill_color.m_rgba.m_a = 0x00; // sprites are prioritized
         std::fill(begin(m_scanline), end(m_scanline), fill_color);
     }
 
@@ -198,9 +194,17 @@ void age::gb_lcd_render::render_scanline(int scanline)
     if (m_lcdc & gb_lcdc_obj_enable)
     {
         auto sprites = m_sprites.get_scanline_sprites(scanline);
-        std::for_each(begin(sprites), end(sprites), [&](const auto &sprite)
+        std::for_each(rbegin(sprites), rend(sprites), [&](const gb_sprite &sprite)
         {
-            //! \todo render sprite
+            if ((sprite.m_data.m_x - 1) < gb_screen_width + 8 - 1)
+            {
+                AGE_ASSERT((px0 + sprite.m_data.m_x) < gb_screen_width + 24);
+                render_sprite_tile(
+                            &m_scanline[px0 + sprite.m_data.m_x - 8],
+                            scanline - (sprite.m_data.m_y - 16),
+                            sprite
+                            );
+            }
         });
     }
 
@@ -228,10 +232,12 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
     AGE_ASSERT((tile_line >= 0) && (tile_line < 8));
 
     int tile_nr = m_video_ram[tile_vram_ofs] ^ m_tile_xor; // bank 0
+
+    // tile attributes (for DMG always zero)
     int attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1
 
     // y-flip
-    if (attributes & bg_tile_flip_y)
+    if (attributes & gb_tile_attrib_flip_y)
     {
         tile_line = 7 - tile_line;
     }
@@ -239,7 +245,7 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
     // read tile data
     int tile_data_ofs = tile_nr << 4; // 16 bytes per tile
     tile_data_ofs += m_tile_data_offset;
-    tile_data_ofs += (attributes & bg_tile_vram_bank) << 10;
+    tile_data_ofs += (attributes & gb_tile_attrib_vram_bank) << 10;
     tile_data_ofs += tile_line << 1; // 2 bytes per line
 
     int tile_byte1 = m_video_ram[tile_data_ofs];
@@ -248,15 +254,17 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
     // x-flip
     // (we invert the x-flip for easier rendering:
     // this way bit 0 is used for the leftmost pixel)
-    if (!(attributes & bg_tile_flip_x))
+    if (!(attributes & gb_tile_attrib_flip_x))
     {
         tile_byte1 = m_xflip_cache[tile_byte1];
         tile_byte2 = m_xflip_cache[tile_byte2];
     }
 
+    // bg palette
+    const pixel *palette = m_palettes.get_palette(attributes & gb_tile_attrib_palette);
+
     // bg priority
-    const pixel *palette = m_palettes.get_palette(attributes & bg_tile_palette);
-    uint8_t priority = attributes & bg_tile_priority;
+    uint8_t priority = attributes & gb_tile_attrib_priority;
 
     // render tile line
     // (least significant bit in byte1)
@@ -266,7 +274,7 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
     {
         int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
         pixel color = palette[color_idx];
-        color.m_channels.m_a = color_idx + priority;
+        color.m_rgba.m_a = color_idx + priority;
         *dst = color;
 
         ++dst;
@@ -280,8 +288,63 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel *dst,
 
 void age::gb_lcd_render::render_sprite_tile(pixel *dst,
                                             int tile_line,
-                                            uint8_t tile_nr,
-                                            uint8_t oam_attr)
+                                            const gb_sprite &sprite)
 {
-    //! \todo render sprite
+    AGE_ASSERT((tile_line >= 0) && (tile_line < 16));
+
+    // y-flip
+    uint8_t oam_attr = sprite.m_data.m_attributes;
+    if (oam_attr & gb_tile_attrib_flip_y)
+    {
+        tile_line = m_sprites.get_sprite_size() - tile_line;
+    }
+
+    // read tile data
+    int tile_data_ofs = sprite.m_data.m_tile_nr & m_sprites.get_tile_nr_mask();
+    tile_data_ofs <<= 4; // 16 bytes per tile
+    tile_data_ofs += (oam_attr & gb_tile_attrib_vram_bank) << 10;
+    tile_data_ofs += tile_line << 1; // 2 bytes per line
+
+    int tile_byte1 = m_video_ram[tile_data_ofs];
+    int tile_byte2 = m_video_ram[tile_data_ofs + 1];
+
+    // x-flip
+    // (we invert the x-flip for easier rendering:
+    // this way bit 0 is used for the leftmost pixel)
+    if (!(oam_attr & gb_tile_attrib_flip_x))
+    {
+        tile_byte1 = m_xflip_cache[tile_byte1];
+        tile_byte2 = m_xflip_cache[tile_byte2];
+    }
+
+    // palette
+    const pixel *palette = m_palettes.get_palette(sprite.m_data.m_palette_idx);
+
+    // bg priority
+    uint8_t priority = oam_attr & gb_tile_attrib_priority;
+
+    // render tile sprite
+    // (least significant bit in byte1)
+    tile_byte2 <<= 1;
+
+    for (int i = 0; i < 8; ++i)
+    {
+        pixel px = *dst;
+
+        // sprite pixel visible?
+        int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
+
+        int px_prio = (px.m_rgba.m_a | priority) & m_priority_mask;
+        if ((px_prio <= 0x80) && color_idx)
+        {
+            pixel color = palette[color_idx];
+            color.m_rgba.m_a = px.m_rgba.m_a;
+            *dst = color;
+        }
+
+        // next pixel
+        ++dst;
+        tile_byte1 >>= 1;
+        tile_byte2 >>= 1;
+    }
 }

@@ -56,7 +56,7 @@ class gb_lcd_scanline
     AGE_DISABLE_COPY(gb_lcd_scanline);
 public:
 
-    gb_lcd_scanline(const gb_clock &clock);
+    gb_lcd_scanline(const gb_device &device, const gb_clock &clock);
 
     int clk_frame_start() const;
     void fast_forward_frames();

@@ -130,7 +130,6 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
     int diff = m_render.get_lcdc() ^ value;
     m_render.set_lcdc(value);
-    m_sprites.set_sprite_size((value & gb_lcdc_obj_size) ? 8 : 16);
 
     if (!(diff & gb_lcdc_enable))
     {

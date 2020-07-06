@@ -53,10 +53,10 @@ struct pixel
         AGE_ASSERT(b <= 255);
         AGE_ASSERT(a <= 255);
 
-        m_channels.m_r = r & 0xFF;
-        m_channels.m_g = g & 0xFF;
-        m_channels.m_b = b & 0xFF;
-        m_channels.m_a = a & 0xFF;
+        m_rgba.m_r = r & 0xFF;
+        m_rgba.m_g = g & 0xFF;
+        m_rgba.m_b = b & 0xFF;
+        m_rgba.m_a = a & 0xFF;
     }
 
     bool operator==(const pixel &other) const
@@ -79,7 +79,7 @@ struct pixel
             uint8_t m_g;
             uint8_t m_b;
             uint8_t m_a;
-        } m_channels;
+        } m_rgba;
         uint32_t m_color;
     };
 };
