@@ -124,7 +124,7 @@ private:
 #define AGE_GB_CLOG_LCD_PORTS(log)
 #endif
 
-// LY is read quite often (e.g. checking for v-blank) by some test roms
+// LY is read quite often by some test roms (e.g. checking for v-blank)
 //  => create an extra logging category for it
 #if 0
 #define AGE_GB_CLOG_LCD_PORTS_LY(log) AGE_GB_CLOG(log)

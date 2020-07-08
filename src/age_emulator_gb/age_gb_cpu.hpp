@@ -60,8 +60,8 @@ private:
     void handle_state();
 
     void set_flags(int from_value);
-    void push_byte(int byte);
-    uint8_t read_byte(int address);
+    void tick_push_byte(int byte);
+    uint8_t tick_read_byte(int address);
     void execute_prefetched();
 
     const gb_device &m_device;

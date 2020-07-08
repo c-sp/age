@@ -219,7 +219,9 @@ void age::gb_serial::update_state()
         AGE_GB_CLOG_SERIAL("serial transfer finished");
         stop_transfer(gb_sio_state::no_transfer);
         AGE_ASSERT(m_sb == 0xFF);
-        m_interrupts.trigger_interrupt(gb_interrupt::serial);
+
+        int clk_irq = m_sio_clk_started + (8 << m_sio_clock_shift);
+        m_interrupts.trigger_interrupt(gb_interrupt::serial, clk_irq);
     }
 }
 

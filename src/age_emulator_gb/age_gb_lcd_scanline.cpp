@@ -25,14 +25,17 @@ age::gb_lcd_scanline::gb_lcd_scanline(const gb_device &device,
     : m_clock(clock)
 {
     m_clk_frame_start = m_clock.get_clock_cycle();
-//    if (device.is_cgb())
-//    {
-//        m_clk_frame_start = m_clock.get_clock_cycle() + 4396 - gb_clock_cycles_per_frame;
-//    }
-//    else
-//    {
-//        m_clk_frame_start = m_clock.get_clock_cycle() + 56 - gb_clock_cycles_per_frame;
-//    }
+    if (device.is_cgb())
+    {
+        m_clk_frame_start = m_clock.get_clock_cycle() + 4396 - gb_clock_cycles_per_frame;
+    }
+    else
+    {
+        m_clk_frame_start = m_clock.get_clock_cycle() + 60 - gb_clock_cycles_per_frame;
+    }
+    m_clk_frame_start -= 3;
+
+    AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start);
 }
 
 
@@ -107,6 +110,7 @@ void age::gb_lcd_scanline::fast_forward_frames()
         int frames = clks / gb_clock_cycles_per_frame;
         m_clk_frame_start += frames * gb_clock_cycles_per_frame;
         m_first_frame = false;
+        AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start);
     }
 }
 
@@ -201,7 +205,7 @@ age::uint8_t age::gb_lcd_scanline::get_stat_mode(int scanline,
         {
             return 1;
         }
-        return (scanline_clks >= gb_clock_cycles_per_scanline - 2) ? 0 : 1;
+        return (scanline_clks >= gb_clock_cycles_per_scanline - 4) ? 0 : 1;
     }
     // 80 cycles mode 0 (instead of mode 2) for the first
     // scanline after switching on the LCD.

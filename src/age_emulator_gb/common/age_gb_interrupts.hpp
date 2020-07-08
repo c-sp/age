@@ -49,7 +49,7 @@ public:
 
     gb_interrupt_trigger(const gb_device &device, gb_clock &clock);
 
-    void trigger_interrupt(gb_interrupt interrupt);
+    void trigger_interrupt(gb_interrupt interrupt, int irq_clock_cycle);
 
 private:
 
@@ -57,18 +57,12 @@ private:
 
 protected:
 
-    void check_halt_mode();
-
     gb_clock &m_clock;
     uint8_t m_if = 0xE1;
     uint8_t m_ie = 0;
     uint8_t m_during_dispatch = 0;
     bool m_ime = false;
     bool m_halted = false;
-
-    //! Due to delayed interrupt enabling by EI m_ime can change
-    //! even after m_halted has been set.
-    bool m_ime_on_halt = false;
 };
 
 

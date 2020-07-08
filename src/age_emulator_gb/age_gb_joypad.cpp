@@ -62,7 +62,7 @@ void age::gb_joypad::write_p1(uint8_t byte)
     int raise_interrupt = (m_p1 ^ byte) & 0x0F;
     if (raise_interrupt > 0)
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::joypad);
+        m_interrupts.trigger_interrupt(gb_interrupt::joypad, 0);
     }
 
     // save new value

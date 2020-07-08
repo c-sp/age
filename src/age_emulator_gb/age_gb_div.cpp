@@ -37,10 +37,15 @@ age::uint8_t age::gb_div::read_div() const
     //! \todo examine DIV behavior during speed change
     int clk = m_clock.get_clock_cycle();
     int shift = m_clock.is_double_speed() ? 7 : 8;
-    uint8_t result = ((clk + m_div_offset) >> shift) & 0xFF;
+    int result = (clk + m_div_offset) >> shift;
 
-    AGE_GB_CLOG_DIV("read DIV " AGE_LOG_HEX8(result));
-    return result;
+    AGE_GB_CLOG_DIV("read DIV " << AGE_LOG_HEX8(result & 0xFF));
+    AGE_GB_CLOG_DIV("    * last increment on lock cycle "
+                    << ((result << shift) - m_div_offset));
+    AGE_GB_CLOG_DIV("    * next increment on lock cycle "
+                    << (((result + 1) << shift) - m_div_offset));
+
+    return result & 0xFF;
 }
 
 int age::gb_div::write_div()

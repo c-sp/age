@@ -18,11 +18,6 @@
 
 #include "age_gb_cpu.hpp"
 
-#define CLOG_CPU(log) AGE_GB_CLOG(AGE_GB_CLOG_CPU)(log)
-#define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_IRQS)(log)
-
-
-
 namespace
 {
 
@@ -833,12 +828,12 @@ void age::gb_cpu::set_flags(int from_value)
     LOAD_FLAGS_FROM(from_value);
 }
 
-void age::gb_cpu::push_byte(int byte)
+void age::gb_cpu::tick_push_byte(int byte)
 {
     PUSH_BYTE(byte);
 }
 
-age::uint8_t age::gb_cpu::read_byte(int address)
+age::uint8_t age::gb_cpu::tick_read_byte(int address)
 {
     uint8_t result;
     READ_BYTE(result, address);
@@ -860,7 +855,6 @@ void age::gb_cpu::execute_prefetched()
     // Let PC point to the byte after the prefetched opcode.
     // HALT may undo this PC increment after prefetching the next opcode.
     m_pc++;
-    int pc_halt_modifier = 0;
 
     int opcode = m_prefetched_opcode;
     switch (opcode)
@@ -1177,8 +1171,13 @@ void age::gb_cpu::execute_prefetched()
             m_interrupts.halt();
             if (!m_interrupts.halted() && !m_interrupts.get_ime())
             {
-                pc_halt_modifier = -1;
-                AGE_GB_CLOG_IRQS("\"HALT bug\", not incrementing PC");
+                READ_BYTE(m_prefetched_opcode, m_pc);
+                AGE_GB_CLOG_IRQS("\"HALT bug\", decrementing PC");
+                // IRQ: handler returns to HALT instruction
+                // else: PC is incremented for next instruction
+                //       and points to the byte after HALT
+                --m_pc;
+                return;
             }
             break;
 
@@ -1545,5 +1544,4 @@ void age::gb_cpu::execute_prefetched()
     }
 
     READ_BYTE(m_prefetched_opcode, m_pc);
-    m_pc = (m_pc + pc_halt_modifier) & 0xFFFF;
 }

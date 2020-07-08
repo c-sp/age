@@ -42,7 +42,8 @@ void age::gb_timer::trigger_interrupt()
     // it does look confusing while debugging.
     if (!interrupt_triggered)
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::timer);
+        int clk_irq = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
+        m_interrupts.trigger_interrupt(gb_interrupt::timer, clk_irq);
         // schedule next interrupt event
         set_clk_timer_zero(m_clk_timer_zero);
     }
@@ -97,7 +98,8 @@ bool age::gb_timer::update_timer_state()
     // event is going to be re-scheduled.
     if (clk_current > m_clk_last_overflow)
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::timer);
+        int clk_irq = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
+        m_interrupts.trigger_interrupt(gb_interrupt::timer, clk_irq);
         return true;
     }
     return false;

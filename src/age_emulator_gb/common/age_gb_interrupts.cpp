@@ -23,6 +23,7 @@ constexpr age::uint8_t serial_bit = to_integral(age::gb_interrupt::serial);
 constexpr age::uint8_t timer_bit = to_integral(age::gb_interrupt::timer);
 
 constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
+constexpr uint8_t halt_delay = serial_bit | timer_bit;
 
 }
 
@@ -44,7 +45,8 @@ age::gb_interrupt_trigger::gb_interrupt_trigger(const gb_device &device,
 
 
 
-void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt)
+void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
+                                                  int irq_clock_cycle)
 {
     uint8_t intr_bit = to_integral(interrupt);
 
@@ -61,45 +63,37 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt)
     //      tima/tc00_irq_late_retrigger_ds_2_cgb04c_outE0
     if ((intr_bit & m_during_dispatch & deny_retrigger) && m_device.is_cgb_hardware())
     {
-        AGE_GB_CLOG_IRQS("denying interrupt request: " << AGE_LOG_HEX8(intr_bit)
+        AGE_GB_CLOG_IRQS("denying interrupt request " << AGE_LOG_HEX8(intr_bit)
+                         << " on clock cycle " << irq_clock_cycle
                          << " (currently being dispatched)");
         return;
     }
 
-    AGE_GB_CLOG_IRQS("interrupt requested: " << AGE_LOG_HEX8(intr_bit));
+    AGE_GB_CLOG_IRQS("interrupt " << AGE_LOG_HEX8(intr_bit)
+                     <<" requested on clock cycle " << irq_clock_cycle);
     m_if |= intr_bit;
 
-    // might clear HALT mode
-    check_halt_mode();
-}
-
-
-
-void age::gb_interrupt_trigger::check_halt_mode()
-{
-    // terminate HALT once ie & if != 0
-    // (even if ime is cleared)
-    if (m_halted && (m_if & m_ie & 0x1F))
+    // terminate HALT mode
+    if (m_halted)
     {
         m_halted = false;
-        AGE_GB_CLOG_IRQS("HALT terminated by pending interrupt");
 
         // We know from Gambatte timer tests that leaving HALT mode
-        // takes one additional machine cycle (DMG and CGB) in the
-        // following case:
-        //      ei
-        //      nop
-        //      halt
+        // takes one additional machine cycle (DMG and CGB) for a timer
+        // interrupt.
         //
-        // However, this breaks the Mooneye GB test:
-        //      acceptance/halt_ime1_timing2-GS
+        // Doing this for all interrupts breaks the following
+        // Mooneye GB tests though:
+        //      acceptance/halt_ime0_nointr_timing (v-blank interrupt)
+        //      acceptance/halt_ime1_timing2-GS    (v-blank interrupt)
+        //      acceptance/ppu/intr_2_mode0_timing (lcd mode-2 interrupt)
+        //      <... there may be more ...>
         //
-        //! \todo examine this further
-        //
-        if (m_ime_on_halt)
+        //! \todo Gambatte: delay depend on sub-machine-cycle timing
+        if (intr_bit & halt_delay)
         {
             m_clock.tick_machine_cycle();
-            AGE_GB_CLOG_IRQS("HALT termination delay");
+            AGE_GB_CLOG_IRQS("HALT termination clock cycle");
         }
     }
 }
@@ -130,16 +124,16 @@ age::uint8_t age::gb_interrupt_ports::read_ie() const
 
 void age::gb_interrupt_ports::write_if(uint8_t value)
 {
+    AGE_ASSERT(!m_halted);
     AGE_GB_CLOG_IRQS("write IF " << AGE_LOG_HEX8(value));
     m_if = value | 0xE0;
-    check_halt_mode();
 }
 
 void age::gb_interrupt_ports::write_ie(uint8_t value)
 {
+    AGE_ASSERT(!m_halted);
     AGE_GB_CLOG_IRQS("write IE " << AGE_LOG_HEX8(value));
     m_ie = value;
-    check_halt_mode();
 }
 
 
@@ -209,10 +203,12 @@ void age::gb_interrupt_dispatcher::halt()
 {
     AGE_ASSERT(!m_halted);
 
-    m_halted = true;
-    m_ime_on_halt = m_ime;
-    AGE_GB_CLOG_IRQS("halted (ime = " << m_ime_on_halt << ")");
+    if (m_if & m_ie & 0x1F)
+    {
+        AGE_GB_CLOG_IRQS("HALT immediately terminated by pending interrupts");
+        return;
+    }
 
-    // a pending interrupt will terminate HALT immediately
-    check_halt_mode();
+    m_halted = true;
+    AGE_GB_CLOG_IRQS("HALTed");
 }

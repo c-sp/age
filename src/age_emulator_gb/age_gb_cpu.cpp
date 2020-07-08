@@ -184,7 +184,9 @@ void age::gb_cpu::handle_state()
 
 void age::gb_cpu::dispatch_interrupt()
 {
-    AGE_GB_CLOG_IRQS("dispatching interrupt, current PC = " << AGE_LOG_HEX16(m_pc));
+    AGE_GB_CLOG_IRQS("dispatching interrupt"
+                     << ", current PC = " << AGE_LOG_HEX16(m_pc)
+                     << ", [PC] = " << AGE_LOG_HEX8(m_bus.read_byte(m_pc)));
 
     m_clock.tick_machine_cycle();
     m_clock.tick_machine_cycle();
@@ -197,7 +199,7 @@ void age::gb_cpu::dispatch_interrupt()
 
     // Writing IE here will influence interrupt dispatching.
     // Writing IF here will influence interrupt dispatching.
-    push_byte(m_pc >> 8);
+    tick_push_byte(m_pc >> 8);
 
     uint8_t intr_bit = m_interrupts.next_interrupt_bit();
     AGE_ASSERT(   (intr_bit == 0x00)
@@ -209,12 +211,11 @@ void age::gb_cpu::dispatch_interrupt()
 
     // Pushing the lower PC byte happens before clearing the interrupt's
     // IF bit (checked by pushing to IF).
-    push_byte(m_pc);
+    tick_push_byte(m_pc);
     m_interrupts.clear_interrupt_flag(intr_bit);
 
     m_pc = interrupt_pc_lookup[intr_bit];
-    m_prefetched_opcode = read_byte(m_pc);
-
+    m_prefetched_opcode = tick_read_byte(m_pc);
     m_interrupts.finish_dispatch();
 
     AGE_GB_CLOG_IRQS("interrupt " << AGE_LOG_HEX8(intr_bit)

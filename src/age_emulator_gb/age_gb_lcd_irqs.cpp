@@ -126,13 +126,11 @@ void age::gb_lcd_irqs::trigger_irq_vblank()
     AGE_ASSERT(m_clk_next_irq_vblank != gb_no_clock_cycle);
     AGE_ASSERT(m_clk_next_irq_vblank <= clk_current);
 
-    m_interrupts.trigger_interrupt(gb_interrupt::vblank);
+    m_interrupts.trigger_interrupt(gb_interrupt::vblank, m_clk_next_irq_vblank);
     if (m_stat & gb_stat_irq_mode1)
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::lcd);
+        m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_vblank);
     }
-    AGE_GB_CLOG_IRQS("    * v-blank IRQ was scheduled for clock cycle "
-                     << m_clk_next_irq_vblank);
 
     m_clk_next_irq_vblank += add_total_frames(m_clk_next_irq_vblank, clk_current);
     int clk_diff = m_clk_next_irq_vblank - clk_current;
@@ -184,9 +182,7 @@ void age::gb_lcd_irqs::trigger_irq_lyc()
     AGE_ASSERT(m_clk_next_irq_lyc != gb_no_clock_cycle);
     AGE_ASSERT(m_clk_next_irq_lyc <= clk_current);
 
-    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
-    AGE_GB_CLOG_IRQS("    * lcd IRQ (LYC) was scheduled for clock cycle "
-                     << m_clk_next_irq_lyc);
+    m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_lyc);
 
     m_clk_next_irq_lyc += add_total_frames(m_clk_next_irq_lyc, clk_current);
     int clk_diff = m_clk_next_irq_lyc - clk_current;
@@ -239,9 +235,7 @@ void age::gb_lcd_irqs::trigger_irq_mode2()
     AGE_ASSERT(m_clk_next_irq_mode2 != gb_no_clock_cycle);
     AGE_ASSERT(m_clk_next_irq_mode2 <= clk_current);
 
-    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
-    AGE_GB_CLOG_IRQS("    * lcd IRQ (mode 2) was scheduled for clock cycle "
-                     << m_clk_next_irq_mode2);
+    m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode2);
 
     // handle all the details in schedule_irq_mode2()
     // (irq for specific scanlines at specific clock cycles)
@@ -324,9 +318,7 @@ void age::gb_lcd_irqs::trigger_irq_mode0(int scx)
     AGE_ASSERT(m_clk_next_irq_mode0 != gb_no_clock_cycle);
     AGE_ASSERT(m_clk_next_irq_mode0 <= clk_current);
 
-    m_interrupts.trigger_interrupt(gb_interrupt::lcd);
-    AGE_GB_CLOG_IRQS("    * lcd IRQ (mode 0) was scheduled for clock cycle "
-                     << m_clk_next_irq_mode0);
+    m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode0);
 
     // handle all the details in schedule_irq_mode0()
     // (irq for specific scanlines at specific clock cycles)
