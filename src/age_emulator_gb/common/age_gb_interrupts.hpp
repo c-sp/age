@@ -51,12 +51,9 @@ public:
 
     void trigger_interrupt(gb_interrupt interrupt, int irq_clock_cycle);
 
-private:
-
-    const gb_device &m_device;
-
 protected:
 
+    const gb_device &m_device;
     gb_clock &m_clock;
     uint8_t m_if = 0xE1;
     uint8_t m_ie = 0;

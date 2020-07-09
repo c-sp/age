@@ -853,7 +853,8 @@ age::uint8_t age::gb_cpu::tick_read_byte(int address)
 void age::gb_cpu::execute_prefetched()
 {
     // Let PC point to the byte after the prefetched opcode.
-    // HALT may undo this PC increment after prefetching the next opcode.
+    // HALT bug: let PC point to the opcode after HALT
+    //           (that opcode is also already prefetched)
     m_pc++;
 
     int opcode = m_prefetched_opcode;

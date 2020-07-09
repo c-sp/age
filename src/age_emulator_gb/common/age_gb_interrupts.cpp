@@ -23,7 +23,6 @@ constexpr age::uint8_t serial_bit = to_integral(age::gb_interrupt::serial);
 constexpr age::uint8_t timer_bit = to_integral(age::gb_interrupt::timer);
 
 constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
-constexpr uint8_t halt_delay = serial_bit | timer_bit;
 
 }
 
@@ -73,29 +72,48 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
                      <<" requested on clock cycle " << irq_clock_cycle);
     m_if |= intr_bit;
 
-    // terminate HALT mode
-    if (m_halted)
+    if (!m_halted)
     {
-        m_halted = false;
-
-        // We know from Gambatte timer tests that leaving HALT mode
-        // takes one additional machine cycle (DMG and CGB) for a timer
-        // interrupt.
-        //
-        // Doing this for all interrupts breaks the following
-        // Mooneye GB tests though:
-        //      acceptance/halt_ime0_nointr_timing (v-blank interrupt)
-        //      acceptance/halt_ime1_timing2-GS    (v-blank interrupt)
-        //      acceptance/ppu/intr_2_mode0_timing (lcd mode-2 interrupt)
-        //      <... there may be more ...>
-        //
-        //! \todo Gambatte: delay depend on sub-machine-cycle timing
-        if (intr_bit & halt_delay)
-        {
-            m_clock.tick_machine_cycle();
-            AGE_GB_CLOG_IRQS("HALT termination clock cycle");
-        }
+        return;
     }
+
+    // terminate HALT mode
+    m_halted = false;
+
+    // We know from Gambatte timer tests that leaving HALT mode
+    // takes one additional machine cycle (DMG and CGB) for a timer
+    // interrupt.
+    //
+    // Doing this for all interrupts breaks the following
+    // Mooneye GB tests though:
+    //      acceptance/halt_ime0_nointr_timing (v-blank interrupt)
+    //      acceptance/halt_ime1_timing2-GS    (v-blank interrupt)
+    //      acceptance/ppu/intr_2_mode0_timing (lcd mode-2 interrupt)
+    //      <... there may be more ...>
+    //
+
+    //! \todo Gambatte: always delay for CGB (analyse test roms)
+    if (m_device.is_cgb())
+    {
+        m_clock.tick_machine_cycle();
+        AGE_GB_CLOG_IRQS("    * HALT termination M-cycle (CGB)");
+        return;
+    }
+
+    //! \todo Gambatte: delay depends on sub-m-cycle timing (analyse test roms)
+    int clk_current = m_clock.get_clock_cycle();
+    AGE_ASSERT(clk_current >= irq_clock_cycle);
+    int clks_diff = clk_current - irq_clock_cycle;
+    int half_mcycle = m_clock.get_machine_cycle_clocks() >> 1;
+
+    if (clks_diff < half_mcycle)
+    {
+        m_clock.tick_machine_cycle();
+        AGE_GB_CLOG_IRQS("    * HALT termination M-cycle (irq "
+                         << clks_diff << " T4-cycles ago)");
+    }
+
+    AGE_GB_CLOG_IRQS("    * no HALT termination M-cycle");
 }
 
 
