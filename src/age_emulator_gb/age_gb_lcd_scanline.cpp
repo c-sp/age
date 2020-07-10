@@ -50,7 +50,7 @@ void age::gb_lcd_scanline::lcd_on()
 
     // switch on LCD:
     // start new frame with shortened first scanline
-    m_clk_frame_start = m_clock.get_clock_cycle() - 2;
+    m_clk_frame_start = m_clock.get_clock_cycle() - 3;
     m_first_frame = true;
     AGE_GB_CLOG_LCD_PORTS("    * aligning first frame to clock cycle "
                           << m_clk_frame_start);
