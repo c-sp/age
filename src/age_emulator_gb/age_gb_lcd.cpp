@@ -30,7 +30,7 @@ age::gb_lcd::gb_lcd(const gb_device &device,
     : m_device(device),
       m_clock(clock),
       m_scanline(device, clock),
-      m_lcd_irqs(clock, m_scanline, events, interrupts),
+      m_lcd_irqs(device, clock, m_scanline, events, interrupts),
       m_palettes(device, dmg_green),
       m_sprites(m_device.is_cgb()),
       m_render(device, m_palettes, m_sprites, video_ram, screen_buffer)

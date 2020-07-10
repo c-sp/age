@@ -1169,18 +1169,33 @@ void age::gb_cpu::execute_prefetched()
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
 
         case 0x76: // HALT
+            AGE_GB_CLOG_IRQS("executing HALT instruction ...");
+            // In case of any irq during HALT the "HALT bug" is triggered
+            // even if interrupt dispatching is enabled.
+            //
+            //! \todo examine this further (Gambatte test roms):
+            //      late_m0int_halt_m0stat_scx2_*
+            //      late_m0int_halt_m0stat_scx3_*
+            m_clock.tick_machine_cycle();
+            m_bus.handle_events();
+            m_prefetched_opcode = m_bus.read_byte(m_pc);
+
             m_interrupts.halt();
-            if (!m_interrupts.halted() && !m_interrupts.get_ime())
+            if (!m_interrupts.halted())
             {
-                READ_BYTE(m_prefetched_opcode, m_pc);
-                AGE_GB_CLOG_IRQS("\"HALT bug\", decrementing PC");
+                AGE_GB_CLOG_IRQS("    * \"HALT bug\", decrementing PC");
                 // IRQ: handler returns to HALT instruction
                 // else: PC is incremented for next instruction
                 //       and points to the byte after HALT
                 --m_pc;
-                return;
             }
-            break;
+            else if (!m_device.is_cgb())
+            {
+                m_clock.tick_machine_cycle();
+                m_clock.tick_machine_cycle();
+                AGE_GB_CLOG_IRQS("    * extra DMG HALT delay");
+            }
+            return;
 
         case 0xF3: // DI
             m_interrupts.set_ime(false);

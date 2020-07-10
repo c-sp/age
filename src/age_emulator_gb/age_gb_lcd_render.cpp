@@ -296,7 +296,7 @@ void age::gb_lcd_render::render_sprite_tile(pixel *dst,
     uint8_t oam_attr = sprite.m_data.m_attributes;
     if (oam_attr & gb_tile_attrib_flip_y)
     {
-        tile_line = m_sprites.get_sprite_size() - tile_line;
+        tile_line = m_sprites.get_sprite_size() - 1 - tile_line;
     }
 
     // read tile data

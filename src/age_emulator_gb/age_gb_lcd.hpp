@@ -93,7 +93,8 @@ class gb_lcd_irqs
     AGE_DISABLE_COPY(gb_lcd_irqs);
 public:
 
-    gb_lcd_irqs(const gb_clock &clock,
+    gb_lcd_irqs(const gb_device &device,
+                const gb_clock &clock,
                 const gb_lcd_scanline &scanline,
                 gb_events &events,
                 gb_interrupt_trigger &interrupts);
@@ -118,6 +119,7 @@ private:
     void schedule_irq_mode2();
     void schedule_irq_mode0(int scx);
 
+    const gb_device &m_device;
     const gb_clock &m_clock;
     const gb_lcd_scanline &m_scanline;
     gb_events &m_events;

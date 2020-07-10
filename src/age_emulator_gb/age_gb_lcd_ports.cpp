@@ -210,7 +210,7 @@ void age::gb_lcd::write_lyc(uint8_t value)
 
 void age::gb_lcd::write_bgp(uint8_t value)
 {
-    AGE_GB_CLOG_LCD_PORTS("write LYC = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write BGP = " << AGE_LOG_HEX8(value));
     update_state();
     m_palettes.write_bgp(value);
 }

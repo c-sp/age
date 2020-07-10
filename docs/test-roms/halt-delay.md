@@ -1,5 +1,16 @@
 
-late_m0int_halt_m0stat_scx2_*
+halt/late_m0int_halt_m0stat_scx2_*
+halt/late_m0int_halt_m0stat_scx3_*
+
+* requires accurate mode 0 interrupts (delayed by one t4-cycle)
+    1. display_startstate/*
+    2. m0int_m0stat/*
+* HALT bug with IME=1 for interrupt during HALT
+    => late_m0int_halt_m0stat_scx*: return to HALT, no int dispatch on next irq
+* HALT (when successful) takes at least 3 m-cycles on DMG
+    => late_m0int_halt_m0stat_scx3_2b_dmg08_cgb04c_out2
+
+
 ```
 T4-cycle - event
 ----------------
@@ -22,7 +33,7 @@ T4-cycle - event
 
    12932 - HALTed (*_scx2_1*)
    12936 - HALTed (*_scx2_2*)
-   12940 - HALTed (*_scx2_3*) <--- the interrupt should probably have happend BEFORE halt!
+   12940 - HALTed (*_scx2_3*)
    12944 - interrupt 0x02 (2) requested on clock cycle 12943
    12948 -     * HALT termination M-cycle (CGB)
    12948 -     * next mode 0 IRQ in 451 clock cycles (13399)

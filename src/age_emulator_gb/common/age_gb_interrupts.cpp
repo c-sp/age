@@ -113,7 +113,8 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
                          << clks_diff << " T4-cycles ago)");
     }
 
-    AGE_GB_CLOG_IRQS("    * no HALT termination M-cycle");
+    AGE_GB_CLOG_IRQS("    * no HALT termination M-cycle (irq "
+                     << clks_diff << " T4-cycles ago)");
 }
 
 
@@ -223,10 +224,10 @@ void age::gb_interrupt_dispatcher::halt()
 
     if (m_if & m_ie & 0x1F)
     {
-        AGE_GB_CLOG_IRQS("HALT immediately terminated by pending interrupts");
+        AGE_GB_CLOG_IRQS("    * HALT immediately terminated by pending interrupts");
         return;
     }
 
     m_halted = true;
-    AGE_GB_CLOG_IRQS("HALTed");
+    AGE_GB_CLOG_IRQS("    * HALTed");
 }

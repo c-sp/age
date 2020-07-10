@@ -37,11 +37,13 @@ int add_total_frames(int clk_last, int clk_current)
 
 
 
-age::gb_lcd_irqs::gb_lcd_irqs(const gb_clock &clock,
+age::gb_lcd_irqs::gb_lcd_irqs(const gb_device &device,
+                              const gb_clock &clock,
                               const gb_lcd_scanline &scanline,
                               gb_events &events,
                               gb_interrupt_trigger &interrupts)
-    : m_clock(clock),
+    : m_device(device),
+      m_clock(clock),
       m_scanline(scanline),
       m_events(events),
       m_interrupts(interrupts)
@@ -220,6 +222,16 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
 
     AGE_ASSERT(m_clk_next_irq_lyc > clk_current);
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, m_clk_next_irq_lyc - clk_current);
+
+    // immediate interrupt, id we're still on this scanline
+    //! \todo what's the exact timing?
+    int scanline, scanline_clks;
+    m_scanline.calculate_scanline(scanline, scanline_clks);
+    int lyc_limit = gb_clock_cycles_per_scanline - m_device.is_cgb() * 2;
+    if ((m_scanline.m_lyc == scanline) && (scanline_clks < lyc_limit))
+    {
+        m_interrupts.trigger_interrupt(gb_interrupt::lcd, clk_current);
+    }
 }
 
 
@@ -238,6 +250,8 @@ void age::gb_lcd_irqs::trigger_irq_mode2()
     AGE_ASSERT(m_clk_next_irq_mode2 <= clk_current);
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode2);
+    AGE_GB_CLOG_IRQS("    * mode 2 IRQ happened on scanline "
+                     << ((m_clk_next_irq_mode2 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline));
 
     // handle all the details in schedule_irq_mode2()
     // (irq for specific scanlines at specific clock cycles)
@@ -322,6 +336,8 @@ void age::gb_lcd_irqs::trigger_irq_mode0(int scx)
     AGE_ASSERT(m_clk_next_irq_mode0 <= clk_current);
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode0);
+    AGE_GB_CLOG_IRQS("    * mode 0 IRQ happened on scanline "
+                     << ((m_clk_next_irq_mode0 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline));
 
     // handle all the details in schedule_irq_mode0()
     // (irq for specific scanlines at specific clock cycles)
@@ -350,9 +366,11 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
     AGE_ASSERT(m0_scanline < gb_scanline_count);
     AGE_ASSERT(scanline_clks < gb_clock_cycles_per_scanline);
 
-    // mode 0 already began, skip this scanline
+    // if we're past the mode 0 irq for this scanline,
+    // continue with the next scanline
+    // (mode 0 irq is delayed by one t4-cycle)
     //! \todo too simple: mode 3 timing also depends on sprites & window
-    int m3_end = 80 + 172 + (scx & 7);
+    int m3_end = 80 + 172 + (scx & 7) + 1;
     if (scanline_clks >= m3_end)
     {
         ++scanline;

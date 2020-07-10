@@ -13,7 +13,7 @@ there may be an error of up to `3` T4-cycles cycles due to one M-cycle
 consisting of `4` T4-cycles.
 
 However,
-since different `SCX` values extend `mode 3` duration by `SCX & 7` T4-cycles,
+since `SCX` extends `mode 3` duration by up to `7` T4-cycles (`SCX & 7`),
 accurate identification of the initial LCD state is possible.
 
 ```
