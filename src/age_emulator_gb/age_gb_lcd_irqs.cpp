@@ -366,15 +366,20 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
     AGE_ASSERT(m0_scanline < gb_scanline_count);
     AGE_ASSERT(scanline_clks < gb_clock_cycles_per_scanline);
 
+    // no mode 0 irq delay for scanline 0 on the first frame
+    // after restarting the LCD
+    //! \todo Gambatte test rom analysis: enable_display/frame0_m0irq_count_scx{2|3}
+    int m1_delay = (!scanline && m_scanline.is_first_frame()) ? -gb_lcd_m_cycle_align : 1;
+
     // if we're past the mode 0 irq for this scanline,
     // continue with the next scanline
-    // (mode 0 irq is delayed by one t4-cycle)
     //! \todo too simple: mode 3 timing also depends on sprites & window
-    int m3_end = 80 + 172 + (scx & 7) + 1;
+    int m3_end = 80 + 172 + (scx & 7) + m1_delay;
     if (scanline_clks >= m3_end)
     {
         ++scanline;
         ++m0_scanline;
+        m3_end -= (m1_delay - 1); // undo scanline 0 frame 0 delay
     }
 
     // skip v-blank

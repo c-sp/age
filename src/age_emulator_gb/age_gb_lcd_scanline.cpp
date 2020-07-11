@@ -33,7 +33,7 @@ age::gb_lcd_scanline::gb_lcd_scanline(const gb_device &device,
     {
         m_clk_frame_start = m_clock.get_clock_cycle() + 60 - gb_clock_cycles_per_frame;
     }
-    m_clk_frame_start -= 3;
+    m_clk_frame_start += gb_lcd_m_cycle_align;
 
     AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start);
 }
@@ -50,7 +50,7 @@ void age::gb_lcd_scanline::lcd_on()
 
     // switch on LCD:
     // start new frame with shortened first scanline
-    m_clk_frame_start = m_clock.get_clock_cycle() - 3;
+    m_clk_frame_start = m_clock.get_clock_cycle() + gb_lcd_m_cycle_align;
     m_first_frame = true;
     AGE_GB_CLOG_LCD_PORTS("    * aligning first frame to clock cycle "
                           << m_clk_frame_start);
@@ -95,6 +95,11 @@ void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
 int age::gb_lcd_scanline::clk_frame_start() const
 {
     return m_clk_frame_start;
+}
+
+bool age::gb_lcd_scanline::is_first_frame() const
+{
+    return m_first_frame;
 }
 
 void age::gb_lcd_scanline::fast_forward_frames()
@@ -211,7 +216,7 @@ age::uint8_t age::gb_lcd_scanline::get_stat_mode(int scanline,
     // scanline after switching on the LCD.
     // Note that the first scanline after switching on the LCD
     // is 2 4-Mhz-clock cycles shorter than usual.
-    if (m_first_frame && !scanline && (scanline_clks < 82))
+    if (m_first_frame && !scanline && (scanline_clks < 80 - gb_lcd_m_cycle_align))
     {
         return 0;
     }

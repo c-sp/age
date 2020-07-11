@@ -47,6 +47,8 @@ constexpr uint8_t gb_stat_irq_mode0 = 0x08;
 constexpr uint8_t gb_stat_ly_match = 0x04;
 constexpr uint8_t gb_stat_modes = 0x03;
 
+constexpr int gb_lcd_m_cycle_align = -3;
+
 
 
 constexpr int gb_scanline_lcd_off = int_max;
@@ -59,6 +61,7 @@ public:
     gb_lcd_scanline(const gb_device &device, const gb_clock &clock);
 
     int clk_frame_start() const;
+    bool is_first_frame() const;
     void fast_forward_frames();
 
     void calculate_scanline(int &scanline, int &scanline_clks) const;
