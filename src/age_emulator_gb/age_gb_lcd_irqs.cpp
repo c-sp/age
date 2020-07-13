@@ -284,16 +284,18 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
     // the irq is triggered.
     // They are NOT supposed to be the scanline FOR WHICH the irq is triggered.
     //
-    // Mode 2 irq is triggered 2 cycles before a scanline begins.
+    // Mode 2 irq is triggered before a scanline begins.
     // If we're too late, jump to the next scanline.
     // (not for scanline 0 though)
-    if (scanline_clks >= gb_clock_cycles_per_scanline - 2)
+    int m2_lead = -1;
+
+    if (scanline_clks >= gb_clock_cycles_per_scanline + m2_lead)
     {
         ++scanline;
         ++m2_scanline;
     }
 
-    // There is a mode-2-irq triggered 2 cycles before v-blank.
+    // There is a mode-2-irq triggered right before v-blank.
     // After that the next mode-2-irq is triggered right before scanline 0.
     if (m2_scanline >= gb_screen_height)
     {
@@ -313,7 +315,7 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
     m_clk_next_irq_mode2 = clk_frame_start
             + ((scanline + 1) * gb_clock_cycles_per_scanline)
             // the mode 2 irq for scanline 0 is not triggered early
-            - ((scanline == 153) ? 0 : 2);
+            + ((scanline == 153) ? 0 : m2_lead);
 
     AGE_ASSERT(m_clk_next_irq_mode2 > clk_current);
 

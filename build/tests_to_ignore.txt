@@ -159,7 +159,9 @@ gambatte:
 /m2int_m0irq/m2int_m0irq_scx3_ifw_4_dmg08_cgb04c_out0.gbc
 /m2int_m0irq/m2int_m0irq_scx3_ifw_ds_2_cgb04c_out0.gbc
 
-/m2int_m3stat/
+/m2int_m3stat/scx/late_scx4_2_dmg08_cgb04c_out0.gbc
+/m2int_m3stat/scx/late_scx4_ds_2_cgb04c_out0.gbc
+
 /miscmstatirq/
 
 /oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc

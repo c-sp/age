@@ -144,8 +144,9 @@ age::uint8_t age::gb_lcd::get_stat_mode(int scanline,
         return 2;
     }
 
+    //! \todo test rom analyses for double-speed-delay (using m2int_m3stat?)
     //! \todo too simple: mode 3 timing also depends on sprites & window
-    int m3_end = 80 + 172 + (scx & 7);
+    int m3_end = 80 + 172 + (scx & 7) + m_clock.is_double_speed();
     return (scanline_clks < m3_end) ? 3 : 0;
 }
 
