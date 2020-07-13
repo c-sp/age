@@ -1,11 +1,18 @@
-
-# Initial LCD state
-
-The initial LCD state may be important to get right as not every rom restarts
-the Gameboy's LCD.
+Prerequisites: [clocks, cycles and state][l-a1]
 
 
-## CGB
+
+# LCD groundwork
+
+* align the LCD (working at T4-cycles) to M-cycles
+* get mode 0 IRQ timing right as this allows us to examine `HALT` behavior
+  at T4-cycle edges instead of M-cycles
+
+
+
+## Cycle alignment
+
+### CGB
 
 By reading `LY` and `STAT` at specific times we can identify the initial LCD
 state in M-cycle "resolution":
@@ -60,8 +67,7 @@ T4-cycle - event
 * [display_startstate/stat_scx5_2_cgb04c_out84](
   https://github.com/sinamas/gambatte/tree/master/test/hwtests/display_startstate/stat_scx5_2_cgb04c_out84.asm)
 
-
-## DMG
+### DMG
 
 ```
 T4-cycle - event
@@ -79,3 +85,31 @@ T4-cycle - event
   https://github.com/sinamas/gambatte/tree/master/test/hwtests/display_startstate/stat_1_dmg08_out85.asm)
 * [display_startstate/stat_2_dmg08_out84](
   https://github.com/sinamas/gambatte/tree/master/test/hwtests/display_startstate/stat_2_dmg08_out84.asm)
+
+
+
+## Mode 0 IRQ timing
+
+The mode 0 interrupt request is delayed by one T4-cycle:
+it occurs one T4-cycle after mode 3 ends.
+
+* [m0int_m0stat/m0int_m0stat_ds_1_cgb04c_out0](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_ds_1_cgb04c_out0.asm)
+* [m0int_m0stat/m0int_m0stat_ds_2_cgb04c_out2](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_ds_2_cgb04c_out2.asm)
+* [m0int_m0stat/m0int_m0stat_scx2_1_dmg08_cgb04c_out0](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx2_1_dmg08_cgb04c_out0.asm)
+* [m0int_m0stat/m0int_m0stat_scx2_2_dmg08_cgb04c_out2](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx2_2_dmg08_cgb04c_out2.asm)
+* [m0int_m0stat/m0int_m0stat_scx3_1_dmg08_cgb04c_out0](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx3_1_dmg08_cgb04c_out0.asm)
+* [m0int_m0stat/m0int_m0stat_scx3_2_dmg08_cgb04c_out2](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx3_2_dmg08_cgb04c_out2.asm)
+* [m0int_m0stat/m0int_m0stat_scx5_ds_1_cgb04c_out0](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx5_ds_1_cgb04c_out0.asm)
+* [m0int_m0stat/m0int_m0stat_scx5_ds_2_cgb04c_out2](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx5_ds_2_cgb04c_out2.asm)
+
+
+
+[l-a1]: ../age/cycles-state.md

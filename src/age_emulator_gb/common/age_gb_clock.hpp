@@ -119,6 +119,12 @@ private:
 #endif
 
 #if 0
+#define AGE_GB_CLOG_LCD_OAM(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_LCD_OAM(log)
+#endif
+
+#if 0
 #define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS(log)
@@ -136,6 +142,12 @@ private:
 #define AGE_GB_CLOG_LCD_RENDER(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_RENDER(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_LCD_VRAM(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_LCD_VRAM(log)
 #endif
 
 #if 0

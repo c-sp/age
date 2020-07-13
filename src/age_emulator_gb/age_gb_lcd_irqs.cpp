@@ -50,7 +50,7 @@ age::gb_lcd_irqs::gb_lcd_irqs(const gb_device &device,
 {
     int clk_current = m_clock.get_clock_cycle();
     int clk_frame_start = m_scanline.clk_frame_start();
-    AGE_ASSERT(clk_frame_start != gb_no_clock_cycle);
+    AGE_ASSERT(m_scanline.lcd_is_on());
     AGE_ASSERT(clk_frame_start <= clk_current);
 
     m_clk_next_irq_vblank = clk_frame_start
@@ -74,7 +74,7 @@ void age::gb_lcd_irqs::write_stat(uint8_t value, int scx)
 {
     m_stat = 0x80 | (value & ~(gb_stat_modes | gb_stat_ly_match));
 
-    if (m_scanline.current_scanline() != gb_scanline_lcd_off)
+    if (m_scanline.lcd_is_on())
     {
         schedule_irq_lyc();
         schedule_irq_mode2();
@@ -150,7 +150,7 @@ void age::gb_lcd_irqs::schedule_irq_vblank()
 {
     int clk_current = m_clock.get_clock_cycle();
     int clk_frame_start = m_scanline.clk_frame_start();
-    AGE_ASSERT(clk_frame_start != gb_no_clock_cycle);
+    AGE_ASSERT(m_scanline.lcd_is_on());
     AGE_ASSERT(clk_frame_start <= clk_current);
 
     m_clk_next_irq_vblank = clk_frame_start
@@ -170,7 +170,7 @@ void age::gb_lcd_irqs::schedule_irq_vblank()
 
 void age::gb_lcd_irqs::lyc_update()
 {
-    if (m_scanline.current_scanline() != gb_scanline_lcd_off)
+    if (m_scanline.lcd_is_on())
     {
         schedule_irq_lyc();
     }
@@ -210,7 +210,7 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
 
     // schedule next LYC irq
     int clk_frame_start = m_scanline.clk_frame_start();
-    AGE_ASSERT(clk_frame_start != gb_no_clock_cycle);
+    AGE_ASSERT(m_scanline.lcd_is_on());
 
     m_clk_next_irq_lyc = clk_frame_start + m_scanline.m_lyc * gb_clock_cycles_per_scanline;
 
@@ -226,7 +226,7 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
     // immediate interrupt, id we're still on this scanline
     //! \todo what's the exact timing?
     int scanline, scanline_clks;
-    m_scanline.calculate_scanline(scanline, scanline_clks);
+    m_scanline.current_scanline(scanline, scanline_clks);
     int lyc_limit = gb_clock_cycles_per_scanline - m_device.is_cgb() * 2;
     if ((m_scanline.m_lyc == scanline) && (scanline_clks < lyc_limit))
     {
@@ -274,7 +274,7 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
     }
 
     int scanline, scanline_clks;
-    m_scanline.calculate_scanline(scanline, scanline_clks);
+    m_scanline.current_scanline(scanline, scanline_clks);
     int m2_scanline = scanline % gb_scanline_count; // scanline during current frame
 
     AGE_ASSERT(m2_scanline < gb_scanline_count);
@@ -360,7 +360,7 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
     }
 
     int scanline, scanline_clks;
-    m_scanline.calculate_scanline(scanline, scanline_clks);
+    m_scanline.current_scanline(scanline, scanline_clks);
     int m0_scanline = scanline % gb_scanline_count; // scanline during current frame
 
     AGE_ASSERT(m0_scanline < gb_scanline_count);

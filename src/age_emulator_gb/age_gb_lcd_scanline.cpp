@@ -27,23 +27,41 @@ age::gb_lcd_scanline::gb_lcd_scanline(const gb_device &device,
     m_clk_frame_start = m_clock.get_clock_cycle();
     if (device.is_cgb())
     {
-        m_clk_frame_start = m_clock.get_clock_cycle() + 4396 - gb_clock_cycles_per_frame;
+        m_clk_frame_start += 4396 - gb_clock_cycles_per_frame;
     }
     else
     {
-        m_clk_frame_start = m_clock.get_clock_cycle() + 60 - gb_clock_cycles_per_frame;
+        m_clk_frame_start += 60 - gb_clock_cycles_per_frame;
     }
     m_clk_frame_start += gb_lcd_m_cycle_align;
+    m_clk_scanline_start = m_clk_frame_start;
 
     AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start);
 }
 
+void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
+{
+    AGE_GB_SET_BACK_CLOCK(m_clk_frame_start, clock_cycle_offset);
+    AGE_GB_SET_BACK_CLOCK(m_clk_scanline_start, clock_cycle_offset);
+}
 
+
+
+//---------------------------------------------------------
+//
+//   LCD operation (on/off)
+//
+//---------------------------------------------------------
+
+bool age::gb_lcd_scanline::lcd_is_on() const
+{
+    return m_clk_frame_start != gb_no_clock_cycle;
+}
 
 void age::gb_lcd_scanline::lcd_on()
 {
     // LCD already on
-    if (m_clk_frame_start != gb_no_clock_cycle)
+    if (lcd_is_on())
     {
         return;
     }
@@ -51,37 +69,25 @@ void age::gb_lcd_scanline::lcd_on()
     // switch on LCD:
     // start new frame with shortened first scanline
     m_clk_frame_start = m_clock.get_clock_cycle() + gb_lcd_m_cycle_align;
+    m_clk_scanline_start = m_clk_frame_start;
+    m_scanline = 0;
     m_first_frame = true;
     AGE_GB_CLOG_LCD_PORTS("    * aligning first frame to clock cycle "
                           << m_clk_frame_start);
-
-    // Clear STAT LY match flag as we now calculate it
-    // for each STAT read
-    // (bit was retained when switching off the LCD).
-    m_retained_ly_match = 0;
 }
 
 void age::gb_lcd_scanline::lcd_off()
 {
-    // The STAT LY match flag is retained when switching off the LCD.
-    // Mooneye GB tests:
-    //      acceptance/ppu/stat_lyc_onoff
-    int scanline, scanline_clks;
-    calculate_scanline(scanline, scanline_clks);
-    m_retained_ly_match = get_stat_ly_match(scanline, scanline_clks);
-
-    AGE_GB_CLOG_LCD_PORTS("    * retained LY match "
-                          << AGE_LOG_HEX8(m_retained_ly_match)
-                          << " for LYC " << AGE_LOG_HEX8(m_lyc)
-                          << " & scanline " << current_scanline());
+    // LCD already off
+    if (!lcd_is_on())
+    {
+        return;
+    }
 
     m_clk_frame_start = gb_no_clock_cycle;
+    m_clk_scanline_start = gb_no_clock_cycle;
+    m_scanline = 0;
     m_first_frame = false;
-}
-
-void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
-{
-    AGE_GB_SET_BACK_CLOCK(m_clk_frame_start, clock_cycle_offset);
 }
 
 
@@ -104,7 +110,7 @@ bool age::gb_lcd_scanline::is_first_frame() const
 
 void age::gb_lcd_scanline::fast_forward_frames()
 {
-    AGE_ASSERT(m_clk_frame_start != gb_no_clock_cycle);
+    AGE_ASSERT(lcd_is_on());
 
     // check for new frame
     int clk_current = m_clock.get_clock_cycle();
@@ -114,6 +120,10 @@ void age::gb_lcd_scanline::fast_forward_frames()
     {
         int frames = clks / gb_clock_cycles_per_frame;
         m_clk_frame_start += frames * gb_clock_cycles_per_frame;
+
+        m_clk_scanline_start = m_clk_frame_start;
+        m_scanline = 0;
+
         m_first_frame = false;
         AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start);
     }
@@ -123,137 +133,36 @@ void age::gb_lcd_scanline::fast_forward_frames()
 
 //---------------------------------------------------------
 //
-//   scanline & ly
+//   scanline
 //
 //---------------------------------------------------------
 
-void age::gb_lcd_scanline::calculate_scanline(int &scanline, int &scanline_clks) const
+void age::gb_lcd_scanline::current_scanline(int &scanline, int &scanline_clks) const
 {
-    AGE_ASSERT(m_clk_frame_start != gb_no_clock_cycle);
-    int clks = m_clock.get_clock_cycle() - m_clk_frame_start;
+    AGE_ASSERT(lcd_is_on());
+
+    int clk_current = m_clock.get_clock_cycle();
+    int clks_diff = clk_current - m_clk_scanline_start;
+
+    // no need to recalculate the scanline
+    // (no expensive division)
+    if (clks_diff < gb_clock_cycles_per_scanline)
+    {
+        scanline = m_scanline;
+        scanline_clks = clks_diff;
+        return;
+    }
+
+    // recalculate scanline
+    int clks_frame = clk_current - m_clk_frame_start;
 
     // We hope for the compiler to optimize the "/" and "%" operations,
     // e.g. to make use of the remainder being a by-product of the
     // division.
     // On x86 this should be a single DIV instruction.
-    scanline = clks / gb_clock_cycles_per_scanline;
-    scanline_clks = clks % gb_clock_cycles_per_scanline;
-}
+    scanline = clks_frame / gb_clock_cycles_per_scanline;
+    scanline_clks = clks_frame % gb_clock_cycles_per_scanline;
 
-int age::gb_lcd_scanline::current_scanline() const
-{
-    if (m_clk_frame_start == gb_no_clock_cycle)
-    {
-        return gb_scanline_lcd_off;
-    }
-    int scanline, scanline_clks;
-    calculate_scanline(scanline, scanline_clks);
-    return scanline;
-}
-
-age::uint8_t age::gb_lcd_scanline::current_ly() const
-{
-    if (m_clk_frame_start == gb_no_clock_cycle)
-    {
-        return 0;
-    }
-
-    int scanline, scanline_clks;
-    calculate_scanline(scanline, scanline_clks);
-    AGE_ASSERT(scanline < gb_scanline_count);
-
-    // LY = 153 for one machine cycle (two for CGB double speed)
-    if ((scanline >= 153) && (scanline_clks >= 2 + m_clock.is_double_speed()))
-    {
-        return 0;
-    }
-
-    // Ly is incremented 2 clock cycles earlier than the respective scanline
-    int ly = scanline + (scanline_clks >= gb_clock_cycles_per_scanline - 2);
-    return ly & 0xFF;
-}
-
-
-
-//---------------------------------------------------------
-//
-//   stat
-//
-//---------------------------------------------------------
-
-age::uint8_t age::gb_lcd_scanline::get_stat_flags(int scx) const
-{
-    if (m_clk_frame_start == gb_no_clock_cycle)
-    {
-        return m_retained_ly_match;
-    }
-
-    int scanline, scanline_clks;
-    calculate_scanline(scanline, scanline_clks);
-
-    return get_stat_ly_match(scanline, scanline_clks)
-            | get_stat_mode(scanline, scanline_clks, scx);
-}
-
-age::uint8_t age::gb_lcd_scanline::get_stat_mode(int scanline,
-                                                 int scanline_clks,
-                                                 int scx) const
-{
-    AGE_ASSERT(scanline != gb_scanline_lcd_off);
-    AGE_ASSERT(scanline < gb_scanline_count);
-
-    if (scanline >= gb_screen_height)
-    {
-        // mode 0 is signalled for v-blank's last machine cycle
-        // (not for double speed though)
-        if (m_clock.is_double_speed() || (scanline < 153))
-        {
-            return 1;
-        }
-        return (scanline_clks >= gb_clock_cycles_per_scanline - 4) ? 0 : 1;
-    }
-    // 80 cycles mode 0 (instead of mode 2) for the first
-    // scanline after switching on the LCD.
-    // Note that the first scanline after switching on the LCD
-    // is 2 4-Mhz-clock cycles shorter than usual.
-    if (m_first_frame && !scanline && (scanline_clks < 80 - gb_lcd_m_cycle_align))
-    {
-        return 0;
-    }
-    if (scanline_clks < 80)
-    {
-        return 2;
-    }
-
-    //! \todo too simple: mode 3 timing also depends on sprites & window
-    int m3_end = 80 + 172 + (scx & 7);
-    return (scanline_clks < m3_end) ? 3 : 0;
-}
-
-age::uint8_t age::gb_lcd_scanline::get_stat_ly_match(int scanline, int scanline_clks) const
-{
-    int match_scanline = scanline;
-
-    // special timing for scanline 153
-    if (scanline == 153)
-    {
-        //! \todo need more timing details
-        if (scanline_clks > 4)
-        {
-            match_scanline = 0;
-        }
-    }
-
-    // "regular" timing
-    else
-    {
-        // when not running at double speed LY-match is cleared early
-        int clks_next_scanline = gb_clock_cycles_per_scanline - scanline_clks;
-        if (clks_next_scanline <= (m_clock.is_double_speed() ? 0 : 2))
-        {
-            match_scanline = -1;
-        }
-    }
-
-    return m_lyc == match_scanline ? gb_stat_ly_match : 0;
+    m_clk_scanline_start = m_clk_frame_start + scanline * gb_clock_cycles_per_scanline;
+    m_scanline = scanline;
 }

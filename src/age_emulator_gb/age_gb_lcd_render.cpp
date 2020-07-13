@@ -104,6 +104,12 @@ void age::gb_lcd_render::render(int until_scanline)
     int santized = std::min<int>(gb_screen_height, until_scanline);
     int to_render = santized - m_rendered_scanlines;
 
+    // new scanlines to render?
+    if (to_render <= 0)
+    {
+        return;
+    }
+
     // init window variables
     if (!m_rendered_scanlines)
     {
@@ -111,15 +117,10 @@ void age::gb_lcd_render::render(int until_scanline)
         m_wline = 0;
     }
 
-    // new scanlines to render?
-    if (to_render <= 0)
-    {
-        return;
-    }
+    // render scanlines
     int scanline = m_rendered_scanlines;
     m_rendered_scanlines += to_render;
 
-    // render scanlines
     for ( ;scanline < m_rendered_scanlines; ++scanline)
     {
         render_scanline(scanline);

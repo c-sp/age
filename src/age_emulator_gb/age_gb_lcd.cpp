@@ -39,14 +39,66 @@ age::gb_lcd::gb_lcd(const gb_device &device,
 
 
 
-age::uint8_t age::gb_lcd::read_oam(int offset) const
+age::uint8_t age::gb_lcd::read_oam(int offset)
 {
-    return m_sprites.read_oam(offset);
+    if (!is_oam_accessible())
+    {
+        AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(offset)
+                            << ": 0xFF (not accessible now)");
+        return 0xFF;
+    }
+    auto result = m_sprites.read_oam(offset);
+    AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(offset)
+                        << ": " << AGE_LOG_HEX8(result));
+    return result;
 }
 
 void age::gb_lcd::write_oam(int offset, uint8_t value)
 {
+    if (!is_oam_accessible())
+    {
+        AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
+                            << " ignored, not accessible now");
+        return;
+    }
+    AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
+                        << ": " << AGE_LOG_HEX8(value));
     m_sprites.write_oam(offset, value);
+}
+
+bool age::gb_lcd::is_oam_accessible()
+{
+    // LCD off
+    if (!m_scanline.lcd_is_on())
+    {
+        return true;
+    }
+
+    int scanline, scanline_clks;
+    m_scanline.current_scanline(scanline, scanline_clks);
+
+    return (scanline >= gb_screen_height)
+            || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7)));
+}
+
+
+
+bool age::gb_lcd::is_video_ram_accessible()
+{
+    // LCD off
+    if (!m_scanline.lcd_is_on())
+    {
+        return true;
+    }
+
+    int scanline, scanline_clks;
+    m_scanline.current_scanline(scanline, scanline_clks);
+
+    // mode 3 end (+1 T4 cycle for double speed)
+    // (Gambatte tests: vramw_m3end/*)
+    return (scanline >= gb_screen_height)
+            || (scanline_clks < 80)
+            || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7) + m_clock.is_double_speed()));
 }
 
 
@@ -54,24 +106,31 @@ void age::gb_lcd::write_oam(int offset, uint8_t value)
 void age::gb_lcd::update_state()
 {
     // LCD on?
-    int scanline = m_scanline.current_scanline();
-    if (scanline == gb_scanline_lcd_off)
+    if (!m_scanline.lcd_is_on())
     {
         return;
     }
 
-    // continue unfinished frame
-    m_render.render(scanline);
+    // Continue unfinished frame.
+    // During a scanline's mode 0 the emulated program may already prepare
+    // data for the next scanline.
+    // We thus render each scanline before it enters mode 0.
+    int scanline, scanline_clks;
+    m_scanline.current_scanline(scanline, scanline_clks);
+
+    m_render.render(scanline + (scanline_clks >= 80 + 172));
 
     // start new frame?
     if (scanline >= gb_scanline_count)
     {
-        AGE_GB_CLOG_LCD_RENDER("switch frame buffers");
+        AGE_GB_CLOG_LCD_RENDER("switch frame buffers on scanline " << scanline);
         m_scanline.fast_forward_frames();
         m_render.new_frame();
-        m_render.render(m_scanline.current_scanline());
+        update_state();
     }
 }
+
+
 
 void age::gb_lcd::trigger_irq_vblank()
 {

@@ -20,20 +20,221 @@
 
 
 
+//---------------------------------------------------------
+//
+//   lcdc
+//
+//---------------------------------------------------------
+
 age::uint8_t age::gb_lcd::read_lcdc() const {
     AGE_GB_CLOG_LCD_PORTS("read LCDC = " << AGE_LOG_HEX8(m_render.get_lcdc()));
     return m_render.get_lcdc();
 }
 
-age::uint8_t age::gb_lcd::read_stat() {
+void age::gb_lcd::write_lcdc(uint8_t value)
+{
+    AGE_GB_CLOG_LCD_PORTS("write LCDC = " << AGE_LOG_HEX8(value));
     update_state();
 
-    uint8_t result = m_lcd_irqs.read_stat()
-            | m_scanline.get_stat_flags(m_render.m_scx);
+    int diff = m_render.get_lcdc() ^ value;
+    m_render.set_lcdc(value);
+
+    if (!(diff & gb_lcdc_enable))
+    {
+        return;
+    }
+
+    // LCD switched on
+    if (value & gb_lcdc_enable)
+    {
+        AGE_GB_CLOG_LCD_PORTS("    * LCD switched on");
+
+        m_scanline.lcd_on();
+        m_lcd_irqs.lcd_on(m_render.m_scx);
+        m_render.new_frame();
+    }
+
+    // LCD switched off
+    else
+    {
+        AGE_GB_CLOG_LCD_PORTS("    * LCD switched off");
+        int scanline, scanline_clks;
+        calculate_scanline(scanline, scanline_clks);
+
+        // switch frame buffers, if the current frame is finished
+        // (otherwise it would be lost because we did not reach
+        // the last v-blank scanline)
+        if (scanline >= gb_screen_height)
+        {
+            AGE_GB_CLOG_LCD_RENDER("    * switching frame buffers (scanline "
+                                   << scanline << ")");
+            m_render.new_frame();
+        }
+
+        // The STAT LY match flag is retained when switching off the LCD.
+        // Mooneye GB tests:
+        //      acceptance/ppu/stat_lyc_onoff
+        m_retained_ly_match = get_stat_ly_match(scanline, scanline_clks);
+
+        AGE_GB_CLOG_LCD_PORTS("    * retained LY match "
+                              << AGE_LOG_HEX8(m_retained_ly_match)
+                              << " for LYC " << AGE_LOG_HEX8(m_scanline.m_lyc)
+                              << " & scanline " << scanline);
+
+        m_lcd_irqs.lcd_off();
+        m_scanline.lcd_off();
+    }
+}
+
+
+
+//---------------------------------------------------------
+//
+//   stat
+//
+//---------------------------------------------------------
+
+age::uint8_t age::gb_lcd::read_stat() {
+    uint8_t result = m_lcd_irqs.read_stat();
+
+    // LCD off: return retained LY match flag
+    if (!m_scanline.lcd_is_on())
+    {
+        AGE_ASSERT((result & gb_stat_modes) == 0);
+        return result | m_retained_ly_match;
+    }
+
+    // LCD on: calculate current mode and LY match flag
+    int scanline, scanline_clks;
+    calculate_scanline(scanline, scanline_clks);
+
+    result |= get_stat_ly_match(scanline, scanline_clks)
+            | get_stat_mode(scanline, scanline_clks, m_render.m_scx);
 
     AGE_GB_CLOG_LCD_PORTS("read STAT = " << AGE_LOG_HEX8(result));
     return result;
 }
+
+age::uint8_t age::gb_lcd::get_stat_mode(int scanline,
+                                        int scanline_clks,
+                                        int scx) const
+{
+    AGE_ASSERT(scanline < gb_scanline_count);
+
+    if (scanline >= gb_screen_height)
+    {
+        // mode 0 is signalled for v-blank's last machine cycle
+        // (not for double speed though)
+        if (m_clock.is_double_speed() || (scanline < 153))
+        {
+            return 1;
+        }
+        return (scanline_clks >= gb_clock_cycles_per_scanline - 4) ? 0 : 1;
+    }
+    // 80 cycles mode 0 (instead of mode 2) for the first
+    // scanline after switching on the LCD.
+    // Note that the first scanline after switching on the LCD
+    // is 2 4-Mhz-clock cycles shorter than usual.
+    if (m_scanline.is_first_frame() && !scanline && (scanline_clks < 80 - gb_lcd_m_cycle_align))
+    {
+        return 0;
+    }
+    if (scanline_clks < 80)
+    {
+        return 2;
+    }
+
+    //! \todo too simple: mode 3 timing also depends on sprites & window
+    int m3_end = 80 + 172 + (scx & 7);
+    return (scanline_clks < m3_end) ? 3 : 0;
+}
+
+age::uint8_t age::gb_lcd::get_stat_ly_match(int scanline, int scanline_clks) const
+{
+    int match_scanline = scanline;
+
+    // special timing for scanline 153
+    if (scanline == 153)
+    {
+        //! \todo need more timing details
+        if (scanline_clks > 4)
+        {
+            match_scanline = 0;
+        }
+    }
+
+    // "regular" timing
+    else
+    {
+        // when not running at double speed LY-match is cleared early
+        int clks_next_scanline = gb_clock_cycles_per_scanline - scanline_clks;
+        if (clks_next_scanline <= (m_clock.is_double_speed() ? 0 : 2))
+        {
+            match_scanline = -1;
+        }
+    }
+
+    return m_scanline.m_lyc == match_scanline ? gb_stat_ly_match : 0;
+}
+
+
+
+void age::gb_lcd::write_stat(uint8_t value)
+{
+    AGE_GB_CLOG_LCD_PORTS("write STAT = " << AGE_LOG_HEX8(value));
+    update_state();
+    m_lcd_irqs.write_stat(value, m_render.m_scx);
+}
+
+
+
+//---------------------------------------------------------
+//
+//   ly
+//
+//---------------------------------------------------------
+
+void age::gb_lcd::calculate_scanline(int &scanline, int &scanline_clks)
+{
+    AGE_ASSERT(m_scanline.lcd_is_on());
+    m_scanline.current_scanline(scanline, scanline_clks);
+    if (scanline >= gb_scanline_count)
+    {
+        update_state();
+        m_scanline.current_scanline(scanline, scanline_clks);
+    }
+    AGE_ASSERT(scanline < gb_scanline_count);
+}
+
+age::uint8_t age::gb_lcd::read_ly() {
+    if (!m_scanline.lcd_is_on())
+    {
+        return 0;
+    }
+
+    int scanline, scanline_clks;
+    calculate_scanline(scanline, scanline_clks);
+
+    // LY = 153 only for 2-3 T4-cycles
+    if ((scanline >= 153) && (scanline_clks > 2 + m_clock.is_double_speed()))
+    {
+        return 0;
+    }
+
+    // Ly is incremented 2 clock cycles earlier than the respective scanline
+    int ly = scanline + (scanline_clks >= gb_clock_cycles_per_scanline - 2);
+
+    AGE_GB_CLOG_LCD_PORTS_LY("read LY = " << AGE_LOG_HEX8(ly & 0xFF));
+    return ly & 0xFF;
+}
+
+
+
+//---------------------------------------------------------
+//
+//   other ports
+//
+//---------------------------------------------------------
 
 age::uint8_t age::gb_lcd::read_scy() const {
     AGE_GB_CLOG_LCD_PORTS("read SCY = " << AGE_LOG_HEX8(m_render.m_scy));
@@ -43,13 +244,6 @@ age::uint8_t age::gb_lcd::read_scy() const {
 age::uint8_t age::gb_lcd::read_scx() const {
     AGE_GB_CLOG_LCD_PORTS("read SCX = " << AGE_LOG_HEX8(m_render.m_scx));
     return m_render.m_scx;
-}
-
-age::uint8_t age::gb_lcd::read_ly() {
-    update_state();
-    auto ly = m_scanline.current_ly();
-    AGE_GB_CLOG_LCD_PORTS_LY("read LY = " << AGE_LOG_HEX8(ly));
-    return ly;
 }
 
 age::uint8_t age::gb_lcd::read_lyc() const {
@@ -119,60 +313,6 @@ age::uint8_t age::gb_lcd::read_ocpd() const
     auto result = m_palettes.read_ocpd();
     AGE_GB_CLOG_LCD_PORTS("read OCPD = " << AGE_LOG_HEX8(result));
     return result;
-}
-
-
-
-void age::gb_lcd::write_lcdc(uint8_t value)
-{
-    AGE_GB_CLOG_LCD_PORTS("write LCDC = " << AGE_LOG_HEX8(value));
-    update_state();
-
-    int diff = m_render.get_lcdc() ^ value;
-    m_render.set_lcdc(value);
-
-    if (!(diff & gb_lcdc_enable))
-    {
-        return;
-    }
-
-    // LCD switched on
-    if (value & gb_lcdc_enable)
-    {
-        AGE_GB_CLOG_LCD_PORTS("    * LCD switched on");
-
-        m_scanline.lcd_on();
-        m_lcd_irqs.lcd_on(m_render.m_scx);
-        m_render.new_frame();
-    }
-
-    // LCD switched off
-    else
-    {
-        AGE_GB_CLOG_LCD_PORTS("    * LCD switched off");
-
-        // switch frame buffers, if the current frame is finished
-        // (otherwise it would be lost because we did not reach
-        // the last v-blank scanline)
-        if (m_scanline.current_scanline() >= gb_screen_height)
-        {
-            AGE_GB_CLOG_LCD_RENDER("    * switching frame buffers (scanline "
-                                   << m_scanline.current_scanline() << ")");
-            m_render.new_frame();
-        }
-
-        m_lcd_irqs.lcd_off();
-        m_scanline.lcd_off();
-    }
-}
-
-
-
-void age::gb_lcd::write_stat(uint8_t value)
-{
-    AGE_GB_CLOG_LCD_PORTS("write STAT = " << AGE_LOG_HEX8(value));
-    update_state();
-    m_lcd_irqs.write_stat(value, m_render.m_scx);
 }
 
 

@@ -146,10 +146,13 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
 
     if ((address & 0xE000) == 0x8000)
     {
-        //! \todo if (m_lcd.is_video_ram_accessible())
+        if (!m_lcd.is_video_ram_accessible())
         {
-            result = m_memory.read_byte(address);
+            AGE_GB_CLOG_LCD_VRAM("VRAM read returns 0xFF (not accessible)");
+            return 0xFF;
         }
+        result = m_memory.read_byte(address);
+        AGE_GB_CLOG_LCD_VRAM("VRAM read returns " << AGE_LOG_HEX8(result));
     }
     else if (address < 0xFE00)
     {
@@ -158,7 +161,6 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
-        //! \todo if (m_lcd.is_oam_readable() && !m_oam_dma_active)
         if (!m_oam_dma_active)
         {
             result = m_lcd.read_oam(address - 0xFE00);
@@ -292,10 +294,16 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 {
     if ((address & 0xE000) == 0x8000)
     {
-        //! \todo if (m_lcd.is_video_ram_accessible())
+        if (!m_lcd.is_video_ram_accessible())
         {
-            m_memory.write_byte(address, byte);
+            AGE_GB_CLOG_LCD_VRAM("VRAM write: [" << AGE_LOG_HEX16(address)
+                                 << "]=" << AGE_LOG_HEX8(byte)
+                                 << " ignored (not accessible)");
+            return;
         }
+        m_memory.write_byte(address, byte);
+        AGE_GB_CLOG_LCD_VRAM("VRAM write: [" << AGE_LOG_HEX16(address)
+                             << "]=" << AGE_LOG_HEX8(byte));
     }
     else if (address < 0xFE00)
     {
@@ -304,7 +312,6 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
-        //! \todo if (m_lcd.is_oam_writable() && !m_oam_dma_active)
         if (!m_oam_dma_active)
         {
             m_lcd.write_oam(address - 0xFE00, byte);

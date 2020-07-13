@@ -40,6 +40,8 @@ constexpr int gb_clock_cycles_per_scanline = 456;
 constexpr int gb_scanline_count = 154;
 constexpr int gb_clock_cycles_per_frame = gb_scanline_count * gb_clock_cycles_per_scanline;
 
+constexpr int gb_lcd_m_cycle_align = -3;
+
 constexpr uint8_t gb_stat_irq_ly_match = 0x40;
 constexpr uint8_t gb_stat_irq_mode2 = 0x20;
 constexpr uint8_t gb_stat_irq_mode1 = 0x10;
@@ -47,11 +49,7 @@ constexpr uint8_t gb_stat_irq_mode0 = 0x08;
 constexpr uint8_t gb_stat_ly_match = 0x04;
 constexpr uint8_t gb_stat_modes = 0x03;
 
-constexpr int gb_lcd_m_cycle_align = -3;
 
-
-
-constexpr int gb_scanline_lcd_off = int_max;
 
 class gb_lcd_scanline
 {
@@ -60,29 +58,25 @@ public:
 
     gb_lcd_scanline(const gb_device &device, const gb_clock &clock);
 
+    void set_back_clock(int clock_cycle_offset);
+
+    bool lcd_is_on() const;
+    void lcd_on();
+    void lcd_off();
+
     int clk_frame_start() const;
     bool is_first_frame() const;
     void fast_forward_frames();
 
-    void calculate_scanline(int &scanline, int &scanline_clks) const;
-    int current_scanline() const;
-    uint8_t current_ly() const;
-
-    uint8_t get_stat_flags(int scx) const;
-
-    void lcd_on();
-    void lcd_off();
-    void set_back_clock(int clock_cycle_offset);
+    void current_scanline(int &scanline, int &scanline_clks) const;
 
 private:
 
-    uint8_t get_stat_mode(int scanline, int scanline_clks, int scx) const;
-    uint8_t get_stat_ly_match(int scanline, int scanline_clks) const;
-
     const gb_clock &m_clock;
     int m_clk_frame_start = gb_no_clock_cycle;
-    int m_first_frame = false;
-    uint8_t m_retained_ly_match = 0;
+    mutable int m_clk_scanline_start = gb_no_clock_cycle;
+    mutable int m_scanline = 0;
+    bool m_first_frame = false;
 
 public:
 
@@ -182,8 +176,9 @@ public:
     void write_ocps(uint8_t value);
     void write_ocpd(uint8_t value);
 
-    uint8_t read_oam(int offset) const;
+    uint8_t read_oam(int offset);
     void write_oam(int offset, uint8_t value);
+    bool is_video_ram_accessible();
 
     void update_state();
     void trigger_irq_vblank();
@@ -194,6 +189,12 @@ public:
 
 private:
 
+    bool is_oam_accessible();
+    void calculate_scanline(int &scanline, int &scanline_clks);
+
+    uint8_t get_stat_mode(int scanline, int scanline_clks, int scx) const;
+    uint8_t get_stat_ly_match(int scanline, int scanline_clks) const;
+
     const gb_device &m_device;
     const gb_clock &m_clock;
     gb_lcd_scanline m_scanline;
@@ -201,6 +202,8 @@ private:
     gb_lcd_palettes m_palettes;
     gb_lcd_sprites m_sprites;
     gb_lcd_render m_render;
+
+    uint8_t m_retained_ly_match = 0;
 };
 
 } // namespace age
