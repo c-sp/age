@@ -94,6 +94,7 @@ void age::gb_lcd_render::new_frame()
 {
     m_screen_buffer.switch_buffers();
     m_rendered_scanlines = 0;
+    m_wline = -1;
 }
 
 void age::gb_lcd_render::render(int until_scanline)
@@ -108,13 +109,6 @@ void age::gb_lcd_render::render(int until_scanline)
     if (to_render <= 0)
     {
         return;
-    }
-
-    // init window variables
-    if (!m_rendered_scanlines)
-    {
-        m_wy_render = m_wy;
-        m_wline = 0;
     }
 
     // render scanlines
@@ -157,16 +151,15 @@ void age::gb_lcd_render::render_scanline(int scanline)
     // render BG & window
     else
     {
+        bool render_window = window_visible(scanline);
+
+        // render BG
         int bg_y = m_scy + scanline;
         int tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
         int tile_line = bg_y & 0b111;
         pixel *px = &m_scanline[8];
 
-        bool window_visible = (m_lcdc & gb_lcdc_win_enable)
-                && (m_wy_render <= scanline)
-                && (m_wx < 167);
-
-        int tiles = window_visible
+        int tiles = render_window
                 ? 1 + std::min<int>(20, std::max<int>(0, m_wx - 7) >> 3)
                 : 21;
 
@@ -176,7 +169,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
         }
 
         // render window
-        if (window_visible)
+        if (render_window)
         {
             tile_vram_ofs = m_win_tile_map_offset + ((m_wline & 0b11111000) << 2);
             tile_line = m_wline & 0b111;
@@ -197,7 +190,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
         auto sprites = m_sprites.get_scanline_sprites(scanline);
         std::for_each(rbegin(sprites), rend(sprites), [&](const gb_sprite &sprite)
         {
-            if ((sprite.m_data.m_x - 1) < gb_screen_width + 8 - 1)
+            if (sprite.m_data.m_x && (sprite.m_data.m_x < gb_screen_width + 8))
             {
                 AGE_ASSERT((px0 + sprite.m_data.m_x) < gb_screen_width + 24);
                 render_sprite_tile(
@@ -211,7 +204,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
 
     // copy scanline
     auto dst = &m_screen_buffer.get_back_buffer()[0] + scanline * gb_screen_width;
-    auto src = &m_scanline[px0]; // % 8
+    auto src = &m_scanline[px0];
 
     int32_t alpha = pixel{0, 0, 0, 255}.m_color;
     for (int i = 0; i < gb_screen_width; ++i)
@@ -221,6 +214,27 @@ void age::gb_lcd_render::render_scanline(int scanline)
         ++src;
         ++dst;
     }
+}
+
+
+
+bool age::gb_lcd_render::window_visible(int scanline)
+{
+    bool win_x_visible = (m_lcdc & gb_lcdc_win_enable) && (m_wx < 167);
+
+    // window was already active
+    if (m_wline >= 0)
+    {
+        return win_x_visible;
+    }
+
+    // start rendering window on this scanline?
+    if (win_x_visible && (m_wy <= scanline))
+    {
+        m_wline = 0;
+        return true;
+    }
+    return false;
 }
 
 

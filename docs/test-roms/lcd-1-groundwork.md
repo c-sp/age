@@ -1,27 +1,23 @@
-Prerequisites: [clocks, cycles and state][l-a1]
-
-
 
 # LCD groundwork
 
+## LCD M-cycle alignment
+
+Prerequisites: [clocks, cycles and state][l-a1]
+
 * align the LCD (working at T4-cycles) to M-cycles
-* get mode 0 IRQ timing right as this allows us to examine `HALT` behavior
-  at T4-cycle edges instead of M-cycles
-
-
-
-## Cycle alignment
+* TL;DR: the LCD seems
 
 ### CGB
 
 By reading `LY` and `STAT` at specific times we can identify the initial LCD
-state in M-cycle "resolution":
-there may be an error of up to `3` T4-cycles cycles due to one M-cycle
-consisting of `4` T4-cycles.
+state at `PC = 0x0100` with M-cycle accuracy.
 
+By just reading `STAT` there may be an error of up to `3` T4-cycles cycles
+though due to one M-cycle consisting of `4` T4-cycles.
 However,
 since `SCX` extends `mode 3` duration by up to `7` T4-cycles (`SCX & 7`),
-accurate identification of the initial LCD state is possible.
+more accurate identification of the initial LCD state is possible.
 
 ```
 T4-cycle - event
@@ -88,27 +84,105 @@ T4-cycle - event
 
 
 
-## Mode 0 IRQ timing
+## LCD restart
 
-The mode 0 interrupt request is delayed by one T4-cycle:
-it occurs one T4-cycle after mode 3 ends.
+### Scanline 0 initial mode
 
-* [m0int_m0stat/m0int_m0stat_ds_1_cgb04c_out0](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_ds_1_cgb04c_out0.asm)
-* [m0int_m0stat/m0int_m0stat_ds_2_cgb04c_out2](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_ds_2_cgb04c_out2.asm)
-* [m0int_m0stat/m0int_m0stat_scx2_1_dmg08_cgb04c_out0](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx2_1_dmg08_cgb04c_out0.asm)
-* [m0int_m0stat/m0int_m0stat_scx2_2_dmg08_cgb04c_out2](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx2_2_dmg08_cgb04c_out2.asm)
-* [m0int_m0stat/m0int_m0stat_scx3_1_dmg08_cgb04c_out0](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx3_1_dmg08_cgb04c_out0.asm)
-* [m0int_m0stat/m0int_m0stat_scx3_2_dmg08_cgb04c_out2](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx3_2_dmg08_cgb04c_out2.asm)
-* [m0int_m0stat/m0int_m0stat_scx5_ds_1_cgb04c_out0](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx5_ds_1_cgb04c_out0.asm)
-* [m0int_m0stat/m0int_m0stat_scx5_ds_2_cgb04c_out2](
-  https://github.com/sinamas/gambatte/tree/master/test/hwtests/m0int_m0stat/m0int_m0stat_scx5_ds_2_cgb04c_out2.asm)
+Prerequisites: [clocks, cycles and state][l-a1]
+
+When restarting the LCD,
+scanline 0 begins with `mode 0` instead of `mode 2` for `77-80` T4-cycles.
+```
+DMG & CGB single speed
+
+T4-cycle - event
+----------------
+           LCD switched off
+       0 - LCD switched on (LYC = 0)
+      76 - STAT = 0x84: scanline 0 mode 0, LY match
+      80 - STAT = 0x87: scanline 0 mode 3, LY match
+```
+* [enable_display/nextstat_1_dmg08_cgb04c_out84](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/nextstat_1_dmg08_cgb04c_out84.asm)
+* [enable_display/nextstat_2_dmg08_cgb04c_out87](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/nextstat_2_dmg08_cgb04c_out87.asm)
+
+
+### Scanline 0 duration
+
+Prerequisites: [clocks, cycles and state][l-a1]
+
+Scanline 0 is `2-3` T4-cycles cycles shorter than usual right after restarting
+the LCD.
+This affects either mode 3 or mode 0 (not the initial mode 0 replacing mode 2).
+
+Detecting this requires CGB double speed though
+(compare to single speed log below).
+```
+CGB double speed
+
+T4-cycle - event
+----------------
+           LCD switched off
+       0 - LCD switched on (LYC = 0)
+       <...>
+      78 - STAT = 0x84: scanline 0 mode 0, LY match
+      80 - STAT = 0x87: scanline 0 mode 3, LY match
+       <...>
+     452 - STAT = 0x84: scanline 0 mode 0, LY match
+     454 - STAT = 0x82: scanline 1 mode 2, 454(!) cycles after LCD restarted
+       <...>
+     532 - STAT = 0x82: scanline 1 mode 2
+     534 - STAT = 0x83: scanline 1 mode 3, at cycle 80 + 454(!)
+       <...>
+     908 - STAT = 0x80: scanline 1 mode 0
+     910 - STAT = 0x82: scanline 2 mode 2, at cycle 454 + 456
+       <...>
+     988 - STAT = 0x82: scanline 2 mode 2
+     990 - STAT = 0x83: scanline 2 mode 3, at cycle 534 + 456
+       <...>
+```
+* [enable_display/frame0_m2stat_count_ds_1_cgb04c_out91](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m2stat_count_ds_1_cgb04c_out91.asm)
+* [enable_display/frame0_m2stat_count_ds_2_cgb04c_out90](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m2stat_count_ds_2_cgb04c_out90.asm)
+* [enable_display/frame0_m3stat_count_ds_1_cgb04c_out90](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m3stat_count_ds_1_cgb04c_out90.asm)
+* [enable_display/frame0_m3stat_count_ds_2_cgb04c_out90](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m3stat_count_ds_2_cgb04c_out90.asm)
+
+```
+DMG & CGB single speed
+
+T4-cycle - event
+----------------
+           LCD switched off
+       0 - LCD switched on (LYC = 0)
+       <...>
+      76 - STAT = 0x84: scanline 0 mode 2
+      80 - STAT = 0x87: scanline 0 mode 3
+       <...>
+     452 - STAT = 0x80: scanline 0 mode 0
+     456 - STAT = 0x82: scanline 1 mode 2, 456 cycles after LCD restarted
+       <...>
+     532 - STAT = 0x82: scanline 1 mode 2
+     536 - STAT = 0x83: scanline 1 mode 3, at cycle 80 + 456
+       <...>
+     908 - STAT = 0x80: scanline 1 mode 0
+     912 - STAT = 0x82: scanline 2 mode 2, 456 cycles after scanline 1 mode 2
+       <...>
+     988 - STAT = 0x82: scanline 2 mode 2
+     992 - STAT = 0x83: scanline 2 mode 3, at cycle 534 + 456
+       <...>
+```
+* [enable_display/frame0_m2stat_count_1_dmg08_cgb04c_out91](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m2stat_count_1_dmg08_cgb04c_out91.asm)
+* [enable_display/frame0_m2stat_count_2_dmg08_cgb04c_out90](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m2stat_count_2_dmg08_cgb04c_out90.asm)
+* [enable_display/frame0_m3stat_count_1_dmg08_cgb04c_out90](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m3stat_count_1_dmg08_cgb04c_out90.asm)
+* [enable_display/frame0_m3stat_count_2_dmg08_cgb04c_out90](
+  https://github.com/sinamas/gambatte/tree/master/test/hwtests/enable_display/frame0_m3stat_count_2_dmg08_cgb04c_out90.asm)
 
 
 

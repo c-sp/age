@@ -161,6 +161,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
+        handle_events();
         if (!m_oam_dma_active)
         {
             result = m_lcd.read_oam(address - 0xFE00);
@@ -169,11 +170,13 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     // 0xFEA0 - 0xFFFF : high ram & IE
     else if ((address & 0x0180) != 0x0100)
     {
+        handle_events();
         result = (to_integral(gb_io_port::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
     }
     // 0xFF00 - 0xFF7F : i/o ports & wave ram
     else
     {
+        handle_events();
         // ports & wave ram
         switch (address)
         {
@@ -312,6 +315,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFE00 - 0xFE9F : object attribute memory
     else if (address < 0xFEA0)
     {
+        handle_events();
         if (!m_oam_dma_active)
         {
             m_lcd.write_oam(address - 0xFE00, byte);
@@ -322,6 +326,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     {
         if (to_integral(gb_io_port::ie) == address)
         {
+            handle_events();
             m_interrupts.write_ie(byte);
         }
         else
@@ -332,6 +337,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFF00 - 0xFF7F : i/o ports & wave ram
     else
     {
+        handle_events();
         switch (address)
         {
             case to_integral(gb_io_port::p1): m_joypad.write_p1(byte); break;

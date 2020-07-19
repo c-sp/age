@@ -61,6 +61,10 @@ void age::gb_lcd::write_oam(int offset, uint8_t value)
                             << " ignored, not accessible now");
         return;
     }
+    if (m_scanline.lcd_is_on())
+    {
+        update_state();
+    }
     AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
                         << ": " << AGE_LOG_HEX8(value));
     m_sprites.write_oam(offset, value);
@@ -118,7 +122,7 @@ void age::gb_lcd::update_state()
     int scanline, scanline_clks;
     m_scanline.current_scanline(scanline, scanline_clks);
 
-    m_render.render(scanline + (scanline_clks >= 80 + 172));
+    m_render.render(scanline + (scanline_clks >= 80));
 
     // start new frame?
     if (scanline >= gb_scanline_count)

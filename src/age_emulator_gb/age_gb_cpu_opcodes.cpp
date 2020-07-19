@@ -106,7 +106,6 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 #define READ_BYTE(destination, address) \
     { \
         TICK_MACHINE_CYCLE; \
-        m_bus.handle_events(); \
         destination = m_bus.read_byte((address) & 0xFFFF); \
     } \
     (void)0 // no-op to force semicolon when using this macro
@@ -114,7 +113,6 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 #define WRITE_BYTE(address, value) \
     { \
         TICK_MACHINE_CYCLE; \
-        m_bus.handle_events(); \
         m_bus.write_byte((address) & 0xFFFF, (value) & 0xFF); \
     } \
     (void)0 // no-op to force semicolon when using this macro

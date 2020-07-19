@@ -185,7 +185,8 @@ public:
 
 private:
 
-    void render_scanline(int ly);
+    void render_scanline(int scanline);
+    bool window_visible(int scanline);
     pixel* render_bg_tile(pixel *dst, int tile_line, int tile_vram_ofs);
     void render_sprite_tile(pixel *dst, int tile_line, const gb_sprite &sprite);
 
@@ -200,14 +201,13 @@ private:
     // 160px + 3 tiles (8px + scx + last window/sprite tile)
     pixel_vector m_scanline{gb_screen_width + 24, pixel(0, 0, 0)};
     int m_rendered_scanlines = 0;
+    int m_wline = -1;
 
     int m_bg_tile_map_offset = 0;
     int m_win_tile_map_offset = 0;
     int m_tile_data_offset = 0;
     uint8_t m_tile_xor = 0;
     uint8_t m_priority_mask = 0xFF;
-    uint8_t m_wy_render = 0;
-    uint8_t m_wline = 0;
 
     uint8_t m_lcdc = 0;
 

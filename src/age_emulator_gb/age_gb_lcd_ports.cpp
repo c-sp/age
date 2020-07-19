@@ -121,6 +121,7 @@ age::uint8_t age::gb_lcd::get_stat_mode(int scanline,
 {
     AGE_ASSERT(scanline < gb_scanline_count);
 
+    // vblank
     if (scanline >= gb_screen_height)
     {
         // mode 0 is signalled for v-blank's last machine cycle
@@ -131,19 +132,24 @@ age::uint8_t age::gb_lcd::get_stat_mode(int scanline,
         }
         return (scanline_clks >= gb_clock_cycles_per_scanline - 4) ? 0 : 1;
     }
-    // 80 cycles mode 0 (instead of mode 2) for the first
-    // scanline after switching on the LCD.
-    // Note that the first scanline after switching on the LCD
-    // is 2 4-Mhz-clock cycles shorter than usual.
+
+    // first scanline after restarting the LCD:
+    // 80 cycles mode 0 instead of mode 2.
+    // Note that this scanline also is 3 T4-cycles shorter than usual
+    // which we handle by offsetting the frame
+    // (see m_scanline.lcd_on).
     if (m_scanline.is_first_frame() && !scanline && (scanline_clks < 80 - gb_lcd_m_cycle_align))
     {
         return 0;
     }
+
+    // mode 2
     if (scanline_clks < 80)
     {
         return 2;
     }
 
+    // mode 3 and mode 0
     //! \todo test rom analyses for double-speed-delay (using m2int_m3stat?)
     //! \todo too simple: mode 3 timing also depends on sprites & window
     int m3_end = 80 + 172 + (scx & 7) + m_clock.is_double_speed();

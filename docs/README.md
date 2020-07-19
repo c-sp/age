@@ -12,9 +12,10 @@ Before diving into test rom analyses please read about
 * [`HALT` bug][l-tr1]
 * [Interrupt dispatching][l-tr2]
 * [LCD - groundwork][l-tr3]
-* [LCD - `STAT` mode timing][l-tr4]
-* [Serial transfer][l-tr5]
-* [Sound circuit (old)][l-tr6]
+* [LCD - modes][l-tr4]
+* [LCD - mode interrupts][l-tr5]
+* [Serial transfer][l-tr6]
+* [Sound circuit (old)][l-tr7]
 
 
 ## Links
@@ -30,9 +31,10 @@ Before diving into test rom analyses please read about
 [l-tr1]: test-roms/halt-bug.md
 [l-tr2]: test-roms/interrupt-dispatch.md
 [l-tr3]: test-roms/lcd-1-groundwork.md
-[l-tr4]: test-roms/lcd-stat-mode-timing.md
-[l-tr5]: test-roms/serial.md
-[l-tr6]: test-roms/sound.md
+[l-tr4]: test-roms/lcd-2-modes.md
+[l-tr5]: test-roms/lcd-3-mode-interrupts.md
+[l-tr6]: test-roms/serial.md
+[l-tr7]: test-roms/sound.md
 
 [l-e1]: https://github.com/AntonioND/giibiiadvance/tree/master/docs
 [l-e2]: https://gekkio.fi/files/gb-docs/gbctr.pdf

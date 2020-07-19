@@ -57,7 +57,7 @@ age::gb_lcd_irqs::gb_lcd_irqs(const gb_device &device,
             + gb_screen_height * gb_clock_cycles_per_scanline;
     if (m_clk_next_irq_vblank < clk_current)
     {
-        m_clk_next_irq_vblank = add_total_frames(m_clk_next_irq_vblank, clk_current);
+        m_clk_next_irq_vblank += add_total_frames(m_clk_next_irq_vblank, clk_current);
     }
     AGE_ASSERT(m_clk_next_irq_vblank > clk_current);
 
@@ -123,10 +123,8 @@ void age::gb_lcd_irqs::set_back_clock(int clock_cycle_offset)
 
 void age::gb_lcd_irqs::trigger_irq_vblank()
 {
-    int clk_current = m_clock.get_clock_cycle();
-
     AGE_ASSERT(m_clk_next_irq_vblank != gb_no_clock_cycle);
-    AGE_ASSERT(m_clk_next_irq_vblank <= clk_current);
+    AGE_ASSERT(m_clk_next_irq_vblank <= m_clock.get_clock_cycle());
 
     m_interrupts.trigger_interrupt(gb_interrupt::vblank, m_clk_next_irq_vblank);
     if (m_stat & gb_stat_irq_mode1)
@@ -134,11 +132,12 @@ void age::gb_lcd_irqs::trigger_irq_vblank()
         m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_vblank);
     }
 
+    int clk_current = m_clock.get_clock_cycle();
     m_clk_next_irq_vblank += add_total_frames(m_clk_next_irq_vblank, clk_current);
     int clk_diff = m_clk_next_irq_vblank - clk_current;
+    AGE_ASSERT(clk_diff > 0);
 
-    AGE_GB_CLOG_IRQS("    * next v-blank IRQ in "
-                     << (m_clk_next_irq_vblank - m_clock.get_clock_cycle())
+    AGE_GB_CLOG_IRQS("    * next v-blank IRQ in " << clk_diff
                      << " clock cycles (" << m_clk_next_irq_vblank << ")");
 
     m_events.schedule_event(gb_event::lcd_interrupt_vblank, clk_diff);
@@ -180,18 +179,17 @@ void age::gb_lcd_irqs::lyc_update()
 
 void age::gb_lcd_irqs::trigger_irq_lyc()
 {
-    int clk_current = m_clock.get_clock_cycle();
-
     AGE_ASSERT(m_clk_next_irq_lyc != gb_no_clock_cycle);
-    AGE_ASSERT(m_clk_next_irq_lyc <= clk_current);
+    AGE_ASSERT(m_clk_next_irq_lyc <= m_clock.get_clock_cycle());
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_lyc);
 
+    int clk_current = m_clock.get_clock_cycle();
     m_clk_next_irq_lyc += add_total_frames(m_clk_next_irq_lyc, clk_current);
     int clk_diff = m_clk_next_irq_lyc - clk_current;
+    AGE_ASSERT(clk_diff > 0);
 
-    AGE_GB_CLOG_IRQS("    * next LYC IRQ in "
-                     << (m_clk_next_irq_lyc - m_clock.get_clock_cycle())
+    AGE_GB_CLOG_IRQS("    * next LYC IRQ in " << clk_diff
                      << " clock cycles (" << m_clk_next_irq_lyc << ")");
 
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
@@ -244,10 +242,8 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
 
 void age::gb_lcd_irqs::trigger_irq_mode2()
 {
-    int clk_current = m_clock.get_clock_cycle();
-
     AGE_ASSERT(m_clk_next_irq_mode2 != gb_no_clock_cycle);
-    AGE_ASSERT(m_clk_next_irq_mode2 <= clk_current);
+    AGE_ASSERT(m_clk_next_irq_mode2 <= m_clock.get_clock_cycle());
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode2);
     AGE_GB_CLOG_IRQS("    * mode 2 IRQ happened on scanline "
@@ -332,10 +328,8 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
 
 void age::gb_lcd_irqs::trigger_irq_mode0(int scx)
 {
-    int clk_current = m_clock.get_clock_cycle();
-
     AGE_ASSERT(m_clk_next_irq_mode0 != gb_no_clock_cycle);
-    AGE_ASSERT(m_clk_next_irq_mode0 <= clk_current);
+    AGE_ASSERT(m_clk_next_irq_mode0 <= m_clock.get_clock_cycle());
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode0);
     AGE_GB_CLOG_IRQS("    * mode 0 IRQ happened on scanline "
@@ -371,17 +365,17 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
     // no mode 0 irq delay for scanline 0 on the first frame
     // after restarting the LCD
     //! \todo Gambatte test rom analysis: enable_display/frame0_m0irq_count_scx{2|3}
-    int m1_delay = (!scanline && m_scanline.is_first_frame()) ? -gb_lcd_m_cycle_align : 1;
+    int m0_delay = (!scanline && m_scanline.is_first_frame()) ? -gb_lcd_m_cycle_align : 1;
 
     // if we're past the mode 0 irq for this scanline,
     // continue with the next scanline
     //! \todo too simple: mode 3 timing also depends on sprites & window
-    int m3_end = 80 + 172 + (scx & 7) + m1_delay;
+    int m3_end = 80 + 172 + (scx & 7) + m0_delay;
     if (scanline_clks >= m3_end)
     {
         ++scanline;
         ++m0_scanline;
-        m3_end -= (m1_delay - 1); // undo scanline 0 frame 0 delay
+        m3_end -= (m0_delay - 1); // undo scanline 0 frame 0 delay
     }
 
     // skip v-blank

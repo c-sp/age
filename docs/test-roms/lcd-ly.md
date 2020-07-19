@@ -1,7 +1,7 @@
 
 # LCD LY
 
-LY is incremented `2` 4-Mhz-clock cycles before the respective scanline is
+LY is incremented `2-3` T4-cycles before the respective scanline is
 finished.
 LY 153 is shorter than usual,
 LY 0 starts early.
