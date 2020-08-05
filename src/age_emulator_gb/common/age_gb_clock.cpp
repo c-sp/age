@@ -20,13 +20,20 @@
 
 age::gb_clock::gb_clock(const gb_device &device)
 {
-    if (device.is_cgb_hardware())
+    if (device.is_cgb())
     {
         // Gambatte tests:
         // div/start_inc_1_cgb_out1E
         // div/start_inc_2_cgb_out1F
         m_clock_cycle = 0x1F * 0x100;
         m_clock_cycle -= 96;
+    }
+    else if (device.is_cgb_hardware())
+    {
+        // Mooneye GB tests:
+        // misc/boot_div-cgbABCDE
+        m_clock_cycle = 0x27 * 0x100;
+        m_clock_cycle -= 136;
     }
     else
     {
