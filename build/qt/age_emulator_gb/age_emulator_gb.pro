@@ -13,6 +13,13 @@ include($$PWD/../age.pri)
 SOURCES += \
     ../../../src/age_emulator_gb/age_gb_cpu_opcodes.cpp \
     ../../../src/age_emulator_gb/age_gb_div.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_irqs.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_palettes.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_ports.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_render.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_scanline.cpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_sprites.cpp \
     ../../../src/age_emulator_gb/age_gb_timer.cpp \
     ../../../src/age_emulator_gb/age_gb_timer_state.cpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.cpp \
@@ -21,11 +28,6 @@ SOURCES += \
     ../../../src/age_emulator_gb/age_gb_emulator.cpp \
     ../../../src/age_emulator_gb/age_gb_emulator_impl.cpp \
     ../../../src/age_emulator_gb/age_gb_joypad.cpp \
-    ../../../src/age_emulator_gb/age_gb_lcd.cpp \
-    ../../../src/age_emulator_gb/age_gb_lcd_ly_lyc.cpp \
-    ../../../src/age_emulator_gb/age_gb_lcd_old_render.cpp \
-    ../../../src/age_emulator_gb/age_gb_lcd_ports.cpp \
-    ../../../src/age_emulator_gb/age_gb_lcd_ppu.cpp \
     ../../../src/age_emulator_gb/age_gb_memory.cpp \
     ../../../src/age_emulator_gb/age_gb_memory_init.cpp \
     ../../../src/age_emulator_gb/age_gb_serial.cpp \
@@ -38,6 +40,8 @@ SOURCES += \
 
 HEADERS += \
     ../../../src/age_emulator_gb/age_gb_div.hpp \
+    ../../../src/age_emulator_gb/age_gb_lcd.hpp \
+    ../../../src/age_emulator_gb/age_gb_lcd_render.hpp \
     ../../../src/age_emulator_gb/age_gb_timer.hpp \
     ../../../src/age_emulator_gb/common/age_gb_clock.hpp \
     ../../../src/age_emulator_gb/age_gb.hpp \
@@ -45,7 +49,6 @@ HEADERS += \
     ../../../src/age_emulator_gb/age_gb_cpu.hpp \
     ../../../src/age_emulator_gb/age_gb_emulator_impl.hpp \
     ../../../src/age_emulator_gb/age_gb_joypad.hpp \
-    ../../../src/age_emulator_gb/age_gb_lcd.hpp \
     ../../../src/age_emulator_gb/age_gb_memory.hpp \
     ../../../src/age_emulator_gb/age_gb_serial.hpp \
     ../../../src/age_emulator_gb/age_gb_sound.hpp \

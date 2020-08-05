@@ -89,8 +89,9 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
         }
     }
 
-    // make sure audio output is complete
+    // sync output
     m_sound.update_state();
+    m_lcd.update_state();
 
     // calculate the cycles actually emulated
     int current_cycle = m_clock.get_clock_cycle();
@@ -151,7 +152,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
                                         gb_hardware hardware,
                                         bool dmg_green,
                                         pcm_vector &pcm_vec,
-                                        screen_buffer &screen_buf)
+                                        screen_buffer &screen_buffer)
     : m_memory(rom),
       m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
       m_clock(m_device),
@@ -159,7 +160,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
       m_events(m_clock),
       m_div(m_clock),
       m_sound(m_clock, m_device.is_cgb(), pcm_vec),
-      m_lcd(m_device, m_clock, m_events, m_interrupts, m_memory, screen_buf, dmg_green),
+      m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_events, m_interrupts, screen_buffer, dmg_green),
       m_timer(m_clock, m_div, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_div, m_interrupts, m_events),

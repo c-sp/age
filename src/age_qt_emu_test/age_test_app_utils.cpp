@@ -143,6 +143,7 @@ age::test_runner::test_runner(const QString &test_file_name,
 
 void age::test_runner::run()
 {
+    // AGE_LOG("start " << m_test_file_name.toStdString());
     QString error_message;
 
     // read the test file
@@ -183,6 +184,7 @@ void age::test_runner::run()
             emit test_failed(m_test_file_name, message);
         }
     }
+    // AGE_LOG("finish " << m_test_file_name.toStdString());
 }
 
 

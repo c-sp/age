@@ -36,9 +36,6 @@ constexpr int gb_cart_ram_bank_size = 0x2000;
 constexpr int gb_internal_ram_bank_size = 0x1000;
 constexpr int gb_video_ram_bank_size = 0x2000;
 
-constexpr int gb_internal_ram_size = 8 * gb_internal_ram_bank_size;
-constexpr int gb_video_ram_size = 2 * gb_video_ram_bank_size;
-
 constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
 
 

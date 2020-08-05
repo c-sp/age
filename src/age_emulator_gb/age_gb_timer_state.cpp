@@ -42,7 +42,8 @@ void age::gb_timer::trigger_interrupt()
     // it does look confusing while debugging.
     if (!interrupt_triggered)
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::timer);
+        int clk_irq = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
+        m_interrupts.trigger_interrupt(gb_interrupt::timer, clk_irq);
         // schedule next interrupt event
         set_clk_timer_zero(m_clk_timer_zero);
     }
@@ -83,11 +84,11 @@ bool age::gb_timer::update_timer_state()
     m_clk_last_overflow = clk_last_inc - (incs_since_overflow << m_clock_shift);
     AGE_ASSERT(m_clk_last_overflow <= clk_current);
 
-    CLOG("timer overflow:");
-    CLOG("    * last overflow on clock cycle " << m_clk_last_overflow);
-    CLOG("    * TIMA = " << AGE_LOG_HEX(tima));
-    CLOG("    * setting TIMA = " << AGE_LOG_HEX8(m_tima)
-         << " (TMA = " << AGE_LOG_HEX8(m_tma) << ")");
+    AGE_GB_CLOG_TIMER("timer overflow:");
+    AGE_GB_CLOG_TIMER("    * last overflow on clock cycle " << m_clk_last_overflow);
+    AGE_GB_CLOG_TIMER("    * TIMA = " << AGE_LOG_HEX(tima));
+    AGE_GB_CLOG_TIMER("    * setting TIMA = " << AGE_LOG_HEX8(m_tima)
+                      << " (TMA = " << AGE_LOG_HEX8(m_tma) << ")");
 
     // re-initialize timer
     start_timer();
@@ -97,7 +98,8 @@ bool age::gb_timer::update_timer_state()
     // event is going to be re-scheduled.
     if (clk_current > m_clk_last_overflow)
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::timer);
+        int clk_irq = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
+        m_interrupts.trigger_interrupt(gb_interrupt::timer, clk_irq);
         return true;
     }
     return false;
@@ -148,13 +150,13 @@ void age::gb_timer::on_div_reset(int old_div_offset)
     clk_overflow += clk_adjust;
     AGE_ASSERT(clk_overflow >= current_clk);
 
-    CLOG("timer at DIV reset:");
-    CLOG("    * old clock bits " << AGE_LOG_HEX16(old_clock & 0xFFFF));
-    CLOG("    * new clock bits " << AGE_LOG_HEX16(new_clock & 0xFFFF));
-    CLOG("    * next increment (old) in " << old_next_inc << " clock cycles");
-    CLOG("    * next increment (new) in " << new_next_inc << " clock cycles");
-    CLOG("    * +/- clock cycles until overflow: " << clk_adjust);
-    CLOG("    * overflow on clock cycle " << clk_overflow);
+    AGE_GB_CLOG_TIMER("timer at DIV reset:");
+    AGE_GB_CLOG_TIMER("    * old clock bits " << AGE_LOG_HEX16(old_clock & 0xFFFF));
+    AGE_GB_CLOG_TIMER("    * new clock bits " << AGE_LOG_HEX16(new_clock & 0xFFFF));
+    AGE_GB_CLOG_TIMER("    * next increment (old) in " << old_next_inc << " clock cycles");
+    AGE_GB_CLOG_TIMER("    * next increment (new) in " << new_next_inc << " clock cycles");
+    AGE_GB_CLOG_TIMER("    * +/- clock cycles until overflow: " << clk_adjust);
+    AGE_GB_CLOG_TIMER("    * overflow on clock cycle " << clk_overflow);
 
     set_clk_timer_zero(m_clk_timer_zero + clk_adjust);
 }
@@ -192,13 +194,13 @@ void age::gb_timer::start_timer()
     int overflow_incs = 0x100 - m_tima;
     int clks_until_overflow = clks_next_inc + ((overflow_incs - 1) << clk_shift);
 
-    CLOG("timer started/updated:");
-    CLOG("    * clock shift " << clk_shift
-         << " (increment each " << clks_per_inc << " clock cycles)");
-    CLOG("    * next increment in " << clks_next_inc << " clock cycles ("
-         << (current_clk + clks_next_inc) << ")");
-    CLOG("    * overflow in " << clks_until_overflow << " clock cycles ("
-         << (current_clk + clks_until_overflow) << ")");
+    AGE_GB_CLOG_TIMER("timer started/updated:");
+    AGE_GB_CLOG_TIMER("    * clock shift " << clk_shift
+                      << " (increment each " << clks_per_inc << " clock cycles)");
+    AGE_GB_CLOG_TIMER("    * next increment in " << clks_next_inc << " clock cycles ("
+                      << (current_clk + clks_next_inc) << ")");
+    AGE_GB_CLOG_TIMER("    * overflow in " << clks_until_overflow << " clock cycles ("
+                      << (current_clk + clks_until_overflow) << ")");
 
     m_clock_shift = clk_shift;
     set_clk_timer_zero(current_clk + clks_until_overflow - 0x100 * clks_per_inc);
@@ -227,7 +229,7 @@ void age::gb_timer::stop_timer()
         update_state(); //! \todo may this trigger an interrupt?
     }
 
-    CLOG("timer stopped");
+    AGE_GB_CLOG_TIMER("timer stopped");
     m_clock_shift = 0;
     m_clk_timer_zero = gb_no_clock_cycle;
     m_clk_last_overflow = gb_no_clock_cycle;

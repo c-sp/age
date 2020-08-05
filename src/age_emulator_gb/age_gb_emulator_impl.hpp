@@ -52,7 +52,11 @@ class gb_emulator_impl
 
 public:
 
-    gb_emulator_impl(const uint8_vector &rom, gb_hardware hardware, bool dmg_green, pcm_vector &pcm_vec, screen_buffer &screen_buf);
+    gb_emulator_impl(const uint8_vector &rom,
+                     gb_hardware hardware,
+                     bool dmg_green,
+                     pcm_vector &pcm_vec,
+                     screen_buffer &screen_buffer);
 
     gb_test_info get_test_info() const;
 

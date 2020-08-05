@@ -38,18 +38,25 @@ struct pixel
     {}
 
     pixel(int r, int g, int b)
+        : pixel(r, g, b, 0xFF)
+    {}
+
+    pixel(int r, int g, int b, int a)
     {
         AGE_ASSERT(r >= 0);
         AGE_ASSERT(g >= 0);
         AGE_ASSERT(b >= 0);
+        AGE_ASSERT(a >= 0);
+
         AGE_ASSERT(r <= 255);
         AGE_ASSERT(g <= 255);
         AGE_ASSERT(b <= 255);
+        AGE_ASSERT(a <= 255);
 
-        m_rgba[0] = r & 0xFF;
-        m_rgba[1] = g & 0xFF;
-        m_rgba[2] = b & 0xFF;
-        m_rgba[3] = 0xFF;
+        m_rgba.m_r = r & 0xFF;
+        m_rgba.m_g = g & 0xFF;
+        m_rgba.m_b = b & 0xFF;
+        m_rgba.m_a = a & 0xFF;
     }
 
     bool operator==(const pixel &other) const
@@ -66,7 +73,13 @@ struct pixel
     // and 32 bit integer access to speed up operations like comparison.
     union
     {
-        uint8_t m_rgba[4];
+        struct
+        {
+            uint8_t m_r;
+            uint8_t m_g;
+            uint8_t m_b;
+            uint8_t m_a;
+        } m_rgba;
         uint32_t m_color;
     };
 };

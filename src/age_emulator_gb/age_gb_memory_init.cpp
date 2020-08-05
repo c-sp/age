@@ -33,6 +33,9 @@
 namespace
 {
 
+constexpr int gb_internal_ram_size = 8 * age::gb_internal_ram_bank_size;
+constexpr int gb_video_ram_size = 2 * age::gb_video_ram_bank_size;
+
 // memory dumps,
 // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
 

@@ -18,11 +18,6 @@
 
 #include "age_gb_cpu.hpp"
 
-#define CLOG_CPU(log) AGE_GB_CLOG(AGE_GB_CLOG_CPU)(log)
-#define CLOG_INTERRUPTS(log) AGE_GB_CLOG(AGE_GB_CLOG_INTERRUPTS)(log)
-
-
-
 namespace
 {
 
@@ -111,7 +106,6 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 #define READ_BYTE(destination, address) \
     { \
         TICK_MACHINE_CYCLE; \
-        m_bus.handle_events(); \
         destination = m_bus.read_byte((address) & 0xFFFF); \
     } \
     (void)0 // no-op to force semicolon when using this macro
@@ -119,7 +113,6 @@ constexpr int gb_hcs_flags = gb_hcs_half_carry + gb_hcs_subtract;
 #define WRITE_BYTE(address, value) \
     { \
         TICK_MACHINE_CYCLE; \
-        m_bus.handle_events(); \
         m_bus.write_byte((address) & 0xFFFF, (value) & 0xFF); \
     } \
     (void)0 // no-op to force semicolon when using this macro
@@ -833,12 +826,12 @@ void age::gb_cpu::set_flags(int from_value)
     LOAD_FLAGS_FROM(from_value);
 }
 
-void age::gb_cpu::push_byte(int byte)
+void age::gb_cpu::tick_push_byte(int byte)
 {
     PUSH_BYTE(byte);
 }
 
-age::uint8_t age::gb_cpu::read_byte(int address)
+age::uint8_t age::gb_cpu::tick_read_byte(int address)
 {
     uint8_t result;
     READ_BYTE(result, address);
@@ -858,9 +851,9 @@ age::uint8_t age::gb_cpu::read_byte(int address)
 void age::gb_cpu::execute_prefetched()
 {
     // Let PC point to the byte after the prefetched opcode.
-    // HALT may undo this PC increment after prefetching the next opcode.
+    // HALT bug: let PC point to the opcode after HALT
+    //           (that opcode is also already prefetched)
     m_pc++;
-    int pc_halt_modifier = 0;
 
     int opcode = m_prefetched_opcode;
     switch (opcode)
@@ -869,9 +862,9 @@ void age::gb_cpu::execute_prefetched()
             // invalid opcode, stay here and freeze CPU
             --m_pc;
             m_cpu_state |= gb_cpu_state_frozen;
-            CLOG_CPU("invalid opcode " << AGE_LOG_HEX8(opcode)
-                     << " at PC = " << AGE_LOG_HEX16(m_pc)
-                     << ", CPU frozen");
+            AGE_GB_CLOG_CPU("invalid opcode " << AGE_LOG_HEX8(opcode)
+                            << " at PC = " << AGE_LOG_HEX16(m_pc)
+                            << ", CPU frozen");
             break;
 
         // increment & decrement
@@ -1128,7 +1121,6 @@ void age::gb_cpu::execute_prefetched()
         case 0xD9: // RETI
             RET;
             m_interrupts.set_ime(true);
-            CLOG_INTERRUPTS("interrupts enabled");
             break;
 
         case 0xC0: RET_IF(!ZERO_FLAGGED); break;
@@ -1175,13 +1167,33 @@ void age::gb_cpu::execute_prefetched()
         case 0x3F: m_carry_indicator ^= 0x100; m_hcs_flags = m_hcs_operand = 0; break;  // CCF
 
         case 0x76: // HALT
+            AGE_GB_CLOG_IRQS("executing HALT instruction ...");
+            // In case of any irq during HALT the "HALT bug" is triggered
+            // even if interrupt dispatching is enabled.
+            //
+            //! \todo examine this further (Gambatte test roms):
+            //      late_m0int_halt_m0stat_scx2_*
+            //      late_m0int_halt_m0stat_scx3_*
+            m_clock.tick_machine_cycle();
+            m_bus.handle_events();
+            m_prefetched_opcode = m_bus.read_byte(m_pc);
+
             m_interrupts.halt();
-            if (!m_interrupts.halted() && !m_interrupts.get_ime())
+            if (!m_interrupts.halted())
             {
-                pc_halt_modifier = -1;
-                CLOG_INTERRUPTS("\"HALT bug\", not incrementing PC");
+                AGE_GB_CLOG_IRQS("    * \"HALT bug\", decrementing PC");
+                // IRQ: handler returns to HALT instruction
+                // else: PC is incremented for next instruction
+                //       and points to the byte after HALT
+                --m_pc;
             }
-            break;
+            else if (!m_device.is_cgb())
+            {
+                m_clock.tick_machine_cycle();
+                m_clock.tick_machine_cycle();
+                AGE_GB_CLOG_IRQS("    * extra DMG HALT delay");
+            }
+            return;
 
         case 0xF3: // DI
             m_interrupts.set_ime(false);
@@ -1546,5 +1558,4 @@ void age::gb_cpu::execute_prefetched()
     }
 
     READ_BYTE(m_prefetched_opcode, m_pc);
-    m_pc = (m_pc + pc_halt_modifier) & 0xFFFF;
 }

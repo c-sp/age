@@ -180,6 +180,7 @@ private:
     int m_dma_source = 0;
     int m_dma_destination = 0;
     bool m_during_dma = false;
+    bool m_hdma_active = false;
 };
 
 } // namespace age
