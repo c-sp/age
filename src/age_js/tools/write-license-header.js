@@ -1,5 +1,5 @@
 //
-// Copyright 2019 Christoph Sprenger
+// Copyright 2020 Christoph Sprenger
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 //
 // This is a utility script for adding a license header to all AGE source files.
 // Run with:
-//      node write_license_header.js
+//      node write-license-header.js
 //
 
 'use strict';
