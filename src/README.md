@@ -12,7 +12,7 @@ Loose coupling is achieved by including shared C++ header files found at
 The following _groups_ exist:
 
 * **`age_common`** contains basic code used throughout the AGE project,
-    like for example AGE-specific data types.
+    like AGE-specific data types.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
 * **[`age_emulator_gb`](/src/age_emulator_gb)** contains the actual gameboy
@@ -20,7 +20,7 @@ The following _groups_ exist:
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
 * **`age_js`** contains the
-    [AGE browser application](https://csprenger.gitlab.io/AGE/) written in
+    [AGE browser application](https://c-sp.github.io/AGE/) written in
     [TypeScript](https://www.typescriptlang.org/index.html) and using
     [Angular](https://angular.io).
     This _group_ requires the `age_wasm` binaries to run the emulator inside
@@ -32,7 +32,7 @@ The following _groups_ exist:
 * **`age_wasm`** contains a [WebAssembly](https://webassembly.org/) interface
     to `age_emulator_gb`.
     It depends on [emscripten](https://kripken.github.io/emscripten-site/) for
-    making specific C++ methods callable from JavaScript.
+    making the emulator callable from JavaScript.
 
 
 ## C++ Code Quality
