@@ -130,15 +130,6 @@ age_js()
 
     # run the requested NG command
     npm run ${CMD} -- ${PARAMS}
-
-    # in case of a build, gzip all generated files
-    # so that web servers can serve compressed content
-    # (GitLab pages: https://docs.gitlab.com/ee/user/project/pages/introduction.html#serving-compressed-assets)
-    if [ ${CMD} = ${JS_BUILD} ]; then
-        OUT_DIR=$(out_dir js)
-        echo "compressing contents of $OUT_DIR"
-        npm run gzip-directory "$OUT_DIR"
-    fi
 }
 
 run_doxygen()
