@@ -95,8 +95,20 @@ jobs:
           key: ${{ runner.os }}-npm-${{ hashFiles('src/age_js/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
 
+      - name: base-href
+        id: base-href
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [ $REF == 'refs/heads/master' ]
+          then
+            echo "::set-output name=base_href::/AGE"
+          else
+            echo "::set-output name=base_href::/AGE/$REF"
+          fi
+
       - name: build Web App
-        run: build/age_ci.sh js build --progress=false --base-href /AGE/
+        run: build/age_ci.sh js build --progress=false --base-href ${{ steps.base-href.outputs.base_href }}
 
       - name: upload JavaScript artifact
         uses: actions/upload-artifact@v1
