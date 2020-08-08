@@ -253,6 +253,9 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
 
+      - name: assemle PWA
+        run: build/age_ci.sh assemble-pwa
+
       - name: deploy PWA
         uses: JamesIves/github-pages-deploy-action@3.5.9
         with:
