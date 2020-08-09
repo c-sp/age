@@ -2,16 +2,17 @@
 
 # AGE - Another Gameboy Emulator
 
-AGE is a Gameboy emulator for Linux/Windows PCs and for your Browser.
+AGE is a [Gameboy emulator for your Browser](https://c-sp.github.io/AGE/)
+and for Linux/Windows PCs.
 
-The AGE desktop application is written in
-[C++14](https://en.cppreference.com/w/cpp/14) and built with
-[Qt](https://www.qt.io/).
 The AGE Web Application is written in
 [TypeScript](https://www.typescriptlang.org/) and makes use of
 [Angular](https://angular.io) and
 [WebAssembly](https://webassembly.org/)
 (compiled with [Emscripten](https://emscripten.org)).
+The AGE desktop application is written in
+[C++14](https://en.cppreference.com/w/cpp/14) and built with
+[Qt](https://www.qt.io/).
 
 [AGE documentation](docs/README.md)
 is still in an early stage and mostly made of test rom analyses.

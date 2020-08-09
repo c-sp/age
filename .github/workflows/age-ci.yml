@@ -95,8 +95,20 @@ jobs:
           key: ${{ runner.os }}-npm-${{ hashFiles('src/age_js/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
 
+      - name: base-href
+        id: base-href
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [ $REF == 'refs/heads/master' ]
+          then
+            echo "::set-output name=base_href::/AGE/"
+          else
+            echo "::set-output name=base_href::/AGE/$REF/"
+          fi
+
       - name: build Web App
-        run: build/age_ci.sh js build --progress=false --base-href /AGE/
+        run: build/age_ci.sh js build --progress=false --base-href ${{ steps.base-href.outputs.base_href }}
 
       - name: upload JavaScript artifact
         uses: actions/upload-artifact@v1
@@ -214,3 +226,54 @@ jobs:
 
       - name: run tests
         run: build/age_ci.sh test mooneye-gb
+
+
+  ###############################################################################
+  ##
+  ##   deploy
+  ##
+  ###############################################################################
+
+  deploy-pwa:
+    name: deploy AGE PWA
+    runs-on: ubuntu-20.04
+    needs: [build-js, build-wasm]
+    steps:
+      - name: checkout
+        # https://github.com/marketplace/actions/deploy-to-github-pages
+        # If you're using actions/checkout@v2 you must set persist-credentials
+        # to false in most cases for the deployment to work correctly.
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: gh-pages target folder
+        id: target-folder
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [ $REF == 'refs/heads/master' ]
+          then
+            echo "::set-output name=target_folder::"
+          else
+            echo "::set-output name=target_folder::$REF"
+          fi
+
+      - name: download artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: assemle PWA
+        run: build/age_ci.sh assemble-pwa
+
+      - name: deploy PWA
+        uses: JamesIves/github-pages-deploy-action@3.5.9
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: build/artifacts/pwa
+          TARGET_FOLDER: ${{ steps.target-folder.outputs.target_folder }}
+          CLEAN: true
+          CLEAN_EXCLUDE: '["refs"]'

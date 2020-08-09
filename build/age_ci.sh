@@ -19,6 +19,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_JS $JS_BUILD"
     echo "    $0 $CMD_JS $JS_TEST"
     echo "    $0 $CMD_JS $JS_LINT"
+    echo "    $0 $CMD_ASSEMBLE_PWA"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_BLARGG"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE"
@@ -132,6 +133,17 @@ age_js()
     npm run ${CMD} -- ${PARAMS}
 }
 
+assemble_pwa()
+{
+    JS_DIR=$(out_dir js)
+    WASM_DIR=$(out_dir wasm)
+
+    switch_to_out_dir pwa
+    cp -r ${JS_DIR}/* .
+    cp ${WASM_DIR}/age_wasm.js assets/
+    cp ${WASM_DIR}/age_wasm.wasm assets/
+}
+
 run_doxygen()
 {
     # make sure that the doxygen out-dir exists and is empty
@@ -212,6 +224,7 @@ TESTS_MOONEYE_GB=mooneye-gb
 CMD_QT=qt
 CMD_WASM=wasm
 CMD_JS=js
+CMD_ASSEMBLE_PWA=assemble-pwa
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -237,8 +250,7 @@ case ${CMD} in
     ${CMD_QT}) build_age_qt $@ ;;
     ${CMD_WASM}) build_age_wasm $@ ;;
     ${CMD_JS}) age_js $@ ;;
-    ${CMD_ASSEMBLE_PAGES}) assemble_pages $@ ;;
-    ${CMD_COLLECT_PAGES}) collect_pages $@ ;;
+    ${CMD_ASSEMBLE_PWA}) assemble_pwa $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
     ${CMD_TEST}) run_tests $@ $@ ;;
 
