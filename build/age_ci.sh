@@ -38,12 +38,6 @@ out_dir()
     echo "$BUILD_DIR/artifacts/$1"
 }
 
-age_js_src_dir()
-{
-    AGE_JS_DIR=`cd "$BUILD_DIR/../src/age_js" && pwd -P`
-    echo "$AGE_JS_DIR"
-}
-
 switch_to_out_dir()
 {
     OUT_DIR=$(out_dir $1)
@@ -77,7 +71,7 @@ build_age_qt()
     switch_to_out_dir qt
     echo "running AGE qt $1 build in \"`pwd -P`\" using $NUM_CORES cores"
 
-    qmake "CONFIG+=$1" "$BUILD_DIR/qt/age.pro"
+    qmake "CONFIG+=$1" "$REPO_DIR/src/age.pro"
     make -j ${NUM_CORES}
 }
 
@@ -95,6 +89,8 @@ build_age_wasm()
         exit 1
     fi
 
+    # to set EMSCRIPTEN manually for testing:
+    # export EMSCRIPTEN=<emsdk>/upstream/emscripten
     TOOLCHAIN_FILE="$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake"
     if ! [ -f "$TOOLCHAIN_FILE" ]; then
         echo "The emscripten toolchain file could not be found:"
@@ -105,7 +101,7 @@ build_age_wasm()
     switch_to_out_dir wasm
     echo "running AGE wasm $1 build in \"`pwd -P`\" using $NUM_CORES cores"
 
-    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$1 -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$BUILD_DIR/wasm"
+    emcmake cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$1 -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$REPO_DIR/src/age_wasm"
     make -j ${NUM_CORES}
 }
 
@@ -122,8 +118,7 @@ age_js()
         *) print_usage_and_exit ;;
     esac
 
-    AGE_JS_DIR=$(age_js_src_dir)
-    cd "$AGE_JS_DIR"
+    cd "$REPO_DIR/src-web/age_js"
     echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
 
     # make sure node_modules exists and is up to date
@@ -232,6 +227,7 @@ CMD_TEST=test
 # (used to determine the target directories of builds)
 BUILD_DIR=`dirname $0`
 BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
+REPO_DIR=`cd "$BUILD_DIR/.." && pwd -P`
 
 # get the number of CPU cores
 # (used for e.g. make)

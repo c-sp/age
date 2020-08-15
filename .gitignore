@@ -8,12 +8,12 @@ build/doxygen/html
 build/artifacts
 
 # AGE-JS
-src/age_js/dist
-src/age_js/node_modules
-src/age_js/npm-debug.log*
-src/age_js/src/assets/age_wasm*
-src/age_js/src/assets/icons/icon-*.png
-src/age_js/src/environments/version.ts
+node_modules
+src-web/age_js/dist
+src-web/age_js/npm-debug.log*
+src-web/age_js/src/assets/age_wasm*
+src-web/age_js/src/assets/icons/icon-*.png
+src-web/age_js/src/environments/version.ts
 
 # miscellaneous files
 Thumbs.db

@@ -1,9 +1,10 @@
 
-# AGE Source Code
+# AGE Desktop Application Source Code
 
 ## Structure
 
-AGE source code is structured into _groups_ of coherent code.
+The AGE desktop application source code is structured into _groups_ of coherent
+code.
 While code inside a _group_ may be tightly coupled,
 code of different _groups_ is only loosely coupled (if at all).
 Loose coupling is achieved by including shared C++ header files found at
@@ -19,12 +20,6 @@ The following _groups_ exist:
     emulation code.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
-* **`age_js`** contains the
-    [AGE browser application](https://c-sp.github.io/AGE/) written in
-    [TypeScript](https://www.typescriptlang.org/index.html) and using
-    [Angular](https://angular.io).
-    This _group_ requires the `age_wasm` binaries to run the emulator inside
-    the browser.
 * **`age_qt_emu_test`** contains an emulator test runner created with
     [Qt](https://www.qt.io/).
 * **`age_qt_gui`** contains the AGE desktop application created with

@@ -31,7 +31,7 @@ _EMSCRIPTEN = $$(EMSCRIPTEN)
 
 
 SOURCES += \
-    ../../../src/age_wasm/age_wasm.cpp
+    age_wasm.cpp
 
 HEADERS += \
 
@@ -42,5 +42,4 @@ unix {
 }
 
 DISTFILES += \
-    ../../wasm/CMakeLists.txt \
-    ../../wasm/run_cmake.sh
+    CMakeLists.txt
