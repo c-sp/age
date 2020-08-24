@@ -16,18 +16,16 @@ The following _groups_ exist:
     like AGE-specific data types.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
-* **[`age_emulator_gb`](/src/age_emulator_gb)** contains the actual gameboy
-    emulation code.
+* **`age_emulator_gb`** is the actual gameboy emulator.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
-* **`age_qt_emu_test`** contains an emulator test runner created with
+* **`age_qt_emu_test`** is an emulator test runner created with
     [Qt](https://www.qt.io/).
-* **`age_qt_gui`** contains the AGE desktop application created with
+* **`age_qt_gui`** is the AGE desktop application created with
     [Qt](https://www.qt.io/).
-* **`age_wasm`** contains a [WebAssembly](https://webassembly.org/) interface
-    to `age_emulator_gb`.
-    It depends on [emscripten](https://kripken.github.io/emscripten-site/) for
-    making the emulator callable from JavaScript.
+* **`age_wasm`** is a [WebAssembly](https://webassembly.org/) interface to
+    `age_emulator_gb`.
+    It is built with [emscripten](https://kripken.github.io/emscripten-site/).
 
 
 ## C++ Code Quality

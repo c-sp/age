@@ -1,6 +1,0 @@
-// this tsconfig exists only to keep WebStorm from using the tsconfig.spec.json
-// on the upper level which contains the "age-lib" path mapping
-// (using the "age-lib" path mapping within age-lib may cause circular dependencies)
-{
-  "extends": "../../tsconfig.json"
-}

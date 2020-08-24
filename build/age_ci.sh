@@ -16,10 +16,6 @@ print_usage_and_exit()
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_JS $JS_BUILD"
-    echo "    $0 $CMD_JS $JS_TEST"
-    echo "    $0 $CMD_JS $JS_LINT"
-    echo "    $0 $CMD_ASSEMBLE_PWA"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_BLARGG"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE"
@@ -105,40 +101,6 @@ build_age_wasm()
     make -j ${NUM_CORES}
 }
 
-age_js()
-{
-    CMD=$1
-    shift
-    PARAMS="$@"
-
-    case ${CMD} in
-        ${JS_BUILD}) PARAMS="--prod --output-path $(out_dir js) $PARAMS" ;;
-        ${JS_TEST}) PARAMS="--watch=false $PARAMS" ;;
-        ${JS_LINT}) ;;
-        *) print_usage_and_exit ;;
-    esac
-
-    cd "$REPO_DIR/src-web/age_js"
-    echo "running AGE-JS task in \"`pwd -P`\": $CMD $PARAMS"
-
-    # make sure node_modules exists and is up to date
-    npm ci
-
-    # run the requested NG command
-    npm run ${CMD} -- ${PARAMS}
-}
-
-assemble_pwa()
-{
-    JS_DIR=$(out_dir js)
-    WASM_DIR=$(out_dir wasm)
-
-    switch_to_out_dir pwa
-    cp -r ${JS_DIR}/* .
-    cp ${WASM_DIR}/age_wasm.js assets/
-    cp ${WASM_DIR}/age_wasm.wasm assets/
-}
-
 run_doxygen()
 {
     # make sure that the doxygen out-dir exists and is empty
@@ -208,18 +170,12 @@ QT_BUILD_TYPE_RELEASE=release
 WASM_BUILD_TYPE_DEBUG=Debug
 WASM_BUILD_TYPE_RELEASE=Release
 
-JS_BUILD=build
-JS_TEST=test
-JS_LINT=lint
-
 TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye-gb
 
 CMD_QT=qt
 CMD_WASM=wasm
-CMD_JS=js
-CMD_ASSEMBLE_PWA=assemble-pwa
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
 
@@ -245,8 +201,6 @@ fi
 case ${CMD} in
     ${CMD_QT}) build_age_qt $@ ;;
     ${CMD_WASM}) build_age_wasm $@ ;;
-    ${CMD_JS}) age_js $@ ;;
-    ${CMD_ASSEMBLE_PWA}) assemble_pwa $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
     ${CMD_TEST}) run_tests $@ $@ ;;
 
