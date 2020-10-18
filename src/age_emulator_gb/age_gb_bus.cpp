@@ -162,9 +162,15 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     else if (address < 0xFEA0)
     {
         handle_events();
-        if (!m_oam_dma_active)
+        int oam_offset = address - 0xFE00;
+        if (m_oam_dma_active || !m_lcd.is_oam_accessible())
         {
-            result = m_lcd.read_oam(address - 0xFE00);
+            AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(oam_offset)
+                                << ": 0xFF, not accessible now");
+        }
+        else
+        {
+            result = m_lcd.read_oam(oam_offset);
         }
     }
     // 0xFEA0 - 0xFFFF : high ram & IE
@@ -304,6 +310,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
                                  << " ignored (not accessible)");
             return;
         }
+        m_lcd.update_state();
         m_memory.write_byte(address, byte);
         AGE_GB_CLOG_LCD_VRAM("VRAM write: [" << AGE_LOG_HEX16(address)
                              << "]=" << AGE_LOG_HEX8(byte));
@@ -316,10 +323,14 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     else if (address < 0xFEA0)
     {
         handle_events();
-        if (!m_oam_dma_active)
+        int oam_offset = address - 0xFE00;
+        if (m_oam_dma_active || !m_lcd.is_oam_accessible())
         {
-            m_lcd.write_oam(address - 0xFE00, byte);
+            AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(oam_offset)
+                                << " ignored, not accessible now");
+            return;
         }
+        m_lcd.write_oam(oam_offset, byte);
     }
     // 0xFEA0 - 0xFFFF : high ram & IE
     else if ((address & 0x0180) != 0x0100)
@@ -636,6 +647,8 @@ void age::gb_bus::set_back_clock(int clock_cycle_offset)
 
 void age::gb_bus::write_dma(uint8_t value)
 {
+    AGE_GB_CLOG_LCD_PORTS("write DMA = " << AGE_LOG_HEX8(value));
+
     //
     // verified by mooneye-gb tests
     //
@@ -738,6 +751,7 @@ void age::gb_bus::handle_oam_dma()
     for (int i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
     {
         uint8_t byte = read_byte((m_oam_dma_address + i) & 0xFFFF);
+        //! \todo apparently oam dma is not blocked by mode 2 and 3, is there any test rom for this?
         m_lcd.write_oam(i, byte);
     }
 

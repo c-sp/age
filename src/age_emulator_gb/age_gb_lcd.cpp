@@ -41,12 +41,6 @@ age::gb_lcd::gb_lcd(const gb_device &device,
 
 age::uint8_t age::gb_lcd::read_oam(int offset)
 {
-    if (!is_oam_accessible())
-    {
-        AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(offset)
-                            << ": 0xFF (not accessible now)");
-        return 0xFF;
-    }
     auto result = m_sprites.read_oam(offset);
     AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(offset)
                         << ": " << AGE_LOG_HEX8(result));
@@ -55,16 +49,7 @@ age::uint8_t age::gb_lcd::read_oam(int offset)
 
 void age::gb_lcd::write_oam(int offset, uint8_t value)
 {
-    if (!is_oam_accessible())
-    {
-        AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
-                            << " ignored, not accessible now");
-        return;
-    }
-    if (m_scanline.lcd_is_on())
-    {
-        update_state();
-    }
+    update_state();
     AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
                         << ": " << AGE_LOG_HEX8(value));
     m_sprites.write_oam(offset, value);

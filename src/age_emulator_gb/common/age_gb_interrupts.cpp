@@ -72,7 +72,8 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
                      <<" requested on clock cycle " << irq_clock_cycle);
     m_if |= intr_bit;
 
-    if (!m_halted)
+    //! \todo terminate halt only for m_if & m_ie != 0 (makes sense, are there any test roms for this?)
+    if (!m_halted || !(m_if & m_ie))
     {
         return;
     }

@@ -1120,6 +1120,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0xD9: // RETI
             RET;
+            AGE_GB_CLOG_IRQS("enable interrupt dispatching with RETI");
             m_interrupts.set_ime(true);
             break;
 
@@ -1196,6 +1197,7 @@ void age::gb_cpu::execute_prefetched()
             return;
 
         case 0xF3: // DI
+            AGE_GB_CLOG_IRQS("disable interrupt dispatching with DI");
             m_interrupts.set_ime(false);
             m_cpu_state &= ~gb_cpu_state_ei;
             break;

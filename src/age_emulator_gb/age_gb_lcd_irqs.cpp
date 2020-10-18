@@ -190,7 +190,8 @@ void age::gb_lcd_irqs::trigger_irq_lyc()
     AGE_ASSERT(clk_diff > 0);
 
     AGE_GB_CLOG_IRQS("    * next LYC IRQ in " << clk_diff
-                     << " clock cycles (" << m_clk_next_irq_lyc << ")");
+                     << " clock cycles (" << m_clk_next_irq_lyc << ")"
+                     << " for LYC " << AGE_LOG_HEX8(m_scanline.m_lyc));
 
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
 }

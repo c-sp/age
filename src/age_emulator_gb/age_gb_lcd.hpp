@@ -178,6 +178,7 @@ public:
 
     uint8_t read_oam(int offset);
     void write_oam(int offset, uint8_t value);
+    bool is_oam_accessible();
     bool is_video_ram_accessible();
 
     void update_state();
@@ -189,7 +190,6 @@ public:
 
 private:
 
-    bool is_oam_accessible();
     void calculate_scanline(int &scanline, int &scanline_clks);
 
     uint8_t get_stat_mode(int scanline, int scanline_clks, int scx) const;
