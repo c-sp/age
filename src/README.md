@@ -3,17 +3,16 @@
 
 ## Structure
 
-The AGE desktop application source code is structured into _groups_ of coherent
-code.
+The AGE source code is structured into _groups_ of coherent code.
 While code inside a _group_ may be tightly coupled,
 code of different _groups_ is only loosely coupled (if at all).
 Loose coupling is achieved by including shared C++ header files found at
 `include`.
 
-The following _groups_ exist:
+Current _groups_:
 
-* **`age_common`** contains basic code used throughout the AGE project,
-    like AGE-specific data types.
+* **`age_common`** contains basic code used throughout the AGE project like
+    common data types.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
 * **`age_emulator_gb`** is the actual gameboy emulator.
@@ -25,12 +24,13 @@ The following _groups_ exist:
     [Qt](https://www.qt.io/).
 * **`age_wasm`** is a [WebAssembly](https://webassembly.org/) interface to
     `age_emulator_gb`.
-    It is built with [emscripten](https://kripken.github.io/emscripten-site/).
+    It is built with [emscripten](https://kripken.github.io/emscripten-site/)
+    and [CMake](https://cmake.org/).
 
 
 ## C++ Code Quality
 
-Do not violate the **single responsibility principle**.
+1. Do not violate the **single responsibility principle**.
     Unrelated functionality must not be grouped together
     (i.e. in the same file).
 
@@ -44,13 +44,12 @@ Do not violate the **single responsibility principle**.
 ### Includes
 
 1. **Use include guards** in every header file.
-    Use the file's name converted to upper snake case for it's include
-    guard,
-    e.g. use the include guard `AGE_FOO_HPP` for a file named `age_foo.hpp`.
-1. **Do not include more than a file needs.**
-    Code required just for cpp files must not bloat header files.
+    Use the file's name converted to upper snake case as include guard,
+    e.g. use `AGE_FOO_HPP` for guarding `age_foo.hpp`.
+1. **Do not include more than what a file needs.**
+    Code required only for a cpp file must not bloat header files.
 1. **Include everything a file needs.**
-    Don't rely on transitive includes or include order in cpp files.
+    Don't rely on transitive includes or the include order in cpp files.
 
 ### Data Types
 
@@ -75,7 +74,8 @@ Do not violate the **single responsibility principle**.
 
 **signed vs. unsigned**
 
-1. **Avoid `unsigned`** for [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
+1. **Do not use `unsigned`** for
+    [ensuring that a value is non-negative](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-nonnegative).
 1. **Use `signed`** until there is a very specific reason to not do so.
     Most arithmetic is [assumed to be `signed`](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es102-use-signed-types-for-arithmetic).
     `signed` integer overflow being undefined

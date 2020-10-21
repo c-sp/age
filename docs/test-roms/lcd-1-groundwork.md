@@ -6,7 +6,7 @@
 Prerequisites: [clocks, cycles and state][l-a1]
 
 * align the LCD (working at T4-cycles) to M-cycles
-* TL;DR: the LCD seems
+* TL;DR: TODO
 
 ### CGB
 
