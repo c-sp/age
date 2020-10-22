@@ -47,7 +47,6 @@ private:
 
     const gb_clock &m_clock;
     int m_div_offset = 0;
-    int8_t m_clk_shift = 8;
 };
 
 } // namespace age
