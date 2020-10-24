@@ -79,25 +79,10 @@ build_age_wasm()
         *) print_usage_and_exit ;;
     esac
 
-    if ! [ -n "$EMSCRIPTEN" ]; then
-        echo "EMSCRIPTEN is not set!"
-        echo "We require this variable to point to the emscripten repository."
-        exit 1
-    fi
-
-    # to set EMSCRIPTEN manually for testing:
-    # export EMSCRIPTEN=<emsdk>/upstream/emscripten
-    TOOLCHAIN_FILE="$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake"
-    if ! [ -f "$TOOLCHAIN_FILE" ]; then
-        echo "The emscripten toolchain file could not be found:"
-        echo "$TOOLCHAIN_FILE"
-        exit 1
-    fi
-
     switch_to_out_dir wasm
     echo "running AGE wasm $1 build in \"`pwd -P`\""
 
-    emcmake cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$1 -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$REPO_DIR/src/age_wasm"
+    emcmake cmake -DCMAKE_BUILD_TYPE=$1 "$REPO_DIR/src/age_wasm"
     make -j -l 5
 }
 

@@ -6,17 +6,10 @@
 ##############################################
 
 #
-# The emscripten environment has to be set up first.
-# (emsdk/emsdk_env.sh)
-#
-
-#
 # CMake Links:
 #
 #   CMake Documentation: https://cmake.org/cmake/help/v3.10/
 #   CMake Tutorial:      https://cmake.org/cmake-tutorial/
-#
-#   Emscripten & CMake: https://stackoverflow.com/a/45277855
 #
 
 cmake_minimum_required (VERSION 3.7.2)
@@ -101,9 +94,8 @@ target_link_libraries(age_wasm age_emulator_gb)
 # ENVIRONMENT=web  to omit node/shell/web-worker code
 #
 set(WASM_LINK_FLAGS "\
--s WASM=1 \
 -s ALLOW_MEMORY_GROWTH=1 \
--s NO_FILESYSTEM=1 \
+-s FILESYSTEM=0 \
 -s MODULARIZE=1 \
 -s EXPORT_ES6=1 \
 -s ENVIRONMENT=web \
