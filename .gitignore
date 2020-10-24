@@ -17,3 +17,4 @@ src-web/age_js/src/environments/version.ts
 
 # miscellaneous files
 Thumbs.db
+.DS_Store
