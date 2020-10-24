@@ -65,10 +65,10 @@ build_age_qt()
     esac
 
     switch_to_out_dir qt
-    echo "running AGE qt $1 build in \"`pwd -P`\" using $NUM_CORES cores"
+    echo "running AGE qt $1 build in \"`pwd -P`\""
 
     qmake "CONFIG+=$1" "$REPO_DIR/src/age.pro"
-    make -j ${NUM_CORES}
+    make -j -l 5
 }
 
 build_age_wasm()
@@ -95,10 +95,10 @@ build_age_wasm()
     fi
 
     switch_to_out_dir wasm
-    echo "running AGE wasm $1 build in \"`pwd -P`\" using $NUM_CORES cores"
+    echo "running AGE wasm $1 build in \"`pwd -P`\""
 
     emcmake cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=$1 -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$REPO_DIR/src/age_wasm"
-    make -j ${NUM_CORES}
+    make -j -l 5
 }
 
 run_doxygen()
@@ -184,13 +184,6 @@ CMD_TEST=test
 BUILD_DIR=`dirname $0`
 BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
 REPO_DIR=`cd "$BUILD_DIR/.." && pwd -P`
-
-# get the number of CPU cores
-# (used for e.g. make)
-NUM_CORES=`grep -c '^processor' /proc/cpuinfo`
-if [ ${NUM_CORES} -lt 4 ]; then
-    NUM_CORES=4
-fi
 
 # check the command in the first parameter
 CMD=$1
