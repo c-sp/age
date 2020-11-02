@@ -147,9 +147,7 @@ private:
         AGE_ASSERT(m_wave_sample <= 15);
         AGE_ASSERT(m_volume <= 60);
 
-        int value = (m_volume > 0)
-                ? (2 * m_wave_sample * m_volume - 15 * 60) * int16_t_max
-                : 0;
+        int value = m_wave_sample * m_volume * int16_t_max;
         //
         // divider:
         //
