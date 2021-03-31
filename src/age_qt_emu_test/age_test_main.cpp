@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#include <optional>
+
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTimer>
@@ -33,21 +35,21 @@ constexpr const char *arg_test_file = "test-file";
 //
 //---------------------------------------------------------
 
-age::optional<age::test_type> parse_test_type(const QString &type_string)
+std::optional<age::test_type> parse_test_type(const QString &type_string)
 {
-    age::optional<age::test_type> result;
+    std::optional<age::test_type> result;
 
     if (type_string.compare(age::blargg) == 0)
     {
-        result.set(age::test_type::blargg_test);
+        result = age::test_type::blargg_test;
     }
     else if (type_string.compare(age::mooneye_gb) == 0)
     {
-        result.set(age::test_type::mooneye_test);
+        result = age::test_type::mooneye_test;
     }
     else if (type_string.compare(age::gambatte) == 0)
     {
-        result.set(age::test_type::gambatte_test);
+        result = age::test_type::gambatte_test;
     }
 
     return result;
@@ -119,8 +121,8 @@ void validate_arguments(const QCommandLineParser &parser,
 
     // parse the test-type
     QString test_type_string = parser.positionalArguments().at(0);
-    age::optional<age::test_type> type = parse_test_type(test_type_string);
-    if (!type.is_set())
+    std::optional<age::test_type> type = parse_test_type(test_type_string);
+    if (!type.has_value())
     {
         auto msg = QString("invalid ").append(arg_test_type)
                 .append(" '").append(test_type_string).append("'");
@@ -152,7 +154,7 @@ void validate_arguments(const QCommandLineParser &parser,
     }
 
     // the default value is never used as the test_type argument is mandatory
-    test_type = type.get(age::test_type::blargg_test);
+    test_type = type.value();
     num_threads = threads;
 }
 

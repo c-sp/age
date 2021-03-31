@@ -31,40 +31,6 @@
 namespace age
 {
 
-//!
-//! This template was created due to the lack of C++17 features.
-//! It's only purpose is to keep a flag next to a value to remember
-//! if that value has been explicitly set.
-//!
-template<typename _T>
-class optional
-{
-public:
-
-    bool is_set() const
-    {
-        return m_value_set;
-    }
-
-    _T get(_T default_value) const
-    {
-        return m_value_set ? m_value : default_value;
-    }
-
-    void set(_T t)
-    {
-        m_value = t;
-        m_value_set = true;
-    }
-
-private:
-
-    bool m_value_set = false;
-    _T m_value;
-};
-
-
-
 struct test_result
 {
     qint64 m_cycles_emulated = 0;

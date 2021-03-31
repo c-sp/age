@@ -69,8 +69,8 @@ set (SOURCES_AGE_WASM
 
 #####   C++ options
 
-# use C++14
-set(CMAKE_CXX_STANDARD 14)
+# use C++17
+set(CMAKE_CXX_STANDARD 17)
 
 # additional include directories
 include_directories (

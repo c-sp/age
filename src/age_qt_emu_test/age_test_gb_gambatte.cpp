@@ -15,6 +15,7 @@
 //
 
 #include <algorithm> // std::count
+#include <optional>
 
 #include <QChar>
 #include <QDir>
@@ -324,9 +325,9 @@ age::test_method gambatte_out_string_test(const age::uint8_vector &out_string, b
 //
 //---------------------------------------------------------
 
-age::optional<bool> parse_outaudio_flag(const QString &string, const QString &prefix)
+std::optional<bool> parse_outaudio_flag(const QString &string, const QString &prefix)
 {
-    age::optional<bool> result;
+    std::optional<bool> result;
 
     int index = string.indexOf(prefix, 0, Qt::CaseInsensitive);
     if (index >= 0)
@@ -337,13 +338,13 @@ age::optional<bool> parse_outaudio_flag(const QString &string, const QString &pr
         // 0 -> no audio output expected
         if (string.at(index) == '0')
         {
-            result.set(false);
+            result = false;
         }
 
         // 1 -> audio output expected
         else if (string.at(index) == '1')
         {
-            result.set(true);
+            result = true;
         }
     }
 
@@ -435,14 +436,14 @@ age::test_method gambatte_test(const QString &test_file_name, QString &result_fi
     // (based on gambatte/test/testrunner.cpp)
 
     // check if the test result is a string on the gameboy screen
-    age::optional<bool> outaudio_flag = parse_outaudio_flag(test_file_name, for_dmg ? "dmg08_outaudio" : "cgb04c_outaudio");
-    if (!outaudio_flag.is_set())
+    std::optional<bool> outaudio_flag = parse_outaudio_flag(test_file_name, for_dmg ? "dmg08_outaudio" : "cgb04c_outaudio");
+    if (!outaudio_flag.has_value())
     {
         outaudio_flag = parse_outaudio_flag(test_file_name, "dmg08_cgb04c_outaudio");
     }
-    if (outaudio_flag.is_set())
+    if (outaudio_flag.has_value())
     {
-        return gambatte_outaudio_test(outaudio_flag.get(true), for_dmg);
+        return gambatte_outaudio_test(outaudio_flag.value(), for_dmg);
     }
 
     // check if the test result is a string on the gameboy screen
