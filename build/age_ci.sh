@@ -108,7 +108,7 @@ build_age_wasm()
     echo "running AGE wasm $1 build in \"$(pwd -P)\""
 
     emcmake cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src/age_wasm"
-    make -j -l 5
+    make -j -l 5 age_wasm
 }
 
 run_doxygen()
