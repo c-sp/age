@@ -107,7 +107,7 @@ build_age_wasm()
     switch_to_out_dir wasm
     echo "running AGE wasm $1 build in \"$(pwd -P)\""
 
-    emcmake cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src/age_wasm"
+    emcmake cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_wasm
 }
 
