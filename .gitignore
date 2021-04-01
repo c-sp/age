@@ -6,6 +6,7 @@
 # build artifacts
 build/doxygen/html
 build/artifacts
+cmake-build-*
 
 # AGE-JS
 node_modules

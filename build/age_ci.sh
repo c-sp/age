@@ -14,6 +14,8 @@ print_usage_and_exit()
     echo "  builds:"
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_TEST_RUNNER $WASM_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_TEST_RUNNER $WASM_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
     echo "  tests:"
@@ -69,6 +71,21 @@ build_age_qt()
 
     qmake "CONFIG+=$1" "$REPO_DIR/src/age.pro"
     make -j -l 5
+}
+
+build_age_test_runner()
+{
+    case $1 in
+        ${WASM_BUILD_TYPE_DEBUG}) ;;
+        ${WASM_BUILD_TYPE_RELEASE}) ;;
+        *) print_usage_and_exit ;;
+    esac
+
+    switch_to_out_dir test_runner
+    echo "running AGE test_runner $1 build in \"`pwd -P`\""
+
+    cmake -DCMAKE_BUILD_TYPE=$1 "$REPO_DIR/src"
+    make -j -l 5 age_test_runner
 }
 
 build_age_wasm()
@@ -160,6 +177,7 @@ TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye-gb
 
 CMD_QT=qt
+CMD_TEST_RUNNER=test_runner
 CMD_WASM=wasm
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
@@ -178,6 +196,7 @@ fi
 
 case ${CMD} in
     ${CMD_QT}) build_age_qt $@ ;;
+    ${CMD_TEST_RUNNER}) build_age_test_runner $@ ;;
     ${CMD_WASM}) build_age_wasm $@ ;;
     ${CMD_DOXYGEN}) run_doxygen ;;
     ${CMD_TEST}) run_tests $@ $@ ;;
