@@ -85,7 +85,7 @@ include_directories (
 #add_library(age_emulator_gb STATIC ${SOURCES_AGE_EMULATOR_GB})
 #target_link_libraries(age_emulator_gb age_common)
 
-add_executable(age_wasm ${SOURCES_AGE_WASM})
+add_executable(age_wasm age_wasm.cpp)
 target_link_libraries(age_wasm age_emulator_gb)
 
 # MODULARIZE=1     to prevent using the global scope
