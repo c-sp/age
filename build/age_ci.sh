@@ -1,4 +1,12 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -e
+#
+# portable shebang:
+# https://www.cyberciti.biz/tips/finding-bash-perl-python-portably-using-env.html
+#
+# bash on macos:
+# https://itnext.io/upgrading-bash-on-macos-7138bd1066ba
+#
 
 
 
@@ -14,10 +22,10 @@ print_usage_and_exit()
     echo "  builds:"
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_TEST_RUNNER $WASM_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_TEST_RUNNER $WASM_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_WASM $WASM_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_TEST_RUNNER $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_TEST_RUNNER $CMAKE_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_WASM $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
     echo "    $0 $CMD_TEST $TESTS_BLARGG"
     echo "    $0 $CMD_TEST $TESTS_GAMBATTE"
@@ -29,7 +37,7 @@ print_usage_and_exit()
 
 out_dir()
 {
-    if ! [ -n "$1" ]; then
+    if [ -z "$1" ]; then
         echo "out-dir not specified"
         exit 1
     fi
@@ -38,7 +46,7 @@ out_dir()
 
 switch_to_out_dir()
 {
-    OUT_DIR=$(out_dir $1)
+    OUT_DIR=$(out_dir "$1")
 
     # remove previous build artifacts
     if [ -e "$OUT_DIR" ]; then
@@ -61,13 +69,13 @@ switch_to_out_dir()
 build_age_qt()
 {
     case $1 in
-        ${QT_BUILD_TYPE_DEBUG}) ;;
-        ${QT_BUILD_TYPE_RELEASE}) ;;
+        "${QT_BUILD_TYPE_DEBUG}") ;;
+        "${QT_BUILD_TYPE_RELEASE}") ;;
         *) print_usage_and_exit ;;
     esac
 
     switch_to_out_dir qt
-    echo "running AGE qt $1 build in \"`pwd -P`\""
+    echo "running AGE qt $1 build in \"$(pwd -P)\""
 
     qmake "CONFIG+=$1" "$REPO_DIR/src/age.pro"
     make -j -l 5
@@ -76,30 +84,30 @@ build_age_qt()
 build_age_test_runner()
 {
     case $1 in
-        ${WASM_BUILD_TYPE_DEBUG}) ;;
-        ${WASM_BUILD_TYPE_RELEASE}) ;;
+        "${CMAKE_BUILD_TYPE_DEBUG}") ;;
+        "${CMAKE_BUILD_TYPE_RELEASE}") ;;
         *) print_usage_and_exit ;;
     esac
 
     switch_to_out_dir test_runner
-    echo "running AGE test_runner $1 build in \"`pwd -P`\""
+    echo "running AGE test_runner $1 build in \"$(pwd -P)\""
 
-    cmake -DCMAKE_BUILD_TYPE=$1 "$REPO_DIR/src"
+    cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_test_runner
 }
 
 build_age_wasm()
 {
     case $1 in
-        ${WASM_BUILD_TYPE_DEBUG}) ;;
-        ${WASM_BUILD_TYPE_RELEASE}) ;;
+        "${CMAKE_BUILD_TYPE_DEBUG}") ;;
+        "${CMAKE_BUILD_TYPE_RELEASE}") ;;
         *) print_usage_and_exit ;;
     esac
 
     switch_to_out_dir wasm
-    echo "running AGE wasm $1 build in \"`pwd -P`\""
+    echo "running AGE wasm $1 build in \"$(pwd -P)\""
 
-    emcmake cmake -DCMAKE_BUILD_TYPE=$1 "$REPO_DIR/src/age_wasm"
+    emcmake cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src/age_wasm"
     make -j -l 5
 }
 
@@ -112,9 +120,9 @@ run_doxygen()
     # based on the current directory.
     # Thus we have to change into the doxygen configuration directory for
     # doxygen to work properly.
-    OUT_DIR=`pwd -P`
+    OUT_DIR=$(pwd -P)
     cd "$BUILD_DIR/doxygen"
-    echo "running doxygen in \"`pwd -P`\""
+    echo "running doxygen in \"$(pwd -P)\""
 
     doxygen doxygen_config
 
@@ -125,9 +133,9 @@ run_doxygen()
 run_tests()
 {
     case $1 in
-        ${TESTS_BLARGG}) ;;
-        ${TESTS_GAMBATTE}) ;;
-        ${TESTS_MOONEYE_GB}) ;;
+        "${TESTS_BLARGG}") ;;
+        "${TESTS_GAMBATTE}") ;;
+        "${TESTS_MOONEYE_GB}") ;;
         *) print_usage_and_exit ;;
     esac
 
@@ -155,7 +163,7 @@ run_tests()
     fi
 
     # run the tests
-    ${TEST_EXEC} --ignore-list "$BUILD_DIR/tests_to_ignore.txt" $1 $SUITE_DIR
+    ${TEST_EXEC} --ignore-list "$BUILD_DIR/tests_to_ignore.txt" "$1" "$SUITE_DIR"
 }
 
 
@@ -169,8 +177,8 @@ run_tests()
 QT_BUILD_TYPE_DEBUG=debug
 QT_BUILD_TYPE_RELEASE=release
 
-WASM_BUILD_TYPE_DEBUG=Debug
-WASM_BUILD_TYPE_RELEASE=Release
+CMAKE_BUILD_TYPE_DEBUG=Debug
+CMAKE_BUILD_TYPE_RELEASE=Release
 
 TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
@@ -184,9 +192,9 @@ CMD_TEST=test
 
 # get the AGE build directory based on the path of this script
 # (used to determine the target directories of builds)
-BUILD_DIR=`dirname $0`
-BUILD_DIR=`cd "$BUILD_DIR" && pwd -P`
-REPO_DIR=`cd "$BUILD_DIR/.." && pwd -P`
+BUILD_DIR=$(dirname "$0")
+BUILD_DIR=$(cd "$BUILD_DIR" && pwd -P)
+REPO_DIR=$(cd "$BUILD_DIR/.." && pwd -P)
 
 # check the command in the first parameter
 CMD=$1
@@ -195,11 +203,11 @@ if [ -n "$CMD" ]; then
 fi
 
 case ${CMD} in
-    ${CMD_QT}) build_age_qt $@ ;;
-    ${CMD_TEST_RUNNER}) build_age_test_runner $@ ;;
-    ${CMD_WASM}) build_age_wasm $@ ;;
-    ${CMD_DOXYGEN}) run_doxygen ;;
-    ${CMD_TEST}) run_tests $@ $@ ;;
+    "${CMD_QT}") build_age_qt "$@" ;;
+    "${CMD_TEST_RUNNER}") build_age_test_runner "$@" ;;
+    "${CMD_WASM}") build_age_wasm "$@" ;;
+    "${CMD_DOXYGEN}") run_doxygen ;;
+    "${CMD_TEST}") run_tests "$@" ;;
 
     *) print_usage_and_exit ;;
 esac
