@@ -22,8 +22,8 @@ print_usage_and_exit()
     echo "  builds:"
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_TEST_RUNNER $CMAKE_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_TEST_RUNNER $CMAKE_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_TESTER $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_TESTER $CMAKE_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_WASM $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
@@ -81,7 +81,7 @@ build_age_qt()
     make -j -l 5
 }
 
-build_age_test_runner()
+build_age_tester()
 {
     case $1 in
         "${CMAKE_BUILD_TYPE_DEBUG}") ;;
@@ -89,11 +89,11 @@ build_age_test_runner()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir test_runner
-    echo "running AGE test_runner $1 build in \"$(pwd -P)\""
+    switch_to_out_dir age_tester
+    echo "running AGE age_tester $1 build in \"$(pwd -P)\""
 
     cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
-    make -j -l 5 age_test_runner
+    make -j -l 5 age_tester
 }
 
 build_age_wasm()
@@ -185,7 +185,7 @@ TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye-gb
 
 CMD_QT=qt
-CMD_TEST_RUNNER=test_runner
+CMD_TESTER=tester
 CMD_WASM=wasm
 CMD_DOXYGEN=doxygen
 CMD_TEST=test
@@ -204,7 +204,7 @@ fi
 
 case ${CMD} in
     "${CMD_QT}") build_age_qt "$@" ;;
-    "${CMD_TEST_RUNNER}") build_age_test_runner "$@" ;;
+    "${CMD_TESTER}") build_age_tester "$@" ;;
     "${CMD_WASM}") build_age_wasm "$@" ;;
     "${CMD_DOXYGEN}") run_doxygen ;;
     "${CMD_TEST}") run_tests "$@" ;;
