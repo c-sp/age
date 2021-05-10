@@ -45,17 +45,17 @@ jobs:
 #          path: ${{ env.ARTIFACT_PATH }}
 
 
-  build-test-runner:
-    name: build test runner binary
+  build-tester:
+    name: build tester binary
     runs-on: ubuntu-20.04
     steps:
       - name: checkout code
         uses: actions/checkout@v2
 
       - name: build binaries
-        run: build/age_ci.sh test_runner Release
+        run: build/age_ci.sh tester Release
 
-      - name: upload test runner artifact
+      - name: upload tester artifact
         uses: actions/upload-artifact@v1
         with:
           name: ${{ env.ARTIFACT_NAME }}
