@@ -23,8 +23,10 @@
 #include <emulator/age_gb_emulator.hpp>
 
 #include <filesystem>
+#include <functional>
 #include <memory> // shared_ptr
 #include <string>
+#include <vector>
 
 
 

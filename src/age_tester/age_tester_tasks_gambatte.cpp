@@ -16,6 +16,7 @@
 
 #include "age_tester_tasks.hpp"
 
+#include <algorithm>
 #include <optional>
 
 
