@@ -10,4 +10,11 @@ add_executable(
         age_tester_thread_pool.hpp
 )
 
-target_link_libraries(age_tester age_emulator_gb age_common)
+# Find pthreads on e.g. Ubuntu,
+# based on:
+#   https://stackoverflow.com/questions/1620918/cmake-and-libpthread
+#   https://cmake.org/cmake/help/v3.1/module/FindThreads.html
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+target_link_libraries(age_tester PRIVATE Threads::Threads age_emulator_gb age_common)
