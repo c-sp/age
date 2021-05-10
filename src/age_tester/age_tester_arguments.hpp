@@ -1,0 +1,61 @@
+//
+// Copyright 2021 Christoph Sprenger
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#ifndef AGE_TESTER_ARGUMENTS_HPP
+#define AGE_TESTER_ARGUMENTS_HPP
+
+#include <filesystem>
+#include <string>
+#include <vector>
+
+
+
+namespace age::tester
+{
+    struct options
+    {
+        bool m_acid2 = false;      //!< run cgb-acid2 and dmg-acid2 tests
+        bool m_blargg = false;     //!< run Blargg tests
+        bool m_gambatte = false;   //!< run Gambatte tests
+        bool m_mealybug = false;   //!< run Mealybug Tearoom tests
+        bool m_mooneye_gb = false; //!< run Mooneye GB tests
+
+        //!
+        //! path to the gameboy-test-roms test suite,
+        //! see also: https://github.com/c-sp/gameboy-test-roms
+        //!
+        std::filesystem::path m_test_suite_path = {};
+
+        std::string m_whitelist = {};
+        std::string m_blacklist = {};
+
+        bool m_help = false;
+        bool m_print_passed = false;
+        bool m_print_failed = false;
+        std::vector<std::string> m_unknown_options = {};
+        std::vector<std::string> m_invalid_arg_options = {};
+    };
+
+
+    void print_help(int argc, char **argv);
+
+    options parse_arguments(int argc, char **argv);
+
+} // namespace age::tester
+
+
+
+#endif // AGE_TESTER_ARGUMENTS_HPP

@@ -1,0 +1,225 @@
+###
+###   gameboy-test-roms blacklist
+###
+###   see also: https://github.com/c-sp/gameboy-test-roms
+###
+
+
+
+##################################################################
+###
+###   blargg
+###
+
+### outdated tests
+### (we run the "-2" test instead)
+
+/blargg/mem_timing/
+
+### single test roms
+### (we run the test suites instead)
+
+/blargg/.*/rom_singles/
+/blargg/.*/individual/
+
+### failing tests
+
+/blargg/halt_bug.gb
+/blargg/interrupt_time/
+/blargg/oam_bug/
+
+
+
+##################################################################
+###
+###   mooneye-gb
+###
+
+### non-test roms
+
+/mooneye-gb/utils/dump_boot_hwio.gb
+/mooneye-gb/utils/bootrom_dumper.gb
+
+### Gameboy hardware not supported by AGE
+
+/mooneye-gb/acceptance/boot_div2-S.gb            # SGB not supported
+/mooneye-gb/acceptance/boot_div-dmg0.gb          # DMG0 not supported
+/mooneye-gb/acceptance/boot_div-S.gb             # SGB not supported
+/mooneye-gb/acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
+/mooneye-gb/acceptance/boot_hwio-S.gb            # SGB not supported
+/mooneye-gb/acceptance/boot_regs-dmg0.gb         # DMG0 not supported
+/mooneye-gb/acceptance/boot_regs-mgb.gb          # MGB not supported
+/mooneye-gb/acceptance/boot_regs-sgb.gb          # SGB not supported
+/mooneye-gb/acceptance/boot_regs-sgb2.gb         # SGB not supported
+/mooneye-gb/madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
+/mooneye-gb/misc/boot_div-A.gb                   # GBA not supported
+/mooneye-gb/misc/boot_div-cgb0.gb                # CGB0 not supported
+/mooneye-gb/misc/boot_regs-A.gb                  # GBA not supported
+
+### failing tests
+
+/mooneye-gb/acceptance/ppu/
+/mooneye-gb/emulator-only/mbc2/bits_ramg.gb
+/mooneye-gb/emulator-only/mbc2/bits_romb.gb
+/mooneye-gb/emulator-only/mbc2/ram.gb
+/mooneye-gb/manual-only/sprite_priority.gb
+/mooneye-gb/misc/ppu/vblank_stat_intr-C.gb
+
+
+
+##################################################################
+###
+###   gambatte
+###
+
+### non-test roms
+
+/gambatte/cgb_bgp_dumper.gbc
+/gambatte/cgb_objp_dumper.gbc
+/gambatte/fexx_ffxx_dumper.gbc
+/gambatte/fexx_read_reset_set_dumper.gbc
+/gambatte/ioregs_reset_dumper.gbc
+/gambatte/jpadirq_1.gbc
+/gambatte/jpadirq_2.gbc
+/gambatte/sram.gbc
+/gambatte/vram_dumper.gbc
+/gambatte/wram_dumper.gbc
+
+### unknown or "x'd" test result
+
+/gambatte/bgtiledata/bgtiledata_spx08_ds_1.gbc
+/gambatte/bgtiledata/bgtiledata_spx08_ds_2.gbc
+/gambatte/halt/ime_noie_nolcdirq_readstat_dmg08_cgb_blank.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_1.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_2.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_3.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_4.gb
+/gambatte/halt/noime_noie_nolcdirq_readstat_dmg08_cgb_blank.gb
+/gambatte/m0enable/lycdisable_ff45_ds_2_xout0.gbc
+/gambatte/scx_during_m3/old/
+/gambatte/scx_during_m3/scx_attrib_during_m3_spx0.gbc
+/gambatte/scx_during_m3/scx_attrib_during_m3_spx1.gbc
+/gambatte/sound/ch1_duty0_to_duty3_pos3_1_dmg08_cgb_xoutaudio1.gbc
+
+### failing tests
+
+/gambatte/bgen/
+/gambatte/bgtiledata/
+/gambatte/bgtilemap/
+/gambatte/cgbpal_m3/
+/gambatte/dma/
+/gambatte/dmgpalette_during_m3/
+
+/gambatte/enable_display/enable_display_ly0_oambusy_read_1_dmg08_cgb04c_out0.gbc
+/gambatte/enable_display/enable_display_ly0_oambusy_read_ds_1_cgb04c_out0.gbc
+/gambatte/enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc
+/gambatte/enable_display/lcdcenable_lyc0irq_2_dmg08_cgb04c_out0.gbc
+/gambatte/enable_display/ly0_late_cgbpr_2_cgb04c_outFF.gbc
+/gambatte/enable_display/ly0_late_cgbpr_ds_2_cgb04c_outFF.gbc
+/gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_oamw_1_dmg08_cgb04c_outAA.gbc
+/gambatte/enable_display/ly0_late_oamw_2_dmg08_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_oamw_ds_1_cgb04c_outAA.gbc
+/gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx3_1_dmg08_cgb04c_out87.gbc
+/gambatte/enable_display/ly0_late_vramr_2_dmg08_outFF_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_vramr_ds_1_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_vramw_2_dmg08_out55_cgb04c_outAA.gbc
+/gambatte/enable_display/ly1_late_cgbpw_2_cgb04c_out55.gbc
+
+/gambatte/halt/m1int_ly_1_dmg08_cgb04c_out90.gbc
+/gambatte/halt/m1int_ly_2_dmg08_out90_cgb04c_out91.gbc
+/gambatte/halt/m1int_ly_3_dmg08_cgb04c_out91.gbc
+
+/gambatte/irq_precedence/
+/gambatte/lcd_offset/
+/gambatte/lcdirq_precedence/
+/gambatte/ly0/
+/gambatte/lyc0int_m0irq/
+/gambatte/lyc153int_m2irq/lyc153int_m2irq_late_retrigger_2_dmg08_cgb04c_out0.gbc
+/gambatte/lycEnable/
+/gambatte/lycint_ly/lycint_ly_2_dmg08_cgb04c_out6.gbc
+/gambatte/lycint_lycflag/lycint_lycflag_4_dmg08_cgb04c_out0.gbc
+/gambatte/lycm2int/lyc0m2int_m2irq_1_dmg08_cgb04c_out0.gbc
+/gambatte/lycm2int/lyc0m2int_stat_dmg08_cgb04c_out1.gbc
+/gambatte/lycm2int/lycm2int_m0stat_1_dmg08_cgb04c_out0.gbc
+/gambatte/lycm2int/lycm2int_m2irq_1_dmg08_cgb04c_out1.gbc
+/gambatte/lywrite/lywrite77_ly44_m3_stat_dmg08_cgb04c_outC7.gbc
+/gambatte/m0enable/
+/gambatte/m1/
+/gambatte/m2enable/
+
+/gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_2_dmg08_cgb04c_out0.gbc
+/gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_4_dmg08_cgb04c_out0.gbc
+/gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_ds_2_cgb04c_out0.gbc
+
+/gambatte/m2int_m3stat/scx/late_scx4_2_dmg08_cgb04c_out0.gbc
+/gambatte/m2int_m3stat/scx/late_scx4_ds_2_cgb04c_out0.gbc
+
+/gambatte/miscmstatirq/
+
+/gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
+/gambatte/oam_access/midread_1_dmg08_cgb04c_out3.gbc
+/gambatte/oam_access/midread_2_dmg08_cgb04c_out3.gbc
+/gambatte/oam_access/midread_3_dmg08_cgb04c_out3.gbc
+/gambatte/oam_access/midwrite_1_dmg08_cgb04c_out0.gbc
+/gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
+/gambatte/oam_access/midwrite_3_dmg08_cgb04c_out0.gbc
+/gambatte/oam_access/postread_scx5_ds_1_cgb04c_out3.gbc
+/gambatte/oam_access/postwrite_scx1_ds_1_cgb04c_out0.gbc
+/gambatte/oam_access/preread_2_dmg08_cgb04c_out3.gbc
+/gambatte/oam_access/preread_ds_lcdoffset1_2_cgb04c_out3.gbc
+/gambatte/oam_access/preread_lcdoffset1_2_cgb04c_out3.gbc
+/gambatte/oam_access/prewrite_2_dmg08_out1_cgb04c_out0.gbc
+/gambatte/oam_access/prewrite_ds_2_cgb04c_out0.gbc
+/gambatte/oam_access/prewrite_ds_lcdoffset1_2_cgb04c_out0.gbc
+/gambatte/oam_access/prewrite_lcdoffset1_2_cgb04c_out0.gbc
+
+/gambatte/oamdma/
+/gambatte/scx_during_m3/
+/gambatte/scy/
+/gambatte/sound/ch1_div_write_reset_length_counter_timing_nr52_1_dmg08_cgb04c_outF1.gbc
+/gambatte/sound/ch1_duty0_pos6_to_pos7_timing_ds_6_cgb04c_outaudio1.gbc
+/gambatte/sound/ch1_late_div_write_nr52_1a_dmg08_cgb04c_outF1.gbc
+/gambatte/sound/ch1_late_div_write_nr52_2a_dmg08_cgb04c_outF1.gbc
+/gambatte/sound/ch1_late_div_write_nr52_2b_dmg08_cgb04c_outF0.gbc
+/gambatte/sound/ch2_div_write_reset_length_counter_timing_nr52_1_dmg08_cgb04c_outF2.gbc
+/gambatte/sound/ch2_late_div_write_nr52_1a_dmg08_cgb04c_outF2.gbc
+/gambatte/sound/ch2_late_div_write_nr52_2a_dmg08_cgb04c_outF2.gbc
+/gambatte/sound/ch2_late_div_write_nr52_2b_dmg08_cgb04c_outF0.gbc
+/gambatte/sound/ch2_late_div_write_nr52_ds_1a_cgb04c_outF2.gbc
+/gambatte/sound/ch2_late_div_write_nr52_ds_2a_cgb04c_outF2.gbc
+/gambatte/sound/ch2_late_reset_nr52_1a_dmg08_cgb04c_out2.gbc
+/gambatte/sound/ch2_late_reset_nr52_1b_dmg08_cgb04c_out0.gbc
+/gambatte/sound/ch2_late_reset_nr52_2a_dmg08_cgb04c_out2.gbc
+/gambatte/sound/ch2_late_reset_nr52_2b_dmg08_cgb04c_out0.gbc
+/gambatte/sound/ch2_late_reset_nr52_ds_1b_cgb04c_out0.gbc
+/gambatte/sound/ch2_late_reset_nr52_ds_2b_cgb04c_out0.gbc
+/gambatte/sound/ch2_reset_length_counter_timing_nr52_ds_1_cgb04c_outF2.gbc
+/gambatte/sound/ch3_div_write_reset_length_counter_timing_nr52_1_dmg08_cgb04c_outF4.gbc
+/gambatte/sound/ch3_late_div_write_nr52_1a_dmg08_cgb04c_outF4.gbc
+/gambatte/sound/ch3_late_div_write_nr52_2a_dmg08_cgb04c_outF4.gbc
+/gambatte/sound/ch3_late_div_write_nr52_2b_dmg08_cgb04c_outF0.gbc
+/gambatte/sound/ch4_div_write_reset_length_counter_timing_nr52_1_dmg08_cgb04c_outF8.gbc
+/gambatte/sound/ch4_late_div_write_nr52_1a_dmg08_cgb04c_outF8.gbc
+/gambatte/sound/ch4_late_div_write_nr52_2a_dmg08_cgb04c_outF8.gbc
+/gambatte/sound/ch4_late_div_write_nr52_2b_dmg08_cgb04c_outF0.gbc
+/gambatte/speedchange/
+/gambatte/sprites/
+
+/gambatte/vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
+/gambatte/vram_m3/postread_scx5_ds_1_cgb04c_out3.gbc
+/gambatte/vram_m3/preread_2_dmg08_out3_cgb04c_out0.gbc
+/gambatte/vram_m3/preread_3_dmg08_cgb04c_out3.gbc
+/gambatte/vram_m3/preread_ds_lcdoffset1_2_cgb04c_out3.gbc
+/gambatte/vram_m3/preread_lcdoffset1_2_cgb04c_out3.gbc
+/gambatte/vram_m3/preread_lcdoffset2_2_cgb04c_out3.gbc
+/gambatte/vram_m3/prewrite_ds_lcdoffset1_2_cgb04c_out0.gbc
+/gambatte/vram_m3/prewrite_lcdoffset1_2_cgb04c_out0.gbc
+/gambatte/vram_m3/prewrite_lcdoffset2_2_cgb04c_out0.gbc
+
+/gambatte/window/
