@@ -18,18 +18,18 @@ set -e
 
 print_usage_and_exit()
 {
-    echo "usages:"
+    echo "usage:"
     echo "  builds:"
-    echo "    $0 $CMD_QT $QT_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_QT $QT_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_TESTER $CMAKE_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_TESTER $CMAKE_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_WASM $CMAKE_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_WASM $CMAKE_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_BUILD_QT $QT_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_BUILD_QT $QT_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
-    echo "    $0 $CMD_TEST $TESTS_BLARGG"
-    echo "    $0 $CMD_TEST $TESTS_GAMBATTE"
-    echo "    $0 $CMD_TEST $TESTS_MOONEYE_GB"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_GB"
     echo "  miscellaneous:"
     echo "    $0 $CMD_DOXYGEN"
     exit 1
@@ -66,7 +66,7 @@ switch_to_out_dir()
 ##
 ###############################################################################
 
-build_age_qt()
+build_qt()
 {
     case $1 in
         "${QT_BUILD_TYPE_DEBUG}") ;;
@@ -74,14 +74,14 @@ build_age_qt()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir qt
-    echo "running AGE qt $1 build in \"$(pwd -P)\""
+    switch_to_out_dir age_qt
+    echo "running age_qt $1 build in \"$(pwd -P)\""
 
     qmake "CONFIG+=$1" "$REPO_DIR/src/age.pro"
     make -j -l 5
 }
 
-build_age_tester()
+build_tester()
 {
     case $1 in
         "${CMAKE_BUILD_TYPE_DEBUG}") ;;
@@ -90,13 +90,13 @@ build_age_tester()
     esac
 
     switch_to_out_dir age_tester
-    echo "running AGE age_tester $1 build in \"$(pwd -P)\""
+    echo "running age_tester $1 build in \"$(pwd -P)\""
 
     cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_tester
 }
 
-build_age_wasm()
+build_wasm()
 {
     case $1 in
         "${CMAKE_BUILD_TYPE_DEBUG}") ;;
@@ -104,8 +104,8 @@ build_age_wasm()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir wasm
-    echo "running AGE wasm $1 build in \"$(pwd -P)\""
+    switch_to_out_dir age_wasm
+    echo "running age_wasm $1 build in \"$(pwd -P)\""
 
     emcmake cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_wasm
@@ -140,7 +140,7 @@ run_tests()
     esac
 
     # the executable file must exist
-    TEST_EXEC="$(out_dir qt)/age_qt_emu_test/age_qt_emu_test"
+    TEST_EXEC="$(out_dir age_tester)/age_tester/age_tester"
     if ! [ -e "$TEST_EXEC" ]; then
         echo "The AGE test executable could not be found at:"
         echo "$TEST_EXEC"
@@ -153,17 +153,17 @@ run_tests()
     chmod +x "$TEST_EXEC"
 
     # check test suite path
-    SUITE_DIR="$(out_dir test-suites)/$1"
+    SUITE_DIR="$(out_dir test-suites)"
     if ! [ -e "$SUITE_DIR" ]; then
         echo "test suite not found at: $SUITE_DIR"
         echo "downloading test suites zip file"
         switch_to_out_dir test-suites
-        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v1.1/gameboy-test-roms-v1.1.zip
-        unzip -q gameboy-test-roms-v1.1.zip
+        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v2.0/gameboy-test-roms-v2.0.zip
+        unzip -q gameboy-test-roms-v2.0.zip
     fi
 
     # run the tests
-    ${TEST_EXEC} --ignore-list "$BUILD_DIR/tests_to_ignore.txt" "$1" "$SUITE_DIR"
+    ${TEST_EXEC} --print-failed --blacklist "$BUILD_DIR/test-blacklist.txt" "--$1" "$SUITE_DIR"
 }
 
 
@@ -184,11 +184,11 @@ TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye-gb
 
-CMD_QT=qt
-CMD_TESTER=tester
-CMD_WASM=wasm
+CMD_BUILD_QT=build-qt
+CMD_BUILD_TESTER=build-tester
+CMD_BUILD_WASM=build-wasm
 CMD_DOXYGEN=doxygen
-CMD_TEST=test
+CMD_RUN_TESTS=run-tests
 
 # get the AGE build directory based on the path of this script
 # (used to determine the target directories of builds)
@@ -203,11 +203,11 @@ if [ -n "$CMD" ]; then
 fi
 
 case ${CMD} in
-    "${CMD_QT}") build_age_qt "$@" ;;
-    "${CMD_TESTER}") build_age_tester "$@" ;;
-    "${CMD_WASM}") build_age_wasm "$@" ;;
+    "${CMD_BUILD_QT}") build_qt "$@" ;;
+    "${CMD_BUILD_TESTER}") build_tester "$@" ;;
+    "${CMD_BUILD_WASM}") build_wasm "$@" ;;
     "${CMD_DOXYGEN}") run_doxygen ;;
-    "${CMD_TEST}") run_tests "$@" ;;
+    "${CMD_RUN_TESTS}") run_tests "$@" ;;
 
     *) print_usage_and_exit ;;
 esac

@@ -36,7 +36,7 @@ jobs:
 #        uses: actions/checkout@v2
 #
 #      - name: build AGE
-#        run: build/age_ci.sh qt release
+#        run: build/age_ci.sh build-qt release
 #
 #      - name: upload Qt artifact
 #        uses: actions/upload-artifact@v1
@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: build binaries
-        run: build/age_ci.sh tester Release
+        run: build/age_ci.sh build-tester Release
 
       - name: upload tester artifact
         uses: actions/upload-artifact@v1
@@ -72,7 +72,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: build binaries
-        run: build/age_ci.sh wasm Release
+        run: build/age_ci.sh build-wasm Release
 
       - name: upload WebAssembly artifact
         uses: actions/upload-artifact@v1
