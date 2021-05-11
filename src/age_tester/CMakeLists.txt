@@ -18,6 +18,6 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # we require libpng for screenshot based testing
-#find_package(PNG REQUIRED)
+find_package(PNG REQUIRED)
 
 target_link_libraries(age_tester PRIVATE Threads::Threads PNG::PNG age_emulator_gb age_common)
