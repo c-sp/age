@@ -50,8 +50,8 @@ namespace age::tester
     typedef std::function<bool(age::gb_emulator&)> run_test_t;
     typedef std::function<void(std::shared_ptr<age::uint8_vector>, age::gb_hardware, run_test_t)> schedule_test_t;
 
-    bool schedule_rom_gambatte(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
-    bool schedule_rom_mooneye_gb(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
+    void schedule_rom_gambatte(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
+    void schedule_rom_mooneye_gb(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
 
     std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path &rom_path);
 

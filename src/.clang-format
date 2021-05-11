@@ -30,7 +30,7 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: true
 BreakBeforeBinaryOperators: None
-BreakBeforeTernaryOperators: true
+BreakBeforeTernaryOperators: false
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
 ColumnLimit: 0

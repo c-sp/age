@@ -180,25 +180,28 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options &opts
     {
         thread_pool pool;
 
-        using schedule_rom_t = std::function<bool(const std::filesystem::path &, const schedule_test_t &)>;
+        using schedule_rom_t = std::function<void(const std::filesystem::path &, const schedule_test_t &)>;
 
         auto schedule_rom = [&pool, &results, &rom_count](const std::filesystem::path &rom_path,
                                                           const schedule_rom_t &schedule_rom) {
             ++rom_count;
             pool.queue_task([&pool, &results, rom_path, schedule_rom]() {
-                auto rom_scheduled = schedule_rom(
+                int scheduled_count = 0;
+
+                schedule_rom(
                     rom_path,
-                    [&pool, &results, rom_path](const std::shared_ptr<age::uint8_vector> &rom_contents,
-                                                age::gb_hardware hardware,
-                                                const run_test_t &run) {
+                    [&pool, &results, rom_path, &scheduled_count](const std::shared_ptr<age::uint8_vector> &rom_contents,
+                                                                  age::gb_hardware hardware,
+                                                                  const run_test_t &run) {
                         pool.queue_task([&results, rom_path, rom_contents, hardware, run]() {
                             std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware));
                             auto passed = run(*emulator);
                             results.push({with_hardware_indicator(rom_path, hardware), passed});
                         });
+                        ++scheduled_count;
                     });
 
-                if (!rom_scheduled)
+                if (!scheduled_count)
                 {
                     results.push({rom_path.string() + " (no test scheduled)", false});
                 }
@@ -208,16 +211,16 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options &opts
         if (opts.m_acid2)
         {
             find_roms(opts.m_test_suite_path / "cgb-acid2", matcher, [&](const std::filesystem::path &rom_path) {
-              //! \todo schedule cgb-acid2
+                //! \todo schedule cgb-acid2
             });
             find_roms(opts.m_test_suite_path / "dmg-acid2", matcher, [&](const std::filesystem::path &rom_path) {
-              //! \todo schedule dmg-acid2
+                //! \todo schedule dmg-acid2
             });
         }
         if (opts.m_blargg)
         {
             find_roms(opts.m_test_suite_path / "blargg", matcher, [&](const std::filesystem::path &rom_path) {
-              //! \todo schedule blargg
+                //! \todo schedule blargg
             });
         }
         if (opts.m_gambatte)

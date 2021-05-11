@@ -17,4 +17,7 @@ add_executable(
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-target_link_libraries(age_tester PRIVATE Threads::Threads age_emulator_gb age_common)
+# we require libpng for screenshot based testing
+#find_package(PNG REQUIRED)
+
+target_link_libraries(age_tester PRIVATE Threads::Threads PNG::PNG age_emulator_gb age_common)

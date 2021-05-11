@@ -48,7 +48,7 @@ namespace
 
 
 
-bool age::tester::schedule_rom_mooneye_gb(const std::filesystem::path &rom_path,
+void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path &rom_path,
                                           const schedule_test_t &schedule)
 {
     auto filename = rom_path.filename().string();
@@ -64,6 +64,4 @@ bool age::tester::schedule_rom_mooneye_gb(const std::filesystem::path &rom_path,
     {
         schedule(rom_contents, gb_hardware::dmg, run_mooneye_test);
     }
-
-    return true;
 }
