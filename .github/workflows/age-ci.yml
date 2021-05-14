@@ -14,35 +14,35 @@ jobs:
   ##
   ###############################################################################
 
-#  build-qt:
-#    name: build Qt applications
-#    runs-on: ubuntu-20.04
-#    steps:
-#      # https://github.com/jurplel/install-qt-action
-#      - name: cache Qt
-#        id: cache-qt
-#        uses: actions/cache@v1
-#        with:
-#          path: ../Qt
-#          key: ${{ runner.os }}-Qt-cache-5.12.8
-#
-#      - name: install Qt
-#        uses: jurplel/install-qt-action@v2
-#        with:
-#          version: '5.12.8'
-#          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-#
-#      - name: checkout code
-#        uses: actions/checkout@v2
-#
-#      - name: build AGE
-#        run: build/age_ci.sh build-qt release
-#
-#      - name: upload Qt artifact
-#        uses: actions/upload-artifact@v1
-#        with:
-#          name: ${{ env.ARTIFACT_NAME }}
-#          path: ${{ env.ARTIFACT_PATH }}
+  build-qt:
+    name: build Qt applications
+    runs-on: ubuntu-20.04
+    steps:
+      # https://github.com/jurplel/install-qt-action
+      - name: cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-Qt-cache-5.12.8
+
+      - name: install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.8'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: build AGE
+        run: build/age_ci.sh build-qt release
+
+      - name: upload Qt artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
 
 
   build-tester:
