@@ -77,7 +77,7 @@ build_qt()
     switch_to_out_dir age_qt
     echo "running age_qt $1 build in \"$(pwd -P)\""
 
-    qmake "CONFIG+=$1" "$REPO_DIR/src/age.pro"
+    qmake "CONFIG+=$1" "$REPO_DIR/src/age_qt_gui.pro"
     make -j -l 5
 }
 

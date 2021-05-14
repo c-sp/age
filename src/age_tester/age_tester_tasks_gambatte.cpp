@@ -187,6 +187,11 @@ namespace
     //!
     constexpr int samples_per_frame = 35112;
 
+    bool is_test_finished(const age::gb_emulator &emulator)
+    {
+        return emulator.get_emulated_cycles() >= test_frames * samples_per_frame * 2;
+    }
+
     void run_test(age::gb_emulator &emulator)
     {
         AGE_ASSERT(emulator.get_pcm_sampling_rate() == emulator.get_cycles_per_second() / 2);
@@ -241,7 +246,7 @@ namespace
         return {};
     }
 
-    age::tester::run_test_t out_string_test(const age::uint8_vector &expected_result)
+    age::tester::run_test_t new_hex_out_test(const age::uint8_vector &expected_result)
     {
         return [=](age::gb_emulator &emulator) {
             run_test(emulator);
@@ -310,7 +315,7 @@ namespace
         }
     }
 
-    age::tester::run_test_t audio_test(bool expect_audio_out)
+    age::tester::run_test_t new_audio_test(bool expect_audio_out)
     {
         return [=](age::gb_emulator &emulator) {
             run_test(emulator);
@@ -332,19 +337,16 @@ namespace
 
 
     std::filesystem::path find_screenshot(const std::filesystem::path &rom_path,
-                                          const std::vector<std::string> &suffixes)
+                                          const std::string &suffix)
     {
         auto base = rom_path;
         base.replace_extension(); // remove file extension
 
-        for (auto &suffix : suffixes)
+        auto screenshot = base;
+        screenshot += suffix;
+        if (is_regular_file(screenshot))
         {
-            auto screenshot = base;
-            screenshot += suffix;
-            if (is_regular_file(screenshot))
-            {
-                return screenshot;
-            }
+            return screenshot;
         }
 
         return {};
@@ -364,36 +366,35 @@ void age::tester::schedule_rom_gambatte(const std::filesystem::path &rom_path,
     auto outaudio_cgb = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_cgb04c_outaudio"});
     if (outaudio_cgb.has_value())
     {
-        schedule(rom_contents, gb_hardware::cgb, audio_test(outaudio_cgb.value()));
+        schedule(rom_contents, gb_hardware::cgb, new_audio_test(outaudio_cgb.value()));
     }
     auto outaudio_dmg = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_dmg08_outaudio"});
     if (outaudio_dmg.has_value())
     {
-        schedule(rom_contents, gb_hardware::dmg, audio_test(outaudio_dmg.value()));
+        schedule(rom_contents, gb_hardware::dmg, new_audio_test(outaudio_dmg.value()));
     }
 
     // check for expected characters on screen
     auto out_cgb = parse_hex_out(filename, {"_dmg08_cgb04c_out", "_cgb04c_out"});
     if (!out_cgb.empty())
     {
-        schedule(rom_contents, gb_hardware::cgb, out_string_test(out_cgb));
+        schedule(rom_contents, gb_hardware::cgb, new_hex_out_test(out_cgb));
     }
     auto out_dmg = parse_hex_out(filename, {"_dmg08_cgb04c_out", "_dmg08_out"});
     if (!out_dmg.empty())
     {
-        schedule(rom_contents, gb_hardware::dmg, out_string_test(out_dmg));
+        schedule(rom_contents, gb_hardware::dmg, new_hex_out_test(out_dmg));
     }
 
     // check for screenshot file
-    //! \todo are there any _dmg08_cgb04c.png screenshots?
-    auto screen_cgb = find_screenshot(rom_path, {"_cgb04c.png"});
+    auto screen_cgb = find_screenshot(rom_path, "_cgb04c.png");
     if (!screen_cgb.empty())
     {
-        //! \todo schedule cgb screenshot test
+        schedule(rom_contents, gb_hardware::cgb, new_screenshot_test(screen_cgb, is_test_finished));
     }
-    auto screen_dmg = find_screenshot(rom_path, {"_dmg08.png"});
+    auto screen_dmg = find_screenshot(rom_path, "_dmg08.png");
     if (!screen_dmg.empty())
     {
-        //! \todo schedule dmg screenshot test
+        schedule(rom_contents, gb_hardware::dmg, new_screenshot_test(screen_cgb, is_test_finished));
     }
 }
