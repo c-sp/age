@@ -51,6 +51,7 @@ public:
     void init_vram(bool for_cgb_hardware);
 
     const uint8_t* get_video_ram() const;
+    const uint8_t* get_rom_header() const;
     std::string get_cartridge_title() const;
 
     uint8_vector get_persistent_ram() const;

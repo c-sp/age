@@ -87,6 +87,24 @@ jobs:
   ##
   ###############################################################################
 
+  test-acid2:
+    name: run dmg-acid2 and cgb-acid2 tests
+    runs-on: ubuntu-20.04
+    needs: [build-tester]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: download artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests acid2
+
+
   test-blargg:
     name: run Blargg's test suite
     runs-on: ubuntu-20.04

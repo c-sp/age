@@ -140,10 +140,11 @@ public:
     gb_lcd(const gb_device &device,
            const gb_clock &clock,
            const uint8_t *video_ram,
+           const uint8_t *rom_header,
            gb_events &events,
            gb_interrupt_trigger &interrupts,
            screen_buffer &screen_buffer,
-           bool dmg_green);
+           gb_colors_hint colors_hint);
 
     uint8_t read_lcdc() const;
     uint8_t read_stat();

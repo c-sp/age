@@ -28,52 +28,61 @@
 namespace age
 {
 
-//!
-//! \brief Configures the hardware (Gameboy or Gameboy Color) to emulate.
-//!
-//! Setting specific hardware is usually only required for running tests.
-//! The end user should probably let the emulator auto detect the hardware
-//! required by the rom to run.
-//!
-enum class gb_hardware
-{
-    auto_detect,
-    cgb,
-    dmg
-};
+    //!
+    //! \brief Configures the hardware (Gameboy or Gameboy Color) to emulate.
+    //!
+    //! Setting specific hardware is usually only required for running tests.
+    //! The end user should probably let the emulator auto detect the hardware
+    //! required by the rom to run.
+    //!
+    enum class gb_hardware
+    {
+        auto_detect,
+        cgb,
+        dmg
+    };
 
 
 
-//!
-//! \brief The operating mode derived from hardware and cartridge capabilities.
-//!
-enum class gb_cart_mode
-{
-    dmg,
-    dmg_on_cgb,
-    cgb
-};
+    //!
+    //! \brief The operating mode derived from hardware and cartridge capabilities.
+    //!
+    enum class gb_cart_mode
+    {
+        dmg,
+        dmg_on_cgb,
+        cgb
+    };
 
 
 
-//!
-//! \brief Struct containing parts of the Gameboy CPU state.
-//!
-//! This struct was implemented for evaluating test rom results.
-//!
-struct gb_test_info
-{
-    gb_cart_mode m_cart_mode;
-    bool m_mooneye_debug_op;
+    enum class gb_colors_hint
+    {
+        default_colors,
+        dmg_greyscale,
+        cgb_acid2
+    };
 
-    uint8_t m_a = 0;
-    uint8_t m_b = 0;
-    uint8_t m_c = 0;
-    uint8_t m_d = 0;
-    uint8_t m_e = 0;
-    uint8_t m_h = 0;
-    uint8_t m_l = 0;
-};
+
+
+    //!
+    //! \brief Struct containing parts of the Gameboy CPU state.
+    //!
+    //! This struct was implemented for evaluating test rom results.
+    //!
+    struct gb_test_info
+    {
+        gb_cart_mode m_cart_mode;
+        bool m_ld_b_b;
+
+        uint8_t m_a = 0;
+        uint8_t m_b = 0;
+        uint8_t m_c = 0;
+        uint8_t m_d = 0;
+        uint8_t m_e = 0;
+        uint8_t m_h = 0;
+        uint8_t m_l = 0;
+    };
 
 } // namespace age
 

@@ -7,6 +7,7 @@ add_executable(
         age_tester_run_tests.hpp
         age_tester_tasks.cpp
         age_tester_tasks.hpp
+        age_tester_tasks_acid2.cpp
         age_tester_tasks_blargg.cpp
         age_tester_tasks_gambatte.cpp
         age_tester_tasks_mooneye_gb.cpp

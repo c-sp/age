@@ -37,6 +37,10 @@ struct pixel
         : pixel(0, 0, 0)
     {}
 
+    explicit pixel(int rgb)
+        : pixel((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF)
+    {}
+
     pixel(int r, int g, int b)
         : pixel(r, g, b, 0xFF)
     {}

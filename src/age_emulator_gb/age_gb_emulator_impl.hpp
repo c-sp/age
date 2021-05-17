@@ -54,7 +54,7 @@ public:
 
     gb_emulator_impl(const uint8_vector &rom,
                      gb_hardware hardware,
-                     bool dmg_green,
+                     gb_colors_hint colors_hint,
                      pcm_vector &pcm_vec,
                      screen_buffer &screen_buffer);
 

@@ -32,7 +32,7 @@ namespace
         {
             emulator.emulate(cycles_per_step);
             // the test is finished when LD B, B has been executed
-            if (emulator.get_test_info().m_mooneye_debug_op)
+            if (emulator.get_test_info().m_ld_b_b)
             {
                 break;
             }
@@ -58,10 +58,10 @@ void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path &rom_path,
     auto rom_contents = load_rom_file(rom_path);
     if (explicit_cgb || !explicit_dmg)
     {
-        schedule(rom_contents, gb_hardware::cgb, run_mooneye_test);
+        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, run_mooneye_test);
     }
     if (explicit_dmg || !explicit_cgb)
     {
-        schedule(rom_contents, gb_hardware::dmg, run_mooneye_test);
+        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::default_colors, run_mooneye_test);
     }
 }

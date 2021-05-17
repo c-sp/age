@@ -100,12 +100,12 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path &rom_path,
     auto cgb_screenshot = find_screenshot(rom_path, "cgb_");
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents, gb_hardware::cgb, new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
+        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
     }
 
     auto dmg_screenshot = find_screenshot(rom_path, "dmg_");
     if (!dmg_screenshot.empty())
     {
-        schedule(rom_contents, gb_hardware::dmg, new_screenshot_test(dmg_screenshot, blargg_test_finished(dmg_screenshot)));
+        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::dmg_greyscale, new_screenshot_test(dmg_screenshot, blargg_test_finished(dmg_screenshot)));
     }
 }

@@ -49,7 +49,7 @@ class gb_emulator : public emulator
 {
 public:
 
-    gb_emulator(const uint8_vector &rom, gb_hardware hardware = gb_hardware::auto_detect, bool dmg_green = true);
+    gb_emulator(const uint8_vector &rom, gb_hardware hardware = gb_hardware::auto_detect, gb_colors_hint colors_hint = gb_colors_hint::default_colors);
     virtual ~gb_emulator() override;
 
     uint8_vector get_persistent_ram() const override;

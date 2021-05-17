@@ -92,7 +92,7 @@ private:
     uint8_t m_prefetched_opcode = 0;
     int8_t m_cpu_state = 0;
 
-    bool m_mooneye_debug_op = false; //!< used to indicate the finishing of a mooneye-gb test
+    bool m_ld_b_b = false; //!< used to indicate a finished test rom
 };
 
 } // namespace age

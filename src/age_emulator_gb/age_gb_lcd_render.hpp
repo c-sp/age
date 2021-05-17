@@ -24,6 +24,7 @@
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
+#include <emulator/age_gb_types.hpp>
 
 #include "common/age_gb_device.hpp"
 
@@ -54,7 +55,7 @@ class gb_lcd_palettes
     AGE_DISABLE_COPY(gb_lcd_palettes);
 public:
 
-    gb_lcd_palettes(const gb_device &device, bool dmg_green);
+    gb_lcd_palettes(const gb_device &device, const uint8_t *rom_header, gb_colors_hint colors_hint);
 
     const pixel* get_palette(unsigned palette_index) const;
 
@@ -80,6 +81,7 @@ private:
     void update_cgb_color(unsigned color_index);
 
     const gb_device &m_device;
+    const gb_colors_hint m_colors_hint;
 
     // CGB:     0x00 - 0x3F  BG
     //          0x40 - 0x7F  OBJ
@@ -92,7 +94,11 @@ private:
     // CGB:     0x00 - 0x1F  BG
     //          0x20 - 0x3F  OBJ
     pixel_vector m_colors{gb_total_color_count, pixel(0, 0, 0)};
-    const bool m_dmg_green;
+
+    // default classic gameboy colors (from 0x00 to 0x03)
+    std::array<pixel, 4> m_bgp_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
+    std::array<pixel, 4> m_obp0_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
+    std::array<pixel, 4> m_obp1_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
 
     uint8_t m_bgp = 0xFC;
     uint8_t m_obp0 = 0xFF;

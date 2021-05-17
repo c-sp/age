@@ -44,7 +44,6 @@ HEADERS += \
     age_common/api/pcm/age_downsampler.hpp \
     age_common/api/pcm/age_pcm_ring_buffer.hpp \
     age_common/api/pcm/age_pcm_sample.hpp \
-    age_emulator_gb/age_gb.hpp \
     age_emulator_gb/age_gb_bus.hpp \
     age_emulator_gb/age_gb_cpu.hpp \
     age_emulator_gb/age_gb_div.hpp \

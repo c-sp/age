@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_lcd.hpp"
 
 
@@ -23,15 +21,16 @@
 age::gb_lcd::gb_lcd(const gb_device &device,
                     const gb_clock &clock,
                     const uint8_t *video_ram,
+                    const uint8_t *rom_header,
                     gb_events &events,
                     gb_interrupt_trigger &interrupts,
                     screen_buffer &screen_buffer,
-                    bool dmg_green)
+                    gb_colors_hint colors_hint)
     : m_device(device),
       m_clock(clock),
       m_scanline(device, clock),
       m_lcd_irqs(device, clock, m_scanline, events, interrupts),
-      m_palettes(device, dmg_green),
+      m_palettes(device, rom_header, colors_hint),
       m_sprites(m_device.is_cgb()),
       m_render(device, m_palettes, m_sprites, video_ram, screen_buffer)
 {

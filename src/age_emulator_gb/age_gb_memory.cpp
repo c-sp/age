@@ -57,6 +57,11 @@ const age::uint8_t* age::gb_memory::get_video_ram() const
     return m_memory.data() + m_video_ram_offset;
 }
 
+const age::uint8_t* age::gb_memory::get_rom_header() const
+{
+    return m_memory.data();
+}
+
 std::string age::gb_memory::get_cartridge_title() const
 {
     const char *buffer = reinterpret_cast<const char*>(m_memory.data() + gb_cia_ofs_title);

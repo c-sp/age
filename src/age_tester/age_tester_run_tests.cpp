@@ -186,9 +186,10 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options &opts
                     rom_path,
                     [&pool, &results, rom_path, &scheduled_count](const std::shared_ptr<age::uint8_vector> &rom_contents,
                                                                   age::gb_hardware hardware,
+                                                                  age::gb_colors_hint colors_hint,
                                                                   const run_test_t &run) {
-                        pool.queue_task([&results, rom_path, rom_contents, hardware, run]() {
-                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, false));
+                        pool.queue_task([&results, rom_path, rom_contents, hardware, colors_hint, run]() {
+                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, colors_hint));
                             auto passed = run(*emulator);
                             results.push({with_hardware_indicator(rom_path, hardware), passed});
                         });
@@ -205,10 +206,10 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options &opts
         if (opts.m_acid2)
         {
             find_roms(opts.m_test_suite_path / "cgb-acid2", matcher, [&](const std::filesystem::path &rom_path) {
-                //! \todo schedule cgb-acid2
+                schedule_rom(rom_path, schedule_rom_acid2_cgb);
             });
             find_roms(opts.m_test_suite_path / "dmg-acid2", matcher, [&](const std::filesystem::path &rom_path) {
-                //! \todo schedule dmg-acid2
+                schedule_rom(rom_path, schedule_rom_acid2_dmg);
             });
         }
         if (opts.m_blargg)

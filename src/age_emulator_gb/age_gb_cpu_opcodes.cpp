@@ -908,7 +908,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x36: LD_IMM8_MEM_HL; break;      // LD [HL], x
         case 0x3E: POP_BYTE_AT_PC(m_a); break; // LD A, x
 
-        case 0x40: m_mooneye_debug_op = true; break; // LD B, B
+        case 0x40: m_ld_b_b = true; break; // LD B, B
         case 0x41: m_b = m_c; break; // LD B, C
         case 0x42: m_b = m_d; break; // LD B, D
         case 0x43: m_b = m_e; break; // LD B, E

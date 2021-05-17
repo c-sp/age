@@ -27,6 +27,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_ACID2"
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_GB"
@@ -133,6 +134,7 @@ run_doxygen()
 run_tests()
 {
     case $1 in
+        "${TESTS_ACID2}") ;;
         "${TESTS_BLARGG}") ;;
         "${TESTS_GAMBATTE}") ;;
         "${TESTS_MOONEYE_GB}") ;;
@@ -180,6 +182,7 @@ QT_BUILD_TYPE_RELEASE=release
 CMAKE_BUILD_TYPE_DEBUG=Debug
 CMAKE_BUILD_TYPE_RELEASE=Release
 
+TESTS_ACID2=acid2
 TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye-gb

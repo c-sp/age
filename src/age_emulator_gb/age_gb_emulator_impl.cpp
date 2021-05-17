@@ -150,7 +150,7 @@ std::string age::gb_emulator_impl::inner_get_emulator_title() const
 
 age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
                                         gb_hardware hardware,
-                                        bool dmg_green,
+                                        gb_colors_hint colors_hint,
                                         pcm_vector &pcm_vec,
                                         screen_buffer &screen_buffer)
     : m_memory(rom),
@@ -160,7 +160,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
       m_events(m_clock),
       m_div(m_clock),
       m_sound(m_clock, m_device.is_cgb(), pcm_vec),
-      m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_events, m_interrupts, screen_buffer, dmg_green),
+      m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, screen_buffer, colors_hint),
       m_timer(m_clock, m_div, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_div, m_interrupts, m_events),

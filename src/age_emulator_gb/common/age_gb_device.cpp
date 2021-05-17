@@ -40,9 +40,6 @@ age::gb_cart_mode calculate_cart_mode(const uint8_t rom_byte_0x143,
                     ? age::gb_cart_mode::cgb
                     : age::gb_cart_mode::dmg;
     }
-
-    // no CGB
-    return age::gb_cart_mode::dmg;
 }
 
 }
