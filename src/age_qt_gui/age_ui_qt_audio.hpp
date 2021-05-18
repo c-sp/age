@@ -232,7 +232,7 @@ private:
 
     QSharedPointer<downsampler> m_downsampler;
     size_t m_downsampler_fir_size = 0;
-    pcm_ring_buffer m_buffer = {1};
+    pcm_ring_buffer m_buffer{1};
     QSharedPointer<QAudioOutput> m_output;
     QIODevice *m_device = nullptr;
     pcm_vector m_silence;
