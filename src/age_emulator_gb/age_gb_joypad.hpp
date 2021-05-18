@@ -31,26 +31,24 @@
 namespace age
 {
 
-class gb_joypad
-{
-    AGE_DISABLE_COPY(gb_joypad);
+    class gb_joypad
+    {
+        AGE_DISABLE_COPY(gb_joypad);
 
-public:
+    public:
+        gb_joypad(const gb_device& device, gb_interrupt_trigger& interrupts);
 
-    gb_joypad(const gb_device &device, gb_interrupt_trigger &interrupts);
+        [[nodiscard]] uint8_t read_p1() const;
+        void                  write_p1(uint8_t byte);
+        void                  set_buttons_down(int buttons);
+        void                  set_buttons_up(int buttons);
 
-    uint8_t read_p1() const;
-    void write_p1(uint8_t byte);
-    void set_buttons_down(int buttons);
-    void set_buttons_up(int buttons);
-
-private:
-
-    gb_interrupt_trigger &m_interrupts;
-    uint8_t m_p1;
-    uint8_t m_p14 = 0x0F;
-    uint8_t m_p15 = 0x0F;
-};
+    private:
+        gb_interrupt_trigger& m_interrupts;
+        uint8_t               m_p1;
+        uint8_t               m_p14 = 0x0F;
+        uint8_t               m_p15 = 0x0F;
+    };
 
 } // namespace age
 

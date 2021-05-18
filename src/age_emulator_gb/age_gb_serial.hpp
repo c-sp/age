@@ -35,56 +35,54 @@
 namespace age
 {
 
-enum class gb_sio_state
-{
-    no_transfer,
-    transfer_external_clock,
-    transfer_internal_clock
-};
+    enum class gb_sio_state
+    {
+        no_transfer,
+        transfer_external_clock,
+        transfer_internal_clock
+    };
 
 
 
-class gb_serial
-{
-    AGE_DISABLE_COPY(gb_serial);
+    class gb_serial
+    {
+        AGE_DISABLE_COPY(gb_serial);
 
-public:
+    public:
+        gb_serial(const gb_device&      device,
+                  const gb_clock&       clock,
+                  const gb_div&         div,
+                  gb_interrupt_trigger& interrupts,
+                  gb_events&            events);
 
-    gb_serial(const gb_device &device,
-              const gb_clock &clock,
-              const gb_div &div,
-              gb_interrupt_trigger &interrupts,
-              gb_events &events);
+        uint8_t               read_sb();
+        [[nodiscard]] uint8_t read_sc() const;
 
-    uint8_t read_sb();
-    uint8_t read_sc() const;
+        void write_sb(uint8_t value);
+        void write_sc(uint8_t value);
 
-    void write_sb(uint8_t value);
-    void write_sc(uint8_t value);
+        void update_state();
+        void on_div_reset(int old_div_offset);
+        void set_back_clock(int clock_cycle_offset);
 
-    void update_state();
-    void on_div_reset(int old_div_offset);
-    void set_back_clock(int clock_cycle_offset);
+    private:
+        void start_transfer(uint8_t value_sc);
+        void stop_transfer(gb_sio_state new_state);
 
-private:
+        const gb_device&      m_device;
+        const gb_clock&       m_clock;
+        const gb_div&         m_div;
+        gb_interrupt_trigger& m_interrupts;
+        gb_events&            m_events;
 
-    void start_transfer(uint8_t value_sc);
-    void stop_transfer(gb_sio_state new_state);
+        gb_sio_state m_sio_state       = gb_sio_state::no_transfer;
+        int          m_sio_clk_started = gb_no_clock_cycle;
+        int          m_sio_clock_shift = 0;
+        uint8_t      m_sio_initial_sb  = 0;
 
-    const gb_device &m_device;
-    const gb_clock &m_clock;
-    const gb_div &m_div;
-    gb_interrupt_trigger &m_interrupts;
-    gb_events &m_events;
-
-    gb_sio_state m_sio_state = gb_sio_state::no_transfer;
-    int m_sio_clk_started = gb_no_clock_cycle;
-    int m_sio_clock_shift = 0;
-    uint8_t m_sio_initial_sb = 0;
-
-    uint8_t m_sb = 0;
-    uint8_t m_sc = 0;
-};
+        uint8_t m_sb = 0;
+        uint8_t m_sc = 0;
+    };
 
 } // namespace age
 

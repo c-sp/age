@@ -31,34 +31,32 @@
 namespace age
 {
 
-class screen_buffer
-{
-public:
+    class screen_buffer
+    {
+    public:
+        screen_buffer(int16_t screen_width, int16_t screen_height);
 
-    screen_buffer(int16_t screen_width, int16_t screen_height);
+        [[nodiscard]] uint8_t get_front_buffer_index() const;
+        [[nodiscard]] int16_t get_screen_width() const;
+        [[nodiscard]] int16_t get_screen_height() const;
 
-    uint8_t get_front_buffer_index() const;
-    int16_t get_screen_width() const;
-    int16_t get_screen_height() const;
+        [[nodiscard]] const pixel_vector& get_front_buffer() const;
+        [[nodiscard]] const pixel_vector& get_back_buffer() const;
 
-    const pixel_vector& get_front_buffer() const;
-    const pixel_vector& get_back_buffer() const;
+        pixel_vector& get_back_buffer();
+        pixel*        get_first_scanline_pixel(int16_t scanline);
+        void          switch_buffers();
 
-    pixel_vector& get_back_buffer();
-    pixel* get_first_scanline_pixel(int16_t scanline);
-    void switch_buffers();
+    private:
+        const int16_t m_screen_width;
+        const int16_t m_screen_height;
 
-private:
-
-    const int16_t m_screen_width;
-    const int16_t m_screen_height;
-
-    std::array<pixel_vector, 2> m_buffers;
-    uint8_t m_current_front_buffer = 0;
-};
-
-
+        std::array<pixel_vector, 2> m_buffers;
+        uint8_t                     m_current_front_buffer = 0;
+    };
 
 } // namespace age
+
+
 
 #endif // AGE_SCREEN_BUFFER_HPP

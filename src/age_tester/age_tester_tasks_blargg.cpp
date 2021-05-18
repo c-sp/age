@@ -20,11 +20,11 @@
 
 namespace
 {
-    std::filesystem::path find_screenshot(const std::filesystem::path &rom_path,
-                                          const std::string &prefix)
+    std::filesystem::path find_screenshot(const std::filesystem::path& rom_path,
+                                          const std::string&           prefix)
     {
-        auto filename = rom_path.filename();
-        bool is_prefixed = filename.string().substr(0, prefix.length()) == prefix;
+        auto filename            = rom_path.filename();
+        bool is_prefixed         = filename.string().substr(0, prefix.length()) == prefix;
         auto screenshot_filename = (is_prefixed ? filename : std::filesystem::path(prefix + filename.string())).replace_extension(".png");
 
         auto screenshot_path = rom_path.parent_path() / screenshot_filename;
@@ -37,7 +37,7 @@ namespace
 
 
 
-    int get_test_seconds(const std::string &screenshot_filename)
+    int get_test_seconds(const std::string& screenshot_filename)
     {
         // see https://github.com/c-sp/gameboy-test-roms
 
@@ -79,11 +79,11 @@ namespace
         return 0;
     }
 
-    age::tester::test_finished_t blargg_test_finished(const std::filesystem::path &rom_path)
+    age::tester::test_finished_t blargg_test_finished(const std::filesystem::path& rom_path)
     {
         age::int64_t seconds = get_test_seconds(rom_path.filename().string());
 
-        return [=](const age::gb_emulator &emulator) {
+        return [=](const age::gb_emulator& emulator) {
             return emulator.get_emulated_cycles() >= seconds * emulator.get_cycles_per_second();
         };
     }
@@ -92,20 +92,26 @@ namespace
 
 
 
-void age::tester::schedule_rom_blargg(const std::filesystem::path &rom_path,
-                                      const schedule_test_t &schedule)
+void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
+                                      const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);
 
     auto cgb_screenshot = find_screenshot(rom_path, "cgb_");
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
+        schedule(rom_contents,
+                 gb_hardware::cgb,
+                 gb_colors_hint::default_colors,
+                 new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
     }
 
     auto dmg_screenshot = find_screenshot(rom_path, "dmg_");
     if (!dmg_screenshot.empty())
     {
-        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::dmg_greyscale, new_screenshot_test(dmg_screenshot, blargg_test_finished(dmg_screenshot)));
+        schedule(rom_contents,
+                 gb_hardware::dmg,
+                 gb_colors_hint::dmg_greyscale,
+                 new_screenshot_test(dmg_screenshot, blargg_test_finished(dmg_screenshot)));
     }
 }

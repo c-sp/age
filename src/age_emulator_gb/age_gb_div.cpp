@@ -18,7 +18,7 @@
 
 
 
-age::gb_div::gb_div(const gb_clock &clock)
+age::gb_div::gb_div(const gb_clock& clock)
     : m_clock(clock)
 {
 }
@@ -35,15 +35,15 @@ int age::gb_div::get_div_offset() const
 age::uint8_t age::gb_div::read_div() const
 {
     //! \todo examine DIV behavior during speed change
-    int clk = m_clock.get_clock_cycle();
-    int shift = m_clock.is_double_speed() ? 7 : 8;
+    int clk    = m_clock.get_clock_cycle();
+    int shift  = m_clock.is_double_speed() ? 7 : 8;
     int result = (clk + m_div_offset) >> shift;
 
-    AGE_GB_CLOG_DIV("read DIV " << AGE_LOG_HEX8(result & 0xFF));
+    AGE_GB_CLOG_DIV("read DIV " << AGE_LOG_HEX8(result & 0xFF))
     AGE_GB_CLOG_DIV("    * last increment on lock cycle "
-                    << ((result << shift) - m_div_offset));
+                    << ((result << shift) - m_div_offset))
     AGE_GB_CLOG_DIV("    * next increment on lock cycle "
-                    << (((result + 1) << shift) - m_div_offset));
+                    << (((result + 1) << shift) - m_div_offset))
 
     return result & 0xFF;
 }
@@ -53,9 +53,9 @@ int age::gb_div::write_div()
     int old_offset = m_div_offset;
 
     int div_internal = m_clock.get_clock_cycle() & 0xFFFF;
-    m_div_offset = 0x10000 - div_internal;
+    m_div_offset     = 0x10000 - div_internal;
     AGE_GB_CLOG_DIV("reset DIV, changing offset from " << AGE_LOG_HEX16(old_offset)
-                    << " to " AGE_LOG_HEX16(m_div_offset));
+                                                       << " to " AGE_LOG_HEX16(m_div_offset))
 
     return old_offset;
 }

@@ -44,51 +44,47 @@
 namespace age
 {
 
+    class gb_emulator_impl
+    {
+        AGE_DISABLE_COPY(gb_emulator_impl);
 
+    public:
+        gb_emulator_impl(const uint8_vector& rom,
+                         gb_hardware         hardware,
+                         gb_colors_hint      colors_hint,
+                         pcm_vector&         pcm_vec,
+                         screen_buffer&      screen_buffer);
 
-class gb_emulator_impl
-{
-    AGE_DISABLE_COPY(gb_emulator_impl);
+        gb_test_info get_test_info() const;
 
-public:
+        uint8_vector get_persistent_ram() const;
+        void         set_persistent_ram(const uint8_vector& source);
 
-    gb_emulator_impl(const uint8_vector &rom,
-                     gb_hardware hardware,
-                     gb_colors_hint colors_hint,
-                     pcm_vector &pcm_vec,
-                     screen_buffer &screen_buffer);
+        void set_buttons_down(int buttons);
+        void set_buttons_up(int buttons);
 
-    gb_test_info get_test_info() const;
+        int inner_emulate(int cycles_to_emulate);
 
-    uint8_vector get_persistent_ram() const;
-    void set_persistent_ram(const uint8_vector &source);
+        std::string inner_get_emulator_title() const;
 
-    void set_buttons_down(int buttons);
-    void set_buttons_up(int buttons);
-
-    int inner_emulate(int cycles_to_emulate);
-
-    std::string inner_get_emulator_title() const;
-
-private:
-
-    gb_memory m_memory;
-    gb_device m_device;
-    gb_clock m_clock;
-    gb_interrupt_dispatcher m_interrupts;
-    gb_events m_events;
-    gb_div m_div;
-    gb_sound m_sound;
-    gb_lcd m_lcd;
-    gb_timer m_timer;
-    gb_joypad m_joypad;
-    gb_serial m_serial;
-    gb_bus m_bus;
-    gb_cpu m_cpu;
-};
-
-
+    private:
+        gb_memory               m_memory;
+        gb_device               m_device;
+        gb_clock                m_clock;
+        gb_interrupt_dispatcher m_interrupts;
+        gb_events               m_events;
+        gb_div                  m_div;
+        gb_sound                m_sound;
+        gb_lcd                  m_lcd;
+        gb_timer                m_timer;
+        gb_joypad               m_joypad;
+        gb_serial               m_serial;
+        gb_bus                  m_bus;
+        gb_cpu                  m_cpu;
+    };
 
 } // namespace age
+
+
 
 #endif // AGE_GB_EMULATOR_IMPL_HPP

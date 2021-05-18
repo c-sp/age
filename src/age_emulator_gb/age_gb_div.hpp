@@ -30,24 +30,22 @@
 namespace age
 {
 
-class gb_div
-{
-    AGE_DISABLE_COPY(gb_div);
+    class gb_div
+    {
+        AGE_DISABLE_COPY(gb_div);
 
-public:
+    public:
+        explicit gb_div(const gb_clock& clock);
 
-    gb_div(const gb_clock &clock);
+        [[nodiscard]] int get_div_offset() const;
 
-    int get_div_offset() const;
+        [[nodiscard]] uint8_t read_div() const;
+        int                   write_div();
 
-    uint8_t read_div() const;
-    int write_div();
-
-private:
-
-    const gb_clock &m_clock;
-    int m_div_offset = 0;
-};
+    private:
+        const gb_clock& m_clock;
+        int             m_div_offset = 0;
+    };
 
 } // namespace age
 

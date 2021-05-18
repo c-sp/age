@@ -27,150 +27,150 @@ namespace
 #define O 1
     // tile_data array contents copied from gambatte code
     // (gambatte/test/testrunner.cpp)
-    constexpr age::uint8_array<16 * 8 * 8> tile_data =
-        {{_, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
+    constexpr age::uint8_array<16 * 8 * 8> tile_data
+        = {{_, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
 
-          _, _, _, _, _, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, _, O, _, _, _,
+            _, _, _, _, _, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, _, O, _, _, _,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
-          _, _, O, O, O, O, O, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
+            _, _, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
 
-          _, _, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, _,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, _,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, _,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, _,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, O, _,
-          _, _, _, _, _, O, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, _, O, _, _, _, _,
-          _, _, _, O, _, _, _, _,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, O, _,
+            _, _, _, _, _, O, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, _, O, _, _, _, _,
+            _, _, _, O, _, _, _, _,
 
-          _, _, _, _, _, _, _, _,
-          _, _, O, O, O, O, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, _, O, O, O, O, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, _, O, O, O, O, O, _,
+            _, _, _, _, _, _, _, _,
+            _, _, O, O, O, O, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, _, O, O, O, O, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, _, O, O, O, O, O, _,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
-          _, _, _, _, _, _, _, O,
-          _, _, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
 
-          _, _, _, _, _, _, _, _,
-          _, _, _, _, O, _, _, _,
-          _, _, O, _, _, _, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
+            _, _, _, _, _, _, _, _,
+            _, _, _, _, O, _, _, _,
+            _, _, O, _, _, _, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, _,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, _,
 
-          _, _, _, _, _, _, _, _,
-          _, _, O, O, O, O, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, O,
-          _, _, O, O, O, O, O, _,
+            _, _, _, _, _, _, _, _,
+            _, _, O, O, O, O, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, O,
+            _, _, O, O, O, O, O, _,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, _,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, _, _, _, _, _, O,
-          _, O, O, O, O, O, O, _,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, _,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, _, _, _, _, _, O,
+            _, O, O, O, O, O, O, _,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
 
-          _, _, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, O, O, O, O, O, O,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _,
-          _, O, _, _, _, _, _, _}};
+            _, _, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, O, O, O, O, O, O,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _,
+            _, O, _, _, _, _, _, _}};
 #undef O
 #undef _
 
@@ -187,14 +187,14 @@ namespace
     //!
     constexpr int samples_per_frame = 35112;
 
-    bool is_test_finished(const age::gb_emulator &emulator)
+    bool is_test_finished(const age::gb_emulator& emulator)
     {
         return emulator.get_emulated_cycles() >= test_frames * samples_per_frame * 2;
     }
 
-    void run_test(age::gb_emulator &emulator)
+    void run_test(age::gb_emulator& emulator)
     {
-        AGE_ASSERT(emulator.get_pcm_sampling_rate() == emulator.get_cycles_per_second() / 2);
+        AGE_ASSERT(emulator.get_pcm_sampling_rate() == emulator.get_cycles_per_second() / 2)
         for (int i = test_frames; i >= 0; --i)
         {
             emulator.emulate(samples_per_frame * 2);
@@ -203,10 +203,10 @@ namespace
 
 
 
-    age::uint8_vector parse_hex_out(const std::string &str,
-                                    const std::vector<std::string> &prefixes)
+    age::uint8_vector parse_hex_out(const std::string&              str,
+                                    const std::vector<std::string>& prefixes)
     {
-        for (auto &prefix : prefixes)
+        for (auto& prefix : prefixes)
         {
             auto pos = str.find(prefix);
             // prefix not found => continue with next prefix
@@ -217,7 +217,7 @@ namespace
             // prefix found => parse value
             age::uint8_vector result;
 
-            for (auto &c : str.substr(pos + prefix.length()))
+            for (auto& c : str.substr(pos + prefix.length()))
             {
                 // end-of-value reached
                 if ((c == '.') || (c == '_'))
@@ -225,10 +225,9 @@ namespace
                     break;
                 }
                 // convert hex character
-                age::uint8_t byte = ((c >= 'a') && (c <= 'f')) ? (c - 'a' + 10) :
-                                    ((c >= 'A') && (c <= 'F')) ? (c - 'A' + 10) :
-                                    ((c >= '0') && (c <= '9')) ? (c - '0') :
-                                                                 0xFF;
+                age::uint8_t byte = ((c >= 'a') && (c <= 'f')) ? (c - 'a' + 10) : ((c >= 'A') && (c <= 'F')) ? (c - 'A' + 10)
+                                                                              : ((c >= '0') && (c <= '9'))   ? (c - '0')
+                                                                                                             : 0xFF;
                 // invalid character found?
                 if (byte >= 0x10)
                 {
@@ -246,13 +245,13 @@ namespace
         return {};
     }
 
-    age::tester::run_test_t new_hex_out_test(const age::uint8_vector &expected_result)
+    age::tester::run_test_t new_hex_out_test(const age::uint8_vector& expected_result)
     {
-        return [=](age::gb_emulator &emulator) {
+        return [=](age::gb_emulator& emulator) {
             run_test(emulator);
 
-            auto &screen = emulator.get_screen_front_buffer();
-            auto screen_width = emulator.get_screen_width();
+            auto& screen       = emulator.get_screen_front_buffer();
+            auto  screen_width = emulator.get_screen_width();
 
             // start with the first line
             // (the emulator screen buffer is filled upside down)
@@ -272,10 +271,10 @@ namespace
                     // pad the expected result with zeroes to fail on e.g. result 0x1F when expecting 0x1
                     auto tile_index = (exp_index >= expected_result.size()) ? 0 : expected_result[exp_index];
 
-                    const age::uint8_t *tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
+                    const age::uint8_t* tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
                     for (int tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
                     {
-                        bool found_background = screen[line_offset + pixel_offset] == background;
+                        bool found_background  = screen[line_offset + pixel_offset] == background;
                         bool expect_background = tile_ptr[tile_pixel] == 0;
 
                         if (found_background != expect_background)
@@ -296,8 +295,8 @@ namespace
 
 
 
-    std::optional<bool> parse_boolean_out(const std::string &str,
-                                          const std::vector<std::string> &prefixes)
+    std::optional<bool> parse_boolean_out(const std::string&              str,
+                                          const std::vector<std::string>& prefixes)
     {
         auto hex_out = parse_hex_out(str, prefixes);
         if (hex_out.size() != 1)
@@ -317,15 +316,16 @@ namespace
 
     age::tester::run_test_t new_audio_test(bool expect_audio_out)
     {
-        return [=](age::gb_emulator &emulator) {
+        return [=](age::gb_emulator& emulator) {
             run_test(emulator);
 
             // evaluate test result by checking the first X samples of the last emulation iteration
             // (similar to gambatte/test/testrunner.cpp)
-            const age::pcm_vector &audio_buffer = emulator.get_audio_buffer();
-            AGE_ASSERT(audio_buffer.size() >= samples_per_frame);
+            const age::pcm_vector& audio_buffer = emulator.get_audio_buffer();
+            AGE_ASSERT(audio_buffer.size() >= samples_per_frame)
 
             const age::pcm_sample first_sample = emulator.get_audio_buffer()[0];
+
             auto count = std::count(begin(audio_buffer),
                                     begin(audio_buffer) + samples_per_frame,
                                     first_sample);
@@ -336,8 +336,8 @@ namespace
 
 
 
-    std::filesystem::path find_screenshot(const std::filesystem::path &rom_path,
-                                          const std::string &suffix)
+    std::filesystem::path find_screenshot(const std::filesystem::path& rom_path,
+                                          const std::string&           suffix)
     {
         auto base = rom_path;
         base.replace_extension(); // remove file extension
@@ -356,11 +356,11 @@ namespace
 
 
 
-void age::tester::schedule_rom_gambatte(const std::filesystem::path &rom_path,
-                                        const schedule_test_t &schedule)
+void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
+                                        const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);
-    auto filename = rom_path.filename().string();
+    auto filename     = rom_path.filename().string();
 
     // check for expected audio output
     auto outaudio_cgb = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_cgb04c_outaudio"});

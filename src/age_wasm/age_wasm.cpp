@@ -31,16 +31,16 @@
 #endif
 
 
-static std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler = nullptr;
-static int output_sample_rate = 44100;
+static std::unique_ptr<age::downsampler_kaiser_low_pass> downsampler        = nullptr;
+static int                                               output_sample_rate = 44100;
 
 static std::unique_ptr<age::gb_emulator> gb_emu = nullptr;
-static age::uint8_vector gb_rom;
-static std::string rom_name;
-static age::uint8_vector gb_persistent_ram;
-static bool gb_persistent_ram_dirty = false; // true => emulator_exists() == true
+static age::uint8_vector                 gb_rom;
+static std::string                       rom_name;
+static age::uint8_vector                 gb_persistent_ram;
+static bool                              gb_persistent_ram_dirty = false; // true => emulator_exists() == true
 
-void free_memory(age::uint8_vector &vec)
+void free_memory(age::uint8_vector& vec)
 {
     age::uint8_vector().swap(vec);
 }
@@ -68,8 +68,8 @@ age::uint8_t* gb_allocate_rom_buffer(unsigned rom_size)
 EMSCRIPTEN_KEEPALIVE
 void gb_new_emulator()
 {
-    gb_emu = std::unique_ptr<age::gb_emulator>(new age::gb_emulator(gb_rom));
-    rom_name = gb_emu->get_emulator_title();
+    gb_emu      = std::unique_ptr<age::gb_emulator>(new age::gb_emulator(gb_rom));
+    rom_name    = gb_emu->get_emulator_title();
     downsampler = nullptr;
 
     free_memory(gb_persistent_ram);
@@ -124,17 +124,15 @@ bool gb_emulate(int min_cycles_to_emulate, int sample_rate)
         if ((output_sample_rate != sample_rate) || (downsampler == nullptr))
         {
             output_sample_rate = sample_rate;
-            downsampler = std::unique_ptr<age::downsampler_kaiser_low_pass>(
+            downsampler        = std::unique_ptr<age::downsampler_kaiser_low_pass>(
                 new age::downsampler_kaiser_low_pass(
-                    gb_emu->get_pcm_sampling_rate(), output_sample_rate, 0.1
-                )
-            );
+                    gb_emu->get_pcm_sampling_rate(), output_sample_rate, 0.1));
         }
 
         downsampler->clear_output_samples();
 
         gb_persistent_ram_dirty = true;
-        result = gb_emu->emulate(min_cycles_to_emulate);
+        result                  = gb_emu->emulate(min_cycles_to_emulate);
 
         downsampler->add_input_samples(gb_emu->get_audio_buffer());
     }

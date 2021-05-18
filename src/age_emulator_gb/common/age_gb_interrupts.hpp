@@ -23,78 +23,75 @@
 
 #include <age_types.hpp>
 
-#include "age_gb_device.hpp"
 #include "age_gb_clock.hpp"
+#include "age_gb_device.hpp"
 
 
 
 namespace age
 {
 
-enum class gb_interrupt : uint8_t
-{
-    vblank = 0x01, // highest priority
-    lcd = 0x02,
-    timer = 0x04,
-    serial = 0x08,
-    joypad = 0x10, // lowest priority
-};
+    enum class gb_interrupt : uint8_t
+    {
+        vblank = 0x01, // highest priority
+        lcd    = 0x02,
+        timer  = 0x04,
+        serial = 0x08,
+        joypad = 0x10, // lowest priority
+    };
 
 
 
-class gb_interrupt_trigger
-{
-    AGE_DISABLE_COPY(gb_interrupt_trigger);
-public:
+    class gb_interrupt_trigger
+    {
+        AGE_DISABLE_COPY(gb_interrupt_trigger);
 
-    gb_interrupt_trigger(const gb_device &device, gb_clock &clock);
+    public:
+        gb_interrupt_trigger(const gb_device& device, gb_clock& clock);
 
-    void trigger_interrupt(gb_interrupt interrupt, int irq_clock_cycle);
+        void trigger_interrupt(gb_interrupt interrupt, int irq_clock_cycle);
 
-protected:
-
-    const gb_device &m_device;
-    gb_clock &m_clock;
-    uint8_t m_if = 0xE1;
-    uint8_t m_ie = 0;
-    uint8_t m_during_dispatch = 0;
-    bool m_ime = false;
-    bool m_halted = false;
-};
-
-
-
-class gb_interrupt_ports : public gb_interrupt_trigger
-{
-public:
-
-    using gb_interrupt_trigger::gb_interrupt_trigger;
-
-    uint8_t read_ie() const;
-    uint8_t read_if() const;
-
-    void write_ie(uint8_t value);
-    void write_if(uint8_t value);
-};
+    protected:
+        const gb_device& m_device;
+        gb_clock&        m_clock;
+        uint8_t          m_if              = 0xE1;
+        uint8_t          m_ie              = 0;
+        uint8_t          m_during_dispatch = 0;
+        bool             m_ime             = false;
+        bool             m_halted          = false;
+    };
 
 
 
-class gb_interrupt_dispatcher : public gb_interrupt_ports
-{
-public:
+    class gb_interrupt_ports : public gb_interrupt_trigger
+    {
+    public:
+        using gb_interrupt_trigger::gb_interrupt_trigger;
 
-    using gb_interrupt_ports::gb_interrupt_ports;
+        [[nodiscard]] uint8_t read_ie() const;
+        [[nodiscard]] uint8_t read_if() const;
 
-    bool get_ime() const;
-    void set_ime(bool ime);
+        void write_ie(uint8_t value);
+        void write_if(uint8_t value);
+    };
 
-    uint8_t next_interrupt_bit() const;
-    void clear_interrupt_flag(uint8_t interrupt_bit);
-    void finish_dispatch();
 
-    bool halted() const;
-    void halt();
-};
+
+    class gb_interrupt_dispatcher : public gb_interrupt_ports
+    {
+    public:
+        using gb_interrupt_ports::gb_interrupt_ports;
+
+        [[nodiscard]] bool get_ime() const;
+        void               set_ime(bool ime);
+
+        [[nodiscard]] uint8_t next_interrupt_bit() const;
+        void                  clear_interrupt_flag(uint8_t interrupt_bit);
+        void                  finish_dispatch();
+
+        [[nodiscard]] bool halted() const;
+        void               halt();
+    };
 
 } // namespace age
 

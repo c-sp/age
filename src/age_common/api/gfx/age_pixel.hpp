@@ -31,69 +31,69 @@
 namespace age
 {
 
-struct pixel
-{
-    pixel()
-        : pixel(0, 0, 0)
-    {}
-
-    explicit pixel(int rgb)
-        : pixel((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF)
-    {}
-
-    pixel(int r, int g, int b)
-        : pixel(r, g, b, 0xFF)
-    {}
-
-    pixel(int r, int g, int b, int a)
+    struct pixel
     {
-        AGE_ASSERT(r >= 0);
-        AGE_ASSERT(g >= 0);
-        AGE_ASSERT(b >= 0);
-        AGE_ASSERT(a >= 0);
+        pixel()
+            : pixel(0, 0, 0)
+        {}
 
-        AGE_ASSERT(r <= 255);
-        AGE_ASSERT(g <= 255);
-        AGE_ASSERT(b <= 255);
-        AGE_ASSERT(a <= 255);
+        explicit pixel(int rgb)
+            : pixel((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF)
+        {}
 
-        m_rgba.m_r = r & 0xFF;
-        m_rgba.m_g = g & 0xFF;
-        m_rgba.m_b = b & 0xFF;
-        m_rgba.m_a = a & 0xFF;
-    }
+        pixel(int r, int g, int b)
+            : pixel(r, g, b, 0xFF)
+        {}
 
-    bool operator==(const pixel &other) const
-    {
-        return m_color == other.m_color;
-    }
-
-    bool operator!=(const pixel &other) const
-    {
-        return m_color != other.m_color;
-    }
-
-    // We use byte-level access to be independent of byte ordering
-    // and 32 bit integer access to speed up operations like comparison.
-    union
-    {
-        struct
+        pixel(int r, int g, int b, int a)
         {
-            uint8_t m_r;
-            uint8_t m_g;
-            uint8_t m_b;
-            uint8_t m_a;
-        } m_rgba;
-        uint32_t m_color;
+            AGE_ASSERT(r >= 0);
+            AGE_ASSERT(g >= 0);
+            AGE_ASSERT(b >= 0);
+            AGE_ASSERT(a >= 0);
+
+            AGE_ASSERT(r <= 255);
+            AGE_ASSERT(g <= 255);
+            AGE_ASSERT(b <= 255);
+            AGE_ASSERT(a <= 255);
+
+            m_rgba.m_r = r & 0xFF;
+            m_rgba.m_g = g & 0xFF;
+            m_rgba.m_b = b & 0xFF;
+            m_rgba.m_a = a & 0xFF;
+        }
+
+        bool operator==(const pixel& other) const
+        {
+            return m_color == other.m_color;
+        }
+
+        bool operator!=(const pixel& other) const
+        {
+            return m_color != other.m_color;
+        }
+
+        // We use byte-level access to be independent of byte ordering
+        // and 32 bit integer access to speed up operations like comparison.
+        union
+        {
+            struct
+            {
+                uint8_t m_r;
+                uint8_t m_g;
+                uint8_t m_b;
+                uint8_t m_a;
+            } m_rgba;
+            uint32_t m_color;
+        };
     };
-};
 
-static_assert(sizeof(pixel) == 4, "expected pixel size of 4 bytes (RGBA)");
+    static_assert(sizeof(pixel) == 4, "expected pixel size of 4 bytes (RGBA)");
 
-typedef std::vector<pixel> pixel_vector;
-
-
+    typedef std::vector<pixel> pixel_vector;
 
 } // namespace age
+
+
 
 #endif // AGE_PIXEL_HPP

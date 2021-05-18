@@ -18,35 +18,36 @@
 
 
 
-namespace {
-
-age::gb_cart_mode calculate_cart_mode(const uint8_t rom_byte_0x143,
-                                      const age::gb_hardware hardware)
+namespace
 {
-    const bool cgb_flag = rom_byte_0x143 >= 0x80;
-    switch (hardware)
+
+    age::gb_cart_mode calculate_cart_mode(const uint8_t          rom_byte_0x143,
+                                          const age::gb_hardware hardware)
     {
-        case age::gb_hardware::dmg:
-            return age::gb_cart_mode::dmg;
+        const bool cgb_flag = rom_byte_0x143 >= 0x80;
+        switch (hardware)
+        {
+            case age::gb_hardware::dmg:
+                return age::gb_cart_mode::dmg;
 
-        case age::gb_hardware::cgb:
-            return cgb_flag
-                    ? age::gb_cart_mode::cgb
-                    : age::gb_cart_mode::dmg_on_cgb;
+            case age::gb_hardware::cgb:
+                return cgb_flag
+                           ? age::gb_cart_mode::cgb
+                           : age::gb_cart_mode::dmg_on_cgb;
 
-        default:
-            // auto-detect hardware
-            return cgb_flag
-                    ? age::gb_cart_mode::cgb
-                    : age::gb_cart_mode::dmg;
+            default:
+                // auto-detect hardware
+                return cgb_flag
+                           ? age::gb_cart_mode::cgb
+                           : age::gb_cart_mode::dmg;
+        }
     }
-}
 
-}
-
+} // namespace
 
 
-age::gb_device::gb_device(const uint8_t rom_byte_0x143,
+
+age::gb_device::gb_device(const uint8_t     rom_byte_0x143,
                           const gb_hardware hardware)
 
     : m_cart_mode(calculate_cart_mode(rom_byte_0x143, hardware))

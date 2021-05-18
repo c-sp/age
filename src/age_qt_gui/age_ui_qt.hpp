@@ -41,6 +41,8 @@ std::string operator+(const std::string &std_string, const QString &q_string);
 namespace age
 {
 
+constexpr const char *project_name = "AGE";
+
 bool is_checked(int checked_state);
 
 constexpr int stats_per_second = 4;

@@ -32,7 +32,7 @@ namespace
     void configure_rgba(png_structp png_ptr, png_infop info_ptr)
     {
         auto color_type = png_get_color_type(png_ptr, info_ptr);
-        auto bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+        auto bit_depth  = png_get_bit_depth(png_ptr, info_ptr);
 
         if (bit_depth == 16)
         {
@@ -56,15 +56,12 @@ namespace
         }
 
         // These color_type don't have an alpha channel then fill it with 0xff.
-        if (color_type == PNG_COLOR_TYPE_RGB ||
-            color_type == PNG_COLOR_TYPE_GRAY ||
-            color_type == PNG_COLOR_TYPE_PALETTE)
+        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)
         {
             png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
         }
 
-        if (color_type == PNG_COLOR_TYPE_GRAY ||
-            color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
         {
             png_set_gray_to_rgb(png_ptr);
         }
@@ -82,9 +79,9 @@ namespace
     //!     <li> https://gist.github.com/niw/5963798
     //! </ul>
     //!
-    age::pixel_vector read_png_file(FILE *fp,
-                                    int screen_width,
-                                    int screen_height)
+    age::pixel_vector read_png_file(FILE* fp,
+                                    int   screen_width,
+                                    int   screen_height)
     {
         // check png signature
         std::uint8_t sig[8];
@@ -101,7 +98,7 @@ namespace
         png_bytep row_pointers[screen_height];
         for (int i = 0; i < screen_height; i++)
         {
-            row_pointers[i] = reinterpret_cast<unsigned char *>(&pixels[i * screen_width]);
+            row_pointers[i] = reinterpret_cast<unsigned char*>(&pixels[i * screen_width]);
         }
 
         // create png data structures
@@ -128,7 +125,7 @@ namespace
         png_read_info(png_ptr, info_ptr);
 
         // check image dimensions
-        auto width = png_get_image_width(png_ptr, info_ptr);
+        auto width  = png_get_image_width(png_ptr, info_ptr);
         auto height = png_get_image_height(png_ptr, info_ptr);
 
         if ((width != screen_width) || (height != screen_height))
@@ -147,10 +144,10 @@ namespace
 
 
 
-    age::pixel_vector load_png(const std::filesystem::path &screenshot_png_path,
-                               const age::gb_emulator &emulator)
+    age::pixel_vector load_png(const std::filesystem::path& screenshot_png_path,
+                               const age::gb_emulator&      emulator)
     {
-        FILE *file = fopen(screenshot_png_path.string().c_str(), "rb");
+        FILE*             file   = fopen(screenshot_png_path.string().c_str(), "rb");
         age::pixel_vector result = read_png_file(file, emulator.get_screen_width(), emulator.get_screen_height());
         fclose(file);
         return result;
@@ -160,7 +157,7 @@ namespace
 
 
 
-std::shared_ptr<age::uint8_vector> age::tester::load_rom_file(const std::filesystem::path &rom_path)
+std::shared_ptr<age::uint8_vector> age::tester::load_rom_file(const std::filesystem::path& rom_path)
 {
     std::ifstream rom_file(rom_path, std::ios::in | std::ios::binary);
     return std::make_shared<age::uint8_vector>((std::istreambuf_iterator<char>(rom_file)), std::istreambuf_iterator<char>());
@@ -168,10 +165,10 @@ std::shared_ptr<age::uint8_vector> age::tester::load_rom_file(const std::filesys
 
 
 
-age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::path &screenshot_png_path,
-                                                         const test_finished_t &test_finished)
+age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::path& screenshot_png_path,
+                                                         const test_finished_t&       test_finished)
 {
-    return [=](age::gb_emulator &emulator) {
+    return [=](age::gb_emulator& emulator) {
         int cycles_per_step = emulator.get_cycles_per_second() >> 8;
 
         while (!test_finished(emulator))
@@ -184,7 +181,7 @@ age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::
 
         // compare screen to screenshot
         auto screenshot = png_data.data();
-        auto screen = emulator.get_screen_front_buffer().data();
+        auto screen     = emulator.get_screen_front_buffer().data();
 
         for (int i = 0, max = emulator.get_screen_width() * emulator.get_screen_height(); i < max; ++i)
         {

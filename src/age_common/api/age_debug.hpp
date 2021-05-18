@@ -41,9 +41,9 @@
 
 #include <cassert>
 #include <iomanip> // std::quoted
-#include <ios> // std::hex
-#include <string>
+#include <ios>     // std::hex
 #include <sstream> // std::stringstream
+#include <string>
 
 #include <mutex>
 
@@ -52,67 +52,63 @@
 namespace age
 {
 
-//!
-//! Utility class to handle concurrent logging to std::cout.
-//! It uses the usual fluent interface for passing values to an std::ostream using operator<<
-//! but collects the logging output to some buffer until we explicitly tell it to pass it to std::cout.
-//! Streaming to std::cout is done after locking a mutex, so that there is always only one thread
-//! using std::cout (provided all threads use concurrent_cout).
-//!
-class concurrent_cout
-{
-public:
-
-    template<class T>
-    concurrent_cout& operator<<(const T &t)
+    //!
+    //! Utility class to handle concurrent logging to std::cout.
+    //! It uses the usual fluent interface for passing values to an std::ostream using operator<<
+    //! but collects the logging output to some buffer until we explicitly tell it to pass it to std::cout.
+    //! Streaming to std::cout is done after locking a mutex, so that there is always only one thread
+    //! using std::cout (provided all threads use concurrent_cout).
+    //!
+    class concurrent_cout
     {
-        m_ss << t;
-        return *this;
-    }
+    public:
+        template<class T>
+        concurrent_cout& operator<<(const T& t)
+        {
+            m_ss << t;
+            return *this;
+        }
 
-    void log_line();
+        void log_line();
 
-private:
+    private:
+        static std::mutex M_mutex;
+        std::stringstream m_ss;
+    };
 
-    static std::mutex M_mutex;
-    std::stringstream m_ss;
-};
+    //!
+    //! \brief Utility class for creating an std::string containing a human readable form of the current time.
+    //!
+    class age_log_time : public std::string
+    {
+    public:
+        age_log_time();
 
-//!
-//! \brief Utility class for creating an std::string containing a human readable form of the current time.
-//!
-class age_log_time : public std::string
-{
-public:
-
-    age_log_time();
-
-private:
-
-    static std::string get_timestamp();
-};
+    private:
+        static std::string get_timestamp();
+    };
 
 } // namespace age
 
 
 
-#define AGE_ASSERT(x) assert(x)
+#define AGE_ASSERT(x) assert(x);
 
-#define AGE_ASSERT_ONE_BIT_SET(x) AGE_ASSERT( ((x) > 0) && (((x) & ((x) - 1)) == 0) );
+#define AGE_ASSERT_ONE_BIT_SET(x) AGE_ASSERT(((x) > 0) && (((x) & ((x) -1)) == 0));
 
-#define AGE_LOG(x) (age::concurrent_cout() << age::age_log_time() <<  " " << x).log_line()
+#define AGE_LOG(x)        (age::concurrent_cout() << age::age_log_time() << " " << x).log_line(); // NOLINT(bugprone-macro-parentheses)
 #define AGE_LOG_QUOTED(x) std::quoted(x)
-#define AGE_LOG_DEC(x) static_cast<int64_t>(x)
+#define AGE_LOG_DEC(x)    static_cast<int64_t>(x)
 
-#define AGE_LOG_HEX_X(x, width) \
-    "0x" \
-    << std::hex << std::uppercase << std::setw(width) << std::setfill('0') \
-    << static_cast<uint64_t>(x) \
-    << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec \
-    << " (" << AGE_LOG_DEC(x) << ")"
+#define AGE_LOG_HEX_X(x, width)                                                \
+    "0x"                                                                       \
+        << std::hex << std::uppercase << std::setw(width) << std::setfill('0') \
+        << static_cast<uint64_t>(x)                                            \
+        << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec   \
+        << " (" << AGE_LOG_DEC(x) << ")"
 
-#define AGE_LOG_HEX(x) AGE_LOG_HEX_X(x, 0)
-#define AGE_LOG_HEX8(x) AGE_LOG_HEX_X(x, 2)
+#define AGE_LOG_HEX(x)   AGE_LOG_HEX_X(x, 0)
+#define AGE_LOG_HEX8(x)  AGE_LOG_HEX_X(x, 2)
 #define AGE_LOG_HEX16(x) AGE_LOG_HEX_X(x, 4)
 #define AGE_LOG_HEX32(x) AGE_LOG_HEX_X(x, 8)
 

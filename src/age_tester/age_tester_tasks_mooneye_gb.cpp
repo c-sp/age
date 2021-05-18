@@ -20,13 +20,13 @@
 
 namespace
 {
-    bool run_mooneye_test(age::gb_emulator &emulator)
+    bool run_mooneye_test(age::gb_emulator& emulator)
     {
         // based on mooneye-gb/src/acceptance_tests/fixture.rs
 
         // run the test
         int cycles_per_step = emulator.get_cycles_per_second() >> 8;
-        int max_cycles = emulator.get_cycles_per_second() * 120;
+        int max_cycles      = emulator.get_cycles_per_second() * 120;
 
         for (int cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
         {
@@ -48,10 +48,10 @@ namespace
 
 
 
-void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path &rom_path,
-                                          const schedule_test_t &schedule)
+void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path& rom_path,
+                                          const schedule_test_t&       schedule)
 {
-    auto filename = rom_path.filename().string();
+    auto filename     = rom_path.filename().string();
     bool explicit_cgb = (filename.find("-cgb") != std::string::npos) || (filename.find("-C") != std::string::npos);
     bool explicit_dmg = (filename.find("-dmg") != std::string::npos) || (filename.find("-G") != std::string::npos);
 

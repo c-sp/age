@@ -50,7 +50,7 @@ namespace age::tester
 
     private:
         mutable std::mutex m_mutex; //!< mutable to allow locking in const functions
-        std::vector<T> m_vector;
+        std::vector<T>     m_vector;
     };
 
 
@@ -70,7 +70,10 @@ namespace age::tester
                         task_t task = nullptr;
                         {
                             std::unique_lock lock(m_mutex);
-                            m_cv.wait(lock, [this]() { return !m_tasks.empty() || should_terminate(); });
+                            m_cv.wait(lock,
+                                      [this]() {
+                                          return !m_tasks.empty() || should_terminate();
+                                      });
 
                             // no tasks left, all threads idle => terminate?
                             if (should_terminate())
@@ -115,7 +118,7 @@ namespace age::tester
             m_cv.notify_all();
 
             // wait for all threads to terminate
-            for (auto &thread : m_threads)
+            for (auto& thread : m_threads)
             {
                 thread.join();
             }
@@ -133,11 +136,11 @@ namespace age::tester
     private:
         std::vector<std::thread> m_threads;
 
-        std::mutex m_mutex;
+        std::mutex              m_mutex;
         std::condition_variable m_cv;
-        std::vector<task_t> m_tasks;
-        bool m_terminate_when_idle = false;
-        int m_working_threads_count = 0;
+        std::vector<task_t>     m_tasks;
+        bool                    m_terminate_when_idle   = false;
+        int                     m_working_threads_count = 0;
 
         [[nodiscard]] bool should_terminate() const
         {

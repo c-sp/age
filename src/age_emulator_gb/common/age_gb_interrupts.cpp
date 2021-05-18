@@ -19,12 +19,13 @@
 namespace
 {
 
-constexpr age::uint8_t serial_bit = to_integral(age::gb_interrupt::serial);
-constexpr age::uint8_t timer_bit = to_integral(age::gb_interrupt::timer);
+    constexpr age::uint8_t serial_bit = to_integral(age::gb_interrupt::serial);
+    constexpr age::uint8_t timer_bit  = to_integral(age::gb_interrupt::timer);
 
-constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
+    constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
 
-}
+} // namespace
+
 
 
 
@@ -35,8 +36,8 @@ constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
 //
 //---------------------------------------------------------
 
-age::gb_interrupt_trigger::gb_interrupt_trigger(const gb_device &device,
-                                                gb_clock &clock)
+age::gb_interrupt_trigger::gb_interrupt_trigger(const gb_device& device,
+                                                gb_clock&        clock)
     : m_device(device),
       m_clock(clock)
 {
@@ -45,7 +46,7 @@ age::gb_interrupt_trigger::gb_interrupt_trigger(const gb_device &device,
 
 
 void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
-                                                  int irq_clock_cycle)
+                                                  int          irq_clock_cycle)
 {
     uint8_t intr_bit = to_integral(interrupt);
 
@@ -63,13 +64,13 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
     if ((intr_bit & m_during_dispatch & deny_retrigger) && m_device.is_cgb_hardware())
     {
         AGE_GB_CLOG_IRQS("denying interrupt request " << AGE_LOG_HEX8(intr_bit)
-                         << " on clock cycle " << irq_clock_cycle
-                         << " (currently being dispatched)");
+                                                      << " on clock cycle " << irq_clock_cycle
+                                                      << " (currently being dispatched)")
         return;
     }
 
     AGE_GB_CLOG_IRQS("interrupt " << AGE_LOG_HEX8(intr_bit)
-                     <<" requested on clock cycle " << irq_clock_cycle);
+                                  << " requested on clock cycle " << irq_clock_cycle)
     m_if |= intr_bit;
 
     //! \todo terminate halt only for m_if & m_ie != 0 (makes sense, are there any test roms for this?)
@@ -97,25 +98,25 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
     if (m_device.is_cgb())
     {
         m_clock.tick_machine_cycle();
-        AGE_GB_CLOG_IRQS("    * HALT termination M-cycle (CGB)");
+        AGE_GB_CLOG_IRQS("    * HALT termination M-cycle (CGB)")
         return;
     }
 
     //! \todo Gambatte: delay depends on sub-m-cycle timing (analyse test roms)
     int clk_current = m_clock.get_clock_cycle();
-    AGE_ASSERT(clk_current >= irq_clock_cycle);
-    int clks_diff = clk_current - irq_clock_cycle;
+    AGE_ASSERT(clk_current >= irq_clock_cycle)
+    int clks_diff   = clk_current - irq_clock_cycle;
     int half_mcycle = m_clock.get_machine_cycle_clocks() >> 1;
 
     if (clks_diff < half_mcycle)
     {
         m_clock.tick_machine_cycle();
         AGE_GB_CLOG_IRQS("    * HALT termination M-cycle (irq "
-                         << clks_diff << " T4-cycles ago)");
+                         << clks_diff << " T4-cycles ago)")
     }
 
     AGE_GB_CLOG_IRQS("    * no HALT termination M-cycle (irq "
-                     << clks_diff << " T4-cycles ago)");
+                     << clks_diff << " T4-cycles ago)")
 }
 
 
@@ -130,13 +131,13 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
 
 age::uint8_t age::gb_interrupt_ports::read_if() const
 {
-    AGE_GB_CLOG_IRQS("read IF " << AGE_LOG_HEX8(m_if));
+    AGE_GB_CLOG_IRQS("read IF " << AGE_LOG_HEX8(m_if))
     return m_if;
 }
 
 age::uint8_t age::gb_interrupt_ports::read_ie() const
 {
-    AGE_GB_CLOG_IRQS("read IE " << AGE_LOG_HEX8(m_if));
+    AGE_GB_CLOG_IRQS("read IE " << AGE_LOG_HEX8(m_if))
     return m_ie;
 }
 
@@ -144,15 +145,15 @@ age::uint8_t age::gb_interrupt_ports::read_ie() const
 
 void age::gb_interrupt_ports::write_if(uint8_t value)
 {
-    AGE_ASSERT(!m_halted);
-    AGE_GB_CLOG_IRQS("write IF " << AGE_LOG_HEX8(value));
+    AGE_ASSERT(!m_halted)
+    AGE_GB_CLOG_IRQS("write IF " << AGE_LOG_HEX8(value))
     m_if = value | 0xE0;
 }
 
 void age::gb_interrupt_ports::write_ie(uint8_t value)
 {
-    AGE_ASSERT(!m_halted);
-    AGE_GB_CLOG_IRQS("write IE " << AGE_LOG_HEX8(value));
+    AGE_ASSERT(!m_halted)
+    AGE_GB_CLOG_IRQS("write IE " << AGE_LOG_HEX8(value))
     m_ie = value;
 }
 
@@ -176,10 +177,10 @@ void age::gb_interrupt_dispatcher::set_ime(bool ime)
     if (ime == m_ime)
     {
         AGE_GB_CLOG_IRQS("(interrupt dispatching already "
-                         << (ime ? "enabled)" : "disabled)"));
+                         << (ime ? "enabled)" : "disabled)"))
         return;
     }
-    AGE_GB_CLOG_IRQS("interrupt dispatching " << (ime ? "enabled" : "disabled"));
+    AGE_GB_CLOG_IRQS("interrupt dispatching " << (ime ? "enabled" : "disabled"))
     m_ime = ime;
 }
 
@@ -202,13 +203,13 @@ void age::gb_interrupt_dispatcher::clear_interrupt_flag(uint8_t interrupt_bit)
 {
     m_if &= ~interrupt_bit;
     m_during_dispatch = interrupt_bit;
-    AGE_GB_CLOG_IRQS("clear IF flag " << AGE_LOG_HEX8(interrupt_bit));
+    AGE_GB_CLOG_IRQS("clear IF flag " << AGE_LOG_HEX8(interrupt_bit))
 }
 
 void age::gb_interrupt_dispatcher::finish_dispatch()
 {
-    AGE_GB_CLOG_IRQS("interrupt dispatching disabled");
-    m_ime = false;
+    AGE_GB_CLOG_IRQS("interrupt dispatching disabled")
+    m_ime             = false;
     m_during_dispatch = 0;
 }
 
@@ -221,14 +222,14 @@ bool age::gb_interrupt_dispatcher::halted() const
 
 void age::gb_interrupt_dispatcher::halt()
 {
-    AGE_ASSERT(!m_halted);
+    AGE_ASSERT(!m_halted)
 
     if (m_if & m_ie & 0x1F)
     {
-        AGE_GB_CLOG_IRQS("    * HALT immediately terminated by pending interrupts");
+        AGE_GB_CLOG_IRQS("    * HALT immediately terminated by pending interrupts")
         return;
     }
 
     m_halted = true;
-    AGE_GB_CLOG_IRQS("    * HALTed");
+    AGE_GB_CLOG_IRQS("    * HALTed")
 }

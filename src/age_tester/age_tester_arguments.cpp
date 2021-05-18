@@ -25,32 +25,32 @@
 
 namespace
 {
-    constexpr char opt_acid2 = 'a';
-    constexpr char opt_blargg = 'b';
+    constexpr char opt_acid2        = 'a';
+    constexpr char opt_blargg       = 'b';
     constexpr char opt_print_failed = 'f';
-    constexpr char opt_gambatte = 'g';
-    constexpr char opt_help = 'h';
-    constexpr char opt_mooneye_gb = 'm';
-    constexpr char opt_mealybug = 'n';
+    constexpr char opt_gambatte     = 'g';
+    constexpr char opt_help         = 'h';
+    constexpr char opt_mooneye_gb   = 'm';
+    constexpr char opt_mealybug     = 'n';
     constexpr char opt_print_passed = 'p';
-    constexpr char opt_whitelist = 'w';
-    constexpr char opt_blacklist = 'x';
+    constexpr char opt_whitelist    = 'w';
+    constexpr char opt_blacklist    = 'x';
 
-    constexpr const char *optstring = ":abfghmnpw:x:";
+    constexpr const char* optstring = ":abfghmnpw:x:";
 
-    constexpr const char *opt_long_acid2 = "acid2";
-    constexpr const char *opt_long_blargg = "blargg";
-    constexpr const char *opt_long_print_failed = "print-failed";
-    constexpr const char *opt_long_gambatte = "gambatte";
-    constexpr const char *opt_long_help = "help";
-    constexpr const char *opt_long_mooneye_gb = "mooneye-gb";
-    constexpr const char *opt_long_mealybug = "mealybug";
-    constexpr const char *opt_long_print_passed = "print-passed";
-    constexpr const char *opt_long_whitelist = "whitelist";
-    constexpr const char *opt_long_blacklist = "blacklist";
+    constexpr const char* opt_long_acid2        = "acid2";
+    constexpr const char* opt_long_blargg       = "blargg";
+    constexpr const char* opt_long_print_failed = "print-failed";
+    constexpr const char* opt_long_gambatte     = "gambatte";
+    constexpr const char* opt_long_help         = "help";
+    constexpr const char* opt_long_mooneye_gb   = "mooneye-gb";
+    constexpr const char* opt_long_mealybug     = "mealybug";
+    constexpr const char* opt_long_print_passed = "print-passed";
+    constexpr const char* opt_long_whitelist    = "whitelist";
+    constexpr const char* opt_long_blacklist    = "blacklist";
 
-    constexpr const char *help_cmd_var = "%cmd%";
-    constexpr const char *help_lines[] = {
+    constexpr const char* help_cmd_var = "%cmd%";
+    constexpr const char* help_lines[] = {
         "Run (parts of) the gameboy-test-roms test suite with AGE.",
         "See also:",
         "  https://github.com/c-sp/gameboy-test-roms",
@@ -82,105 +82,109 @@ namespace
 
 
 
-void age::tester::print_help(int argc, char **argv)
+void age::tester::print_help(int argc, char** argv)
 {
     std::string cmd_var(help_cmd_var);
 
-    std::for_each(std::begin(help_lines), std::end(help_lines), [&](auto line) {
-        std::string l(line);
+    std::for_each(std::begin(help_lines),
+                  std::end(help_lines),
+                  [&](auto line) {
+                      std::string l(line);
 
-        // replace %cmd%
-        auto cmd_var_idx = l.find(cmd_var);
-        if (cmd_var_idx != std::string::npos)
-        {
-            auto cmd = argc >= 1 ? std::filesystem::path(argv[0]).filename().string() : "";
-            l.replace(cmd_var_idx, cmd_var.size(), cmd);
-        }
+                      // replace %cmd%
+                      auto cmd_var_idx = l.find(cmd_var);
+                      if (cmd_var_idx != std::string::npos)
+                      {
+                          auto cmd = argc >= 1 ? std::filesystem::path(argv[0]).filename().string() : "";
+                          l.replace(cmd_var_idx, cmd_var.size(), cmd);
+                      }
 
-        std::cout << l << std::endl;
-    });
+                      std::cout << l << std::endl;
+                  });
 }
 
 
 
-age::tester::options age::tester::parse_arguments(int argc, char **argv)
+age::tester::options age::tester::parse_arguments(int argc, char** argv)
 {
     // based on
     // https://en.wikipedia.org/wiki/Getopt#Using_GNU_extension_getopt_long
 
     struct option long_options[] = {
         {
-            .name = opt_long_acid2,
+            .name    = opt_long_acid2,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_acid2,
+            .flag    = nullptr,
+            .val     = opt_acid2,
         },
         {
-            .name = opt_long_blargg,
+            .name    = opt_long_blargg,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_blargg,
+            .flag    = nullptr,
+            .val     = opt_blargg,
         },
         {
-            .name = opt_long_print_failed,
+            .name    = opt_long_print_failed,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_print_failed,
+            .flag    = nullptr,
+            .val     = opt_print_failed,
         },
         {
-            .name = opt_long_gambatte,
+            .name    = opt_long_gambatte,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_gambatte,
+            .flag    = nullptr,
+            .val     = opt_gambatte,
         },
         {
-            .name = opt_long_help,
+            .name    = opt_long_help,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_help,
+            .flag    = nullptr,
+            .val     = opt_help,
         },
         {
-            .name = opt_long_mooneye_gb,
+            .name    = opt_long_mooneye_gb,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_mooneye_gb,
+            .flag    = nullptr,
+            .val     = opt_mooneye_gb,
         },
         {
-            .name = opt_long_mealybug,
+            .name    = opt_long_mealybug,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_mealybug,
+            .flag    = nullptr,
+            .val     = opt_mealybug,
         },
         {
-            .name = opt_long_print_passed,
+            .name    = opt_long_print_passed,
             .has_arg = no_argument,
-            .flag = nullptr,
-            .val = opt_print_passed,
+            .flag    = nullptr,
+            .val     = opt_print_passed,
         },
         {
-            .name = opt_long_whitelist,
+            .name    = opt_long_whitelist,
             .has_arg = required_argument,
-            .flag = nullptr,
-            .val = opt_whitelist,
+            .flag    = nullptr,
+            .val     = opt_whitelist,
         },
         {
-            .name = opt_long_blacklist,
+            .name    = opt_long_blacklist,
             .has_arg = required_argument,
-            .flag = nullptr,
-            .val = opt_blacklist,
+            .flag    = nullptr,
+            .val     = opt_blacklist,
         },
         {
-            .name = nullptr,
+            .name    = nullptr,
             .has_arg = 0,
-            .flag = nullptr,
-            .val = 0,
+            .flag    = nullptr,
+            .val     = 0,
         },
     };
 
     age::tester::options options;
-    int c;
-    int longindex = 0;
-    opterr = 0; // no getopt() error message on standard error
+    int                  c;
+    int                  longindex = 0;
+
+    // no getopt() error message on standard error
+    opterr = 0;
 
     while ((c = getopt_long(argc, argv, optstring, long_options, &longindex)) != -1)
     {

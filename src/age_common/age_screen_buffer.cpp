@@ -24,10 +24,10 @@ age::screen_buffer::screen_buffer(int16_t screen_width, int16_t screen_height)
     : m_screen_width(screen_width),
       m_screen_height(screen_height)
 {
-    AGE_ASSERT(m_screen_width > 0);
-    AGE_ASSERT(m_screen_height > 0);
+    AGE_ASSERT(m_screen_width > 0)
+    AGE_ASSERT(m_screen_height > 0)
 
-    // we rely on integral promotion to >=32 bits when multipling width & height
+    // we rely on integral promotion to >=32 bits when multiplying width & height
     auto buffer_size = static_cast<unsigned>(m_screen_width * m_screen_height);
 
     m_buffers[0] = pixel_vector(buffer_size);
@@ -70,8 +70,8 @@ age::pixel_vector& age::screen_buffer::get_back_buffer()
 
 age::pixel* age::screen_buffer::get_first_scanline_pixel(int16_t scanline)
 {
-    AGE_ASSERT(scanline < m_screen_height);
-    pixel *result = get_back_buffer().data() + scanline * m_screen_width;
+    AGE_ASSERT(scanline < m_screen_height)
+    pixel* result = get_back_buffer().data() + scanline * m_screen_width;
     return result;
 }
 

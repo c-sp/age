@@ -22,9 +22,7 @@
 
 namespace
 {
-
-constexpr uint8_t oam_palette = 0x10;
-
+    constexpr uint8_t oam_palette = 0x10;
 }
 
 
@@ -59,8 +57,8 @@ age::uint8_t age::gb_lcd_sprites::get_sprite_size() const
 
 void age::gb_lcd_sprites::set_sprite_size(uint8_t sprite_size)
 {
-    AGE_ASSERT((sprite_size == 8) || (sprite_size == 16));
-    m_sprite_size = sprite_size;
+    AGE_ASSERT((sprite_size == 8) || (sprite_size == 16))
+    m_sprite_size  = sprite_size;
     m_tile_nr_mask = (sprite_size == 16) ? 0xFE : 0xFF;
 }
 
@@ -75,13 +73,13 @@ std::vector<age::gb_sprite> age::gb_lcd_sprites::get_scanline_sprites(int scanli
     {
         uint32_t oam = m_oam.m_sprite[sprite_id];
 
-        gb_sprite sprite = gb_sprite{.m_parts={.m_oam=oam, .m_custom=0}};
+        auto sprite               = gb_sprite{.m_parts = {.m_oam = oam, .m_custom = 0}};
         sprite.m_data.m_sprite_id = sprite_id;
         sprite.m_data.m_attributes &= m_attribute_mask;
 
         sprite.m_data.m_palette_idx = m_cgb_features
-                ? (8 + (sprite.m_data.m_attributes & gb_tile_attrib_palette))
-                : ((sprite.m_data.m_attributes & oam_palette) ? gb_palette_obp1 : gb_palette_obp0);
+                                          ? (8 + (sprite.m_data.m_attributes & gb_tile_attrib_palette))
+                                          : ((sprite.m_data.m_attributes & oam_palette) ? gb_palette_obp1 : gb_palette_obp0);
 
         int y_diff = scanline - (sprite.m_data.m_y - 16);
         if ((y_diff < 0) || (y_diff >= m_sprite_size))
@@ -99,11 +97,13 @@ std::vector<age::gb_sprite> age::gb_lcd_sprites::get_scanline_sprites(int scanli
     // non-CGB mode: sort sprites by X coordinate
     if (!m_cgb_features)
     {
-        std::sort(begin(sprites), end(sprites), [&](const gb_sprite &a, const gb_sprite &b){
-            return (a.m_data.m_x == b.m_data.m_x)
-                    ? (a.m_data.m_sprite_id < b.m_data.m_sprite_id)
-                    : (a.m_data.m_x < b.m_data.m_x);
-        });
+        std::sort(begin(sprites),
+                  end(sprites),
+                  [&](const gb_sprite& a, const gb_sprite& b) {
+                      return (a.m_data.m_x == b.m_data.m_x)
+                                 ? (a.m_data.m_sprite_id < b.m_data.m_sprite_id)
+                                 : (a.m_data.m_x < b.m_data.m_x);
+                  });
     }
 
     return sprites;

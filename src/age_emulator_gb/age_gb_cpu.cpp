@@ -21,66 +21,66 @@
 namespace
 {
 
-constexpr const age::uint8_array<17> interrupt_pc_lookup =
-{{
-     0,
-     0x40,
-     0x48,
-     0,
-     0x50,
-     0,
-     0,
-     0,
-     0x58,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0x60,
- }};
+    constexpr const age::uint8_array<17> interrupt_pc_lookup
+        = {{
+            0,
+            0x40,
+            0x48,
+            0,
+            0x50,
+            0,
+            0,
+            0,
+            0x58,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0x60,
+        }};
 
 #ifdef AGE_DEBUG
-constexpr const std::array<const char*, 17> interrupt_name =
-{{
-     "",
-     "v-blank",
-     "lcd",
-     "",
-     "timer",
-     "",
-     "",
-     "",
-     "serial transfer",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "joypad",
- }};
+    constexpr const std::array<const char*, 17> interrupt_name
+        = {{
+            "",
+            "v-blank",
+            "lcd",
+            "",
+            "timer",
+            "",
+            "",
+            "",
+            "serial transfer",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "joypad",
+        }};
 #endif
 
-}
+} // namespace
 
 
 
-age::gb_cpu::gb_cpu(const gb_device &device,
-                    gb_clock &clock,
-                    gb_interrupt_dispatcher &interrupts,
-                    gb_bus &bus)
+age::gb_cpu::gb_cpu(const gb_device&         device,
+                    gb_clock&                clock,
+                    gb_interrupt_dispatcher& interrupts,
+                    gb_bus&                  bus)
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
       m_bus(bus)
 {
     // reset registers (writing m_regs)
-    m_pc = 0x0100;
-    m_sp = 0xFFFE;
+    m_pc                = 0x0100;
+    m_sp                = 0xFFFE;
     m_prefetched_opcode = m_bus.read_byte(m_pc);
 
     if (!m_device.is_cgb_hardware())
@@ -114,16 +114,14 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 {
     gb_test_info result;
 
-    result.m_cart_mode = m_device.get_cart_mode();
     result.m_ld_b_b = m_ld_b_b;
-
-    result.m_a = m_a;
-    result.m_b = m_b;
-    result.m_c = m_c;
-    result.m_d = m_d;
-    result.m_e = m_e;
-    result.m_h = m_h;
-    result.m_l = m_l;
+    result.m_a      = m_a;
+    result.m_b      = m_b;
+    result.m_c      = m_c;
+    result.m_d      = m_d;
+    result.m_e      = m_e;
+    result.m_h      = m_h;
+    result.m_l      = m_l;
 
     return result;
 }
@@ -164,8 +162,8 @@ void age::gb_cpu::handle_state()
     // EI - delayed interrupts enabling
     if (m_cpu_state & gb_cpu_state_ei)
     {
-        AGE_ASSERT(!m_interrupts.get_ime());
-        AGE_GB_CLOG_IRQS("enable interrupt dispatching after this CPU instruction");
+        AGE_ASSERT(!m_interrupts.get_ime())
+        AGE_GB_CLOG_IRQS("enable interrupt dispatching after this CPU instruction")
         execute_prefetched();
 
         // enable interrupts only if this instruction was no DI
@@ -186,7 +184,7 @@ void age::gb_cpu::dispatch_interrupt()
 {
     AGE_GB_CLOG_IRQS("dispatching interrupt"
                      << ", current PC = " << AGE_LOG_HEX16(m_pc)
-                     << ", [PC] = " << AGE_LOG_HEX8(m_bus.read_byte(m_pc)));
+                     << ", [PC] = " << AGE_LOG_HEX8(m_bus.read_byte(m_pc)))
 
     m_clock.tick_machine_cycle();
     m_clock.tick_machine_cycle();
@@ -203,12 +201,12 @@ void age::gb_cpu::dispatch_interrupt()
 
     m_bus.handle_events();
     uint8_t intr_bit = m_interrupts.next_interrupt_bit();
-    AGE_ASSERT(   (intr_bit == 0x00)
+    AGE_ASSERT((intr_bit == 0x00)
                || (intr_bit == 0x01)
                || (intr_bit == 0x02)
                || (intr_bit == 0x04)
                || (intr_bit == 0x08)
-               || (intr_bit == 0x10));
+               || (intr_bit == 0x10))
 
     // Pushing the lower PC byte happens before clearing the interrupt's
     // IF bit (checked by pushing to IF).
@@ -217,13 +215,13 @@ void age::gb_cpu::dispatch_interrupt()
     m_bus.handle_events();
     m_interrupts.clear_interrupt_flag(intr_bit);
 
-    m_pc = interrupt_pc_lookup[intr_bit];
+    m_pc                = interrupt_pc_lookup[intr_bit];
     m_prefetched_opcode = tick_read_byte(m_pc);
 
     m_bus.handle_events();
     m_interrupts.finish_dispatch();
 
     AGE_GB_CLOG_IRQS("interrupt " << AGE_LOG_HEX8(intr_bit)
-                     << " (" << interrupt_name[intr_bit] << ")"
-                     << " dispatched to " << AGE_LOG_HEX16(m_pc));
+                                  << " (" << interrupt_name[intr_bit] << ")"
+                                  << " dispatched to " << AGE_LOG_HEX16(m_pc))
 }

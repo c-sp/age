@@ -24,15 +24,13 @@
 
 namespace
 {
-
-constexpr const std::array<age::uint8_array<8>, 4> gb_duty_waveforms =
-{{
-     {{  0, 0, 0, 0,   0, 0, 0,15 }},
-     {{ 15, 0, 0, 0,   0, 0, 0,15 }},
-     {{ 15, 0, 0, 0,   0,15,15,15 }},
-     {{  0,15,15,15,  15,15,15, 0 }},
- }};
-
+    constexpr const std::array<age::uint8_array<8>, 4> gb_duty_waveforms
+        = {{
+            {{0, 0, 0, 0, 0, 0, 0, 15}},
+            {{15, 0, 0, 0, 0, 0, 0, 15}},
+            {{15, 0, 0, 0, 0, 15, 15, 15}},
+            {{0, 15, 15, 15, 15, 15, 15, 0}},
+        }};
 }
 
 
@@ -74,14 +72,14 @@ void age::gb_sound_channel::set_multiplier(uint8_t nr50, uint8_t shifted_nr51)
     //     - SOx volume
     //     - channel to SOx "routing"
 
-    int16_t volume_SO1 = (nr50 & 7) + 1;
-    int16_t volume_SO2 = ((nr50 >> 4) & 7) + 1;
+    int volume_SO1 = (nr50 & 7) + 1;
+    int volume_SO2 = ((nr50 >> 4) & 7) + 1;
 
     volume_SO1 *= shifted_nr51 & 1;
     volume_SO2 *= (shifted_nr51 >> 4) & 1;
 
     // SO1 is the right channel, SO2 is the left channel
-    m_multiplier = pcm_sample(volume_SO2, volume_SO1).m_stereo_sample;
+    m_multiplier = pcm_sample(static_cast<int16_t>(volume_SO2), static_cast<int16_t>(volume_SO1)).m_stereo_sample;
 }
 
 
@@ -111,23 +109,23 @@ age::int16_t age::gb_duty_source::get_frequency_bits() const
 
 #define DUTY_FREQ_TO_SAMPLES ((2048 - m_frequency_bits) << 1)
 
-void age::gb_duty_source::set_frequency_bits(int16_t frequency_bits)
+void age::gb_duty_source::set_frequency_bits(int frequency_bits)
 {
-    AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048));
-    m_frequency_bits = frequency_bits;
-    int samples = DUTY_FREQ_TO_SAMPLES;
+    AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048))
+    m_frequency_bits = static_cast<int16_t>(frequency_bits);
+    int samples      = DUTY_FREQ_TO_SAMPLES;
     set_frequency_timer_period(samples);
 }
 
 void age::gb_duty_source::set_low_frequency_bits(uint8_t nrX3)
 {
-    int16_t frequency_bits = (m_frequency_bits & ~0xFF) + nrX3;
+    int frequency_bits = (m_frequency_bits & ~0xFF) + nrX3;
     set_frequency_bits(frequency_bits);
 }
 
 void age::gb_duty_source::set_high_frequency_bits(uint8_t nrX4)
 {
-    int16_t frequency_bits = (m_frequency_bits & 0xFF) + ((nrX4 << 8) & 0x700);
+    int frequency_bits = (m_frequency_bits & 0xFF) + ((nrX4 << 8) & 0x700);
     set_frequency_bits(frequency_bits);
 }
 
@@ -216,7 +214,7 @@ void age::gb_wave_source::set_high_frequency_bits(uint8_t nrX4)
 void age::gb_wave_source::calculate_frequency_timer_period()
 {
     int frequency = m_frequency_low + (m_frequency_high << 8);
-    AGE_ASSERT((frequency >= 0) && (frequency < 2048));
+    AGE_ASSERT((frequency >= 0) && (frequency < 2048))
     int samples = 2048 - frequency;
     set_frequency_timer_period(samples);
 }
@@ -231,12 +229,12 @@ void age::gb_wave_source::init_wave_pattern_position()
 
 void age::gb_wave_source::set_wave_pattern_byte(unsigned offset, uint8_t value)
 {
-    uint8_t first_sample = value >> 4;
+    uint8_t first_sample  = value >> 4;
     uint8_t second_sample = value & 0x0F;
 
-    AGE_ASSERT(offset < 16);
+    AGE_ASSERT(offset < 16)
     offset <<= 1;
-    m_wave_pattern[offset] = first_sample;
+    m_wave_pattern[offset]     = first_sample;
     m_wave_pattern[offset + 1] = second_sample;
 }
 
@@ -247,13 +245,13 @@ age::uint8_t age::gb_wave_source::next_wave_sample()
     ++m_index;
     m_index &= 31;
 
-    uint8_t sample = m_wave_pattern[m_index];
+    uint8_t sample       = m_wave_pattern[m_index];
     m_wave_ram_just_read = true;
 
     return sample;
 }
 
-void age::gb_wave_source::generate_samples(pcm_vector &buffer, int buffer_index, int samples_to_generate)
+void age::gb_wave_source::generate_samples(pcm_vector& buffer, int buffer_index, int samples_to_generate)
 {
     m_wave_ram_just_read = false;
     gb_sample_generator<gb_wave_source>::generate_samples(buffer, buffer_index, samples_to_generate);
@@ -288,7 +286,7 @@ void age::gb_noise_source::write_nrX3(uint8_t nrX3)
 {
     m_nrX3 = nrX3;
 
-    m_7steps = (m_nrX3 & 0x08) > 0;
+    m_7steps      = (m_nrX3 & 0x08) > 0;
     m_allow_shift = m_nrX3 < 0xE0;
 
     int ratio = m_nrX3 & 0x07;

@@ -20,9 +20,7 @@
 
 namespace age
 {
-
-constexpr int gb_sampling_rate = gb_clock_cycles_per_second >> 1;
-
+    constexpr int gb_sampling_rate = gb_clock_cycles_per_second >> 1;
 }
 
 
@@ -43,7 +41,7 @@ age::uint8_vector age::gb_emulator::get_persistent_ram() const
     return m_impl->get_persistent_ram();
 }
 
-void age::gb_emulator::set_persistent_ram(const uint8_vector &source)
+void age::gb_emulator::set_persistent_ram(const uint8_vector& source)
 {
     m_impl->set_persistent_ram(source);
 }
@@ -84,7 +82,7 @@ std::string age::gb_emulator::inner_get_emulator_title() const
 //
 //---------------------------------------------------------
 
-age::gb_emulator::gb_emulator(const uint8_vector &rom, gb_hardware hardware, gb_colors_hint colors_hint)
+age::gb_emulator::gb_emulator(const uint8_vector& rom, gb_hardware hardware, gb_colors_hint colors_hint)
     : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_clock_cycles_per_second),
       m_impl(new gb_emulator_impl(rom, hardware, colors_hint, get_pcm_vector(), get_screen_buffer()))
 {
@@ -92,9 +90,5 @@ age::gb_emulator::gb_emulator(const uint8_vector &rom, gb_hardware hardware, gb_
 
 age::gb_emulator::~gb_emulator()
 {
-    if (m_impl != nullptr)
-    {
-        delete m_impl;
-        m_impl = nullptr;
-    }
+    delete m_impl;
 }

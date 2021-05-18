@@ -34,7 +34,7 @@ age::uint8_vector age::gb_emulator_impl::get_persistent_ram() const
     return m_memory.get_persistent_ram();
 }
 
-void age::gb_emulator_impl::set_persistent_ram(const uint8_vector &source)
+void age::gb_emulator_impl::set_persistent_ram(const uint8_vector& source)
 {
     m_memory.set_persistent_ram(source);
 }
@@ -53,17 +53,17 @@ void age::gb_emulator_impl::set_buttons_up(int buttons)
 
 int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 {
-    AGE_ASSERT(cycles_to_emulate > 0);
+    AGE_ASSERT(cycles_to_emulate > 0)
 
     // make sure we have some headroom since we usually emulate
     // a few more cycles than requested
-    constexpr int cycle_limit = int_max - gb_clock_cycles_per_second;
+    constexpr int cycle_limit         = int_max - gb_clock_cycles_per_second;
     constexpr int cycle_setback_limit = 2 * gb_clock_cycles_per_second;
 
     // calculate the number of cycles to emulate based on the current
     // cycle and the cycle limit
     int starting_cycle = m_clock.get_clock_cycle();
-    AGE_ASSERT(starting_cycle < cycle_setback_limit);
+    AGE_ASSERT(starting_cycle < cycle_setback_limit)
 
     int cycle_to_go = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
 
@@ -76,7 +76,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 
         if (m_bus.during_dma())
         {
-            AGE_ASSERT(m_device.is_cgb());
+            AGE_ASSERT(m_device.is_cgb())
             m_bus.handle_dma();
         }
         else if (m_interrupts.halted())
@@ -94,9 +94,9 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
     m_lcd.update_state();
 
     // calculate the cycles actually emulated
-    int current_cycle = m_clock.get_clock_cycle();
+    int current_cycle   = m_clock.get_clock_cycle();
     int cycles_emulated = current_cycle - starting_cycle;
-    AGE_ASSERT(cycles_emulated >= 0);
+    AGE_ASSERT(cycles_emulated >= 0)
 
     // if the cycle counter reaches a certain threshold,
     // set back all stored cycle values to keep the
@@ -106,20 +106,20 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
         // update timer clock values
         m_timer.update_state();
 
-        AGE_ASSERT(cycle_setback_limit >= 2 * gb_clock_cycles_per_second);
+        AGE_ASSERT(cycle_setback_limit >= 2 * gb_clock_cycles_per_second)
 
         // keep a minimum of cycles to prevent negative cycle values
         // (which should still work but is kind of unintuitive)
         int cycles_to_keep = gb_clock_cycles_per_second
-                + (current_cycle % gb_clock_cycles_per_second);
+                             + (current_cycle % gb_clock_cycles_per_second);
 
         int clock_cycle_offset = current_cycle - cycles_to_keep;
-        AGE_ASSERT(clock_cycle_offset > 0);
-        AGE_ASSERT(clock_cycle_offset < current_cycle);
+        AGE_ASSERT(clock_cycle_offset > 0)
+        AGE_ASSERT(clock_cycle_offset < current_cycle)
 
         LOG("set back cycles: " << current_cycle
-            << " -> " << cycles_to_keep
-            << " (-" << offset << ")");
+                                << " -> " << cycles_to_keep
+                                << " (-" << offset << ")")
 
         m_clock.set_back_clock(clock_cycle_offset);
         m_events.set_back_clock(clock_cycle_offset);
@@ -148,11 +148,11 @@ std::string age::gb_emulator_impl::inner_get_emulator_title() const
 //
 //---------------------------------------------------------
 
-age::gb_emulator_impl::gb_emulator_impl(const uint8_vector &rom,
-                                        gb_hardware hardware,
-                                        gb_colors_hint colors_hint,
-                                        pcm_vector &pcm_vec,
-                                        screen_buffer &screen_buffer)
+age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
+                                        gb_hardware         hardware,
+                                        gb_colors_hint      colors_hint,
+                                        pcm_vector&         pcm_vec,
+                                        screen_buffer&      screen_buffer)
     : m_memory(rom),
       m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
       m_clock(m_device),

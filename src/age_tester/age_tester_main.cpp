@@ -24,7 +24,7 @@
 
 namespace
 {
-    void check_run_all(age::tester::options &options)
+    void check_run_all(age::tester::options& options)
     {
         bool run_all = !options.m_acid2 && !options.m_blargg && !options.m_gambatte && !options.m_mealybug && !options.m_mooneye_gb;
 
@@ -35,20 +35,31 @@ namespace
         options.m_mooneye_gb |= run_all;
     }
 
-    void sort_and_print(std::vector<age::tester::test_result> &tests)
+    void sort_and_print(std::vector<age::tester::test_result>& tests)
     {
         std::vector<std::string> test_names;
-        std::transform(begin(tests), end(tests), std::back_inserter(test_names), [](auto &res) { return res.m_test_name; });
+
+        std::transform(begin(tests),
+                       end(tests),
+                       std::back_inserter(test_names),
+                       [](auto& res) {
+                           return res.m_test_name;
+                       });
 
         std::sort(begin(test_names), end(test_names));
-        std::for_each(begin(test_names), end(test_names), [](auto &name) { std::cout << "    " << name << std::endl; });
+
+        std::for_each(begin(test_names),
+                      end(test_names),
+                      [](auto& name) {
+                          std::cout << "    " << name << std::endl;
+                      });
     }
 
 } // namespace
 
 
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     age::tester::options opts = age::tester::parse_arguments(argc, argv);
 
@@ -62,12 +73,18 @@ int main(int argc, char **argv)
     // terminate with error on unknown/invalid argument
     if (!opts.m_unknown_options.empty() || !opts.m_invalid_arg_options.empty())
     {
-        std::for_each(begin(opts.m_unknown_options), end(opts.m_unknown_options), [&](auto &opt) {
-            std::cout << "unknown option: " << opt << std::endl;
-        });
-        std::for_each(begin(opts.m_invalid_arg_options), end(opts.m_invalid_arg_options), [&](auto &opt) {
-            std::cout << "missing or invalid argument for option: " << opt << std::endl;
-        });
+        std::for_each(begin(opts.m_unknown_options),
+                      end(opts.m_unknown_options),
+                      [&](auto& opt) {
+                          std::cout << "unknown option: " << opt << std::endl;
+                      });
+
+        std::for_each(begin(opts.m_invalid_arg_options),
+                      end(opts.m_invalid_arg_options),
+                      [&](auto& opt) {
+                          std::cout << "missing or invalid argument for option: " << opt << std::endl;
+                      });
+
         std::cout << std::endl;
         age::tester::print_help(argc, argv);
         return 1;
@@ -104,7 +121,13 @@ int main(int argc, char **argv)
     std::cout << "finished " << results.size() << " test(s)" << std::endl;
 
     std::vector<age::tester::test_result> passed_tests;
-    std::copy_if(begin(results), end(results), std::back_inserter(passed_tests), [](auto &res) { return res.m_test_passed; });
+    std::copy_if(begin(results),
+                 end(results),
+                 std::back_inserter(passed_tests),
+                 [](auto& res) {
+                     return res.m_test_passed;
+                 });
+
     std::cout << passed_tests.size() << " test(s) passed" << std::endl;
     if (opts.m_print_passed)
     {
@@ -112,7 +135,13 @@ int main(int argc, char **argv)
     }
 
     std::vector<age::tester::test_result> failed_tests;
-    std::copy_if(begin(results), end(results), std::back_inserter(failed_tests), [](auto &res) { return !res.m_test_passed; });
+    std::copy_if(begin(results),
+                 end(results),
+                 std::back_inserter(failed_tests),
+                 [](auto& res) {
+                     return !res.m_test_passed;
+                 });
+
     std::cout << failed_tests.size() << " test(s) failed" << std::endl;
     if (opts.m_print_failed)
     {

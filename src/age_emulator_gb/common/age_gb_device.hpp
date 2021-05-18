@@ -28,20 +28,18 @@
 namespace age
 {
 
-class gb_device
-{
-public:
+    class gb_device
+    {
+    public:
+        gb_device(uint8_t rom_byte_0x143, gb_hardware hardware);
 
-    gb_device(uint8_t rom_byte_0x143, gb_hardware hardware);
+        [[nodiscard]] gb_cart_mode get_cart_mode() const;
+        [[nodiscard]] bool         is_cgb() const;          //!< get_cart_mode() == gb_cart_mode::cgb
+        [[nodiscard]] bool         is_cgb_hardware() const; //!< get_cart_mode() != gb_cart_mode::dmg
 
-    gb_cart_mode get_cart_mode() const;
-    bool is_cgb() const; //!< get_cart_mode() == gb_cart_mode::cgb
-    bool is_cgb_hardware() const; //!< get_cart_mode() != gb_cart_mode::dmg
-
-private:
-
-    const gb_cart_mode m_cart_mode;
-};
+    private:
+        const gb_cart_mode m_cart_mode;
+    };
 
 } // namespace age
 

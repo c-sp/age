@@ -18,14 +18,14 @@
 
 
 
-age::gb_lcd::gb_lcd(const gb_device &device,
-                    const gb_clock &clock,
-                    const uint8_t *video_ram,
-                    const uint8_t *rom_header,
-                    gb_events &events,
-                    gb_interrupt_trigger &interrupts,
-                    screen_buffer &screen_buffer,
-                    gb_colors_hint colors_hint)
+age::gb_lcd::gb_lcd(const gb_device&      device,
+                    const gb_clock&       clock,
+                    const uint8_t*        video_ram,
+                    const uint8_t*        rom_header,
+                    gb_events&            events,
+                    gb_interrupt_trigger& interrupts,
+                    screen_buffer&        screen_buffer,
+                    gb_colors_hint        colors_hint)
     : m_device(device),
       m_clock(clock),
       m_scanline(device, clock),
@@ -42,7 +42,7 @@ age::uint8_t age::gb_lcd::read_oam(int offset)
 {
     auto result = m_sprites.read_oam(offset);
     AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(offset)
-                        << ": " << AGE_LOG_HEX8(result));
+                                     << ": " << AGE_LOG_HEX8(result))
     return result;
 }
 
@@ -50,7 +50,7 @@ void age::gb_lcd::write_oam(int offset, uint8_t value)
 {
     update_state();
     AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
-                        << ": " << AGE_LOG_HEX8(value));
+                                         << ": " << AGE_LOG_HEX8(value))
     m_sprites.write_oam(offset, value);
 }
 
@@ -66,7 +66,7 @@ bool age::gb_lcd::is_oam_accessible()
     m_scanline.current_scanline(scanline, scanline_clks);
 
     return (scanline >= gb_screen_height)
-            || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7)));
+           || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7)));
 }
 
 
@@ -85,8 +85,8 @@ bool age::gb_lcd::is_video_ram_accessible()
     // mode 3 end (+1 T4 cycle for double speed)
     // (Gambatte tests: vramw_m3end/*)
     return (scanline >= gb_screen_height)
-            || (scanline_clks < 80)
-            || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7) + m_clock.is_double_speed()));
+           || (scanline_clks < 80)
+           || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7) + m_clock.is_double_speed()));
 }
 
 
@@ -111,7 +111,7 @@ void age::gb_lcd::update_state()
     // start new frame?
     if (scanline >= gb_scanline_count)
     {
-        AGE_GB_CLOG_LCD_RENDER("switch frame buffers on scanline " << scanline);
+        AGE_GB_CLOG_LCD_RENDER("switch frame buffers on scanline " << scanline)
         m_scanline.fast_forward_frames();
         m_render.new_frame();
         update_state();

@@ -30,23 +30,24 @@
 
 namespace age::tester
 {
-    typedef std::function<bool(age::gb_emulator &)> run_test_t;
-    typedef std::function<void(const std::shared_ptr<age::uint8_vector> &, age::gb_hardware, age::gb_colors_hint colors_hint, run_test_t)> schedule_test_t;
+    typedef std::function<bool(age::gb_emulator&)> run_test_t;
 
-    void schedule_rom_acid2_cgb(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
-    void schedule_rom_acid2_dmg(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
-    void schedule_rom_blargg(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
-    void schedule_rom_gambatte(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
-    void schedule_rom_mooneye_gb(const std::filesystem::path &rom_path, const schedule_test_t &schedule);
+    typedef std::function<void(const std::shared_ptr<age::uint8_vector>&, age::gb_hardware, age::gb_colors_hint colors_hint, run_test_t)> schedule_test_t;
+
+    void schedule_rom_acid2_cgb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_acid2_dmg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_blargg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_gambatte(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_mooneye_gb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
 
 
 
-    std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path &rom_path);
+    std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
 
-    typedef std::function<bool(const age::gb_emulator &)> test_finished_t;
+    typedef std::function<bool(const age::gb_emulator&)> test_finished_t;
 
-    run_test_t new_screenshot_test(const std::filesystem::path &screenshot_png_path,
-                                   const test_finished_t &test_finished);
+    run_test_t new_screenshot_test(const std::filesystem::path& screenshot_png_path,
+                                   const test_finished_t&       test_finished);
 
 } // namespace age::tester
 

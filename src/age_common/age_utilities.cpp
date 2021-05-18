@@ -20,7 +20,7 @@
 
 
 
-age::uint32_t age::crc32(const uint8_vector &data)
+age::uint32_t age::crc32(const uint8_vector& data)
 {
     return crc32(begin(data), end(data));
 }
@@ -29,14 +29,15 @@ age::uint32_t age::crc32(uint8_vector::const_iterator begin, uint8_vector::const
 {
     age::uint32_t crc = 0xFFFFFFFF;
 
-    std::for_each(begin, end, [&](const uint8_t &v)
-    {
-        crc ^= v;
-        for (int i = 0; i < 8; ++i)
-        {
-            crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
-        }
-    });
+    std::for_each(begin,
+                  end,
+                  [&](const uint8_t& v) {
+                      crc ^= v;
+                      for (int i = 0; i < 8; ++i)
+                      {
+                          crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320 : crc >> 1;
+                      }
+                  });
 
     return ~crc;
 }

@@ -29,7 +29,7 @@ namespace age::tester
     struct test_result
     {
         std::string m_test_name;
-        bool m_test_passed;
+        bool        m_test_passed;
 
         test_result(std::string test_name, bool test_passed)
             : m_test_name(std::move(test_name)),
@@ -37,7 +37,7 @@ namespace age::tester
         {}
     };
 
-    std::vector<test_result> run_tests(const options &opts);
+    std::vector<test_result> run_tests(const options& opts);
 
 } // namespace age::tester
 

@@ -18,15 +18,15 @@
 
 #include <emulator/age_emulator.hpp>
 
+#include <algorithm> // std::max
+
 
 
 age::emulator::emulator(int16_t screen_width, int16_t screen_height, int sampling_rate, int cycles_per_second)
-    : m_sampling_rate(sampling_rate),
-      m_cycles_per_second(cycles_per_second),
+    : m_sampling_rate(std::max(1, sampling_rate)),
+      m_cycles_per_second(std::max(1, cycles_per_second)),
       m_screen_buffer(screen_width, screen_height)
 {
-    AGE_ASSERT(m_sampling_rate > 0);
-    AGE_ASSERT(m_cycles_per_second > 0);
 }
 
 
@@ -34,13 +34,13 @@ age::emulator::emulator(int16_t screen_width, int16_t screen_height, int samplin
 std::string age::emulator::get_emulator_title() const
 {
     constexpr char ascii_white_space = 0x20;
-    constexpr char ascii_underscore = 0x5F;
-    constexpr char ascii_0 = 0x30;
-    constexpr char ascii_9 = 0x39;
-    constexpr char ascii_a = 0x61;
-    constexpr char ascii_z = 0x7A;
-    constexpr char ascii_A = 0x41;
-    constexpr char ascii_Z = 0x5A;
+    constexpr char ascii_underscore  = 0x5F;
+    constexpr char ascii_0           = 0x30;
+    constexpr char ascii_9           = 0x39;
+    constexpr char ascii_a           = 0x61;
+    constexpr char ascii_z           = 0x7A;
+    constexpr char ascii_A           = 0x41;
+    constexpr char ascii_Z           = 0x5A;
 
     std::string inner_title = inner_get_emulator_title();
     std::string result;
@@ -55,10 +55,9 @@ std::string age::emulator::get_emulator_title() const
 
         // stop on the first invalid character
         if ((c != ascii_underscore)
-                && !((c >= ascii_0) && (c <= ascii_9))
-                && !((c >= ascii_a) && (c <= ascii_z))
-                && !((c >= ascii_A) && (c <= ascii_Z))
-                )
+            && !((c >= ascii_0) && (c <= ascii_9))
+            && !((c >= ascii_a) && (c <= ascii_z))
+            && !((c >= ascii_A) && (c <= ascii_Z)))
         {
             break;
         }
@@ -124,7 +123,7 @@ bool age::emulator::emulate(int cycles_to_emulate)
     m_audio_buffer.clear();
 
     int emulated_cycles = inner_emulate(cycles_to_emulate);
-    AGE_ASSERT(emulated_cycles > 0);
+    AGE_ASSERT(emulated_cycles > 0)
     m_emulated_cycles += emulated_cycles;
 
     bool new_frame = m_screen_buffer.get_front_buffer_index() != current_front_buffer;

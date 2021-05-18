@@ -24,13 +24,12 @@
 #define LOG(x)
 #endif
 
-namespace age
+namespace
 {
+    constexpr uint8_t gb_p14 = 0x10;
+    constexpr uint8_t gb_p15 = 0x20;
 
-constexpr uint8_t gb_p14 = 0x10;
-constexpr uint8_t gb_p15 = 0x20;
-
-}
+} // namespace
 
 
 
@@ -41,8 +40,8 @@ age::uint8_t age::gb_joypad::read_p1() const
 
 void age::gb_joypad::write_p1(uint8_t byte)
 {
-    AGE_ASSERT(m_p14 <= 0x0F);
-    AGE_ASSERT(m_p15 <= 0x0F);
+    AGE_ASSERT(m_p14 <= 0x0F)
+    AGE_ASSERT(m_p15 <= 0x0F)
     byte |= 0x0F; // set button-bits
 
     // p14 low?
@@ -75,7 +74,7 @@ void age::gb_joypad::set_buttons_up(int buttons)
 {
     if (buttons != 0)
     {
-        LOG(buttons);
+        LOG(buttons)
         uint8_t p14 = buttons & 0x0F;
         uint8_t p15 = (buttons >> 4) & 0x0F;
         m_p14 |= p14;
@@ -88,7 +87,7 @@ void age::gb_joypad::set_buttons_down(int buttons)
 {
     if (buttons != 0)
     {
-        LOG(buttons);
+        LOG(buttons)
         uint8_t p14 = buttons & 0x0F;
         uint8_t p15 = (buttons >> 4) & 0x0F;
         m_p14 &= ~p14;
@@ -99,8 +98,8 @@ void age::gb_joypad::set_buttons_down(int buttons)
 
 
 
-age::gb_joypad::gb_joypad(const gb_device &device,
-                          gb_interrupt_trigger &interrupts)
+age::gb_joypad::gb_joypad(const gb_device&      device,
+                          gb_interrupt_trigger& interrupts)
     : m_interrupts(interrupts),
       m_p1(device.is_cgb_hardware() ? 0xFF : 0xCF)
 {

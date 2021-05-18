@@ -22,13 +22,12 @@
 
 namespace
 {
-
-    void set_colors(std::array<age::pixel, 4> &colors, int color00, int color01, int color10, int color11)
+    void set_colors(std::array<age::pixel, 4>& colors, int color00, int color01, int color10, int color11)
     {
         colors = {age::pixel(color00), age::pixel(color01), age::pixel(color10), age::pixel(color11)};
     }
 
-    bool is_nintendo_rom(const uint8_t *rom_header)
+    bool is_nintendo_rom(const uint8_t* rom_header)
     {
         int licensee = rom_header[0x14B];
         if (licensee == 0x33)
@@ -44,10 +43,10 @@ namespace
     //! https://tcrf.net/Notes:Game_Boy_Color_Bootstrap_ROM#Assigned_Palette_Configurations
     //! https://web.archive.org/web/20170830061747/http://www.vcfed.org/forum/showthread.php?19247-Disassembling-the-GBC-Boot-ROM&p=128734
     //!
-    void init_dmg_colors(std::array<age::pixel, 4> &bgp,
-                         std::array<age::pixel, 4> &obp0,
-                         std::array<age::pixel, 4> &obp1,
-                         const age::uint8_t *rom_header)
+    void init_dmg_colors(std::array<age::pixel, 4>& bgp,
+                         std::array<age::pixel, 4>& obp0,
+                         std::array<age::pixel, 4>& obp1,
+                         const age::uint8_t*        rom_header)
     {
         uint8_t rom_name_hash = 0;
         if (is_nintendo_rom(rom_header))
@@ -718,9 +717,9 @@ namespace
 
 
 
-age::gb_lcd_palettes::gb_lcd_palettes(const gb_device &device,
-                                      const uint8_t *rom_header,
-                                      gb_colors_hint colors_hint)
+age::gb_lcd_palettes::gb_lcd_palettes(const gb_device& device,
+                                      const uint8_t*   rom_header,
+                                      gb_colors_hint   colors_hint)
     : m_device(device),
       m_colors_hint(colors_hint)
 {
@@ -730,7 +729,7 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device &device,
     }
     else if ((device.get_cart_mode() == gb_cart_mode::dmg) && (m_colors_hint == gb_colors_hint::dmg_greyscale))
     {
-        m_bgp_colors = {{pixel(0xFFFFFF), pixel(0xAAAAAA), pixel(0x555555), pixel(0x000000)}};
+        m_bgp_colors  = {{pixel(0xFFFFFF), pixel(0xAAAAAA), pixel(0x555555), pixel(0x000000)}};
         m_obp0_colors = m_bgp_colors;
         m_obp1_colors = m_bgp_colors;
     }
@@ -742,9 +741,9 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device &device,
 
 
 
-const age::pixel *age::gb_lcd_palettes::get_palette(unsigned palette_index) const
+const age::pixel* age::gb_lcd_palettes::get_palette(unsigned palette_index) const
 {
-    AGE_ASSERT(palette_index < gb_palette_count);
+    AGE_ASSERT(palette_index < gb_palette_count)
     return &m_colors[palette_index << 2];
 }
 
@@ -765,25 +764,25 @@ age::uint8_t age::gb_lcd_palettes::read_obp1() const
 
 age::uint8_t age::gb_lcd_palettes::read_bcps() const
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
     return m_bcps;
 }
 
 age::uint8_t age::gb_lcd_palettes::read_bcpd() const
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
     return m_cpd[m_bcps & 0x3F];
 }
 
 age::uint8_t age::gb_lcd_palettes::read_ocps() const
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
     return m_ocps;
 }
 
 age::uint8_t age::gb_lcd_palettes::read_ocpd() const
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
     return m_cpd[0x40 + (m_ocps & 0x3F)];
 }
 
@@ -809,16 +808,16 @@ void age::gb_lcd_palettes::write_obp1(uint8_t value)
 
 void age::gb_lcd_palettes::write_bcps(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
     m_bcps = value | 0x40;
 }
 
 void age::gb_lcd_palettes::write_bcpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
 
     unsigned cpd_index = m_bcps & 0x3F;
-    m_cpd[cpd_index] = value;
+    m_cpd[cpd_index]   = value;
     update_cgb_color(cpd_index >> 1);
 
     m_bcps = increment_cps(m_bcps);
@@ -826,16 +825,16 @@ void age::gb_lcd_palettes::write_bcpd(uint8_t value)
 
 void age::gb_lcd_palettes::write_ocps(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
     m_ocps = value | 0x40;
 }
 
 void age::gb_lcd_palettes::write_ocpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb());
+    AGE_ASSERT(m_device.is_cgb())
 
     unsigned cpd_index = 0x40 + (m_ocps & 0x3F);
-    m_cpd[cpd_index] = value;
+    m_cpd[cpd_index]   = value;
     update_cgb_color(cpd_index >> 1);
 
     m_ocps = increment_cps(m_ocps);
@@ -849,10 +848,10 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
     {
         return;
     }
-    AGE_ASSERT((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1));
+    AGE_ASSERT((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1))
     unsigned color_index = palette_index << 2;
 
-    pixel *color_src;
+    pixel* color_src;
     switch (palette_index)
     {
         case gb_palette_obp0:
@@ -877,13 +876,13 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
 
 void age::gb_lcd_palettes::update_cgb_color(unsigned color_index)
 {
-    AGE_ASSERT(m_device.is_cgb());
-    AGE_ASSERT(color_index < gb_total_color_count);
+    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(color_index < gb_total_color_count)
 
     unsigned cpd_index = color_index << 1;
-    int low_byte = m_cpd[cpd_index];
-    int high_byte = m_cpd[cpd_index + 1];
-    int gb_color = (high_byte << 8) + low_byte;
+    int      low_byte  = m_cpd[cpd_index];
+    int      high_byte = m_cpd[cpd_index + 1];
+    int      gb_color  = (high_byte << 8) + low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9

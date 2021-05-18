@@ -1,19 +1,31 @@
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 BasedOnStyle: LLVM
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: None
-AlignOperands: Align
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
+AlignOperands: Align # see also: BreakBeforeBinaryOperators
+AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Always
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: Always
-AllowShortLambdasOnASingleLine: All
+AllowShortLambdasOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BitFieldColonSpacing: Before
+
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: false
@@ -24,43 +36,76 @@ BraceWrapping:
   AfterNamespace: true
   AfterStruct: true
   AfterUnion: true
-  BeforeCatch: false
+  AfterExternBlock: true
+  BeforeCatch: true
   BeforeElse: true
+  # BeforeLambdaBody: true
+  BeforeWhile: true
   IndentBraces: false
   SplitEmptyFunction: false
-  SplitEmptyRecord: true
-BreakBeforeBinaryOperators: None
-BreakBeforeTernaryOperators: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+BreakBeforeBinaryOperators: All
+BreakBeforeConceptDeclarations: true
+BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
+BreakStringLiterals: true
 ColumnLimit: 0
 CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ContinuationIndentWidth: 4
+Cpp11BracedListStyle: true
+#DeriveLineEnding: false
+#DerivePointerAlignment: false # see also: PointerAlignment
+# not supported by CLion-bundled clang: EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+FixNamespaceComments: true
+IncludeBlocks: Preserve
+# not supported by CLion-bundled clang: IndentAccessModifiers: false
+IndentCaseBlocks: false
 IndentCaseLabels: true
+IndentExternBlock: NoIndent
 IndentPPDirectives: None
+IndentRequires: false
 IndentWidth: 4
+IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: true
-MaxEmptyLinesToKeep: 3
+MaxEmptyLinesToKeep: 5
 NamespaceIndentation: All
-ObjCSpaceAfterProperty: false
-ObjCSpaceBeforeProtocolList: true
-PointerAlignment: Right
+
+PointerAlignment: Left
+# "PointerAlignment: Right" does not really work with e.g. "AlignConsecutiveDeclarations: Consecutive",
+# see also: https://reviews.llvm.org/D27651
+
 ReflowComments: false
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: true
 SpaceAfterCStyleCast: true
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: false
+SpaceAroundPointerQualifiers: Default # Default => just use PointerAlignment
 SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: -1 # allow more than one space for alignment reasons
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 TabWidth: 4
+UseCRLF: false
 UseTab: Never

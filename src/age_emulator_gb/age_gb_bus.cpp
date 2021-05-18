@@ -29,49 +29,41 @@
 namespace
 {
 
-constexpr age::uint8_t gb_hdma_start = 0x80;
+    constexpr age::uint8_t gb_hdma_start = 0x80;
 
-// memory dumps,
-// based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
+    // memory dumps,
+    // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
 
-constexpr const age::uint8_array<0x60> cgb_sparse_FEA0_dump =
-{{
-     // every line used four times:
-     // 0x08, 0x01, 0xEF, 0xDE, ...
-     // 0x08, 0x01, 0xEF, 0xDE, ...
-     // ...
-     0x08, 0x01, 0xEF, 0xDE, 0x06, 0x4A, 0xCD, 0xBD,
-     0x00, 0x90, 0xF7, 0x7F, 0xC0, 0xB1, 0xBC, 0xFB,
-     0x24, 0x13, 0xFD, 0x3A, 0x10, 0x10, 0xAD, 0x45
- }};
+    constexpr const age::uint8_array<0x60> cgb_sparse_FEA0_dump
+        = {{// every line used four times:
+            // 0x08, 0x01, 0xEF, 0xDE, ...
+            // 0x08, 0x01, 0xEF, 0xDE, ...
+            // ...
+            0x08, 0x01, 0xEF, 0xDE, 0x06, 0x4A, 0xCD, 0xBD,
+            0x00, 0x90, 0xF7, 0x7F, 0xC0, 0xB1, 0xBC, 0xFB,
+            0x24, 0x13, 0xFD, 0x3A, 0x10, 0x10, 0xAD, 0x45}};
 
-constexpr const age::uint8_array<0x80> dmg_FF80_dump =
-{{
-     0x2B, 0x0B, 0x64, 0x2F, 0xAF, 0x15, 0x60, 0x6D, 0x61, 0x4E, 0xAC, 0x45, 0x0F, 0xDA, 0x92, 0xF3,
-     0x83, 0x38, 0xE4, 0x4E, 0xA7, 0x6C, 0x38, 0x58, 0xBE, 0xEA, 0xE5, 0x81, 0xB4, 0xCB, 0xBF, 0x7B,
-     0x59, 0xAD, 0x50, 0x13, 0x5E, 0xF6, 0xB3, 0xC1, 0xDC, 0xDF, 0x9E, 0x68, 0xD7, 0x59, 0x26, 0xF3,
-     0x62, 0x54, 0xF8, 0x36, 0xB7, 0x78, 0x6A, 0x22, 0xA7, 0xDD, 0x88, 0x15, 0xCA, 0x96, 0x39, 0xD3,
-     0xE6, 0x55, 0x6E, 0xEA, 0x90, 0x76, 0xB8, 0xFF, 0x50, 0xCD, 0xB5, 0x1B, 0x1F, 0xA5, 0x4D, 0x2E,
-     0xB4, 0x09, 0x47, 0x8A, 0xC4, 0x5A, 0x8C, 0x4E, 0xE7, 0x29, 0x50, 0x88, 0xA8, 0x66, 0x85, 0x4B,
-     0xAA, 0x38, 0xE7, 0x6B, 0x45, 0x3E, 0x30, 0x37, 0xBA, 0xC5, 0x31, 0xF2, 0x71, 0xB4, 0xCF, 0x29,
-     0xBC, 0x7F, 0x7E, 0xD0, 0xC7, 0xC3, 0xBD, 0xCF, 0x59, 0xEA, 0x39, 0x01, 0x2E, 0x00, 0x69, 0x00
- }};
+    constexpr const age::uint8_array<0x80> dmg_FF80_dump
+        = {{0x2B, 0x0B, 0x64, 0x2F, 0xAF, 0x15, 0x60, 0x6D, 0x61, 0x4E, 0xAC, 0x45, 0x0F, 0xDA, 0x92, 0xF3,
+            0x83, 0x38, 0xE4, 0x4E, 0xA7, 0x6C, 0x38, 0x58, 0xBE, 0xEA, 0xE5, 0x81, 0xB4, 0xCB, 0xBF, 0x7B,
+            0x59, 0xAD, 0x50, 0x13, 0x5E, 0xF6, 0xB3, 0xC1, 0xDC, 0xDF, 0x9E, 0x68, 0xD7, 0x59, 0x26, 0xF3,
+            0x62, 0x54, 0xF8, 0x36, 0xB7, 0x78, 0x6A, 0x22, 0xA7, 0xDD, 0x88, 0x15, 0xCA, 0x96, 0x39, 0xD3,
+            0xE6, 0x55, 0x6E, 0xEA, 0x90, 0x76, 0xB8, 0xFF, 0x50, 0xCD, 0xB5, 0x1B, 0x1F, 0xA5, 0x4D, 0x2E,
+            0xB4, 0x09, 0x47, 0x8A, 0xC4, 0x5A, 0x8C, 0x4E, 0xE7, 0x29, 0x50, 0x88, 0xA8, 0x66, 0x85, 0x4B,
+            0xAA, 0x38, 0xE7, 0x6B, 0x45, 0x3E, 0x30, 0x37, 0xBA, 0xC5, 0x31, 0xF2, 0x71, 0xB4, 0xCF, 0x29,
+            0xBC, 0x7F, 0x7E, 0xD0, 0xC7, 0xC3, 0xBD, 0xCF, 0x59, 0xEA, 0x39, 0x01, 0x2E, 0x00, 0x69, 0x00}};
 
-constexpr const age::uint8_array<0x80> cgb_FF80_dump =
-{{
-     0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
-     0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
-     0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
-     0x45, 0xEC, 0x42, 0xFA, 0x08, 0xB7, 0x07, 0x5D, 0x01, 0xF5, 0xC0, 0xFF, 0x08, 0xFC, 0x00, 0xE5,
-     0x0B, 0xF8, 0xC2, 0xCA, 0xF4, 0xF9, 0x0D, 0x7F, 0x44, 0x6D, 0x19, 0xFE, 0x46, 0x97, 0x33, 0x5E,
-     0x08, 0xFF, 0xD1, 0xFF, 0xC6, 0x8B, 0x24, 0x74, 0x12, 0xFC, 0x00, 0x9F, 0x94, 0xB7, 0x06, 0xD5,
-     0x40, 0x7A, 0x20, 0x9E, 0x04, 0x5F, 0x41, 0x2F, 0x3D, 0x77, 0x36, 0x75, 0x81, 0x8A, 0x70, 0x3A,
-     0x98, 0xD1, 0x71, 0x02, 0x4D, 0x01, 0xC1, 0xFF, 0x0D, 0x00, 0xD3, 0x05, 0xF9, 0x00, 0x0B, 0x00
- }};
+    constexpr const age::uint8_array<0x80> cgb_FF80_dump
+        = {{0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+            0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+            0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
+            0x45, 0xEC, 0x42, 0xFA, 0x08, 0xB7, 0x07, 0x5D, 0x01, 0xF5, 0xC0, 0xFF, 0x08, 0xFC, 0x00, 0xE5,
+            0x0B, 0xF8, 0xC2, 0xCA, 0xF4, 0xF9, 0x0D, 0x7F, 0x44, 0x6D, 0x19, 0xFE, 0x46, 0x97, 0x33, 0x5E,
+            0x08, 0xFF, 0xD1, 0xFF, 0xC6, 0x8B, 0x24, 0x74, 0x12, 0xFC, 0x00, 0x9F, 0x94, 0xB7, 0x06, 0xD5,
+            0x40, 0x7A, 0x20, 0x9E, 0x04, 0x5F, 0x41, 0x2F, 0x3D, 0x77, 0x36, 0x75, 0x81, 0x8A, 0x70, 0x3A,
+            0x98, 0xD1, 0x71, 0x02, 0x4D, 0x01, 0xC1, 0xFF, 0x0D, 0x00, 0xD3, 0x05, 0xF9, 0x00, 0x0B, 0x00}};
 
-}
-
-
+} // namespace
 
 
 
@@ -81,17 +73,17 @@ constexpr const age::uint8_array<0x80> cgb_FF80_dump =
 //
 //---------------------------------------------------------
 
-age::gb_bus::gb_bus(const gb_device &device,
-                    gb_clock &clock,
-                    gb_interrupt_ports &interrupts,
-                    gb_events &events,
-                    gb_memory &memory,
-                    gb_div &div,
-                    gb_sound &sound,
-                    gb_lcd &lcd,
-                    gb_timer &timer,
-                    gb_joypad &joypad,
-                    gb_serial &serial)
+age::gb_bus::gb_bus(const gb_device&    device,
+                    gb_clock&           clock,
+                    gb_interrupt_ports& interrupts,
+                    gb_events&          events,
+                    gb_memory&          memory,
+                    gb_div&             div,
+                    gb_sound&           sound,
+                    gb_lcd&             lcd,
+                    gb_timer&           timer,
+                    gb_joypad&          joypad,
+                    gb_serial&          serial)
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
@@ -109,7 +101,7 @@ age::gb_bus::gb_bus(const gb_device &device,
     std::fill(begin(m_high_ram), end(m_high_ram), 0);
 
     // init 0xFF80 - 0xFFFE
-    const uint8_array<0x80> &src = m_device.is_cgb() ? cgb_FF80_dump : dmg_FF80_dump;
+    const uint8_array<0x80>& src = m_device.is_cgb() ? cgb_FF80_dump : dmg_FF80_dump;
     std::copy(begin(src), end(src), begin(m_high_ram) + 0x180);
 
     // init 0xFEA0 - 0xFEFF
@@ -132,8 +124,6 @@ age::gb_bus::gb_bus(const gb_device &device,
 
 
 
-
-
 //---------------------------------------------------------
 //
 //   read byte & write byte
@@ -148,11 +138,11 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     {
         if (!m_lcd.is_video_ram_accessible())
         {
-            AGE_GB_CLOG_LCD_VRAM("VRAM read returns 0xFF (not accessible)");
+            AGE_GB_CLOG_LCD_VRAM("VRAM read returns 0xFF (not accessible)")
             return 0xFF;
         }
         result = m_memory.read_byte(address);
-        AGE_GB_CLOG_LCD_VRAM("VRAM read returns " << AGE_LOG_HEX8(result));
+        AGE_GB_CLOG_LCD_VRAM("VRAM read returns " << AGE_LOG_HEX8(result))
     }
     else if (address < 0xFE00)
     {
@@ -166,7 +156,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         if (m_oam_dma_active || !m_lcd.is_oam_accessible())
         {
             AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(oam_offset)
-                                << ": 0xFF, not accessible now");
+                                             << ": 0xFF, not accessible now")
         }
         else
         {
@@ -200,18 +190,13 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             case to_integral(gb_io_port::nr10): result = m_sound.read_nr10(); break;
             case to_integral(gb_io_port::nr11): result = m_sound.read_nr11(); break;
             case to_integral(gb_io_port::nr12): result = m_sound.read_nr12(); break;
-            case to_integral(gb_io_port::nr13): result = m_sound.read_nr13(); break;
             case to_integral(gb_io_port::nr14): result = m_sound.read_nr14(); break;
             case to_integral(gb_io_port::nr21): result = m_sound.read_nr21(); break;
             case to_integral(gb_io_port::nr22): result = m_sound.read_nr22(); break;
-            case to_integral(gb_io_port::nr23): result = m_sound.read_nr23(); break;
             case to_integral(gb_io_port::nr24): result = m_sound.read_nr24(); break;
             case to_integral(gb_io_port::nr30): result = m_sound.read_nr30(); break;
-            case to_integral(gb_io_port::nr31): result = m_sound.read_nr31(); break;
             case to_integral(gb_io_port::nr32): result = m_sound.read_nr32(); break;
-            case to_integral(gb_io_port::nr33): result = m_sound.read_nr33(); break;
             case to_integral(gb_io_port::nr34): result = m_sound.read_nr34(); break;
-            case to_integral(gb_io_port::nr41): result = m_sound.read_nr41(); break;
             case to_integral(gb_io_port::nr42): result = m_sound.read_nr42(); break;
             case to_integral(gb_io_port::nr43): result = m_sound.read_nr43(); break;
             case to_integral(gb_io_port::nr44): result = m_sound.read_nr44(); break;
@@ -252,6 +237,8 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             case to_integral(gb_io_port::wx): result = m_lcd.read_wx(); break;
 
             case to_integral(gb_io_port::ie): result = m_interrupts.read_ie(); break;
+
+            default: break;
         }
 
         // CGB ports
@@ -272,8 +259,10 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
                 case to_integral(gb_io_port::un72): result = m_un72; break;
                 case to_integral(gb_io_port::un73): result = m_un73; break;
                 case to_integral(gb_io_port::un75): result = m_un75; break;
-                case to_integral(gb_io_port::un76): result = 0; break;
+                case to_integral(gb_io_port::un76):
                 case to_integral(gb_io_port::un77): result = 0; break;
+
+                default: break;
             }
         }
 
@@ -282,14 +271,16 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::vbk):  result = 0xFE; break;
+                case to_integral(gb_io_port::vbk): result = 0xFE; break;
                 case to_integral(gb_io_port::bcps): result = 0xC8; break;
                 case to_integral(gb_io_port::ocps): result = 0xD0; break;
                 case to_integral(gb_io_port::un72): result = m_un72; break;
                 case to_integral(gb_io_port::un73): result = m_un73; break;
                 case to_integral(gb_io_port::un75): result = m_un75; break;
-                case to_integral(gb_io_port::un76): result = 0; break;
+                case to_integral(gb_io_port::un76):
                 case to_integral(gb_io_port::un77): result = 0; break;
+
+                default: break;
             }
         }
     }
@@ -306,14 +297,14 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         if (!m_lcd.is_video_ram_accessible())
         {
             AGE_GB_CLOG_LCD_VRAM("VRAM write: [" << AGE_LOG_HEX16(address)
-                                 << "]=" << AGE_LOG_HEX8(byte)
-                                 << " ignored (not accessible)");
+                                                 << "]=" << AGE_LOG_HEX8(byte)
+                                                 << " ignored (not accessible)")
             return;
         }
         m_lcd.update_state();
         m_memory.write_byte(address, byte);
         AGE_GB_CLOG_LCD_VRAM("VRAM write: [" << AGE_LOG_HEX16(address)
-                             << "]=" << AGE_LOG_HEX8(byte));
+                                             << "]=" << AGE_LOG_HEX8(byte))
     }
     else if (address < 0xFE00)
     {
@@ -327,7 +318,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         if (m_oam_dma_active || !m_lcd.is_oam_accessible())
         {
             AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(oam_offset)
-                                << " ignored, not accessible now");
+                                                 << " ignored, not accessible now")
             return;
         }
         m_lcd.write_oam(oam_offset, byte);
@@ -355,8 +346,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_integral(gb_io_port::sb): m_serial.write_sb(byte); break;
             case to_integral(gb_io_port::sc): m_serial.write_sc(byte); break;
 
-            case to_integral(gb_io_port::div):
-            {
+            case to_integral(gb_io_port::div): {
                 int old_div_offset = m_div.write_div();
                 m_serial.on_div_reset(old_div_offset);
                 m_timer.on_div_reset(old_div_offset);
@@ -422,6 +412,8 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_integral(gb_io_port::obp1): m_lcd.write_obp1(byte); break;
             case to_integral(gb_io_port::wy): m_lcd.write_wy(byte); break;
             case to_integral(gb_io_port::wx): m_lcd.write_wx(byte); break;
+
+            default: break;
         }
 
         // CGB ports
@@ -446,6 +438,8 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
                 case to_integral(gb_io_port::un72): m_un72 = byte; break;
                 case to_integral(gb_io_port::un73): m_un73 = byte; break;
                 case to_integral(gb_io_port::un75): m_un75 = byte | 0x8F; break;
+
+                default: break;
             }
         }
 
@@ -457,12 +451,12 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
                 case to_integral(gb_io_port::un72): m_un72 = byte; break;
                 case to_integral(gb_io_port::un73): m_un73 = byte; break;
                 case to_integral(gb_io_port::un75): m_un75 = byte | 0x8F; break;
+
+                default: break;
             }
         }
     }
 }
-
-
 
 
 
@@ -510,7 +504,7 @@ void age::gb_bus::handle_events()
 
             case gb_event::start_oam_dma:
                 m_oam_dma_last_cycle = m_clock.get_clock_cycle();
-                m_oam_dma_active = true;
+                m_oam_dma_active     = true;
                 //
                 // verified by mooneye-gb tests
                 //
@@ -521,11 +515,11 @@ void age::gb_bus::handle_events()
                 //      acceptance/oam_dma/sources-dmgABCmgbS
                 //
                 m_oam_dma_address = (m_oam_dma_byte * 0x100) & ((m_oam_dma_byte > 0xDF) ? 0xDF00 : 0xFF00);
-                m_oam_dma_offset = 0;
+                m_oam_dma_offset  = 0;
                 break;
 
             default:
-                AGE_ASSERT(false);
+                AGE_ASSERT(false)
                 break;
         }
     }
@@ -550,9 +544,9 @@ void age::gb_bus::handle_dma()
 
     // calculate number of bytes to copy and update remaining DMA length
     int bytes = m_hdma_active ? 0x10 : dma_length * 0x10;
-    AGE_ASSERT(bytes <= 0x800);
-    AGE_ASSERT((bytes & 0xF) == 0);
-    LOG("DMA copying " << bytes << " bytes");
+    AGE_ASSERT(bytes <= 0x800)
+    AGE_ASSERT((bytes & 0xF) == 0)
+    LOG("DMA copying " << bytes << " bytes")
 
     //
     // verified by gambatte tests
@@ -568,8 +562,8 @@ void age::gb_bus::handle_dma()
     {
         bytes = 0x10000 - m_dma_destination;
     }
-    AGE_ASSERT(bytes <= 0x800);
-    AGE_ASSERT((bytes & 0xF) == 0);
+    AGE_ASSERT(bytes <= 0x800)
+    AGE_ASSERT((bytes & 0xF) == 0)
 
     //
     // verified by gambatte tests
@@ -588,8 +582,8 @@ void age::gb_bus::handle_dma()
     // copy bytes
     for (int i = 0; i < bytes; ++i)
     {
-        uint8_t byte = 0xFF;
-        uint16_t src = m_dma_source & 0xFFFF;
+        uint8_t  byte = 0xFF;
+        uint16_t src  = m_dma_source & 0xFFFF;
         if (((src & 0xE000) != 0x8000) && (src < 0xFE00))
         {
             byte = read_byte(src);
@@ -610,14 +604,14 @@ void age::gb_bus::handle_dma()
     uint8_t remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
     if (remaining_dma_length == 0x7F)
     {
-        LOG("DMA finished");
+        LOG("DMA finished")
         m_hdma_active = false;
-        AGE_ASSERT(m_events.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle);
+        AGE_ASSERT(m_events.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle)
     }
     m_hdma5 = (m_hdma5 & gb_hdma_start) + remaining_dma_length;
 
-    AGE_ASSERT((m_dma_source & 0xF) == 0);
-    AGE_ASSERT((m_dma_destination & 0xF) == 0);
+    AGE_ASSERT((m_dma_source & 0xF) == 0)
+    AGE_ASSERT((m_dma_destination & 0xF) == 0)
     m_during_dma = false;
 }
 
@@ -632,10 +626,8 @@ bool age::gb_bus::during_dma() const
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CLOCK(m_oam_dma_last_cycle, clock_cycle_offset);
+    AGE_GB_SET_BACK_CLOCK(m_oam_dma_last_cycle, clock_cycle_offset)
 }
-
-
 
 
 
@@ -647,7 +639,7 @@ void age::gb_bus::set_back_clock(int clock_cycle_offset)
 
 void age::gb_bus::write_dma(uint8_t value)
 {
-    AGE_GB_CLOG_LCD_PORTS("write DMA = " << AGE_LOG_HEX8(value));
+    AGE_GB_CLOG_LCD_PORTS("write DMA = " << AGE_LOG_HEX8(value))
 
     //
     // verified by mooneye-gb tests
@@ -688,7 +680,7 @@ void age::gb_bus::write_hdma5(uint8_t value)
     {
         m_hdma_active = true;
         m_hdma5 |= gb_hdma_start;
-        LOG("HDMA activated");
+        LOG("HDMA activated")
     }
     else
     {
@@ -696,7 +688,7 @@ void age::gb_bus::write_hdma5(uint8_t value)
         if (!m_hdma_active)
         {
             m_during_dma = true;
-            LOG("GDMA activated");
+            LOG("GDMA activated")
         }
         // HDMA running: stop it
         else
@@ -726,26 +718,26 @@ void age::gb_bus::write_hdma5(uint8_t value)
             {
                 m_events.remove_event(gb_event::start_hdma);
             }
-            LOG("HDMA deactivated");
+            LOG("HDMA deactivated")
         }
     }
 
-    LOG("HDMA5 = " << AGE_LOG_DEC(m_hdma5));
+    LOG("HDMA5 = " << AGE_LOG_DEC(m_hdma5))
 }
 
 
 
 void age::gb_bus::handle_oam_dma()
 {
-    AGE_ASSERT(m_oam_dma_active);
+    AGE_ASSERT(m_oam_dma_active)
 
-    int current_clk = m_clock.get_clock_cycle();
+    int current_clk    = m_clock.get_clock_cycle();
     int cycles_elapsed = current_clk - m_oam_dma_last_cycle;
     cycles_elapsed &= ~(m_clock.get_machine_cycle_clocks() - 1);
     m_oam_dma_last_cycle += cycles_elapsed;
     cycles_elapsed <<= m_clock.is_double_speed() ? 1 : 0;
 
-    AGE_ASSERT((cycles_elapsed & 3) == 0);
+    AGE_ASSERT((cycles_elapsed & 3) == 0)
     int bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
 
     for (int i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
@@ -756,10 +748,10 @@ void age::gb_bus::handle_oam_dma()
     }
 
     m_oam_dma_offset += bytes;
-    AGE_ASSERT(m_oam_dma_offset <= 160);
+    AGE_ASSERT(m_oam_dma_offset <= 160)
     if (m_oam_dma_offset >= 160)
     {
-        m_oam_dma_active = false;
+        m_oam_dma_active     = false;
         m_oam_dma_last_cycle = gb_no_clock_cycle;
     }
 }

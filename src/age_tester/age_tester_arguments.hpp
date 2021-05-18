@@ -27,10 +27,10 @@ namespace age::tester
 {
     struct options
     {
-        bool m_acid2 = false;      //!< run cgb-acid2 and dmg-acid2 tests
-        bool m_blargg = false;     //!< run Blargg tests
-        bool m_gambatte = false;   //!< run Gambatte tests
-        bool m_mealybug = false;   //!< run Mealybug Tearoom tests
+        bool m_acid2      = false; //!< run cgb-acid2 and dmg-acid2 tests
+        bool m_blargg     = false; //!< run Blargg tests
+        bool m_gambatte   = false; //!< run Gambatte tests
+        bool m_mealybug   = false; //!< run Mealybug Tearoom tests
         bool m_mooneye_gb = false; //!< run Mooneye GB tests
 
         //!
@@ -42,17 +42,17 @@ namespace age::tester
         std::string m_whitelist = {};
         std::string m_blacklist = {};
 
-        bool m_help = false;
-        bool m_print_passed = false;
-        bool m_print_failed = false;
-        std::vector<std::string> m_unknown_options = {};
+        bool                     m_help                = false;
+        bool                     m_print_passed        = false;
+        bool                     m_print_failed        = false;
+        std::vector<std::string> m_unknown_options     = {};
         std::vector<std::string> m_invalid_arg_options = {};
     };
 
 
-    void print_help(int argc, char **argv);
+    void print_help(int argc, char** argv);
 
-    options parse_arguments(int argc, char **argv);
+    options parse_arguments(int argc, char** argv);
 
 } // namespace age::tester
 

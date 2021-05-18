@@ -28,10 +28,10 @@
 namespace age
 {
 
-uint32_t crc32(const uint8_vector &data);
-uint32_t crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end);
+    uint32_t crc32(const uint8_vector& data);
+    uint32_t crc32(uint8_vector::const_iterator begin, uint8_vector::const_iterator end);
 
-}
+} // namespace age
 
 
 

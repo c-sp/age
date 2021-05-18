@@ -72,8 +72,7 @@ namespace age
     //!
     struct gb_test_info
     {
-        gb_cart_mode m_cart_mode;
-        bool m_ld_b_b;
+        bool m_ld_b_b = false;
 
         uint8_t m_a = 0;
         uint8_t m_b = 0;
