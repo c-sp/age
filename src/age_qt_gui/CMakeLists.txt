@@ -34,6 +34,7 @@ add_executable(
         age_ui_qt_video.hpp
         age_ui_qt_video_post_processor.cpp
         age_ui_qt_video_renderer.cpp
+        shaders/age_qt_gui_shaders.qrc
 )
 
 target_link_libraries(age_qt_gui PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Multimedia age_emulator_gb age_common)
