@@ -29,7 +29,7 @@
 #define LOG(x)
 #endif
 
-constexpr const char *user_value_directory = ".age_emulator";
+constexpr const char* user_value_directory = ".age_emulator";
 
 
 
@@ -72,7 +72,7 @@ age::qt_user_value_store::~qt_user_value_store()
 //
 //---------------------------------------------------------
 
-QVariant age::qt_user_value_store::get_value(const QString &key, const QVariant &default_value) const
+QVariant age::qt_user_value_store::get_value(const QString& key, const QVariant& default_value) const
 {
     QVariant result;
 
@@ -111,7 +111,7 @@ QVariant age::qt_user_value_store::get_value(const QString &key, const QVariant 
 
 
 
-bool age::qt_user_value_store::set_value(const QString &key, const QVariant &value)
+bool age::qt_user_value_store::set_value(const QString& key, const QVariant& value)
 {
     bool saved = false;
 

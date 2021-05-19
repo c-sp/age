@@ -64,7 +64,7 @@ void age::downsampler::clear_output_samples()
 
 void age::downsampler::set_volume(float volume)
 {
-    m_volume = std::min(1.f, std::max(0.f, volume));
+    m_volume = std::min(1.F, std::max(0.F, volume));
 }
 
 void age::downsampler::add_output_sample(int16_t left, int16_t right)
@@ -202,7 +202,8 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector& samples)
 
         while (m_next_output_index <= max)
         {
-            int64_t result0 = 0, result1 = 0;
+            int64_t result0 = 0;
+            int64_t result1 = 0;
 
             for (size_t i = 0; i < m_fir_values.size(); ++i)
             {
@@ -414,16 +415,9 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling
 
 int age::downsampler_kaiser_low_pass::calculate_filter_order(double A, double tw)
 {
-    double dM;
-
-    if (A > 21.0)
-    {
-        dM = (A - 7.95) / (2.285 * tw);
-    }
-    else
-    {
-        dM = 5.79 / tw;
-    }
+    double dM = (A > 21.0)
+                    ? (A - 7.95) / (2.285 * tw)
+                    : 5.79 / tw;
 
     AGE_ASSERT(dM < int_max)
     int M = static_cast<int>(dM) + 1;

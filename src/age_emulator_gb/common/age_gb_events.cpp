@@ -140,7 +140,7 @@ void age::gb_events::set_back_clock(int clock_cycle_offset)
     {
         AGE_GB_SET_BACK_CLOCK(it->m_struct.m_clock_cycle, clock_cycle_offset)
     }
-    for (auto it = begin(m_active_events); it != end(m_active_events); ++it)
+    for (auto *it = begin(m_active_events); it != end(m_active_events); ++it)
     {
         AGE_GB_SET_BACK_CLOCK(*it, clock_cycle_offset)
     }

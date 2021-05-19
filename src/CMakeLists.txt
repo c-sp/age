@@ -10,8 +10,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(age_common)
 add_subdirectory(age_emulator_gb)
 
-# libpng is required for age_tester
-find_package(PNG)
+
+# find Qt before including age_qt_gui
+find_package(Qt5 QUIET COMPONENTS Widgets)
+if (Qt5Widgets_FOUND)
+    message("Qt5 found => configuring age_qt_gui")
+    add_subdirectory(age_qt_gui)
+else ()
+    message("Qt5 not found => age_qt_gui not available")
+endif ()
+
+
+# find libpng before including age_tester
+find_package(PNG QUIET)
 if (PNG_FOUND)
     message("PNG found => configuring age_tester")
     add_subdirectory(age_tester)
@@ -19,7 +30,8 @@ else ()
     message("PNG not found => age_tester not available")
 endif ()
 
-# emscripten is required for age_wasm
+
+# find emscripten before including age_wasm
 if (EMSCRIPTEN)
     message("EMSCRIPTEN=${EMSCRIPTEN} => configuring age_wasm")
     add_subdirectory(age_wasm)

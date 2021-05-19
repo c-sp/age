@@ -1,0 +1,19 @@
+Checks: >
+  *,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-type-union-access,
+  -fuchsia-default-arguments-calls,
+  -fuchsia-default-arguments-declarations,
+  -fuchsia-overloaded-operator,
+  -fuchsia-trailing-return,
+  -llvm-header-guard,
+  -llvmlibc-*,
+  -misc-non-private-member-variables-in-classes,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+
+CheckOptions:
+  - key: readability-implicit-bool-conversion.AllowIntegerConditions
+    value: true

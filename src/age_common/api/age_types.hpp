@@ -52,22 +52,22 @@ namespace age
     // typedefs
     // (define the STL integer types as part of the age namespace for less verbose code)
 
-    typedef std::uint8_t  uint8_t;
-    typedef std::uint16_t uint16_t;
-    typedef std::uint32_t uint32_t;
-    typedef std::uint64_t uint64_t;
+    using uint8_t  = std::uint8_t;
+    using uint16_t = std::uint16_t;
+    using uint32_t = std::uint32_t;
+    using uint64_t = std::uint64_t;
 
-    typedef std::int8_t  int8_t;
-    typedef std::int16_t int16_t;
-    typedef std::int32_t int32_t;
-    typedef std::int64_t int64_t;
+    using int8_t  = std::int8_t;
+    using int16_t = std::int16_t;
+    using int32_t = std::int32_t;
+    using int64_t = std::int64_t;
 
-    typedef std::size_t size_t;
+    using size_t = std::size_t;
 
     template<size_t _size>
     using uint8_array = std::array<uint8_t, _size>;
 
-    typedef std::vector<uint8_t> uint8_vector;
+    using uint8_vector = std::vector<uint8_t>;
 
 
 

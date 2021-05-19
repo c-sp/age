@@ -35,8 +35,8 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
-#include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_emulator.hpp"
+#include "age_ui_qt_settings.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
 
@@ -44,72 +44,70 @@
 namespace age
 {
 
-class qt_main_window : public QMainWindow
-{
-    Q_OBJECT
-    AGE_DISABLE_COPY(qt_main_window);
+    class qt_main_window : public QMainWindow
+    {
+        Q_OBJECT
+        AGE_DISABLE_COPY(qt_main_window);
 
-public:
+    public:
+        explicit qt_main_window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        ~qt_main_window() override;
 
-    qt_main_window(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
-    ~qt_main_window() override;
+    signals:
 
-signals:
+        void emulator_loaded(QSharedPointer<age::qt_emulator> new_emulator);
+        void emulator_screen_resize(int16_t width, int16_t height);
+        void emulator_button_down(int button);
+        void emulator_button_up(int button);
 
-    void emulator_loaded(QSharedPointer<age::qt_emulator> new_emulator);
-    void emulator_screen_resize(int16_t width, int16_t height);
-    void emulator_button_down(int button);
-    void emulator_button_up(int button);
+    private:
+        void contextMenuEvent(QContextMenuEvent* event) override;
+        void mouseDoubleClickEvent(QMouseEvent* event) override;
 
-private:
+        void keyPressEvent(QKeyEvent* keyEvent) override;
+        void keyReleaseEvent(QKeyEvent* keyEvent) override;
 
-    void contextMenuEvent(QContextMenuEvent *event) override;
-    void mouseDoubleClickEvent(QMouseEvent *event) override;
+        [[nodiscard]] int  get_button(qt_key_event key_event) const;
+        [[nodiscard]] bool is_fullscreen() const;
+        void               fill_menu(QMenu* menu);
+        qt_key_event       get_event_for_key(int key);
+        void               open_file(gb_hardware hardware = gb_hardware::auto_detect);
 
-    void keyPressEvent(QKeyEvent *keyEvent) override;
-    void keyReleaseEvent(QKeyEvent *keyEvent) override;
+        QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
 
-    int get_button(qt_key_event key_event) const;
-    bool is_fullscreen() const;
-    void fill_menu(QMenu *menu);
-    qt_key_event get_event_for_key(int key);
-    void open_file(gb_hardware hardware = gb_hardware::auto_detect);
+        QAction* m_action_open       = nullptr;
+        QAction* m_action_open_dmg   = nullptr;
+        QAction* m_action_open_cgb   = nullptr;
+        QAction* m_action_settings   = nullptr;
+        QAction* m_action_fullscreen = nullptr;
+        QAction* m_action_exit       = nullptr;
 
-    QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
+        qt_settings_dialog* m_settings = nullptr;
 
-    QAction *m_action_open = nullptr;
-    QAction *m_action_open_dmg = nullptr;
-    QAction *m_action_open_cgb = nullptr;
-    QAction *m_action_settings = nullptr;
-    QAction *m_action_fullscreen = nullptr;
-    QAction *m_action_exit = nullptr;
+        QLabel* m_emulated_time_label = nullptr;
+        QLabel* m_speed_label         = nullptr;
+        QLabel* m_fps_label           = nullptr;
 
-    qt_settings_dialog *m_settings = nullptr;
+        QThread m_emulation_runner_thread;
 
-    QLabel *m_emulated_time_label = nullptr;
-    QLabel *m_speed_label = nullptr;
-    QLabel *m_fps_label = nullptr;
+    private slots:
 
-    QThread m_emulation_runner_thread;
+        void misc_show_menu_bar_changed(bool show_menu_bar);
+        void misc_show_status_bar_changed(bool show_status_bar);
+        void misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen);
+        void misc_show_status_bar_fullscreen_changed(bool show_status_bar_fullscreen);
 
-private slots:
+        void menu_emulator_open();
+        void menu_emulator_open_dmg();
+        void menu_emulator_open_cgb();
+        void menu_emulator_settings();
+        void menu_emulator_fullscreen();
+        void menu_emulator_exit();
 
-    void misc_show_menu_bar_changed(bool show_menu_bar);
-    void misc_show_status_bar_changed(bool show_status_bar);
-    void misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen);
-    void misc_show_status_bar_fullscreen_changed(bool show_status_bar_fullscreen);
-
-    void menu_emulator_open();
-    void menu_emulator_open_dmg();
-    void menu_emulator_open_cgb();
-    void menu_emulator_settings();
-    void menu_emulator_fullscreen();
-    void menu_emulator_exit();
-
-    void emulator_speed(int speed_percent);
-    void emulator_milliseconds(qint64 emulated_milliseconds);
-    void fps(int fps);
-};
+        void emulator_speed(int speed_percent);
+        void emulator_milliseconds(qint64 emulated_milliseconds);
+        void fps(int fps);
+    };
 
 } // namespace age
 

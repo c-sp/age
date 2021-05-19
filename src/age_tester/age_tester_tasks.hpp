@@ -30,9 +30,9 @@
 
 namespace age::tester
 {
-    typedef std::function<bool(age::gb_emulator&)> run_test_t;
+    using run_test_t = std::function<bool(age::gb_emulator&)>;
 
-    typedef std::function<void(const std::shared_ptr<age::uint8_vector>&, age::gb_hardware, age::gb_colors_hint colors_hint, run_test_t)> schedule_test_t;
+    using schedule_test_t = std::function<void(const std::shared_ptr<age::uint8_vector>&, age::gb_hardware, age::gb_colors_hint colors_hint, run_test_t)>;
 
     void schedule_rom_acid2_cgb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_acid2_dmg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
@@ -44,7 +44,7 @@ namespace age::tester
 
     std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
 
-    typedef std::function<bool(const age::gb_emulator&)> test_finished_t;
+    using test_finished_t = std::function<bool(const age::gb_emulator&)>;
 
     run_test_t new_screenshot_test(const std::filesystem::path& screenshot_png_path,
                                    const test_finished_t&       test_finished);

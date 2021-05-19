@@ -20,7 +20,9 @@
 
 #include "age_ui_qt_settings.hpp"
 
-constexpr const char *qt_settings_open_file_directory = "open_file_directory";
+#include <utility> // std::move
+
+constexpr const char* qt_settings_open_file_directory = "open_file_directory";
 
 
 
@@ -32,20 +34,20 @@ constexpr const char *qt_settings_open_file_directory = "open_file_directory";
 //
 //---------------------------------------------------------
 
-age::qt_settings_dialog::qt_settings_dialog(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_dialog::qt_settings_dialog(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent, Qt::WindowFlags flags)
     : QDialog(parent, flags),
-      m_user_value_store(user_value_store)
+      m_user_value_store(std::move(user_value_store))
 {
     setWindowTitle(QString(project_name) + " settings");
 
     // create tab widget
 
-    m_settings_video = new qt_settings_video(m_user_value_store);
-    m_settings_audio = new qt_settings_audio(m_user_value_store);
-    m_settings_keys = new qt_settings_keys(m_user_value_store);
+    m_settings_video         = new qt_settings_video(m_user_value_store);
+    m_settings_audio         = new qt_settings_audio(m_user_value_store);
+    m_settings_keys          = new qt_settings_keys(m_user_value_store);
     m_settings_miscellaneous = new qt_settings_miscellaneous(m_user_value_store);
 
-    QTabWidget *tab_widget = new QTabWidget;
+    auto* tab_widget = new QTabWidget;
     tab_widget->addTab(m_settings_video, "video");
     tab_widget->addTab(m_settings_audio, "audio");
     tab_widget->addTab(m_settings_keys, "keys");
@@ -53,27 +55,27 @@ age::qt_settings_dialog::qt_settings_dialog(QSharedPointer<qt_user_value_store> 
 
     // set the dialog's layout
 
-    QVBoxLayout *layout = new QVBoxLayout;
+    auto* layout = new QVBoxLayout;
     layout->addWidget(tab_widget);
     setLayout(layout);
 
     // connect signals
 
-    connect(m_settings_video, SIGNAL(use_bilinear_filter_changed(bool)), this, SLOT(emit_video_use_bilinear_filter_changed(bool)));
-    connect(m_settings_video, SIGNAL(frames_to_blend_changed(int)), this, SLOT(emit_video_frames_to_blend_changed(int)));
-    connect(m_settings_video, SIGNAL(filter_chain_changed(qt_filter_list)), this, SLOT(emit_video_post_processing_filter_changed(qt_filter_list)));
+    connect(m_settings_video, &qt_settings_video::use_bilinear_filter_changed, this, &qt_settings_dialog::emit_video_use_bilinear_filter_changed);
+    connect(m_settings_video, &qt_settings_video::frames_to_blend_changed, this, &qt_settings_dialog::emit_video_frames_to_blend_changed);
+    connect(m_settings_video, &qt_settings_video::filter_chain_changed, this, &qt_settings_dialog::emit_video_post_processing_filter_changed);
 
-    connect(m_settings_audio, SIGNAL(output_changed(QAudioDeviceInfo,QAudioFormat)), this, SLOT(emit_audio_output_changed(QAudioDeviceInfo,QAudioFormat)));
-    connect(m_settings_audio, SIGNAL(volume_changed(int)), this, SLOT(emit_audio_volume_changed(int)));
-    connect(m_settings_audio, SIGNAL(latency_changed(int)), this, SLOT(emit_audio_latency_changed(int)));
-    connect(m_settings_audio, SIGNAL(downsampler_quality_changed(age::qt_downsampler_quality)), this, SLOT(emit_audio_downsampler_quality_changed(age::qt_downsampler_quality)));
+    connect(m_settings_audio, &qt_settings_audio::output_changed, this, &qt_settings_dialog::emit_audio_output_changed);
+    connect(m_settings_audio, &qt_settings_audio::volume_changed, this, &qt_settings_dialog::emit_audio_volume_changed);
+    connect(m_settings_audio, &qt_settings_audio::latency_changed, this, &qt_settings_dialog::emit_audio_latency_changed);
+    connect(m_settings_audio, &qt_settings_audio::downsampler_quality_changed, this, &qt_settings_dialog::emit_audio_downsampler_quality_changed);
 
-    connect(m_settings_miscellaneous, SIGNAL(pause_emulator_changed(bool)), this, SLOT(emit_misc_pause_emulator_changed(bool)));
-    connect(m_settings_miscellaneous, SIGNAL(synchronize_emulator_changed(bool)), this, SLOT(emit_misc_synchronize_emulator_changed(bool)));
-    connect(m_settings_miscellaneous, SIGNAL(show_menu_bar_changed(bool)), this, SLOT(emit_misc_show_menu_bar_changed(bool)));
-    connect(m_settings_miscellaneous, SIGNAL(show_status_bar_changed(bool)), this, SLOT(emit_misc_show_status_bar_changed(bool)));
-    connect(m_settings_miscellaneous, SIGNAL(show_menu_bar_fullscreen_changed(bool)), this, SLOT(emit_misc_show_menu_bar_fullscreen_changed(bool)));
-    connect(m_settings_miscellaneous, SIGNAL(show_status_bar_fullscreen_changed(bool)), this, SLOT(emit_misc_show_status_bar_fullscreen_changed(bool)));
+    connect(m_settings_miscellaneous, &qt_settings_miscellaneous::pause_emulator_changed, this, &qt_settings_dialog::emit_misc_pause_emulator_changed);
+    connect(m_settings_miscellaneous, &qt_settings_miscellaneous::synchronize_emulator_changed, this, &qt_settings_dialog::emit_misc_synchronize_emulator_changed);
+    connect(m_settings_miscellaneous, &qt_settings_miscellaneous::show_menu_bar_changed, this, &qt_settings_dialog::emit_misc_show_menu_bar_changed);
+    connect(m_settings_miscellaneous, &qt_settings_miscellaneous::show_status_bar_changed, this, &qt_settings_dialog::emit_misc_show_status_bar_changed);
+    connect(m_settings_miscellaneous, &qt_settings_miscellaneous::show_menu_bar_fullscreen_changed, this, &qt_settings_dialog::emit_misc_show_menu_bar_fullscreen_changed);
+    connect(m_settings_miscellaneous, &qt_settings_miscellaneous::show_status_bar_fullscreen_changed, this, &qt_settings_dialog::emit_misc_show_status_bar_fullscreen_changed);
 }
 
 
@@ -110,7 +112,7 @@ bool age::qt_settings_dialog::show_status_bar(bool fullscreen) const
 
 
 
-void age::qt_settings_dialog::set_open_file_dialog_directory(const QString &directory)
+void age::qt_settings_dialog::set_open_file_dialog_directory(const QString& directory)
 {
     m_user_value_store->set_value(qt_settings_open_file_directory, directory);
 }
@@ -128,41 +130,41 @@ bool age::qt_settings_dialog::trigger_settings_event(qt_key_event event)
 
     switch (event)
     {
-    case qt_key_event::video_toggle_filter_chain:
-        m_settings_video->toggle_filter_chain();
-        break;
+        case qt_key_event::video_toggle_filter_chain:
+            m_settings_video->toggle_filter_chain();
+            break;
 
-    case qt_key_event::video_toggle_bilinear_filter:
-        m_settings_video->toggle_bilinear_filter();
-        break;
+        case qt_key_event::video_toggle_bilinear_filter:
+            m_settings_video->toggle_bilinear_filter();
+            break;
 
-    case qt_key_event::video_cycle_frames_to_blend:
-        m_settings_video->cycle_frames_to_blend();
-        break;
+        case qt_key_event::video_cycle_frames_to_blend:
+            m_settings_video->cycle_frames_to_blend();
+            break;
 
-    case qt_key_event::audio_toggle_mute:
-        m_settings_audio->toggle_mute();
-        break;
+        case qt_key_event::audio_toggle_mute:
+            m_settings_audio->toggle_mute();
+            break;
 
-    case qt_key_event::audio_increase_volume:
-        m_settings_audio->increase_volume();
-        break;
+        case qt_key_event::audio_increase_volume:
+            m_settings_audio->increase_volume();
+            break;
 
-    case qt_key_event::audio_decrease_volume:
-        m_settings_audio->decrease_volume();
-        break;
+        case qt_key_event::audio_decrease_volume:
+            m_settings_audio->decrease_volume();
+            break;
 
-    case qt_key_event::misc_toggle_pause_emulator:
-        m_settings_miscellaneous->toggle_pause_emulator();
-        break;
+        case qt_key_event::misc_toggle_pause_emulator:
+            m_settings_miscellaneous->toggle_pause_emulator();
+            break;
 
-    case qt_key_event::misc_toggle_synchronize_emulator:
-        m_settings_miscellaneous->toggle_synchronize_emulator();
-        break;
+        case qt_key_event::misc_toggle_synchronize_emulator:
+            m_settings_miscellaneous->toggle_synchronize_emulator();
+            break;
 
-    default:
-        result = false;
-        break;
+        default:
+            result = false;
+            break;
     }
 
     return result;
@@ -205,12 +207,12 @@ void age::qt_settings_dialog::set_emulator_screen_size(int16_t width, int16_t he
 //
 //---------------------------------------------------------
 
-void age::qt_settings_dialog::keyPressEvent(QKeyEvent *key_event)
+void age::qt_settings_dialog::keyPressEvent(QKeyEvent* key_event)
 {
     // check, if this key may trigger a settings event
-    Qt::Key qt_key = static_cast<Qt::Key>(key_event->key());
-    qt_key_event event = get_event_for_key(qt_key);
-    bool triggered_settings = trigger_settings_event(event);
+    Qt::Key      qt_key             = static_cast<Qt::Key>(key_event->key());
+    qt_key_event event              = get_event_for_key(qt_key);
+    bool         triggered_settings = trigger_settings_event(event);
 
     // if not, let QDialog process the keyPressEvent
     if (!triggered_settings)
@@ -221,7 +223,7 @@ void age::qt_settings_dialog::keyPressEvent(QKeyEvent *key_event)
 
 
 
-void age::qt_settings_dialog::closeEvent(QCloseEvent *close_event)
+void age::qt_settings_dialog::closeEvent(QCloseEvent* close_event)
 {
     m_user_value_store->sync();
     QDialog::closeEvent(close_event);

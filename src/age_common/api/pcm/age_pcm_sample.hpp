@@ -85,7 +85,7 @@ namespace age
 
     static_assert(sizeof(pcm_sample) == 4, "expected pcm_sample size of 4 bytes (16 bit stereo)");
 
-    typedef std::vector<pcm_sample> pcm_vector;
+    using pcm_vector = std::vector<pcm_sample>;
 
 } // namespace age
 

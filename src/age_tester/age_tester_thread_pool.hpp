@@ -55,7 +55,7 @@ namespace age::tester
 
 
 
-    typedef std::function<void(void)> task_t;
+    using task_t = std::function<void(void)>;
 
     class thread_pool
     {

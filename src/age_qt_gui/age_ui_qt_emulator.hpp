@@ -35,21 +35,19 @@
 namespace age
 {
 
-class qt_emulator
-{
-public:
+    class qt_emulator
+    {
+    public:
+        qt_emulator(const QByteArray& rom, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store);
+        ~qt_emulator();
 
-    qt_emulator(const QByteArray &rom, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store);
-    ~qt_emulator();
+        QSharedPointer<emulator> get_emulator();
 
-    QSharedPointer<emulator> get_emulator();
-
-private:
-
-    QString m_ram_key;
-    QSharedPointer<emulator> m_emulator;
-    QSharedPointer<qt_user_value_store> m_user_value_store;
-};
+    private:
+        QString                             m_ram_key;
+        QSharedPointer<emulator>            m_emulator;
+        QSharedPointer<qt_user_value_store> m_user_value_store;
+    };
 
 } // namespace age
 

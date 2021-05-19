@@ -59,7 +59,7 @@ namespace
 
 
 
-    typedef std::function<bool(const std::string&)> path_matcher;
+    using path_matcher = std::function<bool(const std::string&)>;
 
     bool match_everything(const std::string&) { return true; }
     bool match_nothing(const std::string&) { return false; }

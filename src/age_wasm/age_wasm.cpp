@@ -19,14 +19,12 @@
 #include <emulator/age_gb_emulator.hpp>
 #include <pcm/age_downsampler.hpp>
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 // If emscripten is available include it's header.
 #include <emscripten.h>
 
 #else
-// If emscripten is not available define an empty
-// EMSCRIPTEN_KEEPALIVE macro to allow for successful
-// compilation.
+// If emscripten is not available define an empty EMSCRIPTEN_KEEPALIVE macro.
 #define EMSCRIPTEN_KEEPALIVE
 #endif
 
@@ -68,7 +66,7 @@ age::uint8_t* gb_allocate_rom_buffer(unsigned rom_size)
 EMSCRIPTEN_KEEPALIVE
 void gb_new_emulator()
 {
-    gb_emu      = std::unique_ptr<age::gb_emulator>(new age::gb_emulator(gb_rom));
+    gb_emu      = std::make_unique<age::gb_emulator>(gb_rom);
     rom_name    = gb_emu->get_emulator_title();
     downsampler = nullptr;
 
@@ -124,9 +122,7 @@ bool gb_emulate(int min_cycles_to_emulate, int sample_rate)
         if ((output_sample_rate != sample_rate) || (downsampler == nullptr))
         {
             output_sample_rate = sample_rate;
-            downsampler        = std::unique_ptr<age::downsampler_kaiser_low_pass>(
-                new age::downsampler_kaiser_low_pass(
-                    gb_emu->get_pcm_sampling_rate(), output_sample_rate, 0.1));
+            downsampler        = std::make_unique<age::downsampler_kaiser_low_pass>(gb_emu->get_pcm_sampling_rate(), output_sample_rate, 0.1);
         }
 
         downsampler->clear_output_samples();

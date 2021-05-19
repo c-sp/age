@@ -23,28 +23,39 @@
 
 #include "age_ui_qt_settings.hpp"
 
+#include <utility> // std::move
+
 #if 0
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
 #endif
 
-constexpr const char *qt_settings_keys_gameboy_up = "keys/gameboy_up";
-constexpr const char *qt_settings_keys_gameboy_down = "keys/gameboy_down";
-constexpr const char *qt_settings_keys_gameboy_left = "keys/gameboy_left";
-constexpr const char *qt_settings_keys_gameboy_right = "keys/gameboy_right";
-constexpr const char *qt_settings_keys_gameboy_a = "keys/gameboy_a";
-constexpr const char *qt_settings_keys_gameboy_b = "keys/gameboy_b";
-constexpr const char *qt_settings_keys_gameboy_start = "keys/gameboy_start";
-constexpr const char *qt_settings_keys_gameboy_select = "keys/gameboy_select";
-constexpr const char *qt_settings_keys_video_toggle_filter_chain = "keys/video_toggle_filter_chain";
-constexpr const char *qt_settings_keys_video_toggle_bilinear_filter = "keys/video_toggle_bilinear_filter";
-constexpr const char *qt_settings_keys_video_cycle_frames_to_blend = "keys/video_cycle_frames_to_blend";
-constexpr const char *qt_settings_keys_audio_toggle_mute = "keys/audio_toggle_mute";
-constexpr const char *qt_settings_keys_audio_increase_volume = "keys/audio_increase_volume";
-constexpr const char *qt_settings_keys_audio_decrease_volume = "keys/audio_decrease_volume";
-constexpr const char *qt_settings_keys_misc_toggle_pause_emulator = "keys/misc_toggle_pause_emulator";
-constexpr const char *qt_settings_keys_misc_toggle_synchronize_emulator = "keys/misc_toggle_synchronize_emulator";
+namespace
+{
+    constexpr const char* qt_settings_keys_gameboy_up                       = "keys/gameboy_up";
+    constexpr const char* qt_settings_keys_gameboy_down                     = "keys/gameboy_down";
+    constexpr const char* qt_settings_keys_gameboy_left                     = "keys/gameboy_left";
+    constexpr const char* qt_settings_keys_gameboy_right                    = "keys/gameboy_right";
+    constexpr const char* qt_settings_keys_gameboy_a                        = "keys/gameboy_a";
+    constexpr const char* qt_settings_keys_gameboy_b                        = "keys/gameboy_b";
+    constexpr const char* qt_settings_keys_gameboy_start                    = "keys/gameboy_start";
+    constexpr const char* qt_settings_keys_gameboy_select                   = "keys/gameboy_select";
+    constexpr const char* qt_settings_keys_video_toggle_filter_chain        = "keys/video_toggle_filter_chain";
+    constexpr const char* qt_settings_keys_video_toggle_bilinear_filter     = "keys/video_toggle_bilinear_filter";
+    constexpr const char* qt_settings_keys_video_cycle_frames_to_blend      = "keys/video_cycle_frames_to_blend";
+    constexpr const char* qt_settings_keys_audio_toggle_mute                = "keys/audio_toggle_mute";
+    constexpr const char* qt_settings_keys_audio_increase_volume            = "keys/audio_increase_volume";
+    constexpr const char* qt_settings_keys_audio_decrease_volume            = "keys/audio_decrease_volume";
+    constexpr const char* qt_settings_keys_misc_toggle_pause_emulator       = "keys/misc_toggle_pause_emulator";
+    constexpr const char* qt_settings_keys_misc_toggle_synchronize_emulator = "keys/misc_toggle_synchronize_emulator";
+
+    QString get_key_string(Qt::Key key)
+    {
+        return QKeySequence(key).toString(QKeySequence::PortableText);
+    }
+
+} // namespace
 
 
 
@@ -56,149 +67,143 @@ constexpr const char *qt_settings_keys_misc_toggle_synchronize_emulator = "keys/
 //
 //---------------------------------------------------------
 
-age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
-      m_user_value_store(user_value_store),
+      m_user_value_store(std::move(user_value_store)),
 
-      m_category_strings({
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_up, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_down, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_left, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_right, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_a, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_b, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_start, "Gameboy buttons"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::gb_select, "Gameboy buttons"),
+      m_category_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_down, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_left, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_right, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_a, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_b, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_start, "Gameboy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_select, "Gameboy buttons"),
 
-                         std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, "video settings"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, "video settings"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::video_cycle_frames_to_blend, "video settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, "video settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, "video settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::video_cycle_frames_to_blend, "video settings"),
 
-                         std::pair<qt_key_event, const char*>(qt_key_event::audio_toggle_mute, "audio settings"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, "audio settings"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, "audio settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::audio_toggle_mute, "audio settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, "audio settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, "audio settings"),
 
-                         std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "miscellaneous settings"),
-                         std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "miscellaneous settings")
-                         }),
+                          std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "miscellaneous settings"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "miscellaneous settings")}),
 
-      m_event_strings({
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_up, "up"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_down, "down"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_left, "left"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_right, "right"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_a, "a"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_b, "b"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_start, "start"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::gb_select, "select"),
+      m_event_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, "up"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_down, "down"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_left, "left"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_right, "right"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_a, "a"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_b, "b"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_start, "start"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::gb_select, "select"),
 
-                      std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, "toggle filter chain"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, "toggle bilinear filter"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::video_cycle_frames_to_blend, "cycle frames to blend"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, "toggle filter chain"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, "toggle bilinear filter"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::video_cycle_frames_to_blend, "cycle frames to blend"),
 
-                      std::pair<qt_key_event, const char*>(qt_key_event::audio_toggle_mute, "toggle mute"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, "increase volume"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, "decrease volume"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::audio_toggle_mute, "toggle mute"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, "increase volume"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, "decrease volume"),
 
-                      std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "toggle pause emulator"),
-                      std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "toggle synchronize emulator clock")
-                      }),
+                       std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "toggle pause emulator"),
+                       std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "toggle synchronize emulator clock")}),
 
-      m_event_setting_strings({
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_up, qt_settings_keys_gameboy_up),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_down, qt_settings_keys_gameboy_down),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_left, qt_settings_keys_gameboy_left),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_right, qt_settings_keys_gameboy_right),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_a, qt_settings_keys_gameboy_a),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_b, qt_settings_keys_gameboy_b),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_start, qt_settings_keys_gameboy_start),
-                              std::pair<qt_key_event, const char*>(qt_key_event::gb_select, qt_settings_keys_gameboy_select),
+      m_event_setting_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, qt_settings_keys_gameboy_up),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_down, qt_settings_keys_gameboy_down),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_left, qt_settings_keys_gameboy_left),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_right, qt_settings_keys_gameboy_right),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_a, qt_settings_keys_gameboy_a),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_b, qt_settings_keys_gameboy_b),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_start, qt_settings_keys_gameboy_start),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_select, qt_settings_keys_gameboy_select),
 
-                              std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, qt_settings_keys_video_toggle_filter_chain),
-                              std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, qt_settings_keys_video_toggle_bilinear_filter),
-                              std::pair<qt_key_event, const char*>(qt_key_event::video_cycle_frames_to_blend, qt_settings_keys_video_cycle_frames_to_blend),
+                               std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, qt_settings_keys_video_toggle_filter_chain),
+                               std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, qt_settings_keys_video_toggle_bilinear_filter),
+                               std::pair<qt_key_event, const char*>(qt_key_event::video_cycle_frames_to_blend, qt_settings_keys_video_cycle_frames_to_blend),
 
-                              std::pair<qt_key_event, const char*>(qt_key_event::audio_toggle_mute, qt_settings_keys_audio_toggle_mute),
-                              std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, qt_settings_keys_audio_increase_volume),
-                              std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, qt_settings_keys_audio_decrease_volume),
+                               std::pair<qt_key_event, const char*>(qt_key_event::audio_toggle_mute, qt_settings_keys_audio_toggle_mute),
+                               std::pair<qt_key_event, const char*>(qt_key_event::audio_increase_volume, qt_settings_keys_audio_increase_volume),
+                               std::pair<qt_key_event, const char*>(qt_key_event::audio_decrease_volume, qt_settings_keys_audio_decrease_volume),
 
-                              std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, qt_settings_keys_misc_toggle_pause_emulator),
-                              std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, qt_settings_keys_misc_toggle_synchronize_emulator)
-                              }),
+                               std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, qt_settings_keys_misc_toggle_pause_emulator),
+                               std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, qt_settings_keys_misc_toggle_synchronize_emulator)}),
 
       m_allowed_keys({
-                     Qt::Key_Tab,
-                     Qt::Key_Backspace,
-                     Qt::Key_Return,
-                     Qt::Key_Insert,
-                     Qt::Key_Delete,
-                     Qt::Key_Home,
-                     Qt::Key_End,
-                     Qt::Key_Left,
-                     Qt::Key_Up,
-                     Qt::Key_Right,
-                     Qt::Key_Down,
-                     Qt::Key_PageUp,
-                     Qt::Key_PageDown,
-                     Qt::Key_Shift,
-                     Qt::Key_Control,
-                     Qt::Key_Alt,
+          Qt::Key_Tab,
+          Qt::Key_Backspace,
+          Qt::Key_Return,
+          Qt::Key_Insert,
+          Qt::Key_Delete,
+          Qt::Key_Home,
+          Qt::Key_End,
+          Qt::Key_Left,
+          Qt::Key_Up,
+          Qt::Key_Right,
+          Qt::Key_Down,
+          Qt::Key_PageUp,
+          Qt::Key_PageDown,
+          Qt::Key_Shift,
+          Qt::Key_Control,
+          Qt::Key_Alt,
 
-                     Qt::Key_F1,
-                     Qt::Key_F2,
-                     Qt::Key_F3,
-                     Qt::Key_F4,
-                     Qt::Key_F5,
-                     Qt::Key_F6,
-                     Qt::Key_F7,
-                     Qt::Key_F8,
-                     Qt::Key_F9,
-                     Qt::Key_F10,
-                     Qt::Key_F11,
-                     Qt::Key_F12,
+          Qt::Key_F1,
+          Qt::Key_F2,
+          Qt::Key_F3,
+          Qt::Key_F4,
+          Qt::Key_F5,
+          Qt::Key_F6,
+          Qt::Key_F7,
+          Qt::Key_F8,
+          Qt::Key_F9,
+          Qt::Key_F10,
+          Qt::Key_F11,
+          Qt::Key_F12,
 
-                     Qt::Key_Space,
-                     Qt::Key_0,
-                     Qt::Key_1,
-                     Qt::Key_2,
-                     Qt::Key_3,
-                     Qt::Key_4,
-                     Qt::Key_5,
-                     Qt::Key_6,
-                     Qt::Key_7,
-                     Qt::Key_8,
-                     Qt::Key_9,
-                     Qt::Key_A,
-                     Qt::Key_B,
-                     Qt::Key_C,
-                     Qt::Key_D,
-                     Qt::Key_E,
-                     Qt::Key_F,
-                     Qt::Key_G,
-                     Qt::Key_H,
-                     Qt::Key_I,
-                     Qt::Key_J,
-                     Qt::Key_K,
-                     Qt::Key_L,
-                     Qt::Key_M,
-                     Qt::Key_N,
-                     Qt::Key_O,
-                     Qt::Key_P,
-                     Qt::Key_Q,
-                     Qt::Key_R,
-                     Qt::Key_S,
-                     Qt::Key_T,
-                     Qt::Key_U,
-                     Qt::Key_V,
-                     Qt::Key_W,
-                     Qt::Key_X,
-                     Qt::Key_Y,
-                     Qt::Key_Z,
-                     })
+          Qt::Key_Space,
+          Qt::Key_0,
+          Qt::Key_1,
+          Qt::Key_2,
+          Qt::Key_3,
+          Qt::Key_4,
+          Qt::Key_5,
+          Qt::Key_6,
+          Qt::Key_7,
+          Qt::Key_8,
+          Qt::Key_9,
+          Qt::Key_A,
+          Qt::Key_B,
+          Qt::Key_C,
+          Qt::Key_D,
+          Qt::Key_E,
+          Qt::Key_F,
+          Qt::Key_G,
+          Qt::Key_H,
+          Qt::Key_I,
+          Qt::Key_J,
+          Qt::Key_K,
+          Qt::Key_L,
+          Qt::Key_M,
+          Qt::Key_N,
+          Qt::Key_O,
+          Qt::Key_P,
+          Qt::Key_Q,
+          Qt::Key_R,
+          Qt::Key_S,
+          Qt::Key_T,
+          Qt::Key_U,
+          Qt::Key_V,
+          Qt::Key_W,
+          Qt::Key_X,
+          Qt::Key_Y,
+          Qt::Key_Z,
+      })
 {
     // Gameboy keys
 
-    QGridLayout *gameboy_keys_layout = new QGridLayout;
+    auto* gameboy_keys_layout = new QGridLayout;
     add_key_widgets(gameboy_keys_layout, 0, qt_key_event::gb_up, Qt::Key_Up);
     add_key_widgets(gameboy_keys_layout, 1, qt_key_event::gb_down, Qt::Key_Down);
     add_key_widgets(gameboy_keys_layout, 2, qt_key_event::gb_left, Qt::Key_Left);
@@ -210,45 +215,45 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
     add_key_widgets(gameboy_keys_layout, 8, qt_key_event::gb_start, Qt::Key_Space);
     add_key_widgets(gameboy_keys_layout, 9, qt_key_event::gb_select, Qt::Key_Return);
 
-    const char *gameboy_cagegory = m_category_strings.value(qt_key_event::gb_up);
-    QGroupBox *gameboy_keys_group = new QGroupBox(gameboy_cagegory);
+    const char* gameboy_cagegory   = m_category_strings.value(qt_key_event::gb_up);
+    auto*       gameboy_keys_group = new QGroupBox(gameboy_cagegory);
     gameboy_keys_group->setLayout(gameboy_keys_layout);
 
     // video keys
 
-    QGridLayout *video_keys_layout = new QGridLayout;
+    auto* video_keys_layout = new QGridLayout;
     add_key_widgets(video_keys_layout, 0, qt_key_event::video_toggle_filter_chain, Qt::Key_F2);
     add_key_widgets(video_keys_layout, 1, qt_key_event::video_toggle_bilinear_filter, Qt::Key_F3);
     add_key_widgets(video_keys_layout, 2, qt_key_event::video_cycle_frames_to_blend, Qt::Key_F4);
 
-    const char *video_cagegory = m_category_strings.value(qt_key_event::video_toggle_filter_chain);
-    QGroupBox *video_keys_group = new QGroupBox(video_cagegory);
+    const char* video_cagegory   = m_category_strings.value(qt_key_event::video_toggle_filter_chain);
+    auto*       video_keys_group = new QGroupBox(video_cagegory);
     video_keys_group->setLayout(video_keys_layout);
 
     // audio keys
 
-    QGridLayout *audio_keys_layout = new QGridLayout;
+    auto* audio_keys_layout = new QGridLayout;
     add_key_widgets(audio_keys_layout, 0, qt_key_event::audio_toggle_mute, Qt::Key_F5);
     add_key_widgets(audio_keys_layout, 1, qt_key_event::audio_increase_volume, Qt::Key_PageUp);
     add_key_widgets(audio_keys_layout, 2, qt_key_event::audio_decrease_volume, Qt::Key_PageDown);
 
-    const char *audio_cagegory = m_category_strings.value(qt_key_event::audio_toggle_mute);
-    QGroupBox *audio_keys_group = new QGroupBox(audio_cagegory);
+    const char* audio_cagegory   = m_category_strings.value(qt_key_event::audio_toggle_mute);
+    auto*       audio_keys_group = new QGroupBox(audio_cagegory);
     audio_keys_group->setLayout(audio_keys_layout);
 
     // miscellaneous keys
 
-    QGridLayout *misc_keys_layout = new QGridLayout;
+    auto* misc_keys_layout = new QGridLayout;
     add_key_widgets(misc_keys_layout, 0, qt_key_event::misc_toggle_pause_emulator, Qt::Key_F9);
     add_key_widgets(misc_keys_layout, 1, qt_key_event::misc_toggle_synchronize_emulator, Qt::Key_F10);
 
-    const char *misc_cagegory = m_category_strings.value(qt_key_event::misc_toggle_pause_emulator);
-    QGroupBox *misc_keys_group = new QGroupBox(misc_cagegory);
+    const char* misc_cagegory   = m_category_strings.value(qt_key_event::misc_toggle_pause_emulator);
+    auto*       misc_keys_group = new QGroupBox(misc_cagegory);
     misc_keys_group->setLayout(misc_keys_layout);
 
     // create main layout
 
-    QGridLayout *layout = new QGridLayout;
+    auto* layout = new QGridLayout;
     layout->setContentsMargins(qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin);
     layout->setSpacing(qt_settings_layout_spacing);
     layout->addWidget(gameboy_keys_group, 0, 0, 3, 1);
@@ -288,7 +293,7 @@ age::qt_key_event age::qt_settings_keys::get_event_for_key(Qt::Key key) const
 
 void age::qt_settings_keys::button_clicked(bool)
 {
-    QObject *object = sender();
+    QObject* object = sender();
     if (object != nullptr)
     {
         qt_key_event event = m_event_for_object.value(object, qt_key_event::none);
@@ -297,7 +302,7 @@ void age::qt_settings_keys::button_clicked(bool)
             Qt::Key key = m_key_for_event.value(event, Qt::Key_unknown);
 
             QString event_string = get_event_string(event);
-            QString key_string = get_key_string(key);
+            QString key_string   = get_key_string(key);
 
             qt_key_dialog dialog = {this, event_string, key_string};
             dialog.exec();
@@ -322,18 +327,18 @@ void age::qt_settings_keys::button_clicked(bool)
 
 QString age::qt_settings_keys::get_event_string(qt_key_event event) const
 {
-    constexpr const char *qt_settings_key_none = "<none>";
+    constexpr const char* qt_settings_key_none = "<none>";
 
     QString result;
 
-    const char *category_string = m_category_strings.value(event, nullptr);
+    const char* category_string = m_category_strings.value(event, nullptr);
     if (category_string == nullptr)
     {
         result = qt_settings_key_none;
     }
     else
     {
-        const char *event_string = m_event_strings.value(event, qt_settings_key_none);
+        const char* event_string = m_event_strings.value(event, qt_settings_key_none);
 
         result = category_string;
         result += ", ";
@@ -343,20 +348,14 @@ QString age::qt_settings_keys::get_event_string(qt_key_event event) const
     return result;
 }
 
-QString age::qt_settings_keys::get_key_string(Qt::Key key) const
+
+
+void age::qt_settings_keys::add_key_widgets(QGridLayout* layout, int row, qt_key_event event, Qt::Key default_key)
 {
-    QString result = QKeySequence(key).toString(QKeySequence::PortableText);
-    return result;
-}
-
-
-
-void age::qt_settings_keys::add_key_widgets(QGridLayout *layout, int row, qt_key_event event, Qt::Key default_key)
-{
-    const char *event_string = m_event_strings.value(event);
+    const char* event_string = m_event_strings.value(event);
 
     // create widgets
-    QPushButton *button = new QPushButton;
+    auto* button = new QPushButton;
 
     layout->addWidget(new QLabel(event_string), row, 0);
     layout->addWidget(button, row, 1);
@@ -365,14 +364,14 @@ void age::qt_settings_keys::add_key_widgets(QGridLayout *layout, int row, qt_key
     m_button_for_event.insert(event, button);
 
     // connect to button's clicked() signal
-    connect(button, SIGNAL(clicked(bool)), this, SLOT(button_clicked(bool)));
+    connect(button, &QPushButton::clicked, this, &qt_settings_keys::button_clicked);
 
     // load key binding from settings
-    const char *settings_key = m_event_setting_strings.value(event);
-    QString key_string = m_user_value_store->get_value(settings_key).toString();
+    const char*  settings_key = m_event_setting_strings.value(event);
+    QString      key_string   = m_user_value_store->get_value(settings_key).toString();
     QKeySequence key_sequence(key_string, QKeySequence::PortableText);
-    int key_int = key_sequence[0];
-    Qt::Key key = static_cast<Qt::Key>(key_int);
+    int          key_int = key_sequence[0];
+    auto         key     = static_cast<Qt::Key>(key_int);
 
     if (!m_allowed_keys.contains(key))
     {
@@ -394,7 +393,7 @@ void age::qt_settings_keys::set_key_binding(qt_key_event event, Qt::Key key, boo
     {
         // remove all current mappings for the specified event and key
         qt_key_event old_event = get_event_for_key(key);
-        Qt::Key old_key = m_key_for_event.value(event, Qt::Key_unknown);
+        Qt::Key      old_key   = m_key_for_event.value(event, Qt::Key_unknown);
 
         LOG("old event for key " << get_key_string(key) << ": " << get_event_string(old_event));
         LOG("old key for event " << get_event_string(event) << ": " << get_key_string(old_key));
@@ -409,10 +408,10 @@ void age::qt_settings_keys::set_key_binding(qt_key_event event, Qt::Key key, boo
         // update widgets
         if (old_event != qt_key_event::none)
         {
-            QPushButton *button = m_button_for_event.value(old_event);
+            QPushButton* button = m_button_for_event.value(old_event);
             button->setText("?");
         }
-        QPushButton *button = m_button_for_event.value(event);
+        QPushButton* button = m_button_for_event.value(event);
         button->setText(get_key_string(key));
 
         // update settings
@@ -443,7 +442,7 @@ void age::qt_settings_keys::save_key_binding(qt_key_event event)
             settings_value = key_sequence.toString(QKeySequence::PortableText);
         }
 
-        const char *settings_key = m_event_setting_strings.value(event);
+        const char* settings_key = m_event_setting_strings.value(event);
 
         LOG("saving to settings: " << settings_key << "=" << settings_value);
         m_user_value_store->set_value(settings_key, settings_value);
@@ -460,11 +459,10 @@ void age::qt_settings_keys::save_key_binding(qt_key_event event)
 //
 //---------------------------------------------------------
 
-age::qt_key_dialog::qt_key_dialog(qt_settings_keys *parent, const QString &event, const QString &key)
-    : QDialog(parent),
-      m_parent(parent)
+age::qt_key_dialog::qt_key_dialog(qt_settings_keys* parent, const QString& event, const QString& key)
+    : QDialog(parent)
 {
-    QGridLayout *m_key_layout = new QGridLayout;
+    auto* m_key_layout = new QGridLayout;
     m_key_layout->addItem(new QSpacerItem(1, qt_settings_element_spacing), 0, 0);
     m_key_layout->addWidget(new QLabel("press new key to use for:"), 1, 0, Qt::AlignHCenter);
     m_key_layout->addWidget(new QLabel(event), 2, 0, Qt::AlignHCenter);
@@ -484,7 +482,7 @@ Qt::Key age::qt_key_dialog::get_key_pressed() const
     return m_key_pressed;
 }
 
-void age::qt_key_dialog::keyPressEvent(QKeyEvent *key_event)
+void age::qt_key_dialog::keyPressEvent(QKeyEvent* key_event)
 {
     m_key_pressed = static_cast<Qt::Key>(key_event->key());
     LOG("closing qt_key_dialog with m_key_pressed == " << m_key_pressed);

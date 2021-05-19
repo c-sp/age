@@ -67,15 +67,6 @@ namespace age
         [[nodiscard]] int get_buffered_samples() const;
 
         //!
-        //! \brief Get the number of samples discarded by the last call to add_samples().
-        //!
-        //! \return The number of samples discarded by the last call to add_samples().
-        //! This may be 0 (zero), if the last add_samples() call did not discard any samples.
-        //! The value is always greater than or equal to 0 (zero).
-        //!
-        [[nodiscard]] int get_last_discarded_samples() const;
-
-        //!
         //! \brief Get a pointer to the currently buffered {@link pcm_sample}s.
         //!
         //! Since buffered samples might wrap around from the internal buffer's end to the buffer's beginning, calling
@@ -129,7 +120,6 @@ namespace age
         //!
         //! This will discard the buffer's current content and fill the whole buffer with the specified sample.
         //! Thus, when this method finishes, get_buffered_samples() will be equal to get_max_buffered_samples().
-        //! Calling this method will cause get_last_discarded_samples() to return 0 (zero).
         //!
         //! \param sample The pcm_sample to fill the buffer with.
         //!
@@ -142,7 +132,6 @@ namespace age
         //! \c samples_to_discard samples.
         //! Usually this method is called after get_buffered_samples_ptr() was called and the returned samples have
         //! been processed.
-        //! Note that calling this method will not influence the value returned by get_last_discarded_samples().
         //! If \c samples_to_discard is greater than the number of currently buffered samples, the outcome will be
         //! the same as if \c samples_to_discard was the exact number of buffered samples.
         //!
@@ -154,7 +143,6 @@ namespace age
         //! \brief Clear the whole ring buffer.
         //!
         //! Discard all currently buffered {@link pcm_sample}s.
-        //! The value returned by get_last_discarded_samples() is not influenced.
         //!
         void clear();
 

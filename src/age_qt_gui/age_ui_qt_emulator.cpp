@@ -22,6 +22,8 @@
 
 #include "age_ui_qt_emulator.hpp"
 
+#include <utility> // std::move
+
 #if 0
 #define LOG(x) AGE_LOG(x)
 #else
@@ -36,11 +38,11 @@
 //
 //---------------------------------------------------------
 
-age::qt_emulator::qt_emulator(const QByteArray &rom_contents, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store)
-    : m_user_value_store(user_value_store)
+age::qt_emulator::qt_emulator(const QByteArray& rom_contents, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store)
+    : m_user_value_store(std::move(user_value_store))
 {
     // create emulator
-    uint8_vector rom(rom_contents.begin(), rom_contents.end());
+    uint8_vector                rom(rom_contents.begin(), rom_contents.end());
     QSharedPointer<gb_emulator> gb_emu = QSharedPointer<gb_emulator>(new gb_emulator(rom, hardware, gb_colors_hint::default_colors));
     LOG("emulator created");
 
@@ -49,14 +51,14 @@ age::qt_emulator::qt_emulator(const QByteArray &rom_contents, gb_hardware hardwa
     {
         // create the user value identifier string for loading the persistent ram
         m_ram_key = QString(gb_emu->get_emulator_title().c_str())
-                .append("_")
-                .append(QString::number(crc32(rom), 16))
-                .append(".ram");
+                        .append("_")
+                        .append(QString::number(crc32(rom), 16))
+                        .append(".ram");
         LOG("persistent ram key is " << m_ram_key);
 
         // load persistent ram from user values
-        QVariant ram_value = m_user_value_store->get_value(m_ram_key);
-        QByteArray ram = ram_value.toByteArray();
+        QVariant   ram_value = m_user_value_store->get_value(m_ram_key);
+        QByteArray ram       = ram_value.toByteArray();
         LOG("loaded " << ram.size() << " bytes of persistent ram");
 
         if (ram.size() > 0)
@@ -82,8 +84,8 @@ age::qt_emulator::~qt_emulator()
         uint8_vector ram = m_emulator->get_persistent_ram();
 
         AGE_ASSERT(ram.size() <= int_max);
-        int ram_size = static_cast<int>(ram.size());
-        const char *ram_data = reinterpret_cast<const char*>(ram.data());
+        int         ram_size = static_cast<int>(ram.size());
+        const char* ram_data = reinterpret_cast<const char*>(ram.data());
 
         QByteArray ram_array = {ram_data, ram_size};
         m_user_value_store->set_value(m_ram_key, ram_array);

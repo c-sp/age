@@ -20,16 +20,18 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QMimeData>
-#include <QVBoxLayout>
 #include <QPixmap>
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QStringList>
+#include <QVBoxLayout>
 #include <QVariant>
 
 #include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
+
+#include <utility> // std::move
 
 #if 0
 #define LOG(x) AGE_LOG(x)
@@ -43,22 +45,22 @@
 #define LOG_DRAG(x)
 #endif
 
-constexpr const char *qt_settings_dnd_mime_type = "application/x-age-filter-dnd";
-constexpr const char *qt_settings_property_frames_to_blend = "age_frames_to_blend";
-constexpr const char *qt_settings_property_filter = "age_filter";
+constexpr const char* qt_settings_dnd_mime_type            = "application/x-age-filter-dnd";
+constexpr const char* qt_settings_property_frames_to_blend = "age_frames_to_blend";
+constexpr const char* qt_settings_property_filter          = "age_filter";
 
-constexpr const char *qt_settings_video_use_filter_chain = "video/use_filter_chain";
-constexpr const char *qt_settings_video_bilinear_filter = "video/bilinear_filter";
-constexpr const char *qt_settings_video_frames_to_blend = "video/frames_to_blend";
-constexpr const char *qt_settings_video_filter_chain = "video/filter_chain";
+constexpr const char* qt_settings_video_use_filter_chain = "video/use_filter_chain";
+constexpr const char* qt_settings_video_bilinear_filter  = "video/bilinear_filter";
+constexpr const char* qt_settings_video_frames_to_blend  = "video/frames_to_blend";
+constexpr const char* qt_settings_video_filter_chain     = "video/filter_chain";
 
-constexpr const char *qt_filter_name_none = "none";
-constexpr const char *qt_filter_name_scale2x = "scale2x";
-constexpr const char *qt_filter_name_scale2x_age = "scale2x-age";
-constexpr const char *qt_filter_name_gauss3x3 = "weak blur";
-constexpr const char *qt_filter_name_gauss5x5 = "strong blur";
-constexpr const char *qt_filter_name_emboss3x3 = "weak emboss";
-constexpr const char *qt_filter_name_emboss5x5 = "strong emboss";
+constexpr const char* qt_filter_name_none        = "none";
+constexpr const char* qt_filter_name_scale2x     = "scale2x";
+constexpr const char* qt_filter_name_scale2x_age = "scale2x-age";
+constexpr const char* qt_filter_name_gauss3x3    = "weak blur";
+constexpr const char* qt_filter_name_gauss5x5    = "strong blur";
+constexpr const char* qt_filter_name_emboss3x3   = "weak emboss";
+constexpr const char* qt_filter_name_emboss5x5   = "strong emboss";
 
 
 
@@ -70,26 +72,26 @@ constexpr const char *qt_filter_name_emboss5x5 = "strong emboss";
 //
 //---------------------------------------------------------
 
-age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
-      m_user_value_store(user_value_store)
+      m_user_value_store(std::move(user_value_store))
 {
     // frame filtering
 
-    m_use_filter_chain = new QCheckBox("use filter chain");
+    m_use_filter_chain    = new QCheckBox("use filter chain");
     m_use_bilinear_filter = new QCheckBox("use bilinear filter");
 
-    QVBoxLayout *frame_filter_layout = new QVBoxLayout;
+    auto* frame_filter_layout = new QVBoxLayout;
     frame_filter_layout->setAlignment(Qt::AlignCenter);
     frame_filter_layout->addWidget(m_use_filter_chain);
     frame_filter_layout->addWidget(m_use_bilinear_filter);
 
-    QGroupBox *frame_filter_group = new QGroupBox("frame filter");
+    auto* frame_filter_group = new QGroupBox("frame filter");
     frame_filter_group->setLayout(frame_filter_layout);
 
     // blend frames
 
-    QVBoxLayout *frame_blend_layout = new QVBoxLayout;
+    auto* frame_blend_layout = new QVBoxLayout;
     frame_blend_layout->setAlignment(Qt::AlignCenter);
 
     for (int i = 0; i < qt_video_frame_history_size; ++i)
@@ -100,17 +102,17 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
         frame_blend_layout->addWidget(m_blend_frames[i]);
     }
 
-    QGroupBox *blend_frames_group = new QGroupBox("blend frames");
+    auto* blend_frames_group = new QGroupBox("blend frames");
     blend_frames_group->setLayout(frame_blend_layout);
 
     // filter chain buttons
 
-    QPushButton *add_scale2x = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x));
-    QPushButton *add_scale2x_age = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x_age));
-    QPushButton *add_weak_blur = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss3x3));
-    QPushButton *add_strong_blur = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss5x5));
-    QPushButton *add_weak_emboss = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::emboss3x3));
-    QPushButton *add_strong_emboss = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::emboss5x5));
+    auto* add_scale2x       = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x));
+    auto* add_scale2x_age   = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::scale2x_age));
+    auto* add_weak_blur     = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss3x3));
+    auto* add_strong_blur   = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::gauss5x5));
+    auto* add_weak_emboss   = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::emboss3x3));
+    auto* add_strong_emboss = new QPushButton(QString("add ") + get_name_for_qt_filter(qt_filter::emboss5x5));
 
     add_scale2x->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::scale2x));
     add_scale2x_age->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::scale2x_age));
@@ -119,7 +121,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     add_weak_emboss->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::emboss3x3));
     add_strong_emboss->setProperty(qt_settings_property_filter, get_name_for_qt_filter(qt_filter::emboss5x5));
 
-    QVBoxLayout *filter_chain_buttons_layout = new QVBoxLayout;
+    auto* filter_chain_buttons_layout = new QVBoxLayout;
     filter_chain_buttons_layout->addWidget(add_scale2x);
     filter_chain_buttons_layout->addWidget(add_scale2x_age);
     filter_chain_buttons_layout->addSpacing(qt_settings_element_spacing);
@@ -132,7 +134,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
 
     // filter chain
 
-    QVBoxLayout *filter_chain_layout = new QVBoxLayout;
+    auto* filter_chain_layout = new QVBoxLayout;
     filter_chain_layout->setSpacing(0);
 
     for (int i = 0; i < 8; ++i)
@@ -143,17 +145,17 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
 
     filter_chain_layout->addItem(new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
-    QHBoxLayout *filter_layout = new QHBoxLayout;
+    auto* filter_layout = new QHBoxLayout;
     filter_layout->addLayout(filter_chain_buttons_layout);
     filter_layout->addSpacing(qt_settings_element_spacing);
     filter_layout->addLayout(filter_chain_layout);
 
-    QGroupBox *filter_group = new QGroupBox("filter chain");
+    auto* filter_group = new QGroupBox("filter chain");
     filter_group->setLayout(filter_layout);
 
     // create final layout
 
-    QGridLayout *layout = new QGridLayout;
+    auto* layout = new QGridLayout;
     layout->setContentsMargins(qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin);
     layout->setSpacing(qt_settings_layout_spacing);
     layout->addWidget(frame_filter_group, 0, 0);
@@ -163,28 +165,28 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
 
     // connect signals to slots
 
-    connect(m_use_filter_chain, SIGNAL(stateChanged(int)), this, SLOT(filter_chain_state_changed(int)));
-    connect(m_use_bilinear_filter, SIGNAL(stateChanged(int)), this, SLOT(bilinear_filter_state_changed(int)));
+    connect(m_use_filter_chain, &QCheckBox::stateChanged, this, &qt_settings_video::filter_chain_state_changed);
+    connect(m_use_bilinear_filter, &QCheckBox::stateChanged, this, &qt_settings_video::bilinear_filter_state_changed);
 
-    for (QRadioButton *button : m_blend_frames)
+    for (QRadioButton* button : m_blend_frames)
     {
-        connect(button, SIGNAL(toggled(bool)), this, SLOT(frames_to_blend_toggled(bool)));
+        connect(button, &QRadioButton::toggled, this, &qt_settings_video::frames_to_blend_toggled);
     }
 
-    connect(add_scale2x, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
-    connect(add_scale2x_age, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
-    connect(add_weak_blur, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
-    connect(add_strong_blur, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
-    connect(add_weak_emboss, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
-    connect(add_strong_emboss, SIGNAL(clicked(bool)), this, SLOT(add_filter_clicked()));
+    connect(add_scale2x, &QPushButton::clicked, this, &qt_settings_video::add_filter_clicked);
+    connect(add_scale2x_age, &QPushButton::clicked, this, &qt_settings_video::add_filter_clicked);
+    connect(add_weak_blur, &QPushButton::clicked, this, &qt_settings_video::add_filter_clicked);
+    connect(add_strong_blur, &QPushButton::clicked, this, &qt_settings_video::add_filter_clicked);
+    connect(add_weak_emboss, &QPushButton::clicked, this, &qt_settings_video::add_filter_clicked);
+    connect(add_strong_emboss, &QPushButton::clicked, this, &qt_settings_video::add_filter_clicked);
 
-    for (int i = 0; i < m_filter_widgets.size(); ++i)
+    for (auto* widget : m_filter_widgets)
     {
-        connect(m_filter_widgets[i], SIGNAL(remove(int)), this, SLOT(remove(int)));
-        connect(m_filter_widgets[i], SIGNAL(drag_start(int)), this, SLOT(drag_start(int)));
-        connect(m_filter_widgets[i], SIGNAL(drag_clear()), this, SLOT(drag_clear()));
-        connect(m_filter_widgets[i], SIGNAL(drag_update(int)), this, SLOT(drag_update(int)));
-        connect(m_filter_widgets[i], SIGNAL(drag_finish(bool)), this, SLOT(drag_finish(bool)));
+        connect(widget, &qt_filter_widget::remove, this, &qt_settings_video::remove);
+        connect(widget, &qt_filter_widget::drag_start, this, &qt_settings_video::drag_start);
+        connect(widget, &qt_filter_widget::drag_clear, this, &qt_settings_video::drag_clear);
+        connect(widget, &qt_filter_widget::drag_update, this, &qt_settings_video::drag_update);
+        connect(widget, &qt_filter_widget::drag_finish, this, &qt_settings_video::drag_finish);
     }
 
     // set values from config
@@ -196,24 +198,22 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
     m_frames_to_blend = qMax(1, qMin(m_blend_frames.size(), m_frames_to_blend));
     m_blend_frames[m_frames_to_blend - 1]->setChecked(true);
 
-    QString default_filter_chain =
-            get_name_for_qt_filter(qt_filter::scale2x_age)
-            + ","
-            + get_name_for_qt_filter(qt_filter::scale2x_age)
-            + ","
-            + get_name_for_qt_filter(qt_filter::scale2x_age)
-            + ","
-            + get_name_for_qt_filter(qt_filter::scale2x_age)
-            + ","
-            + get_name_for_qt_filter(qt_filter::gauss5x5)
-            ;
-    QString filter_chain = m_user_value_store->get_value(qt_settings_video_filter_chain, default_filter_chain).toString();
-    QStringList filters = filter_chain.split(",");
+    QString default_filter_chain = get_name_for_qt_filter(qt_filter::scale2x_age)
+                                   + ","
+                                   + get_name_for_qt_filter(qt_filter::scale2x_age)
+                                   + ","
+                                   + get_name_for_qt_filter(qt_filter::scale2x_age)
+                                   + ","
+                                   + get_name_for_qt_filter(qt_filter::scale2x_age)
+                                   + ","
+                                   + get_name_for_qt_filter(qt_filter::gauss5x5);
+    QString     filter_chain = m_user_value_store->get_value(qt_settings_video_filter_chain, default_filter_chain).toString();
+    QStringList filters      = filter_chain.split(",");
 
     for (int i = 0; (i < filters.size()) && (m_filter_list.size() < m_filter_widgets.size()); ++i)
     {
-        QString filter_name = filters.at(i).trimmed();
-        qt_filter filter = get_qt_filter_for_name(filter_name);
+        QString   filter_name = filters.at(i).trimmed();
+        qt_filter filter      = get_qt_filter_for_name(filter_name);
 
         if (filter != qt_filter::none)
         {
@@ -236,7 +236,7 @@ age::qt_settings_video::qt_settings_video(QSharedPointer<qt_user_value_store> us
 
 void age::qt_settings_video::set_emulator_screen_size(GLint width, GLint height)
 {
-    m_emulator_screen_width = width;
+    m_emulator_screen_width  = width;
     m_emulator_screen_height = height;
 
     update_filter_chain_controls(true);
@@ -279,13 +279,13 @@ QString age::qt_settings_video::get_name_for_qt_filter(qt_filter filter)
 
     switch (filter)
     {
-    case qt_filter::scale2x: result = qt_filter_name_scale2x; break;
-    case qt_filter::scale2x_age: result = qt_filter_name_scale2x_age; break;
-    case qt_filter::gauss3x3: result = qt_filter_name_gauss3x3; break;
-    case qt_filter::gauss5x5: result = qt_filter_name_gauss5x5; break;
-    case qt_filter::emboss3x3: result = qt_filter_name_emboss3x3; break;
-    case qt_filter::emboss5x5: result = qt_filter_name_emboss5x5; break;
-    default: result = qt_filter_name_none; break;
+        case qt_filter::scale2x: result = qt_filter_name_scale2x; break;
+        case qt_filter::scale2x_age: result = qt_filter_name_scale2x_age; break;
+        case qt_filter::gauss3x3: result = qt_filter_name_gauss3x3; break;
+        case qt_filter::gauss5x5: result = qt_filter_name_gauss5x5; break;
+        case qt_filter::emboss3x3: result = qt_filter_name_emboss3x3; break;
+        case qt_filter::emboss5x5: result = qt_filter_name_emboss5x5; break;
+        default: result = qt_filter_name_none; break;
     }
 
     return result;
@@ -323,9 +323,9 @@ void age::qt_settings_video::frames_to_blend_toggled(bool checked)
 {
     if (checked)
     {
-        QObject *obj = sender();
+        QObject* obj                 = sender();
         QVariant frames_to_blend_var = obj->property(qt_settings_property_frames_to_blend);
-        m_frames_to_blend = frames_to_blend_var.toInt();
+        m_frames_to_blend            = frames_to_blend_var.toInt();
 
         LOG(m_frames_to_blend);
         m_user_value_store->set_value(qt_settings_video_frames_to_blend, m_frames_to_blend);
@@ -337,9 +337,9 @@ void age::qt_settings_video::add_filter_clicked()
 {
     if (m_filter_list.size() < m_filter_widgets.size())
     {
-        QObject *obj = sender();
+        QObject* obj             = sender();
         QVariant filter_name_var = obj->property(qt_settings_property_filter);
-        QString filter_name = filter_name_var.toString();
+        QString  filter_name     = filter_name_var.toString();
         LOG(filter_name);
 
         qt_filter filter = get_qt_filter_for_name(filter_name);
@@ -365,7 +365,7 @@ void age::qt_settings_video::drag_start(int drag_index)
 {
     LOG("drag_start " << drag_index);
     m_dnd_original_filter_chain = m_filter_list;
-    m_dnd_index = drag_index;
+    m_dnd_index                 = drag_index;
 }
 
 void age::qt_settings_video::drag_clear()
@@ -379,7 +379,7 @@ void age::qt_settings_video::drag_update(int insert_at_index)
 {
     LOG("drag_update " << insert_at_index);
 
-    m_filter_list = m_dnd_original_filter_chain;
+    m_filter_list    = m_dnd_original_filter_chain;
     qt_filter filter = m_filter_list[m_dnd_index];
     m_filter_list.erase(m_filter_list.begin() + m_dnd_index);
     m_filter_list.insert(m_filter_list.begin() + insert_at_index, filter);
@@ -408,7 +408,7 @@ void age::qt_settings_video::drag_finish(bool keep)
 //
 //---------------------------------------------------------
 
-age::qt_filter age::qt_settings_video::get_qt_filter_for_name(const QString &name)
+age::qt_filter age::qt_settings_video::get_qt_filter_for_name(const QString& name)
 {
     qt_filter result;
 
@@ -448,10 +448,10 @@ age::qt_filter age::qt_settings_video::get_qt_filter_for_name(const QString &nam
 
 void age::qt_settings_video::update_filter_chain_controls(bool only_controls)
 {
-    int i = 0;
+    int     i = 0;
     QString filter_string;
 
-    GLint width = m_emulator_screen_width;
+    GLint width  = m_emulator_screen_width;
     GLint height = m_emulator_screen_height;
 
     // adjust filter chain widgets & create settings value
@@ -502,15 +502,15 @@ void age::qt_settings_video::emit_filter_chain_changed()
 //
 //---------------------------------------------------------
 
-age::qt_filter_widget::qt_filter_widget(int widget_index, QWidget *parent, Qt::WindowFlags flags)
+age::qt_filter_widget::qt_filter_widget(int widget_index, QWidget* parent, Qt::WindowFlags flags)
     : QFrame(parent, flags),
       m_widget_index(widget_index)
 {
-    m_text = new QLabel("text text text");
+    m_text   = new QLabel("text text text");
     m_remove = new QPushButton("X");
     m_remove->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    QHBoxLayout *layout = new QHBoxLayout;
+    auto* layout = new QHBoxLayout;
     layout->addWidget(m_text);
     layout->addWidget(m_remove);
 
@@ -518,7 +518,7 @@ age::qt_filter_widget::qt_filter_widget(int widget_index, QWidget *parent, Qt::W
     setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
     setAcceptDrops(true);
 
-    connect(m_remove, SIGNAL(clicked(bool)), this, SLOT(remove_clicked()));
+    connect(m_remove, &QPushButton::clicked, this, &qt_filter_widget::remove_clicked);
 
     set_filter(qt_filter::none, 0, 0);
 }
@@ -554,7 +554,7 @@ void age::qt_filter_widget::set_filter(qt_filter filter, GLint width, GLint heig
 
 
 
-void age::qt_filter_widget::dragEnterEvent(QDragEnterEvent *event)
+void age::qt_filter_widget::dragEnterEvent(QDragEnterEvent* event)
 {
     LOG_DRAG("dragEnterEvent " << m_widget_index);
     bool handled = handle_drag_event(event);
@@ -570,7 +570,7 @@ void age::qt_filter_widget::dragLeaveEvent(QDragLeaveEvent*)
     emit drag_clear();
 }
 
-void age::qt_filter_widget::dropEvent(QDropEvent *event)
+void age::qt_filter_widget::dropEvent(QDropEvent* event)
 {
     LOG_DRAG("dropEvent " << m_widget_index);
     handle_drag_event(event);
@@ -586,18 +586,18 @@ void age::qt_filter_widget::mousePressEvent(QMouseEvent*)
         QPixmap pixmap = grab();
 
         // serialize the pixmap
-        QByteArray itemData;
+        QByteArray  itemData;
         QDataStream dataStream(&itemData, QIODevice::WriteOnly);
         dataStream << pixmap;
 
         // create mime data containing the pixmap
-        QMimeData *mimeData = new QMimeData;
+        auto* mimeData = new QMimeData;
         mimeData->setData(qt_settings_dnd_mime_type, itemData);
 
         // start drag and drop action
         emit drag_start(m_widget_index);
 
-        QDrag *drag = new QDrag(this);
+        auto* drag = new QDrag(this);
         drag->setMimeData(mimeData);
         drag->setPixmap(pixmap);
 
@@ -618,25 +618,18 @@ void age::qt_filter_widget::remove_clicked()
 
 
 
-bool age::qt_filter_widget::handle_drag_event(QDropEvent *event)
+bool age::qt_filter_widget::handle_drag_event(QDropEvent* event) const
 {
-    bool handled;
-
     // accept event?
     bool known_mime_type = event->mimeData()->hasFormat(qt_settings_dnd_mime_type);
 
     if (known_mime_type && m_has_content)
     {
         event->acceptProposedAction();
-        handled = true;
+        return true;
     }
 
     // ignore events
-    else
-    {
-        event->ignore();
-        handled = false;
-    }
-
-    return handled;
+    event->ignore();
+    return false;
 }

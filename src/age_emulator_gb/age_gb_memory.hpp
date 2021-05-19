@@ -67,9 +67,9 @@ namespace age
 
 
     private:
-        typedef std::function<void(gb_memory&, uint16_t, uint8_t)> mbc_writer;
+        using mbc_writer = std::function<void(gb_memory&, uint16_t, uint8_t)>;
 
-        typedef union
+        using gb_mbc_data = union
         {
             struct
             {
@@ -82,7 +82,7 @@ namespace age
                 uint8_t m_2000;
                 uint8_t m_3000;
             } m_mbc5;
-        } gb_mbc_data;
+        };
 
         static mbc_writer get_mbc_writer(gb_mbc_data& mbc, uint8_t mbc_type);
         static void       write_to_mbc_no_op(gb_memory& memory, uint16_t offset, uint8_t value);

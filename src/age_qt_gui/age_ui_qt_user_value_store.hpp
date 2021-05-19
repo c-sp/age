@@ -21,8 +21,8 @@
 //! \file
 //!
 
-#include <QSharedPointer>
 #include <QSettings>
+#include <QSharedPointer>
 #include <QString>
 #include <QVariant>
 
@@ -33,59 +33,57 @@
 namespace age
 {
 
-//!
-//! \brief Access to user specific values is handled by this class.
-//!
-//! User specific values (e.g. settings, persistent ram) is accessed over this class.
-//! The values are stored separately for each user.
-//! To not lose all values when the program exists, a persistent value store is used.
-//!
-class qt_user_value_store
-{
-    AGE_DISABLE_COPY(qt_user_value_store);
+    //!
+    //! \brief Access to user specific values is handled by this class.
+    //!
+    //! User specific values (e.g. settings, persistent ram) is accessed over this class.
+    //! The values are stored separately for each user.
+    //! To not lose all values when the program exists, a persistent value store is used.
+    //!
+    class qt_user_value_store
+    {
+        AGE_DISABLE_COPY(qt_user_value_store);
 
-public:
+    public:
+        qt_user_value_store();
+        ~qt_user_value_store();
 
-    qt_user_value_store();
-    ~qt_user_value_store();
+        //!
+        //! \brief Get the speficied user value.
+        //!
+        //! The value might be returned from memory instead of the persistent value store.
+        //! Thus it might not be equal to the most recent value found in the persistent value store.
+        //! See sync() for more information.
+        //!
+        //! \param key The unique identifier of the user value to get.
+        //! \param default_value The default value to return if the user value has not yet been set.
+        //! \return The requested user value.
+        //!
+        QVariant get_value(const QString& key, const QVariant& default_value = QVariant()) const;
 
-    //!
-    //! \brief Get the speficied user value.
-    //!
-    //! The value might be returned from memory instead of the persistent value store.
-    //! Thus it might not be equal to the most recent value found in the persistent value store.
-    //! See sync() for more information.
-    //!
-    //! \param key The unique identifier of the user value to get.
-    //! \param default_value The default value to return if the user value has not yet been set.
-    //! \return The requested user value.
-    //!
-    QVariant get_value(const QString &key, const QVariant &default_value = QVariant()) const;
+        //!
+        //! \brief Set a user value.
+        //!
+        //! Instead of immediately updating the persistent value store, the value might be just stored to memory.
+        //! To make sure all changed values are persisted, call sync().
+        //!
+        //! \param key The unique identifier of the user value to set.
+        //! \param value The value to set.
+        //! \return True if the value has been saved. False if the value could not be saved for some reason.
+        //!
+        bool set_value(const QString& key, const QVariant& value);
 
-    //!
-    //! \brief Set a user value.
-    //!
-    //! Instead of immediately updating the persistent value store, the value might be just stored to memory.
-    //! To make sure all changed values are persisted, call sync().
-    //!
-    //! \param key The unique identifier of the user value to set.
-    //! \param value The value to set.
-    //! \return True if the value has been saved. False if the value could not be saved for some reason.
-    //!
-    bool set_value(const QString &key, const QVariant &value);
+        //!
+        //! \brief Synchronize the persistent value store and all in-memory copies of user values.
+        //!
+        void sync();
 
-    //!
-    //! \brief Synchronize the persistent value store and all in-memory copies of user values.
-    //!
-    void sync();
+    private:
+        void make_user_directory();
 
-private:
-
-    void make_user_directory();
-
-    const QString m_user_value_directory;
-    QSharedPointer<QSettings> m_settings = nullptr;
-};
+        const QString             m_user_value_directory;
+        QSharedPointer<QSettings> m_settings = nullptr;
+    };
 
 } // namespace age
 

@@ -36,10 +36,10 @@
 namespace age
 {
 
-    typedef gb_length_counter<gb_frequency_sweep<gb_volume_envelope<gb_duty_source>>> gb_sound_channel1;
-    typedef gb_length_counter<gb_volume_envelope<gb_duty_source>>                     gb_sound_channel2;
-    typedef gb_length_counter<gb_wave_source>                                         gb_sound_channel3;
-    typedef gb_length_counter<gb_volume_envelope<gb_noise_source>>                    gb_sound_channel4;
+    using gb_sound_channel1 = gb_length_counter<gb_frequency_sweep<gb_volume_envelope<gb_duty_source>>>;
+    using gb_sound_channel2 = gb_length_counter<gb_volume_envelope<gb_duty_source>>;
+    using gb_sound_channel3 = gb_length_counter<gb_wave_source>;
+    using gb_sound_channel4 = gb_length_counter<gb_volume_envelope<gb_noise_source>>;
 
 
 

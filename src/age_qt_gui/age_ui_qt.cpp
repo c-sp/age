@@ -28,13 +28,13 @@
 //
 //---------------------------------------------------------
 
-std::ostream& operator<<(std::ostream &stream, const QString &string)
+std::ostream& operator<<(std::ostream& stream, const QString& string)
 {
     stream << string.toStdString();
     return stream;
 }
 
-std::string operator+(const std::string &std_string, const QString &q_string)
+std::string operator+(const std::string& std_string, const QString& q_string)
 {
     std::string result = std_string + q_string.toStdString();
     return result;
@@ -77,7 +77,7 @@ QString age::get_name_for_qt_downsampler_quality(qt_downsampler_quality quality)
 
 
 
-age::qt_downsampler_quality age::get_qt_downsampler_quality_for_name(const QString &name)
+age::qt_downsampler_quality age::get_qt_downsampler_quality_for_name(const QString& name)
 {
     qt_downsampler_quality result;
 
@@ -107,26 +107,19 @@ age::qt_downsampler_quality age::get_qt_downsampler_quality_for_name(const QStri
 
 GLint age::get_qt_filter_factor(qt_filter filter)
 {
-    GLint result;
-
-    switch(filter)
+    switch (filter)
     {
-    case qt_filter::scale2x:
-    case qt_filter::scale2x_age:
-        result = 2;
-        break;
+        case qt_filter::scale2x:
+        case qt_filter::scale2x_age:
+            return 2;
 
-    case qt_filter::gauss3x3:
-    case qt_filter::gauss5x5:
-    case qt_filter::emboss3x3:
-    case qt_filter::emboss5x5:
-        result = 1;
-        break;
+        case qt_filter::gauss3x3:
+        case qt_filter::gauss5x5:
+        case qt_filter::emboss3x3:
+        case qt_filter::emboss5x5:
+            return 1;
 
-    default:
-        result = 0;
-        break;
+        default:
+            return 0;
     }
-
-    return result;
 }

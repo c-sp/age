@@ -90,7 +90,7 @@ namespace age
 
     static_assert(sizeof(pixel) == 4, "expected pixel size of 4 bytes (RGBA)");
 
-    typedef std::vector<pixel> pixel_vector;
+    using pixel_vector = std::vector<pixel>;
 
 } // namespace age
 

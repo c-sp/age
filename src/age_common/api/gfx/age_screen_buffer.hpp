@@ -41,10 +41,8 @@ namespace age
         [[nodiscard]] int16_t get_screen_height() const;
 
         [[nodiscard]] const pixel_vector& get_front_buffer() const;
-        [[nodiscard]] const pixel_vector& get_back_buffer() const;
 
         pixel_vector& get_back_buffer();
-        pixel*        get_first_scanline_pixel(int16_t scanline);
         void          switch_buffers();
 
     private:

@@ -65,11 +65,6 @@ int age::pcm_ring_buffer::get_buffered_samples() const
     return m_buffered_samples;
 }
 
-int age::pcm_ring_buffer::get_last_discarded_samples() const
-{
-    return m_last_discarded_samples;
-}
-
 const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int& available_stereo_samples) const
 {
     const pcm_sample* result    = nullptr;

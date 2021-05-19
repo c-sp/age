@@ -89,15 +89,15 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
 
 bool age::gb_clock::trigger_speed_change()
 {
-    if ((m_key1 & 0x01) == 0)
+    if ((m_key1 & 0x01U) == 0)
     {
         // no speed change requested
         return false;
     }
 
     // toggle double speed
-    m_key1 ^= 0x81;
-    const bool double_speed = (m_key1 & 0x80) > 0;
+    m_key1 ^= 0x81U;
+    const bool double_speed = (m_key1 & 0x80U) > 0;
     m_machine_cycle_clocks  = double_speed ? 2 : 4;
 
     AGE_GB_CLOG_CLOCK("double speed "
@@ -113,6 +113,6 @@ age::uint8_t age::gb_clock::read_key1() const
 
 void age::gb_clock::write_key1(uint8_t value)
 {
-    m_key1 = (m_key1 & 0xFE) | (value & 0x01);
+    m_key1 = (m_key1 & 0xfeU) | (value & 0x01U);
     AGE_GB_CLOG_CLOCK("write key1 = " << AGE_LOG_HEX8(m_key1))
 }

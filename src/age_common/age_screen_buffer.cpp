@@ -56,23 +56,11 @@ const age::pixel_vector& age::screen_buffer::get_front_buffer() const
     return m_buffers[m_current_front_buffer];
 }
 
-const age::pixel_vector& age::screen_buffer::get_back_buffer() const
-{
-    return m_buffers[1 - m_current_front_buffer];
-}
-
 
 
 age::pixel_vector& age::screen_buffer::get_back_buffer()
 {
     return m_buffers[1 - m_current_front_buffer];
-}
-
-age::pixel* age::screen_buffer::get_first_scanline_pixel(int16_t scanline)
-{
-    AGE_ASSERT(scanline < m_screen_height)
-    pixel* result = get_back_buffer().data() + scanline * m_screen_width;
-    return result;
 }
 
 void age::screen_buffer::switch_buffers()

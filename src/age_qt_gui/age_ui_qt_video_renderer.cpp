@@ -67,12 +67,12 @@ age::qt_video_renderer::~qt_video_renderer()
 
 
 
-void age::qt_video_renderer::update_matrix(const QSize &emulator_screen, const QSize &viewport)
+void age::qt_video_renderer::update_matrix(const QSize& emulator_screen, const QSize& viewport)
 {
     LOG(emulator_screen.width() << " x " << emulator_screen.height() << " on " << viewport.width() << " x " << viewport.height());
 
     double viewport_ratio = 1. * viewport.width() / viewport.height();
-    double screen_ratio = 1. * emulator_screen.width() / emulator_screen.height();
+    double screen_ratio   = 1. * emulator_screen.width() / emulator_screen.height();
 
     QRectF proj;
     if (viewport_ratio > screen_ratio)
@@ -94,7 +94,7 @@ void age::qt_video_renderer::update_matrix(const QSize &emulator_screen, const Q
 
 
 
-void age::qt_video_renderer::render(const QList<GLuint> &textures_to_render)
+void age::qt_video_renderer::render(const QList<GLuint>& textures_to_render)
 {
     m_program.bind();
     m_program.setUniformValue("u_projection", m_projection);

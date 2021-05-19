@@ -25,19 +25,21 @@
 
 #include "age_ui_qt_settings.hpp"
 
+#include <utility> // std::move
+
 #if 0
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
 #endif
 
-constexpr const char *qt_settings_default_audio_device_name = "default";
+constexpr const char* qt_settings_default_audio_device_name = "default";
 
-constexpr const char *qt_settings_audio_device = "audio/device";
-constexpr const char *qt_settings_audio_volume = "audio/volume";
-constexpr const char *qt_settings_audio_mute = "audio/mute";
-constexpr const char *qt_settings_audio_latency = "audio/latency";
-constexpr const char *qt_settings_audio_downsampler_quality = "audio/downsampler_quality";
+constexpr const char* qt_settings_audio_device              = "audio/device";
+constexpr const char* qt_settings_audio_volume              = "audio/volume";
+constexpr const char* qt_settings_audio_mute                = "audio/mute";
+constexpr const char* qt_settings_audio_latency             = "audio/latency";
+constexpr const char* qt_settings_audio_downsampler_quality = "audio/downsampler_quality";
 
 constexpr int qt_audio_volume_percent_min = 0;
 constexpr int qt_audio_volume_percent_max = 100;
@@ -52,18 +54,18 @@ constexpr int qt_audio_volume_percent_max = 100;
 //
 //---------------------------------------------------------
 
-age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget *parent, Qt::WindowFlags flags)
+age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent, Qt::WindowFlags flags)
     : QWidget(parent, flags),
-      m_user_value_store(user_value_store)
+      m_user_value_store(std::move(user_value_store))
 {
     // audio device
 
     m_combo_devices = new QComboBox;
     m_combo_devices->setEditable(false);
-    QLabel *current = new QLabel("current device:");
-    m_label_device = new QLabel("n/a");
-    m_label_format = new QLabel("n/a");
-    m_label_buffer = new QLabel("n/a");
+    auto* current       = new QLabel("current device:");
+    m_label_device      = new QLabel("n/a");
+    m_label_format      = new QLabel("n/a");
+    m_label_buffer      = new QLabel("n/a");
     m_label_fir_entries = new QLabel("n/a");
 
     // since audio device names may be quite long, we let the respective widgets expand or shrink
@@ -71,7 +73,7 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
     m_combo_devices->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::QSizePolicy::Maximum);
     m_label_device->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::QSizePolicy::Maximum);
 
-    QVBoxLayout *audio_device_layout = new QVBoxLayout;
+    auto* audio_device_layout = new QVBoxLayout;
     audio_device_layout->addWidget(m_combo_devices);
     audio_device_layout->addSpacing(qt_settings_element_spacing);
     audio_device_layout->addWidget(current);
@@ -80,22 +82,22 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
     audio_device_layout->addWidget(m_label_buffer);
     audio_device_layout->addWidget(m_label_fir_entries);
 
-    QGroupBox *audio_device_group = new QGroupBox("audio device");
+    auto* audio_device_group = new QGroupBox("audio device");
     audio_device_group->setLayout(audio_device_layout);
 
     // audio volume
 
     m_slider_volume = new QSlider(Qt::Horizontal);
     m_slider_volume->setRange(qt_audio_volume_percent_min, qt_audio_volume_percent_max);
-    m_label_volume = new QLabel;
-    m_check_mute = new QCheckBox("mute");
+    m_label_volume = new QLabel();
+    m_check_mute   = new QCheckBox("mute");
 
-    QGridLayout *audio_volume_layout = new QGridLayout;
+    auto* audio_volume_layout = new QGridLayout;
     audio_volume_layout->addWidget(m_label_volume, 0, 0);
     audio_volume_layout->addWidget(m_slider_volume, 0, 1);
     audio_volume_layout->addWidget(m_check_mute, 1, 1);
 
-    QGroupBox *audio_volume_group = new QGroupBox("audio volume");
+    auto* audio_volume_group = new QGroupBox("audio volume");
     audio_volume_group->setLayout(audio_volume_layout);
 
     // audio latency
@@ -103,35 +105,35 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
     m_slider_latency = new QSlider(Qt::Horizontal);
     m_slider_latency->setRange(qt_audio_latency_milliseconds_min / qt_audio_latency_milliseconds_step,
                                qt_audio_latency_milliseconds_max / qt_audio_latency_milliseconds_step);
-    m_label_latency = new QLabel;
+    m_label_latency = new QLabel();
 
-    QHBoxLayout *audio_latency_layout = new QHBoxLayout;
+    auto* audio_latency_layout = new QHBoxLayout;
     audio_latency_layout->addWidget(m_label_latency);
     audio_latency_layout->addWidget(m_slider_latency);
 
-    QGroupBox *audio_latency_group = new QGroupBox("audio latency");
+    auto* audio_latency_group = new QGroupBox("audio latency");
     audio_latency_group->setLayout(audio_latency_layout);
 
     // audio downsampler
 
-    m_combo_downsampler = new QComboBox;
+    m_combo_downsampler = new QComboBox();
     m_combo_downsampler->setEditable(false);
     m_combo_downsampler->addItem(get_name_for_qt_downsampler_quality(qt_downsampler_quality::low));
     m_combo_downsampler->addItem(get_name_for_qt_downsampler_quality(qt_downsampler_quality::high));
     m_combo_downsampler->addItem(get_name_for_qt_downsampler_quality(qt_downsampler_quality::highest));
     m_combo_downsampler->setCurrentText(qt_downsampler_quality_high); // default value
-    QLabel *quality = new QLabel("resampling quality:");
+    auto* quality = new QLabel("resampling quality:");
 
-    QVBoxLayout *audio_downsampler_layout = new QVBoxLayout;
+    auto* audio_downsampler_layout = new QVBoxLayout;
     audio_downsampler_layout->addWidget(quality);
     audio_downsampler_layout->addWidget(m_combo_downsampler);
 
-    QGroupBox *audio_downsampler_group = new QGroupBox("audio quality");
+    auto* audio_downsampler_group = new QGroupBox("audio quality");
     audio_downsampler_group->setLayout(audio_downsampler_layout);
 
     // create final layout
 
-    QGridLayout *layout = new QGridLayout;
+    auto* layout = new QGridLayout;
     layout->setContentsMargins(qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin);
     layout->setSpacing(qt_settings_layout_spacing);
     layout->addWidget(audio_device_group, 0, 0, 1, 2);
@@ -142,11 +144,11 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
 
     // connect signals to slots
 
-    connect(m_combo_devices, SIGNAL(currentIndexChanged(QString)), this, SLOT(devices_index_changed(QString)));
-    connect(m_check_mute, SIGNAL(stateChanged(int)), this, SLOT(mute_state_changed(int)));
-    connect(m_slider_volume, SIGNAL(valueChanged(int)), this, SLOT(volume_value_changed(int)));
-    connect(m_slider_latency, SIGNAL(valueChanged(int)), this, SLOT(latency_value_changed(int)));
-    connect(m_combo_downsampler, SIGNAL(currentIndexChanged(QString)), this, SLOT(downsampler_quality_index_changed(QString)));
+    connect(m_combo_devices, qOverload<const QString&>(&QComboBox::currentIndexChanged), this, &qt_settings_audio::devices_index_changed);
+    connect(m_check_mute, &QCheckBox::stateChanged, this, &qt_settings_audio::mute_state_changed);
+    connect(m_slider_volume, &QSlider::valueChanged, this, &qt_settings_audio::volume_value_changed);
+    connect(m_slider_latency, &QSlider::valueChanged, this, &qt_settings_audio::latency_value_changed);
+    connect(m_combo_downsampler, qOverload<const QString&>(&QComboBox::currentIndexChanged), this, &qt_settings_audio::downsampler_quality_index_changed);
 
     // set values from config
 
@@ -174,7 +176,7 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
 //
 //---------------------------------------------------------
 
-void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo &device, const QAudioFormat &format, int buffer_size, int downsampler_fir_size)
+void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
 {
     QString device_name = device.deviceName();
     m_label_device->setText(device_name);
@@ -184,7 +186,7 @@ void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo &dev
 
     AGE_ASSERT(sizeof(pcm_sample) <= int_max);
     int samples = buffer_size / static_cast<int>(sizeof(pcm_sample));
-    int millis = samples * 1000 / format.sampleRate();
+    int millis  = samples * 1000 / format.sampleRate();
     m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
                             + QString::number(samples) + " samples, "
                             + QString::number(millis) + " milliseconds)");
@@ -233,7 +235,7 @@ void age::qt_settings_audio::emit_settings_signals()
 //
 //---------------------------------------------------------
 
-void age::qt_settings_audio::devices_index_changed(const QString &device_name)
+void age::qt_settings_audio::devices_index_changed(const QString& device_name)
 {
     // ignore this signal, if nothing is selected
     if (!device_name.isEmpty())
@@ -254,7 +256,7 @@ void age::qt_settings_audio::devices_index_changed(const QString &device_name)
             // allocate and use the specified audio output, if the format is valid
             if (format.isValid())
             {
-                m_selected_device = device_info;
+                m_selected_device        = device_info;
                 m_selected_device_format = format;
 
                 LOG("emitting output_changed signal with " << device_info.deviceName());
@@ -295,7 +297,7 @@ void age::qt_settings_audio::latency_value_changed(int value)
     emit latency_changed(m_selected_latency);
 }
 
-void age::qt_settings_audio::downsampler_quality_index_changed(const QString &text)
+void age::qt_settings_audio::downsampler_quality_index_changed(const QString& text)
 {
     m_user_value_store->set_value(qt_settings_audio_downsampler_quality, text);
 
@@ -313,18 +315,18 @@ void age::qt_settings_audio::downsampler_quality_index_changed(const QString &te
 //
 //---------------------------------------------------------
 
-void age::qt_settings_audio::populate_devices_box(const QString &device_to_select)
+void age::qt_settings_audio::populate_devices_box(const QString& device_to_select)
 {
     // clear combo box and set "default" item
     m_combo_devices->clear();
     m_combo_devices->addItem(qt_settings_default_audio_device_name);
 
     // add currently available audio output device names
-    int current_device_index = 0; // index of the "default" item
-    QList<QAudioDeviceInfo> output_devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+    int                     current_device_index = 0; // index of the "default" item
+    QList<QAudioDeviceInfo> output_devices       = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
     for (int i = 0; i < output_devices.size(); ++i)
     {
-        QAudioDeviceInfo device_info = output_devices.at(i);
+        auto& device_info = output_devices.at(i);
         LOG("available audio output device: " << device_info.deviceName());
         m_combo_devices->addItem(device_info.deviceName());
 
@@ -356,7 +358,7 @@ void age::qt_settings_audio::update_volume(int volume)
 
 
 
-QAudioDeviceInfo age::qt_settings_audio::get_device_info(const QString &device_name) const
+QAudioDeviceInfo age::qt_settings_audio::get_device_info(const QString& device_name) const
 {
     QAudioDeviceInfo result;
 
@@ -372,7 +374,7 @@ QAudioDeviceInfo age::qt_settings_audio::get_device_info(const QString &device_n
         QList<QAudioDeviceInfo> output_devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
         for (int i = 0; i < output_devices.size(); ++i)
         {
-            QAudioDeviceInfo device_info = output_devices.at(i);
+            auto& device_info = output_devices.at(i);
             if (device_name == device_info.deviceName())
             {
                 result = device_info;
@@ -386,7 +388,7 @@ QAudioDeviceInfo age::qt_settings_audio::get_device_info(const QString &device_n
 
 
 
-QAudioFormat age::qt_settings_audio::find_suitable_format(const QAudioDeviceInfo &device_info)
+QAudioFormat age::qt_settings_audio::find_suitable_format(const QAudioDeviceInfo& device_info)
 {
     // create the audio format we want to use
     QAudioFormat format;

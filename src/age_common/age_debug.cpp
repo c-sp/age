@@ -51,9 +51,9 @@ std::string age::age_log_time::get_timestamp()
     time_t                                tt        = std::chrono::system_clock::to_time_t(tp);
     tm*                                   time_info = localtime(&tt);
 
-    long long milliseconds = dtn.count()
-                             * std::chrono::system_clock::period::num * 1000
-                             / std::chrono::system_clock::period::den;
+    int64_t milliseconds = dtn.count()
+                           * std::chrono::system_clock::period::num * 1000
+                           / std::chrono::system_clock::period::den;
     char tmp[80];
     strftime(tmp, 80, "%H:%M:%S", time_info);
 
