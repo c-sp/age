@@ -36,9 +36,9 @@ namespace age
     public:
         screen_buffer(int16_t screen_width, int16_t screen_height);
 
-        [[nodiscard]] uint8_t get_front_buffer_index() const;
-        [[nodiscard]] int16_t get_screen_width() const;
-        [[nodiscard]] int16_t get_screen_height() const;
+        [[nodiscard]] int16_t  get_screen_width() const;
+        [[nodiscard]] int16_t  get_screen_height() const;
+        [[nodiscard]] unsigned get_current_frame_id() const;
 
         [[nodiscard]] const pixel_vector& get_front_buffer() const;
 
@@ -49,8 +49,9 @@ namespace age
         const int16_t m_screen_width;
         const int16_t m_screen_height;
 
-        std::array<pixel_vector, 2> m_buffers;
-        uint8_t                     m_current_front_buffer = 0;
+        pixel_vector m_front_buffer;
+        pixel_vector m_back_buffer;
+        unsigned     m_frame_id = 0; // unsigned for well defined wrap around behaviour
     };
 
 } // namespace age

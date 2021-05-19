@@ -19,7 +19,6 @@
 #include <gfx/age_screen_buffer.hpp>
 
 
-
 age::screen_buffer::screen_buffer(int16_t screen_width, int16_t screen_height)
     : m_screen_width(screen_width),
       m_screen_height(screen_height)
@@ -27,19 +26,12 @@ age::screen_buffer::screen_buffer(int16_t screen_width, int16_t screen_height)
     AGE_ASSERT(m_screen_width > 0)
     AGE_ASSERT(m_screen_height > 0)
 
-    // we rely on integral promotion to >=32 bits when multiplying width & height
     auto buffer_size = static_cast<unsigned>(m_screen_width * m_screen_height);
 
-    m_buffers[0] = pixel_vector(buffer_size);
-    m_buffers[1] = pixel_vector(buffer_size);
+    m_front_buffer = pixel_vector(buffer_size);
+    m_back_buffer  = pixel_vector(buffer_size);
 }
 
-
-
-age::uint8_t age::screen_buffer::get_front_buffer_index() const
-{
-    return m_current_front_buffer;
-}
 
 age::int16_t age::screen_buffer::get_screen_width() const
 {
@@ -51,19 +43,26 @@ age::int16_t age::screen_buffer::get_screen_height() const
     return m_screen_height;
 }
 
-const age::pixel_vector& age::screen_buffer::get_front_buffer() const
+unsigned age::screen_buffer::get_current_frame_id() const
 {
-    return m_buffers[m_current_front_buffer];
+    return m_frame_id;
 }
 
+const age::pixel_vector& age::screen_buffer::get_front_buffer() const
+{
+    return m_front_buffer;
+}
 
 
 age::pixel_vector& age::screen_buffer::get_back_buffer()
 {
-    return m_buffers[1 - m_current_front_buffer];
+    return m_back_buffer;
 }
 
 void age::screen_buffer::switch_buffers()
 {
-    m_current_front_buffer = 1 - m_current_front_buffer;
+    // https://stackoverflow.com/a/28130696
+    using std::swap;
+    swap(m_front_buffer, m_back_buffer);
+    ++m_frame_id; // may wrap around but that's okay
 }

@@ -119,14 +119,14 @@ bool age::emulator::emulate(int cycles_to_emulate)
         return false;
     }
 
-    auto current_front_buffer = m_screen_buffer.get_front_buffer_index();
+    auto frame_id = m_screen_buffer.get_current_frame_id();
     m_audio_buffer.clear();
 
     int emulated_cycles = inner_emulate(cycles_to_emulate);
     AGE_ASSERT(emulated_cycles > 0)
     m_emulated_cycles += emulated_cycles;
 
-    bool new_frame = m_screen_buffer.get_front_buffer_index() != current_front_buffer;
+    bool new_frame = m_screen_buffer.get_current_frame_id() != frame_id;
     return new_frame;
 }
 
