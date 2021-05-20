@@ -57,7 +57,7 @@ void age::gb_joypad::write_p1(uint8_t byte)
     }
 
     // interrupt: p10-p13 changed from high to low
-    // (raise int for low-to-high too, since it happens on the Gameboy)
+    // (raise int for low-to-high too, since it happens on the Game Boy)
     int raise_interrupt = (m_p1 ^ byte) & 0x0F;
     if (raise_interrupt > 0)
     {

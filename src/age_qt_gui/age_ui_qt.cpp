@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_ui_qt.hpp"
 
 

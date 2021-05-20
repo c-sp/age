@@ -26,11 +26,11 @@ namespace
     constexpr uint8_t gb_half_carry_flag = 0x20;
     constexpr uint8_t gb_carry_flag      = 0x10;
 
-    constexpr int gb_hcs_shift      = 4;
-    constexpr int gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
-    constexpr int gb_hcs_subtract   = gb_subtract_flag << gb_hcs_shift;
-    constexpr int gb_hcs_old_carry  = gb_carry_flag << gb_hcs_shift;
-    constexpr int gb_hcs_flags      = gb_hcs_half_carry + gb_hcs_subtract;
+    constexpr unsigned gb_hcs_shift      = 4;
+    constexpr int      gb_hcs_half_carry = gb_half_carry_flag << gb_hcs_shift;
+    constexpr int      gb_hcs_subtract   = gb_subtract_flag << gb_hcs_shift;
+    constexpr int      gb_hcs_old_carry  = gb_carry_flag << gb_hcs_shift;
+    constexpr int      gb_hcs_flags      = gb_hcs_half_carry + gb_hcs_subtract;
 
 } // namespace
 

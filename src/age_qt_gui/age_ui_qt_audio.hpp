@@ -58,10 +58,10 @@ namespace age
     //!
     //! Hints regarding QAudioOutput:
     //! - When trying "pull mode" (by using a custom QIODevice for buffering audio data),
-    //! there were frequent noticable audio lags caused by buffer underruns.
+    //! there were frequent noticable audio lags caused by buffer underflows.
     //! Apparently some of the timer events used for streaming audio data in "pull mode"
     //! were massively delayed.
-    //! - QAudioOutpu::setVolume() did not work very well on Windows. Calling this method
+    //! - QAudioOutput::setVolume() did not work very well on Windows. Calling this method
     //! sometimes did not work at all and at other times caused CPU load spikes and audio
     //! lags. That's why we use our own volume control: downsampler::set_volume().
     //!
@@ -197,11 +197,11 @@ namespace age
         //! \brief Stream buffered audio data to the audio device.
         //!
         //! This method must be called regularly to keep the audio stream running.
-        //! If a buffer underrun occurs on the audio device's buffer (which may produce
+        //! If a buffer underflow occurs on the audio device's buffer (which may produce
         //! some audible crack noise), streaming will be paused until the intermediate
         //! buffer is filled completely.
         //! By enforcing the audio latency in that way the probability of multiple
-        //! concurrent buffer underruns is reduced.
+        //! concurrent buffer underflows is reduced.
         //!
         //! To add new audio data to the intermediate buffer, call buffer_samples()
         //! or buffer_silence().

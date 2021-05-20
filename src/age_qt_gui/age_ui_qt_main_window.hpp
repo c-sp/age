@@ -56,7 +56,7 @@ namespace age
     signals:
 
         void emulator_loaded(QSharedPointer<age::qt_emulator> new_emulator);
-        void emulator_screen_resize(int16_t width, int16_t height);
+        void emulator_screen_resize(age::int16_t width, age::int16_t height);
         void emulator_button_down(int button);
         void emulator_button_up(int button);
 

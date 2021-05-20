@@ -44,7 +44,7 @@ namespace age
 
     private:
         const gb_clock& m_clock;
-        int             m_div_offset = 0;
+        int             m_div_offset = 0; //!< used to re-align DIV to clock on DIV-writes
     };
 
 } // namespace age

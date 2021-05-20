@@ -243,7 +243,7 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
     AGE_ASSERT(frame_idx >= 0);
     AGE_ASSERT(frame_idx < m_native_frames.size());
 
-    // store the current viewort as we adjust viewport size
+    // store the current viewport as we adjust viewport size
     // during post processing
     GLint saved_viewport[4];
     glGetIntegerv(GL_VIEWPORT, saved_viewport);

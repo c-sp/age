@@ -38,7 +38,7 @@ namespace
     }
 
     //!
-    //! Initialize Gameboy Color palettes for classic roms.
+    //! Initialize Game Boy Color palettes for classic roms.
     //! Based on:
     //! https://tcrf.net/Notes:Game_Boy_Color_Bootstrap_ROM#Assigned_Palette_Configurations
     //! https://web.archive.org/web/20170830061747/http://www.vcfed.org/forum/showthread.php?19247-Disassembling-the-GBC-Boot-ROM&p=128734

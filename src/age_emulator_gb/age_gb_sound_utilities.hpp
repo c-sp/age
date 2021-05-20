@@ -343,7 +343,7 @@ namespace age
             bool is_silent = !(m_nrX2 & 0xF8);
             if (is_silent)
             {
-                gb_sound_channel::deactivate();
+                TYPE::deactivate();
             }
             return is_silent;
         }

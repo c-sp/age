@@ -164,8 +164,8 @@ void age::gb_timer::on_div_reset(int old_div_offset)
 
 void age::gb_timer::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CLOCK(m_clk_timer_zero, clock_cycle_offset)
-    AGE_GB_SET_BACK_CLOCK(m_clk_last_overflow, clock_cycle_offset)
+    gb_set_back_clock_cycle(m_clk_timer_zero, clock_cycle_offset);
+    gb_set_back_clock_cycle(m_clk_last_overflow, clock_cycle_offset);
 }
 
 

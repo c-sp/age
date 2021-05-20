@@ -15,7 +15,7 @@ Current _groups_:
     common data types.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
-* **`age_emulator_gb`** is the actual gameboy emulator.
+* **`age_emulator_gb`** is the actual Game Boy emulator.
     This _group_ does not require any library beside the
     [C++14 STL](https://en.cppreference.com/w/cpp/14).
 * **`age_qt_emu_test`** is an emulator test runner created with
@@ -49,7 +49,7 @@ Current _groups_:
 1. **Do not include more than what a file needs.**
     Code required only for a cpp file must not bloat header files.
 1. **Include everything a file needs.**
-    Don't rely on transitive includes or the include order in cpp files.
+    Don't rely on transitive includes or include order in cpp files.
 
 ### Data Types
 
@@ -84,6 +84,6 @@ Current _groups_:
     though).
 
 AGE code uses `unsigned` only for values representing the emulated hardware
-(e.g. Gameboy CPU registers, Gameboy memory)
+(e.g. Game Boy CPU registers, Game Boy memory)
 and when interacting with STL containers
 (e.g. `size_t std::vector::size()` or `std::vector::operator[size_t]`).

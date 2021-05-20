@@ -195,7 +195,7 @@ void age::qt_emulation_runner::set_audio_downsampler_quality(age::qt_downsampler
 
 void age::qt_emulation_runner::continue_emulation()
 {
-    // check for changede audio settings
+    // check for modified audio settings
     if (m_audio_latency_changed)
     {
         m_audio_latency_changed = false;
@@ -251,9 +251,9 @@ void age::qt_emulation_runner::emulate(QSharedPointer<emulator> emu)
 
     // Calculate the number of nanoseconds to emulate based on elapsed time.
     // Limit the nanos to emulate in order to not stall the system if the CPU cannot keep up
-    // (allow evening out load spikes though, requiring a limit gerater than emulation_interval_nanos).
+    // (allow evening out load spikes though, requiring a limit greater than emulation_interval_nanos).
     qint64 nanos_to_emulate = m_synchronize ? timer_nanos_elapsed : qint64_max;
-    nanos_to_emulate        = qMin(nanos_to_emulate, emulation_interval_nanos << 1);
+    nanos_to_emulate        = qMin(nanos_to_emulate, emulation_interval_nanos * 2);
     LOG("nanos_to_emulate " << nanos_to_emulate);
 
     // convert nanoseconds to emulation cycles
@@ -298,13 +298,13 @@ void age::qt_emulation_runner::emulate(QSharedPointer<emulator> emu)
     {
         qint64 speed_diff_cycles = m_emulated_cycles - m_speed_last_cycles;
 
-        double nanos           = speed_diff_nanos * emu->get_cycles_per_second();
-        double cycles          = speed_diff_cycles * 1000000000.0;
+        auto   nanos           = speed_diff_nanos * emu->get_cycles_per_second();
+        auto   cycles          = speed_diff_cycles * 1000000000;
         double speed_percent   = qRound(cycles * 100.0 / nanos);
-        double emulated_millis = m_emulated_cycles * 1000.0 / emu->get_cycles_per_second();
+        auto   emulated_millis = m_emulated_cycles * 1000 / emu->get_cycles_per_second();
 
         emit emulator_speed(static_cast<int>(speed_percent));
-        emit emulator_milliseconds(static_cast<qint64>(emulated_millis));
+        emit emulator_milliseconds(emulated_millis);
 
         m_speed_last_nanos  = current_timer_nanos;
         m_speed_last_cycles = m_emulated_cycles;

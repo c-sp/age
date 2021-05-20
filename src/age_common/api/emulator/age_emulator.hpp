@@ -48,7 +48,7 @@ namespace age
         //!
         //! The title is for informational purposes only and may depend on whatever data
         //! has been loaded into the emulator.
-        //! E.g. the gameboy emulator returns the gameboy rom's title.
+        //! E.g. the Game Boy emulator returns the Game Boy cartridge's title.
         //! A title is made of up to 32 characters and may be empty.
         //! It contains only the following characters:
         //! - a-z

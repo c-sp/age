@@ -49,7 +49,7 @@ namespace age
         ~qt_user_value_store();
 
         //!
-        //! \brief Get the speficied user value.
+        //! \brief Get the specified user value.
         //!
         //! The value might be returned from memory instead of the persistent value store.
         //! Thus it might not be equal to the most recent value found in the persistent value store.

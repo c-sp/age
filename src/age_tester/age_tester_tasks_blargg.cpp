@@ -28,7 +28,7 @@ namespace
         auto screenshot_filename = (is_prefixed ? filename : std::filesystem::path(prefix + filename.string())).replace_extension(".png");
 
         auto screenshot_path = rom_path.parent_path() / screenshot_filename;
-        if (is_regular_file(screenshot_path))
+        if (std::filesystem::is_regular_file(screenshot_path))
         {
             return screenshot_path;
         }

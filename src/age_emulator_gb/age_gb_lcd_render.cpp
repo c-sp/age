@@ -102,8 +102,8 @@ void age::gb_lcd_render::render(int until_scanline)
     AGE_ASSERT(until_scanline >= m_rendered_scanlines)
     AGE_ASSERT(m_rendered_scanlines <= gb_screen_height)
 
-    int santized  = std::min<int>(gb_screen_height, until_scanline);
-    int to_render = santized - m_rendered_scanlines;
+    int sanitized = std::min<int>(gb_screen_height, until_scanline);
+    int to_render = sanitized - m_rendered_scanlines;
 
     // new scanlines to render?
     if (to_render <= 0)
@@ -127,7 +127,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
 {
     // We use the pixel alpha channel temporary for priority
     // information.
-    // When the scanline is finshed, during copying to the
+    // When the scanline is finished, during copying to the
     // screen buffer the alpha channel is restored to 0xFF.
     //
     // Priority bits:
@@ -349,8 +349,8 @@ void age::gb_lcd_render::render_sprite_tile(pixel*           dst,
         // sprite pixel visible?
         int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
 
-        int px_prio = (px.m_rgba.m_a | priority) & m_priority_mask;
-        if ((px_prio <= 0x80) && color_idx)
+        int px_priority = (px.m_rgba.m_a | priority) & m_priority_mask;
+        if ((px_priority <= 0x80) && color_idx)
         {
             pixel color      = palette[color_idx];
             color.m_rgba.m_a = px.m_rgba.m_a;

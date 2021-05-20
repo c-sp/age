@@ -24,7 +24,7 @@ namespace
                                           const std::string&           filename)
     {
         auto screenshot_path = dir / filename;
-        if (is_regular_file(screenshot_path))
+        if (std::filesystem::is_regular_file(screenshot_path))
         {
             return screenshot_path;
         }

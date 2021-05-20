@@ -179,8 +179,8 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
         },
     };
 
-    age::tester::options options;
-    int                  c;
+    age::tester::options options{};
+    int                  c = 0;
     int                  longindex = 0;
 
     // no getopt() error message on standard error

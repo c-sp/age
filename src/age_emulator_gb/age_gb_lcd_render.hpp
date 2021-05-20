@@ -94,7 +94,7 @@ namespace age
         //          0x20 - 0x3F  OBJ
         pixel_vector m_colors{gb_total_color_count, pixel(0, 0, 0)};
 
-        // default classic gameboy colors (from 0x00 to 0x03)
+        // default classic Game Boy colors (from 0x00 to 0x03)
         std::array<pixel, 4> m_bgp_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
         std::array<pixel, 4> m_obp0_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
         std::array<pixel, 4> m_obp1_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};

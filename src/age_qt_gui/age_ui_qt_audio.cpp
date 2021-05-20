@@ -167,18 +167,18 @@ void age::qt_audio_output::stream_audio_data()
         LOG_STREAM("free bytes: " << m_output->bytesFree() << ", buffered bytes "
                                   << m_buffer.get_buffered_samples() * sizeof_pcm_sample);
 
-        // wait for ring buffer to fill up on buffer underrun
+        // wait for ring buffer to fill up on buffer underflow
         if (m_output->bytesFree() == m_output->bufferSize())
         {
             if (m_buffer.get_buffered_samples() == m_buffer.get_max_buffered_samples())
             {
                 m_pause_streaming = false;
-                LOG("ring buffer is filled completely after buffer underrun, will resume streaming");
+                LOG("ring buffer is filled completely after buffer underflow, will resume streaming");
             }
             else if (!m_pause_streaming)
             {
                 m_pause_streaming = true;
-                LOG("buffer underun detected, streaming paused until ring buffer is filled completely");
+                LOG("buffer underflow detected, streaming paused until ring buffer is filled completely");
             }
         }
 

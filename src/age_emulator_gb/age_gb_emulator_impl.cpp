@@ -16,12 +16,6 @@
 
 #include "age_gb_emulator_impl.hpp"
 
-#if 0
-#define LOG(x) AGE_GB_CLOCK_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 
 
 age::gb_test_info age::gb_emulator_impl::get_test_info() const
@@ -116,10 +110,6 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
         int clock_cycle_offset = current_cycle - cycles_to_keep;
         AGE_ASSERT(clock_cycle_offset > 0)
         AGE_ASSERT(clock_cycle_offset < current_cycle)
-
-        LOG("set back cycles: " << current_cycle
-                                << " -> " << cycles_to_keep
-                                << " (-" << offset << ")")
 
         m_clock.set_back_clock(clock_cycle_offset);
         m_events.set_back_clock(clock_cycle_offset);

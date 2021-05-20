@@ -19,8 +19,8 @@
 namespace
 {
 
-    constexpr age::uint8_t serial_bit = to_integral(age::gb_interrupt::serial);
-    constexpr age::uint8_t timer_bit  = to_integral(age::gb_interrupt::timer);
+    constexpr age::uint8_t serial_bit = to_underlying(age::gb_interrupt::serial);
+    constexpr age::uint8_t timer_bit  = to_underlying(age::gb_interrupt::timer);
 
     constexpr uint8_t deny_retrigger = serial_bit | timer_bit;
 
@@ -48,7 +48,7 @@ age::gb_interrupt_trigger::gb_interrupt_trigger(const gb_device& device,
 void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
                                                   int          irq_clock_cycle)
 {
-    uint8_t intr_bit = to_integral(interrupt);
+    uint8_t intr_bit = to_underlying(interrupt);
 
     // During interrupt dispatch after the respectve IF flag has
     // been cleared the CGB apparently denies that interrupt from being

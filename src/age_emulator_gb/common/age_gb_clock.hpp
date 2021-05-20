@@ -34,6 +34,8 @@ namespace age
     constexpr int gb_no_clock_cycle          = -1;
     constexpr int gb_clock_cycles_per_second = 4194304;
 
+    void gb_set_back_clock_cycle(int &clock_cycle, int cycle_offset);
+
 
 
     class gb_clock
@@ -44,7 +46,7 @@ namespace age
         //! \brief Get the current 4Mhz cycle.
         //!
         //! This clock runs at 4Mhz regardless of the current
-        //! Gameboy Color speed setting.
+        //! Game Boy Color speed setting.
         [[nodiscard]] int    get_clock_cycle() const;
         [[nodiscard]] int8_t get_machine_cycle_clocks() const;
         [[nodiscard]] bool   is_double_speed() const;
@@ -64,22 +66,6 @@ namespace age
     };
 
 } // namespace age
-
-
-
-//! \todo remove this once it's no longer used (no negative cycle numbers!)
-#define AGE_GB_SET_BACK_CLOCK_OVERFLOW(value, offset)                                      \
-    if ((value) != gb_no_clock_cycle)                                                      \
-    {                                                                                      \
-        /*AGE_LOG("set back " << #value << ": " << value << " -> " << (value - offset));*/ \
-        AGE_ASSERT((offset) >= gb_clock_cycles_per_second);                                \
-        AGE_ASSERT(0 == ((offset) & (gb_clock_cycles_per_second - 1)));                    \
-        (value) -= (offset);                                                               \
-    }
-
-#define AGE_GB_SET_BACK_CLOCK(value, offset)                            \
-    AGE_ASSERT(((value) == gb_no_clock_cycle) || ((value) >= (offset))) \
-    AGE_GB_SET_BACK_CLOCK_OVERFLOW(value, offset)
 
 
 
@@ -154,18 +140,21 @@ namespace age
 #endif
 
 #if 0
+#define AGE_GB_CLOG_SOUND(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_SOUND(log)
+#endif
+
+#if 0
+#define AGE_GB_CLOG_SOUND_PORTS(log) AGE_GB_CLOG(log)
+#else
+#define AGE_GB_CLOG_SOUND_PORTS(log)
+#endif
+
+#if 0
 #define AGE_GB_CLOG_TIMER(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_TIMER(log)
-#endif
-
-
-
-//! \todo replacae AGE_GB_CLOCK_LOG with AGE_GB_CLOG
-#ifdef AGE_DEBUG
-#define AGE_GB_CLOCK_LOG(x) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << x) // NOLINT(bugprone-macro-parentheses)
-#else
-#define AGE_GB_CLOCK_LOG(x)
 #endif
 
 

@@ -1,8 +1,11 @@
 Checks: >
   *,
+  -abseil-*,
+  -android-*,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-constant-array-index,   # don't require gsl::at for every array access
   -cppcoreguidelines-pro-type-union-access,
   -fuchsia-default-arguments-calls,
   -fuchsia-default-arguments-declarations,
@@ -16,4 +19,8 @@ Checks: >
 
 CheckOptions:
   - key: readability-implicit-bool-conversion.AllowIntegerConditions
+    value: true
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: true
+  - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
     value: true

@@ -23,8 +23,9 @@
 
 namespace
 {
-#define _ 0
-#define O 1
+    constexpr age::uint8_t _ = 0;
+    constexpr age::uint8_t O = 1;
+
     // tile_data array contents copied from gambatte code
     // (gambatte/test/testrunner.cpp)
     constexpr age::uint8_array<16 * 8 * 8> tile_data
@@ -171,8 +172,6 @@ namespace
             _, O, _, _, _, _, _, _,
             _, O, _, _, _, _, _, _,
             _, O, _, _, _, _, _, _}};
-#undef O
-#undef _
 
     //!
     //! gambatte tests run for 15 frames
@@ -206,7 +205,7 @@ namespace
     age::uint8_vector parse_hex_out(const std::string&              str,
                                     const std::vector<std::string>& prefixes)
     {
-        for (auto& prefix : prefixes)
+        for (const auto& prefix : prefixes)
         {
             auto pos = str.find(prefix);
             // prefix not found => continue with next prefix
@@ -250,8 +249,8 @@ namespace
         return [=](age::gb_emulator& emulator) {
             run_test(emulator);
 
-            auto& screen       = emulator.get_screen_front_buffer();
-            auto  screen_width = emulator.get_screen_width();
+            const auto& screen       = emulator.get_screen_front_buffer();
+            auto        screen_width = emulator.get_screen_width();
 
             // start with the first line
             // (the emulator screen buffer is filled upside down)
@@ -344,7 +343,7 @@ namespace
 
         auto screenshot = base;
         screenshot += suffix;
-        if (is_regular_file(screenshot))
+        if (std::filesystem::is_regular_file(screenshot))
         {
             return screenshot;
         }

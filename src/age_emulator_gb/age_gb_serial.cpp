@@ -64,14 +64,15 @@ age::uint8_t age::gb_serial::read_sb()
 
 age::uint8_t age::gb_serial::read_sc() const
 {
-    uint8_t result = m_sc & 0x03;
-
     // unused bits are always high
-    result |= m_device.is_cgb() ? 0x7C : 0x7E;
+    uint8_t unused = m_device.is_cgb() ? 0x7C : 0x7E;
 
     // serial transfer currently in progress?
-    result |= (m_sio_state == gb_sio_state::no_transfer) ? 0 : sc_start_transfer;
+    uint8_t transfer_flag = (m_sio_state == gb_sio_state::no_transfer) ? 0 : sc_start_transfer;
 
+    uint8_t result = m_sc & 0x03;
+    result |= unused;
+    result |= transfer_flag;
     AGE_GB_CLOG_SERIAL("read SC = " << AGE_LOG_HEX8(result))
     return result;
 }
@@ -243,7 +244,7 @@ void age::gb_serial::stop_transfer(gb_sio_state new_state)
 
 void age::gb_serial::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CLOCK(m_sio_clk_started, clock_cycle_offset)
+    gb_set_back_clock_cycle(m_sio_clk_started, clock_cycle_offset);
 }
 
 

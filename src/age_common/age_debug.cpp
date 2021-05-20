@@ -33,7 +33,7 @@ void age::concurrent_cout::log_line()
 
     std::string str = m_ss.str();
     std::cout << str << std::endl;
-    // fush immediately to make sure we immediately see all logging in case the program crashes
+    // flush immediately to make sure we immediately see all logging in case the program crashes
     std::cout.flush();
 }
 

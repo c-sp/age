@@ -61,8 +61,17 @@ namespace
 
     using path_matcher = std::function<bool(const std::string&)>;
 
-    bool match_everything(const std::string&) { return true; }
-    bool match_nothing(const std::string&) { return false; }
+    bool match_everything(const std::string& value)
+    {
+        AGE_UNUSED(value);
+        return true;
+    }
+
+    bool match_nothing(const std::string& value)
+    {
+        AGE_UNUSED(value);
+        return false;
+    }
 
     path_matcher new_regex_matcher(const std::string& regex_string)
     {
@@ -104,7 +113,7 @@ namespace
         {
             return;
         }
-        for (auto& entry : std::filesystem::directory_iterator(path))
+        for (const auto& entry : std::filesystem::directory_iterator(path))
         {
             if (entry.is_directory())
             {
@@ -122,7 +131,7 @@ namespace
                    const std::function<void(const std::filesystem::path&)>& file_callback)
     {
         const std::array<std::string, 3> rom_file_extensions = {{".gb", ".gbc", ".cgb"}};
-        auto                             ext_end             = end(rom_file_extensions);
+        const auto*                      ext_end             = end(rom_file_extensions);
 
         traverse_directory(path, [&](const std::filesystem::path& file_path) {
             auto file_extension = file_path.extension().string();

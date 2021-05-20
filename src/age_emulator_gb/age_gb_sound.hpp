@@ -99,6 +99,7 @@ namespace age
 
     private:
         [[nodiscard]] bool inc_period() const;
+        [[nodiscard]] int  get_current_sclk() const;
         int                apu_event();
         void               generate_samples(int for_sclk);
         void               set_wave_ram_byte(unsigned offset, uint8_t value);

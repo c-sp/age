@@ -36,6 +36,15 @@ private:                          \
 
 
 
+// Use this to mark unused (but required) parameters,
+// e.g. for callbacks.
+//
+// See also:
+// https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables#comment51105057_1486931
+#define AGE_UNUSED(arg) ((void)&(arg))
+
+
+
 namespace age
 {
 
@@ -80,9 +89,12 @@ namespace age
 
     //!
     //! Convert the specified enum value to the associated value of the underlying type.
+    //! See also: https://stackoverflow.com/a/14589519
+    //!
+    //! Can be replaced by std::to_underlying with C++23.
     //!
     template<typename E>
-    constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type
+    constexpr auto to_underlying(E e) -> typename std::underlying_type<E>::type
     {
         return static_cast<typename std::underlying_type<E>::type>(e);
     }

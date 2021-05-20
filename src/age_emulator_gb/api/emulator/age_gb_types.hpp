@@ -29,7 +29,7 @@ namespace age
 {
 
     //!
-    //! \brief Configures the hardware (Gameboy or Gameboy Color) to emulate.
+    //! \brief Configures the hardware (Game Boy or Game Boy Color) to emulate.
     //!
     //! Setting specific hardware is usually only required for running tests.
     //! The end user should probably let the emulator auto detect the hardware
@@ -66,7 +66,7 @@ namespace age
 
 
     //!
-    //! \brief Struct containing parts of the Gameboy CPU state.
+    //! \brief Struct containing parts of the Game Boy CPU state.
     //!
     //! This struct was implemented for evaluating test rom results.
     //!

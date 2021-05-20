@@ -105,7 +105,7 @@ void age::pcm_ring_buffer::add_samples(const pcm_vector& samples_to_add, int num
     num_samples_to_add = std::max(num_samples_to_add, 0);
     num_samples_to_add = std::min(num_samples_to_add, static_cast<int>(samples_to_add.size()));
 
-    auto first = std::begin(samples_to_add);
+    auto first = begin(samples_to_add);
     auto last  = first + num_samples_to_add;
 
     // if we add more samples than the buffer can hold in total, we just

@@ -107,10 +107,10 @@ void age::gb_lcd_irqs::lcd_off()
 
 void age::gb_lcd_irqs::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CLOCK(m_clk_next_irq_vblank, clock_cycle_offset)
-    AGE_GB_SET_BACK_CLOCK(m_clk_next_irq_lyc, clock_cycle_offset)
-    AGE_GB_SET_BACK_CLOCK(m_clk_next_irq_mode2, clock_cycle_offset)
-    AGE_GB_SET_BACK_CLOCK(m_clk_next_irq_mode0, clock_cycle_offset)
+    gb_set_back_clock_cycle(m_clk_next_irq_vblank, clock_cycle_offset);
+    gb_set_back_clock_cycle(m_clk_next_irq_lyc, clock_cycle_offset);
+    gb_set_back_clock_cycle(m_clk_next_irq_mode2, clock_cycle_offset);
+    gb_set_back_clock_cycle(m_clk_next_irq_mode0, clock_cycle_offset);
 }
 
 

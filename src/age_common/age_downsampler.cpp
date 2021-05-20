@@ -190,7 +190,9 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector& samples)
     // inefficient: we copy all samples into a single buffer before filtering
     size_t num_old_samples = m_prev_samples.size();
     m_prev_samples.resize(num_old_samples + samples.size());
-    std::copy(std::begin(samples), std::end(samples), std::begin(m_prev_samples) + static_cast<int>(num_old_samples));
+    std::copy(std::begin(samples),
+              end(samples),
+              begin(m_prev_samples) + static_cast<int>(num_old_samples));
 
     int prev_samples_size = static_cast<int>(m_prev_samples.size());
     int fir_values_size   = static_cast<int>(m_fir_values.size());
@@ -315,7 +317,7 @@ double age::downsampler_low_pass::calculate_sinc(double n, int filter_order, dou
 //
 //  - We don't use the approach of interpolation followed by decimation since
 //    that would require very big filter kernels depending on the input/output
-//    sampling rates (e.g. gameboy 2097152 -> audio device 44100: interpolate
+//    sampling rates (e.g. Game Boy 2097152 -> audio device 44100: interpolate
 //    by 11025, decimate by 524288).
 //
 //  - Current approach: use continuous lowpass FIR simulated by interpolating

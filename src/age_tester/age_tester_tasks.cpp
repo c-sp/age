@@ -180,8 +180,8 @@ age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::
         auto png_data = load_png(screenshot_png_path, emulator);
 
         // compare screen to screenshot
-        auto screenshot = png_data.data();
-        auto screen     = emulator.get_screen_front_buffer().data();
+        const auto* screenshot = png_data.data();
+        const auto* screen     = emulator.get_screen_front_buffer().data();
 
         for (int i = 0, max = emulator.get_screen_width() * emulator.get_screen_height(); i < max; ++i)
         {

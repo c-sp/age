@@ -63,7 +63,7 @@ namespace age
     //!
     //! The enum contains all key events known by the AGE Qt GUI.
     //! Examples of key events are setting adjustments (e.g. increasing the audio volume)
-    //! or pressing a emulator specific button (e.g. pressing the Gameboy's "start" button).
+    //! or pressing a emulator specific button (e.g. pressing the Game Boy's "start" button).
     //!
     //! The value qt_key_event::none does not represent any actual key event.
     //! It is used for example when parsing a key event from a string fails because the
@@ -426,7 +426,7 @@ namespace age
 
         void video_use_bilinear_filter_changed(bool use);
         void video_frames_to_blend_changed(int frames_to_blend);
-        void video_post_processing_filter_changed(qt_filter_list filter_list);
+        void video_post_processing_filter_changed(age::qt_filter_list filter_list);
 
         void audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
         void audio_volume_changed(int volume_percent);

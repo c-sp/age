@@ -33,14 +33,14 @@
 
 namespace
 {
-    constexpr const char* qt_settings_keys_gameboy_up                       = "keys/gameboy_up";
-    constexpr const char* qt_settings_keys_gameboy_down                     = "keys/gameboy_down";
-    constexpr const char* qt_settings_keys_gameboy_left                     = "keys/gameboy_left";
-    constexpr const char* qt_settings_keys_gameboy_right                    = "keys/gameboy_right";
-    constexpr const char* qt_settings_keys_gameboy_a                        = "keys/gameboy_a";
-    constexpr const char* qt_settings_keys_gameboy_b                        = "keys/gameboy_b";
-    constexpr const char* qt_settings_keys_gameboy_start                    = "keys/gameboy_start";
-    constexpr const char* qt_settings_keys_gameboy_select                   = "keys/gameboy_select";
+    constexpr const char* qt_settings_keys_game_boy_up                      = "keys/game_boy_up";
+    constexpr const char* qt_settings_keys_game_boy_down                    = "keys/game_boy_down";
+    constexpr const char* qt_settings_keys_game_boy_left                    = "keys/game_boy_left";
+    constexpr const char* qt_settings_keys_game_boy_right                   = "keys/game_boy_right";
+    constexpr const char* qt_settings_keys_game_boy_a                       = "keys/game_boy_a";
+    constexpr const char* qt_settings_keys_game_boy_b                       = "keys/game_boy_b";
+    constexpr const char* qt_settings_keys_game_boy_start                   = "keys/game_boy_start";
+    constexpr const char* qt_settings_keys_game_boy_select                  = "keys/game_boy_select";
     constexpr const char* qt_settings_keys_video_toggle_filter_chain        = "keys/video_toggle_filter_chain";
     constexpr const char* qt_settings_keys_video_toggle_bilinear_filter     = "keys/video_toggle_bilinear_filter";
     constexpr const char* qt_settings_keys_video_cycle_frames_to_blend      = "keys/video_cycle_frames_to_blend";
@@ -71,14 +71,14 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
     : QWidget(parent, flags),
       m_user_value_store(std::move(user_value_store)),
 
-      m_category_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_down, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_left, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_right, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_a, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_b, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_start, "Gameboy buttons"),
-                          std::pair<qt_key_event, const char*>(qt_key_event::gb_select, "Gameboy buttons"),
+      m_category_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_down, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_left, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_right, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_a, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_b, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_start, "Game Boy buttons"),
+                          std::pair<qt_key_event, const char*>(qt_key_event::gb_select, "Game Boy buttons"),
 
                           std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, "video settings"),
                           std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, "video settings"),
@@ -111,14 +111,14 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
                        std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_pause_emulator, "toggle pause emulator"),
                        std::pair<qt_key_event, const char*>(qt_key_event::misc_toggle_synchronize_emulator, "toggle synchronize emulator clock")}),
 
-      m_event_setting_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, qt_settings_keys_gameboy_up),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_down, qt_settings_keys_gameboy_down),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_left, qt_settings_keys_gameboy_left),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_right, qt_settings_keys_gameboy_right),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_a, qt_settings_keys_gameboy_a),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_b, qt_settings_keys_gameboy_b),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_start, qt_settings_keys_gameboy_start),
-                               std::pair<qt_key_event, const char*>(qt_key_event::gb_select, qt_settings_keys_gameboy_select),
+      m_event_setting_strings({std::pair<qt_key_event, const char*>(qt_key_event::gb_up, qt_settings_keys_game_boy_up),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_down, qt_settings_keys_game_boy_down),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_left, qt_settings_keys_game_boy_left),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_right, qt_settings_keys_game_boy_right),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_a, qt_settings_keys_game_boy_a),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_b, qt_settings_keys_game_boy_b),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_start, qt_settings_keys_game_boy_start),
+                               std::pair<qt_key_event, const char*>(qt_key_event::gb_select, qt_settings_keys_game_boy_select),
 
                                std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_filter_chain, qt_settings_keys_video_toggle_filter_chain),
                                std::pair<qt_key_event, const char*>(qt_key_event::video_toggle_bilinear_filter, qt_settings_keys_video_toggle_bilinear_filter),
@@ -201,23 +201,23 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
           Qt::Key_Z,
       })
 {
-    // Gameboy keys
+    // Game Boy keys
 
-    auto* gameboy_keys_layout = new QGridLayout;
-    add_key_widgets(gameboy_keys_layout, 0, qt_key_event::gb_up, Qt::Key_Up);
-    add_key_widgets(gameboy_keys_layout, 1, qt_key_event::gb_down, Qt::Key_Down);
-    add_key_widgets(gameboy_keys_layout, 2, qt_key_event::gb_left, Qt::Key_Left);
-    add_key_widgets(gameboy_keys_layout, 3, qt_key_event::gb_right, Qt::Key_Right);
-    gameboy_keys_layout->addItem(new QSpacerItem(1, qt_settings_element_spacing), 4, 0);
-    add_key_widgets(gameboy_keys_layout, 5, qt_key_event::gb_a, Qt::Key_A);
-    add_key_widgets(gameboy_keys_layout, 6, qt_key_event::gb_b, Qt::Key_S);
-    gameboy_keys_layout->addItem(new QSpacerItem(1, qt_settings_element_spacing), 7, 0);
-    add_key_widgets(gameboy_keys_layout, 8, qt_key_event::gb_start, Qt::Key_Space);
-    add_key_widgets(gameboy_keys_layout, 9, qt_key_event::gb_select, Qt::Key_Return);
+    auto* game_boy_keys_layout = new QGridLayout;
+    add_key_widgets(game_boy_keys_layout, 0, qt_key_event::gb_up, Qt::Key_Up);
+    add_key_widgets(game_boy_keys_layout, 1, qt_key_event::gb_down, Qt::Key_Down);
+    add_key_widgets(game_boy_keys_layout, 2, qt_key_event::gb_left, Qt::Key_Left);
+    add_key_widgets(game_boy_keys_layout, 3, qt_key_event::gb_right, Qt::Key_Right);
+    game_boy_keys_layout->addItem(new QSpacerItem(1, qt_settings_element_spacing), 4, 0);
+    add_key_widgets(game_boy_keys_layout, 5, qt_key_event::gb_a, Qt::Key_A);
+    add_key_widgets(game_boy_keys_layout, 6, qt_key_event::gb_b, Qt::Key_S);
+    game_boy_keys_layout->addItem(new QSpacerItem(1, qt_settings_element_spacing), 7, 0);
+    add_key_widgets(game_boy_keys_layout, 8, qt_key_event::gb_start, Qt::Key_Space);
+    add_key_widgets(game_boy_keys_layout, 9, qt_key_event::gb_select, Qt::Key_Return);
 
-    const char* gameboy_cagegory   = m_category_strings.value(qt_key_event::gb_up);
-    auto*       gameboy_keys_group = new QGroupBox(gameboy_cagegory);
-    gameboy_keys_group->setLayout(gameboy_keys_layout);
+    const char* game_boy_category   = m_category_strings.value(qt_key_event::gb_up);
+    auto*       game_boy_keys_group = new QGroupBox(game_boy_category);
+    game_boy_keys_group->setLayout(game_boy_keys_layout);
 
     // video keys
 
@@ -226,8 +226,8 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
     add_key_widgets(video_keys_layout, 1, qt_key_event::video_toggle_bilinear_filter, Qt::Key_F3);
     add_key_widgets(video_keys_layout, 2, qt_key_event::video_cycle_frames_to_blend, Qt::Key_F4);
 
-    const char* video_cagegory   = m_category_strings.value(qt_key_event::video_toggle_filter_chain);
-    auto*       video_keys_group = new QGroupBox(video_cagegory);
+    const char* video_category   = m_category_strings.value(qt_key_event::video_toggle_filter_chain);
+    auto*       video_keys_group = new QGroupBox(video_category);
     video_keys_group->setLayout(video_keys_layout);
 
     // audio keys
@@ -237,8 +237,8 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
     add_key_widgets(audio_keys_layout, 1, qt_key_event::audio_increase_volume, Qt::Key_PageUp);
     add_key_widgets(audio_keys_layout, 2, qt_key_event::audio_decrease_volume, Qt::Key_PageDown);
 
-    const char* audio_cagegory   = m_category_strings.value(qt_key_event::audio_toggle_mute);
-    auto*       audio_keys_group = new QGroupBox(audio_cagegory);
+    const char* audio_category   = m_category_strings.value(qt_key_event::audio_toggle_mute);
+    auto*       audio_keys_group = new QGroupBox(audio_category);
     audio_keys_group->setLayout(audio_keys_layout);
 
     // miscellaneous keys
@@ -247,8 +247,8 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
     add_key_widgets(misc_keys_layout, 0, qt_key_event::misc_toggle_pause_emulator, Qt::Key_F9);
     add_key_widgets(misc_keys_layout, 1, qt_key_event::misc_toggle_synchronize_emulator, Qt::Key_F10);
 
-    const char* misc_cagegory   = m_category_strings.value(qt_key_event::misc_toggle_pause_emulator);
-    auto*       misc_keys_group = new QGroupBox(misc_cagegory);
+    const char* misc_category   = m_category_strings.value(qt_key_event::misc_toggle_pause_emulator);
+    auto*       misc_keys_group = new QGroupBox(misc_category);
     misc_keys_group->setLayout(misc_keys_layout);
 
     // create main layout
@@ -256,7 +256,7 @@ age::qt_settings_keys::qt_settings_keys(QSharedPointer<qt_user_value_store> user
     auto* layout = new QGridLayout;
     layout->setContentsMargins(qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin, qt_settings_layout_margin);
     layout->setSpacing(qt_settings_layout_spacing);
-    layout->addWidget(gameboy_keys_group, 0, 0, 3, 1);
+    layout->addWidget(game_boy_keys_group, 0, 0, 3, 1);
     layout->addWidget(video_keys_group, 0, 1);
     layout->addWidget(audio_keys_group, 1, 1);
     layout->addWidget(misc_keys_group, 2, 1);

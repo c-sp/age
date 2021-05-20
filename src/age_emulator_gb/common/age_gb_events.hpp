@@ -73,7 +73,7 @@ namespace age
 
         const gb_clock& m_clock;
 
-        std::array<int, to_integral(gb_event::none)> m_active_events;
+        std::array<int, to_underlying(gb_event::none)> m_active_events{};
 
         static_assert(sizeof(int) == 4, "gb_events requires int to be exactly 32 bits wide");
         std::vector<scheduled_event> m_events;

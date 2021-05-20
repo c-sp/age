@@ -52,7 +52,7 @@ namespace age
         //!
         //! \brief Get the ring buffer's capacity.
         //!
-        //! \return The ring buffer's capcity.
+        //! \return The ring buffer's capacity.
         //! This is the maximal number of {@link pcm_sample}s this ring buffer can store.
         //! The capacity is guaranteed to be greater than or equal to 1.
         //!

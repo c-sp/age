@@ -160,7 +160,7 @@ age::qt_main_window::~qt_main_window()
 
 //---------------------------------------------------------
 //
-//   overriden widget methods
+//   overridden widget methods
 //
 //---------------------------------------------------------
 
@@ -286,7 +286,7 @@ age::qt_key_event age::qt_main_window::get_event_for_key(int key)
 void age::qt_main_window::open_file(gb_hardware hardware)
 {
     QString     file_name;
-    QFileDialog dialog(this, "Open file", m_settings->get_open_file_dialog_directory(), "Gameboy files (*.gb *.gbc)");
+    QFileDialog dialog(this, "Open file", m_settings->get_open_file_dialog_directory(), "Game Boy files (*.gb *.gbc)");
     dialog.setFileMode(QFileDialog::ExistingFile);
 
     if (dialog.exec())

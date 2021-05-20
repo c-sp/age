@@ -68,7 +68,7 @@ namespace age
         gb_bus&                  m_bus;
 
         // The following values store the results of arithmetic/logical
-        // Gameboy CPU operations.
+        // Game Boy CPU operations.
         // Storing them as int16_t would be sufficient,
         // but we use int for better code readability (no casts required).
         int m_zero_indicator  = 0;

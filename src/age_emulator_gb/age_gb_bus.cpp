@@ -20,11 +20,7 @@
 
 #include "age_gb_bus.hpp"
 
-#if 0
-#define LOG(x) AGE_GB_CLOCK_LOG(x)
-#else
-#define LOG(x)
-#endif
+
 
 namespace
 {
@@ -167,7 +163,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     else if ((address & 0x0180) != 0x0100)
     {
         handle_events();
-        result = (to_integral(gb_io_port::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
+        result = (to_underlying(gb_io_port::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
     }
     // 0xFF00 - 0xFF7F : i/o ports & wave ram
     else
@@ -176,33 +172,33 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         // ports & wave ram
         switch (address)
         {
-            case to_integral(gb_io_port::p1): result = m_joypad.read_p1(); break;
-            case to_integral(gb_io_port::sb): result = m_serial.read_sb(); break;
-            case to_integral(gb_io_port::sc): result = m_serial.read_sc(); break;
+            case to_underlying(gb_io_port::p1): result = m_joypad.read_p1(); break;
+            case to_underlying(gb_io_port::sb): result = m_serial.read_sb(); break;
+            case to_underlying(gb_io_port::sc): result = m_serial.read_sc(); break;
 
-            case to_integral(gb_io_port::div): result = m_div.read_div(); break;
-            case to_integral(gb_io_port::tima): result = m_timer.read_tima(); break;
-            case to_integral(gb_io_port::tma): result = m_timer.read_tma(); break;
-            case to_integral(gb_io_port::tac): result = m_timer.read_tac(); break;
+            case to_underlying(gb_io_port::div): result = m_div.read_div(); break;
+            case to_underlying(gb_io_port::tima): result = m_timer.read_tima(); break;
+            case to_underlying(gb_io_port::tma): result = m_timer.read_tma(); break;
+            case to_underlying(gb_io_port::tac): result = m_timer.read_tac(); break;
 
-            case to_integral(gb_io_port::if_): result = m_interrupts.read_if(); break;
+            case to_underlying(gb_io_port::if_): result = m_interrupts.read_if(); break;
 
-            case to_integral(gb_io_port::nr10): result = m_sound.read_nr10(); break;
-            case to_integral(gb_io_port::nr11): result = m_sound.read_nr11(); break;
-            case to_integral(gb_io_port::nr12): result = m_sound.read_nr12(); break;
-            case to_integral(gb_io_port::nr14): result = m_sound.read_nr14(); break;
-            case to_integral(gb_io_port::nr21): result = m_sound.read_nr21(); break;
-            case to_integral(gb_io_port::nr22): result = m_sound.read_nr22(); break;
-            case to_integral(gb_io_port::nr24): result = m_sound.read_nr24(); break;
-            case to_integral(gb_io_port::nr30): result = m_sound.read_nr30(); break;
-            case to_integral(gb_io_port::nr32): result = m_sound.read_nr32(); break;
-            case to_integral(gb_io_port::nr34): result = m_sound.read_nr34(); break;
-            case to_integral(gb_io_port::nr42): result = m_sound.read_nr42(); break;
-            case to_integral(gb_io_port::nr43): result = m_sound.read_nr43(); break;
-            case to_integral(gb_io_port::nr44): result = m_sound.read_nr44(); break;
-            case to_integral(gb_io_port::nr50): result = m_sound.read_nr50(); break;
-            case to_integral(gb_io_port::nr51): result = m_sound.read_nr51(); break;
-            case to_integral(gb_io_port::nr52): result = m_sound.read_nr52(); break;
+            case to_underlying(gb_io_port::nr10): result = m_sound.read_nr10(); break;
+            case to_underlying(gb_io_port::nr11): result = m_sound.read_nr11(); break;
+            case to_underlying(gb_io_port::nr12): result = m_sound.read_nr12(); break;
+            case to_underlying(gb_io_port::nr14): result = m_sound.read_nr14(); break;
+            case to_underlying(gb_io_port::nr21): result = m_sound.read_nr21(); break;
+            case to_underlying(gb_io_port::nr22): result = m_sound.read_nr22(); break;
+            case to_underlying(gb_io_port::nr24): result = m_sound.read_nr24(); break;
+            case to_underlying(gb_io_port::nr30): result = m_sound.read_nr30(); break;
+            case to_underlying(gb_io_port::nr32): result = m_sound.read_nr32(); break;
+            case to_underlying(gb_io_port::nr34): result = m_sound.read_nr34(); break;
+            case to_underlying(gb_io_port::nr42): result = m_sound.read_nr42(); break;
+            case to_underlying(gb_io_port::nr43): result = m_sound.read_nr43(); break;
+            case to_underlying(gb_io_port::nr44): result = m_sound.read_nr44(); break;
+            case to_underlying(gb_io_port::nr50): result = m_sound.read_nr50(); break;
+            case to_underlying(gb_io_port::nr51): result = m_sound.read_nr51(); break;
+            case to_underlying(gb_io_port::nr52): result = m_sound.read_nr52(); break;
 
             case 0xFF30:
             case 0xFF31:
@@ -223,20 +219,20 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
                 result = m_sound.read_wave_ram(address - 0xFF30);
                 break;
 
-            case to_integral(gb_io_port::lcdc): result = m_lcd.read_lcdc(); break;
-            case to_integral(gb_io_port::stat): result = m_lcd.read_stat(); break;
-            case to_integral(gb_io_port::scy): result = m_lcd.read_scy(); break;
-            case to_integral(gb_io_port::scx): result = m_lcd.read_scx(); break;
-            case to_integral(gb_io_port::ly): result = m_lcd.read_ly(); break;
-            case to_integral(gb_io_port::lyc): result = m_lcd.read_lyc(); break;
-            case to_integral(gb_io_port::dma): result = m_oam_dma_byte; break;
-            case to_integral(gb_io_port::bgp): result = m_lcd.read_bgp(); break;
-            case to_integral(gb_io_port::obp0): result = m_lcd.read_obp0(); break;
-            case to_integral(gb_io_port::obp1): result = m_lcd.read_obp1(); break;
-            case to_integral(gb_io_port::wy): result = m_lcd.read_wy(); break;
-            case to_integral(gb_io_port::wx): result = m_lcd.read_wx(); break;
+            case to_underlying(gb_io_port::lcdc): result = m_lcd.read_lcdc(); break;
+            case to_underlying(gb_io_port::stat): result = m_lcd.read_stat(); break;
+            case to_underlying(gb_io_port::scy): result = m_lcd.read_scy(); break;
+            case to_underlying(gb_io_port::scx): result = m_lcd.read_scx(); break;
+            case to_underlying(gb_io_port::ly): result = m_lcd.read_ly(); break;
+            case to_underlying(gb_io_port::lyc): result = m_lcd.read_lyc(); break;
+            case to_underlying(gb_io_port::dma): result = m_oam_dma_byte; break;
+            case to_underlying(gb_io_port::bgp): result = m_lcd.read_bgp(); break;
+            case to_underlying(gb_io_port::obp0): result = m_lcd.read_obp0(); break;
+            case to_underlying(gb_io_port::obp1): result = m_lcd.read_obp1(); break;
+            case to_underlying(gb_io_port::wy): result = m_lcd.read_wy(); break;
+            case to_underlying(gb_io_port::wx): result = m_lcd.read_wx(); break;
 
-            case to_integral(gb_io_port::ie): result = m_interrupts.read_ie(); break;
+            case to_underlying(gb_io_port::ie): result = m_interrupts.read_ie(); break;
 
             default: break;
         }
@@ -246,21 +242,21 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::key1): result = m_clock.read_key1(); break;
-                case to_integral(gb_io_port::vbk): result = m_memory.read_vbk(); break;
-                case to_integral(gb_io_port::hdma5): result = m_hdma5; break;
-                case to_integral(gb_io_port::rp): result = m_rp; break;
-                case to_integral(gb_io_port::bcps): result = m_lcd.read_bcps(); break;
-                case to_integral(gb_io_port::bcpd): result = m_lcd.read_bcpd(); break;
-                case to_integral(gb_io_port::ocps): result = m_lcd.read_ocps(); break;
-                case to_integral(gb_io_port::ocpd): result = m_lcd.read_ocpd(); break;
-                case to_integral(gb_io_port::un6c): result = m_un6c; break;
-                case to_integral(gb_io_port::svbk): result = m_memory.read_svbk(); break;
-                case to_integral(gb_io_port::un72): result = m_un72; break;
-                case to_integral(gb_io_port::un73): result = m_un73; break;
-                case to_integral(gb_io_port::un75): result = m_un75; break;
-                case to_integral(gb_io_port::un76):
-                case to_integral(gb_io_port::un77): result = 0; break;
+                case to_underlying(gb_io_port::key1): result = m_clock.read_key1(); break;
+                case to_underlying(gb_io_port::vbk): result = m_memory.read_vbk(); break;
+                case to_underlying(gb_io_port::hdma5): result = m_hdma5; break;
+                case to_underlying(gb_io_port::rp): result = m_rp; break;
+                case to_underlying(gb_io_port::bcps): result = m_lcd.read_bcps(); break;
+                case to_underlying(gb_io_port::bcpd): result = m_lcd.read_bcpd(); break;
+                case to_underlying(gb_io_port::ocps): result = m_lcd.read_ocps(); break;
+                case to_underlying(gb_io_port::ocpd): result = m_lcd.read_ocpd(); break;
+                case to_underlying(gb_io_port::un6c): result = m_un6c; break;
+                case to_underlying(gb_io_port::svbk): result = m_memory.read_svbk(); break;
+                case to_underlying(gb_io_port::un72): result = m_un72; break;
+                case to_underlying(gb_io_port::un73): result = m_un73; break;
+                case to_underlying(gb_io_port::un75): result = m_un75; break;
+                case to_underlying(gb_io_port::un76):
+                case to_underlying(gb_io_port::un77): result = 0; break;
 
                 default: break;
             }
@@ -271,14 +267,14 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::vbk): result = 0xFE; break;
-                case to_integral(gb_io_port::bcps): result = 0xC8; break;
-                case to_integral(gb_io_port::ocps): result = 0xD0; break;
-                case to_integral(gb_io_port::un72): result = m_un72; break;
-                case to_integral(gb_io_port::un73): result = m_un73; break;
-                case to_integral(gb_io_port::un75): result = m_un75; break;
-                case to_integral(gb_io_port::un76):
-                case to_integral(gb_io_port::un77): result = 0; break;
+                case to_underlying(gb_io_port::vbk): result = 0xFE; break;
+                case to_underlying(gb_io_port::bcps): result = 0xC8; break;
+                case to_underlying(gb_io_port::ocps): result = 0xD0; break;
+                case to_underlying(gb_io_port::un72): result = m_un72; break;
+                case to_underlying(gb_io_port::un73): result = m_un73; break;
+                case to_underlying(gb_io_port::un75): result = m_un75; break;
+                case to_underlying(gb_io_port::un76):
+                case to_underlying(gb_io_port::un77): result = 0; break;
 
                 default: break;
             }
@@ -326,7 +322,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFEA0 - 0xFFFF : high ram & IE
     else if ((address & 0x0180) != 0x0100)
     {
-        if (to_integral(gb_io_port::ie) == address)
+        if (to_underlying(gb_io_port::ie) == address)
         {
             handle_events();
             m_interrupts.write_ie(byte);
@@ -342,44 +338,44 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         handle_events();
         switch (address)
         {
-            case to_integral(gb_io_port::p1): m_joypad.write_p1(byte); break;
-            case to_integral(gb_io_port::sb): m_serial.write_sb(byte); break;
-            case to_integral(gb_io_port::sc): m_serial.write_sc(byte); break;
+            case to_underlying(gb_io_port::p1): m_joypad.write_p1(byte); break;
+            case to_underlying(gb_io_port::sb): m_serial.write_sb(byte); break;
+            case to_underlying(gb_io_port::sc): m_serial.write_sc(byte); break;
 
-            case to_integral(gb_io_port::div): {
+            case to_underlying(gb_io_port::div): {
                 int old_div_offset = m_div.write_div();
                 m_serial.on_div_reset(old_div_offset);
                 m_timer.on_div_reset(old_div_offset);
             }
             break;
 
-            case to_integral(gb_io_port::tima): m_timer.write_tima(byte); break;
-            case to_integral(gb_io_port::tma): m_timer.write_tma(byte); break;
-            case to_integral(gb_io_port::tac): m_timer.write_tac(byte); break;
+            case to_underlying(gb_io_port::tima): m_timer.write_tima(byte); break;
+            case to_underlying(gb_io_port::tma): m_timer.write_tma(byte); break;
+            case to_underlying(gb_io_port::tac): m_timer.write_tac(byte); break;
 
-            case to_integral(gb_io_port::if_): m_interrupts.write_if(byte); break;
+            case to_underlying(gb_io_port::if_): m_interrupts.write_if(byte); break;
 
-            case to_integral(gb_io_port::nr10): m_sound.write_nr10(byte); break;
-            case to_integral(gb_io_port::nr11): m_sound.write_nr11(byte); break;
-            case to_integral(gb_io_port::nr12): m_sound.write_nr12(byte); break;
-            case to_integral(gb_io_port::nr13): m_sound.write_nr13(byte); break;
-            case to_integral(gb_io_port::nr14): m_sound.write_nr14(byte); break;
-            case to_integral(gb_io_port::nr21): m_sound.write_nr21(byte); break;
-            case to_integral(gb_io_port::nr22): m_sound.write_nr22(byte); break;
-            case to_integral(gb_io_port::nr23): m_sound.write_nr23(byte); break;
-            case to_integral(gb_io_port::nr24): m_sound.write_nr24(byte); break;
-            case to_integral(gb_io_port::nr30): m_sound.write_nr30(byte); break;
-            case to_integral(gb_io_port::nr31): m_sound.write_nr31(byte); break;
-            case to_integral(gb_io_port::nr32): m_sound.write_nr32(byte); break;
-            case to_integral(gb_io_port::nr33): m_sound.write_nr33(byte); break;
-            case to_integral(gb_io_port::nr34): m_sound.write_nr34(byte); break;
-            case to_integral(gb_io_port::nr41): m_sound.write_nr41(byte); break;
-            case to_integral(gb_io_port::nr42): m_sound.write_nr42(byte); break;
-            case to_integral(gb_io_port::nr43): m_sound.write_nr43(byte); break;
-            case to_integral(gb_io_port::nr44): m_sound.write_nr44(byte); break;
-            case to_integral(gb_io_port::nr50): m_sound.write_nr50(byte); break;
-            case to_integral(gb_io_port::nr51): m_sound.write_nr51(byte); break;
-            case to_integral(gb_io_port::nr52): m_sound.write_nr52(byte); break;
+            case to_underlying(gb_io_port::nr10): m_sound.write_nr10(byte); break;
+            case to_underlying(gb_io_port::nr11): m_sound.write_nr11(byte); break;
+            case to_underlying(gb_io_port::nr12): m_sound.write_nr12(byte); break;
+            case to_underlying(gb_io_port::nr13): m_sound.write_nr13(byte); break;
+            case to_underlying(gb_io_port::nr14): m_sound.write_nr14(byte); break;
+            case to_underlying(gb_io_port::nr21): m_sound.write_nr21(byte); break;
+            case to_underlying(gb_io_port::nr22): m_sound.write_nr22(byte); break;
+            case to_underlying(gb_io_port::nr23): m_sound.write_nr23(byte); break;
+            case to_underlying(gb_io_port::nr24): m_sound.write_nr24(byte); break;
+            case to_underlying(gb_io_port::nr30): m_sound.write_nr30(byte); break;
+            case to_underlying(gb_io_port::nr31): m_sound.write_nr31(byte); break;
+            case to_underlying(gb_io_port::nr32): m_sound.write_nr32(byte); break;
+            case to_underlying(gb_io_port::nr33): m_sound.write_nr33(byte); break;
+            case to_underlying(gb_io_port::nr34): m_sound.write_nr34(byte); break;
+            case to_underlying(gb_io_port::nr41): m_sound.write_nr41(byte); break;
+            case to_underlying(gb_io_port::nr42): m_sound.write_nr42(byte); break;
+            case to_underlying(gb_io_port::nr43): m_sound.write_nr43(byte); break;
+            case to_underlying(gb_io_port::nr44): m_sound.write_nr44(byte); break;
+            case to_underlying(gb_io_port::nr50): m_sound.write_nr50(byte); break;
+            case to_underlying(gb_io_port::nr51): m_sound.write_nr51(byte); break;
+            case to_underlying(gb_io_port::nr52): m_sound.write_nr52(byte); break;
 
             case 0xFF30:
             case 0xFF31:
@@ -400,18 +396,18 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
                 m_sound.write_wave_ram(address - 0xFF30, byte);
                 break;
 
-            case to_integral(gb_io_port::lcdc): m_lcd.write_lcdc(byte); break;
-            case to_integral(gb_io_port::stat): m_lcd.write_stat(byte); break;
-            case to_integral(gb_io_port::scy): m_lcd.write_scy(byte); break;
-            case to_integral(gb_io_port::scx): m_lcd.write_scx(byte); break;
-            case to_integral(gb_io_port::ly): break; // cannot be written
-            case to_integral(gb_io_port::lyc): m_lcd.write_lyc(byte); break;
-            case to_integral(gb_io_port::dma): write_dma(byte); break;
-            case to_integral(gb_io_port::bgp): m_lcd.write_bgp(byte); break;
-            case to_integral(gb_io_port::obp0): m_lcd.write_obp0(byte); break;
-            case to_integral(gb_io_port::obp1): m_lcd.write_obp1(byte); break;
-            case to_integral(gb_io_port::wy): m_lcd.write_wy(byte); break;
-            case to_integral(gb_io_port::wx): m_lcd.write_wx(byte); break;
+            case to_underlying(gb_io_port::lcdc): m_lcd.write_lcdc(byte); break;
+            case to_underlying(gb_io_port::stat): m_lcd.write_stat(byte); break;
+            case to_underlying(gb_io_port::scy): m_lcd.write_scy(byte); break;
+            case to_underlying(gb_io_port::scx): m_lcd.write_scx(byte); break;
+            case to_underlying(gb_io_port::ly): break; // cannot be written
+            case to_underlying(gb_io_port::lyc): m_lcd.write_lyc(byte); break;
+            case to_underlying(gb_io_port::dma): write_dma(byte); break;
+            case to_underlying(gb_io_port::bgp): m_lcd.write_bgp(byte); break;
+            case to_underlying(gb_io_port::obp0): m_lcd.write_obp0(byte); break;
+            case to_underlying(gb_io_port::obp1): m_lcd.write_obp1(byte); break;
+            case to_underlying(gb_io_port::wy): m_lcd.write_wy(byte); break;
+            case to_underlying(gb_io_port::wx): m_lcd.write_wx(byte); break;
 
             default: break;
         }
@@ -421,23 +417,23 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::key1): m_clock.write_key1(byte); break;
-                case to_integral(gb_io_port::vbk): m_memory.write_vbk(byte); break;
-                case to_integral(gb_io_port::hdma1): m_dma_source = (m_dma_source & 0xFF) + (byte << 8); break;
-                case to_integral(gb_io_port::hdma2): m_dma_source = (m_dma_source & 0xFF00) + (byte & 0xF0); break;
-                case to_integral(gb_io_port::hdma3): m_dma_destination = (m_dma_destination & 0xFF) + (byte << 8); break;
-                case to_integral(gb_io_port::hdma4): m_dma_destination = (m_dma_destination & 0xFF00) + (byte & 0xF0); break;
-                case to_integral(gb_io_port::hdma5): write_hdma5(byte); break;
-                case to_integral(gb_io_port::rp): m_rp = byte | 0x3E; break;
-                case to_integral(gb_io_port::bcps): m_lcd.write_bcps(byte); break;
-                case to_integral(gb_io_port::bcpd): m_lcd.write_bcpd(byte); break;
-                case to_integral(gb_io_port::ocps): m_lcd.write_ocps(byte); break;
-                case to_integral(gb_io_port::ocpd): m_lcd.write_ocpd(byte); break;
-                case to_integral(gb_io_port::un6c): m_un6c = byte | 0xFE; break;
-                case to_integral(gb_io_port::svbk): m_memory.write_svbk(byte); break;
-                case to_integral(gb_io_port::un72): m_un72 = byte; break;
-                case to_integral(gb_io_port::un73): m_un73 = byte; break;
-                case to_integral(gb_io_port::un75): m_un75 = byte | 0x8F; break;
+                case to_underlying(gb_io_port::key1): m_clock.write_key1(byte); break;
+                case to_underlying(gb_io_port::vbk): m_memory.write_vbk(byte); break;
+                case to_underlying(gb_io_port::hdma1): m_dma_source = (m_dma_source & 0xFF) + (byte << 8); break;
+                case to_underlying(gb_io_port::hdma2): m_dma_source = (m_dma_source & 0xFF00) + (byte & 0xF0); break;
+                case to_underlying(gb_io_port::hdma3): m_dma_destination = (m_dma_destination & 0xFF) + (byte << 8); break;
+                case to_underlying(gb_io_port::hdma4): m_dma_destination = (m_dma_destination & 0xFF00) + (byte & 0xF0); break;
+                case to_underlying(gb_io_port::hdma5): write_hdma5(byte); break;
+                case to_underlying(gb_io_port::rp): m_rp = byte | 0x3E; break;
+                case to_underlying(gb_io_port::bcps): m_lcd.write_bcps(byte); break;
+                case to_underlying(gb_io_port::bcpd): m_lcd.write_bcpd(byte); break;
+                case to_underlying(gb_io_port::ocps): m_lcd.write_ocps(byte); break;
+                case to_underlying(gb_io_port::ocpd): m_lcd.write_ocpd(byte); break;
+                case to_underlying(gb_io_port::un6c): m_un6c = byte | 0xFE; break;
+                case to_underlying(gb_io_port::svbk): m_memory.write_svbk(byte); break;
+                case to_underlying(gb_io_port::un72): m_un72 = byte; break;
+                case to_underlying(gb_io_port::un73): m_un73 = byte; break;
+                case to_underlying(gb_io_port::un75): m_un75 = byte | 0x8F; break;
 
                 default: break;
             }
@@ -448,9 +444,9 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         {
             switch (address)
             {
-                case to_integral(gb_io_port::un72): m_un72 = byte; break;
-                case to_integral(gb_io_port::un73): m_un73 = byte; break;
-                case to_integral(gb_io_port::un75): m_un75 = byte | 0x8F; break;
+                case to_underlying(gb_io_port::un72): m_un72 = byte; break;
+                case to_underlying(gb_io_port::un73): m_un73 = byte; break;
+                case to_underlying(gb_io_port::un75): m_un75 = byte | 0x8F; break;
 
                 default: break;
             }
@@ -543,10 +539,9 @@ void age::gb_bus::handle_dma()
     uint8_t dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
 
     // calculate number of bytes to copy and update remaining DMA length
-    int bytes = m_hdma_active ? 0x10 : dma_length * 0x10;
+    unsigned bytes = m_hdma_active ? 0x10 : dma_length * 0x10;
     AGE_ASSERT(bytes <= 0x800)
-    AGE_ASSERT((bytes & 0xF) == 0)
-    LOG("DMA copying " << bytes << " bytes")
+    AGE_ASSERT((bytes & 0xFU) == 0)
 
     //
     // verified by gambatte tests
@@ -604,7 +599,6 @@ void age::gb_bus::handle_dma()
     uint8_t remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
     if (remaining_dma_length == 0x7F)
     {
-        LOG("DMA finished")
         m_hdma_active = false;
         AGE_ASSERT(m_events.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle)
     }
@@ -626,7 +620,7 @@ bool age::gb_bus::during_dma() const
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CLOCK(m_oam_dma_last_cycle, clock_cycle_offset)
+    gb_set_back_clock_cycle(m_oam_dma_last_cycle, clock_cycle_offset);
 }
 
 
@@ -680,7 +674,6 @@ void age::gb_bus::write_hdma5(uint8_t value)
     {
         m_hdma_active = true;
         m_hdma5 |= gb_hdma_start;
-        LOG("HDMA activated")
     }
     else
     {
@@ -688,7 +681,6 @@ void age::gb_bus::write_hdma5(uint8_t value)
         if (!m_hdma_active)
         {
             m_during_dma = true;
-            LOG("GDMA activated")
         }
         // HDMA running: stop it
         else
@@ -718,11 +710,8 @@ void age::gb_bus::write_hdma5(uint8_t value)
             {
                 m_events.remove_event(gb_event::start_hdma);
             }
-            LOG("HDMA deactivated")
         }
     }
-
-    LOG("HDMA5 = " << AGE_LOG_DEC(m_hdma5))
 }
 
 

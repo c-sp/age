@@ -41,8 +41,8 @@ age::gb_lcd_scanline::gb_lcd_scanline(const gb_device& device,
 
 void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_SET_BACK_CLOCK(m_clk_frame_start, clock_cycle_offset)
-    AGE_GB_SET_BACK_CLOCK(m_clk_scanline_start, clock_cycle_offset)
+    gb_set_back_clock_cycle(m_clk_frame_start, clock_cycle_offset);
+    gb_set_back_clock_cycle(m_clk_scanline_start, clock_cycle_offset);
 }
 
 
