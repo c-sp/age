@@ -249,7 +249,7 @@ void age::gb_serial::set_back_clock(int clock_cycle_offset)
 
 
 
-void age::gb_serial::on_div_reset(int old_div_offset)
+void age::gb_serial::on_div_reset()
 {
     update_state();
 
@@ -264,44 +264,21 @@ void age::gb_serial::on_div_reset(int old_div_offset)
     int clks_per_step = 1 << (m_sio_clock_shift - 1);
     AGE_ASSERT(clks_per_step > 0)
 
-    // identify the "trigger bit":
-    // this clock bit goes low 16 times during serial transfer
-    int trigger_bit = 1 << (m_sio_clock_shift - 2);
+    // calculate potential immediate serial transfer step by div reset
+    auto reset_details = m_div.calculate_reset_details(clks_per_step);
 
-    // calculate old and new "serial io clock" as we have to compare them
-    // to check for the "trigger bit" going low due to DIV reset
-    int current_clk = m_clock.get_clock_cycle();
-    int old_clock   = current_clk + old_div_offset;
-    int new_clock   = current_clk + m_div.get_div_offset();
-
-    int old_next_step = clks_per_step - (old_clock & (clks_per_step - 1));
-    int new_next_step = clks_per_step - (new_clock & (clks_per_step - 1));
-
-    int old_trigger_bit = old_clock & trigger_bit;
-    int new_trigger_bit = new_clock & trigger_bit;
-
-    int clk_adjust = (old_trigger_bit && !new_trigger_bit)
-                         // trigger bit goes low
-                         //      => immediate serial transfer step
-                         //      => serial transfer time shortened
-                         ? -old_next_step
-                         // trigger bit not going low
-                         //      => serial transfer takes longer
-                         : new_next_step - old_next_step;
-
+    int clk_current = m_clock.get_clock_cycle();
     int clk_finished = m_sio_clk_started + (8 << m_sio_clock_shift);
-    AGE_ASSERT(clk_finished > current_clk)
-    clk_finished += clk_adjust;
-    AGE_ASSERT(clk_finished >= current_clk)
+    AGE_ASSERT(clk_finished > clk_current)
+    clk_finished += reset_details.m_clk_adjust;
+    AGE_ASSERT(clk_finished >= clk_current)
 
     AGE_GB_CLOG_SERIAL("serial transfer at DIV reset:")
-    AGE_GB_CLOG_SERIAL("    * old lower clock bits: " << AGE_LOG_HEX16(old_clock & 0xFFFF))
-    AGE_GB_CLOG_SERIAL("    * new lower clock bits: " << AGE_LOG_HEX16(new_clock & 0xFFFF))
-    AGE_GB_CLOG_SERIAL("    * next step (old) in " << old_next_step << " clock cycles")
-    AGE_GB_CLOG_SERIAL("    * next step (new) in " << new_next_step << " clock cycles")
-    AGE_GB_CLOG_SERIAL("    * +/- remaining clock cycles: " << clk_adjust)
+    AGE_GB_CLOG_SERIAL("    * next step (old) in " << reset_details.m_old_next_increment << " clock cycles")
+    AGE_GB_CLOG_SERIAL("    * next step (new) in " << reset_details.m_new_next_increment << " clock cycles")
+    AGE_GB_CLOG_SERIAL("    * +/- remaining clock cycles: " << reset_details.m_clk_adjust)
     AGE_GB_CLOG_SERIAL("    * finish on clock cycle " << clk_finished)
 
-    m_sio_clk_started += clk_adjust;
-    m_events.schedule_event(gb_event::serial_transfer_finished, clk_finished - current_clk);
+    m_sio_clk_started += reset_details.m_clk_adjust;
+    m_events.schedule_event(gb_event::serial_transfer_finished, clk_finished - clk_current);
 }

@@ -30,6 +30,15 @@
 namespace age
 {
 
+    struct gb_div_reset_details
+    {
+        int m_old_next_increment = 0;
+        int m_new_next_increment = 0;
+        int m_clk_adjust         = 0;
+    };
+
+
+
     class gb_div
     {
         AGE_DISABLE_COPY(gb_div);
@@ -37,14 +46,17 @@ namespace age
     public:
         explicit gb_div(const gb_clock& clock);
 
+        [[nodiscard]] gb_div_reset_details calculate_reset_details(int lowest_counter_bit) const;
+
         [[nodiscard]] int get_div_offset() const;
 
         [[nodiscard]] uint8_t read_div() const;
-        int                   write_div();
+        void                  write_div();
 
     private:
         const gb_clock& m_clock;
-        int             m_div_offset = 0; //!< used to re-align DIV to clock on DIV-writes
+        int             m_old_div_offset = 0; //!< clock offset before the last reset
+        int             m_div_offset     = 0; //!< used to re-align DIV to clock on DIV-writes
     };
 
 } // namespace age

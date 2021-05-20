@@ -54,7 +54,7 @@ namespace age
 
         void trigger_interrupt();
         void update_state();
-        void on_div_reset(int old_div_offset);
+        void on_div_reset();
         void set_back_clock(int clock_cycle_offset);
 
     private:
