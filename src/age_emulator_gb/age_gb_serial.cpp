@@ -256,6 +256,7 @@ void age::gb_serial::on_div_reset()
     // no transfer => nothing to do here
     if (m_sio_state != gb_sio_state::transfer_internal_clock)
     {
+        AGE_GB_CLOG_SERIAL("serial transfer not active at DIV reset => nothing to do")
         return;
     }
     // ongoing transfer => calculate new timing

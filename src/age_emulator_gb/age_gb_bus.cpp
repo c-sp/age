@@ -345,6 +345,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_underlying(gb_io_port::div): {
                 m_div.write_div();
                 m_serial.on_div_reset();
+                m_sound.on_div_reset();
                 m_timer.on_div_reset();
             }
             break;

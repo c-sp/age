@@ -110,6 +110,7 @@ void age::gb_timer::on_div_reset()
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
+        AGE_GB_CLOG_TIMER("timer off at DIV reset => nothing to do")
         return;
     }
     update_timer_state();

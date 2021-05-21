@@ -1292,12 +1292,20 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x00: break; // NOP
 
-        case 0x10:                 // STOP
-            if (m_device.is_cgb()) // only with CGB features activated
+        case 0x10: // STOP
+            // STOP will reset the DIV.
+            // When switching to double speed, the reset is delayed by one machine cycle.
+            //! \todo gambatte test analysis: speedchange_div_* & speedchange2_div_*
+            //! \todo DIV reset delay on STOP: is this always the case?
+            READ_BYTE(m_prefetched_opcode, m_pc);
+            m_bus.write_byte(to_underlying(gb_io_port::div), 0);
+
+            // only with CGB features activated: check for speed change
+            if (m_device.is_cgb())
             {
                 m_clock.trigger_speed_change();
             }
-            break;
+            return;
 
         case 0x2F:
             m_a           = ~m_a;

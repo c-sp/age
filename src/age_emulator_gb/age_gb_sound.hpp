@@ -27,6 +27,7 @@
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
+#include "age_gb_div.hpp"
 #include "age_gb_sound_utilities.hpp"
 #include "common/age_gb_clock.hpp"
 #include "common/age_gb_device.hpp"
@@ -35,6 +36,7 @@
 
 namespace age
 {
+    constexpr int gb_apu_event_clock_cycles = 1 << 13;
 
     using gb_sound_channel1 = gb_length_counter<gb_frequency_sweep<gb_volume_envelope<gb_duty_source>>>;
     using gb_sound_channel2 = gb_length_counter<gb_volume_envelope<gb_duty_source>>;
@@ -48,7 +50,7 @@ namespace age
         AGE_DISABLE_COPY(gb_sound);
 
     public:
-        gb_sound(const gb_clock& clock, bool cgb_features, pcm_vector& samples);
+        gb_sound(const gb_clock& clock, const gb_div& div, bool cgb_features, pcm_vector& samples);
 
         [[nodiscard]] uint8_t read_nr10() const;
         [[nodiscard]] uint8_t read_nr11() const;
@@ -93,23 +95,25 @@ namespace age
         void    write_wave_ram(unsigned offset, uint8_t value);
 
         void update_state();
-        void set_back_clock();
+        void on_div_reset();
+        void set_back_clock(int clock_cycle_offset);
 
 
 
     private:
-        [[nodiscard]] bool inc_period() const;
-        [[nodiscard]] int  get_current_sclk() const;
+        [[nodiscard]] bool should_inc_period() const;
+        [[nodiscard]] bool should_dec_length_counter() const;
         int                apu_event();
-        void               generate_samples(int for_sclk);
+        void               generate_samples(int for_clk);
         void               set_wave_ram_byte(unsigned offset, uint8_t value);
 
         pcm_vector& m_samples;
 
         const gb_clock& m_clock;
+        const gb_div&   m_div;
         const bool      m_cgb;
-        int             m_sclk                      = 0;
-        int             m_sclk_next_apu_event       = 0;
+        int             m_clk_current_state         = 0;
+        int             m_clk_next_apu_event        = 0;
         int8_t          m_next_frame_sequencer_step = 0;
         bool            m_delayed_disable_c1        = false;
         bool            m_skip_frame_sequencer_step = false;

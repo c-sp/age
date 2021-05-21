@@ -32,9 +32,22 @@ namespace age
 
     struct gb_div_reset_details
     {
+        //! the next counter increment aligned with the previous DIV
+        //! (relative to the current clock cycle)
         int m_old_next_increment = 0;
+
+        //! the next counter increment aligned with the current DIV reset
+        //! (relative to the current clock cycle)
         int m_new_next_increment = 0;
-        int m_clk_adjust         = 0;
+
+        //! positive value:
+        //! the next counter increment is delayed by the DIV reset
+        //! (m_new_next_increment - m_old_next_increment).
+        //!
+        //! negative value:
+        //! the DIV reset causes an immediate counter increment
+        //! (-m_old_next_increment).
+        int m_clk_adjust = 0;
     };
 
 

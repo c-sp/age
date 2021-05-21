@@ -27,6 +27,8 @@ namespace
 {
     constexpr char opt_acid2        = 'a';
     constexpr char opt_blargg       = 'b';
+    constexpr char opt_cgb_only     = 'c';
+    constexpr char opt_dmg_only     = 'd';
     constexpr char opt_print_failed = 'f';
     constexpr char opt_gambatte     = 'g';
     constexpr char opt_help         = 'h';
@@ -36,10 +38,12 @@ namespace
     constexpr char opt_whitelist    = 'w';
     constexpr char opt_blacklist    = 'x';
 
-    constexpr const char* optstring = ":abfghmnpw:x:";
+    constexpr const char* optstring = ":abcdfghmnpw:x:";
 
     constexpr const char* opt_long_acid2        = "acid2";
     constexpr const char* opt_long_blargg       = "blargg";
+    constexpr const char* opt_long_cgb_only     = "cgb-only";
+    constexpr const char* opt_long_dmg_only     = "dmg-only";
     constexpr const char* opt_long_print_failed = "print-failed";
     constexpr const char* opt_long_gambatte     = "gambatte";
     constexpr const char* opt_long_help         = "help";
@@ -66,6 +70,8 @@ namespace
         "  -h, --help             print this text",
         "  -f, --print-failed     print failed tests",
         "  -p, --print-passed     print passed tests",
+        "  -c, --cgb-only         run only Game Boy Color tests",
+        "  -d, --dmg-only         run only Game Boy Classic tests",
         "  -w, --whitelist <...>  whitelist file/regex",
         "  -x, --blacklist <...>  blacklist file/regex",
         "",
@@ -124,6 +130,18 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_blargg,
         },
         {
+            .name    = opt_long_cgb_only,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_cgb_only,
+        },
+        {
+            .name    = opt_long_dmg_only,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_dmg_only,
+        },
+        {
             .name    = opt_long_print_failed,
             .has_arg = no_argument,
             .flag    = nullptr,
@@ -180,7 +198,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     };
 
     age::tester::options options{};
-    int                  c = 0;
+    int                  c         = 0;
     int                  longindex = 0;
 
     // no getopt() error message on standard error
@@ -196,6 +214,14 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_blargg:
                 options.m_blargg = true;
+                break;
+
+            case opt_cgb_only:
+                options.m_cgb_only = true;
+                break;
+
+            case opt_dmg_only:
+                options.m_dmg_only = true;
                 break;
 
             case opt_print_failed:

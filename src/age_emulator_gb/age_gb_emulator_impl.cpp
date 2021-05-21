@@ -113,7 +113,7 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 
         m_clock.set_back_clock(clock_cycle_offset);
         m_events.set_back_clock(clock_cycle_offset);
-        m_sound.set_back_clock();
+        m_sound.set_back_clock(clock_cycle_offset);
         m_lcd.set_back_clock(clock_cycle_offset);
         m_timer.set_back_clock(clock_cycle_offset);
         m_serial.set_back_clock(clock_cycle_offset);
@@ -149,7 +149,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
       m_interrupts(m_device, m_clock),
       m_events(m_clock),
       m_div(m_clock),
-      m_sound(m_clock, m_device.is_cgb(), pcm_vec),
+      m_sound(m_clock, m_div, m_device.is_cgb(), pcm_vec),
       m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, screen_buffer, colors_hint),
       m_timer(m_clock, m_div, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
