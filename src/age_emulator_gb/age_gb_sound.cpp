@@ -235,8 +235,8 @@ int age::gb_sound::apu_event()
     }
 
     // perform next frame sequencer step
-    AGE_GB_CLOG_SOUND("step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
-                              << " at clock cycle " << m_clk_current_state)
+    AGE_GB_CLOG_SOUND("apu step " << AGE_LOG_DEC(m_next_frame_sequencer_step)
+                                  << " at clock cycle " << m_clk_current_state)
 
     int clks_next_apu_event = gb_apu_event_clock_cycles;
     switch (m_next_frame_sequencer_step)

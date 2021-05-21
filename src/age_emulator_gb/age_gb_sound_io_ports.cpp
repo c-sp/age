@@ -244,10 +244,10 @@ void age::gb_sound::write_nr52(uint8_t value)
         AGE_GB_CLOG_SOUND("apu switched on");
         AGE_GB_CLOG_SOUND("    * first frame sequencer step in " << clks_first_step << " clock cycles"
                                                                  << " (on clock cycle " << m_clk_next_apu_event << ")");
-
         // delay frame sequencer step 0
         // (see test rom analysis)
-        if ((clk_div_aligned + 4) & (gb_apu_event_clock_cycles / 2))
+        int ofs = m_clock.is_double_speed() ? 2 : 4;
+        if ((clk_div_aligned + ofs) & (gb_apu_event_clock_cycles / 2))
         {
             m_next_frame_sequencer_step = 7;
             m_skip_frame_sequencer_step = true;

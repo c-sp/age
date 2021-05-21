@@ -184,7 +184,6 @@
 /gambatte/scy/
 
 /gambatte/sound/ch1_duty0_pos6_to_pos7_timing_ds_6_cgb04c_outaudio1.gbc
-/gambatte/sound/ch2_late_reset_nr52_ds_1a_cgb04c_out2.gbc
 
 /gambatte/speedchange/speedchange2_ch1
 /gambatte/speedchange/speedchange2_ch2
