@@ -146,12 +146,6 @@ namespace age
 #endif
 
 #if 0
-#define AGE_GB_CLOG_SOUND_PORTS(log) AGE_GB_CLOG(log)
-#else
-#define AGE_GB_CLOG_SOUND_PORTS(log)
-#endif
-
-#if 0
 #define AGE_GB_CLOG_TIMER(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_TIMER(log)

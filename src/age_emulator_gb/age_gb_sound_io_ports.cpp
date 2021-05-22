@@ -36,28 +36,28 @@ namespace
 age::uint8_t age::gb_sound::read_nr10() const
 {
     uint8_t result = m_nr10 | 0x80;
-    AGE_GB_CLOG_SOUND_PORTS("read NR10 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR10 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr11() const
 {
     uint8_t result = m_nr11 | 0x3F;
-    AGE_GB_CLOG_SOUND_PORTS("read NR11 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR11 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr12() const
 {
     uint8_t result = m_c1.read_nrX2();
-    AGE_GB_CLOG_SOUND_PORTS("read NR12 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR12 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr14() const
 {
     uint8_t result = m_nr14 | 0xBF;
-    AGE_GB_CLOG_SOUND_PORTS("read NR14 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR14 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
@@ -66,21 +66,21 @@ age::uint8_t age::gb_sound::read_nr14() const
 age::uint8_t age::gb_sound::read_nr21() const
 {
     uint8_t result = m_nr21 | 0x3F;
-    AGE_GB_CLOG_SOUND_PORTS("read NR21 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR21 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr22() const
 {
     uint8_t result = m_c2.read_nrX2();
-    AGE_GB_CLOG_SOUND_PORTS("read NR22 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR22 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr24() const
 {
     uint8_t result = m_nr24 | 0xBF;
-    AGE_GB_CLOG_SOUND_PORTS("read NR24 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR24 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
@@ -89,21 +89,21 @@ age::uint8_t age::gb_sound::read_nr24() const
 age::uint8_t age::gb_sound::read_nr30() const
 {
     uint8_t result = m_nr30 | 0x7F;
-    AGE_GB_CLOG_SOUND_PORTS("read NR30 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR30 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr32() const
 {
     uint8_t result = m_nr32 | 0x9F;
-    AGE_GB_CLOG_SOUND_PORTS("read NR32 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR32 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr34() const
 {
     uint8_t result = m_nr34 | 0xBF;
-    AGE_GB_CLOG_SOUND_PORTS("read NR34 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR34 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
@@ -112,21 +112,21 @@ age::uint8_t age::gb_sound::read_nr34() const
 age::uint8_t age::gb_sound::read_nr42() const
 {
     uint8_t result = m_c4.read_nrX2();
-    AGE_GB_CLOG_SOUND_PORTS("read NR42 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR42 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr43() const
 {
     uint8_t result = m_c4.read_nrX3();
-    AGE_GB_CLOG_SOUND_PORTS("read NR43 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR43 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr44() const
 {
     uint8_t result = m_nr44 | 0xBF;
-    AGE_GB_CLOG_SOUND_PORTS("read NR44 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR44 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
@@ -134,13 +134,13 @@ age::uint8_t age::gb_sound::read_nr44() const
 
 age::uint8_t age::gb_sound::read_nr50() const
 {
-    AGE_GB_CLOG_SOUND_PORTS("read NR50 = " << AGE_LOG_HEX8(m_nr50))
+    AGE_GB_CLOG_SOUND("read NR50 = " << AGE_LOG_HEX8(m_nr50))
     return m_nr50;
 }
 
 age::uint8_t age::gb_sound::read_nr51() const
 {
-    AGE_GB_CLOG_SOUND_PORTS("read NR51 = " << AGE_LOG_HEX8(m_nr51))
+    AGE_GB_CLOG_SOUND("read NR51 = " << AGE_LOG_HEX8(m_nr51))
     return m_nr51;
 }
 
@@ -156,7 +156,7 @@ age::uint8_t age::gb_sound::read_nr52()
     result += m_c3.active() ? 4 : 0;
     result += m_c4.active() ? 8 : 0;
 
-    AGE_GB_CLOG_SOUND_PORTS("read NR52 = " << AGE_LOG_HEX8(result))
+    AGE_GB_CLOG_SOUND("read NR52 = " << AGE_LOG_HEX8(result))
     return result;
 }
 
@@ -172,8 +172,8 @@ age::uint8_t age::gb_sound::read_nr52()
 
 void age::gb_sound::write_nr50(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR50 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR50 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -188,8 +188,8 @@ void age::gb_sound::write_nr50(uint8_t value)
 
 void age::gb_sound::write_nr51(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR51 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR51 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -205,8 +205,8 @@ void age::gb_sound::write_nr51(uint8_t value)
 void age::gb_sound::write_nr52(uint8_t value)
 {
     bool new_master_on = (value & gb_sound_master_switch) != 0;
-    AGE_GB_CLOG_SOUND_PORTS("write NR52 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on << " -> " << new_master_on)
+    AGE_GB_CLOG_SOUND("write NR52 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on << " -> " << new_master_on)
     // sound switched off
     if (m_master_on && !new_master_on)
     {
@@ -269,11 +269,11 @@ void age::gb_sound::write_nr52(uint8_t value)
 
 void age::gb_sound::write_nr10(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR10 = " << AGE_LOG_HEX8(value)
-                                            << ", period " << AGE_LOG_DEC((value >> 4) & 7)
-                                            << ", up " << ((value & 8) == 0)
-                                            << ", shift " << AGE_LOG_DEC(value & 7)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR10 = " << AGE_LOG_HEX8(value)
+                                      << ", period " << AGE_LOG_DEC((value >> 4) & 7)
+                                      << ", up " << ((value & 8) == 0)
+                                      << ", shift " << AGE_LOG_DEC(value & 7)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -284,10 +284,10 @@ void age::gb_sound::write_nr10(uint8_t value)
 
 void age::gb_sound::write_nr11(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR11 = " << AGE_LOG_HEX8(value)
-                                            << ", lc " << AGE_LOG_DEC((~value & 0x3F) + 1)
-                                            << ", duty " << AGE_LOG_DEC(value >> 6)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR11 = " << AGE_LOG_HEX8(value)
+                                      << ", lc " << AGE_LOG_DEC((~value & 0x3F) + 1)
+                                      << ", duty " << AGE_LOG_DEC(value >> 6)
+                                      << ", master " << m_master_on)
     update_state();
 
     // length counter always writable for DMG
@@ -306,11 +306,11 @@ void age::gb_sound::write_nr11(uint8_t value)
 
 void age::gb_sound::write_nr12(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR12 = " << AGE_LOG_HEX8(value)
-                                            << ", period " << AGE_LOG_DEC(value & 7)
-                                            << ", up " << ((value & 8) != 0)
-                                            << ", volume " << AGE_LOG_DEC(value >> 4)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR12 = " << AGE_LOG_HEX8(value)
+                                      << ", period " << AGE_LOG_DEC(value & 7)
+                                      << ", up " << ((value & 8) != 0)
+                                      << ", volume " << AGE_LOG_DEC(value >> 4)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -320,8 +320,8 @@ void age::gb_sound::write_nr12(uint8_t value)
 
 void age::gb_sound::write_nr13(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR13 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR13 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -331,11 +331,11 @@ void age::gb_sound::write_nr13(uint8_t value)
 
 void age::gb_sound::write_nr14(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR14 = " << AGE_LOG_HEX8(value)
-                                            << ", high freq " << AGE_LOG_DEC(value & 7)
-                                            << ", lc " << ((value & 0x40) > 0)
-                                            << ", init " << ((value & gb_nrX4_initialize) > 0)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR14 = " << AGE_LOG_HEX8(value)
+                                      << ", high freq " << AGE_LOG_DEC(value & 7)
+                                      << ", lc " << ((value & 0x40) > 0)
+                                      << ", init " << ((value & gb_nrX4_initialize) > 0)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -344,7 +344,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            m_c1.init_frequency_timer();
+            m_c1.init_frequency_timer(m_clk_current_state, m_clock.is_double_speed());
 
             // one frequency sweep step is skipped if the next frame sequencer
             // step 2 or 6 is near
@@ -379,10 +379,10 @@ void age::gb_sound::write_nr14(uint8_t value)
 
 void age::gb_sound::write_nr21(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR21 = " << AGE_LOG_HEX8(value)
-                                            << ", lc " << AGE_LOG_DEC((~value & 0x3F) + 1)
-                                            << ", duty " << AGE_LOG_DEC(value >> 6)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR21 = " << AGE_LOG_HEX8(value)
+                                      << ", lc " << AGE_LOG_DEC((~value & 0x3F) + 1)
+                                      << ", duty " << AGE_LOG_DEC(value >> 6)
+                                      << ", master " << m_master_on)
     update_state();
 
     // length counter always writable for DMG
@@ -401,11 +401,11 @@ void age::gb_sound::write_nr21(uint8_t value)
 
 void age::gb_sound::write_nr22(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR22 = " << AGE_LOG_HEX8(value)
-                                            << ", period " << AGE_LOG_DEC(value & 7)
-                                            << ", up " << ((value & 8) != 0)
-                                            << ", volume " << AGE_LOG_DEC(value >> 4)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR22 = " << AGE_LOG_HEX8(value)
+                                      << ", period " << AGE_LOG_DEC(value & 7)
+                                      << ", up " << ((value & 8) != 0)
+                                      << ", volume " << AGE_LOG_DEC(value >> 4)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -415,8 +415,8 @@ void age::gb_sound::write_nr22(uint8_t value)
 
 void age::gb_sound::write_nr23(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR23 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR23 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -426,11 +426,11 @@ void age::gb_sound::write_nr23(uint8_t value)
 
 void age::gb_sound::write_nr24(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR24 = " << AGE_LOG_HEX8(value)
-                                            << ", high freq " << AGE_LOG_DEC(value & 7)
-                                            << ", lc " << ((value & 0x40) > 0)
-                                            << ", init " << ((value & gb_nrX4_initialize) > 0)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR24 = " << AGE_LOG_HEX8(value)
+                                      << ", high freq " << AGE_LOG_DEC(value & 7)
+                                      << ", lc " << ((value & 0x40) > 0)
+                                      << ", init " << ((value & gb_nrX4_initialize) > 0)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -439,7 +439,7 @@ void age::gb_sound::write_nr24(uint8_t value)
 
         if ((value & gb_nrX4_initialize) > 0)
         {
-            m_c2.init_frequency_timer();
+            m_c2.init_frequency_timer(m_clk_current_state, m_clock.is_double_speed());
 
             bool deactivated = m_c2.init_volume_envelope(should_inc_period());
             if (!deactivated)
@@ -464,8 +464,8 @@ void age::gb_sound::write_nr24(uint8_t value)
 
 void age::gb_sound::write_nr30(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR30 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR30 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         m_nr30 = value;
@@ -479,8 +479,8 @@ void age::gb_sound::write_nr30(uint8_t value)
 
 void age::gb_sound::write_nr31(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR31 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR31 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
 
     if (m_master_on || !m_cgb) // length counter always writable for DMG
     {
@@ -491,8 +491,8 @@ void age::gb_sound::write_nr31(uint8_t value)
 
 void age::gb_sound::write_nr32(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR32 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR32 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -509,8 +509,8 @@ void age::gb_sound::write_nr32(uint8_t value)
 
 void age::gb_sound::write_nr33(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR33 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR33 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -520,8 +520,8 @@ void age::gb_sound::write_nr33(uint8_t value)
 
 void age::gb_sound::write_nr34(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR34 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR34 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -573,8 +573,8 @@ void age::gb_sound::write_nr34(uint8_t value)
 
 void age::gb_sound::write_nr41(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR41 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR41 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
 
     if (m_master_on || !m_cgb) // length counter always writable for DMG
     {
@@ -585,8 +585,8 @@ void age::gb_sound::write_nr41(uint8_t value)
 
 void age::gb_sound::write_nr42(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR42 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR42 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -596,8 +596,8 @@ void age::gb_sound::write_nr42(uint8_t value)
 
 void age::gb_sound::write_nr43(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR43 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR43 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();
@@ -607,8 +607,8 @@ void age::gb_sound::write_nr43(uint8_t value)
 
 void age::gb_sound::write_nr44(uint8_t value)
 {
-    AGE_GB_CLOG_SOUND_PORTS("write NR44 = " << AGE_LOG_HEX8(value)
-                                            << ", master " << m_master_on)
+    AGE_GB_CLOG_SOUND("write NR44 = " << AGE_LOG_HEX8(value)
+                                      << ", master " << m_master_on)
     if (m_master_on)
     {
         update_state();

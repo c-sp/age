@@ -181,7 +181,7 @@ namespace age
         void set_low_frequency_bits(uint8_t nrX3);
         void set_high_frequency_bits(uint8_t nrX4);
         void set_duty_waveform(uint8_t nrX1);
-        void init_frequency_timer();
+        void init_frequency_timer(int current_clock_cycle, bool double_speed);
 
         void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index);
 

@@ -131,11 +131,13 @@ void age::gb_duty_source::set_high_frequency_bits(uint8_t nrX4)
 
 
 
-void age::gb_duty_source::init_frequency_timer()
+void age::gb_duty_source::init_frequency_timer(int current_clock_cycle, bool double_speed)
 {
     // frequency timer delay on channel initialization
     // (see test rom analysis)
-    reset_frequency_timer(4);
+    //! \todo test rom analysis for ch1_duty0_pos6_to_pos7_timing_ds_X
+    int sample_delay = (double_speed && !(current_clock_cycle & 2)) ? 3 : 4;
+    reset_frequency_timer(sample_delay);
 }
 
 void age::gb_duty_source::set_duty_waveform(uint8_t nrX1)
