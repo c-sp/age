@@ -33,6 +33,13 @@ namespace age::tester
         bool m_mealybug   = false; //!< run Mealybug Tearoom tests
         bool m_mooneye_gb = false; //!< run Mooneye GB tests
 
+        bool m_cgb_only = false;
+        bool m_dmg_only = false;
+
+        bool m_help         = false;
+        bool m_print_passed = false;
+        bool m_print_failed = false;
+
         //!
         //! path to the gameboy-test-roms test suite,
         //! see also: https://github.com/c-sp/gameboy-test-roms
@@ -42,9 +49,6 @@ namespace age::tester
         std::string m_whitelist = {};
         std::string m_blacklist = {};
 
-        bool                     m_help                = false;
-        bool                     m_print_passed        = false;
-        bool                     m_print_failed        = false;
         std::vector<std::string> m_unknown_options     = {};
         std::vector<std::string> m_invalid_arg_options = {};
     };

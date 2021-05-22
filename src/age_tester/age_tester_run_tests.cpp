@@ -192,18 +192,31 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
 
         using schedule_rom_t = std::function<void(const std::filesystem::path&, const schedule_test_t&)>;
 
-        auto schedule_rom = [&pool, &results, &rom_count](const std::filesystem::path& rom_path,
-                                                          const schedule_rom_t&        schedule_rom) {
+        auto schedule_rom = [&pool, &results, &opts, &rom_count](const std::filesystem::path& rom_path,
+                                                                 const schedule_rom_t&        schedule_rom) {
             ++rom_count;
-            pool.queue_task([&pool, &results, rom_path, schedule_rom]() {
+            pool.queue_task([&pool, &results, &opts, rom_path, schedule_rom]() {
                 int scheduled_count = 0;
 
                 schedule_rom(
                     rom_path,
-                    [&pool, &results, rom_path, &scheduled_count](const std::shared_ptr<age::uint8_vector>& rom_contents,
-                                                                  age::gb_hardware                          hardware,
-                                                                  age::gb_colors_hint                       colors_hint,
-                                                                  const run_test_t&                         run) {
+                    [&pool, &results, &opts, rom_path, &scheduled_count](const std::shared_ptr<age::uint8_vector>& rom_contents,
+                                                                         age::gb_hardware                          hardware,
+                                                                         age::gb_colors_hint                       colors_hint,
+                                                                         const run_test_t&                         run) {
+                        if (hardware == gb_hardware::auto_detect)
+                        {
+                            return;
+                        }
+                        if ((hardware == gb_hardware::cgb) && opts.m_dmg_only)
+                        {
+                            return;
+                        }
+                        if ((hardware == gb_hardware::dmg) && opts.m_cgb_only)
+                        {
+                            return;
+                        }
+
                         pool.queue_task([&results, rom_path, rom_contents, hardware, colors_hint, run]() {
                             std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, colors_hint));
                             auto                              passed = run(*emulator);

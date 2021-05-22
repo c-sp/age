@@ -106,10 +106,11 @@ bool age::gb_timer::update_timer_state()
 
 
 
-void age::gb_timer::on_div_reset(int old_div_offset)
+void age::gb_timer::on_div_reset()
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
+        AGE_GB_CLOG_TIMER("timer off at DIV reset => nothing to do")
         return;
     }
     update_timer_state();
@@ -117,47 +118,18 @@ void age::gb_timer::on_div_reset(int old_div_offset)
     // identify the least significant timer clock bit
     int clks_per_inc = 1 << m_clock_shift;
 
-    // identify the clock bit that triggers a timer increment
-    // when going low
-    int trigger_bit = clks_per_inc >> 1;
-    AGE_ASSERT(trigger_bit > 0)
+    // calculate potential immediate timer increment by div reset
+    auto reset_details = m_div.calculate_reset_details(clks_per_inc);
 
-    // calculate old and new div-aligned clock
-    int current_clk = m_clock.get_clock_cycle();
-    int old_clock   = current_clk + old_div_offset;
-    int new_clock   = current_clk + m_div.get_div_offset();
-
-    // calculate the number of clock cycles until the next
-    // timer increment for both clocks
-    int old_next_inc = clks_per_inc - (old_clock & (clks_per_inc - 1));
-    int new_next_inc = clks_per_inc - (new_clock & (clks_per_inc - 1));
-
-    int old_trigger_bit = old_clock & trigger_bit;
-    int new_trigger_bit = new_clock & trigger_bit;
-
-    int clk_adjust = (old_trigger_bit && !new_trigger_bit)
-                         // trigger bit goes low
-                         //      => immediate timer increment
-                         //      => time-to-overflow shortened
-                         ? -old_next_inc
-                         // trigger bit not going low
-                         //      => time-to-overflow increased
-                         : new_next_inc - old_next_inc;
-
-    int clk_overflow = m_clk_timer_zero + 0x100 * clks_per_inc;
-    AGE_ASSERT(clk_overflow > current_clk)
-    clk_overflow += clk_adjust;
-    AGE_ASSERT(clk_overflow >= current_clk)
+    AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) > m_clock.get_clock_cycle())
+    set_clk_timer_zero(m_clk_timer_zero + reset_details.m_clk_adjust);
+    AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) >= m_clock.get_clock_cycle())
 
     AGE_GB_CLOG_TIMER("timer at DIV reset:")
-    AGE_GB_CLOG_TIMER("    * old clock bits " << AGE_LOG_HEX16(old_clock & 0xFFFF))
-    AGE_GB_CLOG_TIMER("    * new clock bits " << AGE_LOG_HEX16(new_clock & 0xFFFF))
-    AGE_GB_CLOG_TIMER("    * next increment (old) in " << old_next_inc << " clock cycles")
-    AGE_GB_CLOG_TIMER("    * next increment (new) in " << new_next_inc << " clock cycles")
-    AGE_GB_CLOG_TIMER("    * +/- clock cycles until overflow: " << clk_adjust)
-    AGE_GB_CLOG_TIMER("    * overflow on clock cycle " << clk_overflow)
-
-    set_clk_timer_zero(m_clk_timer_zero + clk_adjust);
+    AGE_GB_CLOG_TIMER("    * next increment (old) in " << reset_details.m_old_next_increment << " clock cycles")
+    AGE_GB_CLOG_TIMER("    * next increment (new) in " << reset_details.m_new_next_increment << " clock cycles")
+    AGE_GB_CLOG_TIMER("    * +/- clock cycles until overflow: " << reset_details.m_clk_adjust)
+    AGE_GB_CLOG_TIMER("    * overflow on clock cycle " << (m_clk_timer_zero + 0x100 * clks_per_inc))
 }
 
 
