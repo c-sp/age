@@ -108,9 +108,8 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
 
 bool age::gb_clock::trigger_speed_change()
 {
-    if ((m_key1 & 0x01) == 0)
+    if ((m_key1 & 1) == 0)
     {
-        // no speed change requested
         return false;
     }
 
@@ -123,6 +122,8 @@ bool age::gb_clock::trigger_speed_change()
                       << (double_speed ? "activated" : "deactivated"))
     return true;
 }
+
+
 
 age::uint8_t age::gb_clock::read_key1() const
 {

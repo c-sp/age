@@ -60,8 +60,7 @@ namespace age
         explicit gb_div(const gb_clock& clock);
 
         [[nodiscard]] gb_div_reset_details calculate_reset_details(int lowest_counter_bit) const;
-
-        [[nodiscard]] int get_div_offset() const;
+        [[nodiscard]] int                  get_div_offset() const;
 
         [[nodiscard]] uint8_t read_div() const;
         void                  write_div();

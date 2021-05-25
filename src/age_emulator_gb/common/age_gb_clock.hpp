@@ -34,7 +34,7 @@ namespace age
     constexpr int gb_no_clock_cycle          = -1;
     constexpr int gb_clock_cycles_per_second = 4194304;
 
-    void gb_set_back_clock_cycle(int &clock_cycle, int cycle_offset);
+    void gb_set_back_clock_cycle(int& clock_cycle, int cycle_offset);
 
 
 
@@ -55,7 +55,8 @@ namespace age
         void tick_2_clock_cycles();
         void set_back_clock(int clock_cycle_offset);
 
-        bool                  trigger_speed_change();
+        [[nodiscard]] bool trigger_speed_change();
+
         [[nodiscard]] uint8_t read_key1() const;
         void                  write_key1(uint8_t value);
 
@@ -72,7 +73,7 @@ namespace age
 #define AGE_GB_CLOG(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log) // NOLINT(bugprone-macro-parentheses)
 
 #if 0
-#define AGE_GB_CLOG_CLOCK(log) AGE_LOG("clock " << get_clock_cycle() << " - " << log)
+#define AGE_GB_CLOG_CLOCK(log) AGE_LOG("clock " << get_clock_cycle() << " - " << log) // NOLINT(bugprone-macro-parentheses)
 #else
 #define AGE_GB_CLOG_CLOCK(log)
 #endif

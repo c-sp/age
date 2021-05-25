@@ -119,7 +119,7 @@ void age::gb_sound::update_state()
 
 
 
-void age::gb_sound::on_div_reset()
+void age::gb_sound::after_div_reset()
 {
     // m_master_on cannot be changed by update_state()
     // which is why we can check it first

@@ -36,13 +36,13 @@ age::gb_timer::gb_timer(const gb_clock&       clock,
 {
 }
 
-int age::gb_timer::get_clock_shift(int tac) const
+age::uint8_t age::gb_timer::get_clock_shift() const
 {
     // 00   (4096 Hz): clock cycle >> 10 (1024 clock cycles)
     // 01 (262144 Hz): clock cycle >>  4   (16 clock cycles)
     // 10  (65536 Hz): clock cycle >>  6   (64 clock cycles)
     // 11  (16384 Hz): clock cycle >>  8  (256 clock cycles)
-    int clock_shift = 4 + (((tac - 1) & 0x03) << 1);
+    uint8_t clock_shift = 4 + (((m_tac - 1) & 0x03) << 1);
 
     // CGB double speed => faster increments
     clock_shift -= m_clock.is_double_speed();
@@ -179,7 +179,7 @@ void age::gb_timer::write_tac(uint8_t value)
     int old_trigger_bit = 1 << (m_clock_shift - 1);
     int old_bit         = div_clock & old_trigger_bit;
 
-    int new_trigger_bit = 1 << (get_clock_shift(m_tac) - 1);
+    int new_trigger_bit = 1 << (get_clock_shift() - 1);
     int new_bit         = div_clock & new_trigger_bit;
 
     if (old_bit && !new_bit)

@@ -249,9 +249,9 @@ void age::gb_serial::set_back_clock(int clock_cycle_offset)
 
 
 
-void age::gb_serial::on_div_reset()
+void age::gb_serial::after_div_reset()
 {
-    update_state();
+    update_state(); // may finish active transfer
 
     // no transfer => nothing to do here
     if (m_sio_state != gb_sio_state::transfer_internal_clock)

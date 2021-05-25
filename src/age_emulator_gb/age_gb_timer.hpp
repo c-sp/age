@@ -54,24 +54,27 @@ namespace age
 
         void trigger_interrupt();
         void update_state();
-        void on_div_reset();
         void set_back_clock(int clock_cycle_offset);
 
+        void after_speed_change();
+        void after_div_reset();
+
     private:
-        [[nodiscard]] int get_clock_shift(int tac) const;
-        bool              update_timer_state();
-        void              start_timer();
-        void              stop_timer();
-        void              set_clk_timer_zero(int new_clk_timer_zero);
+        [[nodiscard]] uint8_t get_clock_shift() const;
+
+        bool update_timer_state();
+        void start_timer();
+        void stop_timer();
+        void set_clk_timer_zero(int new_clk_timer_zero);
 
         const gb_clock&       m_clock;
         const gb_div&         m_div;
         gb_interrupt_trigger& m_interrupts;
         gb_events&            m_events;
 
-        int m_clock_shift       = 0;
-        int m_clk_timer_zero    = gb_no_clock_cycle;
-        int m_clk_last_overflow = gb_no_clock_cycle;
+        int     m_clk_timer_zero    = gb_no_clock_cycle;
+        int     m_clk_last_overflow = gb_no_clock_cycle;
+        uint8_t m_clock_shift       = 0;
 
         uint8_t m_tima = 0;
         uint8_t m_tma  = 0;

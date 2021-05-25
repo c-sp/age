@@ -141,6 +141,7 @@ namespace age
         void               handle_dma();
         [[nodiscard]] bool during_dma() const;
 
+        void adjust_clock_speed();
         void set_back_clock(int clock_cycle_offset);
 
     private:

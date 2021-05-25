@@ -344,9 +344,9 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 
             case to_underlying(gb_io_port::div): {
                 m_div.write_div();
-                m_serial.on_div_reset();
-                m_sound.on_div_reset();
-                m_timer.on_div_reset();
+                m_serial.after_div_reset();
+                m_sound.after_div_reset();
+                m_timer.after_div_reset();
             }
             break;
 
@@ -618,6 +618,14 @@ bool age::gb_bus::during_dma() const
 }
 
 
+
+void age::gb_bus::adjust_clock_speed()
+{
+    if(m_clock.trigger_speed_change())
+    {
+        m_timer.after_speed_change();
+    }
+}
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)
 {
