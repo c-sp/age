@@ -27,6 +27,7 @@ namespace age::tester
 {
     struct options
     {
+        bool m_age        = false; //!< run age-test-roms
         bool m_acid2      = false; //!< run cgb-acid2 and dmg-acid2 tests
         bool m_blargg     = false; //!< run Blargg tests
         bool m_gambatte   = false; //!< run Gambatte tests

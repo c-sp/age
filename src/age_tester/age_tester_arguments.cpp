@@ -29,6 +29,7 @@ namespace
     constexpr char opt_blargg       = 'b';
     constexpr char opt_cgb_only     = 'c';
     constexpr char opt_dmg_only     = 'd';
+    constexpr char opt_age          = 'e';
     constexpr char opt_print_failed = 'f';
     constexpr char opt_gambatte     = 'g';
     constexpr char opt_help         = 'h';
@@ -38,12 +39,13 @@ namespace
     constexpr char opt_whitelist    = 'w';
     constexpr char opt_blacklist    = 'x';
 
-    constexpr const char* optstring = ":abcdfghmnpw:x:";
+    constexpr const char* optstring = ":abcdefghmnpw:x:";
 
     constexpr const char* opt_long_acid2        = "acid2";
     constexpr const char* opt_long_blargg       = "blargg";
     constexpr const char* opt_long_cgb_only     = "cgb-only";
     constexpr const char* opt_long_dmg_only     = "dmg-only";
+    constexpr const char* opt_long_age          = "age";
     constexpr const char* opt_long_print_failed = "print-failed";
     constexpr const char* opt_long_gambatte     = "gambatte";
     constexpr const char* opt_long_help         = "help";
@@ -79,6 +81,7 @@ namespace
         "All tests will run when no category is specified.",
         "Multiple categories can be picked simultaneously.",
         "  -a, --acid2         run cgb-acid-2 and dmg-acid-2 test roms",
+        "  -e, --age           run age test roms",
         "  -b, --blargg        run Blarggs test roms",
         "  -g, --gambatte      run Gambatte test roms",
         "  -m, --mooneye-gb    run Mooneye GB test roms",
@@ -140,6 +143,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .has_arg = no_argument,
             .flag    = nullptr,
             .val     = opt_dmg_only,
+        },
+        {
+            .name    = opt_long_age,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_age,
         },
         {
             .name    = opt_long_print_failed,
@@ -222,6 +231,10 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_dmg_only:
                 options.m_dmg_only = true;
+                break;
+
+            case opt_age:
+                options.m_age = true;
                 break;
 
             case opt_print_failed:

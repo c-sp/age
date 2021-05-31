@@ -106,12 +106,19 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
 
 
 
-bool age::gb_clock::trigger_speed_change()
+bool age::gb_clock::tick_speed_change_delay()
 {
     if ((m_key1 & 1) == 0)
     {
         return false;
     }
+    m_clock_cycle += is_double_speed() ? 0x10000 : 0x20000;
+    return true;
+}
+
+void age::gb_clock::change_speed()
+{
+    AGE_ASSERT(m_key1 & 1);
 
     // toggle double speed
     m_key1 ^= 0x81;
@@ -120,7 +127,6 @@ bool age::gb_clock::trigger_speed_change()
 
     AGE_GB_CLOG_CLOCK("double speed "
                       << (double_speed ? "activated" : "deactivated"))
-    return true;
 }
 
 

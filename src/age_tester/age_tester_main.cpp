@@ -26,9 +26,10 @@ namespace
 {
     void check_run_all(age::tester::options& options)
     {
-        bool run_all = !options.m_acid2 && !options.m_blargg && !options.m_gambatte && !options.m_mealybug && !options.m_mooneye_gb;
+        bool run_all = !options.m_acid2 && !options.m_age && !options.m_blargg && !options.m_gambatte && !options.m_mealybug && !options.m_mooneye_gb;
 
         options.m_acid2 |= run_all;
+        options.m_age |= run_all;
         options.m_blargg |= run_all;
         options.m_gambatte |= run_all;
         options.m_mealybug |= run_all;
@@ -94,6 +95,7 @@ int main(int argc, char** argv)
     check_run_all(opts);
     std::cout << "test categories:"
               << (opts.m_acid2 ? " acid2" : "")
+              << (opts.m_age ? " age" : "")
               << (opts.m_blargg ? " blargg" : "")
               << (opts.m_gambatte ? " gambatte" : "")
               << (opts.m_mealybug ? " mealybug-tearoom-tests" : "")

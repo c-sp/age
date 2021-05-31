@@ -36,6 +36,7 @@ namespace age::tester
 
     void schedule_rom_acid2_cgb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_acid2_dmg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_age(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_blargg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_gambatte(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mooneye_gb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);

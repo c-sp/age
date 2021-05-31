@@ -621,10 +621,7 @@ bool age::gb_bus::during_dma() const
 
 void age::gb_bus::adjust_clock_speed()
 {
-    if(m_clock.trigger_speed_change())
-    {
-        m_timer.after_speed_change();
-    }
+    m_timer.after_speed_change();
 }
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)

@@ -55,7 +55,8 @@ namespace age
         void tick_2_clock_cycles();
         void set_back_clock(int clock_cycle_offset);
 
-        [[nodiscard]] bool trigger_speed_change();
+        bool tick_speed_change_delay();
+        void change_speed();
 
         [[nodiscard]] uint8_t read_key1() const;
         void                  write_key1(uint8_t value);
