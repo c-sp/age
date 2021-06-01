@@ -116,6 +116,9 @@ void age::gb_timer::set_back_clock(int clock_cycle_offset)
 
 void age::gb_timer::after_speed_change()
 {
+    // speed change: DIV has just been reset
+    AGE_ASSERT(((m_clock.get_clock_cycle() + m_div.get_div_offset()) & 0xFFFF) == 0);
+
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
         AGE_GB_CLOG_TIMER("timer off at speed change => nothing to do")
@@ -137,12 +140,16 @@ void age::gb_timer::after_speed_change()
 
     int clk_overflow_new = clk_current + clks_until_overflow;
 
+    AGE_GB_CLOG_TIMER("timer at speed change:")
+    AGE_GB_CLOG_TIMER("    * TIMA == " << AGE_LOG_HEX8(m_tima))
+    AGE_GB_CLOG_TIMER("    * next increment (old) in " << (1 << m_clock_shift) << " clock cycles ("
+                                                       << (m_clock.get_clock_cycle() + (1 << m_clock_shift)) << ")")
     // update timer state
     m_clock_shift = get_clock_shift();
     set_clk_timer_zero(clk_overflow_new - 0x100 * (1 << m_clock_shift));
 
-    AGE_GB_CLOG_TIMER("timer at speed change:")
-    AGE_GB_CLOG_TIMER("    * TIMA == " << AGE_LOG_HEX8(m_tima))
+    AGE_GB_CLOG_TIMER("    * next increment (new) in " << (1 << m_clock_shift) << " clock cycles ("
+                                                       << (m_clock.get_clock_cycle() + (1 << m_clock_shift)) << ")")
     AGE_GB_CLOG_TIMER("    * timer overflow (old) at clock cycle " << clk_overflow_old)
     AGE_GB_CLOG_TIMER("    * timer overflow (new) at clock cycle " << clk_overflow_new)
 }

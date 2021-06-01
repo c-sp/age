@@ -112,7 +112,7 @@ bool age::gb_clock::tick_speed_change_delay()
     {
         return false;
     }
-    m_clock_cycle += is_double_speed() ? 0x10000 : 0x20000;
+    m_clock_cycle += (0x20000 + 4) >> (is_double_speed() ? 1 : 0);
     return true;
 }
 

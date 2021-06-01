@@ -73,7 +73,7 @@ namespace age
 
 #define AGE_GB_CLOG(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log) // NOLINT(bugprone-macro-parentheses)
 
-#if 0
+#if 1
 #define AGE_GB_CLOG_CLOCK(log) AGE_LOG("clock " << get_clock_cycle() << " - " << log) // NOLINT(bugprone-macro-parentheses)
 #else
 #define AGE_GB_CLOG_CLOCK(log)
@@ -85,7 +85,7 @@ namespace age
 #define AGE_GB_CLOG_CPU(log)
 #endif
 
-#if 0
+#if 1
 #define AGE_GB_CLOG_DIV(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_DIV(log)
@@ -147,7 +147,7 @@ namespace age
 #define AGE_GB_CLOG_SOUND(log)
 #endif
 
-#if 0
+#if 1
 #define AGE_GB_CLOG_TIMER(log) AGE_GB_CLOG(log)
 #else
 #define AGE_GB_CLOG_TIMER(log)
