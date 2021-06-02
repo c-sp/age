@@ -38,6 +38,28 @@ namespace age
 
 
 
+    struct gb_div_reset_details
+    {
+        //! the next counter increment aligned with the previous DIV
+        //! (relative to the current clock cycle)
+        int m_old_next_increment = 0;
+
+        //! the next counter increment aligned with the current DIV reset
+        //! (relative to the current clock cycle)
+        int m_new_next_increment = 0;
+
+        //! positive value:
+        //! the next counter increment is delayed by the DIV reset
+        //! (m_new_next_increment - m_old_next_increment).
+        //!
+        //! negative value:
+        //! the DIV reset causes an immediate counter increment
+        //! (-m_old_next_increment).
+        int m_clk_adjust = 0;
+    };
+
+
+
     class gb_clock
     {
     public:
@@ -61,56 +83,67 @@ namespace age
         [[nodiscard]] uint8_t read_key1() const;
         void                  write_key1(uint8_t value);
 
+        [[nodiscard]] gb_div_reset_details get_div_reset_details(int lowest_counter_bit) const;
+        [[nodiscard]] int                  get_div_offset() const;
+
+        [[nodiscard]] uint8_t read_div() const;
+        void                  write_div();
+
     private:
         int     m_clock_cycle          = 0;
         int8_t  m_machine_cycle_clocks = 4;
         uint8_t m_key1                 = 0x7E;
+
+        int m_old_div_offset = 0; //!< clock offset before the last reset
+        int m_div_offset     = 0; //!< used to re-align DIV to clock on DIV-writes
     };
 
 } // namespace age
 
 
 
-#define AGE_GB_CLOG(log) AGE_LOG("clock " << m_clock.get_clock_cycle() << " - " << log) // NOLINT(bugprone-macro-parentheses)
+#define AGE_GB_CLOG(clock, div_offset, log) AGE_LOG(AGE_LOG_DEC8(clock) << "  " << AGE_LOG_BIN16((clock) + (div_offset)) << " : " << log) // NOLINT(bugprone-macro-parentheses)
 
-#if 1
-#define AGE_GB_CLOG_CLOCK(log) AGE_LOG("clock " << get_clock_cycle() << " - " << log) // NOLINT(bugprone-macro-parentheses)
+#define AGE_GB_MCLOG(log) AGE_GB_CLOG(m_clock.get_clock_cycle(), m_clock.get_div_offset(), log)
+
+#if 0
+#define AGE_GB_CLOG_CLOCK(log) AGE_GB_CLOG(m_clock_cycle, m_div_offset, log)
 #else
 #define AGE_GB_CLOG_CLOCK(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_CPU(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_CPU(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_CPU(log)
 #endif
 
-#if 1
-#define AGE_GB_CLOG_DIV(log) AGE_GB_CLOG(log)
+#if 0
+#define AGE_GB_CLOG_DIV(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_DIV(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_EVENTS(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_EVENTS(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_EVENTS(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_IRQS(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_IRQS(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_IRQS(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_LCD_OAM(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_LCD_OAM(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_OAM(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS(log)
 #endif
@@ -118,37 +151,37 @@ namespace age
 // LY is read quite often by some test roms (e.g. checking for v-blank)
 //  => create an extra logging category for it
 #if 0
-#define AGE_GB_CLOG_LCD_PORTS_LY(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_LCD_PORTS_LY(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS_LY(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_LCD_RENDER(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_LCD_RENDER(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_RENDER(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_LCD_VRAM(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_LCD_VRAM(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_VRAM(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_SERIAL(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_SERIAL(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_SERIAL(log)
 #endif
 
 #if 0
-#define AGE_GB_CLOG_SOUND(log) AGE_GB_CLOG(log)
+#define AGE_GB_CLOG_SOUND(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_SOUND(log)
 #endif
 
-#if 1
-#define AGE_GB_CLOG_TIMER(log) AGE_GB_CLOG(log)
+#if 0
+#define AGE_GB_CLOG_TIMER(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_TIMER(log)
 #endif

@@ -31,12 +31,10 @@ namespace
 
 age::gb_serial::gb_serial(const gb_device&      device,
                           const gb_clock&       clock,
-                          const gb_div&         div,
                           gb_interrupt_trigger& interrupts,
                           gb_events&            events)
     : m_device(device),
       m_clock(clock),
-      m_div(div),
       m_interrupts(interrupts),
       m_events(events)
 {
@@ -160,7 +158,7 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
 
     // div-aligned clock
     auto current_clk     = m_clock.get_clock_cycle();
-    int  clk_div_aligned = current_clk + m_div.get_div_offset();
+    int  clk_div_aligned = current_clk + m_clock.get_div_offset();
 
     // number of clock cycles until first serial transfer step
     int clks_into_step      = clk_div_aligned & (clks_per_step - 1);
@@ -266,7 +264,7 @@ void age::gb_serial::after_div_reset()
     AGE_ASSERT(clks_per_step > 0)
 
     // calculate potential immediate serial transfer step by div reset
-    auto reset_details = m_div.calculate_reset_details(clks_per_step);
+    auto reset_details = m_clock.get_div_reset_details(clks_per_step);
 
     int clk_current = m_clock.get_clock_cycle();
     int clk_finished = m_sio_clk_started + (8 << m_sio_clock_shift);

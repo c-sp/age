@@ -88,20 +88,28 @@ bool age::gb_timer::update_timer_state()
     AGE_GB_CLOG_TIMER("    * TIMA == " << AGE_LOG_HEX(tima))
     AGE_GB_CLOG_TIMER("    * setting TIMA = " << AGE_LOG_HEX8(m_tima)
                                               << " (TMA == " << AGE_LOG_HEX8(m_tma) << ")")
+    bool interrupt_triggered = false;
 
-    // re-initialize timer
-    start_timer();
-
-    // If the overflow happened at least one machine cycle ago,
-    // we have to trigger an interrupt here as the timer interrupt
-    // event is going to be re-scheduled.
+    // trigger interrupt, if
+    //  * the overflow happened at least one machine cycle ago
+    //  * or multiple overflows occurred
     if (clk_current > m_clk_last_overflow)
     {
         int clk_irq = m_clk_last_overflow + m_clock.get_machine_cycle_clocks();
         m_interrupts.trigger_interrupt(gb_interrupt::timer, clk_irq);
-        return true;
+        interrupt_triggered = true;
     }
-    return false;
+    else if ((clk_current == m_clk_last_overflow) && (tima > 0x100))
+    {
+        m_interrupts.trigger_interrupt(gb_interrupt::timer, 0); // we don't care for the actual clock cycle any more
+        interrupt_triggered = true;
+        m_events.schedule_event(gb_event::timer_interrupt, m_clock.get_machine_cycle_clocks());
+    }
+
+    // re-initialize timer
+    start_timer();
+
+    return interrupt_triggered;
 }
 
 
@@ -116,15 +124,15 @@ void age::gb_timer::set_back_clock(int clock_cycle_offset)
 
 void age::gb_timer::after_speed_change()
 {
-    // speed change: DIV has just been reset
-    AGE_ASSERT(((m_clock.get_clock_cycle() + m_div.get_div_offset()) & 0xFFFF) == 0);
-
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
         AGE_GB_CLOG_TIMER("timer off at speed change => nothing to do")
         return;
     }
-    update_timer_state();
+    // DIV has just been reset
+    AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0);
+    // state is up to date
+    AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima);
 
     // calculate the old timer overflow clock cycle
     int clk_overflow_old = m_clk_timer_zero + 0x100 * (1 << m_clock_shift);
@@ -169,14 +177,15 @@ void age::gb_timer::after_div_reset()
     int clks_per_inc = 1 << m_clock_shift;
 
     // calculate potential immediate timer increment by div reset
-    auto reset_details = m_div.calculate_reset_details(clks_per_inc);
+    auto reset_details = m_clock.get_div_reset_details(clks_per_inc);
 
     AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) > m_clock.get_clock_cycle())
     set_clk_timer_zero(m_clk_timer_zero + reset_details.m_clk_adjust);
     AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) >= m_clock.get_clock_cycle())
 
     AGE_GB_CLOG_TIMER("timer at DIV reset:")
-    AGE_GB_CLOG_TIMER("    * TIMA == " << AGE_LOG_HEX8(m_tima))
+    AGE_GB_CLOG_TIMER("    * TIMA (old) == " << AGE_LOG_HEX8(m_tima))
+    AGE_GB_CLOG_TIMER("    * TIMA (new) == " << AGE_LOG_HEX8((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift))
     AGE_GB_CLOG_TIMER("    * next increment (old) in " << reset_details.m_old_next_increment << " clock cycles ("
                                                        << (m_clock.get_clock_cycle() + reset_details.m_old_next_increment) << ")")
     AGE_GB_CLOG_TIMER("    * next increment (new) in " << reset_details.m_new_next_increment << " clock cycles ("
@@ -201,7 +210,7 @@ void age::gb_timer::start_timer()
 
     // align timer with DIV
     int current_clk     = m_clock.get_clock_cycle();
-    int clk_div_aligned = current_clk + m_div.get_div_offset();
+    int clk_div_aligned = current_clk + m_clock.get_div_offset();
 
     // clock cycles until next increment
     int clks_next_inc = clks_per_inc - (clk_div_aligned % clks_per_inc);
@@ -238,7 +247,7 @@ void age::gb_timer::stop_timer()
     int clks_per_inc = 1 << m_clock_shift;
     int trigger_bit  = clks_per_inc >> 1;
 
-    int timer_clock = m_clock.get_clock_cycle() + m_div.get_div_offset();
+    int timer_clock = m_clock.get_clock_cycle() + m_clock.get_div_offset();
     if (timer_clock & trigger_bit)
     {
         m_clk_timer_zero -= clks_per_inc;

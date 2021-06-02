@@ -232,7 +232,7 @@ void age::gb_sound::write_nr52(uint8_t value)
         update_state();
 
         // calculate the number of clock cycles until the first frame sequencer step
-        int clk_div_aligned = m_clk_current_state + m_div.get_div_offset();
+        int clk_div_aligned = m_clk_current_state + m_clock.get_div_offset();
         int clks_into_step  = clk_div_aligned & (gb_apu_event_clock_cycles - 1);
         int clks_first_step = gb_apu_event_clock_cycles - clks_into_step;
 

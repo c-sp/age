@@ -46,7 +46,6 @@ HEADERS += \
     age_common/api/pcm/age_pcm_sample.hpp \
     age_emulator_gb/age_gb_bus.hpp \
     age_emulator_gb/age_gb_cpu.hpp \
-    age_emulator_gb/age_gb_div.hpp \
     age_emulator_gb/age_gb_emulator_impl.hpp \
     age_emulator_gb/age_gb_joypad.hpp \
     age_emulator_gb/age_gb_lcd.hpp \
@@ -81,7 +80,6 @@ SOURCES += \
     age_emulator_gb/age_gb_bus.cpp \
     age_emulator_gb/age_gb_cpu.cpp \
     age_emulator_gb/age_gb_cpu_opcodes.cpp \
-    age_emulator_gb/age_gb_div.cpp \
     age_emulator_gb/age_gb_emulator.cpp \
     age_emulator_gb/age_gb_emulator_impl.cpp \
     age_emulator_gb/age_gb_joypad.cpp \

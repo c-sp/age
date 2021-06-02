@@ -1293,22 +1293,16 @@ void age::gb_cpu::execute_prefetched()
         case 0x00: break; // NOP
 
         case 0x10: { // STOP
-            // the delay happens before the DIV reset
-            // (see switch-speed-tima-inc-cgb)
-            bool change_speed = m_clock.tick_speed_change_delay();
+            READ_BYTE(m_prefetched_opcode, m_pc);
 
             //! \todo DIV reset delay on STOP: always or just for speed change?
-            // STOP will reset the DIV after a one machine cycle delay.
-            READ_BYTE(m_prefetched_opcode, m_pc);
-            m_bus.write_byte(to_underlying(gb_io_port::div), 0);
+            // STOP will reset the DIV
+            // m_bus.write_byte(to_underlying(gb_io_port::div), 0);
+            WRITE_BYTE(to_underlying(gb_io_port::div), 0);
 
-            // Adjust the CPU speed after DIV reset,
-            // otherwise we might mess up the DIV reset by evaluating the wrong bits
-            // (speed adjustment is done on the same cycle as the DIV reset,
-            // so there should not be any cycle-issue).
+            bool change_speed = m_clock.tick_speed_change_delay();
             if (change_speed)
             {
-                m_clock.change_speed();
                 m_bus.adjust_clock_speed();
             }
             return;

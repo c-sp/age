@@ -27,8 +27,6 @@
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 
-#include "age_gb_div.hpp"
-
 
 
 namespace age
@@ -40,7 +38,6 @@ namespace age
 
     public:
         gb_timer(const gb_clock&       clock,
-                 const gb_div&         div,
                  gb_interrupt_trigger& interrupts,
                  gb_events&            events);
 
@@ -68,7 +65,6 @@ namespace age
         void set_clk_timer_zero(int new_clk_timer_zero);
 
         const gb_clock&       m_clock;
-        const gb_div&         m_div;
         gb_interrupt_trigger& m_interrupts;
         gb_events&            m_events;
 

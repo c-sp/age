@@ -133,7 +133,7 @@ void age::gb_sound::after_div_reset()
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
     AGE_ASSERT(m_clk_current_state < m_clk_next_apu_event)
 
-    auto reset_details = m_div.calculate_reset_details(gb_apu_event_clock_cycles);
+    auto reset_details = m_clock.get_div_reset_details(gb_apu_event_clock_cycles);
     AGE_ASSERT(m_clk_next_apu_event == m_clk_current_state + reset_details.m_old_next_increment);
 
     if (reset_details.m_clk_adjust < 0)
@@ -331,12 +331,10 @@ void age::gb_sound::set_wave_ram_byte(unsigned offset, uint8_t value)
 //---------------------------------------------------------
 
 age::gb_sound::gb_sound(const gb_clock& clock,
-                        const gb_div&   div,
                         bool            cgb_features,
                         pcm_vector&     samples)
     : m_samples(samples),
       m_clock(clock),
-      m_div(div),
       m_cgb(cgb_features),
       m_clk_current_state(m_clock.get_clock_cycle()),
       // initialize frame sequencer

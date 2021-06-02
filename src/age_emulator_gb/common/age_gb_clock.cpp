@@ -112,7 +112,9 @@ bool age::gb_clock::tick_speed_change_delay()
     {
         return false;
     }
-    m_clock_cycle += (0x20000 + 4) >> (is_double_speed() ? 1 : 0);
+    int delay = 0x20000 >> (is_double_speed() ? 1 : 0);
+    AGE_GB_CLOG_CLOCK("speed change delay of " << AGE_LOG_HEX(delay) << " clock cycles");
+    m_clock_cycle += delay;
     return true;
 }
 
@@ -141,4 +143,72 @@ void age::gb_clock::write_key1(uint8_t value)
 {
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
     AGE_GB_CLOG_CLOCK("write key1 = " << AGE_LOG_HEX8(m_key1))
+}
+
+
+
+age::gb_div_reset_details age::gb_clock::get_div_reset_details(int lowest_counter_bit) const
+{
+    int lower_bits  = lowest_counter_bit - 1;
+    int trigger_bit = lowest_counter_bit / 2;
+    AGE_ASSERT((lowest_counter_bit & lower_bits) == 0); // only one bit set
+
+    // calculate old and new (current) div-aligned clock
+    int old_clock = m_clock_cycle + m_old_div_offset;
+    int new_clock = m_clock_cycle + m_div_offset;
+
+    // calculate the number of clock cycles until the next
+    // counter increment for both clocks (old & new)
+    gb_div_reset_details details;
+    details.m_old_next_increment = lowest_counter_bit - (old_clock & lower_bits);
+    details.m_new_next_increment = lowest_counter_bit - (new_clock & lower_bits);
+
+    // if the bit triggering a counter increment is switched from
+    // high to low by the div reset,
+    // the counter is immediately incremented
+    int old_trigger_bit = old_clock & trigger_bit;
+    int new_trigger_bit = new_clock & trigger_bit;
+
+    details.m_clk_adjust = (old_trigger_bit && !new_trigger_bit)
+                               // trigger bit goes low
+                               //      => immediate counter increment
+                               //      => time to counter overflow decreased
+                               ? -details.m_old_next_increment
+                               // trigger bit not going low
+                               //      => time to counter overflow increased
+                               : details.m_new_next_increment - details.m_old_next_increment;
+    return details;
+}
+
+
+
+int age::gb_clock::get_div_offset() const
+{
+    return m_div_offset;
+}
+
+
+
+age::uint8_t age::gb_clock::read_div() const
+{
+    //! \todo examine DIV behavior during speed change
+    int shift  = is_double_speed() ? 7 : 8;
+    int result = (m_clock_cycle + m_div_offset) >> shift;
+
+    AGE_GB_CLOG_CLOCK("read DIV " << AGE_LOG_HEX8(result & 0xFF))
+    AGE_GB_CLOG_CLOCK("    * last increment on lock cycle " << ((result << shift) - m_div_offset))
+    AGE_GB_CLOG_CLOCK("    * next increment on lock cycle " << (((result + 1) << shift) - m_div_offset))
+
+    return result & 0xFF;
+}
+
+void age::gb_clock::write_div()
+{
+    int div_counter    = m_clock_cycle & 0xFFFF;
+    int new_div_offset = 0x10000 - div_counter;
+
+    AGE_GB_CLOG_CLOCK("DIV reset, changing offset from " << AGE_LOG_HEX16(m_div_offset)
+                                                         << " to " AGE_LOG_HEX16(new_div_offset))
+    m_old_div_offset = m_div_offset;
+    m_div_offset     = new_div_offset;
 }

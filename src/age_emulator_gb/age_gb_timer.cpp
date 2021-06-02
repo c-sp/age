@@ -26,11 +26,9 @@ namespace
 
 
 age::gb_timer::gb_timer(const gb_clock&       clock,
-                        const gb_div&         div,
                         gb_interrupt_trigger& interrupts,
                         gb_events&            events)
     : m_clock(clock),
-      m_div(div),
       m_interrupts(interrupts),
       m_events(events)
 {
@@ -174,7 +172,7 @@ void age::gb_timer::write_tac(uint8_t value)
     // Gambatte tests:
     //      tima/tc00_tc01_late_tc00_of_2
 
-    int div_clock = m_clock.get_clock_cycle() + m_div.get_div_offset();
+    int div_clock = m_clock.get_clock_cycle() + m_clock.get_div_offset();
 
     int old_trigger_bit = 1 << (m_clock_shift - 1);
     int old_bit         = div_clock & old_trigger_bit;

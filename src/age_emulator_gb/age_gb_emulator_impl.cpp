@@ -148,13 +148,12 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
       m_clock(m_device),
       m_interrupts(m_device, m_clock),
       m_events(m_clock),
-      m_div(m_clock),
-      m_sound(m_clock, m_div, m_device.is_cgb(), pcm_vec),
+      m_sound(m_clock, m_device.is_cgb(), pcm_vec),
       m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, screen_buffer, colors_hint),
-      m_timer(m_clock, m_div, m_interrupts, m_events),
+      m_timer(m_clock, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
-      m_serial(m_device, m_clock, m_div, m_interrupts, m_events),
-      m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_div, m_sound, m_lcd, m_timer, m_joypad, m_serial),
+      m_serial(m_device, m_clock, m_interrupts, m_events),
+      m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
       m_cpu(m_device, m_clock, m_interrupts, m_bus)
 {
     m_memory.init_vram(m_device.is_cgb_hardware());

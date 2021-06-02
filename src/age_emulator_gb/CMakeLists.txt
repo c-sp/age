@@ -8,7 +8,6 @@ add_library(
         age_gb_bus.cpp
         age_gb_cpu.cpp
         age_gb_cpu_opcodes.cpp
-        age_gb_div.cpp
         age_gb_emulator.cpp
         age_gb_emulator_impl.cpp
         age_gb_joypad.cpp

@@ -39,8 +39,9 @@
 // we skip the following includes for doxygen output since they would bloat the include graphs
 //! \cond
 
+#include <bitset>
 #include <cassert>
-#include <iomanip> // std::quoted
+#include <iomanip> // std::quoted, etc.
 #include <ios>     // std::hex
 #include <sstream> // std::stringstream
 #include <string>
@@ -92,13 +93,14 @@ namespace age
 
 
 
-#define AGE_ASSERT(x) assert(x);
-
+#define AGE_ASSERT(x)             assert(x);
 #define AGE_ASSERT_ONE_BIT_SET(x) AGE_ASSERT(((x) > 0) && (((x) & ((x) -1)) == 0));
 
 #define AGE_LOG(x)        (age::concurrent_cout() << age::age_log_time() << " " << x).log_line(); // NOLINT(bugprone-macro-parentheses)
 #define AGE_LOG_QUOTED(x) std::quoted(x)
-#define AGE_LOG_DEC(x)    static_cast<int64_t>(x)
+
+#define AGE_LOG_DEC(x)  static_cast<int64_t>(x)
+#define AGE_LOG_DEC8(x) std::setw(8) << AGE_LOG_DEC(x) << std::setw(0)
 
 #define AGE_LOG_HEX_X(x, width)                                                \
     "0x"                                                                       \
@@ -112,17 +114,29 @@ namespace age
 #define AGE_LOG_HEX16(x) AGE_LOG_HEX_X(x, 4)
 #define AGE_LOG_HEX32(x) AGE_LOG_HEX_X(x, 8)
 
+#define AGE_LOG_BIN16(x)                                        \
+    std::bitset<4>{static_cast<unsigned>(x) >> 12}              \
+        << "'" << std::bitset<4>{static_cast<unsigned>(x) >> 8} \
+        << "'" << std::bitset<4>{static_cast<unsigned>(x) >> 4} \
+        << "'" << std::bitset<4> { static_cast<unsigned>(x) }
+
 #else // #ifdef AGE_DEBUG
 
 #define AGE_ASSERT(x)
 #define AGE_ASSERT_ONE_BIT_SET(x)
+
 #define AGE_LOG(x)
+#define AGE_LOG_QUOTED(x)
+
 #define AGE_LOG_DEC(x)
+#define AGE_LOG_DEC8(x)
+
 #define AGE_LOG_HEX(x)
 #define AGE_LOG_HEX8(x)
 #define AGE_LOG_HEX16(x)
 #define AGE_LOG_HEX32(x)
-#define AGE_LOG_QUOTED(x)
+
+#define AGE_LOG_BIN16(x)
 
 #endif // #ifdef AGE_DEBUG
 

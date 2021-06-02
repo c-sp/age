@@ -27,7 +27,6 @@
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
-#include "age_gb_div.hpp"
 #include "age_gb_sound_utilities.hpp"
 #include "common/age_gb_clock.hpp"
 #include "common/age_gb_device.hpp"
@@ -50,7 +49,7 @@ namespace age
         AGE_DISABLE_COPY(gb_sound);
 
     public:
-        gb_sound(const gb_clock& clock, const gb_div& div, bool cgb_features, pcm_vector& samples);
+        gb_sound(const gb_clock& clock, bool cgb_features, pcm_vector& samples);
 
         [[nodiscard]] uint8_t read_nr10() const;
         [[nodiscard]] uint8_t read_nr11() const;
@@ -110,7 +109,6 @@ namespace age
         pcm_vector& m_samples;
 
         const gb_clock& m_clock;
-        const gb_div&   m_div;
         const bool      m_cgb;
         int             m_clk_current_state         = 0;
         int             m_clk_next_apu_event        = 0;
