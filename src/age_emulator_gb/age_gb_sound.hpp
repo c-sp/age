@@ -94,7 +94,8 @@ namespace age
         void    write_wave_ram(unsigned offset, uint8_t value);
 
         void update_state();
-        void after_div_reset();
+        void after_div_reset(bool during_stop);
+        void after_speed_change();
         void set_back_clock(int clock_cycle_offset);
 
 

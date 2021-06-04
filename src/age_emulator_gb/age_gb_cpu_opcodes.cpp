@@ -1294,17 +1294,8 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x10: { // STOP
             READ_BYTE(m_prefetched_opcode, m_pc);
-
-            //! \todo DIV reset delay on STOP: always or just for speed change?
-            // STOP will reset the DIV
-            // m_bus.write_byte(to_underlying(gb_io_port::div), 0);
-            WRITE_BYTE(to_underlying(gb_io_port::div), 0);
-
-            bool change_speed = m_clock.tick_speed_change_delay();
-            if (change_speed)
-            {
-                m_bus.adjust_clock_speed();
-            }
+            TICK_MACHINE_CYCLE;
+            m_bus.execute_stop();
             return;
         }
 

@@ -129,7 +129,7 @@ void age::gb_timer::after_speed_change()
         AGE_GB_CLOG_TIMER("timer off at speed change => nothing to do")
         return;
     }
-    // DIV has just been reset
+    // DIV has been reset
     AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0);
     // state is up to date
     AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima);
@@ -164,7 +164,7 @@ void age::gb_timer::after_speed_change()
 
 
 
-void age::gb_timer::after_div_reset()
+void age::gb_timer::after_div_reset(bool during_stop)
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
@@ -179,11 +179,22 @@ void age::gb_timer::after_div_reset()
     // calculate potential immediate timer increment by div reset
     auto reset_details = m_clock.get_div_reset_details(clks_per_inc);
 
+    AGE_GB_CLOG_TIMER("timer at DIV reset:")
+
+    // speed change TAC 00 glitch (see age-test-roms/speed-switch/switch-speed-tima-00-cgb):
+    // no immediate action by div reset on the exact first machine cycle
+    //! \todo we only checked the 0->1 edge, check the 1->0 edge too
+    if (during_stop && ((m_tac & 0x03) == 0) && (reset_details.m_clk_adjust == -clks_per_inc / 2))
+    {
+        AGE_GB_CLOG_TIMER("TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle");
+        AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
+        reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
+    }
+
     AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) > m_clock.get_clock_cycle())
     set_clk_timer_zero(m_clk_timer_zero + reset_details.m_clk_adjust);
     AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) >= m_clock.get_clock_cycle())
 
-    AGE_GB_CLOG_TIMER("timer at DIV reset:")
     AGE_GB_CLOG_TIMER("    * TIMA (old) == " << AGE_LOG_HEX8(m_tima))
     AGE_GB_CLOG_TIMER("    * TIMA (new) == " << AGE_LOG_HEX8((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift))
     AGE_GB_CLOG_TIMER("    * next increment (old) in " << reset_details.m_old_next_increment << " clock cycles ("

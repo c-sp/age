@@ -106,29 +106,28 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
 
 
 
-bool age::gb_clock::tick_speed_change_delay()
+void age::gb_clock::tick_speed_change_delay()
+{
+    // same number of machine cycles, different number of T4 cycles
+    int delay = is_double_speed() ? 0x10000 : 0x20000;
+    AGE_GB_CLOG_CLOCK("about to apply speed change delay of " << AGE_LOG_HEX(delay) << " clock cycles");
+    m_clock_cycle += delay;
+}
+
+bool age::gb_clock::change_speed()
 {
     if ((m_key1 & 1) == 0)
     {
         return false;
     }
-    int delay = 0x20000 >> (is_double_speed() ? 1 : 0);
-    AGE_GB_CLOG_CLOCK("speed change delay of " << AGE_LOG_HEX(delay) << " clock cycles");
-    m_clock_cycle += delay;
-    return true;
-}
-
-void age::gb_clock::change_speed()
-{
-    AGE_ASSERT(m_key1 & 1);
 
     // toggle double speed
     m_key1 ^= 0x81;
     const bool double_speed = (m_key1 & 0x80) > 0;
     m_machine_cycle_clocks  = double_speed ? 2 : 4;
 
-    AGE_GB_CLOG_CLOCK("double speed "
-                      << (double_speed ? "activated" : "deactivated"))
+    AGE_GB_CLOG_CLOCK((double_speed ? "double speed activated" : "single speed activated"))
+    return true;
 }
 
 
@@ -191,7 +190,6 @@ int age::gb_clock::get_div_offset() const
 
 age::uint8_t age::gb_clock::read_div() const
 {
-    //! \todo examine DIV behavior during speed change
     int shift  = is_double_speed() ? 7 : 8;
     int result = (m_clock_cycle + m_div_offset) >> shift;
 

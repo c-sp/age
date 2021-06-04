@@ -54,7 +54,7 @@ namespace age
         void set_back_clock(int clock_cycle_offset);
 
         void after_speed_change();
-        void after_div_reset();
+        void after_div_reset(bool during_stop);
 
     private:
         [[nodiscard]] uint8_t get_clock_shift() const;

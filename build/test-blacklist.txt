@@ -184,31 +184,20 @@
 /gambatte/scy/
 
 /gambatte/speedchange/speedchange2_ch1
-/gambatte/speedchange/speedchange2_ch2
 /gambatte/speedchange/speedchange2_frame1
 /gambatte/speedchange/speedchange2_lcdoff
 /gambatte/speedchange/speedchange2_ly44
 /gambatte/speedchange/speedchange2_m2int
 /gambatte/speedchange/speedchange2_nop
-/gambatte/speedchange/speedchange2_tima
 /gambatte/speedchange/speedchange3_ch1
 /gambatte/speedchange/speedchange3_ch2
 /gambatte/speedchange/speedchange3_ly44
 /gambatte/speedchange/speedchange3_nop
-/gambatte/speedchange/speedchange4_ch1
-/gambatte/speedchange/speedchange4_ch2
 /gambatte/speedchange/speedchange4_ly44
 /gambatte/speedchange/speedchange4_nop
-/gambatte/speedchange/speedchange5_ch1
-/gambatte/speedchange/speedchange5_ch2
 /gambatte/speedchange/speedchange5_ly44
 /gambatte/speedchange/speedchange5_nop
 /gambatte/speedchange/speedchange_ch1
-/gambatte/speedchange/speedchange_ch2
-/gambatte/speedchange/speedchange_lcdoff
-/gambatte/speedchange/speedchange_ly44
-/gambatte/speedchange/speedchange_ly97
-/gambatte/speedchange/speedchange_tima
 
 /gambatte/sprites/
 

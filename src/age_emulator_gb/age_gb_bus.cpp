@@ -340,13 +340,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             case to_underlying(gb_io_port::sb): m_serial.write_sb(byte); break;
             case to_underlying(gb_io_port::sc): m_serial.write_sc(byte); break;
 
-            case to_underlying(gb_io_port::div): {
-                m_clock.write_div();
-                m_serial.after_div_reset();
-                m_sound.after_div_reset();
-                m_timer.after_div_reset();
-            }
-            break;
+            case to_underlying(gb_io_port::div): reset_div(false); break;
 
             case to_underlying(gb_io_port::tima): m_timer.write_tima(byte); break;
             case to_underlying(gb_io_port::tma): m_timer.write_tma(byte); break;
@@ -617,11 +611,26 @@ bool age::gb_bus::during_dma() const
 
 
 
-void age::gb_bus::adjust_clock_speed()
+void age::gb_bus::execute_stop()
 {
+    // STOP resets the DIV
+    reset_div(true);
+
+    // state update in case of an upcoming speed switch
     m_timer.update_state();
-    m_clock.change_speed();
+
+    // check for speed change
+    bool speed_changed = m_clock.change_speed();
+    if (!speed_changed)
+    {
+        return;
+    }
+
+    // adjust for new speed
+    m_sound.after_speed_change();
     m_timer.after_speed_change();
+
+    m_clock.tick_speed_change_delay();
 }
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)
@@ -636,6 +645,19 @@ void age::gb_bus::set_back_clock(int clock_cycle_offset)
 //   Private methods
 //
 //---------------------------------------------------------
+
+void age::gb_bus::reset_div(bool during_stop)
+{
+    m_sound.update_state();
+
+    m_clock.write_div();
+
+    m_serial.after_div_reset();
+    m_sound.after_div_reset(during_stop);
+    m_timer.after_div_reset(during_stop);
+}
+
+
 
 void age::gb_bus::write_dma(uint8_t value)
 {

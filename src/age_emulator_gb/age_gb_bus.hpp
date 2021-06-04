@@ -140,10 +140,11 @@ namespace age
         void               handle_dma();
         [[nodiscard]] bool during_dma() const;
 
-        void adjust_clock_speed();
+        void execute_stop();
         void set_back_clock(int clock_cycle_offset);
 
     private:
+        void reset_div(bool during_stop);
         void write_dma(uint8_t value);
         void write_hdma5(uint8_t value);
 

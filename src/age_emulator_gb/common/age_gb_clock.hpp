@@ -77,8 +77,8 @@ namespace age
         void tick_2_clock_cycles();
         void set_back_clock(int clock_cycle_offset);
 
-        bool tick_speed_change_delay();
-        void change_speed();
+        void tick_speed_change_delay();
+        bool change_speed();
 
         [[nodiscard]] uint8_t read_key1() const;
         void                  write_key1(uint8_t value);
@@ -176,8 +176,10 @@ namespace age
 
 #if 0
 #define AGE_GB_CLOG_SOUND(log) AGE_GB_MCLOG(log)
+#define AGE_GB_CLOG_SOUND_STEP(log) AGE_GB_CLOG(m_clk_current_state, m_clock.get_div_offset(), log)
 #else
 #define AGE_GB_CLOG_SOUND(log)
+#define AGE_GB_CLOG_SOUND_STEP(log)
 #endif
 
 #if 0
