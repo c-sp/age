@@ -31,3 +31,6 @@ add_library(
 target_link_libraries(age_emulator_gb age_common)
 
 target_include_directories(age_emulator_gb PUBLIC api)
+
+# uncomment this to generate assembler listings with g++
+#set_target_properties(age_emulator_gb PROPERTIES COMPILE_FLAGS "-save-temps -fverbose-asm -Wa,-adhlmn=main.lst")

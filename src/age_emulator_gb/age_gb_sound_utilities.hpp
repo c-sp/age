@@ -69,7 +69,7 @@ namespace age
             AGE_ASSERT(m_frequency_timer >= 0)
 
             uint32_t channel_multiplier = static_cast<TYPE*>(this)->get_multiplier();
-            AGE_ASSERT((channel_multiplier & 0xFFFF) <= 8)
+            AGE_ASSERT((channel_multiplier & 0xFFFFU) <= 8)
             AGE_ASSERT((channel_multiplier >> 16) <= 8)
 
             for (int samples_remaining = samples_to_generate; samples_remaining > 0;)
@@ -340,7 +340,7 @@ namespace age
     private:
         bool deactivate_if_silent()
         {
-            bool is_silent = !(m_nrX2 & 0xF8);
+            bool is_silent = !(m_nrX2 & 0xF8U);
             if (is_silent)
             {
                 TYPE::deactivate();
@@ -396,7 +396,7 @@ namespace age
 
             if (m_swept_down && m_sweep_up)
             {
-                gb_sound_channel::deactivate();
+                TYPE::deactivate();
             }
         }
 
@@ -418,7 +418,7 @@ namespace age
             bool deactivate = (m_shift > 0) && next_sweep_invalid();
             if (deactivate)
             {
-                gb_sound_channel::deactivate();
+                TYPE::deactivate();
             }
             return deactivate;
         }
@@ -528,7 +528,7 @@ namespace age
                     m_counter -= decrement;
                     if (m_counter == 0)
                     {
-                        gb_sound_channel::deactivate();
+                        TYPE::deactivate();
                     }
                 }
             }
@@ -550,7 +550,7 @@ namespace age
                     --m_counter;
                     if (m_counter == 0)
                     {
-                        gb_sound_channel::deactivate();
+                        TYPE::deactivate();
                     }
                 }
             }

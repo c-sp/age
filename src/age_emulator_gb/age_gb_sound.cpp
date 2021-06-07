@@ -166,6 +166,10 @@ void age::gb_sound::after_div_reset(bool during_stop)
 
 void age::gb_sound::after_speed_change()
 {
+    // everything must be up to date
+    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+
     // Gambatte speedchange_ch2_nr52_* tests:
     // apparently the frame sequencer is 2 clock cycles late
     // after switching to double speed

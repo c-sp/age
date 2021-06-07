@@ -171,7 +171,10 @@ void age::gb_timer::after_div_reset(bool during_stop)
         AGE_GB_CLOG_TIMER("timer off at DIV reset => nothing to do")
         return;
     }
-    update_timer_state();
+    // DIV has been reset
+    AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0);
+    // state is up to date
+    AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima);
 
     // identify the least significant timer clock bit
     int clks_per_inc = 1 << m_clock_shift;
@@ -186,7 +189,7 @@ void age::gb_timer::after_div_reset(bool during_stop)
     //! \todo we only checked the 0->1 edge, check the 1->0 edge too
     if (during_stop && ((m_tac & 0x03) == 0) && (reset_details.m_clk_adjust == -clks_per_inc / 2))
     {
-        AGE_GB_CLOG_TIMER("TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle");
+        AGE_GB_CLOG_TIMER("    * TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle");
         AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
         reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
     }

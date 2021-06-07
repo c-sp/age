@@ -649,6 +649,7 @@ void age::gb_bus::set_back_clock(int clock_cycle_offset)
 void age::gb_bus::reset_div(bool during_stop)
 {
     m_sound.update_state();
+    m_timer.update_state();
 
     m_clock.write_div();
 
