@@ -186,7 +186,6 @@ void age::gb_timer::after_div_reset(bool during_stop)
 
     // speed change TAC 00 glitch (see age-test-roms/speed-switch/switch-speed-tima-00-cgb):
     // no immediate action by div reset on the exact first machine cycle
-    //! \todo we only checked the 0->1 edge, check the 1->0 edge too
     if (during_stop && ((m_tac & 0x03) == 0) && (reset_details.m_clk_adjust == -clks_per_inc / 2))
     {
         AGE_GB_CLOG_TIMER("    * TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle");
