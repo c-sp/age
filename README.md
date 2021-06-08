@@ -2,8 +2,8 @@
 
 # AGE - Another Game Boy Emulator
 
-AGE is a Linux/Windows/macOS Game Boy Emulator which
-[also runs in your Browser](https://c-sp.github.io/age-online)
+AGE is a Game Boy Emulator for Linux/Windows/macOS
+[and your Browser](https://c-sp.github.io/age-online)
 (see also [age-online](https://github.com/c-sp/age-online)).
 
 AGE requires a
