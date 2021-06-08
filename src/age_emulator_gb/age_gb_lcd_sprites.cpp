@@ -23,7 +23,8 @@
 namespace
 {
     constexpr uint8_t oam_palette = 0x10;
-}
+
+} // namespace
 
 
 

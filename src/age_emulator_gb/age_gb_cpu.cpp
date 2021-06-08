@@ -76,13 +76,11 @@ age::gb_cpu::gb_cpu(const gb_device&         device,
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
-      m_bus(bus)
+      m_bus(bus),
+      m_pc(0x0100),
+      m_sp(0xFFFE),
+      m_prefetched_opcode(m_bus.read_byte(m_pc))
 {
-    // reset registers (writing m_regs)
-    m_pc                = 0x0100;
-    m_sp                = 0xFFFE;
-    m_prefetched_opcode = m_bus.read_byte(m_pc);
-
     if (!m_device.is_cgb_hardware())
     {
         m_a = 0x01;

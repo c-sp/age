@@ -18,11 +18,6 @@
 
 #include "age_gb_emulator_impl.hpp"
 
-namespace age
-{
-    constexpr int gb_sampling_rate = gb_clock_cycles_per_second >> 1;
-}
-
 
 
 //---------------------------------------------------------
@@ -83,7 +78,7 @@ std::string age::gb_emulator::inner_get_emulator_title() const
 //---------------------------------------------------------
 
 age::gb_emulator::gb_emulator(const uint8_vector& rom, gb_hardware hardware, gb_colors_hint colors_hint)
-    : emulator(gb_screen_width, gb_screen_height, gb_sampling_rate, gb_clock_cycles_per_second),
+    : emulator(gb_screen_width, gb_screen_height, gb_clock_cycles_per_second / 2, gb_clock_cycles_per_second),
       m_impl(new gb_emulator_impl(rom, hardware, colors_hint, get_pcm_vector(), get_screen_buffer()))
 {
 }

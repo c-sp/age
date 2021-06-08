@@ -62,7 +62,8 @@ bool age::gb_lcd::is_oam_accessible()
         return true;
     }
 
-    int scanline, scanline_clks;
+    int scanline = -1;
+    int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
 
     return (scanline >= gb_screen_height)
@@ -79,7 +80,8 @@ bool age::gb_lcd::is_video_ram_accessible()
         return true;
     }
 
-    int scanline, scanline_clks;
+    int scanline = -1;
+    int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
 
     // mode 3 end (+1 T4 cycle for double speed)
@@ -103,7 +105,8 @@ void age::gb_lcd::update_state()
     // During a scanline's mode 0 the emulated program may already prepare
     // data for the next scanline.
     // We thus render each scanline before it enters mode 0.
-    int scanline, scanline_clks;
+    int scanline = -1;
+    int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
 
     m_render.render(scanline + (scanline_clks >= 80));

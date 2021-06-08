@@ -21,7 +21,8 @@
 namespace
 {
     constexpr uint8_t tac_start_timer = 0x04;
-}
+
+} // namespace
 
 
 

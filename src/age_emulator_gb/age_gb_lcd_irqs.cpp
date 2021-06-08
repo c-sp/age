@@ -224,7 +224,8 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
 
     // immediate interrupt, id we're still on this scanline
     //! \todo what's the exact timing?
-    int scanline, scanline_clks;
+    int scanline = -1;
+    int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
     int lyc_limit = gb_clock_cycles_per_scanline - m_device.is_cgb() * 2;
     if ((m_scanline.m_lyc == scanline) && (scanline_clks < lyc_limit))
@@ -270,7 +271,8 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
         return;
     }
 
-    int scanline, scanline_clks;
+    int scanline = -1;
+    int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
     int m2_scanline = scanline % gb_scanline_count; // scanline during current frame
 
@@ -356,7 +358,8 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
         return;
     }
 
-    int scanline, scanline_clks;
+    int scanline = -1;
+    int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
     int m0_scanline = scanline % gb_scanline_count; // scanline during current frame
 

@@ -120,49 +120,37 @@ namespace
 
     age::int16_t get_num_cart_rom_banks(const age::uint8_vector& cart_rom)
     {
-        age::int16_t result;
-
         auto rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
         LOG("rom banks byte: " << AGE_LOG_HEX(rom_banks))
         switch (rom_banks)
         {
             //case 0x00:
-            default: result = 2; break;
-            case 0x01: result = 4; break;
-            case 0x02: result = 8; break;
-            case 0x03: result = 16; break;
-            case 0x04: result = 32; break;
-            case 0x05: result = 64; break;
-            case 0x06: result = 128; break;
-            case 0x07: result = 256; break;
-            case 0x08: result = 512; break;
+            default: return 2;
+            case 0x01: return 4;
+            case 0x02: return 8;
+            case 0x03: return 16;
+            case 0x04: return 32;
+            case 0x05: return 64;
+            case 0x06: return 128;
+            case 0x07: return 256;
+            case 0x08: return 512;
         }
-
-        AGE_ASSERT((result & (result - 1)) == 0) // just one bit must be set
-        LOG("cartridge has " << result << " rom bank(s)")
-        return result;
     }
 
     age::int16_t get_num_cart_ram_banks(const age::uint8_vector& cart_rom)
     {
-        age::int16_t result;
-
         auto ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
         LOG("ram banks byte: " << AGE_LOG_HEX(ram_banks))
         switch (ram_banks)
         {
             //case 0x00:
-            default: result = 0; break;
+            default: return 0;
             case 0x01: //! \todo actually only 2048 bytes, but one whole bank is easier to handle
-            case 0x02: result = 1; break;
-            case 0x03: result = 4; break;
-            case 0x04: result = 16; break;
-            case 0x05: result = 8; break;
+            case 0x02: return 1;
+            case 0x03: return 4;
+            case 0x04: return 16;
+            case 0x05: return 8;
         }
-
-        AGE_ASSERT((result & (result - 1)) == 0) // just one bit must be set
-        LOG("cartridge has " << result << " ram bank(s)")
-        return result;
     }
 
 } // namespace
@@ -190,7 +178,9 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom)
     AGE_ASSERT(m_internal_ram_offset >= m_cart_ram_offset)
     AGE_ASSERT(m_video_ram_offset > m_internal_ram_offset)
 
-    LOG("persistent ram " << m_has_battery)
+    LOG("cartridge has " << m_num_cart_rom_banks << " rom bank(s)")
+    LOG("cartridge has " << m_num_cart_ram_banks << " ram bank(s)")
+    LOG("cartridge has persistent ram: " << m_has_battery)
 
     // 0x0000 - 0x3FFF : rom bank 0
     // 0x4000 - 0x7FFF : switchable rom bank

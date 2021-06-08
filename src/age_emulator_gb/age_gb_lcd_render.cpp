@@ -203,8 +203,8 @@ void age::gb_lcd_render::render_scanline(int scanline)
     }
 
     // copy scanline
-    auto dst = &m_screen_buffer.get_back_buffer()[0] + scanline * gb_screen_width;
-    auto src = &m_scanline[px0];
+    auto* dst = &m_screen_buffer.get_back_buffer()[0] + scanline * gb_screen_width;
+    auto* src = &m_scanline[px0];
 
     auto alpha = pixel{0, 0, 0, 255}.m_color;
     for (int i = 0; i < gb_screen_width; ++i)

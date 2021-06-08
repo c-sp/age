@@ -32,13 +32,21 @@
 #define BANK_LOG(x)
 #endif
 
-#define RAM_ACCESSIBLE(value) ((value & 0x0F) == 0x0A)
-#define IS_MBC_RAM(address)   ((address & 0xE000) == 0xA000)
-
 namespace
 {
     constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
-}
+
+    bool isRamAccessible(uint8_t value)
+    {
+        return (value & 0x0F) == 0x0A;
+    }
+
+    bool isCartridgeRam(uint16_t address)
+    {
+        return (address & 0xE000) == 0xA000;
+    }
+
+} // namespace
 
 
 
@@ -52,7 +60,7 @@ namespace
 
 const age::uint8_t* age::gb_memory::get_video_ram() const
 {
-    return m_memory.data() + m_video_ram_offset;
+    return &m_memory[m_video_ram_offset];
 }
 
 const age::uint8_t* age::gb_memory::get_rom_header() const
@@ -62,7 +70,7 @@ const age::uint8_t* age::gb_memory::get_rom_header() const
 
 std::string age::gb_memory::get_cartridge_title() const
 {
-    const char* buffer = reinterpret_cast<const char*>(m_memory.data() + gb_cia_ofs_title);
+    const char* buffer = reinterpret_cast<const char*>(&m_memory[gb_cia_ofs_title]);
     std::string result = {buffer, 16};
     return result;
 }
@@ -126,7 +134,7 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
 age::uint8_t age::gb_memory::read_byte(uint16_t address) const
 {
     AGE_ASSERT(address < 0xFE00)
-    uint8_t value = (!IS_MBC_RAM(address) || m_mbc_ram_accessible) ? m_memory[get_offset(address)] : 0xFF;
+    uint8_t value = (!isCartridgeRam(address) || m_mbc_ram_accessible) ? m_memory[get_offset(address)] : 0xFF;
     return value;
 }
 
@@ -150,7 +158,7 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
     {
         m_mbc_writer(*this, address, value);
     }
-    else if (!IS_MBC_RAM(address) || m_mbc_ram_accessible)
+    else if (!isCartridgeRam(address) || m_mbc_ram_accessible)
     {
         unsigned offset  = get_offset(address);
         m_memory[offset] = value;
@@ -258,55 +266,46 @@ age::gb_memory::mbc_writer age::gb_memory::get_mbc_writer(gb_mbc_data& mbc, uint
         //case 0x08:
         //case 0x09:
         default:
-            result = &write_to_mbc_no_op;
-            break;
+            return write_to_mbc_no_op;
 
         case 0x01:
         case 0x02:
         case 0x03:
-            mbc.m_mbc1.m_bank1 = 1;
-            mbc.m_mbc1.m_bank2 = 0;
-            mbc.m_mbc1.m_mode1 = false;
-            result             = &write_to_mbc1;
-            break;
+            mbc = gb_mbc1_data{.m_bank1 = 1, .m_bank2 = 0, .m_mode1 = false};
+            return write_to_mbc1;
 
         case 0x05:
         case 0x06:
-            result = &write_to_mbc2;
-            break;
+            return write_to_mbc2;
 
         case 0x0F:
         case 0x10:
         case 0x11:
         case 0x12:
         case 0x13:
-            result = &write_to_mbc3;
-            break;
+            return write_to_mbc3;
 
         case 0x19:
         case 0x1A:
         case 0x1B:
-            mbc.m_mbc5.m_2000 = 1;
-            mbc.m_mbc5.m_3000 = 0;
-            result            = &write_to_mbc5;
-            break;
+            mbc = gb_mbc5_data{.m_2000 = 1, .m_3000 = 0};
+            return write_to_mbc5;
 
         case 0x1C:
         case 0x1D:
         case 0x1E:
-            mbc.m_mbc5.m_2000 = 1;
-            mbc.m_mbc5.m_3000 = 0;
-            result            = &write_to_mbc5_rumble;
-            break;
+            mbc = gb_mbc5_data{.m_2000 = 1, .m_3000 = 0};
+            return write_to_mbc5_rumble;
     }
-
-    return result;
 }
 
 
 
-void age::gb_memory::write_to_mbc_no_op(gb_memory&, uint16_t, uint8_t)
+void age::gb_memory::write_to_mbc_no_op(gb_memory& memory, uint16_t offset, uint8_t value)
 {
+    AGE_UNUSED(memory);
+    AGE_UNUSED(offset);
+    AGE_UNUSED(value);
 }
 
 
@@ -315,28 +314,30 @@ void age::gb_memory::write_to_mbc1(gb_memory& memory, uint16_t offset, uint8_t v
 {
     AGE_ASSERT(offset < 0x8000)
 
+    auto& mbc_data = std::get<gb_mbc1_data>(memory.m_mbc_data);
+
     switch (offset & 0x6000)
     {
         case 0x0000:
             // (de)activate ram
-            memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
+            memory.m_mbc_ram_accessible = isRamAccessible(value);
             return;
 
         case 0x2000:
             // select rom bank (lower 5 bits)
-            memory.m_mbc_data.m_mbc1.m_bank1 = ((value & 0x1F) == 0) ? value + 1 : value;
+            mbc_data.m_bank1 = ((value & 0x1F) == 0) ? value + 1 : value;
             break;
 
         case 0x4000:
             // select rom/ram bank
-            memory.m_mbc_data.m_mbc1.m_bank2 = value;
+            mbc_data.m_bank2 = value;
             break;
 
         case 0x6000:
             // select MBC1 mode:
             //  - mode 0: bank2 affects 0x4000-0x7FFF
             //  - mode 1: bank2 affects 0x0000-0x7FFF, 0xA000-0xBFFF
-            memory.m_mbc_data.m_mbc1.m_mode1 = (value & 0x01) > 0;
+            mbc_data.m_mode1 = (value & 0x01) > 0;
             break;
     }
 
@@ -352,13 +353,13 @@ void age::gb_memory::write_to_mbc1(gb_memory& memory, uint16_t offset, uint8_t v
     //      emulator-only/mbc1/rom_16Mb
     //
 
-    int mbc_high_bits = memory.m_mbc_data.m_mbc1.m_bank2 & 0x03;
+    int mbc_high_bits = mbc_data.m_bank2 & 0x03;
 
     int high_rom_bits    = mbc_high_bits << (memory.m_mbc1_multi_cart ? 4 : 5);
-    int low_rom_bank_id  = memory.m_mbc_data.m_mbc1.m_mode1 ? high_rom_bits : 0;
-    int high_rom_bank_id = high_rom_bits + (memory.m_mbc_data.m_mbc1.m_bank1 & (memory.m_mbc1_multi_cart ? 0x0F : 0x1F));
+    int low_rom_bank_id  = mbc_data.m_mode1 ? high_rom_bits : 0;
+    int high_rom_bank_id = high_rom_bits + (mbc_data.m_bank1 & (memory.m_mbc1_multi_cart ? 0x0FU : 0x1FU));
 
-    int ram_bank_id = memory.m_mbc_data.m_mbc1.m_mode1 ? mbc_high_bits : 0;
+    int ram_bank_id = mbc_data.m_mode1 ? mbc_high_bits : 0;
 
     // set rom & ram banks
     AGE_ASSERT(memory.m_mbc1_multi_cart || ((high_rom_bank_id & 0x1F) > 0))
@@ -375,7 +376,7 @@ void age::gb_memory::write_to_mbc2(gb_memory& memory, uint16_t offset, uint8_t v
     // (de)activate ram
     if (offset < 0xFFF)
     {
-        memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
+        memory.m_mbc_ram_accessible = isRamAccessible(value);
     }
 
     // switch rom bank
@@ -399,7 +400,7 @@ void age::gb_memory::write_to_mbc3(gb_memory& memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
+            memory.m_mbc_ram_accessible = isRamAccessible(value);
             break;
 
         case 0x2000: {
@@ -430,24 +431,26 @@ void age::gb_memory::write_to_mbc5(gb_memory& memory, uint16_t offset, uint8_t v
 {
     AGE_ASSERT(offset < 0x8000)
 
+    auto& mbc_data = std::get<gb_mbc5_data>(memory.m_mbc_data);
+
     switch (offset & 0x6000)
     {
         case 0x0000:
             // (de)activate ram
-            memory.m_mbc_ram_accessible = RAM_ACCESSIBLE(value);
+            memory.m_mbc_ram_accessible = isRamAccessible(value);
             break;
 
         case 0x2000:
             // select rom bank (lower 5 bits)
             if ((offset & 0x1000) == 0)
             {
-                memory.m_mbc_data.m_mbc5.m_2000 = value;
+                mbc_data.m_2000 = value;
             }
             else
             {
-                memory.m_mbc_data.m_mbc5.m_3000 = value;
+                mbc_data.m_3000 = value;
             }
-            memory.set_rom_banks(0, ((memory.m_mbc_data.m_mbc5.m_3000 & 0x01) << 8) + memory.m_mbc_data.m_mbc5.m_2000);
+            memory.set_rom_banks(0, ((mbc_data.m_3000 & 0x01) << 8) + mbc_data.m_2000);
             break;
 
         case 0x4000:

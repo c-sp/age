@@ -23,6 +23,7 @@
 
 #include <functional>
 #include <string>
+#include <variant>
 
 #include <age_types.hpp>
 
@@ -69,20 +70,20 @@ namespace age
     private:
         using mbc_writer = std::function<void(gb_memory&, uint16_t, uint8_t)>;
 
-        using gb_mbc_data = union
+        struct gb_mbc1_data
         {
-            struct
-            {
-                uint8_t m_bank1;
-                uint8_t m_bank2;
-                bool    m_mode1;
-            } m_mbc1;
-            struct
-            {
-                uint8_t m_2000;
-                uint8_t m_3000;
-            } m_mbc5;
+            uint8_t m_bank1;
+            uint8_t m_bank2;
+            bool    m_mode1;
         };
+
+        struct gb_mbc5_data
+        {
+            uint8_t m_2000;
+            uint8_t m_3000;
+        };
+
+        using gb_mbc_data = std::variant<gb_mbc1_data, gb_mbc5_data>;
 
         static mbc_writer get_mbc_writer(gb_mbc_data& mbc, uint8_t mbc_type);
         static void       write_to_mbc_no_op(gb_memory& memory, uint16_t offset, uint8_t value);
@@ -98,16 +99,19 @@ namespace age
         void                   set_rom_banks(int low_bank_id, int high_bank_id);
         void                   set_ram_bank(int bank_id);
 
-        mbc_writer  m_mbc_writer;
+        // m_mbc_data must be initialized first!
+        // Otherwise it's MBC-dependent value will be overwritten by
+        // the initial value (see gb_memory constructor)
         gb_mbc_data m_mbc_data;
-        bool        m_mbc1_multi_cart    = false;
-        bool        m_mbc_ram_accessible = false;
+        mbc_writer  m_mbc_writer;
 
         const int16_t m_num_cart_rom_banks;
         const int16_t m_num_cart_ram_banks;
         const bool    m_has_battery;
-        uint8_t       m_svbk = 0xF8;
-        uint8_t       m_vbk  = 0xF8;
+        bool          m_mbc1_multi_cart    = false;
+        bool          m_mbc_ram_accessible = false;
+        uint8_t       m_svbk               = 0xF8;
+        uint8_t       m_vbk                = 0xF8;
 
         const int           m_cart_ram_offset;
         const int           m_internal_ram_offset;
