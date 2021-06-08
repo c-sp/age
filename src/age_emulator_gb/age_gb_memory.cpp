@@ -314,7 +314,10 @@ void age::gb_memory::write_to_mbc1(gb_memory& memory, uint16_t offset, uint8_t v
 {
     AGE_ASSERT(offset < 0x8000)
 
-    auto& mbc_data = std::get<gb_mbc1_data>(memory.m_mbc_data);
+    // workaround for older STL implementations
+    // (we actually want to use std::get<gb_mbc1_data> here ...)
+    auto* p_mbc_data = std::get_if<gb_mbc1_data>(&memory.m_mbc_data);
+    auto mbc_data = *p_mbc_data;
 
     switch (offset & 0x6000)
     {
@@ -431,7 +434,10 @@ void age::gb_memory::write_to_mbc5(gb_memory& memory, uint16_t offset, uint8_t v
 {
     AGE_ASSERT(offset < 0x8000)
 
-    auto& mbc_data = std::get<gb_mbc5_data>(memory.m_mbc_data);
+    // workaround for older STL implementations
+    // (we actually want to use std::get<gb_mbc1_data> here ...)
+    auto* p_mbc_data = std::get_if<gb_mbc5_data>(&memory.m_mbc_data);
+    auto mbc_data = *p_mbc_data;
 
     switch (offset & 0x6000)
     {
