@@ -16,6 +16,7 @@
 
 #include "age_tester_write_log.hpp"
 
+#include <algorithm>
 #include <bitset>
 #include <fstream>
 #include <sstream>
