@@ -26,7 +26,12 @@
 
 namespace age::tester
 {
-    void write_log(const std::filesystem::path& log_path, const std::vector<gb_log_entry>& log_entries);
+    std::string get_hardware_string(age::gb_hardware hardware);
+
+    void write_log(const std::filesystem::path& log_path,
+                   const std::vector<gb_log_entry>& log_entries,
+                   const std::filesystem::path& rom_path,
+                   gb_hardware hardware);
 
 } // namespace age::tester
 

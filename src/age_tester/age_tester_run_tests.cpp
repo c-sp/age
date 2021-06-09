@@ -142,7 +142,7 @@ namespace
                 return;
             }
             std::string path = file_path.string();
-            if (std::filesystem::path::preferred_separator != '/')
+            if constexpr (std::filesystem::path::preferred_separator != '/')
             {
                 std::replace(begin(path), end(path), static_cast<char>(std::filesystem::path::preferred_separator), '/');
             }
@@ -158,19 +158,7 @@ namespace
     std::string with_hardware_indicator(const std::filesystem::path& rom_path,
                                         age::gb_hardware             hardware)
     {
-        auto path = rom_path.string();
-        switch (hardware)
-        {
-            case age::gb_hardware::auto_detect:
-                return path + " (auto-detect)";
-
-            case age::gb_hardware::dmg:
-                return path + " (dmg)";
-
-            case age::gb_hardware::cgb:
-                return path + " (cgb)";
-        }
-        return path;
+        return rom_path.string() + " " + age::tester::get_hardware_string(hardware);
     }
 
 } // namespace
@@ -227,7 +215,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                             {
                                 std::filesystem::path log_path = rom_path;
                                 log_path.replace_extension(".log");
-                                write_log(log_path, emulator->get_log_entries());
+                                write_log(log_path, emulator->get_log_entries(), rom_path, hardware);
                             }
                         });
                         ++scheduled_count;

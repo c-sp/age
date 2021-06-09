@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#include <git_revision.hpp>
+
 #include "age_tester_arguments.hpp"
 
 #include <algorithm> // std::for_each
@@ -58,11 +60,14 @@ namespace
     constexpr const char* opt_long_blacklist    = "blacklist";
 
     constexpr const char* help_cmd_var = "%cmd%";
+    constexpr const char* help_git_var = "%git%";
     constexpr const char* help_lines[] = {
         "Run (parts of) the gameboy-test-roms test suite with AGE.",
         "See also:",
         "  https://github.com/c-sp/gameboy-test-roms",
         "  https://github.com/c-sp/AGE",
+        "",
+        "AGE git revision: %git%",
         "",
         "Usage:",
         "  %cmd% [options] [gameboy-test-roms path]",
@@ -97,6 +102,7 @@ namespace
 void age::tester::print_help(int argc, char** argv)
 {
     std::string cmd_var(help_cmd_var);
+    std::string git_var(help_git_var);
 
     std::for_each(std::begin(help_lines),
                   std::end(help_lines),
@@ -109,6 +115,26 @@ void age::tester::print_help(int argc, char** argv)
                       {
                           auto cmd = argc >= 1 ? std::filesystem::path(argv[0]).filename().string() : "";
                           l.replace(cmd_var_idx, cmd_var.size(), cmd);
+                      }
+
+                      // replace %git%
+                      auto git_var_idx = l.find(git_var);
+                      if (git_var_idx != std::string::npos)
+                      {
+                          std::string git_rev{GIT_REV};
+                          std::string git_tag{GIT_TAG};
+                          std::string git_branch{GIT_BRANCH};
+
+
+                          std::string branch = !git_tag.empty()      ? git_tag + ", "
+                                               : !git_branch.empty() ? git_branch + ", "
+                                                                     : "";
+
+                          std::string git = git_rev.empty()
+                                                ? "unknown"
+                                                : git_rev + " (" + branch + GIT_DATE + ")";
+
+                          l.replace(git_var_idx, git_var.size(), git);
                       }
 
                       std::cout << l << std::endl;

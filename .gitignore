@@ -3,20 +3,15 @@
 *.pro.user*
 .idea
 
+# generated code
+src/age_common/api/git_revision.hpp
+
 # build artifacts
 build/doxygen/html
 build/artifacts
 cmake-build-*
 build*Qt*Debug
 build*Qt*Release
-
-# AGE-JS
-node_modules
-src-web/age_js/dist
-src-web/age_js/npm-debug.log*
-src-web/age_js/src/assets/age_wasm*
-src-web/age_js/src/assets/icons/icon-*.png
-src-web/age_js/src/environments/version.ts
 
 # miscellaneous files
 Thumbs.db
