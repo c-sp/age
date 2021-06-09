@@ -34,7 +34,8 @@ void age::gb_set_back_clock_cycle(int& clock_cycle, int cycle_offset)
 
 
 
-age::gb_clock::gb_clock(const gb_device& device)
+age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
+    : m_logger(logger)
 {
     if (device.is_cgb())
     {

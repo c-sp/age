@@ -13,6 +13,7 @@ add_executable(
         age_tester_tasks_gambatte.cpp
         age_tester_tasks_mooneye_gb.cpp
         age_tester_thread_pool.hpp
+        age_tester_write_log.cpp
 )
 
 # Find pthreads on e.g. Ubuntu,

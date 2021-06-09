@@ -6,6 +6,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
+OPTION(COMPILE_LOGGER "compile AGE with logging enabled") # disabled by default
+if (COMPILE_LOGGER)
+    message("compiling AGE with logging enabled")
+    ADD_DEFINITIONS(-DAGE_COMPILE_LOGGER)
+else ()
+    message("compiling AGE with logging disabled")
+endif (COMPILE_LOGGER)
+
 
 add_subdirectory(age_common)
 add_subdirectory(age_emulator_gb)

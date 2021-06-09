@@ -18,9 +18,83 @@
 
 
 
-age::gb_test_info age::gb_emulator_impl::get_test_info() const
+std::string age::gb_emulator_impl::get_emulator_title() const
 {
-    return m_cpu.get_test_info();
+    constexpr char ascii_white_space = 0x20;
+    constexpr char ascii_underscore  = 0x5F;
+    constexpr char ascii_0           = 0x30;
+    constexpr char ascii_9           = 0x39;
+    constexpr char ascii_a           = 0x61;
+    constexpr char ascii_z           = 0x7A;
+    constexpr char ascii_A           = 0x41;
+    constexpr char ascii_Z           = 0x5A;
+
+    auto cart_title = m_memory.get_cartridge_title();
+    std::string result;
+
+    for (char c : cart_title)
+    {
+        // translate white spaces to underscores
+        if (c == ascii_white_space)
+        {
+            c = ascii_underscore;
+        }
+
+        // stop on the first invalid character
+        if ((c != ascii_underscore)
+            && !((c >= ascii_0) && (c <= ascii_9))
+            && !((c >= ascii_a) && (c <= ascii_z))
+            && !((c >= ascii_A) && (c <= ascii_Z)))
+        {
+            break;
+        }
+
+        // add character to result
+        result.append(1, c);
+
+        // stop if we hit the length limit
+        if (result.length() >= 32)
+        {
+            break;
+        }
+    }
+
+    return result;
+}
+
+age::int16_t age::gb_emulator_impl::get_screen_width() const
+{
+    return m_screen_buffer.get_screen_width();
+}
+
+age::int16_t age::gb_emulator_impl::get_screen_height() const
+{
+    return m_screen_buffer.get_screen_height();
+}
+
+const age::pixel_vector& age::gb_emulator_impl::get_screen_front_buffer() const
+{
+    return m_screen_buffer.get_front_buffer();
+}
+
+const age::pcm_vector& age::gb_emulator_impl::get_audio_buffer() const
+{
+    return m_audio_buffer;
+}
+
+int age::gb_emulator_impl::get_pcm_sampling_rate() const
+{
+    return gb_clock_cycles_per_second / 2;
+}
+
+int age::gb_emulator_impl::get_cycles_per_second() const
+{
+    return gb_clock_cycles_per_second;
+}
+
+age::int64_t age::gb_emulator_impl::get_emulated_cycles() const
+{
+    return m_emulated_cycles;
 }
 
 age::uint8_vector age::gb_emulator_impl::get_persistent_ram() const
@@ -43,9 +117,36 @@ void age::gb_emulator_impl::set_buttons_up(int buttons)
     m_joypad.set_buttons_up(buttons);
 }
 
+bool age::gb_emulator_impl::emulate(int cycles_to_emulate)
+{
+    if (cycles_to_emulate <= 0)
+    {
+        return false;
+    }
+
+    auto frame_id = m_screen_buffer.get_current_frame_id();
+    m_audio_buffer.clear();
+
+    int emulated_cycles = emulate_cycles(cycles_to_emulate);
+    AGE_ASSERT(emulated_cycles > 0)
+    m_emulated_cycles += emulated_cycles;
+
+    return m_screen_buffer.get_current_frame_id() != frame_id;
+}
+
+age::gb_test_info age::gb_emulator_impl::get_test_info() const
+{
+    return m_cpu.get_test_info();
+}
+
+const std::vector<age::gb_log_entry>& age::gb_emulator_impl::get_log_entries()
+{
+    return m_logger.get_log_entries();
+}
 
 
-int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
+
+int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 {
     AGE_ASSERT(cycles_to_emulate > 0)
 
@@ -125,13 +226,6 @@ int age::gb_emulator_impl::inner_emulate(int cycles_to_emulate)
 
 
 
-std::string age::gb_emulator_impl::inner_get_emulator_title() const
-{
-    return m_memory.get_cartridge_title();
-}
-
-
-
 //---------------------------------------------------------
 //
 //   object creation & destruction
@@ -140,16 +234,15 @@ std::string age::gb_emulator_impl::inner_get_emulator_title() const
 
 age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
                                         gb_hardware         hardware,
-                                        gb_colors_hint      colors_hint,
-                                        pcm_vector&         pcm_vec,
-                                        screen_buffer&      screen_buffer)
-    : m_memory(rom),
+                                        gb_colors_hint      colors_hint)
+    : m_screen_buffer(gb_screen_width, gb_screen_height),
+      m_memory(rom),
       m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
-      m_clock(m_device),
+      m_clock(m_logger, m_device),
       m_interrupts(m_device, m_clock),
       m_events(m_clock),
-      m_sound(m_clock, m_device.is_cgb(), pcm_vec),
-      m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, screen_buffer, colors_hint),
+      m_sound(m_clock, m_device.is_cgb(), m_audio_buffer),
+      m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, m_screen_buffer, colors_hint),
       m_timer(m_clock, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_interrupts, m_events),

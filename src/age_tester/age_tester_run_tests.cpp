@@ -17,6 +17,7 @@
 #include "age_tester_run_tests.hpp"
 #include "age_tester_tasks.hpp"
 #include "age_tester_thread_pool.hpp"
+#include "age_tester_write_log.hpp"
 
 #include <algorithm>
 #include <array>
@@ -217,10 +218,17 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                             return;
                         }
 
-                        pool.queue_task([&results, rom_path, rom_contents, hardware, colors_hint, run]() {
+                        pool.queue_task([&results, &opts, rom_path, rom_contents, hardware, colors_hint, run]() {
                             std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, colors_hint));
                             auto                              passed = run(*emulator);
                             results.push({with_hardware_indicator(rom_path, hardware), passed});
+
+                            if (opts.m_write_logs)
+                            {
+                                std::filesystem::path log_path = rom_path;
+                                log_path.replace_extension(".log");
+                                write_log(log_path, emulator->get_log_entries());
+                            }
                         });
                         ++scheduled_count;
                     });

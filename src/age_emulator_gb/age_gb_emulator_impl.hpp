@@ -28,6 +28,7 @@
 #include "common/age_gb_device.hpp"
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
+#include "common/age_gb_logger.hpp"
 
 #include "age_gb_bus.hpp"
 #include "age_gb_cpu.hpp"
@@ -50,23 +51,40 @@ namespace age
     public:
         gb_emulator_impl(const uint8_vector& rom,
                          gb_hardware         hardware,
-                         gb_colors_hint      colors_hint,
-                         pcm_vector&         pcm_vec,
-                         screen_buffer&      screen_buffer);
+                         gb_colors_hint      colors_hint);
 
-        gb_test_info get_test_info() const;
+        [[nodiscard]] std::string get_emulator_title() const;
 
-        uint8_vector get_persistent_ram() const;
-        void         set_persistent_ram(const uint8_vector& source);
+        [[nodiscard]] int16_t             get_screen_width() const;
+        [[nodiscard]] int16_t             get_screen_height() const;
+        [[nodiscard]] const pixel_vector& get_screen_front_buffer() const;
+
+        [[nodiscard]] const pcm_vector& get_audio_buffer() const;
+        [[nodiscard]] int               get_pcm_sampling_rate() const;
+
+        [[nodiscard]] int     get_cycles_per_second() const;
+        [[nodiscard]] int64_t get_emulated_cycles() const;
+
+        [[nodiscard]] uint8_vector get_persistent_ram() const;
+        void                       set_persistent_ram(const uint8_vector& source);
 
         void set_buttons_down(int buttons);
         void set_buttons_up(int buttons);
 
-        int inner_emulate(int cycles_to_emulate);
+        bool emulate(int cycles_to_emulate);
 
-        std::string inner_get_emulator_title() const;
+        [[nodiscard]] gb_test_info get_test_info() const;
+
+        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries();
 
     private:
+        int emulate_cycles(int cycles_to_emulate);
+
+        screen_buffer m_screen_buffer;
+        pcm_vector    m_audio_buffer;
+        int64_t       m_emulated_cycles = 0;
+
+        gb_logger               m_logger;
         gb_memory               m_memory;
         gb_device               m_device;
         gb_clock                m_clock;

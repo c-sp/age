@@ -33,13 +33,14 @@ namespace
     constexpr char opt_print_failed = 'f';
     constexpr char opt_gambatte     = 'g';
     constexpr char opt_help         = 'h';
+    constexpr char opt_write_logs   = 'l';
     constexpr char opt_mooneye_gb   = 'm';
     constexpr char opt_mealybug     = 'n';
     constexpr char opt_print_passed = 'p';
     constexpr char opt_whitelist    = 'w';
     constexpr char opt_blacklist    = 'x';
 
-    constexpr const char* optstring = ":abcdefghmnpw:x:";
+    constexpr const char* optstring = ":abcdefghlmnpw:x:";
 
     constexpr const char* opt_long_acid2        = "acid2";
     constexpr const char* opt_long_blargg       = "blargg";
@@ -49,6 +50,7 @@ namespace
     constexpr const char* opt_long_print_failed = "print-failed";
     constexpr const char* opt_long_gambatte     = "gambatte";
     constexpr const char* opt_long_help         = "help";
+    constexpr const char* opt_long_write_logs   = "write-logs";
     constexpr const char* opt_long_mooneye_gb   = "mooneye-gb";
     constexpr const char* opt_long_mealybug     = "mealybug";
     constexpr const char* opt_long_print_passed = "print-passed";
@@ -70,6 +72,7 @@ namespace
         "",
         "Options:",
         "  -h, --help             print this text",
+        "  -l, --write-logs       write test log files",
         "  -f, --print-failed     print failed tests",
         "  -p, --print-passed     print passed tests",
         "  -c, --cgb-only         run only Game Boy Color tests",
@@ -169,6 +172,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_help,
         },
         {
+            .name    = opt_long_write_logs,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_write_logs,
+        },
+        {
             .name    = opt_long_mooneye_gb,
             .has_arg = no_argument,
             .flag    = nullptr,
@@ -247,6 +256,10 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_help:
                 options.m_help = true;
+                break;
+
+            case opt_write_logs:
+                options.m_write_logs = true;
                 break;
 
             case opt_mooneye_gb:

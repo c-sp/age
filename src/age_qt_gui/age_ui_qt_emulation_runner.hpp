@@ -81,7 +81,7 @@ namespace age
         void continue_emulation();
 
     private:
-        void emulate(QSharedPointer<emulator> emu);
+        void emulate(QSharedPointer<gb_emulator> emu);
         void set_emulation_timer_interval();
         void emit_audio_output_activated();
 

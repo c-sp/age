@@ -93,7 +93,7 @@ void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emul
     LOG("");
 
     AGE_ASSERT(new_emulator != nullptr);
-    QSharedPointer<emulator> emu = new_emulator->get_emulator();
+    auto emu = new_emulator->get_emulator();
     AGE_ASSERT(emu != nullptr);
 
     m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
@@ -208,7 +208,7 @@ void age::qt_emulation_runner::continue_emulation()
 
     if (m_emulator != nullptr)
     {
-        QSharedPointer<emulator> emu = m_emulator->get_emulator();
+        auto emu = m_emulator->get_emulator();
 
         // handle "button down" events even when paused
         emu->set_buttons_down(m_buttons_down);
@@ -244,7 +244,7 @@ void age::qt_emulation_runner::continue_emulation()
 //
 //---------------------------------------------------------
 
-void age::qt_emulation_runner::emulate(QSharedPointer<emulator> emu)
+void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
 {
     qint64 current_timer_nanos = m_timer.nsecsElapsed();
     qint64 timer_nanos_elapsed = current_timer_nanos - m_last_emulate_nanos;

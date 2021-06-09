@@ -23,6 +23,8 @@
 
 #include <age_types.hpp>
 
+#include <string>
+
 
 
 namespace age
@@ -81,6 +83,29 @@ namespace age
         uint8_t m_e = 0;
         uint8_t m_h = 0;
         uint8_t m_l = 0;
+    };
+
+
+
+    enum class gb_log_type
+    {
+        LT_CLOCK,
+        LT_TIMER,
+    };
+
+    struct gb_log_entry
+    {
+        gb_log_entry(gb_log_type type, int clock, int div_offset, std::string message)
+            : m_type(type),
+              m_clock(clock),
+              m_div_offset(div_offset),
+              m_message(message)
+        {}
+
+        gb_log_type m_type;
+        int         m_clock;
+        int         m_div_offset;
+        std::string m_message;
     };
 
 } // namespace age

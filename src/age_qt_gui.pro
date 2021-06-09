@@ -38,7 +38,6 @@ HEADERS += \
     age_common/api/age_debug.hpp \
     age_common/api/age_types.hpp \
     age_common/api/age_utilities.hpp \
-    age_common/api/emulator/age_emulator.hpp \
     age_common/api/gfx/age_pixel.hpp \
     age_common/api/gfx/age_screen_buffer.hpp \
     age_common/api/pcm/age_downsampler.hpp \
@@ -73,7 +72,6 @@ HEADERS += \
 SOURCES += \
     age_common/age_debug.cpp \
     age_common/age_downsampler.cpp \
-    age_common/age_emulator.cpp \
     age_common/age_pcm_ring_buffer.cpp \
     age_common/age_screen_buffer.cpp \
     age_common/age_utilities.cpp \

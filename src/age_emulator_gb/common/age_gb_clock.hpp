@@ -25,6 +25,7 @@
 #include <age_types.hpp>
 
 #include "age_gb_device.hpp"
+#include "age_gb_logger.hpp"
 
 
 
@@ -62,8 +63,10 @@ namespace age
 
     class gb_clock
     {
+        AGE_DISABLE_COPY(gb_clock);
+
     public:
-        explicit gb_clock(const gb_device& device);
+        explicit gb_clock(gb_logger& logger, const gb_device& device);
 
         //! \brief Get the current 4Mhz cycle.
         //!
@@ -89,7 +92,15 @@ namespace age
         [[nodiscard]] uint8_t read_div() const;
         void                  write_div();
 
+        // this method is part of the header to enable compile time optimization
+        [[nodiscard]] gb_log_message_stream& log(gb_log_type type) const
+        {
+            return m_logger.log(type, m_clock_cycle, m_div_offset);
+        }
+
     private:
+        gb_logger& m_logger;
+
         int     m_clock_cycle          = 0;
         int8_t  m_machine_cycle_clocks = 4;
         uint8_t m_key1                 = 0x7E;

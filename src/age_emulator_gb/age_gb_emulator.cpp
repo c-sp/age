@@ -20,15 +20,56 @@
 
 
 
-//---------------------------------------------------------
-//
-//   public methods
-//
-//---------------------------------------------------------
-
-age::gb_test_info age::gb_emulator::get_test_info() const
+age::gb_emulator::gb_emulator(const uint8_vector& rom, gb_hardware hardware, gb_colors_hint colors_hint)
+    : m_impl(new gb_emulator_impl(rom, hardware, colors_hint))
 {
-    return m_impl->get_test_info();
+}
+
+age::gb_emulator::~gb_emulator()
+{
+    delete m_impl;
+}
+
+
+
+std::string age::gb_emulator::get_emulator_title() const
+{
+    return m_impl->get_emulator_title();
+}
+
+age::int16_t age::gb_emulator::get_screen_width() const
+{
+    return m_impl->get_screen_width();
+}
+
+age::int16_t age::gb_emulator::get_screen_height() const
+{
+    return m_impl->get_screen_height();
+}
+
+const age::pixel_vector& age::gb_emulator::get_screen_front_buffer() const
+{
+    return m_impl->get_screen_front_buffer();
+}
+
+const age::pcm_vector& age::gb_emulator::get_audio_buffer() const
+{
+    return m_impl->get_audio_buffer();
+}
+
+int age::gb_emulator::get_pcm_sampling_rate() const
+{
+    return m_impl->get_pcm_sampling_rate();
+}
+
+int age::gb_emulator::get_cycles_per_second() const
+{
+    return m_impl->get_cycles_per_second();
+}
+
+age::int64_t age::gb_emulator::get_emulated_cycles() const
+{
+    return m_impl->get_emulated_cycles();
 }
 
 age::uint8_vector age::gb_emulator::get_persistent_ram() const
@@ -51,39 +92,17 @@ void age::gb_emulator::set_buttons_up(int buttons)
     m_impl->set_buttons_up(buttons);
 }
 
-
-
-//---------------------------------------------------------
-//
-//   protected methods
-//
-//---------------------------------------------------------
-
-int age::gb_emulator::inner_emulate(int cycles_to_emulate)
+bool age::gb_emulator::emulate(int cycles_to_emulate)
 {
-    return m_impl->inner_emulate(cycles_to_emulate);
+    return m_impl->emulate(cycles_to_emulate);
 }
 
-std::string age::gb_emulator::inner_get_emulator_title() const
+age::gb_test_info age::gb_emulator::get_test_info() const
 {
-    return m_impl->inner_get_emulator_title();
+    return m_impl->get_test_info();
 }
 
-
-
-//---------------------------------------------------------
-//
-//   object creation & destruction
-//
-//---------------------------------------------------------
-
-age::gb_emulator::gb_emulator(const uint8_vector& rom, gb_hardware hardware, gb_colors_hint colors_hint)
-    : emulator(gb_screen_width, gb_screen_height, gb_clock_cycles_per_second / 2, gb_clock_cycles_per_second),
-      m_impl(new gb_emulator_impl(rom, hardware, colors_hint, get_pcm_vector(), get_screen_buffer()))
+const std::vector<age::gb_log_entry>& age::gb_emulator::get_log_entries()
 {
-}
-
-age::gb_emulator::~gb_emulator()
-{
-    delete m_impl;
+    return m_impl->get_log_entries();
 }

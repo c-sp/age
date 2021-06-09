@@ -38,6 +38,7 @@ namespace age::tester
         bool m_dmg_only = false;
 
         bool m_help         = false;
+        bool m_write_logs   = false;
         bool m_print_passed = false;
         bool m_print_failed = false;
 

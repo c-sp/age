@@ -100,7 +100,7 @@ age::qt_emulator::~qt_emulator()
 //
 //---------------------------------------------------------
 
-QSharedPointer<age::emulator> age::qt_emulator::get_emulator()
+QSharedPointer<age::gb_emulator> age::qt_emulator::get_emulator()
 {
     return m_emulator;
 }

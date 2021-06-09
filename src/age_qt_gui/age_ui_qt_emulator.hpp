@@ -24,8 +24,7 @@
 #include <QByteArray>
 #include <QString>
 
-#include <age_types.hpp>
-#include <emulator/age_emulator.hpp>
+#include <emulator/age_gb_emulator.hpp>
 #include <emulator/age_gb_types.hpp>
 
 #include "age_ui_qt_user_value_store.hpp"
@@ -41,11 +40,11 @@ namespace age
         qt_emulator(const QByteArray& rom, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store);
         ~qt_emulator();
 
-        QSharedPointer<emulator> get_emulator();
+        QSharedPointer<gb_emulator> get_emulator();
 
     private:
         QString                             m_ram_key;
-        QSharedPointer<emulator>            m_emulator;
+        QSharedPointer<gb_emulator>         m_emulator;
         QSharedPointer<qt_user_value_store> m_user_value_store;
     };
 
