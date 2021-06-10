@@ -207,7 +207,7 @@ namespace age
             return m_dummy_stream;
         }
 
-        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries()
+        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const
         {
             return m_no_entries;
         }
