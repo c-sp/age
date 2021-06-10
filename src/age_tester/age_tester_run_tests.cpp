@@ -207,7 +207,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                         }
 
                         pool.queue_task([&results, &opts, rom_path, rom_contents, hardware, colors_hint, run]() {
-                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, colors_hint));
+                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, colors_hint, opts.m_log_categories));
                             auto                              passed = run(*emulator);
                             results.push({with_hardware_indicator(rom_path, hardware), passed});
 

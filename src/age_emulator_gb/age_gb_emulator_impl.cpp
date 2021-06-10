@@ -29,7 +29,7 @@ std::string age::gb_emulator_impl::get_emulator_title() const
     constexpr char ascii_A           = 0x41;
     constexpr char ascii_Z           = 0x5A;
 
-    auto cart_title = m_memory.get_cartridge_title();
+    auto        cart_title = m_memory.get_cartridge_title();
     std::string result;
 
     for (char c : cart_title)
@@ -139,7 +139,7 @@ age::gb_test_info age::gb_emulator_impl::get_test_info() const
     return m_cpu.get_test_info();
 }
 
-const std::vector<age::gb_log_entry>& age::gb_emulator_impl::get_log_entries()
+std::vector<age::gb_log_entry> age::gb_emulator_impl::get_log_entries() const
 {
     return m_logger.get_log_entries();
 }
@@ -234,8 +234,11 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 
 age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
                                         gb_hardware         hardware,
-                                        gb_colors_hint      colors_hint)
-    : m_screen_buffer(gb_screen_width, gb_screen_height),
+                                        gb_colors_hint      colors_hint,
+                                        gb_log_categories   log_categories)
+
+    : m_logger(std::move(log_categories)),
+      m_screen_buffer(gb_screen_width, gb_screen_height),
       m_memory(rom),
       m_device(m_memory.read_byte(gb_cia_ofs_cgb), hardware),
       m_clock(m_logger, m_device),

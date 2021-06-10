@@ -51,8 +51,9 @@ namespace age
     {
     public:
         explicit gb_emulator(const uint8_vector& rom,
-                             gb_hardware         hardware    = gb_hardware::auto_detect,
-                             gb_colors_hint      colors_hint = gb_colors_hint::default_colors);
+                             gb_hardware         hardware       = gb_hardware::auto_detect,
+                             gb_colors_hint      colors_hint    = gb_colors_hint::default_colors,
+                             gb_log_categories   log_categories = {});
         ~gb_emulator();
 
         //!
@@ -158,7 +159,7 @@ namespace age
 
         [[nodiscard]] gb_test_info get_test_info() const;
 
-        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries();
+        [[nodiscard]] std::vector<gb_log_entry> get_log_entries() const;
 
     private:
         // std::unique_ptr<gb_emulator_impl> does not work on incomplete types

@@ -93,12 +93,18 @@ namespace age
         void                  write_div();
 
         // this method is part of the header to enable compile time optimization
-        [[nodiscard]] gb_log_message_stream& log(gb_log_type type) const
+        [[nodiscard]] gb_log_message_stream& log(gb_log_category category) const
         {
-            return m_logger.log(type, m_clock_cycle, m_div_offset);
+            return m_logger.log(category, m_clock_cycle, m_div_offset);
         }
 
     private:
+        // this method is part of the header to enable compile time optimization
+        [[nodiscard]] gb_log_message_stream& log() const
+        {
+            return m_logger.log(gb_log_category::lc_clock, m_clock_cycle, m_div_offset);
+        }
+
         gb_logger& m_logger;
 
         int     m_clock_cycle          = 0;
@@ -118,27 +124,9 @@ namespace age
 #define AGE_GB_MCLOG(log) AGE_GB_CLOG(m_clock.get_clock_cycle(), m_clock.get_div_offset(), log)
 
 #if 0
-#define AGE_GB_CLOG_CLOCK(log) AGE_GB_CLOG(m_clock_cycle, m_div_offset, log)
-#else
-#define AGE_GB_CLOG_CLOCK(log)
-#endif
-
-#if 0
 #define AGE_GB_CLOG_CPU(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_CPU(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_DIV(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_DIV(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_EVENTS(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_EVENTS(log)
 #endif
 
 #if 0
@@ -186,17 +174,11 @@ namespace age
 #endif
 
 #if 0
-#define AGE_GB_CLOG_SOUND(log) AGE_GB_MCLOG(log)
+#define AGE_GB_CLOG_SOUND(log)      AGE_GB_MCLOG(log)
 #define AGE_GB_CLOG_SOUND_STEP(log) AGE_GB_CLOG(m_clk_current_state, m_clock.get_div_offset(), log)
 #else
 #define AGE_GB_CLOG_SOUND(log)
 #define AGE_GB_CLOG_SOUND_STEP(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_TIMER(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_TIMER(log)
 #endif
 
 

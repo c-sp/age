@@ -24,6 +24,7 @@
 #include <age_types.hpp>
 
 #include <string>
+#include <unordered_set>
 
 
 
@@ -87,25 +88,28 @@ namespace age
 
 
 
-    enum class gb_log_type
+    enum class gb_log_category
     {
-        LT_CLOCK,
-        LT_TIMER,
+        lc_clock,
+        lc_events,
+        lc_timer,
     };
+
+    using gb_log_categories = std::unordered_set<gb_log_category>;
 
     struct gb_log_entry
     {
-        gb_log_entry(gb_log_type type, int clock, int div_offset, std::string message)
-            : m_type(type),
+        gb_log_entry(gb_log_category category, int clock, int div_offset, std::string message)
+            : m_category(category),
               m_clock(clock),
               m_div_offset(div_offset),
-              m_message(message)
+              m_message(std::move(message))
         {}
 
-        gb_log_type m_type;
-        int         m_clock;
-        int         m_div_offset;
-        std::string m_message;
+        gb_log_category m_category;
+        int             m_clock;
+        int             m_div_offset;
+        std::string     m_message;
     };
 
 } // namespace age

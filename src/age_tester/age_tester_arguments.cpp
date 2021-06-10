@@ -67,6 +67,9 @@ namespace
         "  https://github.com/c-sp/gameboy-test-roms",
         "  https://github.com/c-sp/AGE",
         "",
+#ifndef AGE_COMPILE_LOGGER
+        "This test runner has been compiled without logging support!",
+#endif
         "AGE git revision: %git%",
         "",
         "Usage:",
@@ -335,6 +338,13 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     {
         options.m_test_suite_path /= argv[optind];
     }
+
+    //! \todo adjust & evaluate -l parameter
+    options.m_log_categories = {
+        gb_log_category::lc_clock,
+        gb_log_category::lc_events,
+        gb_log_category::lc_timer,
+    };
 
     return options;
 }

@@ -83,11 +83,10 @@ bool age::gb_timer::update_timer_state()
     m_clk_last_overflow     = clk_last_inc - (incs_since_overflow << m_clock_shift);
     AGE_ASSERT(m_clk_last_overflow <= clk_current);
 
-    AGE_GB_CLOG_TIMER("timer overflow:")
-    AGE_GB_CLOG_TIMER("    * last overflow on clock cycle " << m_clk_last_overflow)
-    AGE_GB_CLOG_TIMER("    * TIMA == " << AGE_LOG_HEX(tima))
-    AGE_GB_CLOG_TIMER("    * setting TIMA = " << AGE_LOG_HEX8(m_tima)
-                                              << " (TMA == " << AGE_LOG_HEX8(m_tma) << ")")
+    log() << "timer overflow on clock cycle " << m_clk_last_overflow
+          << "\n    * TIMA == " << log_hex8(tima)
+          << "\n    * setting TIMA = " << log_hex8(m_tima) << " (TMA == " << log_hex8(m_tma) << ")";
+
     bool interrupt_triggered = false;
 
     // trigger interrupt, if
@@ -126,7 +125,6 @@ void age::gb_timer::after_speed_change()
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
-        AGE_GB_CLOG_TIMER("timer off at speed change => nothing to do")
         log() << "timer off at speed change => nothing to do";
         return;
     }
@@ -144,34 +142,22 @@ void age::gb_timer::after_speed_change()
 
     // calculate the new timer overflow clock cycle
     clks_until_overflow = m_clock.is_double_speed()
-                              ? clks_until_overflow >> 1  // switched to double speed
-                              : clks_until_overflow << 1; // switched to single speed
+                              ? clks_until_overflow / 2  // switched to double speed
+                              : clks_until_overflow * 2; // switched to single speed
 
     int clk_overflow_new = clk_current + clks_until_overflow;
 
-    AGE_GB_CLOG_TIMER("timer at speed change:")
-    auto& msg = log() << "timer at speed change:";
-    AGE_GB_CLOG_TIMER("    * TIMA == " << AGE_LOG_HEX8(m_tima))
-    msg << log_detail() << "TIMA == " << log_hex8(m_tima);
-    AGE_GB_CLOG_TIMER("    * next increment (old) in " << (1 << m_clock_shift) << " clock cycles ("
-                                                       << (m_clock.get_clock_cycle() + (1 << m_clock_shift)) << ")")
-    msg << log_detail() << "next increment (old) in " << (1 << m_clock_shift) << " clock cycles"
-        << " (on clock cycle " << (m_clock.get_clock_cycle() + (1 << m_clock_shift)) << ")";
+    auto& msg = log() << "timer at speed change:"
+                      << "\n    * TIMA == " << log_hex8(m_tima)
+                      << "\n    * next increment (old) in " << log_in_clks(1 << m_clock_shift, m_clock.get_clock_cycle());
 
     // update timer state
     m_clock_shift = get_clock_shift();
     set_clk_timer_zero(clk_overflow_new - 0x100 * (1 << m_clock_shift));
 
-    AGE_GB_CLOG_TIMER("    * next increment (new) in " << (1 << m_clock_shift) << " clock cycles ("
-                                                       << (m_clock.get_clock_cycle() + (1 << m_clock_shift)) << ")")
-    msg << log_detail() << "next increment (new) in " << (1 << m_clock_shift) << " clock cycles"
-        << " (on clock cycle " << (m_clock.get_clock_cycle() + (1 << m_clock_shift)) << ")";
-
-    AGE_GB_CLOG_TIMER("    * timer overflow (old) at clock cycle " << clk_overflow_old)
-    msg << log_detail() << "timer overflow (old) at clock cycle " << clk_overflow_old;
-
-    AGE_GB_CLOG_TIMER("    * timer overflow (new) at clock cycle " << clk_overflow_new)
-    msg << log_detail() << "timer overflow (new) at clock cycle " << clk_overflow_new;
+    msg << "\n    * next increment (new) in " << log_in_clks(1 << m_clock_shift, m_clock.get_clock_cycle())
+        << "\n    * timer overflow (old) at clock cycle " << clk_overflow_old
+        << "\n    * timer overflow (new) at clock cycle " << clk_overflow_new;
 }
 
 
@@ -180,7 +166,7 @@ void age::gb_timer::after_div_reset(bool during_stop)
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
-        AGE_GB_CLOG_TIMER("timer off at DIV reset => nothing to do")
+        log() << "timer off at DIV reset => nothing to do";
         return;
     }
     // DIV has been reset
@@ -194,13 +180,13 @@ void age::gb_timer::after_div_reset(bool during_stop)
     // calculate potential immediate timer increment by div reset
     auto reset_details = m_clock.get_div_reset_details(clks_per_inc);
 
-    AGE_GB_CLOG_TIMER("timer at DIV reset:")
+    auto& msg = log() << "timer at DIV reset:";
 
     // speed change TAC 00 glitch (see age-test-roms/speed-switch/switch-speed-tima-00-cgb):
     // no immediate action by div reset on the exact first machine cycle
     if (during_stop && ((m_tac & 0x03) == 0) && (reset_details.m_clk_adjust == -clks_per_inc / 2))
     {
-        AGE_GB_CLOG_TIMER("    * TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle");
+        msg << "\n    * TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle";
         AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
         reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
     }
@@ -209,14 +195,12 @@ void age::gb_timer::after_div_reset(bool during_stop)
     set_clk_timer_zero(m_clk_timer_zero + reset_details.m_clk_adjust);
     AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) >= m_clock.get_clock_cycle())
 
-    AGE_GB_CLOG_TIMER("    * TIMA (old) == " << AGE_LOG_HEX8(m_tima))
-    AGE_GB_CLOG_TIMER("    * TIMA (new) == " << AGE_LOG_HEX8((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift))
-    AGE_GB_CLOG_TIMER("    * next increment (old) in " << reset_details.m_old_next_increment << " clock cycles ("
-                                                       << (m_clock.get_clock_cycle() + reset_details.m_old_next_increment) << ")")
-    AGE_GB_CLOG_TIMER("    * next increment (new) in " << reset_details.m_new_next_increment << " clock cycles ("
-                                                       << (m_clock.get_clock_cycle() + reset_details.m_new_next_increment) << ")")
-    AGE_GB_CLOG_TIMER("    * +/- clock cycles until overflow: " << reset_details.m_clk_adjust)
-    AGE_GB_CLOG_TIMER("    * overflow on clock cycle " << (m_clk_timer_zero + 0x100 * clks_per_inc))
+    msg << "\n    * TIMA (old) == " << log_hex8(m_tima)
+        << "\n    * TIMA (new) == " << log_hex8((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift)
+        << "\n    * next increment (old) in " << log_in_clks(reset_details.m_old_next_increment, m_clock.get_clock_cycle())
+        << "\n    * next increment (new) in " << log_in_clks(reset_details.m_new_next_increment, m_clock.get_clock_cycle())
+        << "\n    * +/- clock cycles until overflow: " << reset_details.m_clk_adjust
+        << "\n    * overflow on clock cycle " << (m_clk_timer_zero + 0x100 * clks_per_inc);
 }
 
 
@@ -244,13 +228,10 @@ void age::gb_timer::start_timer()
     int overflow_incs       = 0x100 - m_tima;
     int clks_until_overflow = clks_next_inc + ((overflow_incs - 1) << clk_shift);
 
-    AGE_GB_CLOG_TIMER("timer started/updated:")
-    AGE_GB_CLOG_TIMER("    * clock shift " << AGE_LOG_DEC(clk_shift)
-                                           << " (increment each " << clks_per_inc << " clock cycles)")
-    AGE_GB_CLOG_TIMER("    * next increment in " << clks_next_inc << " clock cycles ("
-                                                 << (current_clk + clks_next_inc) << ")")
-    AGE_GB_CLOG_TIMER("    * overflow in " << clks_until_overflow << " clock cycles ("
-                                           << (current_clk + clks_until_overflow) << ")")
+    log() << "timer started/updated"
+          << "\n    * clock shift " << log_dec(clk_shift) << " (increment each " << clks_per_inc << " clock cycles)"
+          << "\n    * next increment in " << log_in_clks(clks_next_inc, current_clk)
+          << "\n    * overflow in " << log_in_clks(clks_until_overflow, current_clk);
 
     m_clock_shift = clk_shift;
     set_clk_timer_zero(current_clk + clks_until_overflow - 0x100 * clks_per_inc);
@@ -270,7 +251,7 @@ void age::gb_timer::stop_timer()
     // Stopping the timer while the clock bit triggering timer increments is
     // high causes an immediate timer increment.
     int clks_per_inc = 1 << m_clock_shift;
-    int trigger_bit  = clks_per_inc >> 1;
+    int trigger_bit  = clks_per_inc / 2;
 
     int timer_clock = m_clock.get_clock_cycle() + m_clock.get_div_offset();
     if (timer_clock & trigger_bit)
@@ -279,7 +260,7 @@ void age::gb_timer::stop_timer()
         update_state(); //! \todo may this trigger an interrupt?
     }
 
-    AGE_GB_CLOG_TIMER("timer stopped")
+    log() << "timer stopped";
     m_clock_shift       = 0;
     m_clk_timer_zero    = gb_no_clock_cycle;
     m_clk_last_overflow = gb_no_clock_cycle;

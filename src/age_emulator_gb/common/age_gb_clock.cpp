@@ -63,7 +63,7 @@ age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
         m_clock_cycle = 0xAC * 0x100;
         m_clock_cycle -= 52;
     }
-    AGE_GB_CLOG_CLOCK("clock initialized to " << AGE_LOG_HEX(m_clock_cycle))
+    log() << "clock initialized to " << log_hex(m_clock_cycle);
     AGE_ASSERT((m_clock_cycle % 4) == 0);
 }
 
@@ -99,8 +99,8 @@ void age::gb_clock::tick_2_clock_cycles()
 
 void age::gb_clock::set_back_clock(int clock_cycle_offset)
 {
-    AGE_GB_CLOG_CLOCK("set back clock to " << (m_clock_cycle - clock_cycle_offset)
-                                           << " (-" << clock_cycle_offset << ")")
+    log() << "set back clock to " << (m_clock_cycle - clock_cycle_offset)
+          << " (-" << clock_cycle_offset << ")";
 
     gb_set_back_clock_cycle(m_clock_cycle, clock_cycle_offset);
 }
@@ -111,7 +111,7 @@ void age::gb_clock::tick_speed_change_delay()
 {
     // same number of machine cycles, different number of T4 cycles
     int delay = is_double_speed() ? 0x10000 : 0x20000;
-    AGE_GB_CLOG_CLOCK("about to apply speed change delay of " << AGE_LOG_HEX(delay) << " clock cycles");
+    log() << "applying speed change delay of " << log_hex(delay) << " clock cycles";
     m_clock_cycle += delay;
 }
 
@@ -127,7 +127,7 @@ bool age::gb_clock::change_speed()
     const bool double_speed = (m_key1 & 0x80) > 0;
     m_machine_cycle_clocks  = double_speed ? 2 : 4;
 
-    AGE_GB_CLOG_CLOCK((double_speed ? "double speed activated" : "single speed activated"))
+    log() << ((double_speed ? "double speed activated" : "single speed activated"));
     return true;
 }
 
@@ -135,14 +135,14 @@ bool age::gb_clock::change_speed()
 
 age::uint8_t age::gb_clock::read_key1() const
 {
-    AGE_GB_CLOG_CLOCK("read key1 = " << AGE_LOG_HEX8(m_key1))
+    log() << "read key1 == " << log_hex8(m_key1);
     return m_key1;
 }
 
 void age::gb_clock::write_key1(uint8_t value)
 {
     m_key1 = (m_key1 & 0xFE) | (value & 0x01);
-    AGE_GB_CLOG_CLOCK("write key1 = " << AGE_LOG_HEX8(m_key1))
+    log() << "write key1 = " << log_hex8(m_key1);
 }
 
 
@@ -191,14 +191,15 @@ int age::gb_clock::get_div_offset() const
 
 age::uint8_t age::gb_clock::read_div() const
 {
-    int shift  = is_double_speed() ? 7 : 8;
-    int result = (m_clock_cycle + m_div_offset) >> shift;
+    int     shift       = is_double_speed() ? 7 : 8;
+    int     result      = (m_clock_cycle + m_div_offset) >> shift;
+    uint8_t result_byte = result & 0xFF;
 
-    AGE_GB_CLOG_CLOCK("read DIV " << AGE_LOG_HEX8(result & 0xFF))
-    AGE_GB_CLOG_CLOCK("    * last increment on lock cycle " << ((result << shift) - m_div_offset))
-    AGE_GB_CLOG_CLOCK("    * next increment on lock cycle " << (((result + 1) << shift) - m_div_offset))
+    log() << "read DIV == " << log_hex8(result_byte)
+          << "\n    * last increment on clock cycle " << ((result << shift) - m_div_offset)
+          << "\n    * next increment on clock cycle " << (((result + 1) << shift) - m_div_offset);
 
-    return result & 0xFF;
+    return result_byte;
 }
 
 void age::gb_clock::write_div()
@@ -206,8 +207,10 @@ void age::gb_clock::write_div()
     int div_counter    = m_clock_cycle & 0xFFFF;
     int new_div_offset = 0x10000 - div_counter;
 
-    AGE_GB_CLOG_CLOCK("DIV reset, changing offset from " << AGE_LOG_HEX16(m_div_offset)
-                                                         << " to " AGE_LOG_HEX16(new_div_offset))
+    // log before adjusting m_div_offset
+    log() << "DIV reset, changed DIV offset from " << log_hex16(m_div_offset)
+          << " to " << log_hex16(new_div_offset);
+
     m_old_div_offset = m_div_offset;
     m_div_offset     = new_div_offset;
 }

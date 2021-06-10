@@ -104,6 +104,17 @@ int main(int argc, char** argv)
               << "looking for test roms in: " << opts.m_test_suite_path.string()
               << std::endl;
 
+#ifndef AGE_COMPILE_LOGGER
+    opts.m_log_categories = {};
+#endif
+    if (opts.m_log_categories.empty())
+    {
+        std::cout << "test rom logs disabled" << std::endl;
+    }
+    else
+    {
+    }
+
     if (!opts.m_whitelist.empty())
     {
         std::cout << "whitelist: " << opts.m_whitelist << std::endl;

@@ -51,7 +51,8 @@ namespace age
     public:
         gb_emulator_impl(const uint8_vector& rom,
                          gb_hardware         hardware,
-                         gb_colors_hint      colors_hint);
+                         gb_colors_hint      colors_hint,
+                         gb_log_categories   log_categories);
 
         [[nodiscard]] std::string get_emulator_title() const;
 
@@ -75,7 +76,7 @@ namespace age
 
         [[nodiscard]] gb_test_info get_test_info() const;
 
-        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries();
+        [[nodiscard]] std::vector<gb_log_entry> get_log_entries() const;
 
     private:
         int emulate_cycles(int cycles_to_emulate);

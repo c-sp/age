@@ -20,8 +20,12 @@
 
 
 
-age::gb_emulator::gb_emulator(const uint8_vector& rom, gb_hardware hardware, gb_colors_hint colors_hint)
-    : m_impl(new gb_emulator_impl(rom, hardware, colors_hint))
+age::gb_emulator::gb_emulator(const uint8_vector& rom,
+                              gb_hardware hardware,
+                              gb_colors_hint colors_hint,
+                              gb_log_categories log_categories)
+
+    : m_impl(new gb_emulator_impl(rom, hardware, colors_hint, log_categories))
 {
 }
 
@@ -102,7 +106,7 @@ age::gb_test_info age::gb_emulator::get_test_info() const
     return m_impl->get_test_info();
 }
 
-const std::vector<age::gb_log_entry>& age::gb_emulator::get_log_entries()
+std::vector<age::gb_log_entry> age::gb_emulator::get_log_entries() const
 {
     return m_impl->get_log_entries();
 }

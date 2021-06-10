@@ -17,6 +17,7 @@
 #ifndef AGE_TESTER_ARGUMENTS_HPP
 #define AGE_TESTER_ARGUMENTS_HPP
 
+#include <emulator/age_gb_types.hpp>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -48,6 +49,7 @@ namespace age::tester
         //!
         std::filesystem::path m_test_suite_path = {};
 
+        gb_log_categories m_log_categories = {};
         std::string m_whitelist = {};
         std::string m_blacklist = {};
 
