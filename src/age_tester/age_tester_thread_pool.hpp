@@ -26,17 +26,17 @@
 
 namespace age::tester
 {
-    template<typename T>
+    template<typename Element>
     class blocking_vector
     {
     public:
-        void push(T t)
+        void push(Element t)
         {
             std::unique_lock lock(m_mutex);
             m_vector.emplace_back(std::move(t));
         }
 
-        std::vector<T> copy() const
+        std::vector<Element> copy() const
         {
             std::unique_lock lock(m_mutex);
             return m_vector;
@@ -49,8 +49,8 @@ namespace age::tester
         }
 
     private:
-        mutable std::mutex m_mutex; //!< mutable to allow locking in const functions
-        std::vector<T>     m_vector;
+        mutable std::mutex   m_mutex; //!< mutable to allow locking in const functions
+        std::vector<Element> m_vector;
     };
 
 
@@ -59,6 +59,8 @@ namespace age::tester
 
     class thread_pool
     {
+        AGE_DISABLE_COPY(thread_pool);
+
     public:
         explicit thread_pool(size_t num_threads = std::thread::hardware_concurrency())
         {
@@ -144,7 +146,7 @@ namespace age::tester
 
         [[nodiscard]] bool should_terminate() const
         {
-            return m_tasks.empty() && m_terminate_when_idle && !m_working_threads_count;
+            return m_tasks.empty() && m_terminate_when_idle && (m_working_threads_count == 0);
         }
     };
 

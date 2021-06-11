@@ -33,7 +33,7 @@
 namespace age
 {
 
-    template<typename DERIVED_TYPE>
+    template<typename DerivedClass>
     class gb_sample_generator
     {
     public:
@@ -44,7 +44,7 @@ namespace age
             AGE_ASSERT(m_frequency_timer_period > 0)
             AGE_ASSERT(m_frequency_timer >= 0)
 
-            uint32_t channel_multiplier = static_cast<DERIVED_TYPE*>(this)->get_multiplier();
+            uint32_t channel_multiplier = static_cast<DerivedClass*>(this)->get_multiplier();
             AGE_ASSERT((channel_multiplier & 0xFFFFU) <= 8)
             AGE_ASSERT((channel_multiplier >> 16) <= 8)
 
@@ -75,7 +75,7 @@ namespace age
                 if (m_frequency_timer == 0)
                 {
                     m_frequency_timer = m_frequency_timer_period;
-                    m_wave_sample     = static_cast<DERIVED_TYPE*>(this)->next_wave_sample();
+                    m_wave_sample     = static_cast<DerivedClass*>(this)->next_wave_sample();
                     calculate_output_sample();
                 }
             }

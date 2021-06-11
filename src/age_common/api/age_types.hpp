@@ -73,8 +73,8 @@ namespace age
 
     using size_t = std::size_t;
 
-    template<size_t _size>
-    using uint8_array = std::array<uint8_t, _size>;
+    template<size_t Size>
+    using uint8_array = std::array<uint8_t, Size>;
 
     using uint8_vector = std::vector<uint8_t>;
 
@@ -93,10 +93,10 @@ namespace age
     //!
     //! Can be replaced by std::to_underlying with C++23.
     //!
-    template<typename E>
-    constexpr auto to_underlying(E e) -> typename std::underlying_type<E>::type
+    template<typename Enum>
+    constexpr auto to_underlying(Enum e) -> typename std::underlying_type<Enum>::type
     {
-        return static_cast<typename std::underlying_type<E>::type>(e);
+        return static_cast<typename std::underlying_type<Enum>::type>(e);
     }
 
 } // namespace age

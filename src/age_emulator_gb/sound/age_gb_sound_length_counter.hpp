@@ -36,16 +36,16 @@ namespace age
 
 
 
-    template<typename BASE_CLASS>
-    class gb_length_counter : public BASE_CLASS
+    template<typename BaseClass>
+    class gb_length_counter : public BaseClass
     {
         static_assert(
-            std::is_base_of<gb_sound_channel, BASE_CLASS>::value,
+            std::is_base_of<gb_sound_channel, BaseClass>::value,
             "gb_length_counter must derive from gb_sound_channel");
 
     public:
         explicit gb_length_counter(uint8_t counter_mask, const gb_sound_logger* clock)
-            : BASE_CLASS(clock),
+            : BaseClass(clock),
               m_counter_mask(counter_mask)
         {
             AGE_ASSERT(m_counter_mask >= 0x3F)
@@ -69,7 +69,7 @@ namespace age
                     m_counter -= decrement;
                     if (m_counter == 0)
                     {
-                        BASE_CLASS::deactivate();
+                        BaseClass::deactivate();
                     }
                 }
             }
@@ -91,7 +91,7 @@ namespace age
                     --m_counter;
                     if (m_counter == 0)
                     {
-                        BASE_CLASS::deactivate();
+                        BaseClass::deactivate();
                     }
                 }
             }

@@ -33,15 +33,15 @@
 namespace age
 {
 
-    template<typename BASE_CLASS>
-    class gb_volume_envelope : public BASE_CLASS
+    template<typename BaseClass>
+    class gb_volume_envelope : public BaseClass
     {
         static_assert(
-            std::is_base_of<gb_sound_channel, BASE_CLASS>::value,
+            std::is_base_of<gb_sound_channel, BaseClass>::value,
             "gb_volume_envelope must derive from gb_sound_channel");
 
     public:
-        using BASE_CLASS::BASE_CLASS;
+        using BaseClass::BaseClass;
 
         [[nodiscard]] uint8_t read_nrX2() const
         {
@@ -117,7 +117,7 @@ namespace age
             bool is_silent = (m_nrX2 & 0xF8U) == 0;
             if (is_silent)
             {
-                BASE_CLASS::deactivate();
+                BaseClass::deactivate();
             }
             return is_silent;
         }
@@ -126,7 +126,7 @@ namespace age
         {
             AGE_ASSERT((new_volume >= 0) && (new_volume < 0x10))
             m_volume = static_cast<int8_t>(new_volume);
-            BASE_CLASS::set_volume(m_volume * 4);
+            BaseClass::set_volume(m_volume * 4);
         }
 
         bool adjust_volume()

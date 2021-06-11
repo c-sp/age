@@ -55,6 +55,7 @@ namespace
             case age::gb_log_category::lc_clock: return "clock";
             case age::gb_log_category::lc_events: return "events";
             case age::gb_log_category::lc_serial: return "serial";
+            case age::gb_log_category::lc_sound: return "sound";
             case age::gb_log_category::lc_timer: return "timer";
         }
         return "";

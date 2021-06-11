@@ -33,15 +33,15 @@
 namespace age
 {
 
-    template<typename BASE_CLASS>
-    class gb_frequency_sweep : public BASE_CLASS
+    template<typename BaseClass>
+    class gb_frequency_sweep : public BaseClass
     {
         static_assert(
-            std::is_base_of<gb_sound_channel, BASE_CLASS>::value,
+            std::is_base_of<gb_sound_channel, BaseClass>::value,
             "gb_frequency_sweep must derive from gb_sound_channel");
 
     public:
-        using BASE_CLASS::BASE_CLASS;
+        using BaseClass::BaseClass;
 
         void write_nrX0(uint8_t nrX0)
         {
@@ -51,7 +51,7 @@ namespace age
 
             if (m_swept_down && m_sweep_up)
             {
-                BASE_CLASS::deactivate();
+                BaseClass::deactivate();
             }
         }
 
@@ -60,7 +60,7 @@ namespace age
             m_skip_first_step = skip_first_step;
 
             m_swept_down     = false;
-            m_frequency_bits = BASE_CLASS::get_frequency_bits();
+            m_frequency_bits = BaseClass::get_frequency_bits();
 
             // enable sweep if period or shift are set
             m_sweep_enabled = (m_period + m_shift) > 0;
@@ -73,7 +73,7 @@ namespace age
             bool deactivate = (m_shift > 0) && next_sweep_invalid();
             if (deactivate)
             {
-                BASE_CLASS::deactivate();
+                BaseClass::deactivate();
             }
             return deactivate;
         }
@@ -96,7 +96,7 @@ namespace age
                         if (!deactivate && (m_shift > 0))
                         {
                             m_frequency_bits = frequency_bits;
-                            BASE_CLASS::set_frequency_bits(frequency_bits);
+                            BaseClass::set_frequency_bits(frequency_bits);
                             deactivate = next_sweep_invalid();
                         }
                     }

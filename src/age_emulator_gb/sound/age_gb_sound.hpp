@@ -35,8 +35,6 @@
 #include "age_gb_sound_sweep.hpp"
 #include "age_gb_sound_volume.hpp"
 
-#include <array>
-
 
 
 namespace age

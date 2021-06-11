@@ -43,48 +43,48 @@
 
 namespace age
 {
-    template<typename T, typename U>
+    template<typename Cycles, typename Clock>
     struct log_in_clks
     {
-        explicit log_in_clks(T clock_cycles, U current_clock_cycle)
+        explicit log_in_clks(Cycles clock_cycles, Clock current_clock_cycle)
             : m_clock_cycles(clock_cycles),
               m_current_clock_cycle(current_clock_cycle)
         {}
-        T m_clock_cycles;
-        U m_current_clock_cycle;
+        Cycles m_clock_cycles;
+        Clock m_current_clock_cycle;
     };
 
-    template<int BITS, typename T>
+    template<int Bits, typename Value>
     struct log_hex_v
     {
-        static_assert(BITS % 4 == 0);
-        explicit log_hex_v(T value) : m_value(value) {}
-        T m_value;
+        static_assert(Bits % 4 == 0);
+        explicit log_hex_v(Value value) : m_value(value) {}
+        Value m_value;
     };
 
-    template<typename T>
-    log_hex_v<0, T> log_hex(T value)
+    template<typename Value>
+    log_hex_v<0, Value> log_hex(Value value)
     {
-        return log_hex_v<0, T>(value);
+        return log_hex_v<0, Value>(value);
     }
 
-    template<typename T>
-    log_hex_v<8, T> log_hex8(T value)
+    template<typename Value>
+    log_hex_v<8, Value> log_hex8(Value value)
     {
-        return log_hex_v<8, T>(value);
+        return log_hex_v<8, Value>(value);
     }
 
-    template<typename T>
-    log_hex_v<16, T> log_hex16(T value)
+    template<typename Value>
+    log_hex_v<16, Value> log_hex16(Value value)
     {
-        return log_hex_v<16, T>(value);
+        return log_hex_v<16, Value>(value);
     }
 
-    template<typename T>
+    template<typename Value>
     struct log_dec
     {
-        explicit log_dec(T value) : m_value(value) {}
-        T m_value;
+        explicit log_dec(Value value) : m_value(value) {}
+        Value m_value;
     };
 
     class gb_log_message_stream
@@ -110,26 +110,26 @@ namespace age
         gb_log_message_stream& operator=(const gb_log_message_stream&) = delete;
         gb_log_message_stream& operator=(gb_log_message_stream&&) = default;
 
-        template<typename T, typename U>
-        gb_log_message_stream& operator<<(const log_in_clks<T, U>& value)
+        template<typename Cycles, typename Clock>
+        gb_log_message_stream& operator<<(const log_in_clks<Cycles, Clock>& value)
         {
             m_stream << static_cast<int64_t>(value.m_clock_cycles) << " clock cycles"
                      << " (on clock cycle " << static_cast<int64_t>(value.m_current_clock_cycle + value.m_clock_cycles) << ")";
             return *this;
         }
 
-        template<typename T>
-        gb_log_message_stream& operator<<(const log_dec<T>& value)
+        template<typename Value>
+        gb_log_message_stream& operator<<(const log_dec<Value>& value)
         {
             m_stream << static_cast<int64_t>(value.m_value);
             return *this;
         };
 
 
-        template<int BITS, typename T>
-        gb_log_message_stream& operator<<(const log_hex_v<BITS, T>& value)
+        template<int Bits, typename Value>
+        gb_log_message_stream& operator<<(const log_hex_v<Bits, Value>& value)
         {
-            auto chars = BITS / 4;
+            auto chars = Bits / 4;
             auto v     = static_cast<uint64_t>(value.m_value);
 
             m_stream << "0x"
@@ -141,8 +141,8 @@ namespace age
             return *this;
         }
 
-        template<typename T>
-        gb_log_message_stream& operator<<(const T& value)
+        template<typename Value>
+        gb_log_message_stream& operator<<(const Value& value)
         {
             m_stream << value;
             return *this;
@@ -154,8 +154,8 @@ namespace age
         }
 #else
     public:
-        template<typename T>
-        gb_log_message_stream& operator<<(const T& value)
+        template<typename Value>
+        gb_log_message_stream& operator<<(const Value& value)
         {
             AGE_UNUSED(value);
             return *this;

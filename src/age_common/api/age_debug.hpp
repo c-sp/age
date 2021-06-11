@@ -63,8 +63,8 @@ namespace age
     class concurrent_cout
     {
     public:
-        template<class T>
-        concurrent_cout& operator<<(const T& t)
+        template<typename Value>
+        concurrent_cout& operator<<(const Value& t)
         {
             m_ss << t;
             return *this;
