@@ -51,8 +51,6 @@ HEADERS += \
     age_emulator_gb/age_gb_lcd_render.hpp \
     age_emulator_gb/age_gb_memory.hpp \
     age_emulator_gb/age_gb_serial.hpp \
-    age_emulator_gb/age_gb_sound.hpp \
-    age_emulator_gb/age_gb_sound_utilities.hpp \
     age_emulator_gb/age_gb_timer.hpp \
     age_emulator_gb/api/emulator/age_gb_emulator.hpp \
     age_emulator_gb/api/emulator/age_gb_types.hpp \
@@ -60,6 +58,15 @@ HEADERS += \
     age_emulator_gb/common/age_gb_device.hpp \
     age_emulator_gb/common/age_gb_events.hpp \
     age_emulator_gb/common/age_gb_interrupts.hpp \
+    age_emulator_gb/sound/age_gb_sound.hpp \
+    age_emulator_gb/sound/age_gb_sound_channel.hpp \
+    age_emulator_gb/sound/age_gb_sound_generate.hpp \
+    age_emulator_gb/sound/age_gb_sound_generate_duty.hpp \
+    age_emulator_gb/sound/age_gb_sound_generate_noise.hpp \
+    age_emulator_gb/sound/age_gb_sound_generate_wave.hpp \
+    age_emulator_gb/sound/age_gb_sound_length_counter.hpp \
+    age_emulator_gb/sound/age_gb_sound_sweep.hpp \
+    age_emulator_gb/sound/age_gb_sound_volume.hpp \
     age_qt_gui/age_ui_qt.hpp \
     age_qt_gui/age_ui_qt_audio.hpp \
     age_qt_gui/age_ui_qt_emulation_runner.hpp \
@@ -93,13 +100,12 @@ SOURCES += \
     age_emulator_gb/age_gb_timer.cpp \
     age_emulator_gb/age_gb_timer_state.cpp \
     age_emulator_gb/age_gb_serial.cpp \
-    age_emulator_gb/age_gb_sound.cpp \
-    age_emulator_gb/age_gb_sound_io_ports.cpp \
-    age_emulator_gb/age_gb_sound_utilities.cpp \
     age_emulator_gb/common/age_gb_clock.cpp \
     age_emulator_gb/common/age_gb_device.cpp \
     age_emulator_gb/common/age_gb_events.cpp \
     age_emulator_gb/common/age_gb_interrupts.cpp \
+    age_emulator_gb/sound/age_gb_sound.cpp \
+    age_emulator_gb/sound/age_gb_sound_io_ports.cpp \
     age_qt_gui/age_ui_qt.cpp \
     age_qt_gui/age_ui_qt_audio.cpp \
     age_qt_gui/age_ui_qt_emulation_runner.cpp \
