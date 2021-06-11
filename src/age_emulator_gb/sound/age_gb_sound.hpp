@@ -41,10 +41,10 @@ namespace age
 {
     constexpr int gb_apu_event_clock_cycles = 1 << 13;
 
-    using gb_sound_channel1 = gb_length_counter<gb_volume_envelope<gb_frequency_sweep<gb_duty_generator>>>;
-    using gb_sound_channel2 = gb_length_counter<gb_volume_envelope<gb_duty_generator>>;
-    using gb_sound_channel3 = gb_length_counter<gb_wave_generator>;
-    using gb_sound_channel4 = gb_length_counter<gb_volume_envelope<gb_noise_generator>>;
+    using gb_sound_channel1 = gb_length_counter<gb_volume_envelope<gb_frequency_sweep<gb_duty_generator<1>>>>;
+    using gb_sound_channel2 = gb_length_counter<gb_volume_envelope<gb_duty_generator<2>>>;
+    using gb_sound_channel3 = gb_length_counter<gb_wave_generator<3>>;
+    using gb_sound_channel4 = gb_length_counter<gb_volume_envelope<gb_noise_generator<4>>>;
 
 
 

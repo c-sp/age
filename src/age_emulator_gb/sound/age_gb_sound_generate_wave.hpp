@@ -34,12 +34,13 @@
 namespace age
 {
 
-    class gb_wave_generator : public gb_sample_generator<gb_wave_generator>,
-                              public gb_sound_channel
+    template<int ChannelId>
+    class gb_wave_generator : public gb_sample_generator<gb_wave_generator<ChannelId>>,
+                              public gb_sound_channel<ChannelId>
     {
     public:
         explicit gb_wave_generator(const gb_sound_logger* clock)
-            : gb_sound_channel(clock)
+            : gb_sound_channel<ChannelId>(clock)
         {
             std::fill(begin(m_wave_pattern), end(m_wave_pattern), 0);
             calculate_frequency_timer_period();
@@ -47,7 +48,7 @@ namespace age
 
         [[nodiscard]] bool next_sample_reads_wave_ram() const
         {
-            return get_frequency_timer() == 1;
+            return gb_sample_generator<gb_wave_generator<ChannelId>>::get_frequency_timer() == 1;
         }
 
         [[nodiscard]] bool wave_ram_just_read() const
@@ -79,7 +80,7 @@ namespace age
         void init_wave_pattern_position()
         {
             m_index = 0;
-            reset_frequency_timer(3);
+            gb_sample_generator<gb_wave_generator<ChannelId>>::reset_frequency_timer(3);
         }
 
         void set_wave_pattern_byte(unsigned offset, uint8_t value)
@@ -110,7 +111,7 @@ namespace age
         {
             m_wave_ram_just_read = false;
             gb_sample_generator<gb_wave_generator>::generate_samples(buffer, buffer_index, samples_to_generate);
-            m_wave_ram_just_read &= frequency_timer_just_reloaded();
+            m_wave_ram_just_read &= gb_sample_generator<gb_wave_generator<ChannelId>>::frequency_timer_just_reloaded();
         }
 
 
@@ -121,7 +122,7 @@ namespace age
             int frequency = m_frequency_low + (m_frequency_high << 8);
             AGE_ASSERT((frequency >= 0) && (frequency < 2048))
             int samples = 2048 - frequency;
-            set_frequency_timer_period(samples);
+            gb_sample_generator<gb_wave_generator<ChannelId>>::set_frequency_timer_period(samples);
         }
 
     private:

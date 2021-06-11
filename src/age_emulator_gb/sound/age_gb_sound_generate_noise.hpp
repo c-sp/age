@@ -31,12 +31,13 @@
 namespace age
 {
 
-    class gb_noise_generator : public gb_sample_generator<gb_noise_generator>,
-                               public gb_sound_channel
+    template<int ChannelId>
+    class gb_noise_generator : public gb_sample_generator<gb_noise_generator<ChannelId>>,
+                               public gb_sound_channel<ChannelId>
     {
     public:
         explicit gb_noise_generator(const gb_sound_logger* clock)
-            : gb_sound_channel(clock)
+            : gb_sound_channel<ChannelId>(clock)
         {
             write_nrX3(0);
         }
@@ -65,7 +66,7 @@ namespace age
             }
 
             int samples = ratio << (shift - 1);
-            set_frequency_timer_period(samples);
+            gb_sample_generator<gb_noise_generator<ChannelId>>::set_frequency_timer_period(samples);
         }
 
         void init_generator()

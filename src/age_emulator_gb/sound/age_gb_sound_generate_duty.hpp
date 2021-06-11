@@ -43,14 +43,13 @@ namespace age
 
 
 
-#define DUTY_FREQ_TO_SAMPLES ((2048 - m_frequency_bits) << 1)
-
-    class gb_duty_generator : public gb_sample_generator<gb_duty_generator>,
-                              public gb_sound_channel
+    template<int ChannelId>
+    class gb_duty_generator : public gb_sample_generator<gb_duty_generator<ChannelId>>,
+                              public gb_sound_channel<ChannelId>
     {
     public:
         explicit gb_duty_generator(const gb_sound_logger* clock)
-            : gb_sound_channel(clock)
+            : gb_sound_channel<ChannelId>(clock)
         {
             set_frequency_bits(0);
             set_duty_waveform(0);
@@ -79,15 +78,15 @@ namespace age
             // (see test rom analysis)
             //! \todo test rom analysis for ch1_duty0_pos6_to_pos7_timing_ds_X
             int sample_delay = (double_speed && !(current_clock_cycle & 2)) ? 3 : 4;
-            reset_frequency_timer(sample_delay);
+            gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(sample_delay);
         }
 
         void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index)
         {
             set_frequency_bits(frequency_bits);
 
-            int offset = sample_offset - DUTY_FREQ_TO_SAMPLES;
-            reset_frequency_timer(offset);
+            auto offset = sample_offset - freq_to_samples();
+            gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(offset);
 
             m_index = index;
         }
@@ -111,11 +110,16 @@ namespace age
         {
             AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048))
             m_frequency_bits = static_cast<int16_t>(frequency_bits);
-            int samples      = DUTY_FREQ_TO_SAMPLES;
-            set_frequency_timer_period(samples);
+            auto samples     = freq_to_samples();
+            gb_sample_generator<gb_duty_generator<ChannelId>>::set_frequency_timer_period(samples);
         }
 
     private:
+        [[nodiscard]] int freq_to_samples() const
+        {
+            return (2048 - m_frequency_bits) * 2;
+        }
+
         int16_t m_frequency_bits = 0;
         uint8_t m_index          = 0;
         uint8_t m_duty           = 0;

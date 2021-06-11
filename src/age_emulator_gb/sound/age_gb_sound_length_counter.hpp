@@ -23,10 +23,6 @@
 
 #include <age_types.hpp>
 
-#include "age_gb_sound_channel.hpp"
-
-#include <type_traits> // std::is_base_of
-
 
 
 namespace age
@@ -39,10 +35,6 @@ namespace age
     template<typename BaseClass>
     class gb_length_counter : public BaseClass
     {
-        static_assert(
-            std::is_base_of<gb_sound_channel, BaseClass>::value,
-            "gb_length_counter must derive from gb_sound_channel");
-
     public:
         explicit gb_length_counter(uint8_t counter_mask, const gb_sound_logger* clock)
             : BaseClass(clock),

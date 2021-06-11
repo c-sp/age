@@ -54,6 +54,7 @@ namespace age
 
 
 
+    template<int ChannelId>
     class gb_sound_channel
     {
     public:
@@ -71,11 +72,19 @@ namespace age
 
         void activate()
         {
+            if (!m_active)
+            {
+                log() << "channel activated";
+            }
             m_active = true;
         }
 
         void deactivate()
         {
+            if (m_active)
+            {
+                log() << "channel deactivated";
+            }
             m_active = false;
         }
 
@@ -101,8 +110,8 @@ namespace age
         [[nodiscard]] gb_log_message_stream log() const
         {
             auto log = m_clock->log();
-            //! \todo add channel prefix
-            return std::move(log);
+            log << "(channel " << ChannelId << ") ";
+            return log;
         }
 
     private:

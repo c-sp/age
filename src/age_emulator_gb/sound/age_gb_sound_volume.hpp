@@ -24,10 +24,6 @@
 #include <age_debug.hpp>
 #include <age_types.hpp>
 
-#include "age_gb_sound_channel.hpp"
-
-#include <type_traits> // std::is_base_of
-
 
 
 namespace age
@@ -36,10 +32,6 @@ namespace age
     template<typename BaseClass>
     class gb_volume_envelope : public BaseClass
     {
-        static_assert(
-            std::is_base_of<gb_sound_channel, BaseClass>::value,
-            "gb_volume_envelope must derive from gb_sound_channel");
-
     public:
         using BaseClass::BaseClass;
 
