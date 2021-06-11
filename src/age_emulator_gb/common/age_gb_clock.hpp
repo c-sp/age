@@ -92,15 +92,19 @@ namespace age
         [[nodiscard]] uint8_t read_div() const;
         void                  write_div();
 
-        // this method is part of the header to enable compile time optimization
-        [[nodiscard]] gb_log_message_stream& log(gb_log_category category) const
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log(gb_log_category category) const
         {
             return m_logger.log(category, m_clock_cycle, m_div_offset);
         }
+        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock_cycle) const
+        {
+            return m_logger.log(category, clock_cycle, m_div_offset);
+        }
 
     private:
-        // this method is part of the header to enable compile time optimization
-        [[nodiscard]] gb_log_message_stream& log() const
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log() const
         {
             return m_logger.log(gb_log_category::lc_clock, m_clock_cycle, m_div_offset);
         }
@@ -165,12 +169,6 @@ namespace age
 #define AGE_GB_CLOG_LCD_VRAM(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_VRAM(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_SERIAL(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_SERIAL(log)
 #endif
 
 #if 0

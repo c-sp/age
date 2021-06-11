@@ -159,7 +159,7 @@ namespace age
 
         [[nodiscard]] gb_test_info get_test_info() const;
 
-        [[nodiscard]] std::vector<gb_log_entry> get_log_entries() const;
+        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const;
 
     private:
         // std::unique_ptr<gb_emulator_impl> does not work on incomplete types

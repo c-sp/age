@@ -71,7 +71,7 @@ void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
     m_active_events[ev_idx] = ev_cycle;
 
     log() << "event " << to_underlying(event) << " scheduled"
-          << " (" << m_events.size() << " events scheduled total)";
+          << ", " << m_events.size() << " event(s) scheduled total";
 }
 
 
@@ -96,7 +96,7 @@ void age::gb_events::remove_event(gb_event event)
     }
     m_active_events[idx] = gb_no_clock_cycle;
     log() << "event " << to_underlying(event) << " removed"
-          << " (" << m_events.size() << " events still scheduled)";
+          << ", " << m_events.size() << " event(s) still scheduled";
 }
 
 
@@ -129,7 +129,7 @@ age::gb_event age::gb_events::poll_event()
     m_active_events[to_underlying(event)] = gb_no_clock_cycle;
 
     log() << "event " << to_underlying(event) << " polled"
-          << " (" << m_events.size() << " events still scheduled)";
+          << ", " << m_events.size() << " event(s) still scheduled";
 
     return event;
 }

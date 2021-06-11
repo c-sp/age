@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
 #include <age_debug.hpp>
 
 #include "age_gb_sound.hpp"
+
+#include <algorithm>
 
 
 
@@ -123,7 +123,7 @@ void age::gb_sound::after_div_reset(bool during_stop)
 {
     if (!m_master_on)
     {
-        AGE_GB_CLOG_SOUND("apu off at DIV reset => nothing to do")
+        AGE_GB_CLOG_SOUND("apu off at DIV reset")
         return;
     }
     // everything must be up to date
@@ -363,10 +363,9 @@ void age::gb_sound::set_wave_ram_byte(unsigned offset, uint8_t value)
 age::gb_sound::gb_sound(const gb_clock& clock,
                         bool            cgb_features,
                         pcm_vector&     samples)
-    : m_samples(samples),
-      m_clock(clock),
+    : gb_sound_logger(clock, clock.get_clock_cycle()),
+      m_samples(samples),
       m_cgb(cgb_features),
-      m_clk_current_state(m_clock.get_clock_cycle()),
       // initialize frame sequencer
       // (see test rom analysis)
       m_clk_next_apu_event((m_clk_current_state / gb_apu_event_clock_cycles + 1) * gb_apu_event_clock_cycles),

@@ -28,11 +28,12 @@
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 
+#include "sound/age_gb_sound.hpp"
+
 #include "age_gb_joypad.hpp"
 #include "age_gb_lcd.hpp"
 #include "age_gb_memory.hpp"
 #include "age_gb_serial.hpp"
-#include "age_gb_sound.hpp"
 #include "age_gb_timer.hpp"
 
 

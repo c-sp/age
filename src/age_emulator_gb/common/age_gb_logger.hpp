@@ -91,19 +91,25 @@ namespace age
     {
 #ifdef AGE_COMPILE_LOGGER
         std::stringstream m_stream;
-
-        template<typename T>
-        void stream_hex(T value, int chars)
-        {
-            auto v = static_cast<uint64_t>(value);
-            m_stream << "0x"
-                     << std::hex << std::uppercase << std::setw(chars) << std::setfill('0')
-                     << v
-                     << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec
-                     << " (" << v << ")";
-        }
+        gb_log_entry*     m_entry;
 
     public:
+        explicit gb_log_message_stream(gb_log_entry* entry) : m_entry(entry) {}
+
+        ~gb_log_message_stream()
+        {
+            if (m_entry)
+            {
+                m_entry->m_message = m_stream.str();
+            }
+        }
+
+        gb_log_message_stream(const gb_log_message_stream&) = delete;
+        gb_log_message_stream(gb_log_message_stream&&)      = default;
+
+        gb_log_message_stream& operator=(const gb_log_message_stream&) = delete;
+        gb_log_message_stream& operator=(gb_log_message_stream&&) = default;
+
         template<typename T, typename U>
         gb_log_message_stream& operator<<(const log_in_clks<T, U>& value)
         {
@@ -123,7 +129,15 @@ namespace age
         template<int BITS, typename T>
         gb_log_message_stream& operator<<(const log_hex_v<BITS, T>& value)
         {
-            stream_hex(value.m_value, BITS / 4);
+            auto chars = BITS / 4;
+            auto v     = static_cast<uint64_t>(value.m_value);
+
+            m_stream << "0x"
+                     << std::hex << std::uppercase << std::setw(chars) << std::setfill('0')
+                     << v
+                     << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec
+                     << " (" << v << ")";
+
             return *this;
         }
 
@@ -157,54 +171,35 @@ namespace age
     public:
         explicit gb_logger(gb_log_categories log_categories) : m_log_categories(std::move(log_categories)) {}
 
-        [[nodiscard]] gb_log_message_stream& log(gb_log_category category, int clock, int div_offset)
+        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_offset)
         {
-            m_messages.emplace_back(active_stream{category, clock, div_offset});
-            return (m_messages.end() - 1)->m_stream;
+            if (m_log_categories.find(category) == end(m_log_categories))
+            {
+                return gb_log_message_stream(nullptr);
+            }
+            m_messages.emplace_back(gb_log_entry{category, clock, div_offset, ""});
+            return gb_log_message_stream(&m_messages[m_messages.size() - 1]);
         }
 
-        [[nodiscard]] std::vector<gb_log_entry> get_log_entries() const
+        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const
         {
-            std::vector<gb_log_entry> result;
-
-            //! \todo filter categories
-            std::transform(begin(m_messages),
-                           end(m_messages),
-                           std::back_inserter(result),
-                           [](auto& message) {
-                               return gb_log_entry(message.m_category, message.m_clock, message.m_div_offset, message.m_stream());
-                           });
-
-            return result;
+            return m_messages;
         }
 
     private:
-        struct active_stream
-        {
-            active_stream(gb_log_category category, int clock, int div_offset)
-                : m_category(category),
-                  m_clock(clock),
-                  m_div_offset(div_offset)
-            {}
-            gb_log_category       m_category;
-            int                   m_clock;
-            int                   m_div_offset;
-            gb_log_message_stream m_stream;
-        };
-
-        gb_log_categories          m_log_categories;
-        std::vector<active_stream> m_messages;
+        gb_log_categories         m_log_categories;
+        std::vector<gb_log_entry> m_messages;
 
 #else
     public:
         explicit gb_logger(gb_log_categories log_categories) { AGE_UNUSED(log_categories); }
 
-        [[nodiscard]] gb_log_message_stream& log(gb_log_category category, int clock, int div_offset)
+        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_offset)
         {
             AGE_UNUSED(category);
             AGE_UNUSED(clock);
             AGE_UNUSED(div_offset);
-            return m_dummy_stream;
+            return gb_log_message_stream();
         }
 
         [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const
@@ -214,7 +209,6 @@ namespace age
 
     private:
         std::vector<gb_log_entry> m_no_entries;
-        gb_log_message_stream     m_dummy_stream;
 #endif
     };
 

@@ -214,7 +214,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                             if (opts.m_write_logs)
                             {
                                 std::filesystem::path log_path = rom_path;
-                                log_path.replace_extension(".log");
+                                log_path.replace_extension((hardware == gb_hardware::cgb) ? ".cgb.log" : ".dmg.log");
                                 write_log(log_path, emulator->get_log_entries(), rom_path, hardware);
                             }
                         });

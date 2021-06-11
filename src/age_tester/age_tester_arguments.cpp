@@ -343,6 +343,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     options.m_log_categories = {
         gb_log_category::lc_clock,
         gb_log_category::lc_events,
+        gb_log_category::lc_serial,
         gb_log_category::lc_timer,
     };
 

@@ -30,13 +30,14 @@
 #include "common/age_gb_interrupts.hpp"
 #include "common/age_gb_logger.hpp"
 
+#include "sound/age_gb_sound.hpp"
+
 #include "age_gb_bus.hpp"
 #include "age_gb_cpu.hpp"
 #include "age_gb_joypad.hpp"
 #include "age_gb_lcd.hpp"
 #include "age_gb_memory.hpp"
 #include "age_gb_serial.hpp"
-#include "age_gb_sound.hpp"
 #include "age_gb_timer.hpp"
 
 
@@ -76,7 +77,7 @@ namespace age
 
         [[nodiscard]] gb_test_info get_test_info() const;
 
-        [[nodiscard]] std::vector<gb_log_entry> get_log_entries() const;
+        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const;
 
     private:
         int emulate_cycles(int cycles_to_emulate);

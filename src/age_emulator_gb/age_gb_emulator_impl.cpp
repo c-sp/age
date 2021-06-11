@@ -139,7 +139,7 @@ age::gb_test_info age::gb_emulator_impl::get_test_info() const
     return m_cpu.get_test_info();
 }
 
-std::vector<age::gb_log_entry> age::gb_emulator_impl::get_log_entries() const
+const std::vector<age::gb_log_entry>& age::gb_emulator_impl::get_log_entries() const
 {
     return m_logger.get_log_entries();
 }

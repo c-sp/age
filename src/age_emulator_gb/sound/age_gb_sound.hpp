@@ -21,15 +21,21 @@
 //! \file
 //!
 
-#include <array>
-
 #include <age_debug.hpp>
 #include <age_types.hpp>
 #include <pcm/age_pcm_sample.hpp>
 
-#include "age_gb_sound_utilities.hpp"
-#include "common/age_gb_clock.hpp"
-#include "common/age_gb_device.hpp"
+#include "../common/age_gb_clock.hpp"
+#include "../common/age_gb_device.hpp"
+
+#include "age_gb_sound_generate_duty.hpp"
+#include "age_gb_sound_generate_noise.hpp"
+#include "age_gb_sound_generate_wave.hpp"
+#include "age_gb_sound_length_counter.hpp"
+#include "age_gb_sound_sweep.hpp"
+#include "age_gb_sound_volume.hpp"
+
+#include <array>
 
 
 
@@ -37,14 +43,14 @@ namespace age
 {
     constexpr int gb_apu_event_clock_cycles = 1 << 13;
 
-    using gb_sound_channel1 = gb_length_counter<gb_frequency_sweep<gb_volume_envelope<gb_duty_source>>>;
-    using gb_sound_channel2 = gb_length_counter<gb_volume_envelope<gb_duty_source>>;
-    using gb_sound_channel3 = gb_length_counter<gb_wave_source>;
-    using gb_sound_channel4 = gb_length_counter<gb_volume_envelope<gb_noise_source>>;
+    using gb_sound_channel1 = gb_length_counter<gb_volume_envelope<gb_frequency_sweep<gb_duty_generator>>>;
+    using gb_sound_channel2 = gb_length_counter<gb_volume_envelope<gb_duty_generator>>;
+    using gb_sound_channel3 = gb_length_counter<gb_wave_generator>;
+    using gb_sound_channel4 = gb_length_counter<gb_volume_envelope<gb_noise_generator>>;
 
 
 
-    class gb_sound
+    class gb_sound : private gb_sound_logger
     {
         AGE_DISABLE_COPY(gb_sound);
 
@@ -109,13 +115,11 @@ namespace age
 
         pcm_vector& m_samples;
 
-        const gb_clock& m_clock;
-        const bool      m_cgb;
-        int             m_clk_current_state         = 0;
-        int             m_clk_next_apu_event        = 0;
-        int8_t          m_next_frame_sequencer_step = 0;
-        bool            m_delayed_disable_c1        = false;
-        bool            m_skip_frame_sequencer_step = false;
+        const bool m_cgb;
+        int        m_clk_next_apu_event        = 0;
+        int8_t     m_next_frame_sequencer_step = 0;
+        bool       m_delayed_disable_c1        = false;
+        bool       m_skip_frame_sequencer_step = false;
 
         // channel control
 
@@ -125,17 +129,17 @@ namespace age
         // channels
 
         uint8_t           m_nr10 = 0, m_nr11 = 0x80, m_nr14 = 0;
-        gb_sound_channel1 m_c1{0x3F};
+        gb_sound_channel1 m_c1{0x3F, this};
 
         uint8_t           m_nr21 = 0, m_nr24 = 0;
-        gb_sound_channel2 m_c2{0x3F};
+        gb_sound_channel2 m_c2{0x3F, this};
 
         uint8_t           m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
         uint8_array<16>   m_c3_wave_ram;
-        gb_sound_channel3 m_c3{0xFF};
+        gb_sound_channel3 m_c3{0xFF, this};
 
         uint8_t           m_nr44 = 0;
-        gb_sound_channel4 m_c4{0x3F};
+        gb_sound_channel4 m_c4{0x3F, this};
     };
 
 } // namespace age

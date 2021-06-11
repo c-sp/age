@@ -5,6 +5,8 @@ add_library(
         common/age_gb_device.cpp
         common/age_gb_events.cpp
         common/age_gb_interrupts.cpp
+        sound/age_gb_sound.cpp
+        sound/age_gb_sound_io_ports.cpp
         age_gb_bus.cpp
         age_gb_cpu.cpp
         age_gb_cpu_opcodes.cpp
@@ -21,9 +23,6 @@ add_library(
         age_gb_memory.cpp
         age_gb_memory_init.cpp
         age_gb_serial.cpp
-        age_gb_sound.cpp
-        age_gb_sound_io_ports.cpp
-        age_gb_sound_utilities.cpp
         age_gb_timer.cpp
         age_gb_timer_state.cpp
 )

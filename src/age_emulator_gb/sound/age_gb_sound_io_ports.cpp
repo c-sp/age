@@ -220,10 +220,10 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_nr44                   = 0;
         m_nr50 = m_nr51 = 0;
 
-        m_c1 = gb_sound_channel1(0x3F);
-        m_c2 = gb_sound_channel2(0x3F);
-        m_c3 = gb_sound_channel3(0xFF);
-        m_c4 = gb_sound_channel4(0x3F);
+        m_c1 = gb_sound_channel1(0x3F, this);
+        m_c2 = gb_sound_channel2(0x3F, this);
+        m_c3 = gb_sound_channel3(0xFF, this);
+        m_c4 = gb_sound_channel4(0x3F, this);
     }
 
     // sound switched on

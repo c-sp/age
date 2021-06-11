@@ -41,7 +41,7 @@ namespace
                << "--------------------------------------------------------------------------------\n"
                << '\n'
                << "T4-cycle  16-bit-divider       category  comments" << '\n'
-               << "--------  -------------------  --------  ----------------" << '\n';
+               << "--------  -------------------  --------  ---------------------------------------\n";
 
         return result.str();
     }
@@ -54,6 +54,7 @@ namespace
         {
             case age::gb_log_category::lc_clock: return "clock";
             case age::gb_log_category::lc_events: return "events";
+            case age::gb_log_category::lc_serial: return "serial";
             case age::gb_log_category::lc_timer: return "timer";
         }
         return "";
@@ -124,12 +125,13 @@ void age::tester::write_log(const std::filesystem::path&     log_path,
                             const std::filesystem::path&     rom_path,
                             gb_hardware                      hardware)
 {
-    std::stringstream log;
-
-    if (!log_entries.empty())
+    if (log_entries.empty())
     {
-        log << log_header(rom_path, hardware);
+        return;
     }
+
+    std::stringstream log;
+    log << log_header(rom_path, hardware);
 
     std::for_each(begin(log_entries),
                   end(log_entries),

@@ -57,8 +57,8 @@ namespace age
         void after_div_reset(bool during_stop);
 
     private:
-        // this method is part of the header to enable compile time optimization
-        [[nodiscard]] gb_log_message_stream& log() const
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_timer);
         }

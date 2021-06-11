@@ -92,6 +92,8 @@ namespace age
     {
         lc_clock,
         lc_events,
+        lc_serial,
+        lc_sound,
         lc_timer,
     };
 

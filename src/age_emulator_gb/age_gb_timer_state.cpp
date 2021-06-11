@@ -166,7 +166,7 @@ void age::gb_timer::after_div_reset(bool during_stop)
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
-        log() << "timer off at DIV reset => nothing to do";
+        log() << "timer off at DIV reset";
         return;
     }
     // DIV has been reset
