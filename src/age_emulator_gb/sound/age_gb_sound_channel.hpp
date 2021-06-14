@@ -29,8 +29,6 @@
 
 namespace age
 {
-
-    // the only reason this class exists is to have individual logging for each channel
     class gb_sound_logger
     {
         AGE_DISABLE_COPY(gb_sound_logger);
@@ -58,7 +56,7 @@ namespace age
     class gb_sound_channel
     {
     public:
-        explicit gb_sound_channel(const gb_sound_logger* clock) : m_clock(clock) {}
+        explicit gb_sound_channel(const gb_sound_logger* logger) : m_logger(logger) {}
 
         [[nodiscard]] bool active() const
         {
@@ -105,17 +103,16 @@ namespace age
             m_multiplier = pcm_sample(static_cast<int16_t>(volume_SO2), static_cast<int16_t>(volume_SO1)).m_stereo_sample;
         }
 
-    protected:
         // logging code is header-only to allow compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
-            auto log = m_clock->log();
+            auto log = m_logger->log();
             log << "(channel " << ChannelId << ") ";
             return log;
         }
 
     private:
-        const gb_sound_logger* m_clock;
+        const gb_sound_logger* m_logger;
 
         bool     m_active     = false;
         uint32_t m_multiplier = 0;

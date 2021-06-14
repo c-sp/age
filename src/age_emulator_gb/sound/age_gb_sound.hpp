@@ -118,6 +118,7 @@ namespace age
         int8_t     m_next_frame_sequencer_step = 0;
         bool       m_delayed_disable_c1        = false;
         bool       m_skip_frame_sequencer_step = false;
+        bool       m_ds_delay                  = true;
 
         // channel control
 

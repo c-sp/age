@@ -255,7 +255,7 @@ void age::gb_serial::after_div_reset()
     // no transfer => nothing to do here
     if (m_sio_state != gb_sio_state::transfer_internal_clock)
     {
-        log() << "serial transfer not active at DIV reset";
+        log() << "serial transfer off at DIV reset";
         return;
     }
     // ongoing transfer => calculate new timing
@@ -274,8 +274,8 @@ void age::gb_serial::after_div_reset()
     AGE_ASSERT(clk_finished >= clk_current)
 
     log() << "serial transfer at DIV reset:"
-          << "\n    * next step (old) in " << reset_details.m_old_next_increment << " clock cycles"
-          << "\n    * next step (new) in " << reset_details.m_new_next_increment << " clock cycles"
+          << "\n    * next step (old) in " << log_in_clks(reset_details.m_old_next_increment, clk_current)
+          << "\n    * next step (new) in " << log_in_clks(reset_details.m_new_next_increment, clk_current)
           << "\n    * +/- remaining clock cycles: " << reset_details.m_clk_adjust
           << "\n    * finished on clock cycle " << clk_finished;
 

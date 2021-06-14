@@ -125,7 +125,7 @@ void age::gb_timer::after_speed_change()
 {
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
-        log() << "timer off at speed change => nothing to do";
+        log() << "timer off at speed change";
         return;
     }
     // DIV has been reset
@@ -147,9 +147,10 @@ void age::gb_timer::after_speed_change()
 
     int clk_overflow_new = clk_current + clks_until_overflow;
 
-    auto& msg = log() << "timer at speed change:"
-                      << "\n    * TIMA == " << log_hex8(m_tima)
-                      << "\n    * next increment (old) in " << log_in_clks(1 << m_clock_shift, m_clock.get_clock_cycle());
+    auto msg = log();
+    msg << "timer at speed change:"
+        << "\n    * TIMA == " << log_hex8(m_tima)
+        << "\n    * next increment (old) in " << log_in_clks(1 << m_clock_shift, m_clock.get_clock_cycle());
 
     // update timer state
     m_clock_shift = get_clock_shift();
@@ -180,7 +181,8 @@ void age::gb_timer::after_div_reset(bool during_stop)
     // calculate potential immediate timer increment by div reset
     auto reset_details = m_clock.get_div_reset_details(clks_per_inc);
 
-    auto& msg = log() << "timer at DIV reset:";
+    auto msg = log();
+    msg << "timer at DIV reset:";
 
     // speed change TAC 00 glitch (see age-test-roms/speed-switch/switch-speed-tima-00-cgb):
     // no immediate action by div reset on the exact first machine cycle
@@ -241,7 +243,7 @@ void age::gb_timer::start_timer()
 
 void age::gb_timer::stop_timer()
 {
-    // timer not active?
+    // timer off?
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
         return;

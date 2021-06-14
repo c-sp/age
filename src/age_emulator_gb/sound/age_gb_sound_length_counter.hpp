@@ -36,8 +36,8 @@ namespace age
     class gb_length_counter : public BaseClass
     {
     public:
-        explicit gb_length_counter(uint8_t counter_mask, const gb_sound_logger* clock)
-            : BaseClass(clock),
+        explicit gb_length_counter(uint8_t counter_mask, const gb_sound_logger* logger)
+            : BaseClass(logger),
               m_counter_mask(counter_mask)
         {
             AGE_ASSERT(m_counter_mask >= 0x3F)
@@ -45,7 +45,9 @@ namespace age
 
         void write_nrX1(uint8_t nrX1)
         {
-            m_counter = (~nrX1 & m_counter_mask) + 1;
+            uint8_t invNrX1 = ~nrX1;
+            m_counter       = (invNrX1 & m_counter_mask) + 1;
+            BaseClass::log() << "set length counter = " << m_counter;
         }
 
         void init_length_counter(uint8_t nrX4, bool immediate_decrement)
@@ -81,6 +83,7 @@ namespace age
                 if (m_counter > 0)
                 {
                     --m_counter;
+                    BaseClass::log() << "decrement length counter (" << (m_counter + 1) << " => " << m_counter << ")";
                     if (m_counter == 0)
                     {
                         BaseClass::deactivate();

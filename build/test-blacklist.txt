@@ -188,15 +188,18 @@
 /gambatte/speedchange/speedchange2_lcdoff
 /gambatte/speedchange/speedchange2_ly44
 /gambatte/speedchange/speedchange2_m2int
-/gambatte/speedchange/speedchange2_nop
+/gambatte/speedchange/speedchange2_nop_ch1
+/gambatte/speedchange/speedchange2_nop_lcdoff
+/gambatte/speedchange/speedchange2_nop_ly44
+/gambatte/speedchange/speedchange2_nop_m2int
 /gambatte/speedchange/speedchange3_ch1
-/gambatte/speedchange/speedchange3_ch2
 /gambatte/speedchange/speedchange3_ly44
-/gambatte/speedchange/speedchange3_nop
+/gambatte/speedchange/speedchange3_nop_ch1
+/gambatte/speedchange/speedchange3_nop_ly44
 /gambatte/speedchange/speedchange4_ly44
-/gambatte/speedchange/speedchange4_nop
+/gambatte/speedchange/speedchange4_nop_ly44
 /gambatte/speedchange/speedchange5_ly44
-/gambatte/speedchange/speedchange5_nop
+/gambatte/speedchange/speedchange5_nop_ly44
 /gambatte/speedchange/speedchange_ch1
 
 /gambatte/sprites/

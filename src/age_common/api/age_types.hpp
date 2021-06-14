@@ -41,7 +41,7 @@ private:                          \
 //
 // See also:
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables#comment51105057_1486931
-#define AGE_UNUSED(arg) ((void)&(arg))
+#define AGE_UNUSED(arg) ((void) &(arg))
 
 
 

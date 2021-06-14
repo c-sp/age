@@ -95,11 +95,14 @@ namespace age
         {
             AGE_ASSERT(number_of_samples > 0)
             m_frequency_timer_period = number_of_samples;
+            static_cast<DerivedClass*>(this)->log() << "set frequency timer period = " << m_frequency_timer_period << " samples";
         }
 
         void reset_frequency_timer(int sample_offset)
         {
             m_frequency_timer = m_frequency_timer_period + sample_offset;
+            static_cast<DerivedClass*>(this)->log() << "set frequency timer = " << m_frequency_timer
+                                                    << " samples (period == " << m_frequency_timer_period << " samples)";
         }
 
         [[nodiscard]] int get_frequency_timer() const

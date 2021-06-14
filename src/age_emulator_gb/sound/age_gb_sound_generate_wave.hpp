@@ -39,8 +39,8 @@ namespace age
                               public gb_sound_channel<ChannelId>
     {
     public:
-        explicit gb_wave_generator(const gb_sound_logger* clock)
-            : gb_sound_channel<ChannelId>(clock)
+        explicit gb_wave_generator(const gb_sound_logger* logger)
+            : gb_sound_channel<ChannelId>(logger)
         {
             std::fill(begin(m_wave_pattern), end(m_wave_pattern), 0);
             calculate_frequency_timer_period();
@@ -122,6 +122,9 @@ namespace age
             int frequency = m_frequency_low + (m_frequency_high << 8);
             AGE_ASSERT((frequency >= 0) && (frequency < 2048))
             int samples = 2048 - frequency;
+
+            gb_sound_channel<ChannelId>::log() << "set frequency = " << log_hex16(frequency);
+
             gb_sample_generator<gb_wave_generator<ChannelId>>::set_frequency_timer_period(samples);
         }
 

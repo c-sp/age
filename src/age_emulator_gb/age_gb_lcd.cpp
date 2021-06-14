@@ -62,7 +62,7 @@ bool age::gb_lcd::is_oam_accessible()
         return true;
     }
 
-    int scanline = -1;
+    int scanline      = -1;
     int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
 
@@ -80,7 +80,7 @@ bool age::gb_lcd::is_video_ram_accessible()
         return true;
     }
 
-    int scanline = -1;
+    int scanline      = -1;
     int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
 
@@ -105,7 +105,7 @@ void age::gb_lcd::update_state()
     // During a scanline's mode 0 the emulated program may already prepare
     // data for the next scanline.
     // We thus render each scanline before it enters mode 0.
-    int scanline = -1;
+    int scanline      = -1;
     int scanline_clks = -1;
     m_scanline.current_scanline(scanline, scanline_clks);
 

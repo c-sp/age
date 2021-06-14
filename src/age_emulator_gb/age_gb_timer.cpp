@@ -109,7 +109,8 @@ age::uint8_t age::gb_timer::read_tima()
 
 void age::gb_timer::write_tma(uint8_t value)
 {
-    auto& msg = log() << "write TIMA = " << log_hex8(value);
+    auto msg = log();
+    msg << "write TIMA = " << log_hex8(value);
 
     if (m_clk_timer_zero != gb_no_clock_cycle)
     {
@@ -141,12 +142,13 @@ void age::gb_timer::write_tma(uint8_t value)
 
 void age::gb_timer::write_tac(uint8_t value)
 {
-    auto& msg = log() << "write TAC = " << log_hex8(value);
+    auto msg = log();
+    msg << "write TAC = " << log_hex8(value);
 
     m_tac                = value | 0xF8;
     bool start_new_timer = m_tac & tac_start_timer;
 
-    // timer not active => maybe start it?
+    // timer off => maybe start it?
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
         if (start_new_timer)
@@ -202,9 +204,10 @@ void age::gb_timer::write_tac(uint8_t value)
 
 void age::gb_timer::write_tima(uint8_t value)
 {
-    auto& msg = log() << "write TIMA = " << log_hex8(value);
+    auto msg = log();
+    msg << "write TIMA = " << log_hex8(value);
 
-    // timer not active => just write the value
+    // timer off => just write the value
     if (m_clk_timer_zero == gb_no_clock_cycle)
     {
         m_tima = value;

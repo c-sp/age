@@ -123,7 +123,7 @@ void age::gb_sound::after_div_reset(bool during_stop)
 {
     if (!m_master_on)
     {
-        AGE_GB_CLOG_SOUND("apu off at DIV reset")
+        log() << "sound off at DIV reset";
         return;
     }
     // everything must be up to date
@@ -137,21 +137,22 @@ void age::gb_sound::after_div_reset(bool during_stop)
     AGE_ASSERT((m_clk_next_apu_event == m_clk_current_state + reset_details.m_old_next_increment)
                || (m_clk_next_apu_event - 2 == m_clk_current_state + reset_details.m_old_next_increment));
 
-    AGE_GB_CLOG_SOUND("apu frame sequencer at DIV reset:")
+    auto msg = log();
+    msg << "frame sequencer at DIV reset:";
 
     // speed change sound STOP glitch (see Gambatte speedchange_ch2_nr52_* tests):
     // no immediate action by div reset on the exact first machine cycle
     //! \todo we only checked the 0->1 edge, check the 1->0 edge too
     if (during_stop && (reset_details.m_clk_adjust == -gb_apu_event_clock_cycles / 2))
     {
-        AGE_GB_CLOG_SOUND("    * sound STOP glitch: immediate frame sequencer step by DIV reset not on this machine cycle");
+        msg << "\n    * sound STOP glitch: immediate frame sequencer step by DIV reset not on this machine cycle";
         AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
         reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
     }
 
-    AGE_GB_CLOG_SOUND("    * next step (old) in " << reset_details.m_old_next_increment << " clock cycles")
-    AGE_GB_CLOG_SOUND("    * next step (new) in " << reset_details.m_new_next_increment << " clock cycles")
-    AGE_GB_CLOG_SOUND("    * +/- clock cycles until next step: " << reset_details.m_clk_adjust)
+    msg << "\n    * next step (old) in " << log_in_clks(reset_details.m_old_next_increment, m_clk_current_state)
+        << "\n    * next step (new) in " << log_in_clks(reset_details.m_new_next_increment, m_clk_current_state)
+        << "\n    * +/- clock cycles until next step: " << reset_details.m_clk_adjust;
 
     // immediate frame sequencer step caused by DIV reset?
     if (reset_details.m_clk_adjust < 0)
@@ -175,8 +176,12 @@ void age::gb_sound::after_speed_change()
     // after switching to double speed
     if (m_clock.is_double_speed())
     {
-        AGE_GB_CLOG_SOUND("delaying frame sequencer by 2 clock cycles after switching to double speed")
-        m_clk_next_apu_event += 2;
+        if (m_ds_delay)
+        {
+            log() << "delaying frame sequencer by 2 clock cycles after switching to double speed";
+            m_clk_next_apu_event += 2;
+        }
+        m_ds_delay = !m_ds_delay;
     }
 }
 
@@ -247,7 +252,7 @@ int age::gb_sound::apu_event()
     // (triggered by switching on the APU at specific cycles)
     if (m_skip_frame_sequencer_step)
     {
-        AGE_GB_CLOG_SOUND_STEP("skipping apu step " << AGE_LOG_DEC(m_next_frame_sequencer_step))
+        log() << "skipping frame sequencer step " << log_dec(m_next_frame_sequencer_step);
         AGE_ASSERT(!m_delayed_disable_c1)
         AGE_ASSERT(m_next_frame_sequencer_step == 7)
         m_next_frame_sequencer_step = 0;
@@ -258,16 +263,14 @@ int age::gb_sound::apu_event()
     // delayed disabling of channel 1 due to frequency sweep overflow
     if (m_delayed_disable_c1)
     {
-        AGE_GB_CLOG_SOUND_STEP("delayed disabling of c1")
+        log() << "delayed deactivation of channel 1 triggered by frequency sweep";
         AGE_ASSERT((m_next_frame_sequencer_step == 7) || (m_next_frame_sequencer_step == 3))
         m_c1.deactivate();
         m_delayed_disable_c1 = false;
         return gb_apu_event_clock_cycles - gb_frequency_sweep_check_delay;
     }
 
-    // perform next frame sequencer step
-    AGE_GB_CLOG_SOUND_STEP("apu step " << AGE_LOG_DEC(m_next_frame_sequencer_step))
-
+    // execute next frame sequencer step
     int clks_next_apu_event = gb_apu_event_clock_cycles;
     switch (m_next_frame_sequencer_step)
     {
@@ -371,7 +374,8 @@ age::gb_sound::gb_sound(const gb_clock& clock,
       m_clk_next_apu_event((m_clk_current_state / gb_apu_event_clock_cycles + 1) * gb_apu_event_clock_cycles),
       m_next_frame_sequencer_step(m_cgb ? 0 : 1)
 {
-    AGE_GB_CLOG_SOUND("next apu event at clock " << m_clk_next_apu_event)
+    log() << "first frame sequencer step (" << log_dec(m_next_frame_sequencer_step)
+          << ") at clock cycle " << m_clk_next_apu_event;
 
     // initialize wave ram
     const uint8_array<0x10>& src = m_cgb ? cgb_wave_ram : dmg_wave_ram;
@@ -380,7 +384,7 @@ age::gb_sound::gb_sound(const gb_clock& clock,
     // initialize channel 1
     m_c1.activate();
     m_c1.write_nrX2(0xF3);
-    m_c1.set_duty_waveform(0x80);
+    m_c1.set_waveform_duty(0x80);
 
     // channel 1 initial state:
     // we know from gambatte test roms at which cycle
@@ -394,10 +398,5 @@ age::gb_sound::gb_sound(const gb_clock& clock,
     int duty_clks_offset = duty_clks_diff % 252;
     int duty_index       = 4 - (duty_clks_diff / 252);
 
-    m_c1.init_duty_waveform_position(0x7C1, duty_clks_offset / 2, duty_index & 7);
-
-    AGE_GB_CLOG_SOUND("channel 1 init (cgb " << m_cgb << "): "
-                                             << "duty_clks_diff " << duty_clks_diff
-                                             << ", duty_clks_offset " << duty_clks_offset
-                                             << ", index " << duty_index << " (" << (duty_index & 7) << ")")
+    m_c1.init_waveform_duty_position(0x7C1, duty_clks_offset / 2, duty_index & 7);
 }

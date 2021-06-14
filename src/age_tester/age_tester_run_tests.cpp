@@ -246,7 +246,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
         if (opts.m_blargg)
         {
             find_roms(opts.m_test_suite_path / "blargg", matcher, [&](const std::filesystem::path& rom_path) {
-              schedule_rom(rom_path, schedule_rom_blargg);
+                schedule_rom(rom_path, schedule_rom_blargg);
             });
         }
         if (opts.m_gambatte)

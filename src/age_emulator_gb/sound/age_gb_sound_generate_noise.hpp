@@ -36,8 +36,8 @@ namespace age
                                public gb_sound_channel<ChannelId>
     {
     public:
-        explicit gb_noise_generator(const gb_sound_logger* clock)
-            : gb_sound_channel<ChannelId>(clock)
+        explicit gb_noise_generator(const gb_sound_logger* logger)
+            : gb_sound_channel<ChannelId>(logger)
         {
             write_nrX3(0);
         }
@@ -64,6 +64,8 @@ namespace age
                 ratio = 1;
                 --shift;
             }
+
+            gb_sound_channel<ChannelId>::log() << "set ratio = " << ratio << ", shift = " << shift;
 
             int samples = ratio << (shift - 1);
             gb_sample_generator<gb_noise_generator<ChannelId>>::set_frequency_timer_period(samples);

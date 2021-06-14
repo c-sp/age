@@ -42,6 +42,8 @@ namespace age
 
         void write_nrX2(uint8_t nrX2)
         {
+            auto msg = BaseClass::log();
+
             // "zombie" update
             int volume = static_cast<uint8_t>(m_volume);
             if ((m_period == 0) && (m_period_counter > 0))
@@ -65,6 +67,11 @@ namespace age
             m_nrX2            = nrX2;
             m_period          = m_nrX2 & 0x07;
             m_increase_volume = (m_nrX2 & 0x08) > 0;
+
+            msg << "configure volume envelope:"
+                << "\n    * period = " << log_hex8(m_period)
+                << "\n    * volume = " << log_hex8(m_volume)
+                << "\n    * volume " << (m_increase_volume ? "up" : "down");
 
             deactivate_if_silent();
         }

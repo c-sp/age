@@ -33,7 +33,7 @@
 
 namespace age
 {
-    constexpr const std::array<age::uint8_array<8>, 4> gb_duty_waveforms
+    constexpr const std::array<age::uint8_array<8>, 4> gb_waveforms_duty
         = {{
             {{0, 0, 0, 0, 0, 0, 0, 15}},
             {{15, 0, 0, 0, 0, 0, 0, 15}},
@@ -48,11 +48,11 @@ namespace age
                               public gb_sound_channel<ChannelId>
     {
     public:
-        explicit gb_duty_generator(const gb_sound_logger* clock)
-            : gb_sound_channel<ChannelId>(clock)
+        explicit gb_duty_generator(const gb_sound_logger* logger)
+            : gb_sound_channel<ChannelId>(logger)
         {
             set_frequency_bits(0);
-            set_duty_waveform(0);
+            set_waveform_duty(0);
         }
 
         void set_low_frequency_bits(uint8_t nrX3)
@@ -67,9 +67,10 @@ namespace age
             set_frequency_bits(frequency_bits);
         }
 
-        void set_duty_waveform(uint8_t nrX1)
+        void set_waveform_duty(uint8_t nrX1)
         {
             m_duty = nrX1 >> 6;
+            gb_sound_channel<ChannelId>::log() << "waveform duty " << log_dec(m_duty) << " activated";
         }
 
         void init_frequency_timer(int current_clock_cycle, bool double_speed)
@@ -81,7 +82,7 @@ namespace age
             gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(sample_delay);
         }
 
-        void init_duty_waveform_position(int16_t frequency_bits, int sample_offset, uint8_t index)
+        void init_waveform_duty_position(int16_t frequency_bits, int sample_offset, uint8_t index)
         {
             set_frequency_bits(frequency_bits);
 
@@ -89,6 +90,7 @@ namespace age
             gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(offset);
 
             m_index = index;
+            gb_sound_channel<ChannelId>::log() << "set waveform duty index = " << log_dec(m_index);
         }
 
         uint8_t next_wave_sample()
@@ -96,7 +98,7 @@ namespace age
             ++m_index;
             m_index &= 7;
 
-            uint8_t sample = gb_duty_waveforms[m_duty][m_index];
+            uint8_t sample = gb_waveforms_duty[m_duty][m_index];
             return sample;
         }
 
@@ -111,6 +113,9 @@ namespace age
             AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048))
             m_frequency_bits = static_cast<int16_t>(frequency_bits);
             auto samples     = freq_to_samples();
+
+            gb_sound_channel<ChannelId>::log() << "set frequency = " << log_hex16(m_frequency_bits);
+
             gb_sample_generator<gb_duty_generator<ChannelId>>::set_frequency_timer_period(samples);
         }
 

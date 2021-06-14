@@ -59,7 +59,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
     else
     {
         AGE_GB_CLOG_LCD_PORTS("    * LCD switched off")
-        int scanline = -1;
+        int scanline      = -1;
         int scanline_clks = -1;
         calculate_scanline(scanline, scanline_clks);
 
@@ -108,7 +108,7 @@ age::uint8_t age::gb_lcd::read_stat()
     }
 
     // LCD on: calculate current mode and LY match flag
-    int scanline = -1;
+    int scanline      = -1;
     int scanline_clks = -1;
     calculate_scanline(scanline, scanline_clks);
 
@@ -224,7 +224,7 @@ age::uint8_t age::gb_lcd::read_ly()
         return 0;
     }
 
-    int scanline = -1;
+    int scanline      = -1;
     int scanline_clks = -1;
     calculate_scanline(scanline, scanline_clks);
 

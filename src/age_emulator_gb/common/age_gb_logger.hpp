@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -51,7 +52,7 @@ namespace age
               m_current_clock_cycle(current_clock_cycle)
         {}
         Cycles m_clock_cycles;
-        Clock m_current_clock_cycle;
+        Clock  m_current_clock_cycle;
     };
 
     template<int Bits, typename Value>
@@ -90,18 +91,22 @@ namespace age
     class gb_log_message_stream
     {
 #ifdef AGE_COMPILE_LOGGER
-        std::stringstream m_stream;
-        gb_log_entry*     m_entry;
+        std::unique_ptr<std::ostringstream> m_stream;
+        gb_log_entry*                       m_entry;
 
     public:
-        explicit gb_log_message_stream(gb_log_entry* entry) : m_entry(entry) {}
+        explicit gb_log_message_stream(gb_log_entry* entry) : m_stream(new std::ostringstream),
+                                                              m_entry(entry) {}
 
         ~gb_log_message_stream()
         {
             if (m_entry)
             {
-                m_entry->m_message = m_stream.str();
+                m_entry->m_message = m_stream->str();
             }
+            // discard stream to explicitly fail in any use-after-free situation
+            // (e.g. auto& msg = log() << "foo"; msg << "bar";)
+            m_stream = nullptr;
         }
 
         gb_log_message_stream(const gb_log_message_stream&) = delete;
@@ -113,15 +118,15 @@ namespace age
         template<typename Cycles, typename Clock>
         gb_log_message_stream& operator<<(const log_in_clks<Cycles, Clock>& value)
         {
-            m_stream << static_cast<int64_t>(value.m_clock_cycles) << " clock cycles"
-                     << " (on clock cycle " << static_cast<int64_t>(value.m_current_clock_cycle + value.m_clock_cycles) << ")";
+            *m_stream << static_cast<int64_t>(value.m_clock_cycles) << " clock cycles"
+                      << " (on clock cycle " << static_cast<int64_t>(value.m_current_clock_cycle + value.m_clock_cycles) << ")";
             return *this;
         }
 
         template<typename Value>
         gb_log_message_stream& operator<<(const log_dec<Value>& value)
         {
-            m_stream << static_cast<int64_t>(value.m_value);
+            *m_stream << static_cast<int64_t>(value.m_value);
             return *this;
         };
 
@@ -132,11 +137,11 @@ namespace age
             auto chars = Bits / 4;
             auto v     = static_cast<uint64_t>(value.m_value);
 
-            m_stream << "0x"
-                     << std::hex << std::uppercase << std::setw(chars) << std::setfill('0')
-                     << v
-                     << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec
-                     << " (" << v << ")";
+            *m_stream << "0x"
+                      << std::hex << std::uppercase << std::setw(chars) << std::setfill('0')
+                      << v
+                      << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec
+                      << " (" << v << ")";
 
             return *this;
         }
@@ -144,13 +149,8 @@ namespace age
         template<typename Value>
         gb_log_message_stream& operator<<(const Value& value)
         {
-            m_stream << value;
+            *m_stream << value;
             return *this;
-        }
-
-        std::string operator()() const
-        {
-            return m_stream.str();
         }
 #else
     public:

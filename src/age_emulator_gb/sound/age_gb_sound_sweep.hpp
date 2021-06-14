@@ -41,8 +41,15 @@ namespace age
             m_shift    = static_cast<int8_t>(nrX0 & 7);
             m_sweep_up = (nrX0 & 8) == 0;
 
+            auto msg = BaseClass::log();
+            msg << "configure sweep:"
+                << "\n    * period = " << log_hex8(m_period)
+                << "\n    * shift = " << log_hex8(m_shift)
+                << "\n    * sweep " << (m_sweep_up ? "up" : "down");
+
             if (m_swept_down && m_sweep_up)
             {
+                msg << "\n    * deactivating channel: swept down => sweep up";
                 BaseClass::deactivate();
             }
         }

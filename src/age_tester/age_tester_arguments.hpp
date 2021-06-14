@@ -50,8 +50,8 @@ namespace age::tester
         std::filesystem::path m_test_suite_path = {};
 
         gb_log_categories m_log_categories = {};
-        std::string m_whitelist = {};
-        std::string m_blacklist = {};
+        std::string       m_whitelist      = {};
+        std::string       m_blacklist      = {};
 
         std::vector<std::string> m_unknown_options     = {};
         std::vector<std::string> m_invalid_arg_options = {};
