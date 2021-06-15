@@ -65,7 +65,7 @@ namespace age
                 --shift;
             }
 
-            gb_sound_channel<ChannelId>::log() << "set ratio = " << ratio << ", shift = " << shift;
+            gb_sound_channel<ChannelId>::log() << "set noise ratio = " << ratio << ", shift = " << shift;
 
             int samples = ratio << (shift - 1);
             gb_sample_generator<gb_noise_generator<ChannelId>>::set_frequency_timer_period(samples);
@@ -74,6 +74,7 @@ namespace age
         void init_generator()
         {
             m_lfsr = 0x7FFF;
+            gb_sound_channel<ChannelId>::log() << "initialize noise lfsr = " << log_hex16(m_lfsr);
         }
 
 

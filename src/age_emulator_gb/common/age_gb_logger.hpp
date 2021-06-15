@@ -171,13 +171,13 @@ namespace age
     public:
         explicit gb_logger(gb_log_categories log_categories) : m_log_categories(std::move(log_categories)) {}
 
-        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_offset)
+        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_clock)
         {
             if (m_log_categories.find(category) == end(m_log_categories))
             {
                 return gb_log_message_stream(nullptr);
             }
-            m_messages.emplace_back(gb_log_entry{category, clock, div_offset, ""});
+            m_messages.emplace_back(gb_log_entry{category, clock, div_clock, ""});
             return gb_log_message_stream(&m_messages[m_messages.size() - 1]);
         }
 

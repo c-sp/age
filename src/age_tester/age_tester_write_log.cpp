@@ -40,7 +40,7 @@ namespace
                << "     AGE git revision: " << GIT_REV << " (" << GIT_DATE << ")\n"
                << "--------------------------------------------------------------------------------\n"
                << '\n'
-               << "T4-cycle  16-bit-divider       category  comments" << '\n'
+               << "T4-cycle  T4-16-bit-divider    category  comments" << '\n'
                << "--------  -------------------  --------  ---------------------------------------\n";
 
         return result.str();
@@ -65,7 +65,7 @@ namespace
 
     std::string format_log_entry(const age::gb_log_entry& entry)
     {
-        unsigned div = entry.m_clock + entry.m_div_offset;
+        unsigned div = entry.m_div_clock;
 
         std::bitset<4> div4{div >> 12};
         std::bitset<4> div3{div >> 8};

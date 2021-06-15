@@ -101,16 +101,16 @@ namespace age
 
     struct gb_log_entry
     {
-        gb_log_entry(gb_log_category category, int clock, int div_offset, std::string message)
+        gb_log_entry(gb_log_category category, int clock, int div_clock, std::string message)
             : m_category(category),
               m_clock(clock),
-              m_div_offset(div_offset),
+              m_div_clock(div_clock),
               m_message(std::move(message))
         {}
 
         gb_log_category m_category;
         int             m_clock;
-        int             m_div_offset;
+        uint16_t        m_div_clock;
         std::string     m_message;
     };
 

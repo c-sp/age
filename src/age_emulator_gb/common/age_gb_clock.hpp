@@ -95,18 +95,19 @@ namespace age
         // logging code is header-only to allow compile time optimization
         [[nodiscard]] gb_log_message_stream log(gb_log_category category) const
         {
-            return m_logger.log(category, m_clock_cycle, m_div_offset);
+            return log(category, m_clock_cycle);
         }
         [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock_cycle) const
         {
-            return m_logger.log(category, clock_cycle, m_div_offset);
+            int div_clock = clock_cycle + m_div_offset;
+            return m_logger.log(category, clock_cycle, div_clock);
         }
 
     private:
         // logging code is header-only to allow compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
-            return m_logger.log(gb_log_category::lc_clock, m_clock_cycle, m_div_offset);
+            return log(gb_log_category::lc_clock, m_clock_cycle);
         }
 
         gb_logger& m_logger;
