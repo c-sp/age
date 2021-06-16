@@ -107,6 +107,7 @@ namespace age
     private:
         [[nodiscard]] bool should_inc_period() const;
         [[nodiscard]] bool should_dec_length_counter() const;
+        [[nodiscard]] bool should_delay_frequency_timer() const;
         int                apu_event();
         void               generate_samples(int for_clk);
         void               set_wave_ram_byte(unsigned offset, uint8_t value);

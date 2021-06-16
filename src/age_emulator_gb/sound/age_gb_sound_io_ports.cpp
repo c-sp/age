@@ -278,7 +278,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
     if ((value & gb_nrX4_initialize) > 0)
     {
-        m_c1.init_frequency_timer(m_clk_current_state, m_clock.is_double_speed());
+        m_c1.init_frequency_timer(should_delay_frequency_timer());
 
         // one frequency sweep step is skipped if the next frame sequencer
         // step 2 or 6 is near
@@ -394,7 +394,7 @@ void age::gb_sound::write_nr24(uint8_t value)
 
     if ((value & gb_nrX4_initialize) > 0)
     {
-        m_c2.init_frequency_timer(m_clk_current_state, m_clock.is_double_speed());
+        m_c2.init_frequency_timer(should_delay_frequency_timer());
 
         bool deactivated = m_c2.init_volume_envelope(should_inc_period());
         if (!deactivated)

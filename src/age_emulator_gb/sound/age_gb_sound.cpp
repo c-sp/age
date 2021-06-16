@@ -240,6 +240,17 @@ bool age::gb_sound::should_dec_length_counter() const
     return m_next_frame_sequencer_step & 1;
 }
 
+bool age::gb_sound::should_delay_frequency_timer() const
+{
+    AGE_ASSERT(m_master_on);
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+    // everything must be up to date
+    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+
+    return m_ds_delay && m_clock.is_double_speed();
+}
+
 
 
 int age::gb_sound::apu_event()

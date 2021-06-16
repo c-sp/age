@@ -73,12 +73,11 @@ namespace age
             gb_sound_channel<ChannelId>::log() << "waveform duty " << log_dec(m_duty) << " activated";
         }
 
-        void init_frequency_timer(int current_clock_cycle, bool double_speed)
+        void init_frequency_timer(bool additional_delay)
         {
             // frequency timer delay on channel initialization
             // (see test rom analysis)
-            //! \todo test rom analysis for ch1_duty0_pos6_to_pos7_timing_ds_X
-            int sample_delay = (double_speed && !(current_clock_cycle & 2)) ? 3 : 4;
+            int sample_delay = additional_delay ? 4 : 3;
             gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(sample_delay);
         }
 
