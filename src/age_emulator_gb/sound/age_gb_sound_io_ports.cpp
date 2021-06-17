@@ -115,8 +115,8 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_nr21 = m_nr24 = 0;
         m_nr30 = m_nr32 = m_nr34 = 0;
         m_nr44                   = 0;
-        m_nr50 = m_nr51 = 0;
-        m_ds_delay      = true;
+        m_nr50 = m_nr51    = 0;
+        m_current_ds_delay = 0;
 
         m_c1 = gb_sound_channel1(0x3F, this);
         m_c2 = gb_sound_channel2(0x3F, this);

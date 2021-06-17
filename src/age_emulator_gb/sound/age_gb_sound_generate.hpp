@@ -90,6 +90,12 @@ namespace age
             calculate_output_sample();
         }
 
+        void delay_one_sample()
+        {
+            AGE_ASSERT(m_frequency_timer > 0)
+            m_frequency_timer++;
+        }
+
     protected:
         void set_frequency_timer_period(int number_of_samples)
         {

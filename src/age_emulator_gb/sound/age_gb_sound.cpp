@@ -167,21 +167,55 @@ void age::gb_sound::after_div_reset(bool during_stop)
 
 void age::gb_sound::after_speed_change()
 {
+    if (!m_master_on)
+    {
+        log() << "sound off at speed change";
+        return;
+    }
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
-    // Gambatte speedchange_ch2_nr52_* tests:
-    // apparently the frame sequencer is 2 clock cycles late
-    // after switching to double speed
+    auto msg = log();
+    msg << "sound at speed change:";
+
     if (m_clock.is_double_speed())
     {
-        if (m_ds_delay)
+        if (m_current_ds_delay == 0)
         {
-            log() << "delaying frame sequencer by 2 clock cycles after switching to double speed";
+            m_current_ds_delay = 2;
+            msg << "\n    * delaying frame sequencer by 2 clock cycles after switching to double speed";
             m_clk_next_apu_event += 2;
         }
-        m_ds_delay = !m_ds_delay;
+        else
+        {
+            m_current_ds_delay = 0;
+            msg << "\n    * no frame sequencer delay after switching to double speed";
+        }
+    }
+    else if (m_current_ds_delay == 0)
+    {
+        if (m_c1.active())
+        {
+            m_c1.delay_one_sample();
+            msg << "\n    * delaying channel 1 frequency timer by one sample";
+        }
+        if (m_c2.active())
+        {
+            m_c2.delay_one_sample();
+            msg << "\n    * delaying channel 2 frequency timer by one sample";
+        }
+        if (m_c3.active())
+        {
+            m_c3.delay_one_sample();
+            msg << "\n    * delaying channel 3 frequency timer by one sample";
+        }
+        if (m_c4.active())
+        {
+            m_c4.delay_one_sample();
+            msg << "\n    * delaying channel 4 frequency timer by one sample";
+        }
     }
 }
 
@@ -248,7 +282,63 @@ bool age::gb_sound::should_delay_frequency_timer() const
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
-    return m_ds_delay && m_clock.is_double_speed();
+    //! \todo this needs more test roms (find them or write them)
+    //
+    // TL;DR:
+    //      - during double speed the a (duty?) frequency timer is initially delayed
+    //        by one sample on channel init,
+    //        if bit 1 (0x02) is set in the current div
+    //
+    //      - when switching to single speed,
+    //        running frequency timers are delayed by one sample
+    //        if the double speed delay was NOT active
+    //
+    // frq-tm  div&2   div&2   audio1  delay
+    // (spch*) (spch*) (init)  (clks)  (clks)  test
+    // ------- ------- ------  ------  ------  ----
+    //                                         sound off & on -> c1 init
+    //                      0    1800  5-8       sound/ch1_duty0_pos6_to_pos7_timing_1/2  (128 sample period)
+    //
+    //                                         sound off & on -> double speed -> c1 init
+    //                      0     902  5-6       speedchange_ch1_nr4init_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
+    //
+    //                                         double speed -> sound off & on -> c1 init
+    //                      2     904  7-8       sound/ch1_duty0_pos6_to_pos7_timing_ds_1/2  (64 sample period)
+    //                      2     904  7-8       sound/ch1_duty0_pos6_to_pos7_timing_ds_3/4  (64 sample period)
+    //                      0     902  5-6       sound/ch1_duty0_pos6_to_pos7_timing_ds_5/6  (64 sample period)
+    //
+    //                                         double speed -> sound off & on -> c1 init -> single speed(*)
+    //     115      0       0  132872  5- 8      speedchange_ch1_duty0_pos6_to_pos7_timing_ds_1/2      (128 sample period)
+    //     114      2       0  132874  7-10      speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_172  (128 sample period)
+    //
+    //                                         double speed -> sound off & on -> c1 init -> single speed(*) -> double speed
+    //      59      0       0  197512  7-8       speedchange2_ch1_duty0_pos6_to_pos7_timing_ds_1/2      (64 sample period)
+    //      59      0       0  197512  7-8       speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_ds_1/2  (64 sample period)
+    //      58      2       0  197512  7-8       speedchange2_nop_ch1_duty0_pos6_to_pos7_timing_ds_1/2  (64 sample period)
+    //
+    //                                         sound off & on -> c1 init -> double speed
+    //                      0   66438  5-6       speedchange_ch1_duty0_pos6_to_pos7_timing_1/2      (64 sample period)
+    //                      0   66438  5-6       speedchange_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (64 sample period)
+    //
+    //                                         sound off & on -> c1 init -> double speed -> single speed(*)
+    //              0       0  198408  5-8       speedchange2_ch1_duty0_pos6_to_pos7_timing_1/2      (128 sample period)
+    //              2       0  198406  3-6       speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (128 sample period)
+    //
+    //                                         sound off & on -> c1 init -> double speed -> single speed(*) -> double speed
+    //              0       0  263046  5-6       speedchange3_ch1_duty0_pos6_to_pos7_timing_1/2      (64 sample period)
+    //              0       0  263046  5-6       speedchange3_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (64 sample period)
+    //              2       0  263046  5-6       speedchange3_nop_ch1_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
+    //
+    //                                         sound off & on -> c1 init -> double speed -> single speed(*) -> double speed -> single speed(*)
+    //            0/0       0  395016  5- 8      speedchange4_ch1_duty0_pos6_to_pos7_timing_1/2      (128 sample period)
+    //            0/2       0  395018  7-10      speedchange4_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (128 sample period)
+    //
+    //                                         sound off & on -> c1 init -> double speed -> single speed(*) -> double speed -> single speed(*) -> double speed
+    //            0/0       0  459656  7-8       speedchange5_ch1_duty0_pos6_to_pos7_timing_1/2      (64 sample period)
+    //            0/0       0  459656  7-8       speedchange5_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (64 sample period)
+    //            0/2       0  459656  7-8       speedchange5_nop_ch1_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
+
+    return m_clock.is_double_speed() && (((m_clk_current_state + m_clock.get_div_offset()) & 2) != 0);
 }
 
 
