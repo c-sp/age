@@ -35,10 +35,10 @@ namespace age
 {
     constexpr const std::array<age::uint8_array<8>, 4> gb_waveforms_duty
         = {{
-            {{0, 0, 0, 0, 0, 0, 0, 15}},
-            {{15, 0, 0, 0, 0, 0, 0, 15}},
-            {{15, 0, 0, 0, 0, 15, 15, 15}},
-            {{0, 15, 15, 15, 15, 15, 15, 0}},
+            {{0, 0, 0, 0, 0, 0, 0, 1}},
+            {{1, 0, 0, 0, 0, 0, 0, 1}},
+            {{1, 0, 0, 0, 0, 1, 1, 1}},
+            {{0, 1, 1, 1, 1, 1, 1, 0}},
         }};
 
 
@@ -71,13 +71,22 @@ namespace age
         {
             m_duty = nrX1 >> 6;
             gb_sound_channel<ChannelId>::log() << "waveform duty " << log_dec(m_duty) << " activated";
+            //! \todo set_current_pcm_amplitude()?
         }
 
-        void init_frequency_timer(bool additional_delay)
+        void init_frequency_timer(bool align_to_1mhz)
         {
             // frequency timer delay on channel initialization
-            // (see test rom analysis)
-            int sample_delay = additional_delay ? 4 : 3;
+            // (based on SameSuite test roms)
+            int sample_delay = align_to_1mhz ? 5 : 4;
+
+            // frequency timer delay reduced for already active channel
+            // (based on SameSuite test roms)
+            if (gb_sound_channel<ChannelId>::active())
+            {
+                sample_delay -= 2;
+            }
+
             gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(sample_delay);
         }
 
@@ -88,17 +97,23 @@ namespace age
             auto offset = sample_offset - freq_to_samples();
             gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(offset);
 
-            m_index = index;
-            gb_sound_channel<ChannelId>::log() << "set waveform duty index = " << log_dec(m_index);
+            m_duty_index = index;
+            gb_sound_channel<ChannelId>::log() << "set waveform duty index = " << log_dec(m_duty_index);
         }
 
-        uint8_t next_wave_sample()
+        void set_volume(uint8_t volume)
         {
-            ++m_index;
-            m_index &= 7;
+            AGE_ASSERT(volume <= 15)
+            m_volume = volume;
+            gb_sample_generator<gb_duty_generator<ChannelId>>::set_current_pcm_amplitude(m_current_duty_value ? m_volume : 0);
+        }
 
-            uint8_t sample = gb_waveforms_duty[m_duty][m_index];
-            return sample;
+        uint8_t next_pcm_amplitude()
+        {
+            ++m_duty_index;
+            m_duty_index &= 7;
+            m_current_duty_value = gb_waveforms_duty[m_duty][m_duty_index];
+            return m_current_duty_value ? m_volume : 0;
         }
 
     protected:
@@ -124,9 +139,11 @@ namespace age
             return (2048 - m_frequency_bits) * 2;
         }
 
-        int16_t m_frequency_bits = 0;
-        uint8_t m_index          = 0;
-        uint8_t m_duty           = 0;
+        int16_t m_frequency_bits     = 0;
+        uint8_t m_duty               = 0;
+        uint8_t m_duty_index         = 0;
+        uint8_t m_current_duty_value = 0; //!< used to start with value 0 on every channel init (ignoring the first duty value)
+        uint8_t m_volume             = 0;
     };
 
 } // namespace age

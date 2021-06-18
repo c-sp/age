@@ -125,7 +125,7 @@ namespace age
         {
             AGE_ASSERT((new_volume >= 0) && (new_volume < 0x10))
             m_volume = static_cast<int8_t>(new_volume);
-            BaseClass::set_volume(m_volume * 4);
+            BaseClass::set_volume(m_volume);
         }
 
         bool adjust_volume()

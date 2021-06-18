@@ -61,6 +61,7 @@ age::gb_cart_mode age::gb_device::get_cart_mode() const
 
 bool age::gb_device::is_cgb() const
 {
+    //! \todo some calls to is_cgb() should probably be replaced by is_cgb_hardware()
     return m_cart_mode == gb_cart_mode::cgb;
 }
 

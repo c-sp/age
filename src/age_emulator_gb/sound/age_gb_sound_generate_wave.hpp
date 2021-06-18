@@ -85,26 +85,30 @@ namespace age
 
         void set_wave_pattern_byte(unsigned offset, uint8_t value)
         {
-            uint8_t first_sample  = value >> 4;
-            uint8_t second_sample = value & 0x0F;
+            uint8_t first_byte  = value >> 4;
+            uint8_t second_byte = value & 0x0F;
 
             AGE_ASSERT(offset < 16)
             offset <<= 1;
-            m_wave_pattern[offset]     = first_sample;
-            m_wave_pattern[offset + 1] = second_sample;
+            m_wave_pattern[offset]     = first_byte;
+            m_wave_pattern[offset + 1] = second_byte;
         }
 
 
 
-        uint8_t next_wave_sample()
+        void set_volume_shift(uint8_t volume_shift)
+        {
+            AGE_ASSERT(volume_shift <= 4)
+            m_volume_shift = volume_shift;
+            gb_sample_generator<gb_wave_generator<ChannelId>>::set_current_pcm_amplitude(get_current_wave_value());
+        }
+
+        uint8_t next_pcm_amplitude()
         {
             ++m_index;
             m_index &= 31;
-
-            uint8_t sample       = m_wave_pattern[m_index];
             m_wave_ram_just_read = true;
-
-            return sample;
+            return get_current_wave_value();
         }
 
         void generate_samples(pcm_vector& buffer, int buffer_index, int samples_to_generate)
@@ -116,7 +120,7 @@ namespace age
 
 
 
-    protected:
+    private:
         void calculate_frequency_timer_period()
         {
             int frequency = m_frequency_low + (m_frequency_high << 8);
@@ -128,11 +132,17 @@ namespace age
             gb_sample_generator<gb_wave_generator<ChannelId>>::set_frequency_timer_period(samples);
         }
 
-    private:
+        uint8_t get_current_wave_value()
+        {
+            uint8_t wave_byte = m_wave_pattern[m_index];
+            return wave_byte >> m_volume_shift;
+        }
+
         uint8_array<32> m_wave_pattern{};
         uint8_t         m_frequency_low      = 0;
         uint8_t         m_frequency_high     = 0;
         uint8_t         m_index              = 0;
+        uint8_t         m_volume_shift       = 0;
         bool            m_wave_ram_just_read = false;
     };
 

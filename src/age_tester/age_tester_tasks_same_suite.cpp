@@ -18,19 +18,18 @@
 
 
 
-void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path& rom_path,
+void age::tester::schedule_rom_same_suite(const std::filesystem::path& rom_path,
                                           const schedule_test_t&       schedule)
 {
-    auto filename     = rom_path.filename().string();
-    bool explicit_cgb = (filename.find("-cgb") != std::string::npos) || (filename.find("-C") != std::string::npos);
-    bool explicit_dmg = (filename.find("-dmg") != std::string::npos) || (filename.find("-G") != std::string::npos);
+    std::string normalized_rom_path = age::tester::normalize_path_separator(rom_path.string());
+
+    bool allow_dmg = (normalized_rom_path.find("/apu/") == std::string::npos)
+                     || (rom_path.filename() == "div_write_trigger.gb")
+                     || (rom_path.filename() == "div_write_trigger_10.gb");
 
     auto rom_contents = load_rom_file(rom_path);
-    if (explicit_cgb || !explicit_dmg)
-    {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, run_common_test);
-    }
-    if (explicit_dmg || !explicit_cgb)
+    schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, run_common_test);
+    if (allow_dmg)
     {
         schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::default_colors, run_common_test);
     }

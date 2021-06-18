@@ -119,8 +119,9 @@ namespace age
         un73 = 0xFF73,
         // un74 = 0xFF74,
         un75 = 0xFF75,
-        un76 = 0xFF76,
-        un77 = 0xFF77,
+
+        pcm12 = 0xFF76,
+        pcm34 = 0xFF77,
 
         ie = 0xFFFF
     };

@@ -39,6 +39,7 @@ namespace
     constexpr char opt_mooneye_gb   = 'm';
     constexpr char opt_mealybug     = 'n';
     constexpr char opt_print_passed = 'p';
+    constexpr char opt_same_suite   = 's';
     constexpr char opt_whitelist    = 'w';
     constexpr char opt_blacklist    = 'x';
 
@@ -56,6 +57,7 @@ namespace
     constexpr const char* opt_long_mooneye_gb   = "mooneye-gb";
     constexpr const char* opt_long_mealybug     = "mealybug";
     constexpr const char* opt_long_print_passed = "print-passed";
+    constexpr const char* opt_long_same_suite   = "same-suite";
     constexpr const char* opt_long_whitelist    = "whitelist";
     constexpr const char* opt_long_blacklist    = "blacklist";
 
@@ -68,14 +70,14 @@ namespace
         "  https://github.com/c-sp/AGE",
         "",
 #ifndef AGE_COMPILE_LOGGER
-        "This test runner has been compiled without logging support!",
+        "This test runner has been compiled without logging!",
 #endif
         "AGE git revision: %git%",
         "",
         "Usage:",
         "  %cmd% [options] [gameboy-test-roms path]",
         "",
-        "  If no gameboy-test-roms path is specified,",
+        "  If no gameboy-test-roms path is specified",
         "  the current working directory is used.",
         "",
         "Options:",
@@ -88,15 +90,16 @@ namespace
         "  -w, --whitelist <...>  whitelist file/regex",
         "  -x, --blacklist <...>  blacklist file/regex",
         "",
-        "Use the following category options to run a subset of the test suite.",
-        "All tests will run when no category is specified.",
+        "Use the following category options to run only a subset of test roms.",
         "Multiple categories can be picked simultaneously.",
+        "If no category is specified all tests will run.",
         "  -a, --acid2         run cgb-acid-2 and dmg-acid-2 test roms",
         "  -e, --age           run age test roms",
         "  -b, --blargg        run Blarggs test roms",
         "  -g, --gambatte      run Gambatte test roms",
         "  -m, --mooneye-gb    run Mooneye GB test roms",
         "  -n, --mealybug      run Mealybug Tearoom test roms",
+        "  -s, --same-suite    run SameSuite test roms",
     };
 } // namespace
 
@@ -225,6 +228,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_print_passed,
         },
         {
+            .name    = opt_long_same_suite,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_same_suite,
+        },
+        {
             .name    = opt_long_whitelist,
             .has_arg = required_argument,
             .flag    = nullptr,
@@ -301,6 +310,10 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_print_passed:
                 options.m_print_passed = true;
+                break;
+
+            case opt_same_suite:
+                options.m_same_suite = true;
                 break;
 
             case opt_whitelist:

@@ -71,6 +71,8 @@ namespace age
         [[nodiscard]] uint8_t read_nr50() const;
         [[nodiscard]] uint8_t read_nr51() const;
         uint8_t               read_nr52();
+        uint8_t               read_pcm12();
+        uint8_t               read_pcm34();
 
         void write_nr10(uint8_t value);
         void write_nr11(uint8_t value);
@@ -107,7 +109,7 @@ namespace age
     private:
         [[nodiscard]] bool should_inc_period() const;
         [[nodiscard]] bool should_dec_length_counter() const;
-        [[nodiscard]] bool should_delay_frequency_timer() const;
+        [[nodiscard]] bool should_align_frequency_timer() const;
         int                apu_event();
         void               generate_samples(int for_clk);
         void               set_wave_ram_byte(unsigned offset, uint8_t value);
@@ -115,6 +117,7 @@ namespace age
         pcm_vector& m_samples;
 
         const bool m_cgb;
+        int        m_clk_bits_apu_on           = 0;
         int        m_clk_next_apu_event        = 0;
         int8_t     m_next_frame_sequencer_step = 0;
         bool       m_delayed_disable_c1        = false;

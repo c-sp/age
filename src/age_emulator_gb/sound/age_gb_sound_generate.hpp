@@ -50,21 +50,14 @@ namespace age
 
             for (int samples_remaining = samples_to_generate; samples_remaining > 0;)
             {
-                // write output samples until we have to retrieve the next wave sample
+                // write output samples until we have to update the channel's PCM amplitude
                 int samples = std::min(samples_remaining, m_frequency_timer);
 
-                // the result might be slightly distorted by overflow from
-                // lower sample into upper sample
-                // (ignored since it's just +1/-1)
                 uint32_t output_sample = m_output_value * channel_multiplier;
 
                 for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
                 {
                     auto idx = static_cast<unsigned>(buffer_index);
-
-                    // result might be slightly distorted by overflow from
-                    // lower sample into upper sample
-                    // (ignored since it's just +1/-1)
                     buffer[idx].m_stereo_sample += output_sample;
                 }
 
@@ -75,25 +68,23 @@ namespace age
                 if (m_frequency_timer == 0)
                 {
                     m_frequency_timer = m_frequency_timer_period;
-                    m_wave_sample     = static_cast<DerivedClass*>(this)->next_wave_sample();
-                    calculate_output_sample();
+                    set_current_pcm_amplitude(static_cast<DerivedClass*>(this)->next_pcm_amplitude());
                 }
             }
 
             AGE_ASSERT(m_frequency_timer > 0)
         }
 
-        void set_volume(uint8_t volume)
-        {
-            AGE_ASSERT(volume <= 60)
-            m_volume = volume;
-            calculate_output_sample();
-        }
-
         void delay_one_sample()
         {
             AGE_ASSERT(m_frequency_timer > 0)
             m_frequency_timer++;
+        }
+
+        uint8_t get_current_pcm_amplitude()
+        {
+            AGE_ASSERT(m_current_pcm_amplitude <= 15)
+            return m_current_pcm_amplitude;
         }
 
     protected:
@@ -121,36 +112,31 @@ namespace age
             return m_frequency_timer == m_frequency_timer_period;
         }
 
-    private:
-        void calculate_output_sample()
+        void set_current_pcm_amplitude(uint8_t current_pcm_amplitude)
         {
-            AGE_ASSERT(m_wave_sample <= 15)
-            AGE_ASSERT(m_volume <= 60)
+            AGE_ASSERT(current_pcm_amplitude <= 15)
+            m_current_pcm_amplitude = current_pcm_amplitude;
 
-            int value = m_wave_sample * m_volume * int16_t_max;
-            //
             // divider:
-            //
-            //   / 15  ->  max amplitude
+            //   / 15  ->  max channel PCM amplitude
             //   / 32  ->  4 channels, SOx volume up to 8
-            //   / 60  ->  combining volume 1-15 (channels 1,2,4)
-            //             and volume 0, 1, 0.5, 0.25 (channel 3)
-            //
-            int output     = value / (15 * 32 * 60); // 15 * 32 * 60 = 28800
+            int value = m_current_pcm_amplitude * int16_t_max;
+            int output = value / (15 * 32);
+            AGE_ASSERT(output >= 0);
+            AGE_ASSERT(output <= int16_t_max / 32);
+
             m_output_value = static_cast<int16_t>(output);
         }
 
+    private:
         int m_frequency_timer_period = 0;
         int m_frequency_timer        = 0;
 
-        //!
-        //! \brief the current wave sample
-        //! (taken from duty waveform, wave ram or noise LFSR)
-        //!
-        uint8_t m_wave_sample = 0;
-        uint8_t m_volume      = 0;
-
         int16_t m_output_value = 0;
+
+        //! \brief the channel's current PCM amplitude
+        //! (combines duty waveform, wave ram or noise LFSR bits & channel volume)
+        uint8_t m_current_pcm_amplitude = 0;
     };
 
 } // namespace age

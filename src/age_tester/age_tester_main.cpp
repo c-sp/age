@@ -26,7 +26,7 @@ namespace
 {
     void check_run_all(age::tester::options& options)
     {
-        bool run_all = !options.m_acid2 && !options.m_age && !options.m_blargg && !options.m_gambatte && !options.m_mealybug && !options.m_mooneye_gb;
+        bool run_all = !options.m_acid2 && !options.m_age && !options.m_blargg && !options.m_gambatte && !options.m_mealybug && !options.m_mooneye_gb && !options.m_same_suite;
 
         options.m_acid2 |= run_all;
         options.m_age |= run_all;
@@ -34,6 +34,7 @@ namespace
         options.m_gambatte |= run_all;
         options.m_mealybug |= run_all;
         options.m_mooneye_gb |= run_all;
+        options.m_same_suite |= run_all;
     }
 
     void sort_and_print(std::vector<age::tester::test_result>& tests)

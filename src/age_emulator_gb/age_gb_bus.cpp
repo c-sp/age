@@ -253,8 +253,8 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
                 case to_underlying(gb_io_port::un72): result = m_un72; break;
                 case to_underlying(gb_io_port::un73): result = m_un73; break;
                 case to_underlying(gb_io_port::un75): result = m_un75; break;
-                case to_underlying(gb_io_port::un76):
-                case to_underlying(gb_io_port::un77): result = 0; break;
+                case to_underlying(gb_io_port::pcm12): result = m_sound.read_pcm12(); break;
+                case to_underlying(gb_io_port::pcm34): result = m_sound.read_pcm34(); break;
 
                 default: break;
             }
@@ -271,8 +271,8 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
                 case to_underlying(gb_io_port::un72): result = m_un72; break;
                 case to_underlying(gb_io_port::un73): result = m_un73; break;
                 case to_underlying(gb_io_port::un75): result = m_un75; break;
-                case to_underlying(gb_io_port::un76):
-                case to_underlying(gb_io_port::un77): result = 0; break;
+                case to_underlying(gb_io_port::pcm12): result = m_sound.read_pcm12(); break;
+                case to_underlying(gb_io_port::pcm34): result = m_sound.read_pcm34(); break;
 
                 default: break;
             }

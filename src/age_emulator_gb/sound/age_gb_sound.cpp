@@ -274,7 +274,7 @@ bool age::gb_sound::should_dec_length_counter() const
     return m_next_frame_sequencer_step & 1;
 }
 
-bool age::gb_sound::should_delay_frequency_timer() const
+bool age::gb_sound::should_align_frequency_timer() const
 {
     AGE_ASSERT(m_master_on);
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
@@ -303,13 +303,13 @@ bool age::gb_sound::should_delay_frequency_timer() const
     //                      0     902  5-6       speedchange_ch1_nr4init_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
     //
     //                                         double speed -> sound off & on -> c1 init
-    //                      2     904  7-8       sound/ch1_duty0_pos6_to_pos7_timing_ds_1/2  (64 sample period)
-    //                      2     904  7-8       sound/ch1_duty0_pos6_to_pos7_timing_ds_3/4  (64 sample period)
-    //                      0     902  5-6       sound/ch1_duty0_pos6_to_pos7_timing_ds_5/6  (64 sample period)
+    //                      2     904  7-8       sound/ch1_duty0_pos6_to_pos7_timing_ds_1/2  (64 sample period) init 60 clks after on
+    //                      2     904  7-8       sound/ch1_duty0_pos6_to_pos7_timing_ds_3/4  (64 sample period) init 60 clks after on
+    //                      0     902  5-6       sound/ch1_duty0_pos6_to_pos7_timing_ds_5/6  (64 sample period) init 62 clks after on
     //
     //                                         double speed -> sound off & on -> c1 init -> single speed(*)
     //     115      0       0  132872  5- 8      speedchange_ch1_duty0_pos6_to_pos7_timing_ds_1/2      (128 sample period)
-    //     114      2       0  132874  7-10      speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_172  (128 sample period)
+    //     114      2       0  132874  7-10      speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_1/2  (128 sample period)
     //
     //                                         double speed -> sound off & on -> c1 init -> single speed(*) -> double speed
     //      59      0       0  197512  7-8       speedchange2_ch1_duty0_pos6_to_pos7_timing_ds_1/2      (64 sample period)
@@ -338,7 +338,10 @@ bool age::gb_sound::should_delay_frequency_timer() const
     //            0/0       0  459656  7-8       speedchange5_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (64 sample period)
     //            0/2       0  459656  7-8       speedchange5_nop_ch1_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
 
-    return m_clock.is_double_speed() && (((m_clk_current_state + m_clock.get_div_offset()) & 2) != 0);
+    // align frequency timer to 1mhz
+    int master_on_diff_bit = (m_clk_bits_apu_on ^ m_clk_current_state) & 2;
+
+    return (master_on_diff_bit != 0);
 }
 
 
@@ -432,7 +435,6 @@ void age::gb_sound::generate_samples(int for_clk)
     // fill the silence, if audio is enabled
     if (m_master_on)
     {
-        //! \todo find out when frequency timers are counting and when not
         if (m_c1.active())
         {
             m_c1.generate_samples(m_samples, sample_index, samples_to_generate);
@@ -441,8 +443,14 @@ void age::gb_sound::generate_samples(int for_clk)
         {
             m_c2.generate_samples(m_samples, sample_index, samples_to_generate);
         }
-        m_c3.generate_samples(m_samples, sample_index, samples_to_generate);
-        m_c4.generate_samples(m_samples, sample_index, samples_to_generate);
+        // if (m_c3.active()) //! \todo uncommenting this causes blargg/dmg-sound to fail
+        {
+            m_c3.generate_samples(m_samples, sample_index, samples_to_generate);
+        }
+        if (m_c4.active())
+        {
+            m_c4.generate_samples(m_samples, sample_index, samples_to_generate);
+        }
     }
 }
 

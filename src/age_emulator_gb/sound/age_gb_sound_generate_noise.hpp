@@ -79,7 +79,14 @@ namespace age
 
 
 
-        uint8_t next_wave_sample()
+        void set_volume(uint8_t volume)
+        {
+            AGE_ASSERT(volume <= 15)
+            m_volume = volume;
+            gb_sample_generator<gb_noise_generator<ChannelId>>::set_current_pcm_amplitude(get_current_noise_value());
+        }
+
+        uint8_t next_pcm_amplitude()
         {
             if (m_allow_shift)
             {
@@ -95,15 +102,21 @@ namespace age
                 }
             }
 
-            uint8_t sample = static_cast<uint8_t>(~m_lfsr & 1) * 15;
-            return sample;
+            return get_current_noise_value();
         }
 
     private:
+        uint8_t get_current_noise_value()
+        {
+            int current_bit = m_lfsr & 1;
+            return current_bit ? 0 : m_volume; // 0 => high, 1 => low
+        }
+
+        uint16_t m_lfsr        = 0;
+        uint8_t  m_volume      = 0;
         uint8_t  m_nrX3        = 0;
         bool     m_7steps      = false;
         bool     m_allow_shift = true;
-        uint16_t m_lfsr        = 0;
     };
 
 } // namespace age

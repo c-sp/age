@@ -25,6 +25,30 @@ namespace
 
 
 
+age::uint8_t age::gb_sound::read_pcm12()
+{
+    update_state();
+
+    uint8_t c1_sample = m_c1.active() ? m_c1.get_current_pcm_amplitude() : 0;
+    uint8_t c2_sample = m_c2.active() ? m_c2.get_current_pcm_amplitude() << 4 : 0;
+
+    log() << "read PCM12 == " << log_hex8(c1_sample + c2_sample);
+    return c1_sample + c2_sample;
+}
+
+age::uint8_t age::gb_sound::read_pcm34()
+{
+    update_state();
+
+    uint8_t c3_sample = m_c3.active() ? m_c3.get_current_pcm_amplitude() : 0;
+    uint8_t c4_sample = m_c4.active() ? m_c4.get_current_pcm_amplitude() << 4 : 0;
+
+    log() << "read PCM34 == " << log_hex8(c3_sample + c4_sample);
+    return c3_sample + c4_sample;
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -134,6 +158,7 @@ void age::gb_sound::write_nr52(uint8_t value)
         int clks_into_step  = clk_div_aligned & (gb_apu_event_clock_cycles - 1);
         int clks_first_step = gb_apu_event_clock_cycles - clks_into_step;
 
+        m_clk_bits_apu_on           = m_clk_current_state & 0xFFFF;
         m_clk_next_apu_event        = m_clk_current_state + clks_first_step;
         m_next_frame_sequencer_step = 0;
         m_delayed_disable_c1        = false;
@@ -278,7 +303,7 @@ void age::gb_sound::write_nr14(uint8_t value)
 
     if ((value & gb_nrX4_initialize) > 0)
     {
-        m_c1.init_frequency_timer(should_delay_frequency_timer());
+        m_c1.init_frequency_timer(should_align_frequency_timer());
 
         // one frequency sweep step is skipped if the next frame sequencer
         // step 2 or 6 is near
@@ -394,7 +419,7 @@ void age::gb_sound::write_nr24(uint8_t value)
 
     if ((value & gb_nrX4_initialize) > 0)
     {
-        m_c2.init_frequency_timer(should_delay_frequency_timer());
+        m_c2.init_frequency_timer(should_align_frequency_timer());
 
         bool deactivated = m_c2.init_volume_envelope(should_inc_period());
         if (!deactivated)
@@ -484,10 +509,10 @@ void age::gb_sound::write_nr32(uint8_t value)
     m_nr32 = value;
     switch (m_nr32 & 0x60)
     {
-        case 0x00: m_c3.set_volume(0); break;
-        case 0x20: m_c3.set_volume(60); break;
-        case 0x40: m_c3.set_volume(30); break;
-        case 0x60: m_c3.set_volume(15); break;
+        case 0x00: m_c3.set_volume_shift(4); break;
+        case 0x20: m_c3.set_volume_shift(0); break;
+        case 0x40: m_c3.set_volume_shift(1); break;
+        case 0x60: m_c3.set_volume_shift(2); break;
     }
 }
 

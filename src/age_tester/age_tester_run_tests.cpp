@@ -141,11 +141,7 @@ namespace
             {
                 return;
             }
-            std::string path = file_path.string();
-            if constexpr (std::filesystem::path::preferred_separator != '/')
-            {
-                std::replace(begin(path), end(path), static_cast<char>(std::filesystem::path::preferred_separator), '/');
-            }
+            std::string path = age::tester::normalize_path_separator(file_path.string());
             if (use_file(path))
             {
                 file_callback(file_path);
@@ -265,6 +261,12 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
         {
             find_roms(opts.m_test_suite_path / "mooneye-gb", matcher, [&](const std::filesystem::path& rom_path) {
                 schedule_rom(rom_path, schedule_rom_mooneye_gb);
+            });
+        }
+        if (opts.m_same_suite)
+        {
+            find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
+              schedule_rom(rom_path, schedule_rom_same_suite);
             });
         }
 

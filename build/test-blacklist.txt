@@ -183,6 +183,24 @@
 /gambatte/scx_during_m3/
 /gambatte/scy/
 
+/gambatte/sound/ch1_duty0_pos6_to_pos7_timing_ds_6
+/gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange2_nop_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange3_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange3_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange3_nop_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange4_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange5_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange5_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange5_nop_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
+/gambatte/speedchange/speedchange_ch1_nr4init_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
+
 /gambatte/speedchange/speedchange2_frame1
 /gambatte/speedchange/speedchange2_lcdoff
 /gambatte/speedchange/speedchange2_ly44
@@ -211,3 +229,19 @@
 /gambatte/vram_m3/prewrite_lcdoffset2_2_cgb04c_out0.gbc
 
 /gambatte/window/
+
+
+
+##################################################################
+###
+###   same suite
+###
+
+### Gameboy hardware not supported by AGE
+
+/same-suite/sgb
+
+### failing tests
+
+/same-suite/dma
+/same-suite/ppu

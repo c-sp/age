@@ -40,9 +40,13 @@ namespace age::tester
     void schedule_rom_blargg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_gambatte(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mooneye_gb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_same_suite(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+
+    bool run_common_test(age::gb_emulator& emulator);
 
 
 
+    std::string normalize_path_separator(const std::string &path);
     std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
 
     using test_finished_t = std::function<bool(const age::gb_emulator&)>;
