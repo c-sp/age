@@ -43,12 +43,14 @@ namespace age
     class gb_cpu
     {
         AGE_DISABLE_COPY(gb_cpu);
+        AGE_DISABLE_MOVE(gb_cpu);
 
     public:
         gb_cpu(const gb_device&         device,
                gb_clock&                clock,
                gb_interrupt_dispatcher& interrupts,
                gb_bus&                  bus);
+        ~gb_cpu() = default;
 
         [[nodiscard]] gb_test_info get_test_info() const;
         void                       emulate();

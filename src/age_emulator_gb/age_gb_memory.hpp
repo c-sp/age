@@ -44,9 +44,11 @@ namespace age
     class gb_memory
     {
         AGE_DISABLE_COPY(gb_memory);
+        AGE_DISABLE_MOVE(gb_memory);
 
     public:
         explicit gb_memory(const uint8_vector& cart_rom);
+        ~gb_memory() = default;
 
         void init_vram(bool for_cgb_hardware);
 

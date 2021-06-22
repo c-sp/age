@@ -14,11 +14,13 @@
 // limitations under the License.
 //
 
-#include <algorithm> // std::sort
-
 #include <age_debug.hpp>
 
 #include "age_gb_lcd_render.hpp"
+
+#include <algorithm> // std::sort
+
+
 
 namespace
 {

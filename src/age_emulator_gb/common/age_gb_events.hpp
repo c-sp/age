@@ -50,9 +50,11 @@ namespace age
     class gb_events
     {
         AGE_DISABLE_COPY(gb_events);
+        AGE_DISABLE_MOVE(gb_events);
 
     public:
         explicit gb_events(const gb_clock& clock);
+        ~gb_events() = default;
 
         void              schedule_event(gb_event event, int clock_cycle_offset);
         void              remove_event(gb_event event);

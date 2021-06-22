@@ -29,13 +29,12 @@
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 #include "common/age_gb_logger.hpp"
-
+#include "lcd/age_gb_lcd.hpp"
 #include "sound/age_gb_sound.hpp"
 
 #include "age_gb_bus.hpp"
 #include "age_gb_cpu.hpp"
 #include "age_gb_joypad.hpp"
-#include "age_gb_lcd.hpp"
 #include "age_gb_memory.hpp"
 #include "age_gb_serial.hpp"
 #include "age_gb_timer.hpp"
@@ -48,12 +47,14 @@ namespace age
     class gb_emulator_impl
     {
         AGE_DISABLE_COPY(gb_emulator_impl);
+        AGE_DISABLE_MOVE(gb_emulator_impl);
 
     public:
         gb_emulator_impl(const uint8_vector& rom,
                          gb_hardware         hardware,
                          gb_colors_hint      colors_hint,
                          gb_log_categories   log_categories);
+        ~gb_emulator_impl() = default;
 
         [[nodiscard]] std::string get_emulator_title() const;
 

@@ -40,8 +40,8 @@ namespace
                << "     AGE git revision: " << GIT_REV << " (" << GIT_DATE << ")\n"
                << "--------------------------------------------------------------------------------\n"
                << '\n'
-               << "T4-cycle  T4-16-bit-divider    category  comments" << '\n'
-               << "--------  -------------------  --------  ---------------------------------------\n";
+               << "T4-cycle  T4-16-bit-divider    category    comments" << '\n'
+               << "--------  -------------------  ----------  ---------------------------------------\n";
 
         return result.str();
     }
@@ -53,9 +53,13 @@ namespace
         switch (category)
         {
             case age::gb_log_category::lc_clock: return "clock";
+            case age::gb_log_category::lc_cpu: return "cpu";
             case age::gb_log_category::lc_events: return "events";
+            case age::gb_log_category::lc_interrupts: return "interrupts";
+            case age::gb_log_category::lc_lcd_no_memory_access: return "lcd-mem";
             case age::gb_log_category::lc_serial: return "serial";
             case age::gb_log_category::lc_sound: return "sound";
+            case age::gb_log_category::lc_sound_registers: return "sound-reg";
             case age::gb_log_category::lc_timer: return "timer";
         }
         return "";
@@ -75,7 +79,7 @@ namespace
         std::stringstream prefix_str;
         prefix_str << std::setw(8) << entry.m_clock << std::setw(0)
                    << "  " << div4 << "'" << div3 << "'" << div2 << "'" << div1
-                   << "  " << std::left << std::setw(8) << category_str(entry.m_category) << std::setw(0) << std::right
+                   << "  " << std::left << std::setw(10) << category_str(entry.m_category) << std::setw(0) << std::right
                    << "  ";
 
         auto prefix = prefix_str.str();

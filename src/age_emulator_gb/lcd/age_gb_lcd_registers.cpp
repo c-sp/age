@@ -68,8 +68,6 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         // the last v-blank scanline)
         if (scanline >= gb_screen_height)
         {
-            AGE_GB_CLOG_LCD_RENDER("    * switching frame buffers (scanline "
-                                   << scanline << ")")
             m_render.new_frame();
         }
 
@@ -245,7 +243,7 @@ age::uint8_t age::gb_lcd::read_ly()
 
 //---------------------------------------------------------
 //
-//   other ports
+//   other registers
 //
 //---------------------------------------------------------
 

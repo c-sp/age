@@ -27,11 +27,10 @@
 #include "common/age_gb_device.hpp"
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
-
+#include "lcd/age_gb_lcd.hpp"
 #include "sound/age_gb_sound.hpp"
 
 #include "age_gb_joypad.hpp"
-#include "age_gb_lcd.hpp"
 #include "age_gb_memory.hpp"
 #include "age_gb_serial.hpp"
 #include "age_gb_timer.hpp"
@@ -41,7 +40,7 @@
 namespace age
 {
 
-    enum class gb_io_port : uint16_t
+    enum class gb_register : uint16_t
     {
         p1 = 0xFF00,
 
@@ -131,9 +130,20 @@ namespace age
     class gb_bus
     {
         AGE_DISABLE_COPY(gb_bus);
+        AGE_DISABLE_MOVE(gb_bus);
 
     public:
-        gb_bus(const gb_device& device, gb_clock& clock, gb_interrupt_ports& interrupts, gb_events& events, gb_memory& memory, gb_sound& sound, gb_lcd& lcd, gb_timer& timer, gb_joypad& joypad, gb_serial& serial);
+        gb_bus(const gb_device&        device,
+               gb_clock&               clock,
+               gb_interrupt_registers& interrupts,
+               gb_events&              events,
+               gb_memory&              memory,
+               gb_sound&               sound,
+               gb_lcd&                 lcd,
+               gb_timer&               timer,
+               gb_joypad&              joypad,
+               gb_serial&              serial);
+        ~gb_bus() = default;
 
         uint8_t read_byte(uint16_t address);
         void    write_byte(uint16_t address, uint8_t byte);
@@ -152,18 +162,18 @@ namespace age
 
         void handle_oam_dma();
 
-        const gb_device&    m_device;
-        gb_clock&           m_clock;
-        gb_interrupt_ports& m_interrupts;
-        gb_events&          m_events;
-        gb_memory&          m_memory;
-        gb_sound&           m_sound;
-        gb_lcd&             m_lcd;
-        gb_timer&           m_timer;
-        gb_joypad&          m_joypad;
-        gb_serial&          m_serial;
+        const gb_device&        m_device;
+        gb_clock&               m_clock;
+        gb_interrupt_registers& m_interrupts;
+        gb_events&              m_events;
+        gb_memory&              m_memory;
+        gb_sound&               m_sound;
+        gb_lcd&                 m_lcd;
+        gb_timer&               m_timer;
+        gb_joypad&              m_joypad;
+        gb_serial&              m_serial;
 
-        uint8_array<0x200> m_high_ram; // 0xFE00 - 0xFFFF (including OAM ram and i/o ports for easier handling)
+        uint8_array<0x200> m_high_ram; // 0xFE00 - 0xFFFF (including OAM ram and registers for easier handling)
         uint8_t            m_rp   = 0x3E;
         uint8_t            m_un6c = 0xFE;
         uint8_t            m_un72 = 0;

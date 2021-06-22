@@ -862,9 +862,9 @@ void age::gb_cpu::execute_prefetched()
             // invalid opcode, stay here and freeze CPU
             --m_pc;
             m_cpu_state |= gb_cpu_state_frozen;
-            AGE_GB_CLOG_CPU("invalid opcode " << AGE_LOG_HEX8(opcode)
-                                              << " at PC = " << AGE_LOG_HEX16(m_pc)
-                                              << ", CPU frozen")
+            m_clock.log(gb_log_category::lc_cpu) << "invalid opcode " << log_hex8(opcode)
+                                                 << " at PC == " << log_hex16(m_pc)
+                                                 << ", cpu frozen";
             break;
 
             // increment & decrement
@@ -1219,8 +1219,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0xD9: // RETI
             RET;
-            AGE_GB_CLOG_IRQS("enable interrupt dispatching with RETI")
-            m_interrupts.set_ime(true);
+            m_interrupts.set_ime(true, "RETI");
             break;
 
         case 0xC0: RET_IF(!ZERO_FLAGGED); break;
@@ -1313,8 +1312,9 @@ void age::gb_cpu::execute_prefetched()
             m_hcs_flags = m_hcs_operand = 0;
             break; // CCF
 
-        case 0x76: // HALT
-            AGE_GB_CLOG_IRQS("executing HALT instruction ...")
+        case 0x76: { // HALT
+            auto msg = m_interrupts.log();
+            msg << "executing HALT instruction";
             // In case of any irq during HALT the "HALT bug" is triggered
             // even if interrupt dispatching is enabled.
             //
@@ -1325,10 +1325,19 @@ void age::gb_cpu::execute_prefetched()
             m_bus.handle_events();
             m_prefetched_opcode = m_bus.read_byte(m_pc);
 
-            m_interrupts.halt();
+            bool halted = m_interrupts.halt();
+            if (halted)
+            {
+                msg << "\n    * CPU HALTed";
+            }
+            else
+            {
+                msg << "\n    * HALT immediately terminated by pending interrupts";
+            }
+
             if (!m_interrupts.halted())
             {
-                AGE_GB_CLOG_IRQS("    * \"HALT bug\", decrementing PC")
+                msg << "\n    * \"HALT bug\", decrementing PC";
                 // IRQ: handler returns to HALT instruction
                 // else: PC is incremented for next instruction
                 //       and points to the byte after HALT
@@ -1338,19 +1347,20 @@ void age::gb_cpu::execute_prefetched()
             {
                 m_clock.tick_machine_cycle();
                 m_clock.tick_machine_cycle();
-                AGE_GB_CLOG_IRQS("    * extra DMG HALT delay")
+                msg << "\n    * applying extra DMG HALT delay (2 m-cycles)";
             }
             return;
+        }
 
         case 0xF3: // DI
-            AGE_GB_CLOG_IRQS("disable interrupt dispatching with DI")
-            m_interrupts.set_ime(false);
+            m_interrupts.set_ime(false, "DI");
             m_cpu_state &= ~gb_cpu_state_ei;
             break;
 
         case 0xFB: // EI
             if (!m_interrupts.get_ime())
             {
+                m_interrupts.log() << "EI encountered: enable interrupt dispatching after the next CPU instruction";
                 m_cpu_state |= gb_cpu_state_ei;
             }
             break;

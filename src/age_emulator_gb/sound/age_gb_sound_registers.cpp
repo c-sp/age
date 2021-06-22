@@ -32,7 +32,7 @@ age::uint8_t age::gb_sound::read_pcm12()
     uint8_t c1_sample = m_c1.active() ? m_c1.get_current_pcm_amplitude() : 0;
     uint8_t c2_sample = m_c2.active() ? m_c2.get_current_pcm_amplitude() << 4 : 0;
 
-    log() << "read PCM12 == " << log_hex8(c1_sample + c2_sample);
+    log_reg() << "read PCM12 == " << log_hex8(c1_sample + c2_sample);
     return c1_sample + c2_sample;
 }
 
@@ -43,7 +43,7 @@ age::uint8_t age::gb_sound::read_pcm34()
     uint8_t c3_sample = m_c3.active() ? m_c3.get_current_pcm_amplitude() : 0;
     uint8_t c4_sample = m_c4.active() ? m_c4.get_current_pcm_amplitude() << 4 : 0;
 
-    log() << "read PCM34 == " << log_hex8(c3_sample + c4_sample);
+    log_reg() << "read PCM34 == " << log_hex8(c3_sample + c4_sample);
     return c3_sample + c4_sample;
 }
 
@@ -53,19 +53,19 @@ age::uint8_t age::gb_sound::read_pcm34()
 
 //---------------------------------------------------------
 //
-//   control ports
+//   control registers
 //
 //---------------------------------------------------------
 
 age::uint8_t age::gb_sound::read_nr50() const
 {
-    log() << "read NR50 == " << log_hex8(m_nr50);
+    log_reg() << "read NR50 == " << log_hex8(m_nr50);
     return m_nr50;
 }
 
 age::uint8_t age::gb_sound::read_nr51() const
 {
-    log() << "read NR51 == " << log_hex8(m_nr51);
+    log_reg() << "read NR51 == " << log_hex8(m_nr51);
     return m_nr51;
 }
 
@@ -81,7 +81,7 @@ age::uint8_t age::gb_sound::read_nr52()
     result += m_c3.active() ? 4 : 0;
     result += m_c4.active() ? 8 : 0;
 
-    log() << "read NR52 == " << log_hex8(result);
+    log_reg() << "read NR52 == " << log_hex8(result);
     return result;
 }
 
@@ -91,11 +91,11 @@ void age::gb_sound::write_nr50(uint8_t value)
 {
     if (!m_master_on)
     {
-        log() << "write NR50 = " << log_hex8(value) << " ignored: all sound off";
+        log_reg() << "write NR50 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    log() << "write NR50 = " << log_hex8(value); // log after state update
+    log_reg() << "write NR50 = " << log_hex8(value); // log after state update
 
     m_nr50 = value; // SO1 SO2 volume
 
@@ -109,11 +109,11 @@ void age::gb_sound::write_nr51(uint8_t value)
 {
     if (!m_master_on)
     {
-        log() << "write NR51 = " << log_hex8(value) << " ignored: all sound off";
+        log_reg() << "write NR51 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    log() << "write NR51 = " << log_hex8(value); // log after state update
+    log_reg() << "write NR51 = " << log_hex8(value); // log after state update
 
     m_nr51 = value; // C1..4 to SO1 SO2 "routing"
 
@@ -131,7 +131,7 @@ void age::gb_sound::write_nr52(uint8_t value)
     if (m_master_on && !new_master_on)
     {
         update_state();
-        log() << "write NR52 = " << log_hex8(value) << ": all sound off"; // log after state update
+        log_reg() << "write NR52 = " << log_hex8(value) << ": all sound off"; // log after state update
 
         m_clk_next_apu_event = gb_no_clock_cycle;
 
@@ -164,9 +164,9 @@ void age::gb_sound::write_nr52(uint8_t value)
         m_delayed_disable_c1        = false;
         m_skip_frame_sequencer_step = false;
 
-        log() << "write NR52 = " << log_hex8(value) << ": activating sound" // log after state update
-              << "\n    * first frame sequencer step in " << clks_first_step << " clock cycles"
-              << " (on clock cycle " << m_clk_next_apu_event << ")";
+        log_reg() << "write NR52 = " << log_hex8(value) << ": activating sound" // log after state update
+                  << "\n    * first frame sequencer step in " << clks_first_step << " clock cycles"
+                  << " (on clock cycle " << m_clk_next_apu_event << ")";
 
         // delay frame sequencer step 0
         // (see test rom analysis)
@@ -179,7 +179,7 @@ void age::gb_sound::write_nr52(uint8_t value)
     }
     else
     {
-        log() << "write NR52 = " << log_hex8(value) << ": no effect";
+        log_reg() << "write NR52 = " << log_hex8(value) << ": no effect";
     }
 
     m_master_on = new_master_on;
@@ -191,35 +191,35 @@ void age::gb_sound::write_nr52(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   channel 1 ports
+//   channel 1 registers
 //
 //---------------------------------------------------------
 
 age::uint8_t age::gb_sound::read_nr10() const
 {
     uint8_t result = m_nr10 | 0x80;
-    m_c1.log() << "read NR10 == " << log_hex8(result);
+    m_c1.log_reg() << "read NR10 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr11() const
 {
     uint8_t result = m_nr11 | 0x3F;
-    m_c1.log() << "read NR11 == " << log_hex8(result);
+    m_c1.log_reg() << "read NR11 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr12() const
 {
     uint8_t result = m_c1.read_nrX2();
-    m_c1.log() << "read NR12 == " << log_hex8(result);
+    m_c1.log_reg() << "read NR12 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr14() const
 {
     uint8_t result = m_nr14 | 0xBF;
-    m_c1.log() << "read NR14 == " << log_hex8(result);
+    m_c1.log_reg() << "read NR14 == " << log_hex8(result);
     return result;
 }
 
@@ -229,11 +229,11 @@ void age::gb_sound::write_nr10(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c1.log() << "write NR10 = " << log_hex8(value) << " ignored: all sound off";
+        m_c1.log_reg() << "write NR10 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c1.log() << "write NR10 = " << log_hex8(value); // log after state update
+    m_c1.log_reg() << "write NR10 = " << log_hex8(value); // log after state update
 
     m_nr10 = value;
     m_c1.write_nrX0(value);
@@ -243,11 +243,11 @@ void age::gb_sound::write_nr11(uint8_t value)
 {
     if (!m_master_on && m_cgb)
     {
-        m_c1.log() << "write NR11 = " << log_hex8(value) << " ignored: all sound off";
+        m_c1.log_reg() << "write NR11 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c1.log() << "write NR11 = " << log_hex8(value); // log after state update
+    m_c1.log_reg() << "write NR11 = " << log_hex8(value); // log after state update
 
     // length counter always writable for DMG
     m_c1.write_nrX1(value);
@@ -264,11 +264,11 @@ void age::gb_sound::write_nr12(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c1.log() << "write NR12 = " << log_hex8(value) << " ignored: all sound off";
+        m_c1.log_reg() << "write NR12 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c1.log() << "write NR12 = " << log_hex8(value); // log after state update
+    m_c1.log_reg() << "write NR12 = " << log_hex8(value); // log after state update
 
     m_c1.write_nrX2(value);
 }
@@ -277,11 +277,11 @@ void age::gb_sound::write_nr13(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c1.log() << "write NR13 = " << log_hex8(value) << " ignored: all sound off";
+        m_c1.log_reg() << "write NR13 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c1.log() << "write NR13 = " << log_hex8(value); // log after state update
+    m_c1.log_reg() << "write NR13 = " << log_hex8(value); // log after state update
 
     m_c1.set_low_frequency_bits(value);
 }
@@ -290,11 +290,11 @@ void age::gb_sound::write_nr14(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c1.log() << "write NR14 = " << log_hex8(value) << " ignored: all sound off";
+        m_c1.log_reg() << "write NR14 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c1.log() << "write NR14 = " << log_hex8(value); // log after state update
+    m_c1.log_reg() << "write NR14 = " << log_hex8(value); // log after state update
 
     m_nr14 = value;
 
@@ -329,28 +329,28 @@ void age::gb_sound::write_nr14(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   Write channel 2 ports
+//   channel 2 registers
 //
 //---------------------------------------------------------
 
 age::uint8_t age::gb_sound::read_nr21() const
 {
     uint8_t result = m_nr21 | 0x3F;
-    m_c2.log() << "read NR21 == " << log_hex8(result);
+    m_c2.log_reg() << "read NR21 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr22() const
 {
     uint8_t result = m_c2.read_nrX2();
-    m_c2.log() << "read NR22 == " << log_hex8(result);
+    m_c2.log_reg() << "read NR22 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr24() const
 {
     uint8_t result = m_nr24 | 0xBF;
-    m_c2.log() << "read NR24 == " << log_hex8(result);
+    m_c2.log_reg() << "read NR24 == " << log_hex8(result);
     return result;
 }
 
@@ -361,11 +361,11 @@ void age::gb_sound::write_nr21(uint8_t value)
 {
     if (!m_master_on && m_cgb)
     {
-        m_c2.log() << "write NR21 = " << log_hex8(value) << " ignored: all sound off";
+        m_c2.log_reg() << "write NR21 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c2.log() << "write NR21 = " << log_hex8(value); // log after state update
+    m_c2.log_reg() << "write NR21 = " << log_hex8(value); // log after state update
 
     // length counter always writable for DMG
     m_c2.write_nrX1(value);
@@ -382,11 +382,11 @@ void age::gb_sound::write_nr22(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c2.log() << "write NR22 = " << log_hex8(value) << " ignored: all sound off";
+        m_c2.log_reg() << "write NR22 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c2.log() << "write NR22 = " << log_hex8(value); // log after state update
+    m_c2.log_reg() << "write NR22 = " << log_hex8(value); // log after state update
 
     m_c2.write_nrX2(value);
 }
@@ -395,11 +395,11 @@ void age::gb_sound::write_nr23(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c2.log() << "write NR23 = " << log_hex8(value) << " ignored: all sound off";
+        m_c2.log_reg() << "write NR23 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c2.log() << "write NR23 = " << log_hex8(value); // log after state update
+    m_c2.log_reg() << "write NR23 = " << log_hex8(value); // log after state update
 
     m_c2.set_low_frequency_bits(value);
 }
@@ -408,11 +408,11 @@ void age::gb_sound::write_nr24(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c2.log() << "write NR24 = " << log_hex8(value) << " ignored: all sound off";
+        m_c2.log_reg() << "write NR24 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c2.log() << "write NR24 = " << log_hex8(value); // log after state update
+    m_c2.log_reg() << "write NR24 = " << log_hex8(value); // log after state update
 
     m_c2.set_high_frequency_bits(value);
     m_c2.init_length_counter(value, should_dec_length_counter());
@@ -437,28 +437,28 @@ void age::gb_sound::write_nr24(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   Write channel 3 ports
+//   channel 3 registers
 //
 //---------------------------------------------------------
 
 age::uint8_t age::gb_sound::read_nr30() const
 {
     uint8_t result = m_nr30 | 0x7F;
-    m_c3.log() << "read NR30 == " << log_hex8(result);
+    m_c3.log_reg() << "read NR30 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr32() const
 {
     uint8_t result = m_nr32 | 0x9F;
-    m_c3.log() << "read NR32 == " << log_hex8(result);
+    m_c3.log_reg() << "read NR32 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr34() const
 {
     uint8_t result = m_nr34 | 0xBF;
-    m_c3.log() << "read NR34 == " << log_hex8(result);
+    m_c3.log_reg() << "read NR34 == " << log_hex8(result);
     return result;
 }
 
@@ -469,11 +469,11 @@ void age::gb_sound::write_nr30(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c3.log() << "write NR30 = " << log_hex8(value) << " ignored: all sound off";
+        m_c3.log_reg() << "write NR30 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c3.log() << "write NR30 = " << log_hex8(value); // log after state update
+    m_c3.log_reg() << "write NR30 = " << log_hex8(value); // log after state update
 
     m_nr30 = value;
     if ((m_nr30 & gb_sound_master_switch) == 0)
@@ -486,11 +486,11 @@ void age::gb_sound::write_nr31(uint8_t value)
 {
     if (!m_master_on && m_cgb)
     {
-        m_c3.log() << "write NR31 = " << log_hex8(value) << " ignored: all sound off";
+        m_c3.log_reg() << "write NR31 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c3.log() << "write NR31 = " << log_hex8(value); // log after state update
+    m_c3.log_reg() << "write NR31 = " << log_hex8(value); // log after state update
 
     // length counter always writable for DMG
     m_c3.write_nrX1(value);
@@ -500,11 +500,11 @@ void age::gb_sound::write_nr32(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c3.log() << "write NR32 = " << log_hex8(value) << " ignored: all sound off";
+        m_c3.log_reg() << "write NR32 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c3.log() << "write NR32 = " << log_hex8(value); // log after state update
+    m_c3.log_reg() << "write NR32 = " << log_hex8(value); // log after state update
 
     m_nr32 = value;
     switch (m_nr32 & 0x60)
@@ -520,11 +520,11 @@ void age::gb_sound::write_nr33(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c3.log() << "write NR33 = " << log_hex8(value) << " ignored: all sound off";
+        m_c3.log_reg() << "write NR33 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c3.log() << "write NR33 = " << log_hex8(value); // log after state update
+    m_c3.log_reg() << "write NR33 = " << log_hex8(value); // log after state update
 
     m_c3.set_low_frequency_bits(value);
 }
@@ -533,11 +533,11 @@ void age::gb_sound::write_nr34(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c3.log() << "write NR34 = " << log_hex8(value) << " ignored: all sound off";
+        m_c3.log_reg() << "write NR34 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c3.log() << "write NR34 = " << log_hex8(value); // log after state update
+    m_c3.log_reg() << "write NR34 = " << log_hex8(value); // log after state update
 
     m_c3.set_high_frequency_bits(value);
     m_c3.init_length_counter(value, should_dec_length_counter());
@@ -580,28 +580,28 @@ void age::gb_sound::write_nr34(uint8_t value)
 
 //---------------------------------------------------------
 //
-//   Write channel 4 ports
+//   channel 4 registers
 //
 //---------------------------------------------------------
 
 age::uint8_t age::gb_sound::read_nr42() const
 {
     uint8_t result = m_c4.read_nrX2();
-    m_c4.log() << "read NR42 == " << log_hex8(result);
+    m_c4.log_reg() << "read NR42 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr43() const
 {
     uint8_t result = m_c4.read_nrX3();
-    m_c4.log() << "read NR43 == " << log_hex8(result);
+    m_c4.log_reg() << "read NR43 == " << log_hex8(result);
     return result;
 }
 
 age::uint8_t age::gb_sound::read_nr44() const
 {
     uint8_t result = m_nr44 | 0xBF;
-    m_c4.log() << "read NR44 == " << log_hex8(result);
+    m_c4.log_reg() << "read NR44 == " << log_hex8(result);
     return result;
 }
 
@@ -612,11 +612,11 @@ void age::gb_sound::write_nr41(uint8_t value)
 {
     if (!m_master_on && m_cgb)
     {
-        m_c4.log() << "write NR41 = " << log_hex8(value) << " ignored: all sound off";
+        m_c4.log_reg() << "write NR41 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c4.log() << "write NR41 = " << log_hex8(value); // log after state update
+    m_c4.log_reg() << "write NR41 = " << log_hex8(value); // log after state update
 
     m_c4.write_nrX1(value);
 }
@@ -625,11 +625,11 @@ void age::gb_sound::write_nr42(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c4.log() << "write NR42 = " << log_hex8(value) << " ignored: all sound off";
+        m_c4.log_reg() << "write NR42 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c4.log() << "write NR42 = " << log_hex8(value); // log after state update
+    m_c4.log_reg() << "write NR42 = " << log_hex8(value); // log after state update
 
     m_c4.write_nrX2(value);
 }
@@ -638,11 +638,11 @@ void age::gb_sound::write_nr43(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c4.log() << "write NR43 = " << log_hex8(value) << " ignored: all sound off";
+        m_c4.log_reg() << "write NR43 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c4.log() << "write NR43 = " << log_hex8(value); // log after state update
+    m_c4.log_reg() << "write NR43 = " << log_hex8(value); // log after state update
 
     m_c4.write_nrX3(value);
 }
@@ -651,11 +651,11 @@ void age::gb_sound::write_nr44(uint8_t value)
 {
     if (!m_master_on)
     {
-        m_c4.log() << "write NR44 = " << log_hex8(value) << " ignored: all sound off";
+        m_c4.log_reg() << "write NR44 = " << log_hex8(value) << " ignored: all sound off";
         return;
     }
     update_state();
-    m_c4.log() << "write NR44 = " << log_hex8(value); // log after state update
+    m_c4.log_reg() << "write NR44 = " << log_hex8(value); // log after state update
 
     m_c4.init_length_counter(value, should_dec_length_counter());
 

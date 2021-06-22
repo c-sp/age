@@ -51,9 +51,11 @@ namespace age
     class gb_sound : private gb_sound_logger
     {
         AGE_DISABLE_COPY(gb_sound);
+        AGE_DISABLE_MOVE(gb_sound);
 
     public:
         gb_sound(const gb_clock& clock, bool cgb_features, pcm_vector& samples);
+        ~gb_sound() = default;
 
         [[nodiscard]] uint8_t read_nr10() const;
         [[nodiscard]] uint8_t read_nr11() const;

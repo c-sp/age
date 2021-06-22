@@ -14,11 +14,13 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
 #include <age_debug.hpp>
 
 #include "age_gb_lcd.hpp"
+
+#include <algorithm>
+
+
 
 namespace
 {
@@ -137,8 +139,7 @@ void age::gb_lcd_irqs::trigger_irq_vblank()
     int clk_diff = m_clk_next_irq_vblank - clk_current;
     AGE_ASSERT(clk_diff > 0)
 
-    AGE_GB_CLOG_IRQS("    * next v-blank IRQ in " << clk_diff
-                                                  << " clock cycles (" << m_clk_next_irq_vblank << ")")
+    m_interrupts.log() << "next v-blank IRQ in " << clk_diff << " clock cycles (" << m_clk_next_irq_vblank << ")";
 
     m_events.schedule_event(gb_event::lcd_interrupt_vblank, clk_diff);
 }
@@ -189,9 +190,9 @@ void age::gb_lcd_irqs::trigger_irq_lyc()
     int clk_diff = m_clk_next_irq_lyc - clk_current;
     AGE_ASSERT(clk_diff > 0)
 
-    AGE_GB_CLOG_IRQS("    * next LYC IRQ in " << clk_diff
-                                              << " clock cycles (" << m_clk_next_irq_lyc << ")"
-                                              << " for LYC " << AGE_LOG_HEX8(m_scanline.m_lyc))
+    m_interrupts.log() << "next LYC IRQ in " << clk_diff
+                       << " clock cycles (" << m_clk_next_irq_lyc << ")"
+                       << " for LYC " << log_hex8(m_scanline.m_lyc);
 
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
 }
@@ -248,16 +249,16 @@ void age::gb_lcd_irqs::trigger_irq_mode2()
     AGE_ASSERT(m_clk_next_irq_mode2 <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode2);
-    AGE_GB_CLOG_IRQS("    * mode 2 IRQ happened on scanline "
-                     << ((m_clk_next_irq_mode2 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline))
+    m_interrupts.log() << "mode 2 IRQ happened on scanline "
+                       << ((m_clk_next_irq_mode2 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline);
 
     // handle all the details in schedule_irq_mode2()
     // (irq for specific scanlines at specific clock cycles)
     schedule_irq_mode2();
 
-    AGE_GB_CLOG_IRQS("    * next mode 2 IRQ in "
-                     << (m_clk_next_irq_mode2 - m_clock.get_clock_cycle())
-                     << " clock cycles (" << m_clk_next_irq_mode2 << ")")
+    m_interrupts.log() << "next mode 2 IRQ in "
+                       << (m_clk_next_irq_mode2 - m_clock.get_clock_cycle())
+                       << " clock cycles (" << m_clk_next_irq_mode2 << ")";
 }
 
 
@@ -335,16 +336,16 @@ void age::gb_lcd_irqs::trigger_irq_mode0(int scx)
     AGE_ASSERT(m_clk_next_irq_mode0 <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode0);
-    AGE_GB_CLOG_IRQS("    * mode 0 IRQ happened on scanline "
-                     << ((m_clk_next_irq_mode0 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline))
+    m_interrupts.log() << "mode 0 IRQ happened on scanline "
+                       << ((m_clk_next_irq_mode0 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline);
 
     // handle all the details in schedule_irq_mode0()
     // (irq for specific scanlines at specific clock cycles)
     schedule_irq_mode0(scx);
 
-    AGE_GB_CLOG_IRQS("    * next mode 0 IRQ in "
-                     << (m_clk_next_irq_mode0 - m_clock.get_clock_cycle())
-                     << " clock cycles (" << m_clk_next_irq_mode0 << ")")
+    m_interrupts.log() << "next mode 0 IRQ in "
+                       << (m_clk_next_irq_mode0 - m_clock.get_clock_cycle())
+                       << " clock cycles (" << m_clk_next_irq_mode0 << ")";
 }
 
 

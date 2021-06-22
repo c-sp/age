@@ -60,6 +60,7 @@ namespace age::tester
     class thread_pool
     {
         AGE_DISABLE_COPY(thread_pool);
+        AGE_DISABLE_MOVE(thread_pool);
 
     public:
         explicit thread_pool(size_t num_threads = std::thread::hardware_concurrency())

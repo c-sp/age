@@ -24,10 +24,10 @@
 #include <age_types.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
-#include "common/age_gb_clock.hpp"
-#include "common/age_gb_device.hpp"
-#include "common/age_gb_events.hpp"
-#include "common/age_gb_interrupts.hpp"
+#include "../common/age_gb_clock.hpp"
+#include "../common/age_gb_device.hpp"
+#include "../common/age_gb_events.hpp"
+#include "../common/age_gb_interrupts.hpp"
 
 #include "age_gb_lcd_render.hpp"
 
@@ -54,9 +54,11 @@ namespace age
     class gb_lcd_scanline
     {
         AGE_DISABLE_COPY(gb_lcd_scanline);
+        AGE_DISABLE_MOVE(gb_lcd_scanline);
 
     public:
         gb_lcd_scanline(const gb_device& device, const gb_clock& clock);
+        ~gb_lcd_scanline() = default;
 
         void set_back_clock(int clock_cycle_offset);
 
@@ -86,6 +88,7 @@ namespace age
     class gb_lcd_irqs
     {
         AGE_DISABLE_COPY(gb_lcd_irqs);
+        AGE_DISABLE_MOVE(gb_lcd_irqs);
 
     public:
         gb_lcd_irqs(const gb_device&       device,
@@ -93,6 +96,7 @@ namespace age
                     const gb_lcd_scanline& scanline,
                     gb_events&             events,
                     gb_interrupt_trigger&  interrupts);
+        ~gb_lcd_irqs() = default;
 
         [[nodiscard]] uint8_t read_stat() const;
         void                  write_stat(uint8_t value, int scx);
@@ -132,6 +136,7 @@ namespace age
     class gb_lcd
     {
         AGE_DISABLE_COPY(gb_lcd);
+        AGE_DISABLE_MOVE(gb_lcd);
 
     public:
         gb_lcd(const gb_device&      device,
@@ -142,6 +147,7 @@ namespace age
                gb_interrupt_trigger& interrupts,
                screen_buffer&        screen_buffer,
                gb_colors_hint        colors_hint);
+        ~gb_lcd() = default;
 
         uint8_t read_lcdc() const;
         uint8_t read_stat();

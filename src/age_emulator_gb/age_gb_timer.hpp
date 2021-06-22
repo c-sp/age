@@ -35,11 +35,13 @@ namespace age
     class gb_timer
     {
         AGE_DISABLE_COPY(gb_timer);
+        AGE_DISABLE_MOVE(gb_timer);
 
     public:
         gb_timer(const gb_clock&       clock,
                  gb_interrupt_trigger& interrupts,
                  gb_events&            events);
+        ~gb_timer() = default;
 
         uint8_t               read_tima();
         [[nodiscard]] uint8_t read_tma() const;

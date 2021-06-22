@@ -40,17 +40,12 @@ age::gb_lcd::gb_lcd(const gb_device&      device,
 
 age::uint8_t age::gb_lcd::read_oam(int offset)
 {
-    auto result = m_sprites.read_oam(offset);
-    AGE_GB_CLOG_LCD_OAM("read OAM @" << AGE_LOG_HEX8(offset)
-                                     << ": " << AGE_LOG_HEX8(result))
-    return result;
+    return m_sprites.read_oam(offset);
 }
 
 void age::gb_lcd::write_oam(int offset, uint8_t value)
 {
     update_state();
-    AGE_GB_CLOG_LCD_OAM("write to OAM @" << AGE_LOG_HEX8(offset)
-                                         << ": " << AGE_LOG_HEX8(value))
     m_sprites.write_oam(offset, value);
 }
 
@@ -114,7 +109,6 @@ void age::gb_lcd::update_state()
     // start new frame?
     if (scanline >= gb_scanline_count)
     {
-        AGE_GB_CLOG_LCD_RENDER("switch frame buffers on scanline " << scanline)
         m_scanline.fast_forward_frames();
         m_render.new_frame();
         update_state();

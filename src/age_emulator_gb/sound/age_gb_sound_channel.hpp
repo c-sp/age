@@ -32,17 +32,25 @@ namespace age
     class gb_sound_logger
     {
         AGE_DISABLE_COPY(gb_sound_logger);
+        AGE_DISABLE_MOVE(gb_sound_logger);
 
     public:
         explicit gb_sound_logger(const gb_clock& clock, int clk_current_state)
             : m_clock(clock),
               m_clk_current_state(clk_current_state)
         {}
+        ~gb_sound_logger() = default;
 
         // logging code is header-only to allow compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_sound, m_clk_current_state);
+        }
+
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log_reg() const
+        {
+            return m_clock.log(gb_log_category::lc_sound_registers, m_clk_current_state);
         }
 
     protected:
@@ -107,6 +115,14 @@ namespace age
         [[nodiscard]] gb_log_message_stream log() const
         {
             auto log = m_logger->log();
+            log << "(channel " << ChannelId << ") ";
+            return log;
+        }
+
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log_reg() const
+        {
+            auto log = m_logger->log_reg();
             log << "(channel " << ChannelId << ") ";
             return log;
         }

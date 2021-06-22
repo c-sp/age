@@ -34,9 +34,11 @@ namespace age
     class gb_joypad
     {
         AGE_DISABLE_COPY(gb_joypad);
+        AGE_DISABLE_MOVE(gb_joypad);
 
     public:
         gb_joypad(const gb_device& device, gb_interrupt_trigger& interrupts);
+        ~gb_joypad() = default;
 
         [[nodiscard]] uint8_t read_p1() const;
         void                  write_p1(uint8_t byte);

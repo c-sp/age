@@ -47,8 +47,8 @@ HEADERS += \
     age_emulator_gb/age_gb_cpu.hpp \
     age_emulator_gb/age_gb_emulator_impl.hpp \
     age_emulator_gb/age_gb_joypad.hpp \
-    age_emulator_gb/age_gb_lcd.hpp \
-    age_emulator_gb/age_gb_lcd_render.hpp \
+    age_emulator_gb/lcd/age_gb_lcd.hpp \
+    age_emulator_gb/lcd/age_gb_lcd_render.hpp \
     age_emulator_gb/age_gb_memory.hpp \
     age_emulator_gb/age_gb_serial.hpp \
     age_emulator_gb/age_gb_timer.hpp \
@@ -88,13 +88,13 @@ SOURCES += \
     age_emulator_gb/age_gb_emulator.cpp \
     age_emulator_gb/age_gb_emulator_impl.cpp \
     age_emulator_gb/age_gb_joypad.cpp \
-    age_emulator_gb/age_gb_lcd.cpp \
-    age_emulator_gb/age_gb_lcd_irqs.cpp \
-    age_emulator_gb/age_gb_lcd_palettes.cpp \
-    age_emulator_gb/age_gb_lcd_ports.cpp \
-    age_emulator_gb/age_gb_lcd_render.cpp \
-    age_emulator_gb/age_gb_lcd_scanline.cpp \
-    age_emulator_gb/age_gb_lcd_sprites.cpp \
+    age_emulator_gb/lcd/age_gb_lcd.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_irqs.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_palettes.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_registers.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_render.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_scanline.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_sprites.cpp \
     age_emulator_gb/age_gb_memory.cpp \
     age_emulator_gb/age_gb_memory_init.cpp \
     age_emulator_gb/age_gb_timer.cpp \
@@ -105,7 +105,7 @@ SOURCES += \
     age_emulator_gb/common/age_gb_events.cpp \
     age_emulator_gb/common/age_gb_interrupts.cpp \
     age_emulator_gb/sound/age_gb_sound.cpp \
-    age_emulator_gb/sound/age_gb_sound_io_ports.cpp \
+    age_emulator_gb/sound/age_gb_sound_registers.cpp \
     age_qt_gui/age_ui_qt.cpp \
     age_qt_gui/age_ui_qt_audio.cpp \
     age_qt_gui/age_ui_qt_emulation_runner.cpp \

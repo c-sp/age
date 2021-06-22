@@ -45,12 +45,14 @@ namespace age
     class gb_serial
     {
         AGE_DISABLE_COPY(gb_serial);
+        AGE_DISABLE_MOVE(gb_serial);
 
     public:
         gb_serial(const gb_device&      device,
                   const gb_clock&       clock,
                   gb_interrupt_trigger& interrupts,
                   gb_events&            events);
+        ~gb_serial() = default;
 
         uint8_t               read_sb();
         [[nodiscard]] uint8_t read_sc() const;

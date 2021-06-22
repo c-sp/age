@@ -26,7 +26,7 @@
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
-#include "common/age_gb_device.hpp"
+#include "../common/age_gb_device.hpp"
 
 
 
@@ -53,9 +53,11 @@ namespace age
     class gb_lcd_palettes
     {
         AGE_DISABLE_COPY(gb_lcd_palettes);
+        AGE_DISABLE_MOVE(gb_lcd_palettes);
 
     public:
         gb_lcd_palettes(const gb_device& device, const uint8_t* rom_header, gb_colors_hint colors_hint);
+        ~gb_lcd_palettes() = default;
 
         [[nodiscard]] const pixel* get_palette(unsigned palette_index) const;
 
@@ -132,9 +134,11 @@ namespace age
     class gb_lcd_sprites
     {
         AGE_DISABLE_COPY(gb_lcd_sprites);
+        AGE_DISABLE_MOVE(gb_lcd_sprites);
 
     public:
         explicit gb_lcd_sprites(bool cgb_features);
+        ~gb_lcd_sprites() = default;
 
         [[nodiscard]] uint8_t read_oam(int offset) const;
         void                  write_oam(int offset, uint8_t value);
@@ -176,6 +180,7 @@ namespace age
     class gb_lcd_render
     {
         AGE_DISABLE_COPY(gb_lcd_render);
+        AGE_DISABLE_MOVE(gb_lcd_render);
 
     public:
         gb_lcd_render(const gb_device&       device,
@@ -183,6 +188,7 @@ namespace age
                       gb_lcd_sprites&        sprites,
                       const uint8_t*         video_ram,
                       screen_buffer&         screen_buffer);
+        ~gb_lcd_render() = default;
 
         [[nodiscard]] uint8_t get_lcdc() const;
         void                  set_lcdc(int lcdc);

@@ -18,9 +18,10 @@
 
 #include "age_gb_cpu.hpp"
 
+
+
 namespace
 {
-
     constexpr const age::uint8_array<17> interrupt_pc_lookup
         = {{
             0,
@@ -42,7 +43,6 @@ namespace
             0x60,
         }};
 
-#ifdef AGE_DEBUG
     constexpr const std::array<const char*, 17> interrupt_name
         = {{
             "",
@@ -63,7 +63,6 @@ namespace
             "",
             "joypad",
         }};
-#endif
 
 } // namespace
 
@@ -161,14 +160,17 @@ void age::gb_cpu::handle_state()
     if (m_cpu_state & gb_cpu_state_ei)
     {
         AGE_ASSERT(!m_interrupts.get_ime())
-        AGE_GB_CLOG_IRQS("enable interrupt dispatching after this CPU instruction")
         execute_prefetched();
 
         // enable interrupts only if this instruction was no DI
         if (m_cpu_state & gb_cpu_state_ei)
         {
-            m_interrupts.set_ime(true);
+            m_interrupts.set_ime(true, "EI (delayed)");
             m_cpu_state &= ~gb_cpu_state_ei;
+        }
+        else
+        {
+            m_interrupts.log() << "delayed interrupt enabling prevented by DI";
         }
 
         // we're done here
@@ -180,9 +182,9 @@ void age::gb_cpu::handle_state()
 
 void age::gb_cpu::dispatch_interrupt()
 {
-    AGE_GB_CLOG_IRQS("dispatching interrupt"
-                     << ", current PC = " << AGE_LOG_HEX16(m_pc)
-                     << ", [PC] = " << AGE_LOG_HEX8(m_bus.read_byte(m_pc)))
+    m_interrupts.log() << "about to dispatch interrupt"
+                       << ", PC == " << log_hex16(m_pc)
+                       << ", [PC] == " << log_hex8(m_bus.read_byte(m_pc));
 
     m_clock.tick_machine_cycle();
     m_clock.tick_machine_cycle();
@@ -219,7 +221,7 @@ void age::gb_cpu::dispatch_interrupt()
     m_bus.handle_events();
     m_interrupts.finish_dispatch();
 
-    AGE_GB_CLOG_IRQS("interrupt " << AGE_LOG_HEX8(intr_bit)
-                                  << " (" << interrupt_name[intr_bit] << ")"
-                                  << " dispatched to " << AGE_LOG_HEX16(m_pc))
+    m_interrupts.log() << "interrupt " << log_hex8(intr_bit)
+                       << " (" << interrupt_name[intr_bit] << ")"
+                       << " dispatched to " << log_hex16(m_pc);
 }

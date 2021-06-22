@@ -14,11 +14,13 @@
 // limitations under the License.
 //
 
-#include <algorithm> // std::fill
-
 #include <age_debug.hpp>
 
 #include "age_gb_lcd.hpp"
+
+#include <algorithm> // std::fill
+
+
 
 namespace
 {

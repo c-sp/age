@@ -34,6 +34,11 @@ private:                          \
     Class(const Class&) = delete; \
     Class& operator=(const Class&) = delete
 
+#define AGE_DISABLE_MOVE(Class)    \
+private:                           \
+    Class(const Class&&) = delete; \
+    Class& operator=(const Class&&) = delete
+
 
 
 // Use this to mark unused (but required) parameters,

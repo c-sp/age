@@ -64,9 +64,11 @@ namespace age
     class gb_clock
     {
         AGE_DISABLE_COPY(gb_clock);
+        AGE_DISABLE_MOVE(gb_clock);
 
     public:
         explicit gb_clock(gb_logger& logger, const gb_device& device);
+        ~gb_clock() = default;
 
         //! \brief Get the current 4Mhz cycle.
         //!
@@ -129,24 +131,6 @@ namespace age
 #define AGE_GB_MCLOG(log) AGE_GB_CLOG(m_clock.get_clock_cycle(), m_clock.get_div_offset(), log)
 
 #if 0
-#define AGE_GB_CLOG_CPU(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_CPU(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_IRQS(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_IRQS(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_LCD_OAM(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_LCD_OAM(log)
-#endif
-
-#if 0
 #define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS(log)
@@ -158,18 +142,6 @@ namespace age
 #define AGE_GB_CLOG_LCD_PORTS_LY(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS_LY(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_LCD_RENDER(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_LCD_RENDER(log)
-#endif
-
-#if 0
-#define AGE_GB_CLOG_LCD_VRAM(log) AGE_GB_MCLOG(log)
-#else
-#define AGE_GB_CLOG_LCD_VRAM(log)
 #endif
 
 

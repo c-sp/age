@@ -35,6 +35,7 @@ namespace age
     class downsampler
     {
         AGE_DISABLE_COPY(downsampler);
+        AGE_DISABLE_MOVE(downsampler);
 
     public:
         downsampler(int input_sampling_rate, int output_sampling_rate);

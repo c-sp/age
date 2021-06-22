@@ -6,20 +6,20 @@ add_library(
         common/age_gb_events.cpp
         common/age_gb_interrupts.cpp
         sound/age_gb_sound.cpp
-        sound/age_gb_sound_io_ports.cpp
+        sound/age_gb_sound_registers.cpp
         age_gb_bus.cpp
         age_gb_cpu.cpp
         age_gb_cpu_opcodes.cpp
         age_gb_emulator.cpp
         age_gb_emulator_impl.cpp
         age_gb_joypad.cpp
-        age_gb_lcd.cpp
-        age_gb_lcd_irqs.cpp
-        age_gb_lcd_palettes.cpp
-        age_gb_lcd_ports.cpp
-        age_gb_lcd_render.cpp
-        age_gb_lcd_scanline.cpp
-        age_gb_lcd_sprites.cpp
+        lcd/age_gb_lcd.cpp
+        lcd/age_gb_lcd_irqs.cpp
+        lcd/age_gb_lcd_palettes.cpp
+        lcd/age_gb_lcd_registers.cpp
+        lcd/age_gb_lcd_render.cpp
+        lcd/age_gb_lcd_scanline.cpp
+        lcd/age_gb_lcd_sprites.cpp
         age_gb_memory.cpp
         age_gb_memory_init.cpp
         age_gb_serial.cpp

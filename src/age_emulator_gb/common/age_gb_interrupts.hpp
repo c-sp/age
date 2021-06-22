@@ -45,11 +45,19 @@ namespace age
     class gb_interrupt_trigger
     {
         AGE_DISABLE_COPY(gb_interrupt_trigger);
+        AGE_DISABLE_MOVE(gb_interrupt_trigger);
 
     public:
         gb_interrupt_trigger(const gb_device& device, gb_clock& clock);
+        ~gb_interrupt_trigger() = default;
 
         void trigger_interrupt(gb_interrupt interrupt, int irq_clock_cycle);
+
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log() const
+        {
+            return m_clock.log(gb_log_category::lc_interrupts);
+        }
 
     protected:
         const gb_device& m_device;
@@ -63,7 +71,7 @@ namespace age
 
 
 
-    class gb_interrupt_ports : public gb_interrupt_trigger
+    class gb_interrupt_registers : public gb_interrupt_trigger
     {
     public:
         using gb_interrupt_trigger::gb_interrupt_trigger;
@@ -77,20 +85,20 @@ namespace age
 
 
 
-    class gb_interrupt_dispatcher : public gb_interrupt_ports
+    class gb_interrupt_dispatcher : public gb_interrupt_registers
     {
     public:
-        using gb_interrupt_ports::gb_interrupt_ports;
+        using gb_interrupt_registers::gb_interrupt_registers;
 
         [[nodiscard]] bool get_ime() const;
-        void               set_ime(bool ime);
+        void               set_ime(bool ime, const char* cause);
 
         [[nodiscard]] uint8_t next_interrupt_bit() const;
         void                  clear_interrupt_flag(uint8_t interrupt_bit);
         void                  finish_dispatch();
 
         [[nodiscard]] bool halted() const;
-        void               halt();
+        bool               halt();
     };
 
 } // namespace age
