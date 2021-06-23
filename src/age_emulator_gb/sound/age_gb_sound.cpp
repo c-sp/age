@@ -137,6 +137,12 @@ void age::gb_sound::after_div_reset(bool during_stop)
     AGE_ASSERT((m_clk_next_apu_event == m_clk_current_state + reset_details.m_old_next_increment)
                || (m_clk_next_apu_event - 2 == m_clk_current_state + reset_details.m_old_next_increment));
 
+    if (!during_stop)
+    {
+        reset_details.m_old_next_increment += m_current_ds_delay;
+        reset_details.m_new_next_increment += m_current_ds_delay;
+    }
+
     auto msg = log();
     msg << "frame sequencer at DIV reset:";
 
