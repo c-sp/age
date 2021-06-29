@@ -130,7 +130,7 @@ namespace age
 
 #define AGE_GB_MCLOG(log) AGE_GB_CLOG(m_clock.get_clock_cycle(), m_clock.get_div_offset(), log)
 
-#if 0
+#if 1
 #define AGE_GB_CLOG_LCD_PORTS(log) AGE_GB_MCLOG(log)
 #else
 #define AGE_GB_CLOG_LCD_PORTS(log)

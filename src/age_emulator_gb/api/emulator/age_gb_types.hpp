@@ -95,6 +95,7 @@ namespace age
         lc_events,
         lc_interrupts,
         lc_lcd_no_memory_access,
+        lc_lcd_registers,
         lc_serial,
         lc_sound,
         lc_sound_registers,

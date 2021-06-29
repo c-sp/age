@@ -56,7 +56,8 @@ namespace
             case age::gb_log_category::lc_cpu: return "cpu";
             case age::gb_log_category::lc_events: return "events";
             case age::gb_log_category::lc_interrupts: return "interrupts";
-            case age::gb_log_category::lc_lcd_no_memory_access: return "lcd-mem";
+            case age::gb_log_category::lc_lcd_no_memory_access: return "lcd-memory";
+            case age::gb_log_category::lc_lcd_registers: return "lcd-reg";
             case age::gb_log_category::lc_serial: return "serial";
             case age::gb_log_category::lc_sound: return "sound";
             case age::gb_log_category::lc_sound_registers: return "sound-reg";

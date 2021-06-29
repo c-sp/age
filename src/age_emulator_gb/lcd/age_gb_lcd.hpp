@@ -193,6 +193,12 @@ namespace age
         void set_back_clock(int clock_cycle_offset);
 
     private:
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log_reg() const
+        {
+            return m_clock.log(gb_log_category::lc_lcd_registers);
+        }
+
         void calculate_scanline(int& scanline, int& scanline_clks);
 
         uint8_t get_stat_mode(int scanline, int scanline_clks, int scx) const;

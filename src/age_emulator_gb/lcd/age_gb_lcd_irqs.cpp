@@ -336,16 +336,18 @@ void age::gb_lcd_irqs::trigger_irq_mode0(int scx)
     AGE_ASSERT(m_clk_next_irq_mode0 <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode0);
-    m_interrupts.log() << "mode 0 IRQ happened on scanline "
-                       << ((m_clk_next_irq_mode0 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline);
+    auto msg = m_interrupts.log();
+    msg << "mode 0 interrupt requested on scanline "
+        << ((m_clk_next_irq_mode0 - m_scanline.clk_frame_start()) / gb_clock_cycles_per_scanline)
+        << "\n    * " << ((m_clk_next_irq_mode0 - m_scanline.clk_frame_start()) % gb_clock_cycles_per_scanline)
+        << " cycles into scanline";
 
     // handle all the details in schedule_irq_mode0()
     // (irq for specific scanlines at specific clock cycles)
     schedule_irq_mode0(scx);
 
-    m_interrupts.log() << "next mode 0 IRQ in "
-                       << (m_clk_next_irq_mode0 - m_clock.get_clock_cycle())
-                       << " clock cycles (" << m_clk_next_irq_mode0 << ")";
+    msg << "\n    * next mode 0 IRQ in "
+        << log_in_clks(m_clk_next_irq_mode0 - m_clock.get_clock_cycle(), m_clock.get_clock_cycle());
 }
 
 
