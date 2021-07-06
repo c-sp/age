@@ -93,7 +93,7 @@ SOURCES += \
     age_emulator_gb/lcd/age_gb_lcd_palettes.cpp \
     age_emulator_gb/lcd/age_gb_lcd_registers.cpp \
     age_emulator_gb/lcd/age_gb_lcd_render.cpp \
-    age_emulator_gb/lcd/age_gb_lcd_scanline.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_line.cpp \
     age_emulator_gb/lcd/age_gb_lcd_sprites.cpp \
     age_emulator_gb/age_gb_memory.cpp \
     age_emulator_gb/age_gb_memory_init.cpp \

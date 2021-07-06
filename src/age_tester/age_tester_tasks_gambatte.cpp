@@ -283,7 +283,7 @@ namespace
                     }
                 }
 
-                // next scanline
+                // next line
                 line_offset += screen_width;
                 tile_offset += 8;
             }

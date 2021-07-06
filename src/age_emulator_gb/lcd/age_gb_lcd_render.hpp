@@ -147,7 +147,7 @@ namespace age
         [[nodiscard]] uint8_t get_sprite_size() const;
         void                  set_sprite_size(uint8_t sprite_size);
 
-        std::vector<gb_sprite> get_scanline_sprites(int scanline);
+        std::vector<gb_sprite> get_line_sprites(int line);
 
     private:
         union
@@ -194,11 +194,11 @@ namespace age
         void                  set_lcdc(int lcdc);
 
         void new_frame();
-        void render(int until_scanline);
+        void render(int until_line);
 
     private:
-        void   render_scanline(int scanline);
-        bool   window_visible(int scanline);
+        void   render_line(int line);
+        bool   window_visible(int line);
         pixel* render_bg_tile(pixel* dst, int tile_line, int tile_vram_ofs);
         void   render_sprite_tile(pixel* dst, int tile_line, const gb_sprite& sprite);
 
@@ -211,9 +211,9 @@ namespace age
         uint8_array<256> m_xflip_cache;
 
         // 160px + 3 tiles (8px + scx + last window/sprite tile)
-        pixel_vector m_scanline{gb_screen_width + 24, pixel(0, 0, 0)};
-        int          m_rendered_scanlines = 0;
-        int          m_wline              = -1;
+        pixel_vector m_line{gb_screen_width + 24, pixel(0, 0, 0)};
+        int          m_rendered_lines = 0;
+        int          m_wline          = -1;
 
         int     m_bg_tile_map_offset  = 0;
         int     m_win_tile_map_offset = 0;

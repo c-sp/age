@@ -626,6 +626,7 @@ void age::gb_bus::execute_stop()
     }
 
     // adjust for new speed
+    m_lcd.after_speed_change();
     m_sound.after_speed_change();
     m_timer.after_speed_change();
 

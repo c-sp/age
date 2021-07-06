@@ -36,9 +36,9 @@
 namespace age
 {
 
-    constexpr int gb_clock_cycles_per_scanline = 456;
-    constexpr int gb_scanline_count            = 154;
-    constexpr int gb_clock_cycles_per_frame    = gb_scanline_count * gb_clock_cycles_per_scanline;
+    constexpr int gb_clock_cycles_per_lcd_line  = 456;
+    constexpr int gb_lcd_line_count             = 154;
+    constexpr int gb_clock_cycles_per_lcd_frame = gb_lcd_line_count * gb_clock_cycles_per_lcd_line;
 
     constexpr int gb_lcd_m_cycle_align = -3;
 
@@ -51,15 +51,22 @@ namespace age
 
 
 
-    class gb_lcd_scanline
+    struct gb_current_line
     {
-        AGE_DISABLE_COPY(gb_lcd_scanline);
-        AGE_DISABLE_MOVE(gb_lcd_scanline);
+        int m_line;
+        int m_line_clks;
+    };
+
+    class gb_lcd_line
+    {
+        AGE_DISABLE_COPY(gb_lcd_line);
+        AGE_DISABLE_MOVE(gb_lcd_line);
 
     public:
-        gb_lcd_scanline(const gb_device& device, const gb_clock& clock);
-        ~gb_lcd_scanline() = default;
+        gb_lcd_line(const gb_device& device, const gb_clock& clock);
+        ~gb_lcd_line() = default;
 
+        void after_speed_change();
         void set_back_clock(int clock_cycle_offset);
 
         bool lcd_is_on() const;
@@ -68,16 +75,17 @@ namespace age
 
         int  clk_frame_start() const;
         bool is_first_frame() const;
+        bool is_odd_alignment() const;
         void fast_forward_frames();
 
-        void current_scanline(int& scanline, int& scanline_clks) const;
+        gb_current_line current_line() const;
 
     private:
         const gb_clock& m_clock;
-        int             m_clk_frame_start    = gb_no_clock_cycle;
-        mutable int     m_clk_scanline_start = gb_no_clock_cycle;
-        mutable int     m_scanline           = 0;
-        bool            m_first_frame        = false;
+        int             m_clk_frame_start = gb_no_clock_cycle;
+        mutable int     m_clk_line_start  = gb_no_clock_cycle;
+        mutable int     m_line            = 0;
+        bool            m_first_frame     = false;
 
     public:
         uint8_t m_lyc = 0;
@@ -91,11 +99,11 @@ namespace age
         AGE_DISABLE_MOVE(gb_lcd_irqs);
 
     public:
-        gb_lcd_irqs(const gb_device&       device,
-                    const gb_clock&        clock,
-                    const gb_lcd_scanline& scanline,
-                    gb_events&             events,
-                    gb_interrupt_trigger&  interrupts);
+        gb_lcd_irqs(const gb_device&      device,
+                    const gb_clock&       clock,
+                    const gb_lcd_line&    line,
+                    gb_events&            events,
+                    gb_interrupt_trigger& interrupts);
         ~gb_lcd_irqs() = default;
 
         [[nodiscard]] uint8_t read_stat() const;
@@ -117,11 +125,11 @@ namespace age
         void schedule_irq_mode2();
         void schedule_irq_mode0(int scx);
 
-        const gb_device&       m_device;
-        const gb_clock&        m_clock;
-        const gb_lcd_scanline& m_scanline;
-        gb_events&             m_events;
-        gb_interrupt_trigger&  m_interrupts;
+        const gb_device&      m_device;
+        const gb_clock&       m_clock;
+        const gb_lcd_line&    m_line;
+        gb_events&            m_events;
+        gb_interrupt_trigger& m_interrupts;
 
         int m_clk_next_irq_vblank = gb_no_clock_cycle;
         int m_clk_next_irq_lyc    = gb_no_clock_cycle;
@@ -185,6 +193,7 @@ namespace age
         bool    is_oam_accessible();
         bool    is_video_ram_accessible();
 
+        void after_speed_change();
         void update_state();
         void trigger_irq_vblank();
         void trigger_irq_lyc();
@@ -199,14 +208,14 @@ namespace age
             return m_clock.log(gb_log_category::lc_lcd_registers);
         }
 
-        void calculate_scanline(int& scanline, int& scanline_clks);
+        gb_current_line calculate_line();
 
-        uint8_t get_stat_mode(int scanline, int scanline_clks, int scx) const;
-        uint8_t get_stat_ly_match(int scanline, int scanline_clks) const;
+        uint8_t get_stat_mode(const gb_current_line& current_line, int scx) const;
+        uint8_t get_stat_ly_match(const gb_current_line& current_line) const;
 
         const gb_device& m_device;
         const gb_clock&  m_clock;
-        gb_lcd_scanline  m_scanline;
+        gb_lcd_line      m_line;
         gb_lcd_irqs      m_lcd_irqs;
         gb_lcd_palettes  m_palettes;
         gb_lcd_sprites   m_sprites;

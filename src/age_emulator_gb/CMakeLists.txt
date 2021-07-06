@@ -18,7 +18,7 @@ add_library(
         lcd/age_gb_lcd_palettes.cpp
         lcd/age_gb_lcd_registers.cpp
         lcd/age_gb_lcd_render.cpp
-        lcd/age_gb_lcd_scanline.cpp
+        lcd/age_gb_lcd_line.cpp
         lcd/age_gb_lcd_sprites.cpp
         age_gb_memory.cpp
         age_gb_memory_init.cpp

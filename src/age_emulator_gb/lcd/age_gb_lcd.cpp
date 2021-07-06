@@ -28,8 +28,8 @@ age::gb_lcd::gb_lcd(const gb_device&      device,
                     gb_colors_hint        colors_hint)
     : m_device(device),
       m_clock(clock),
-      m_scanline(device, clock),
-      m_lcd_irqs(device, clock, m_scanline, events, interrupts),
+      m_line(device, clock),
+      m_lcd_irqs(device, clock, m_line, events, interrupts),
       m_palettes(device, rom_header, colors_hint),
       m_sprites(m_device.is_cgb()),
       m_render(device, m_palettes, m_sprites, video_ram, screen_buffer)
@@ -52,17 +52,31 @@ void age::gb_lcd::write_oam(int offset, uint8_t value)
 bool age::gb_lcd::is_oam_accessible()
 {
     // LCD off
-    if (!m_scanline.lcd_is_on())
+    if (!m_line.lcd_is_on())
     {
         return true;
     }
 
-    int scanline      = -1;
-    int scanline_clks = -1;
-    m_scanline.current_scanline(scanline, scanline_clks);
+    auto line = calculate_line();
+    AGE_ASSERT(line.m_line < gb_lcd_line_count)
 
-    return (scanline >= gb_screen_height)
-           || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7)));
+    bool accessible;
+    if (line.m_line_clks == gb_clock_cycles_per_lcd_line - 1)
+    {
+        accessible = false;
+    }
+    else if (m_line.is_first_frame() && !line.m_line)
+    {
+        accessible = (line.m_line_clks < 82) || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7) + 2));
+    }
+    else
+    {
+        accessible = (line.m_line >= gb_screen_height) || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));
+    }
+
+    log_reg() << "OAM accessible: " << accessible
+              << " (" << line.m_line_clks << " clks into line " << line.m_line << ")";
+    return accessible;
 }
 
 
@@ -70,46 +84,52 @@ bool age::gb_lcd::is_oam_accessible()
 bool age::gb_lcd::is_video_ram_accessible()
 {
     // LCD off
-    if (!m_scanline.lcd_is_on())
+    if (!m_line.lcd_is_on())
     {
         return true;
     }
 
-    int scanline      = -1;
-    int scanline_clks = -1;
-    m_scanline.current_scanline(scanline, scanline_clks);
+    auto line = calculate_line();
 
     // mode 3 end (+1 T4 cycle for double speed)
     // (Gambatte tests: vramw_m3end/*)
-    return (scanline >= gb_screen_height)
-           || (scanline_clks < 80)
-           || (scanline_clks >= (80 + 172 + (m_render.m_scx & 7) + m_clock.is_double_speed()));
+    bool accessible = (line.m_line >= gb_screen_height)
+                      || (line.m_line_clks < 80)
+                      || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));
+
+    log_reg() << "VRAM accessible: " << accessible
+              << " (" << line.m_line_clks << " clks into line " << line.m_line << ")";
+    return accessible;
 }
 
 
 
+void age::gb_lcd::after_speed_change()
+{
+    update_state();
+    m_line.after_speed_change();
+}
+
 void age::gb_lcd::update_state()
 {
     // LCD on?
-    if (!m_scanline.lcd_is_on())
+    if (!m_line.lcd_is_on())
     {
         return;
     }
 
     // Continue unfinished frame.
-    // During a scanline's mode 0 the emulated program may already prepare
-    // data for the next scanline.
-    // We thus render each scanline before it enters mode 0.
-    int scanline      = -1;
-    int scanline_clks = -1;
-    m_scanline.current_scanline(scanline, scanline_clks);
+    // During a line's mode 0 the emulated program may already prepare
+    // data for the next line.
+    // We thus render each line before it enters mode 0.
+    auto line = m_line.current_line();
 
-    m_render.render(scanline + (scanline_clks >= 80));
+    m_render.render(line.m_line + (line.m_line_clks >= 80));
 
     // start new frame?
-    if (scanline >= gb_scanline_count)
+    if (line.m_line >= gb_lcd_line_count)
     {
-        m_scanline.fast_forward_frames();
+        m_line.fast_forward_frames();
         m_render.new_frame();
         update_state();
     }
@@ -139,6 +159,6 @@ void age::gb_lcd::trigger_irq_mode0()
 
 void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 {
-    m_scanline.set_back_clock(clock_cycle_offset);
+    m_line.set_back_clock(clock_cycle_offset);
     m_lcd_irqs.set_back_clock(clock_cycle_offset);
 }

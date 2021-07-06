@@ -20,29 +20,39 @@
 
 
 
-age::gb_lcd_scanline::gb_lcd_scanline(const gb_device& device,
-                                      const gb_clock&  clock)
+age::gb_lcd_line::gb_lcd_line(const gb_device& device,
+                              const gb_clock&  clock)
     : m_clock(clock),
       m_clk_frame_start(m_clock.get_clock_cycle())
 {
     if (device.is_cgb())
     {
-        m_clk_frame_start += 4396 - gb_clock_cycles_per_frame;
+        m_clk_frame_start += 4396 - gb_clock_cycles_per_lcd_frame;
     }
     else
     {
-        m_clk_frame_start += 60 - gb_clock_cycles_per_frame;
+        m_clk_frame_start += 60 - gb_clock_cycles_per_lcd_frame;
     }
     m_clk_frame_start += gb_lcd_m_cycle_align;
-    m_clk_scanline_start = m_clk_frame_start;
+    m_clk_line_start = m_clk_frame_start;
 
     AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start)
 }
 
-void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
+
+
+void age::gb_lcd_line::after_speed_change()
+{
+    if ((m_clk_frame_start != gb_no_clock_cycle) && is_odd_alignment()) {
+        ++m_clk_frame_start;
+        ++m_clk_line_start;
+    }
+}
+
+void age::gb_lcd_line::set_back_clock(int clock_cycle_offset)
 {
     gb_set_back_clock_cycle(m_clk_frame_start, clock_cycle_offset);
-    gb_set_back_clock_cycle(m_clk_scanline_start, clock_cycle_offset);
+    gb_set_back_clock_cycle(m_clk_line_start, clock_cycle_offset);
 }
 
 
@@ -53,12 +63,12 @@ void age::gb_lcd_scanline::set_back_clock(int clock_cycle_offset)
 //
 //---------------------------------------------------------
 
-bool age::gb_lcd_scanline::lcd_is_on() const
+bool age::gb_lcd_line::lcd_is_on() const
 {
     return m_clk_frame_start != gb_no_clock_cycle;
 }
 
-void age::gb_lcd_scanline::lcd_on()
+void age::gb_lcd_line::lcd_on()
 {
     // LCD already on
     if (lcd_is_on())
@@ -67,16 +77,15 @@ void age::gb_lcd_scanline::lcd_on()
     }
 
     // switch on LCD:
-    // start new frame with shortened first scanline
-    m_clk_frame_start    = m_clock.get_clock_cycle() + gb_lcd_m_cycle_align;
-    m_clk_scanline_start = m_clk_frame_start;
-    m_scanline           = 0;
-    m_first_frame        = true;
-    AGE_GB_CLOG_LCD_PORTS("    * aligning first frame to clock cycle "
-                          << m_clk_frame_start)
+    // start new frame with shortened first line
+    m_clk_frame_start = m_clock.get_clock_cycle() + gb_lcd_m_cycle_align + m_clock.is_double_speed();
+    m_clk_line_start  = m_clk_frame_start;
+    m_line            = 0;
+    m_first_frame     = true;
+    AGE_GB_CLOG_LCD_PORTS("    * aligning first frame to clock cycle " << m_clk_frame_start)
 }
 
-void age::gb_lcd_scanline::lcd_off()
+void age::gb_lcd_line::lcd_off()
 {
     // LCD already off
     if (!lcd_is_on())
@@ -84,10 +93,10 @@ void age::gb_lcd_scanline::lcd_off()
         return;
     }
 
-    m_clk_frame_start    = gb_no_clock_cycle;
-    m_clk_scanline_start = gb_no_clock_cycle;
-    m_scanline           = 0;
-    m_first_frame        = false;
+    m_clk_frame_start = gb_no_clock_cycle;
+    m_clk_line_start  = gb_no_clock_cycle;
+    m_line            = 0;
+    m_first_frame     = false;
 }
 
 
@@ -98,17 +107,22 @@ void age::gb_lcd_scanline::lcd_off()
 //
 //---------------------------------------------------------
 
-int age::gb_lcd_scanline::clk_frame_start() const
+int age::gb_lcd_line::clk_frame_start() const
 {
     return m_clk_frame_start;
 }
 
-bool age::gb_lcd_scanline::is_first_frame() const
+bool age::gb_lcd_line::is_first_frame() const
 {
     return m_first_frame;
 }
 
-void age::gb_lcd_scanline::fast_forward_frames()
+bool age::gb_lcd_line::is_odd_alignment() const
+{
+    return (m_clk_frame_start % 2) != 0;
+}
+
+void age::gb_lcd_line::fast_forward_frames()
 {
     AGE_ASSERT(lcd_is_on())
 
@@ -116,15 +130,14 @@ void age::gb_lcd_scanline::fast_forward_frames()
     int clk_current = m_clock.get_clock_cycle();
     int clks        = clk_current - m_clk_frame_start;
 
-    if (clks >= gb_clock_cycles_per_frame)
+    if (clks >= gb_clock_cycles_per_lcd_frame)
     {
-        int frames = clks / gb_clock_cycles_per_frame;
-        m_clk_frame_start += frames * gb_clock_cycles_per_frame;
+        int frames = clks / gb_clock_cycles_per_lcd_frame;
+        m_clk_frame_start += frames * gb_clock_cycles_per_lcd_frame;
 
-        m_clk_scanline_start = m_clk_frame_start;
-        m_scanline           = 0;
-
-        m_first_frame = false;
+        m_clk_line_start = m_clk_frame_start;
+        m_line           = 0;
+        m_first_frame    = false;
         AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start)
     }
 }
@@ -133,36 +146,35 @@ void age::gb_lcd_scanline::fast_forward_frames()
 
 //---------------------------------------------------------
 //
-//   scanline
+//   line
 //
 //---------------------------------------------------------
 
-void age::gb_lcd_scanline::current_scanline(int& scanline, int& scanline_clks) const
+age::gb_current_line age::gb_lcd_line::current_line() const
 {
     AGE_ASSERT(lcd_is_on())
 
     int clk_current = m_clock.get_clock_cycle();
-    int clks_diff   = clk_current - m_clk_scanline_start;
+    int clks_diff   = clk_current - m_clk_line_start;
 
-    // no need to recalculate the scanline
+    // no need to recalculate the line
     // (no expensive division)
-    if (clks_diff < gb_clock_cycles_per_scanline)
+    if (clks_diff < gb_clock_cycles_per_lcd_line)
     {
-        scanline      = m_scanline;
-        scanline_clks = clks_diff;
-        return;
+        return {.m_line = m_line, .m_line_clks = clks_diff};
     }
 
-    // recalculate scanline
+    // recalculate line
     int clks_frame = clk_current - m_clk_frame_start;
 
     // We hope for the compiler to optimize the "/" and "%" operations,
     // e.g. to make use of the remainder being a by-product of the
     // division.
     // On x86 this should be a single DIV instruction.
-    scanline      = clks_frame / gb_clock_cycles_per_scanline;
-    scanline_clks = clks_frame % gb_clock_cycles_per_scanline;
+    m_line        = clks_frame / gb_clock_cycles_per_lcd_line;
+    int line_clks = clks_frame % gb_clock_cycles_per_lcd_line;
 
-    m_clk_scanline_start = m_clk_frame_start + scanline * gb_clock_cycles_per_scanline;
-    m_scanline           = scanline;
+    m_clk_line_start = m_clk_frame_start + m_line * gb_clock_cycles_per_lcd_line;
+
+    return {.m_line = m_line, .m_line_clks = line_clks};
 }

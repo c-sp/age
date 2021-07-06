@@ -110,26 +110,7 @@
 /gambatte/dma/
 /gambatte/dmgpalette_during_m3/
 
-/gambatte/enable_display/enable_display_ly0_oambusy_read_1_dmg08_cgb04c_out0.gbc
-/gambatte/enable_display/enable_display_ly0_oambusy_read_ds_1_cgb04c_out0.gbc
-/gambatte/enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc
-/gambatte/enable_display/lcdcenable_lyc0irq_2_dmg08_cgb04c_out0.gbc
-/gambatte/enable_display/ly0_late_cgbpr_2_cgb04c_outFF.gbc
-/gambatte/enable_display/ly0_late_cgbpr_ds_2_cgb04c_outFF.gbc
-/gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_oamw_1_dmg08_cgb04c_outAA.gbc
-/gambatte/enable_display/ly0_late_oamw_2_dmg08_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_oamw_ds_1_cgb04c_outAA.gbc
-/gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx3_1_dmg08_cgb04c_out87.gbc
-/gambatte/enable_display/ly0_late_vramr_2_dmg08_outFF_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_vramr_ds_1_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_vramw_2_dmg08_out55_cgb04c_outAA.gbc
-/gambatte/enable_display/ly1_late_cgbpw_2_cgb04c_out55.gbc
+/gambatte/enable_display/
 
 /gambatte/halt/m1int_ly_1_dmg08_cgb04c_out90.gbc
 /gambatte/halt/m1int_ly_2_dmg08_out90_cgb04c_out91.gbc
@@ -162,28 +143,19 @@
 
 /gambatte/miscmstatirq/
 
-/gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
-/gambatte/oam_access/midread_1_dmg08_cgb04c_out3.gbc
-/gambatte/oam_access/midread_2_dmg08_cgb04c_out3.gbc
-/gambatte/oam_access/midread_3_dmg08_cgb04c_out3.gbc
-/gambatte/oam_access/midwrite_1_dmg08_cgb04c_out0.gbc
+/gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
-/gambatte/oam_access/midwrite_3_dmg08_cgb04c_out0.gbc
-/gambatte/oam_access/postread_scx5_ds_1_cgb04c_out3.gbc
-/gambatte/oam_access/postwrite_scx1_ds_1_cgb04c_out0.gbc
-/gambatte/oam_access/preread_2_dmg08_cgb04c_out3.gbc
 /gambatte/oam_access/preread_ds_lcdoffset1_2_cgb04c_out3.gbc
-/gambatte/oam_access/preread_lcdoffset1_2_cgb04c_out3.gbc
 /gambatte/oam_access/prewrite_2_dmg08_out1_cgb04c_out0.gbc
 /gambatte/oam_access/prewrite_ds_2_cgb04c_out0.gbc
 /gambatte/oam_access/prewrite_ds_lcdoffset1_2_cgb04c_out0.gbc
-/gambatte/oam_access/prewrite_lcdoffset1_2_cgb04c_out0.gbc
 
 /gambatte/oamdma/
 /gambatte/scx_during_m3/
 /gambatte/scy/
 
 /gambatte/sound/ch1_duty0_pos6_to_pos7_timing_ds_6
+
 /gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
 /gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
 /gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
@@ -200,7 +172,6 @@
 /gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
 /gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
 /gambatte/speedchange/speedchange_ch1_nr4init_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-
 /gambatte/speedchange/speedchange2_frame1
 /gambatte/speedchange/speedchange2_lcdoff
 /gambatte/speedchange/speedchange2_ly44
@@ -218,15 +189,9 @@
 /gambatte/sprites/
 
 /gambatte/vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
-/gambatte/vram_m3/postread_scx5_ds_1_cgb04c_out3.gbc
 /gambatte/vram_m3/preread_2_dmg08_out3_cgb04c_out0.gbc
-/gambatte/vram_m3/preread_3_dmg08_cgb04c_out3.gbc
-/gambatte/vram_m3/preread_ds_lcdoffset1_2_cgb04c_out3.gbc
-/gambatte/vram_m3/preread_lcdoffset1_2_cgb04c_out3.gbc
-/gambatte/vram_m3/preread_lcdoffset2_2_cgb04c_out3.gbc
-/gambatte/vram_m3/prewrite_ds_lcdoffset1_2_cgb04c_out0.gbc
-/gambatte/vram_m3/prewrite_lcdoffset1_2_cgb04c_out0.gbc
-/gambatte/vram_m3/prewrite_lcdoffset2_2_cgb04c_out0.gbc
+/gambatte/vram_m3/preread_lcdoffset2_1_cgb04c_out0.gbc
+/gambatte/vram_m3/prewrite_lcdoffset2_1_cgb04c_out1.gbc
 
 /gambatte/window/
 

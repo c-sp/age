@@ -67,9 +67,9 @@ void age::gb_lcd_sprites::set_sprite_size(uint8_t sprite_size)
 
 
 
-std::vector<age::gb_sprite> age::gb_lcd_sprites::get_scanline_sprites(int scanline)
+std::vector<age::gb_sprite> age::gb_lcd_sprites::get_line_sprites(int line)
 {
-    // find the first 10 sprites on this scanline
+    // find the first 10 sprites on this line
     std::vector<gb_sprite> sprites;
 
     for (uint8_t sprite_id = 0; sprite_id < 40; ++sprite_id)
@@ -84,7 +84,7 @@ std::vector<age::gb_sprite> age::gb_lcd_sprites::get_scanline_sprites(int scanli
                                           ? (8 + (sprite.m_data.m_attributes & gb_tile_attrib_palette))
                                           : ((sprite.m_data.m_attributes & oam_palette) ? gb_palette_obp1 : gb_palette_obp0);
 
-        int y_diff = scanline - (sprite.m_data.m_y - 16);
+        int y_diff = line - (sprite.m_data.m_y - 16);
         if ((y_diff < 0) || (y_diff >= m_sprite_size))
         {
             continue;

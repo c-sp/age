@@ -95,41 +95,41 @@ void age::gb_lcd_render::set_lcdc(int lcdc)
 void age::gb_lcd_render::new_frame()
 {
     m_screen_buffer.switch_buffers();
-    m_rendered_scanlines = 0;
-    m_wline              = -1;
+    m_rendered_lines = 0;
+    m_wline          = -1;
 }
 
-void age::gb_lcd_render::render(int until_scanline)
+void age::gb_lcd_render::render(int until_line)
 {
-    AGE_ASSERT(until_scanline >= m_rendered_scanlines)
-    AGE_ASSERT(m_rendered_scanlines <= gb_screen_height)
+    AGE_ASSERT(until_line >= m_rendered_lines)
+    AGE_ASSERT(m_rendered_lines <= gb_screen_height)
 
-    int sanitized = std::min<int>(gb_screen_height, until_scanline);
-    int to_render = sanitized - m_rendered_scanlines;
+    int sanitized = std::min<int>(gb_screen_height, until_line);
+    int to_render = sanitized - m_rendered_lines;
 
-    // new scanlines to render?
+    // new lines to render?
     if (to_render <= 0)
     {
         return;
     }
 
-    // render scanlines
-    int scanline = m_rendered_scanlines;
-    m_rendered_scanlines += to_render;
+    // render lines
+    int line = m_rendered_lines;
+    m_rendered_lines += to_render;
 
-    for (; scanline < m_rendered_scanlines; ++scanline)
+    for (; line < m_rendered_lines; ++line)
     {
-        render_scanline(scanline);
+        render_line(line);
     }
 }
 
 
 
-void age::gb_lcd_render::render_scanline(int scanline)
+void age::gb_lcd_render::render_line(int line)
 {
     // We use the pixel alpha channel temporary for priority
     // information.
-    // When the scanline is finished, during copying to the
+    // When the line is finished, during copying to the
     // screen buffer the alpha channel is restored to 0xFF.
     //
     // Priority bits:
@@ -147,19 +147,19 @@ void age::gb_lcd_render::render_scanline(int scanline)
     {
         pixel fill_color      = m_palettes.get_palette(gb_palette_bgp)[0];
         fill_color.m_rgba.m_a = 0x00; // sprites are prioritized
-        std::fill(begin(m_scanline), end(m_scanline), fill_color);
+        std::fill(begin(m_line), end(m_line), fill_color);
     }
 
     // render BG & window
     else
     {
-        bool render_window = window_visible(scanline);
+        bool render_window = window_visible(line);
 
         // render BG
-        int    bg_y          = m_scy + scanline;
+        int    bg_y          = m_scy + line;
         int    tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
         int    tile_line     = bg_y & 0b111;
-        pixel* px            = &m_scanline[8];
+        pixel* px            = &m_line[8];
 
         int tiles = render_window
                         ? 1 + std::min<int>(20, std::max<int>(0, m_wx - 7) >> 3)
@@ -175,7 +175,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
         {
             tile_vram_ofs = m_win_tile_map_offset + ((m_wline & 0b11111000) << 2);
             tile_line     = m_wline & 0b111;
-            px            = &m_scanline[px0 + m_wx - 7];
+            px            = &m_line[px0 + m_wx - 7];
 
             for (int tx = 0, max = ((gb_screen_width + 7 - m_wx) >> 3) + 1; tx < max; ++tx)
             {
@@ -189,7 +189,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
     // render sprites
     if (m_lcdc & gb_lcdc_obj_enable)
     {
-        auto sprites = m_sprites.get_scanline_sprites(scanline);
+        auto sprites = m_sprites.get_line_sprites(line);
         std::for_each(rbegin(sprites),
                       rend(sprites),
                       [&](const gb_sprite& sprite) {
@@ -197,16 +197,16 @@ void age::gb_lcd_render::render_scanline(int scanline)
                           {
                               AGE_ASSERT((px0 + sprite.m_data.m_x) < gb_screen_width + 24)
                               render_sprite_tile(
-                                  &m_scanline[px0 + sprite.m_data.m_x - 8],
-                                  scanline - (sprite.m_data.m_y - 16),
+                                  &m_line[px0 + sprite.m_data.m_x - 8],
+                                  line - (sprite.m_data.m_y - 16),
                                   sprite);
                           }
                       });
     }
 
-    // copy scanline
-    auto* dst = &m_screen_buffer.get_back_buffer()[0] + scanline * gb_screen_width;
-    auto* src = &m_scanline[px0];
+    // copy line
+    auto* dst = &m_screen_buffer.get_back_buffer()[0] + line * gb_screen_width;
+    auto* src = &m_line[px0];
 
     auto alpha = pixel{0, 0, 0, 255}.m_color;
     for (int i = 0; i < gb_screen_width; ++i)
@@ -220,7 +220,7 @@ void age::gb_lcd_render::render_scanline(int scanline)
 
 
 
-bool age::gb_lcd_render::window_visible(int scanline)
+bool age::gb_lcd_render::window_visible(int line)
 {
     bool win_x_visible = (m_lcdc & gb_lcdc_win_enable) && (m_wx < 167);
 
@@ -230,8 +230,8 @@ bool age::gb_lcd_render::window_visible(int scanline)
         return win_x_visible;
     }
 
-    // start rendering window on this scanline?
-    if (win_x_visible && (m_wy <= scanline))
+    // start rendering window on this line?
+    if (win_x_visible && (m_wy <= line))
     {
         m_wline = 0;
         return true;
