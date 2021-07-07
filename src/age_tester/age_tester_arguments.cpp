@@ -358,6 +358,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
         gb_log_category::lc_cpu,
         // gb_log_category::lc_events,
         gb_log_category::lc_interrupts,
+        gb_log_category::lc_lcd,
         gb_log_category::lc_lcd_no_memory_access,
         gb_log_category::lc_lcd_registers,
         gb_log_category::lc_serial,

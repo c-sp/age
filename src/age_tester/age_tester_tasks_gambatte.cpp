@@ -202,6 +202,13 @@ namespace
 
 
 
+    age::uint8_t to_hex(char c)
+    {
+        return ((c >= 'a') && (c <= 'f')) ? (c - 'a' + 10) : ((c >= 'A') && (c <= 'F')) ? (c - 'A' + 10)
+                                                         : ((c >= '0') && (c <= '9'))   ? (c - '0')
+                                                                                        : 0xFF;
+    }
+
     age::uint8_vector parse_hex_out(const std::string&              str,
                                     const std::vector<std::string>& prefixes)
     {
@@ -224,9 +231,7 @@ namespace
                     break;
                 }
                 // convert hex character
-                age::uint8_t byte = ((c >= 'a') && (c <= 'f')) ? (c - 'a' + 10) : ((c >= 'A') && (c <= 'F')) ? (c - 'A' + 10)
-                                                                              : ((c >= '0') && (c <= '9'))   ? (c - '0')
-                                                                                                             : 0xFF;
+                age::uint8_t byte = to_hex(c);
                 // invalid character found?
                 if (byte >= 0x10)
                 {

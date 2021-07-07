@@ -226,7 +226,7 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
     // immediate interrupt, id we're still on this line
     //! \todo what's the exact timing?
     auto line      = m_line.current_line();
-    int  lyc_limit = gb_clock_cycles_per_lcd_line - m_device.is_cgb() * 2;
+    int  lyc_limit = gb_clock_cycles_per_lcd_line - (m_device.is_cgb() ? 2 : 0);
 
     if ((m_line.m_lyc == line.m_line) && (line.m_line_clks < lyc_limit))
     {
@@ -285,7 +285,7 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
     // Mode 2 irq is triggered before a line begins.
     // If we're too late, jump to the next line.
     // (not for line 0 though)
-    int m2_lead = -2;
+    int m2_lead = (m_clock.is_double_speed() || m_line.is_odd_alignment()) ? -2 : -1;
 
     if (current_line.m_line_clks >= gb_clock_cycles_per_lcd_line + m2_lead)
     {
@@ -366,21 +366,17 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
     AGE_ASSERT(m0_line < gb_lcd_line_count)
     AGE_ASSERT(current_line.m_line_clks < gb_clock_cycles_per_lcd_line)
 
-    // no mode 0 irq delay for line 0 on the first frame
-    // after restarting the LCD
     //! \todo Gambatte test rom analysis: enable_display/frame0_m0irq_count_scx{2|3}
     //! \todo write a test rom for this
-    int m0_delay = m_line.is_odd_alignment();
+    int m3_end = 80 + 172 + (scx & 7) + (m_line.is_odd_alignment() ? 1 : 0);
 
     // if we're past the mode 0 irq for this line,
     // continue with the next line
     //! \todo too simple: mode 3 timing also depends on sprites & window
-    int m3_end = 80 + 172 + (scx & 7) + m0_delay;
     if (current_line.m_line_clks >= m3_end)
     {
         ++line;
         ++m0_line;
-        // m3_end -= (m0_delay - 1); // undo line 0 frame 0 delay
     }
 
     // skip v-blank

@@ -158,7 +158,7 @@ void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_li
 
 void age::qt_video_post_processor::add_new_frame(const pixel_vector& pixel_data)
 {
-    AGE_ASSERT(m_native_frames.size() > 0);
+    AGE_ASSERT(!m_native_frames.size());
     AGE_ASSERT(m_new_frame_idx >= 0);
     AGE_ASSERT(m_new_frame_idx < m_native_frames.size());
 
@@ -276,7 +276,7 @@ void age::qt_video_post_processor::post_process_frame(int frame_idx)
 
         // prepare shader program
         step.m_program->bind();
-        step.m_program->setUniformValue("u_inv_texture_size", QVector2D(1.f / texture_size.width(), 1.f / texture_size.height()));
+        step.m_program->setUniformValue("u_inv_texture_size", QVector2D(1.F / texture_size.width(), 1.F / texture_size.height()));
         qt_use_float_attribute_buffer(*step.m_program, "a_vertex", 0, 3);
 
         // post-process texture

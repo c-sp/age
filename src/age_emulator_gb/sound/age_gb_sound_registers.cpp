@@ -21,7 +21,8 @@
 namespace
 {
     constexpr age::uint8_t gb_sound_master_switch = 0x80;
-}
+
+} // namespace
 
 
 
@@ -310,7 +311,7 @@ void age::gb_sound::write_nr14(uint8_t value)
         // (see test rom analysis)
         AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
         int  clks_next_event = m_clk_next_apu_event - m_clk_current_state; // were updated by update_state()
-        bool skip_sweep_step = (m_next_frame_sequencer_step & 2)
+        bool skip_sweep_step = ((m_next_frame_sequencer_step & 2) != 0)
                                && (clks_next_event <= (m_cgb ? 8 : 4));
 
         bool deactivated = m_c1.init_frequency_sweep(skip_sweep_step);

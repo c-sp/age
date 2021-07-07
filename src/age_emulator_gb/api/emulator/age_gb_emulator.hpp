@@ -49,6 +49,9 @@ namespace age
 
     class gb_emulator
     {
+        AGE_DISABLE_COPY(gb_emulator);
+        AGE_DISABLE_MOVE(gb_emulator);
+
     public:
         explicit gb_emulator(const uint8_vector& rom,
                              gb_hardware         hardware       = gb_hardware::auto_detect,

@@ -151,7 +151,7 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     int  clock_shift = fast_sio ? (sio_clock_shift - 5) : sio_clock_shift;
 
     // adjust to CGB double speed
-    clock_shift -= m_clock.is_double_speed();
+    clock_shift -= m_clock.is_double_speed() ? 1 : 0;
     AGE_ASSERT(clock_shift >= 3)
     AGE_ASSERT(clock_shift <= 9)
 

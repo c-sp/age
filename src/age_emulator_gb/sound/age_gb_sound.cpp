@@ -277,7 +277,7 @@ bool age::gb_sound::should_dec_length_counter() const
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
-    return m_next_frame_sequencer_step & 1;
+    return (m_next_frame_sequencer_step & 1) != 0;
 }
 
 bool age::gb_sound::should_align_frequency_timer() const

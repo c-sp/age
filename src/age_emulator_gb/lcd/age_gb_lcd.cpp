@@ -60,7 +60,7 @@ bool age::gb_lcd::is_oam_accessible()
     auto line = calculate_line();
     AGE_ASSERT(line.m_line < gb_lcd_line_count)
 
-    bool accessible;
+    bool accessible = false;
     if (line.m_line_clks == gb_clock_cycles_per_lcd_line - 1)
     {
         accessible = false;
@@ -106,8 +106,11 @@ bool age::gb_lcd::is_video_ram_accessible()
 
 void age::gb_lcd::after_speed_change()
 {
-    update_state();
-    m_line.after_speed_change();
+    if (m_line.lcd_is_on())
+    {
+        update_state();
+        m_line.after_speed_change();
+    }
 }
 
 void age::gb_lcd::update_state()
@@ -124,7 +127,7 @@ void age::gb_lcd::update_state()
     // We thus render each line before it enters mode 0.
     auto line = m_line.current_line();
 
-    m_render.render(line.m_line + (line.m_line_clks >= 80));
+    m_render.render(line.m_line + ((line.m_line_clks >= 80) ? 1 : 0));
 
     // start new frame?
     if (line.m_line >= gb_lcd_line_count)

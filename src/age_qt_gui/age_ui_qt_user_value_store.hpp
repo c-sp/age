@@ -59,7 +59,7 @@ namespace age
         //! \param default_value The default value to return if the user value has not yet been set.
         //! \return The requested user value.
         //!
-        QVariant get_value(const QString& key, const QVariant& default_value = QVariant()) const;
+        [[nodiscard]] QVariant get_value(const QString& key, const QVariant& default_value = QVariant()) const;
 
         //!
         //! \brief Set a user value.

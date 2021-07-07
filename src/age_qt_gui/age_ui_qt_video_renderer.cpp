@@ -107,7 +107,7 @@ void age::qt_video_renderer::render(const QList<GLuint>& textures_to_render)
 
     for (int i = 0; i < textures_to_render.size(); ++i)
     {
-        m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1.f / (i + 1)));
+        m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1.F / (i + 1)));
         glBindTexture(GL_TEXTURE_2D, textures_to_render[i]);
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
     }

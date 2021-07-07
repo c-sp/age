@@ -222,7 +222,7 @@ void age::gb_lcd_render::render_line(int line)
 
 bool age::gb_lcd_render::window_visible(int line)
 {
-    bool win_x_visible = (m_lcdc & gb_lcdc_win_enable) && (m_wx < 167);
+    bool win_x_visible = ((m_lcdc & gb_lcdc_win_enable) != 0) && (m_wx < 167);
 
     // window was already active
     if (m_wline >= 0)

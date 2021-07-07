@@ -222,14 +222,14 @@ age::uint8_t age::gb_lcd::read_ly()
     auto line = calculate_line();
 
     // LY = 153 only for 2-3 T4-cycles
-    if ((line.m_line >= 153) && (line.m_line_clks > 2 + m_clock.is_double_speed()))
+    if ((line.m_line >= 153) && (line.m_line_clks > 2 + (m_clock.is_double_speed() ? 1 : 0)))
     {
         log_reg() << "read LY == 0 (line 153 shortened)";
         return 0;
     }
 
     // Ly is incremented 2 clock cycles earlier than the respective line
-    int ly = line.m_line + (line.m_line_clks >= gb_clock_cycles_per_lcd_line - 2);
+    int ly = line.m_line + ((line.m_line_clks >= gb_clock_cycles_per_lcd_line - 2) ? 1 : 0);
 
     log_reg() << "read LY == " << log_hex8(ly)
               << " (" << line.m_line_clks << " clock cylces into line " << line.m_line << ")";

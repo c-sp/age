@@ -44,7 +44,7 @@ age::uint8_t age::gb_timer::get_clock_shift() const
     uint8_t clock_shift = 4 + (((m_tac - 1) & 0x03) << 1);
 
     // CGB double speed => faster increments
-    clock_shift -= m_clock.is_double_speed();
+    clock_shift -= m_clock.is_double_speed() ? 1 : 0;
 
     AGE_ASSERT(clock_shift <= 10)
     AGE_ASSERT(clock_shift >= 3) // CGB double speed: up to 524288 Hz
@@ -146,7 +146,7 @@ void age::gb_timer::write_tac(uint8_t value)
     msg << "write TAC = " << log_hex8(value);
 
     m_tac                = value | 0xF8;
-    bool start_new_timer = m_tac & tac_start_timer;
+    bool start_new_timer = (m_tac & tac_start_timer) != 0;
 
     // timer off => maybe start it?
     if (m_clk_timer_zero == gb_no_clock_cycle)

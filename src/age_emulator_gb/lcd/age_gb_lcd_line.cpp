@@ -33,19 +33,20 @@ age::gb_lcd_line::gb_lcd_line(const gb_device& device,
     {
         m_clk_frame_start += 60 - gb_clock_cycles_per_lcd_frame;
     }
-    m_clk_frame_start += gb_lcd_m_cycle_align;
+    m_clk_frame_start += gb_lcd_initial_alignment;
     m_clk_line_start = m_clk_frame_start;
-
-    AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start)
+    log_frame_alignment();
 }
 
 
 
 void age::gb_lcd_line::after_speed_change()
 {
-    if ((m_clk_frame_start != gb_no_clock_cycle) && is_odd_alignment()) {
+    if (lcd_is_on() && m_clock.is_double_speed())
+    {
         ++m_clk_frame_start;
         ++m_clk_line_start;
+        log_frame_alignment();
     }
 }
 
@@ -78,11 +79,12 @@ void age::gb_lcd_line::lcd_on()
 
     // switch on LCD:
     // start new frame with shortened first line
-    m_clk_frame_start = m_clock.get_clock_cycle() + gb_lcd_m_cycle_align + m_clock.is_double_speed();
+    m_clk_frame_start = m_clock.get_clock_cycle() + gb_lcd_initial_alignment + (m_clock.is_double_speed() ? 1 : 0);
     m_clk_line_start  = m_clk_frame_start;
     m_line            = 0;
     m_first_frame     = true;
-    AGE_GB_CLOG_LCD_PORTS("    * aligning first frame to clock cycle " << m_clk_frame_start)
+
+    log_frame_alignment();
 }
 
 void age::gb_lcd_line::lcd_off()
@@ -119,7 +121,7 @@ bool age::gb_lcd_line::is_first_frame() const
 
 bool age::gb_lcd_line::is_odd_alignment() const
 {
-    return (m_clk_frame_start % 2) != 0;
+    return (m_clk_frame_start & 1) != 0;
 }
 
 void age::gb_lcd_line::fast_forward_frames()
@@ -138,8 +140,15 @@ void age::gb_lcd_line::fast_forward_frames()
         m_clk_line_start = m_clk_frame_start;
         m_line           = 0;
         m_first_frame    = false;
-        AGE_GB_CLOG_LCD_PORTS("aligned frame to clock cycle " << m_clk_frame_start)
+
+        log_frame_alignment();
     }
+}
+
+void age::gb_lcd_line::log_frame_alignment() const
+{
+    log() << "aligned frame to clock cycle " << m_clk_frame_start
+          << " (" << (is_odd_alignment() ? "odd" : "even") << " alignment)";
 }
 
 

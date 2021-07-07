@@ -662,7 +662,7 @@ void age::gb_bus::reset_div(bool during_stop)
 
 void age::gb_bus::write_dma(uint8_t value)
 {
-    AGE_GB_CLOG_LCD_PORTS("write DMA = " << AGE_LOG_HEX8(value))
+    // AGE_GB_CLOG_LCD_PORTS("write DMA = " << AGE_LOG_HEX8(value))
 
     //
     // verified by mooneye-gb tests

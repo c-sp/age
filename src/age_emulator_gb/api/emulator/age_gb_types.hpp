@@ -94,6 +94,7 @@ namespace age
         lc_cpu,
         lc_events,
         lc_interrupts,
+        lc_lcd,
         lc_lcd_no_memory_access,
         lc_lcd_registers,
         lc_serial,

@@ -40,7 +40,7 @@ namespace age
     constexpr int gb_lcd_line_count             = 154;
     constexpr int gb_clock_cycles_per_lcd_frame = gb_lcd_line_count * gb_clock_cycles_per_lcd_line;
 
-    constexpr int gb_lcd_m_cycle_align = -3;
+    constexpr int gb_lcd_initial_alignment = -3;
 
     constexpr uint8_t gb_stat_irq_ly_match = 0x40;
     constexpr uint8_t gb_stat_irq_mode2    = 0x20;
@@ -80,7 +80,15 @@ namespace age
 
         gb_current_line current_line() const;
 
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log() const
+        {
+            return m_clock.log(gb_log_category::lc_lcd);
+        }
+
     private:
+        void log_frame_alignment() const;
+
         const gb_clock& m_clock;
         int             m_clk_frame_start = gb_no_clock_cycle;
         mutable int     m_clk_line_start  = gb_no_clock_cycle;

@@ -8,6 +8,18 @@
 
 ##################################################################
 ###
+###   age
+###
+
+age-test-roms/lcd/ly-timing-cgbE.gb
+age-test-roms/lcd/oam-read-timing-cgbE.gb
+age-test-roms/lcd/stat-mode-timing-cgbE.gb
+age-test-roms/tima/spsw-tima-cgbE.gb
+
+
+
+##################################################################
+###
 ###   blargg
 ###
 
@@ -58,7 +70,11 @@
 
 ### failing tests
 
-/mooneye-gb/acceptance/ppu/
+/mooneye-gb/acceptance/ppu/intr_2_mode0_timing_sprites.gb
+/mooneye-gb/acceptance/ppu/lcdon_timing-GS.gb
+/mooneye-gb/acceptance/ppu/lcdon_write_timing-GS.gb
+/mooneye-gb/acceptance/ppu/stat_irq_blocking.gb
+/mooneye-gb/acceptance/ppu/stat_lyc_onoff.gb
 /mooneye-gb/emulator-only/mbc2/bits_ramg.gb
 /mooneye-gb/emulator-only/mbc2/bits_romb.gb
 /mooneye-gb/emulator-only/mbc2/ram.gb
@@ -110,7 +126,27 @@
 /gambatte/dma/
 /gambatte/dmgpalette_during_m3/
 
-/gambatte/enable_display/
+/gambatte/enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc
+/gambatte/enable_display/frame0_m0irq_count_scx2_1_dmg08_cgb04c_out90.gbc
+/gambatte/enable_display/frame0_m0irq_count_scx2_ds_1_cgb04c_out90.gbc
+/gambatte/enable_display/frame0_m0irq_count_scx3_ds_1_cgb04c_out90.gbc
+/gambatte/enable_display/lcdcenable_lyc0irq_2_dmg08_cgb04c_out0.gbc
+/gambatte/enable_display/ly0_late_cgbpr_2_cgb04c_outFF.gbc
+/gambatte/enable_display/ly0_late_cgbpr_ds_2_cgb04c_outFF.gbc
+/gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx3_2_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_vramr_2_dmg08_outFF_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_vramr_ds_1_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_vramw_2_dmg08_out55_cgb04c_outAA.gbc
+/gambatte/enable_display/ly0_m0irq_scx0_ds_1_cgb04c_outE0.gbc
+/gambatte/enable_display/ly0_m0irq_scx1_1_dmg08_cgb04c_outE0.gbc
+/gambatte/enable_display/ly0_m0irq_scx1_ds_1_cgb04c_outE0.gbc
+/gambatte/enable_display/ly1_late_cgbpw_2_cgb04c_out55.gbc
 
 /gambatte/halt/m1int_ly_1_dmg08_cgb04c_out90.gbc
 /gambatte/halt/m1int_ly_2_dmg08_out90_cgb04c_out91.gbc
@@ -172,19 +208,6 @@
 /gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
 /gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
 /gambatte/speedchange/speedchange_ch1_nr4init_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange2_frame1
-/gambatte/speedchange/speedchange2_lcdoff
-/gambatte/speedchange/speedchange2_ly44
-/gambatte/speedchange/speedchange2_m2int
-/gambatte/speedchange/speedchange2_nop_lcdoff
-/gambatte/speedchange/speedchange2_nop_ly44
-/gambatte/speedchange/speedchange2_nop_m2int
-/gambatte/speedchange/speedchange3_ly44
-/gambatte/speedchange/speedchange3_nop_ly44
-/gambatte/speedchange/speedchange4_ly44
-/gambatte/speedchange/speedchange4_nop_ly44
-/gambatte/speedchange/speedchange5_ly44
-/gambatte/speedchange/speedchange5_nop_ly44
 
 /gambatte/sprites/
 
@@ -207,6 +230,43 @@
 /same-suite/sgb
 
 ### failing tests
+
+/same-suite/apu/channel_1/channel_1_extra_length_clocking-cgb0B.gb
+/same-suite/apu/channel_1/channel_1_freq_change_timing-A.gb
+/same-suite/apu/channel_1/channel_1_freq_change_timing-cgb0BC.gb
+/same-suite/apu/channel_1/channel_1_freq_change_timing-cgbDE.gb
+/same-suite/apu/channel_1/channel_1_nrx2_glitch.gb
+/same-suite/apu/channel_1/channel_1_nrx2_speed_change.gb
+/same-suite/apu/channel_1/channel_1_sweep.gb
+/same-suite/apu/channel_1/channel_1_sweep_restart.gb
+/same-suite/apu/channel_1/channel_1_volume.gb
+/same-suite/apu/channel_2/channel_2_extra_length_clocking-cgb0B.gb
+/same-suite/apu/channel_2/channel_2_nrx2_glitch.gb
+/same-suite/apu/channel_2/channel_2_nrx2_speed_change.gb
+/same-suite/apu/channel_2/channel_2_volume.gb
+/same-suite/apu/channel_3/channel_3_and_glitch.gb
+/same-suite/apu/channel_3/channel_3_delay.gb
+/same-suite/apu/channel_3/channel_3_extra_length_clocking-cgb0.gb
+/same-suite/apu/channel_3/channel_3_extra_length_clocking-cgbB.gb
+/same-suite/apu/channel_3/channel_3_first_sample.gb
+/same-suite/apu/channel_3/channel_3_freq_change_delay.gb
+/same-suite/apu/channel_3/channel_3_restart_during_delay.gb
+/same-suite/apu/channel_3/channel_3_restart_stop_delay.gb
+/same-suite/apu/channel_3/channel_3_shift_skip_delay.gb
+/same-suite/apu/channel_3/channel_3_wave_ram_locked_write.gb
+/same-suite/apu/channel_3/channel_3_wave_ram_sync.gb
+/same-suite/apu/channel_4/channel_4_align.gb
+/same-suite/apu/channel_4/channel_4_delay.gb
+/same-suite/apu/channel_4/channel_4_equivalent_frequencies.gb
+/same-suite/apu/channel_4/channel_4_extra_length_clocking-cgb0B.gb
+/same-suite/apu/channel_4/channel_4_freq_change.gb
+/same-suite/apu/channel_4/channel_4_frequency_alignment.gb
+/same-suite/apu/channel_4/channel_4_lfsr.gb
+/same-suite/apu/channel_4/channel_4_lfsr15.gb
+/same-suite/apu/channel_4/channel_4_lfsr_15_7.gb
+/same-suite/apu/channel_4/channel_4_lfsr_7_15.gb
+/same-suite/apu/channel_4/channel_4_lfsr_restart.gb
+/same-suite/apu/channel_4/channel_4_lfsr_restart_fast.gb
 
 /same-suite/dma
 /same-suite/ppu

@@ -56,7 +56,7 @@ age::qt_user_value_store::qt_user_value_store()
 age::qt_user_value_store::~qt_user_value_store()
 {
     // force writing the complete settings file by re-setting all current values
-    for (auto key : m_settings->allKeys())
+    for (const auto& key : m_settings->allKeys())
     {
         m_settings->setValue(key, m_settings->value(key));
     }
