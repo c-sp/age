@@ -158,7 +158,7 @@ void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_li
 
 void age::qt_video_post_processor::add_new_frame(const pixel_vector& pixel_data)
 {
-    AGE_ASSERT(!m_native_frames.size());
+    AGE_ASSERT(!m_native_frames.empty());
     AGE_ASSERT(m_new_frame_idx >= 0);
     AGE_ASSERT(m_new_frame_idx < m_native_frames.size());
 
