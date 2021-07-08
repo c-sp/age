@@ -22,12 +22,6 @@
 
 #include "age_gb_memory.hpp"
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 
 
 namespace
@@ -121,7 +115,6 @@ namespace
     age::int16_t get_num_cart_rom_banks(const age::uint8_vector& cart_rom)
     {
         auto rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
-        LOG("rom banks byte: " << AGE_LOG_HEX(rom_banks))
         switch (rom_banks)
         {
             //case 0x00:
@@ -140,12 +133,9 @@ namespace
     age::int16_t get_num_cart_ram_banks(const age::uint8_vector& cart_rom)
     {
         auto ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
-        LOG("ram banks byte: " << AGE_LOG_HEX(ram_banks))
         switch (ram_banks)
         {
-            //case 0x00:
             default: return 0;
-            case 0x01: //! \todo actually only 2048 bytes, but one whole bank is easier to handle
             case 0x02: return 1;
             case 0x03: return 4;
             case 0x04: return 16;
@@ -163,8 +153,9 @@ namespace
 //
 //---------------------------------------------------------
 
-age::gb_memory::gb_memory(const uint8_vector& cart_rom)
-    : m_mbc_writer(get_mbc_writer(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
+age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
+    : m_clock(clock),
+      m_mbc_writer(get_mbc_writer(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
       m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
@@ -177,10 +168,6 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom)
     AGE_ASSERT(m_cart_ram_offset > 0)
     AGE_ASSERT(m_internal_ram_offset >= m_cart_ram_offset)
     AGE_ASSERT(m_video_ram_offset > m_internal_ram_offset)
-
-    LOG("cartridge has " << m_num_cart_rom_banks << " rom bank(s)")
-    LOG("cartridge has " << m_num_cart_ram_banks << " ram bank(s)")
-    LOG("cartridge has persistent ram: " << m_has_battery)
 
     // 0x0000 - 0x3FFF : rom bank 0
     // 0x4000 - 0x7FFF : switchable rom bank
@@ -201,12 +188,12 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom)
     int memory_size   = cart_rom_size + cart_ram_size + gb_internal_ram_size + gb_video_ram_size;
     AGE_ASSERT(memory_size > 0)
 
-    LOG("allocating " << memory_size << " bytes as gb_memory")
+    log() << "allocating " << memory_size << " bytes total";
     m_memory = uint8_vector(static_cast<unsigned>(memory_size), 0);
 
     // copy rom
     int copy_rom_bytes = std::min(cart_rom_size, static_cast<int>(cart_rom.size()));
-    LOG("copying " << copy_rom_bytes << " bytes of cartridge rom (rom size is " << cart_rom.size() << " bytes)")
+    log() << "copying " << copy_rom_bytes << " bytes of cartridge rom (rom size is " << cart_rom.size() << " bytes)";
     std::copy(begin(cart_rom), begin(cart_rom) + copy_rom_bytes, begin(m_memory));
 
     //
@@ -233,8 +220,13 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom)
         }
 
         m_mbc1_multi_cart = (findings >= 3);
-        LOG("multi-cart: " << m_mbc1_multi_cart)
     }
+
+    log() << "cartridge:"
+          << "\n    * has " << m_num_cart_rom_banks << " rom bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_rom_size))
+          << "\n    * has " << m_num_cart_ram_banks << " ram bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_ram_size))
+          << "\n    * has " << (m_has_battery ? "a" : "no") << " battery: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
+          << "\n    * is a multicart: " << m_mbc1_multi_cart;
 }
 
 

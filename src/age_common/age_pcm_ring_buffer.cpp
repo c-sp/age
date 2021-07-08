@@ -19,12 +19,6 @@
 #include <age_debug.hpp>
 #include <pcm/age_pcm_ring_buffer.hpp>
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 #define BUFFER_SIZE_MATCHES  (m_buffer_size == static_cast<int>(m_buffer.size()))
 #define BUFFER_FILLED        ((m_buffered_samples == m_buffer_size) && (m_first_buffered_sample == m_first_new_sample))
 #define BUFFER_EMPTY         ((m_buffered_samples == 0) && (m_first_buffered_sample == m_first_new_sample))
@@ -164,7 +158,6 @@ void age::pcm_ring_buffer::discard_buffered_samples(int samples_to_discard)
     if (samples_to_discard >= m_buffered_samples)
     {
         clear();
-        LOG("clearing")
     }
     else
     {
@@ -173,11 +166,6 @@ void age::pcm_ring_buffer::discard_buffered_samples(int samples_to_discard)
 
         m_first_buffered_sample = add_check_wrap_around(m_first_buffered_sample, samples_to_discard);
         m_buffered_samples -= samples_to_discard;
-
-        LOG("samples_to_discard " << samples_to_discard
-                                  << ", m_first_buffered_sample " << m_first_buffered_sample
-                                  << ", m_first_new_sample " << m_first_new_sample
-                                  << ", m_buffered_samples " << m_buffered_samples)
 
         // we did not discard all buffered samples, but more than zero
         AGE_ASSERT((m_buffered_samples > 0) && (m_buffered_samples < m_buffer_size))
@@ -241,7 +229,6 @@ int age::pcm_ring_buffer::add_samples_with_offset(pcm_vector::const_iterator beg
         }
     }
 
-    LOG("added " << samples_added << " samples")
     return samples_added;
 }
 

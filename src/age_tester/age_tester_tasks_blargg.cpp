@@ -74,8 +74,6 @@ namespace
         {
             return 36;
         }
-
-        AGE_LOG("0 seconds for " << screenshot_filename);
         return 0;
     }
 

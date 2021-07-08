@@ -31,7 +31,7 @@ namespace age
     class gb_device
     {
     public:
-        gb_device(uint8_t rom_byte_0x143, gb_hardware hardware);
+        gb_device(const uint8_vector& rom, gb_hardware hardware);
 
         [[nodiscard]] gb_cart_mode get_cart_mode() const;
         [[nodiscard]] bool         is_cgb() const;          //!< get_cart_mode() == gb_cart_mode::cgb

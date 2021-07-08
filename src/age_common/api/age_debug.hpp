@@ -99,27 +99,6 @@ namespace age
 #define AGE_LOG(x)        (age::concurrent_cout() << age::age_log_time() << " " << x).log_line(); // NOLINT(bugprone-macro-parentheses)
 #define AGE_LOG_QUOTED(x) std::quoted(x)
 
-#define AGE_LOG_DEC(x)  static_cast<int64_t>(x)
-#define AGE_LOG_DEC8(x) std::setw(8) << AGE_LOG_DEC(x) << std::setw(0)
-
-#define AGE_LOG_HEX_X(x, width)                                                \
-    "0x"                                                                       \
-        << std::hex << std::uppercase << std::setw(width) << std::setfill('0') \
-        << static_cast<uint64_t>(x)                                            \
-        << std::setfill(' ') << std::setw(0) << std::nouppercase << std::dec   \
-        << " (" << AGE_LOG_DEC(x) << ")"
-
-#define AGE_LOG_HEX(x)   AGE_LOG_HEX_X(x, 0)
-#define AGE_LOG_HEX8(x)  AGE_LOG_HEX_X(x, 2)
-#define AGE_LOG_HEX16(x) AGE_LOG_HEX_X(x, 4)
-#define AGE_LOG_HEX32(x) AGE_LOG_HEX_X(x, 8)
-
-#define AGE_LOG_BIN16(x)                                        \
-    std::bitset<4>{static_cast<unsigned>(x) >> 12}              \
-        << "'" << std::bitset<4>{static_cast<unsigned>(x) >> 8} \
-        << "'" << std::bitset<4>{static_cast<unsigned>(x) >> 4} \
-        << "'" << std::bitset<4> { static_cast<unsigned>(x) }
-
 #else // #ifdef AGE_DEBUG
 
 #define AGE_ASSERT(x)
@@ -127,16 +106,6 @@ namespace age
 
 #define AGE_LOG(x)
 #define AGE_LOG_QUOTED(x)
-
-#define AGE_LOG_DEC(x)
-#define AGE_LOG_DEC8(x)
-
-#define AGE_LOG_HEX(x)
-#define AGE_LOG_HEX8(x)
-#define AGE_LOG_HEX16(x)
-#define AGE_LOG_HEX32(x)
-
-#define AGE_LOG_BIN16(x)
 
 #endif // #ifdef AGE_DEBUG
 

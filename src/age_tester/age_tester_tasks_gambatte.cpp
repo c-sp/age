@@ -399,6 +399,6 @@ void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
     auto screen_dmg = find_screenshot(rom_path, "_dmg08.png");
     if (!screen_dmg.empty())
     {
-        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::dmg_greyscale, new_screenshot_test(screen_cgb, is_test_finished));
+        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::dmg_greyscale, new_screenshot_test(screen_dmg, is_test_finished));
     }
 }

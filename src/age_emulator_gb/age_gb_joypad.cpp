@@ -18,12 +18,6 @@
 
 #include "age_gb_joypad.hpp"
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 namespace
 {
     constexpr uint8_t gb_p14 = 0x10;
@@ -74,7 +68,6 @@ void age::gb_joypad::set_buttons_up(int buttons)
 {
     if (buttons != 0)
     {
-        LOG(buttons)
         uint8_t p14 = buttons & 0x0F;
         uint8_t p15 = (buttons >> 4) & 0x0F;
         m_p14 |= p14;
@@ -87,7 +80,6 @@ void age::gb_joypad::set_buttons_down(int buttons)
 {
     if (buttons != 0)
     {
-        LOG(buttons)
         uint8_t p14 = buttons & 0x0F;
         uint8_t p15 = (buttons >> 4) & 0x0F;
         m_p14 &= ~p14;

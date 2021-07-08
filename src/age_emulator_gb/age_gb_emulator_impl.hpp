@@ -88,9 +88,9 @@ namespace age
         int64_t       m_emulated_cycles = 0;
 
         gb_logger               m_logger;
-        gb_memory               m_memory;
         gb_device               m_device;
         gb_clock                m_clock;
+        gb_memory               m_memory;
         gb_interrupt_dispatcher m_interrupts;
         gb_events               m_events;
         gb_sound                m_sound;

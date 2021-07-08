@@ -27,6 +27,8 @@
 
 #include <age_types.hpp>
 
+#include "common/age_gb_clock.hpp"
+
 
 
 namespace age
@@ -37,8 +39,6 @@ namespace age
     constexpr int gb_internal_ram_bank_size = 0x1000;
     constexpr int gb_video_ram_bank_size    = 0x2000;
 
-    constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
-
 
 
     class gb_memory
@@ -47,7 +47,7 @@ namespace age
         AGE_DISABLE_MOVE(gb_memory);
 
     public:
-        explicit gb_memory(const uint8_vector& cart_rom);
+        explicit gb_memory(const uint8_vector& cart_rom, const gb_clock& clock);
         ~gb_memory() = default;
 
         void init_vram(bool for_cgb_hardware);
@@ -101,7 +101,15 @@ namespace age
         void                   set_rom_banks(int low_bank_id, int high_bank_id);
         void                   set_ram_bank(int bank_id);
 
-        // m_mbc_data must be initialized first!
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log() const
+        {
+            return m_clock.log(gb_log_category::lc_mbc);
+        }
+
+        const gb_clock& m_clock; //!< used only for logging
+
+        // m_mbc_data must be initialized before m_mbc_writer!
         // Otherwise it's MBC-dependent value will be overwritten by
         // the initial value (see gb_memory constructor)
         gb_mbc_data m_mbc_data;

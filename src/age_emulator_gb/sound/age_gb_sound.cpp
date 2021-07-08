@@ -344,10 +344,13 @@ bool age::gb_sound::should_align_frequency_timer() const
     //            0/0       0  459656  7-8       speedchange5_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (64 sample period)
     //            0/2       0  459656  7-8       speedchange5_nop_ch1_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
 
-    // align frequency timer to 1mhz
-    int master_on_diff_bit = (m_clk_bits_apu_on ^ m_clk_current_state) & 2;
+    return m_clock.is_double_speed() && (((m_clk_current_state + m_clock.get_div_offset()) & 2) != 0);
 
-    return (master_on_diff_bit != 0);
+    //! \todo implement CGB model specific behaviour
+//    // align frequency timer to 1mhz
+//    int master_on_diff_bit = (m_clk_bits_apu_on ^ m_clk_current_state) & 2;
+//
+//    return (master_on_diff_bit != 0);
 }
 
 

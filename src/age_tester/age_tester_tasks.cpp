@@ -184,7 +184,7 @@ bool age::tester::run_common_test(age::gb_emulator& emulator)
 
 
 
-std::string age::tester::normalize_path_separator(const std::string &path)
+std::string age::tester::normalize_path_separator(const std::string& path)
 {
     if constexpr (std::filesystem::path::preferred_separator == '/')
     {
@@ -220,8 +220,13 @@ age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::
         auto png_data = load_png(screenshot_png_path, emulator);
 
         // compare screen to screenshot
-        const auto* screenshot = png_data.data();
         const auto* screen     = emulator.get_screen_front_buffer().data();
+        const auto* screenshot = png_data.data();
+        if (!screenshot)
+        {
+            std::cout << "could not load screenshot: " << screenshot_png_path.string() << std::endl;
+            return false;
+        }
 
         for (int i = 0, max = emulator.get_screen_width() * emulator.get_screen_height(); i < max; ++i)
         {

@@ -20,10 +20,13 @@
 
 namespace
 {
+    constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
 
-    age::gb_cart_mode calculate_cart_mode(const uint8_t          rom_byte_0x143,
-                                          const age::gb_hardware hardware)
+    age::gb_cart_mode calculate_cart_mode(const age::uint8_vector& rom,
+                                          const age::gb_hardware   hardware)
     {
+        auto rom_byte_0x143 = (rom.size() > gb_cia_ofs_cgb) ? rom[gb_cia_ofs_cgb] : 0;
+
         const bool cgb_flag = rom_byte_0x143 >= 0x80;
         switch (hardware)
         {
@@ -47,10 +50,10 @@ namespace
 
 
 
-age::gb_device::gb_device(const uint8_t     rom_byte_0x143,
-                          const gb_hardware hardware)
+age::gb_device::gb_device(const uint8_vector& rom,
+                          const gb_hardware   hardware)
 
-    : m_cart_mode(calculate_cart_mode(rom_byte_0x143, hardware))
+    : m_cart_mode(calculate_cart_mode(rom, hardware))
 {
 }
 

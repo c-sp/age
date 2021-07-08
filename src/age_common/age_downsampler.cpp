@@ -20,18 +20,6 @@
 #include <age_debug.hpp>
 #include <pcm/age_downsampler.hpp>
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
-#if 0
-#define LOG_FIR(x) AGE_LOG(x)
-#else
-#define LOG_FIR(x)
-#endif
-
 constexpr double pi = 3.14159265358979323846;
 
 
@@ -92,9 +80,6 @@ int age::downsampler::calculate_ratio(int value1, int value2)
     AGE_ASSERT(fp_ratio > 0)
     AGE_ASSERT(fp_ratio < int_max)
     int ratio = static_cast<int>(fp_ratio);
-
-    LOG(value1 << " / " << value2 << " ratio: " << (ratio >> 16) << " + " << (ratio & 0xFFFF) << "/65536")
-    LOG("floating point ratio was: " << fp_ratio << ", diff is " << (fp_ratio - ratio / 65536.0))
 
     return ratio;
 }
@@ -276,10 +261,6 @@ void age::downsampler_low_pass::create_windowed_sinc(double                     
         AGE_ASSERT(!(windowed < -1.0))
 
         auto i = static_cast<int32_t>(windowed * int32_t_max);
-
-        LOG_FIR("n " << dn << ":   " << sinc << " * " << weight << " = " << windowed
-                     << "   (" << AGE_LOG_HEX(i) << ")")
-
         m_fir_values.push_back(i);
     }
 }
@@ -353,11 +334,9 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling
     // (According to Wikipedia this should actually be 20000 hz,
     // but we use 15000 hz for a smaller FIR)
     constexpr int max_audible_frequency_hz = 15000;
-    LOG("using " << max_audible_frequency_hz << " hz as maximal audible frequency")
 
     // calculate the Nyquist Frequency
     int nyquist_frequency_hz = output_sampling_rate >> 1;
-    LOG("output sampling rate " << output_sampling_rate << ", Nyquist Frequency " << nyquist_frequency_hz << " hz")
 
     // calculate the transition width:
     //  - not smaller than 10% of the Nyquist Frequency
@@ -372,16 +351,12 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling
     transition_width /= input_sampling_rate; // we're creating the FIR for the input signal
     AGE_ASSERT(transition_width < 0.5)
 
-    LOG("transition width " << transition_width << " (" << transition_width_hz << " hz)")
-
     // calculate transition frequency that marks the
     // center of the transition band
     int    transition_frequency_hz = nyquist_frequency_hz - transition_width_hz / 2;
     double transition_frequency    = transition_frequency_hz;
     transition_frequency /= input_sampling_rate; // we're creating the FIR for the input signal
     AGE_ASSERT(transition_width < 0.5)
-
-    LOG("transition frequency " << transition_frequency << " (" << transition_frequency_hz << " hz)")
 
     // calculate Kaiser Window parameters
     double A  = -20 * std::log10(ripple);
@@ -390,8 +365,6 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling
     int M = calculate_filter_order(A, tw);
     M += M & 1; // make even
     double beta = calculate_beta(A);
-
-    LOG("ripple " << ripple << ", A " << A << ", tw " << tw << ", beta " << beta << ", filter order " << M)
 
     // window weight value calculation method
     double beta_bessel = calculate_bessel(beta);
@@ -407,10 +380,6 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling
 
     // calculate filter values
     create_windowed_sinc(transition_frequency, M, window_weight);
-
-    LOG("")
-    LOG("----------------------------------------------------------------------------")
-    LOG("")
 }
 
 

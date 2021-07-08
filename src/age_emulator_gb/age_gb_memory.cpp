@@ -20,18 +20,6 @@
 
 #include "age_gb_memory.hpp"
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
-#if 0
-#define BANK_LOG(x) LOG(x)
-#else
-#define BANK_LOG(x)
-#endif
-
 namespace
 {
     constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
@@ -97,7 +85,6 @@ age::uint8_vector age::gb_memory::get_persistent_ram() const
         result = uint8_vector();
     }
 
-    LOG("returning persistent ram of size " << result.size())
     return result;
 }
 
@@ -111,7 +98,6 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
 
         // copy persistent ram
         int bytes_to_copy = std::min(cart_ram_size, source_size);
-        LOG("copying " << bytes_to_copy << " bytes into the persistent cartridge ram")
 
         std::copy(begin(source),
                   begin(source) + bytes_to_copy,
@@ -120,8 +106,6 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
         // fill up with zeroes, if the source vector is smaller than the actual persistent ram
         if (cart_ram_size > source_size)
         {
-            LOG("filling up " << (cart_ram_size - source_size) << " bytes of persistent cartridge ram with zeroes")
-
             std::fill(begin(m_memory) + m_cart_ram_offset + source_size,
                       begin(m_memory) + m_cart_ram_offset + cart_ram_size,
                       0);
@@ -174,7 +158,7 @@ void age::gb_memory::write_svbk(uint8_t value)
     {
         bank_id = 1;
     }
-    BANK_LOG("svbk bank id " << bank_id)
+    log() << "switched to SVBK bank " << bank_id;
 
     int offset     = bank_id * gb_internal_ram_bank_size;
     m_offsets[0xD] = m_internal_ram_offset + offset - 0xD000;
@@ -184,9 +168,11 @@ void age::gb_memory::write_svbk(uint8_t value)
 void age::gb_memory::write_vbk(uint8_t value)
 {
     m_vbk = value | 0xFE;
-    BANK_LOG("svbk bank id " << AGE_LOG_DEC(m_vbk & 1))
 
-    int offset   = (m_vbk & 0x01) * gb_video_ram_bank_size;
+    auto bank = m_vbk & 1;
+    log() << "switched to VBK bank " << bank;
+
+    auto offset  = bank * gb_video_ram_bank_size;
     m_offsets[8] = m_video_ram_offset + offset - 0x8000;
     m_offsets[9] = m_offsets[8];
 }
@@ -231,7 +217,8 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
     m_offsets[6] = m_offsets[4];
     m_offsets[7] = m_offsets[4];
 
-    BANK_LOG("switched to rom banks " << AGE_LOG_HEX(low_bank_id) << ", " << AGE_LOG_HEX(high_bank_id))
+    log() << "switched to rom banks " << log_hex(low_bank_id) << " @ 0x0000-0x3FFF, "
+          << log_hex(low_bank_id) << " @ 0x4000-0x7FFF";
 }
 
 void age::gb_memory::set_ram_bank(int bank_id)
@@ -243,7 +230,7 @@ void age::gb_memory::set_ram_bank(int bank_id)
     m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;
     m_offsets[0xB] = m_offsets[0xA];
 
-    BANK_LOG("switched to ram bank " << AGE_LOG_HEX(bank_id))
+    log() << "switched to ram bank " << log_hex(bank_id);
 }
 
 
@@ -376,20 +363,23 @@ void age::gb_memory::write_to_mbc2(gb_memory& memory, uint16_t offset, uint8_t v
 {
     AGE_ASSERT(offset < 0x8000)
 
+    // writes to $4000-$7FFF have no effect
+    if (offset >= 0x4000)
+    {
+        return;
+    }
+
     // (de)activate ram
-    if (offset < 0xFFF)
+    if ((offset & 0x100) == 0)
     {
         memory.m_mbc_ram_accessible = isRamAccessible(value);
     }
 
     // switch rom bank
-    else if ((offset & 0x6000) == 0x2000)
+    else
     {
-        if ((offset & 0x0100) > 0)
-        {
-            int rom_bank_id = value & 0x0F;
-            memory.set_rom_banks(0, (rom_bank_id == 0) ? 1 : rom_bank_id);
-        }
+        int rom_bank_id = value & 0x0F;
+        memory.set_rom_banks(0, (rom_bank_id == 0) ? 1 : rom_bank_id);
     }
 }
 

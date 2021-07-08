@@ -97,6 +97,7 @@ namespace age
         lc_lcd,
         lc_lcd_no_memory_access,
         lc_lcd_registers,
+        lc_mbc,
         lc_serial,
         lc_sound,
         lc_sound_registers,

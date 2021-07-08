@@ -75,8 +75,6 @@ age-test-roms/tima/spsw-tima-cgbE.gb
 /mooneye-gb/acceptance/ppu/lcdon_write_timing-GS.gb
 /mooneye-gb/acceptance/ppu/stat_irq_blocking.gb
 /mooneye-gb/acceptance/ppu/stat_lyc_onoff.gb
-/mooneye-gb/emulator-only/mbc2/bits_ramg.gb
-/mooneye-gb/emulator-only/mbc2/bits_romb.gb
 /mooneye-gb/emulator-only/mbc2/ram.gb
 /mooneye-gb/manual-only/sprite_priority.gb
 /mooneye-gb/misc/ppu/vblank_stat_intr-C.gb
@@ -189,26 +187,6 @@ age-test-roms/tima/spsw-tima-cgbE.gb
 /gambatte/oamdma/
 /gambatte/scx_during_m3/
 /gambatte/scy/
-
-/gambatte/sound/ch1_duty0_pos6_to_pos7_timing_ds_6
-
-/gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange2_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange2_nop_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange3_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange3_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange3_nop_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange4_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange5_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange5_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange5_nop_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_ds_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange_ch1_duty0_pos6_to_pos7_timing_nop_ds_2_cgb04c_outaudio1
-/gambatte/speedchange/speedchange_ch1_nr4init_duty0_pos6_to_pos7_timing_2_cgb04c_outaudio1
-
 /gambatte/sprites/
 
 /gambatte/vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
@@ -231,18 +209,28 @@ age-test-roms/tima/spsw-tima-cgbE.gb
 
 ### failing tests
 
+/same-suite/apu/channel_1/channel_1_align.gb
+/same-suite/apu/channel_1/channel_1_align_cpu.gb
+/same-suite/apu/channel_1/channel_1_duty.gb
 /same-suite/apu/channel_1/channel_1_extra_length_clocking-cgb0B.gb
 /same-suite/apu/channel_1/channel_1_freq_change_timing-A.gb
 /same-suite/apu/channel_1/channel_1_freq_change_timing-cgb0BC.gb
 /same-suite/apu/channel_1/channel_1_freq_change_timing-cgbDE.gb
 /same-suite/apu/channel_1/channel_1_nrx2_glitch.gb
 /same-suite/apu/channel_1/channel_1_nrx2_speed_change.gb
+/same-suite/apu/channel_1/channel_1_restart.gb
+/same-suite/apu/channel_1/channel_1_restart_nrx2_glitch.gb
 /same-suite/apu/channel_1/channel_1_sweep.gb
 /same-suite/apu/channel_1/channel_1_sweep_restart.gb
 /same-suite/apu/channel_1/channel_1_volume.gb
+/same-suite/apu/channel_2/channel_2_align.gb
+/same-suite/apu/channel_2/channel_2_align_cpu.gb
+/same-suite/apu/channel_2/channel_2_duty.gb
 /same-suite/apu/channel_2/channel_2_extra_length_clocking-cgb0B.gb
 /same-suite/apu/channel_2/channel_2_nrx2_glitch.gb
 /same-suite/apu/channel_2/channel_2_nrx2_speed_change.gb
+/same-suite/apu/channel_2/channel_2_restart.gb
+/same-suite/apu/channel_2/channel_2_restart_nrx2_glitch.gb
 /same-suite/apu/channel_2/channel_2_volume.gb
 /same-suite/apu/channel_3/channel_3_and_glitch.gb
 /same-suite/apu/channel_3/channel_3_delay.gb
