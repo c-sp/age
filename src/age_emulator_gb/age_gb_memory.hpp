@@ -98,6 +98,7 @@ namespace age
 
 
         [[nodiscard]] unsigned get_offset(uint16_t address) const;
+        void                   set_ram_accessible(uint8_t value);
         void                   set_rom_banks(int low_bank_id, int high_bank_id);
         void                   set_ram_bank(int bank_id);
 
@@ -118,6 +119,7 @@ namespace age
         const int16_t m_num_cart_rom_banks;
         const int16_t m_num_cart_ram_banks;
         const bool    m_has_battery;
+        const bool    m_is_mbc2; //!< special RAM addressing
         bool          m_mbc1_multi_cart    = false;
         bool          m_mbc_ram_accessible = false;
         uint8_t       m_svbk               = 0xF8;

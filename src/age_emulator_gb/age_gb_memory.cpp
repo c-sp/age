@@ -24,12 +24,13 @@ namespace
 {
     constexpr age::uint16_t gb_cia_ofs_title = 0x0134;
 
-    bool isRamAccessible(uint8_t value)
+    uint16_t mbc2_ram_address(uint16_t address)
     {
-        return (value & 0x0F) == 0x0A;
+        uint16_t ram_offset = address - 0xA000;
+        return 0xA000 + (ram_offset & 0x1FF);
     }
 
-    bool isCartridgeRam(uint16_t address)
+    bool is_cartridge_ram(uint16_t address)
     {
         return (address & 0xE000) == 0xA000;
     }
@@ -118,8 +119,23 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
 age::uint8_t age::gb_memory::read_byte(uint16_t address) const
 {
     AGE_ASSERT(address < 0xFE00)
-    uint8_t value = (!isCartridgeRam(address) || m_mbc_ram_accessible) ? m_memory[get_offset(address)] : 0xFF;
-    return value;
+    // rom & internal ram
+    if (!is_cartridge_ram(address))
+    {
+        return m_memory[get_offset(address)];
+    }
+    // cartridge ram not readable
+    if (!m_mbc_ram_accessible)
+    {
+        return 0xFF;
+    }
+    // read MBC2 ram
+    if (m_is_mbc2)
+    {
+        return m_memory[get_offset(mbc2_ram_address(address))] | 0xF0;
+    }
+    // read regular cartridge ram
+    return m_memory[get_offset(address)];
 }
 
 age::uint8_t age::gb_memory::read_svbk() const
@@ -137,16 +153,30 @@ age::uint8_t age::gb_memory::read_vbk() const
 void age::gb_memory::write_byte(uint16_t address, uint8_t value)
 {
     AGE_ASSERT(address < 0xFE00)
-
+    // access MBC
     if (address < 0x8000)
     {
         m_mbc_writer(*this, address, value);
+        return;
     }
-    else if (!isCartridgeRam(address) || m_mbc_ram_accessible)
+    // write internal ram
+    if (!is_cartridge_ram(address))
     {
-        unsigned offset  = get_offset(address);
-        m_memory[offset] = value;
+        m_memory[get_offset(address)] = value;
+        return;
     }
+    // cartridge ram not writable
+    if (!m_mbc_ram_accessible)
+    {
+        return;
+    }
+    // write MBC2 ram
+    if (m_is_mbc2)
+    {
+        m_memory[get_offset(mbc2_ram_address(address))] = value | 0xF0;
+    }
+    // write regular cartridge ram
+    m_memory[get_offset(address)] = value;
 }
 
 void age::gb_memory::write_svbk(uint8_t value)
@@ -158,7 +188,7 @@ void age::gb_memory::write_svbk(uint8_t value)
     {
         bank_id = 1;
     }
-    log() << "switched to SVBK bank " << bank_id;
+    log() << "switch to SVBK bank " << bank_id;
 
     int offset     = bank_id * gb_internal_ram_bank_size;
     m_offsets[0xD] = m_internal_ram_offset + offset - 0xD000;
@@ -170,7 +200,7 @@ void age::gb_memory::write_vbk(uint8_t value)
     m_vbk = value | 0xFE;
 
     auto bank = m_vbk & 1;
-    log() << "switched to VBK bank " << bank;
+    log() << "switch to VBK bank " << bank;
 
     auto offset  = bank * gb_video_ram_bank_size;
     m_offsets[8] = m_video_ram_offset + offset - 0x8000;
@@ -198,6 +228,11 @@ unsigned age::gb_memory::get_offset(uint16_t address) const
     return static_cast<unsigned>(offset);
 }
 
+void age::gb_memory::set_ram_accessible(uint8_t value)
+{
+    m_mbc_ram_accessible = ((value & 0x0F) == 0x0A) && (m_num_cart_ram_banks > 0);
+}
+
 void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
 {
     AGE_ASSERT(low_bank_id >= 0)
@@ -217,7 +252,7 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
     m_offsets[6] = m_offsets[4];
     m_offsets[7] = m_offsets[4];
 
-    log() << "switched to rom banks " << log_hex(low_bank_id) << " @ 0x0000-0x3FFF, "
+    log() << "switch to rom banks " << log_hex(low_bank_id) << " @ 0x0000-0x3FFF, "
           << log_hex(low_bank_id) << " @ 0x4000-0x7FFF";
 }
 
@@ -230,7 +265,7 @@ void age::gb_memory::set_ram_bank(int bank_id)
     m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;
     m_offsets[0xB] = m_offsets[0xA];
 
-    log() << "switched to ram bank " << log_hex(bank_id);
+    log() << "switch to ram bank " << log_hex(bank_id);
 }
 
 
@@ -310,7 +345,7 @@ void age::gb_memory::write_to_mbc1(gb_memory& memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            memory.m_mbc_ram_accessible = isRamAccessible(value);
+            memory.set_ram_accessible(value);
             return;
 
         case 0x2000:
@@ -372,7 +407,7 @@ void age::gb_memory::write_to_mbc2(gb_memory& memory, uint16_t offset, uint8_t v
     // (de)activate ram
     if ((offset & 0x100) == 0)
     {
-        memory.m_mbc_ram_accessible = isRamAccessible(value);
+        memory.set_ram_accessible(value);
     }
 
     // switch rom bank
@@ -393,7 +428,7 @@ void age::gb_memory::write_to_mbc3(gb_memory& memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            memory.m_mbc_ram_accessible = isRamAccessible(value);
+            memory.set_ram_accessible(value);
             break;
 
         case 0x2000: {
@@ -433,7 +468,7 @@ void age::gb_memory::write_to_mbc5(gb_memory& memory, uint16_t offset, uint8_t v
     {
         case 0x0000:
             // (de)activate ram
-            memory.m_mbc_ram_accessible = isRamAccessible(value);
+            memory.set_ram_accessible(value);
             break;
 
         case 0x2000:

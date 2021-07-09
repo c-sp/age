@@ -112,6 +112,20 @@ namespace
         }
     }
 
+    bool is_mbc2(const age::uint8_vector& rom)
+    {
+        auto cart_type = safe_get(rom, gb_cia_ofs_type);
+        switch (cart_type)
+        {
+            case 0x05:
+            case 0x06:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     age::int16_t get_num_cart_rom_banks(const age::uint8_vector& cart_rom)
     {
         auto rom_banks = safe_get(cart_rom, gb_cia_ofs_rom_size);
@@ -132,6 +146,10 @@ namespace
 
     age::int16_t get_num_cart_ram_banks(const age::uint8_vector& cart_rom)
     {
+        if (is_mbc2(cart_rom))
+        {
+            return 1;
+        }
         auto ram_banks = safe_get(cart_rom, gb_cia_ofs_ram_size);
         switch (ram_banks)
         {
@@ -159,6 +177,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
       m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
+      m_is_mbc2(is_mbc2(cart_rom)),
       m_cart_ram_offset(m_num_cart_rom_banks * gb_cart_rom_bank_size),
       m_internal_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
       m_video_ram_offset(m_internal_ram_offset + gb_internal_ram_size)

@@ -71,11 +71,9 @@ age-test-roms/tima/spsw-tima-cgbE.gb
 ### failing tests
 
 /mooneye-gb/acceptance/ppu/intr_2_mode0_timing_sprites.gb
-/mooneye-gb/acceptance/ppu/lcdon_timing-GS.gb
 /mooneye-gb/acceptance/ppu/lcdon_write_timing-GS.gb
 /mooneye-gb/acceptance/ppu/stat_irq_blocking.gb
 /mooneye-gb/acceptance/ppu/stat_lyc_onoff.gb
-/mooneye-gb/emulator-only/mbc2/ram.gb
 /mooneye-gb/manual-only/sprite_priority.gb
 /mooneye-gb/misc/ppu/vblank_stat_intr-C.gb
 
@@ -133,6 +131,7 @@ age-test-roms/tima/spsw-tima-cgbE.gb
 /gambatte/enable_display/ly0_late_cgbpr_ds_2_cgb04c_outFF.gbc
 /gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_oamw_2_dmg08_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
@@ -190,9 +189,9 @@ age-test-roms/tima/spsw-tima-cgbE.gb
 /gambatte/sprites/
 
 /gambatte/vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
-/gambatte/vram_m3/preread_2_dmg08_out3_cgb04c_out0.gbc
 /gambatte/vram_m3/preread_lcdoffset2_1_cgb04c_out0.gbc
 /gambatte/vram_m3/prewrite_lcdoffset2_1_cgb04c_out1.gbc
+/gambatte/vram_m3/vramw_m3start_1_dmg08_cgb04c_out1.gbc
 
 /gambatte/window/
 

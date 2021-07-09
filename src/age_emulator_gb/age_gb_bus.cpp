@@ -132,8 +132,8 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     {
         if (!m_lcd.is_video_ram_accessible())
         {
-            m_clock.log(gb_log_category::lc_lcd_no_memory_access)
-                << "reading VRAM [" << log_hex16(address) << "] == 0xFF (VRAM not accessible)";
+            m_clock.log(gb_log_category::lc_lcd_vram)
+                << "read VRAM [" << log_hex16(address) << "] == 0xFF (VRAM not accessible)";
             return 0xFF;
         }
         result = m_memory.read_byte(address);
@@ -147,10 +147,10 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     {
         handle_events();
         int oam_offset = address - 0xFE00;
-        if (m_oam_dma_active || !m_lcd.is_oam_accessible())
+        if (m_oam_dma_active)
         {
-            m_clock.log(gb_log_category::lc_lcd_no_memory_access)
-                << "reading OAM [" << log_hex8(oam_offset) << "] == 0xFF (OAM not accessible)";
+            m_clock.log(gb_log_category::lc_lcd_oam) << "read OAM[" << log_hex8(oam_offset)
+                                                     << "] == 0xFF (OAM DMA running)";
         }
         else
         {
@@ -290,8 +290,8 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     {
         if (!m_lcd.is_video_ram_accessible())
         {
-            m_clock.log(gb_log_category::lc_lcd_no_memory_access)
-                << "writing VRAM [" << log_hex16(address) << "] = " << log_hex8(byte)
+            m_clock.log(gb_log_category::lc_lcd_vram)
+                << "write VRAM [" << log_hex16(address) << "] = " << log_hex8(byte)
                 << " ignored (VRAM not accessible)";
             return;
         }
@@ -307,11 +307,10 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     {
         handle_events();
         int oam_offset = address - 0xFE00;
-        if (m_oam_dma_active || !m_lcd.is_oam_accessible())
+        if (m_oam_dma_active)
         {
-            m_clock.log(gb_log_category::lc_lcd_no_memory_access)
-                << "writing OAM [" << log_hex8(oam_offset) << "] = " << log_hex8(byte)
-                << " ignored (OAM not accessible)";
+            m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(oam_offset)
+                                                     << "] = " << log_hex8(byte) << " ignored (OAM DMA running)";
             return;
         }
         m_lcd.write_oam(oam_offset, byte);

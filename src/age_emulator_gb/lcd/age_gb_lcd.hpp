@@ -198,7 +198,6 @@ namespace age
 
         uint8_t read_oam(int offset);
         void    write_oam(int offset, uint8_t value);
-        bool    is_oam_accessible();
         bool    is_video_ram_accessible();
 
         void after_speed_change();
@@ -216,6 +215,8 @@ namespace age
             return m_clock.log(gb_log_category::lc_lcd_registers);
         }
 
+        bool            is_oam_readable(gb_current_line &line);
+        bool            is_oam_writable(gb_current_line &line);
         gb_current_line calculate_line();
 
         uint8_t get_stat_mode(const gb_current_line& current_line, int scx) const;
