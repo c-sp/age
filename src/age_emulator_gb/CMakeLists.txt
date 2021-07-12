@@ -33,3 +33,15 @@ target_include_directories(age_emulator_gb PUBLIC api)
 
 # uncomment this to generate assembler listings with g++
 #set_target_properties(age_emulator_gb PROPERTIES COMPILE_FLAGS "-save-temps -fverbose-asm -Wa,-adhlmn=main.lst")
+
+
+add_executable(
+        age_emulator_gb_test
+        common/age_gb_events.test.cpp
+)
+
+target_link_libraries(age_emulator_gb_test age_emulator_gb age_common gtest_main)
+
+target_include_directories(age_emulator_gb_test PUBLIC api)
+
+gtest_discover_tests(age_emulator_gb_test)

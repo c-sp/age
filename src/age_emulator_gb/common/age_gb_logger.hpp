@@ -169,7 +169,7 @@ namespace age
     {
 #ifdef AGE_COMPILE_LOGGER
     public:
-        explicit gb_logger(gb_log_categories log_categories) : m_log_categories(std::move(log_categories)) {}
+        explicit gb_logger(gb_log_categories log_categories = {}) : m_log_categories(std::move(log_categories)) {}
 
         [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_clock)
         {
@@ -192,7 +192,7 @@ namespace age
 
 #else
     public:
-        explicit gb_logger(gb_log_categories log_categories) { AGE_UNUSED(log_categories); }
+        explicit gb_logger(gb_log_categories log_categories = {}) { AGE_UNUSED(log_categories); }
 
         [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_offset)
         {
