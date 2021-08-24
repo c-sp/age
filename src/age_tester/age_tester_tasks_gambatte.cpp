@@ -204,9 +204,10 @@ namespace
 
     age::uint8_t to_hex(char c)
     {
-        return ((c >= 'a') && (c <= 'f')) ? (c - 'a' + 10) : ((c >= 'A') && (c <= 'F')) ? (c - 'A' + 10)
-                                                         : ((c >= '0') && (c <= '9'))   ? (c - '0')
-                                                                                        : 0xFF;
+        return ((c >= 'a') && (c <= 'f'))   ? (c - 'a' + 10)
+               : ((c >= 'A') && (c <= 'F')) ? (c - 'A' + 10)
+               : ((c >= '0') && (c <= '9')) ? (c - '0')
+                                            : 0xFF;
     }
 
     age::uint8_vector parse_hex_out(const std::string&              str,
@@ -370,7 +371,7 @@ void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
     auto outaudio_cgb = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_cgb04c_outaudio"});
     if (outaudio_cgb.has_value())
     {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, new_audio_test(outaudio_cgb.value()));
+        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::cgb_gambatte, new_audio_test(outaudio_cgb.value()));
     }
     auto outaudio_dmg = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_dmg08_outaudio"});
     if (outaudio_dmg.has_value())
@@ -382,7 +383,7 @@ void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
     auto out_cgb = parse_hex_out(filename, {"_dmg08_cgb04c_out", "_cgb04c_out"});
     if (!out_cgb.empty())
     {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, new_hex_out_test(out_cgb));
+        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::cgb_gambatte, new_hex_out_test(out_cgb));
     }
     auto out_dmg = parse_hex_out(filename, {"_dmg08_cgb04c_out", "_dmg08_out"});
     if (!out_dmg.empty())
@@ -394,7 +395,7 @@ void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
     auto screen_cgb = find_screenshot(rom_path, "_cgb04c.png");
     if (!screen_cgb.empty())
     {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, new_screenshot_test(screen_cgb, is_test_finished));
+        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::cgb_gambatte, new_screenshot_test(screen_cgb, is_test_finished));
     }
     auto screen_dmg = find_screenshot(rom_path, "_dmg08.png");
     if (!screen_dmg.empty())

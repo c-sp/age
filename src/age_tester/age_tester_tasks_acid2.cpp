@@ -74,7 +74,7 @@ void age::tester::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
     {
         schedule(rom_contents,
                  gb_hardware::cgb,
-                 gb_colors_hint::default_colors,
+                 gb_colors_hint::default_colors, // the color palette is predefined for DMG-on-CGB roms
                  new_screenshot_test(cgb_screenshot, is_test_finished));
     }
 
