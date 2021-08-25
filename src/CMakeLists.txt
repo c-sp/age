@@ -49,14 +49,15 @@ else ()
 endif ()
 
 
-# find libpng before including age_tester
+# find libpng before including age_cgb_lut and age_tester
 find_package(PNG QUIET)
 if (PNG_FOUND)
-    message("PNG found => configuring age_tester")
+    message("PNG found => configuring age_cgb_lut and age_tester")
     add_compile_definitions(LIBPNG_FOUND)
+    add_subdirectory(age_cgb_lut)
     add_subdirectory(age_tester)
 else ()
-    message("PNG not found => age_tester not available")
+    message("PNG not found => age_cgb_lut and age_tester not available")
 endif ()
 
 
