@@ -58,6 +58,7 @@ endif ()
 add_library(
         age_common
         STATIC
+        api/gfx/age_png.hpp
         api/git_revision.hpp
         age_debug.cpp
         age_downsampler.cpp
