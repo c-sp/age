@@ -114,6 +114,7 @@ int main(int argc, char** argv)
     }
     else
     {
+        //! \todo print log categories
     }
 
     if (!opts.m_whitelist.empty())

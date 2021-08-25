@@ -20,8 +20,8 @@
 
 #include <cstdio>
 #include <filesystem>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <string>
 
@@ -32,7 +32,11 @@ namespace
     age::pixel_vector load_png(const std::filesystem::path& screenshot_png_path,
                                const age::gb_emulator&      emulator)
     {
-        FILE*             file   = fopen(screenshot_png_path.string().c_str(), "rb");
+        FILE* file = fopen(screenshot_png_path.string().c_str(), "rb");
+        if (!file)
+        {
+            return {};
+        }
         age::pixel_vector result = age::read_png_file(file, emulator.get_screen_width(), emulator.get_screen_height());
         fclose(file);
         return result;
