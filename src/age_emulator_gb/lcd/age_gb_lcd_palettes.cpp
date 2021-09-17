@@ -851,21 +851,19 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
     AGE_ASSERT((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1))
     unsigned color_index = palette_index << 2;
 
-    pixel* color_src;
-    switch (palette_index)
-    {
-        case gb_palette_obp0:
-            color_src = m_obp0_colors.data();
-            break;
+    const std::array<pixel, 4>& color_src = [&]() {
+        switch (palette_index)
+        {
+            case gb_palette_obp0:
+                return m_obp0_colors;
 
-        case gb_palette_obp1:
-            color_src = m_obp1_colors.data();
-            break;
+            case gb_palette_obp1:
+                return m_obp1_colors;
 
-        default:
-            color_src = m_bgp_colors.data();
-            break;
-    }
+            default:
+                return m_bgp_colors;
+        }
+    }();
 
     for (unsigned idx = color_index, max = color_index + 4; idx < max; ++idx)
     {
@@ -882,14 +880,14 @@ void age::gb_lcd_palettes::update_cgb_color(unsigned color_index)
     unsigned cpd_index = color_index << 1;
     int      low_byte  = m_cpd[cpd_index];
     int      high_byte = m_cpd[cpd_index + 1];
-    int      gb_color  = (high_byte << 8) + low_byte;
+    int      gb_rgb15  = (high_byte << 8) + low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9
     //             blue:   bits 10-14
-    int gb_r = gb_color & 0x1F;
-    int gb_g = (gb_color >> 5) & 0x1F;
-    int gb_b = (gb_color >> 10) & 0x1F;
+    int gb_r = gb_rgb15 & 0x1F;
+    int gb_g = (gb_rgb15 >> 5) & 0x1F;
+    int gb_b = (gb_rgb15 >> 10) & 0x1F;
 
     // use Matt Currie's formula
     // (for acid2- and mealybug-tearoom-tests)

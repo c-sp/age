@@ -86,7 +86,7 @@ namespace age
 
         // CGB:     0x00 - 0x3F  BG
         //          0x40 - 0x7F  OBJ
-        uint8_array<gb_total_color_count * 2> m_cpd; // 2 bytes per color
+        uint8_array<gb_total_color_count * 2ULL> m_cpd; // 2 bytes per color
         //
         // DMG:     0x00 - 0x03  BGP
         //          0x20 - 0x23  OBP0
@@ -150,11 +150,7 @@ namespace age
         std::vector<gb_sprite> get_line_sprites(int line);
 
     private:
-        union
-        {
-            uint8_t  m_byte[160];
-            uint32_t m_sprite[40];
-        } m_oam;
+        uint8_array<160> m_oam;
 
         uint8_t m_sprite_size  = 8;
         uint8_t m_tile_nr_mask = 0xFF;

@@ -28,3 +28,6 @@ find_package(Threads REQUIRED)
 find_package(PNG REQUIRED)
 
 target_link_libraries(age_tester PRIVATE Threads::Threads PNG::PNG age_emulator_gb age_common)
+
+# uncomment this to generate assembler listings with g++
+#set_target_properties(age_tester PROPERTIES COMPILE_FLAGS "-save-temps -fverbose-asm -Wa,-adhlmn=main.lst")

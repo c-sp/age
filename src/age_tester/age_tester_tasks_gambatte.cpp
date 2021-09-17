@@ -265,7 +265,7 @@ namespace
 
             // the first pixel in the first line is always expected to be of the background color
             // (see tiles stored in tile_data)
-            age::pixel background = screen[line_offset];
+            auto background = screen[line_offset];
 
             // examine each pixel
             for (int line = 0; line < 8; ++line)

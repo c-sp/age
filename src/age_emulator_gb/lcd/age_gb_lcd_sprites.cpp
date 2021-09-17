@@ -40,12 +40,14 @@ age::gb_lcd_sprites::gb_lcd_sprites(bool cgb_features)
 
 age::uint8_t age::gb_lcd_sprites::read_oam(int offset) const
 {
-    return m_oam.m_byte[offset];
+    AGE_ASSERT((offset >= 0) && (offset < 160));
+    return m_oam[offset];
 }
 
 void age::gb_lcd_sprites::write_oam(int offset, uint8_t value)
 {
-    m_oam.m_byte[offset] = value;
+    AGE_ASSERT((offset >= 0) && (offset < 160));
+    m_oam[offset] = value;
 }
 
 age::uint8_t age::gb_lcd_sprites::get_tile_nr_mask() const
@@ -74,7 +76,8 @@ std::vector<age::gb_sprite> age::gb_lcd_sprites::get_line_sprites(int line)
 
     for (uint8_t sprite_id = 0; sprite_id < 40; ++sprite_id)
     {
-        uint32_t oam = m_oam.m_sprite[sprite_id];
+        uint32_t oam = 0;
+        memcpy(&oam, &m_oam[sprite_id * 4], sizeof(uint32_t));
 
         auto sprite               = gb_sprite{.m_parts = {.m_oam = oam, .m_custom = 0}};
         sprite.m_data.m_sprite_id = sprite_id;
