@@ -24,11 +24,11 @@
 // the following code requires libpng
 #ifdef LIBPNG_FOUND
 
+#include <gfx/age_pixel.hpp>
+
 #include <csetjmp>
 #include <cstdio>
 #include <png.h>
-
-#include "age_pixel.hpp"
 
 
 
