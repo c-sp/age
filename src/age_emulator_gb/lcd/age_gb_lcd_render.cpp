@@ -16,7 +16,7 @@
 
 #include <age_debug.hpp>
 
-#include "age_gb_lcd.hpp"
+#include "age_gb_lcd_render.hpp"
 
 #include <algorithm> // std::fill
 
@@ -70,7 +70,7 @@ age::uint8_t age::gb_lcd_render::get_lcdc() const
     return m_lcdc;
 }
 
-void age::gb_lcd_render::set_lcdc(int lcdc)
+void age::gb_lcd_render::set_lcdc(uint8_t lcdc)
 {
     m_lcdc = lcdc;
 
@@ -145,8 +145,8 @@ void age::gb_lcd_render::render_line(int line)
     // BG & windows not visible
     if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
     {
-        pixel fill_color      = m_palettes.get_palette(gb_palette_bgp)[0];
-        fill_color.m_rgba.m_a = 0x00; // sprites are prioritized
+        pixel fill_color = m_palettes.get_palette(gb_palette_bgp)[0];
+        fill_color.m_a   = 0; // sprites are prioritized
         std::fill(begin(m_line), end(m_line), fill_color);
     }
 
@@ -208,11 +208,11 @@ void age::gb_lcd_render::render_line(int line)
     auto* dst = &m_screen_buffer.get_back_buffer()[0] + line * gb_screen_width;
     auto* src = &m_line[px0];
 
-    auto alpha = pixel{0, 0, 0, 255}.m_color;
+    auto alpha_bits = pixel{0, 0, 0, 255}.get_32bits();
     for (int i = 0; i < gb_screen_width; ++i)
     {
         // replace priority information with alpha value
-        dst->m_color = src->m_color | alpha;
+        dst->set_32bits(src->get_32bits() | alpha_bits);
         ++src;
         ++dst;
     }
@@ -289,10 +289,10 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel* dst,
 
     for (int i = 0; i < 8; ++i)
     {
-        int   color_idx  = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
-        pixel color      = palette[color_idx];
-        color.m_rgba.m_a = color_idx + priority;
-        *dst             = color;
+        int   color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
+        pixel color     = palette[color_idx];
+        color.m_a       = color_idx + priority;
+        *dst            = color;
 
         ++dst;
         tile_byte1 >>= 1;
@@ -351,12 +351,12 @@ void age::gb_lcd_render::render_sprite_tile(pixel*           dst,
         // sprite pixel visible?
         int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
 
-        int px_priority = (px.m_rgba.m_a | priority) & m_priority_mask;
+        int px_priority = (px.m_a | priority) & m_priority_mask;
         if ((px_priority <= 0x80) && color_idx)
         {
-            pixel color      = palette[color_idx];
-            color.m_rgba.m_a = px.m_rgba.m_a;
-            *dst             = color;
+            pixel color = palette[color_idx];
+            color.m_a   = px.m_a;
+            *dst        = color;
         }
 
         // next pixel

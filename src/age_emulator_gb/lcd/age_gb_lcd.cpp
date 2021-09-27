@@ -53,10 +53,10 @@ age::uint8_t age::gb_lcd::read_oam(int offset)
     return result;
 }
 
-void age::gb_lcd::write_oam(int offset, uint8_t value)
+void age::gb_lcd::write_oam(int offset, uint8_t value, bool during_oam_dma)
 {
     gb_current_line line{};
-    if (!is_oam_writable(line))
+    if (!is_oam_writable(line) && !during_oam_dma)
     {
         m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value) << " ignored"
                                                  << " (OAM not writable, " << line.m_line_clks << " clock cycles into line " << line.m_line << ")";

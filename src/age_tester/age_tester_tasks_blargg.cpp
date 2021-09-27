@@ -100,7 +100,7 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
     {
         schedule(rom_contents,
                  gb_hardware::cgb,
-                 gb_colors_hint::default_colors,
+                 gb_colors_hint::cgb_gambatte,
                  new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
     }
 

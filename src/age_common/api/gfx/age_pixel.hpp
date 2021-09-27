@@ -21,6 +21,7 @@
 //! \file
 //!
 
+#include <cstring> // memcpy
 #include <vector>
 
 #include <age_debug.hpp>
@@ -38,7 +39,9 @@ namespace age
         {}
 
         explicit pixel(unsigned rgb)
-            : pixel((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF)
+            : pixel(static_cast<uint8_t>(rgb >> 16),
+                    static_cast<uint8_t>(rgb >> 8),
+                    static_cast<uint8_t>(rgb))
         {}
 
         pixel(int r, int g, int b)
@@ -46,6 +49,10 @@ namespace age
         {}
 
         pixel(int r, int g, int b, int a)
+            : m_r(static_cast<uint8_t>(r)),
+              m_g(static_cast<uint8_t>(g)),
+              m_b(static_cast<uint8_t>(b)),
+              m_a(static_cast<uint8_t>(a))
         {
             AGE_ASSERT(r >= 0);
             AGE_ASSERT(g >= 0);
@@ -56,36 +63,36 @@ namespace age
             AGE_ASSERT(g <= 255);
             AGE_ASSERT(b <= 255);
             AGE_ASSERT(a <= 255);
-
-            m_rgba.m_r = r & 0xFF;
-            m_rgba.m_g = g & 0xFF;
-            m_rgba.m_b = b & 0xFF;
-            m_rgba.m_a = a & 0xFF;
         }
+
+
+        [[nodiscard]] uint32_t get_32bits() const
+        {
+            uint32_t color = 0;
+            memcpy(&color, &m_r, sizeof(uint32_t));
+            return color;
+        }
+
+        void set_32bits(uint32_t color)
+        {
+            memcpy(&m_r, &color, sizeof(pixel));
+        }
+
 
         bool operator==(const pixel& other) const
         {
-            return m_color == other.m_color;
+            return this->get_32bits() == other.get_32bits();
         }
 
         bool operator!=(const pixel& other) const
         {
-            return m_color != other.m_color;
+            return !(*this == other);
         }
 
-        // We use byte-level access to be independent of byte ordering
-        // and 32 bit integer access to speed up operations like comparison.
-        union
-        {
-            struct
-            {
-                uint8_t m_r;
-                uint8_t m_g;
-                uint8_t m_b;
-                uint8_t m_a;
-            } m_rgba;
-            uint32_t m_color;
-        };
+        uint8_t m_r;
+        uint8_t m_g;
+        uint8_t m_b;
+        uint8_t m_a;
     };
 
     static_assert(sizeof(pixel) == 4, "expected pixel size of 4 bytes (RGBA)");

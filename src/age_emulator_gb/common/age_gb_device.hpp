@@ -33,9 +33,21 @@ namespace age
     public:
         gb_device(const uint8_vector& rom, gb_hardware hardware);
 
-        [[nodiscard]] gb_cart_mode get_cart_mode() const;
-        [[nodiscard]] bool         is_cgb() const;          //!< get_cart_mode() == gb_cart_mode::cgb
-        [[nodiscard]] bool         is_cgb_hardware() const; //!< get_cart_mode() != gb_cart_mode::dmg
+        [[nodiscard]] gb_cart_mode get_cart_mode() const
+        {
+            return m_cart_mode;
+        }
+
+        [[nodiscard]] bool is_cgb() const
+        {
+            //! \todo some calls to is_cgb() should probably be replaced by is_cgb_hardware()
+            return m_cart_mode == gb_cart_mode::cgb;
+        }
+
+        [[nodiscard]] bool is_cgb_hardware() const
+        {
+            return m_cart_mode != gb_cart_mode::dmg;
+        }
 
     private:
         const gb_cart_mode m_cart_mode;

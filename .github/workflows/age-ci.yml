@@ -45,6 +45,23 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}
 
 
+  build-gtest:
+    name: build Google Test binary
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: build Google Test binary
+        run: build/age_ci.sh build-gtest Debug
+
+      - name: upload Google Test artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+
   build-tester:
     name: build tester binary
     runs-on: ubuntu-20.04
@@ -52,7 +69,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v2
 
-      - name: build binaries
+      - name: build tester binary
         run: build/age_ci.sh build-tester Release
 
       - name: upload tester artifact
@@ -87,10 +104,28 @@ jobs:
   ##
   ###############################################################################
 
+  gtest:
+    name: run AGE test suite
+    runs-on: ubuntu-20.04
+    needs: [ build-gtest ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: download artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run test suite
+        run: build/age_ci.sh run-gtest
+
+
   test-acid2:
     name: run dmg-acid2 and cgb-acid2 tests
     runs-on: ubuntu-20.04
-    needs: [build-tester]
+    needs: [ build-tester ]
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -108,7 +143,7 @@ jobs:
   test-blargg:
     name: run Blargg's test suite
     runs-on: ubuntu-20.04
-    needs: [build-tester]
+    needs: [ build-tester ]
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -126,7 +161,7 @@ jobs:
   test-gambatte:
     name: run Gambatte test suite
     runs-on: ubuntu-20.04
-    needs: [build-tester]
+    needs: [ build-tester ]
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -144,7 +179,7 @@ jobs:
   test-mooneye-gb:
     name: run Mooneye GB test suite
     runs-on: ubuntu-20.04
-    needs: [build-tester]
+    needs: [ build-tester ]
     steps:
       - name: checkout code
         uses: actions/checkout@v2

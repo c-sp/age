@@ -2,7 +2,7 @@ Checks: >
   *,
   -abseil-*,
   -android-*,
-  -altera-struct-pack-align,
+  -altera-*,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-owning-memory,

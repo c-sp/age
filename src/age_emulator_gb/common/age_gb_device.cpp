@@ -56,19 +56,3 @@ age::gb_device::gb_device(const uint8_vector& rom,
     : m_cart_mode(calculate_cart_mode(rom, hardware))
 {
 }
-
-age::gb_cart_mode age::gb_device::get_cart_mode() const
-{
-    return m_cart_mode;
-}
-
-bool age::gb_device::is_cgb() const
-{
-    //! \todo some calls to is_cgb() should probably be replaced by is_cgb_hardware()
-    return m_cart_mode == gb_cart_mode::cgb;
-}
-
-bool age::gb_device::is_cgb_hardware() const
-{
-    return m_cart_mode != gb_cart_mode::dmg;
-}

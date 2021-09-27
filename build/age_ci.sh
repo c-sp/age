@@ -20,6 +20,8 @@ print_usage_and_exit()
 {
     echo "usage:"
     echo "  builds:"
+    echo "    $0 $CMD_BUILD_GTEST $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_BUILD_GTEST $CMAKE_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_BUILD_QT $QT_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_QT $QT_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_DEBUG"
@@ -27,6 +29,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
+    echo "    $0 $CMD_RUN_GTEST"
     echo "    $0 $CMD_RUN_TESTS $TESTS_ACID2"
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
@@ -66,6 +69,21 @@ switch_to_out_dir()
 ##   commands
 ##
 ###############################################################################
+
+build_gtest()
+{
+    case $1 in
+        "${CMAKE_BUILD_TYPE_DEBUG}") ;;
+        "${CMAKE_BUILD_TYPE_RELEASE}") ;;
+        *) print_usage_and_exit ;;
+    esac
+
+    switch_to_out_dir age_gtest
+    echo "running age_gtest $1 build in \"$(pwd -P)\""
+
+    cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
+    make -j -l 5 age_gtest
+}
 
 build_qt()
 {
@@ -131,6 +149,25 @@ run_doxygen()
     mv html "$OUT_DIR"
 }
 
+run_gtest()
+{
+    # the executable file must exist
+    TEST_EXEC="$(out_dir age_gtest)/age_gtest"
+    if ! [ -e "$TEST_EXEC" ]; then
+        echo "The AGE Google Test executable could not be found at:"
+        echo "$TEST_EXEC"
+        exit 1
+    fi
+    # set +x on the executable as GitHub currently breaks file permissions
+    # when up/downloading artifacts:
+    # https://github.com/actions/upload-artifact/issues/38
+    # TODO remove setting +x once GitHub artifact file permissions work
+    chmod +x "$TEST_EXEC"
+
+    # run the tests
+    ${TEST_EXEC} $@
+}
+
 run_tests()
 {
     case $1 in
@@ -187,10 +224,12 @@ TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye-gb
 
+CMD_BUILD_GTEST=build-gtest
 CMD_BUILD_QT=build-qt
 CMD_BUILD_TESTER=build-tester
 CMD_BUILD_WASM=build-wasm
 CMD_DOXYGEN=doxygen
+CMD_RUN_GTEST=run-gtest
 CMD_RUN_TESTS=run-tests
 
 # get the AGE build directory based on the path of this script
@@ -206,10 +245,12 @@ if [ -n "$CMD" ]; then
 fi
 
 case ${CMD} in
+    "${CMD_BUILD_GTEST}") build_gtest "$@" ;;
     "${CMD_BUILD_QT}") build_qt "$@" ;;
     "${CMD_BUILD_TESTER}") build_tester "$@" ;;
     "${CMD_BUILD_WASM}") build_wasm "$@" ;;
     "${CMD_DOXYGEN}") run_doxygen ;;
+    "${CMD_RUN_GTEST}") run_gtest "$@" ;;
     "${CMD_RUN_TESTS}") run_tests "$@" ;;
 
     *) print_usage_and_exit ;;
