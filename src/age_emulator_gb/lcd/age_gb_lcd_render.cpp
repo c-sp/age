@@ -16,7 +16,7 @@
 
 #include <age_debug.hpp>
 
-#include "age_gb_lcd.hpp"
+#include "age_gb_lcd_render.hpp"
 
 #include <algorithm> // std::fill
 
@@ -70,7 +70,7 @@ age::uint8_t age::gb_lcd_render::get_lcdc() const
     return m_lcdc;
 }
 
-void age::gb_lcd_render::set_lcdc(int lcdc)
+void age::gb_lcd_render::set_lcdc(uint8_t lcdc)
 {
     m_lcdc = lcdc;
 

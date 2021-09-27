@@ -78,8 +78,11 @@ namespace age
         void write_ocpd(uint8_t value);
 
     private:
+        void init_dmg_colors(const age::uint8_t* rom_header);
+
         void update_dmg_palette(unsigned palette_index, uint8_t value);
         void update_cgb_color(unsigned color_index);
+        pixel lookup_cgb_color(unsigned cgb_rgb15);
 
         const gb_device&     m_device;
         const gb_colors_hint m_colors_hint;
@@ -101,12 +104,16 @@ namespace age
         std::array<pixel, 4> m_obp0_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
         std::array<pixel, 4> m_obp1_colors{{pixel(0x98C00F), pixel(0x70980F), pixel(0x30600F), pixel(0x0F380F)}};
 
+        pixel_vector m_cgb_color_lut{};
+
         uint8_t m_bgp  = 0xFC;
         uint8_t m_obp0 = 0xFF;
         uint8_t m_obp1 = 0xFF;
         uint8_t m_bcps = 0xC0;
         uint8_t m_ocps = 0xC1;
     };
+
+    pixel correct_cgb_color(unsigned cgb_rgb15);
 
 
 
@@ -187,7 +194,7 @@ namespace age
         ~gb_lcd_render() = default;
 
         [[nodiscard]] uint8_t get_lcdc() const;
-        void                  set_lcdc(int lcdc);
+        void                  set_lcdc(uint8_t lcdc);
 
         void new_frame();
         void render(int until_line);

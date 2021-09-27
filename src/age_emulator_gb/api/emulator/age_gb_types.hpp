@@ -64,8 +64,8 @@ namespace age
         //!
         //! Use the default color calculation for the emulated device.
         //! DMG colors will be greenish,
-        //! CGB colors are taken from a lookup table
-        //! (see also https://forums.libretro.com/t/real-gba-and-ds-phat-colors/1540/190).
+        //! CGB colors are calculated as described here:
+        //! https://forums.libretro.com/t/real-gba-and-ds-phat-colors/1540/190
         //!
         default_colors,
 
@@ -73,8 +73,8 @@ namespace age
         //! Use grey shades instead of green shades for DMG emulation
         //! (0x000000, 0x555555, 0xAAAAAA and 0xFFFFFF).
         //!
-        //! For CGB emulation this value is ignored,
-        //! the default CGB colors are used instead.
+        //! For CGB emulation this value is ignored and default CGB colors are
+        //! used.
         //!
         dmg_greyscale,
 
@@ -82,16 +82,16 @@ namespace age
         //! CGB colors are calculated compatible to Matt Currie's
         //! acid2 and Mealybug Tearoom test roms.
         //!
-        //! For DMG emulation this value is ignored,
-        //! the default DMG colors are used instead.
+        //! For DMG emulation this value is ignored and default DMG colors are
+        //! used.
         //!
         cgb_acid2,
 
         //!
         //! CGB colors are calculated compatible to Gambatte test roms.
         //!
-        //! For DMG emulation this value is ignored,
-        //! the default DMG colors are used instead.
+        //! For DMG emulation this value is ignored and default DMG colors are
+        //! used.
         //!
         cgb_gambatte
     };

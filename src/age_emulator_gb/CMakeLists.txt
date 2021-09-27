@@ -16,6 +16,8 @@ add_library(
         lcd/age_gb_lcd.cpp
         lcd/age_gb_lcd_irqs.cpp
         lcd/age_gb_lcd_palettes.cpp
+        lcd/age_gb_lcd_palettes_cgb.cpp
+        lcd/age_gb_lcd_palettes_compat.cpp
         lcd/age_gb_lcd_registers.cpp
         lcd/age_gb_lcd_render.cpp
         lcd/age_gb_lcd_line.cpp

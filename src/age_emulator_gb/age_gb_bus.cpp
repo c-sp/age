@@ -761,6 +761,7 @@ void age::gb_bus::handle_oam_dma()
     {
         uint8_t byte = read_byte((m_oam_dma_address + i) & 0xFFFF);
         //! \todo apparently oam dma is not blocked by mode 2 and 3, is there any test rom for this?
+        //        (see e.g. Zelda on DMG: sprites bugs when blocking oam writes here)
         m_lcd.write_oam(i, byte, true);
     }
 
