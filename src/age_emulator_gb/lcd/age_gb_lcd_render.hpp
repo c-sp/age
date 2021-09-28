@@ -162,7 +162,7 @@ namespace age
         uint8_t m_sprite_size  = 8;
         uint8_t m_tile_nr_mask = 0xFF;
 
-        const bool    m_cgb_features;
+        const bool    m_cgb_mode;
         const uint8_t m_attribute_mask;
     };
 

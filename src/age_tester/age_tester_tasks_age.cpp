@@ -16,22 +16,62 @@
 
 #include "age_tester_tasks.hpp"
 
+#include <optional>
+
+
+
+namespace
+{
+    std::optional<age::gb_device_type> parse_cgb_type(char c)
+    {
+        switch (c)
+        {
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+                return {age::gb_device_type::cgb_abcd};
+
+            case 'E':
+                return {age::gb_device_type::cgb_e};
+
+            default:
+                return {};
+        }
+    }
+
+} // namespace
+
 
 
 void age::tester::schedule_rom_age(const std::filesystem::path& rom_path,
                                    const schedule_test_t&       schedule)
 {
     auto filename     = rom_path.filename().string();
-    bool explicit_cgb = filename.find("-cgb") != std::string::npos;
-    bool explicit_dmg = filename.find("-dmg") != std::string::npos;
-
     auto rom_contents = load_rom_file(rom_path);
-    if (explicit_cgb || !explicit_dmg)
+
+    // no need to parse DMG device types
+    if (filename.find("-dmg") != std::string::npos)
     {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, run_common_test);
+        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::default_colors, run_common_test);
     }
-    if (explicit_dmg || !explicit_cgb)
+
+    // parse CGB device types
+    std::string cgb_prefix("-cgb");
+
+    auto cgb_hint = filename.find(cgb_prefix);
+    if (cgb_hint != std::string::npos)
     {
-        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::default_colors, run_common_test);
+        cgb_hint += cgb_prefix.size();
+
+        for (; cgb_hint < filename.size(); ++cgb_hint)
+        {
+            auto dev_type = parse_cgb_type(filename.at(cgb_hint));
+            if (!dev_type.has_value())
+            {
+                break;
+            }
+            schedule(rom_contents, dev_type.value(), gb_colors_hint::default_colors, run_common_test);
+        }
     }
 }

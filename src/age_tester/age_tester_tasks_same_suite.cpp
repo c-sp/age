@@ -28,9 +28,9 @@ void age::tester::schedule_rom_same_suite(const std::filesystem::path& rom_path,
                      || (rom_path.filename() == "div_write_trigger_10.gb");
 
     auto rom_contents = load_rom_file(rom_path);
-    schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, run_common_test);
+    schedule(rom_contents, gb_device_type::cgb_e, gb_colors_hint::default_colors, run_common_test);
     if (allow_dmg)
     {
-        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::default_colors, run_common_test);
+        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::default_colors, run_common_test);
     }
 }

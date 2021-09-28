@@ -82,7 +82,7 @@ void age::gb_lcd_render::set_lcdc(uint8_t lcdc)
     m_tile_data_offset = (lcdc & gb_lcdc_bg_win_data) ? 0x0000 : 0x0800;
     m_tile_xor         = (lcdc & gb_lcdc_bg_win_data) ? 0 : 0x80;
 
-    if (m_device.is_cgb())
+    if (m_device.cgb_mode())
     {
         // CGB: if LCDC bit 0 is 0, sprites are always displayed above
         // BG & window regardless of any priority flags
@@ -143,7 +143,7 @@ void age::gb_lcd_render::render_line(int line)
     int px0 = 8 + (m_scx & 0b111);
 
     // BG & windows not visible
-    if (!m_device.is_cgb() && !(m_lcdc & gb_lcdc_bg_enable))
+    if (!m_device.cgb_mode() && !(m_lcdc & gb_lcdc_bg_enable))
     {
         pixel fill_color = m_palettes.get_palette(gb_palette_bgp)[0];
         fill_color.m_a   = 0; // sprites are prioritized

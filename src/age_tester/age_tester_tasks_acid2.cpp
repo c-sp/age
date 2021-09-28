@@ -53,7 +53,8 @@ void age::tester::schedule_rom_acid2_cgb(const std::filesystem::path& rom_path,
     auto cgb_screenshot = find_screenshot(rom_path.parent_path(), "cgb-acid2.png");
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::cgb_acid2, new_screenshot_test(cgb_screenshot, is_test_finished));
+        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_acid2, new_screenshot_test(cgb_screenshot, is_test_finished));
+        schedule(rom_contents, gb_device_type::cgb_e, gb_colors_hint::cgb_acid2, new_screenshot_test(cgb_screenshot, is_test_finished));
     }
 }
 
@@ -73,7 +74,12 @@ void age::tester::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
     if (!cgb_screenshot.empty())
     {
         schedule(rom_contents,
-                 gb_hardware::cgb,
+                 gb_device_type::cgb_abcd,
+                 gb_colors_hint::default_colors, // the color palette is predefined for DMG-on-CGB roms
+                 new_screenshot_test(cgb_screenshot, is_test_finished));
+
+        schedule(rom_contents,
+                 gb_device_type::cgb_e,
                  gb_colors_hint::default_colors, // the color palette is predefined for DMG-on-CGB roms
                  new_screenshot_test(cgb_screenshot, is_test_finished));
     }
@@ -82,7 +88,7 @@ void age::tester::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
     if (!dmg_screenshot.empty())
     {
         schedule(rom_contents,
-                 gb_hardware::dmg,
+                 gb_device_type::dmg,
                  gb_colors_hint::dmg_greyscale,
                  new_screenshot_test(dmg_screenshot, is_test_finished));
     }

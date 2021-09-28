@@ -62,7 +62,7 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
     //      tima/tc00_irq_late_retrigger_1_dmg08_cgb04c_outE4
     //      tima/tc00_irq_late_retrigger_2_dmg08_outE4_cgb04c_outE0
     //      tima/tc00_irq_late_retrigger_ds_2_cgb04c_outE0
-    if ((intr_bit & m_during_dispatch & deny_retrigger) && m_device.is_cgb_hardware())
+    if ((intr_bit & m_during_dispatch & deny_retrigger) && m_device.is_cgb_device())
     {
         msg << "denying interrupt request " << log_hex8(intr_bit)
             << " on clock cycle " << irq_clock_cycle
@@ -96,7 +96,7 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
     //
 
     //! \todo Gambatte: always delay for CGB (analyse test roms)
-    if (m_device.is_cgb())
+    if (m_device.is_cgb_device())
     {
         m_clock.tick_machine_cycle();
         msg << "\n    * additional CGB HALT termination m-cycle";

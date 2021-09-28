@@ -1343,7 +1343,7 @@ void age::gb_cpu::execute_prefetched()
                 //       and points to the byte after HALT
                 --m_pc;
             }
-            else if (!m_device.is_cgb())
+            else if (!m_device.is_cgb_device())
             {
                 m_clock.tick_machine_cycle();
                 m_clock.tick_machine_cycle();

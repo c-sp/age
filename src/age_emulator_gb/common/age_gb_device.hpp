@@ -27,30 +27,47 @@
 
 namespace age
 {
+    //!
+    //! \brief The device mode is derived from the emulated device and
+    //!        cartridge capabilities.
+    //!
+    enum class gb_device_mode
+    {
+        dmg,
+        cgb_in_dmg_mode,
+        cgb
+    };
+
+
 
     class gb_device
     {
     public:
-        gb_device(const uint8_vector& rom, gb_hardware hardware);
+        gb_device(const uint8_vector& rom, gb_device_type device_type);
 
-        [[nodiscard]] gb_cart_mode get_cart_mode() const
+        [[nodiscard]] bool cgb_in_dmg_mode() const
         {
-            return m_cart_mode;
+            return m_device_mode == gb_device_mode::cgb_in_dmg_mode;
         }
 
-        [[nodiscard]] bool is_cgb() const
+        [[nodiscard]] bool cgb_mode() const
         {
-            //! \todo some calls to is_cgb() should probably be replaced by is_cgb_hardware()
-            return m_cart_mode == gb_cart_mode::cgb;
+            return m_device_mode == gb_device_mode::cgb;
         }
 
-        [[nodiscard]] bool is_cgb_hardware() const
+        [[nodiscard]] bool is_cgb_device() const
         {
-            return m_cart_mode != gb_cart_mode::dmg;
+            return m_device_mode != gb_device_mode::dmg;
+        }
+
+        [[nodiscard]] bool is_cgb_e_device() const
+        {
+            return m_device_type == gb_device_type::cgb_e;
         }
 
     private:
-        const gb_cart_mode m_cart_mode;
+        const gb_device_mode m_device_mode;
+        const gb_device_type m_device_type;
     };
 
 } // namespace age

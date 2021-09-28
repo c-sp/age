@@ -61,11 +61,12 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
 
     m_settings = new qt_settings_dialog(m_user_value_store, this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
-    m_action_open       = new QAction("open file", this);
-    m_action_open_dmg   = new QAction("open file as GB", this);
-    m_action_open_cgb   = new QAction("open file as CGB", this);
-    m_action_settings   = new QAction("settings", this);
-    m_action_fullscreen = new QAction("fullscreen", this);
+    m_action_open          = new QAction("open file", this);
+    m_action_open_dmg      = new QAction("open file as DMG", this);
+    m_action_open_cgb_abcd = new QAction("open file as CGB A/B/C/D", this);
+    m_action_open_cgb_e    = new QAction("open file as CGB E", this);
+    m_action_settings      = new QAction("settings", this);
+    m_action_fullscreen    = new QAction("fullscreen", this);
     m_action_fullscreen->setCheckable(true);
     m_action_fullscreen->setChecked(false);
     m_action_exit = new QAction("exit", this);
@@ -126,7 +127,8 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
 
     connect(m_action_open, &QAction::triggered, this, &qt_main_window::menu_emulator_open);
     connect(m_action_open_dmg, &QAction::triggered, this, &qt_main_window::menu_emulator_open_dmg);
-    connect(m_action_open_cgb, &QAction::triggered, this, &qt_main_window::menu_emulator_open_cgb);
+    connect(m_action_open_cgb_abcd, &QAction::triggered, this, &qt_main_window::menu_emulator_open_cgb_abcd);
+    connect(m_action_open_cgb_e, &QAction::triggered, this, &qt_main_window::menu_emulator_open_cgb_e);
     connect(m_action_settings, &QAction::triggered, this, &qt_main_window::menu_emulator_settings);
     connect(m_action_fullscreen, &QAction::triggered, this, &qt_main_window::menu_emulator_fullscreen);
     connect(m_action_exit, &QAction::triggered, this, &qt_main_window::menu_emulator_exit);
@@ -264,7 +266,8 @@ void age::qt_main_window::fill_menu(QMenu* menu)
 {
     menu->addAction(m_action_open);
     menu->addAction(m_action_open_dmg);
-    menu->addAction(m_action_open_cgb);
+    menu->addAction(m_action_open_cgb_abcd);
+    menu->addAction(m_action_open_cgb_e);
     menu->addSeparator();
     menu->addAction(m_action_settings);
     menu->addAction(m_action_fullscreen);
@@ -283,7 +286,7 @@ age::qt_key_event age::qt_main_window::get_event_for_key(int key)
 
 
 
-void age::qt_main_window::open_file(gb_hardware hardware)
+void age::qt_main_window::open_file(gb_device_type device_type)
 {
     QString     file_name;
     QFileDialog dialog(this, "Open file", m_settings->get_open_file_dialog_directory(), "Game Boy files (*.gb *.gbc)");
@@ -317,7 +320,7 @@ void age::qt_main_window::open_file(gb_hardware hardware)
 
         if (file_contents.size() > 0)
         {
-            new_emulator = QSharedPointer<qt_emulator>(new qt_emulator(file_contents, hardware, m_user_value_store));
+            new_emulator = QSharedPointer<qt_emulator>(new qt_emulator(file_contents, device_type, m_user_value_store));
         }
 
         // propagate new emulator
@@ -388,13 +391,19 @@ void age::qt_main_window::menu_emulator_open()
 
 void age::qt_main_window::menu_emulator_open_dmg()
 {
-    open_file(gb_hardware::dmg);
+    open_file(gb_device_type::dmg);
     m_settings->set_pause_emulator(false);
 }
 
-void age::qt_main_window::menu_emulator_open_cgb()
+void age::qt_main_window::menu_emulator_open_cgb_abcd()
 {
-    open_file(gb_hardware::cgb);
+    open_file(gb_device_type::cgb_abcd);
+    m_settings->set_pause_emulator(false);
+}
+
+void age::qt_main_window::menu_emulator_open_cgb_e()
+{
+    open_file(gb_device_type::cgb_e);
     m_settings->set_pause_emulator(false);
 }
 

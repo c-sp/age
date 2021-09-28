@@ -99,7 +99,12 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
     if (!cgb_screenshot.empty())
     {
         schedule(rom_contents,
-                 gb_hardware::cgb,
+                 gb_device_type::cgb_abcd,
+                 gb_colors_hint::cgb_gambatte,
+                 new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
+
+        schedule(rom_contents,
+                 gb_device_type::cgb_e,
                  gb_colors_hint::cgb_gambatte,
                  new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
     }
@@ -108,7 +113,7 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
     if (!dmg_screenshot.empty())
     {
         schedule(rom_contents,
-                 gb_hardware::dmg,
+                 gb_device_type::dmg,
                  gb_colors_hint::dmg_greyscale,
                  new_screenshot_test(dmg_screenshot, blargg_test_finished(dmg_screenshot)));
     }

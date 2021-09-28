@@ -30,31 +30,34 @@
 
 namespace age
 {
-
     //!
-    //! \brief Configures the hardware (Game Boy or Game Boy Color) to emulate.
+    //! \brief Configures the device (Game Boy or Game Boy Color) to emulate.
     //!
-    //! Setting specific hardware is usually only required for running tests.
-    //! The end user should probably let the emulator auto detect the hardware
-    //! required by the rom to run.
+    //! Setting a specific device is usually only required for running tests.
+    //! The end user should let the emulator auto detect the device for the
+    //! respective rom.
     //!
-    enum class gb_hardware
+    enum class gb_device_type
     {
+        //!
+        //! Auto-detect the device based on the respective rom.
+        //!
         auto_detect,
-        cgb,
-        dmg
-    };
 
-
-
-    //!
-    //! \brief The operating mode derived from hardware and cartridge capabilities.
-    //!
-    enum class gb_cart_mode
-    {
+        //!
+        //! Emulate a DMG device.
+        //!
         dmg,
-        dmg_on_cgb,
-        cgb
+
+        //!
+        //! Emulate a CGB-A/B/C/D device.
+        //!
+        cgb_abcd,
+
+        //!
+        //! Emulate a CGB-E device.
+        //!
+        cgb_e,
     };
 
 

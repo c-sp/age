@@ -32,7 +32,7 @@ namespace age::tester
 {
     using run_test_t = std::function<bool(age::gb_emulator&)>;
 
-    using schedule_test_t = std::function<void(const std::shared_ptr<age::uint8_vector>&, age::gb_hardware, age::gb_colors_hint colors_hint, run_test_t)>;
+    using schedule_test_t = std::function<void(const std::shared_ptr<age::uint8_vector>&, age::gb_device_type, age::gb_colors_hint colors_hint, run_test_t)>;
 
     void schedule_rom_acid2_cgb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_acid2_dmg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);

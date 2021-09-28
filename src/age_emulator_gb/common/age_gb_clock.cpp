@@ -37,7 +37,7 @@ void age::gb_set_back_clock_cycle(int& clock_cycle, int cycle_offset)
 age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
     : m_logger(logger)
 {
-    if (device.is_cgb())
+    if (device.cgb_mode())
     {
         // Gambatte tests:
         // div/start_inc_1_cgb_out1E
@@ -45,7 +45,7 @@ age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
         m_clock_cycle = 0x1F * 0x100;
         m_clock_cycle -= 96;
     }
-    else if (device.is_cgb_hardware())
+    else if (device.cgb_in_dmg_mode())
     {
         // Mooneye GB tests:
         // misc/boot_div-cgbABCDE

@@ -51,7 +51,7 @@ namespace age
 
     public:
         gb_emulator_impl(const uint8_vector& rom,
-                         gb_hardware         hardware,
+                         gb_device_type      device_type,
                          gb_colors_hint      colors_hint,
                          gb_log_categories   log_categories);
         ~gb_emulator_impl() = default;

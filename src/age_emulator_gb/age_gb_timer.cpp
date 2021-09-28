@@ -26,10 +26,12 @@ namespace
 
 
 
-age::gb_timer::gb_timer(const gb_clock&       clock,
+age::gb_timer::gb_timer(const gb_device&      device,
+                        const gb_clock&       clock,
                         gb_interrupt_trigger& interrupts,
                         gb_events&            events)
-    : m_clock(clock),
+    : m_device(device),
+      m_clock(clock),
       m_interrupts(interrupts),
       m_events(events)
 {

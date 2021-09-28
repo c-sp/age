@@ -50,7 +50,7 @@ namespace age
         explicit gb_memory(const uint8_vector& cart_rom, const gb_clock& clock);
         ~gb_memory() = default;
 
-        void init_vram(bool for_cgb_hardware);
+        void init_vram(bool for_cgb_device);
 
         [[nodiscard]] const uint8_t* get_video_ram() const;
         [[nodiscard]] const uint8_t* get_rom_header() const;

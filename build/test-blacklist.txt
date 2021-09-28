@@ -16,9 +16,7 @@ age-test-roms/lcd/mode-timing-cgbE.gb
 age-test-roms/lcd/mode2-obj-size-ds-cgb.gb
 age-test-roms/lcd/mode2-obj-size.gb
 age-test-roms/lcd/read-timing-oam-cgbE.gb
-age-test-roms/lcd/stat-mode-timing-cgbE.gb
 age-test-roms/lcd/write-timing-oam-dmgC.gb
-age-test-roms/tima/spsw-tima-cgbE.gb
 
 
 

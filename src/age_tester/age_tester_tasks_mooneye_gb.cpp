@@ -16,22 +16,113 @@
 
 #include "age_tester_tasks.hpp"
 
+#include <optional>
+#include <unordered_set>
+
+
+
+namespace
+{
+    std::optional<age::gb_device_type> parse_cgb_type(char c)
+    {
+        switch (c)
+        {
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+                return {age::gb_device_type::cgb_abcd};
+
+            case 'E':
+                return {age::gb_device_type::cgb_e};
+
+            default:
+                return {};
+        }
+    }
+
+    std::unordered_set<age::gb_device_type> parse_cgb_types(const std::string& filename, size_t idx)
+    {
+        std::unordered_set<age::gb_device_type> result;
+
+        for (; idx < filename.size(); ++idx)
+        {
+            auto dev_type = parse_cgb_type(filename.at(idx));
+            if (!dev_type.has_value())
+            {
+                break;
+            }
+            result.insert(dev_type.value());
+        }
+
+        // if this test is not constrained to any CGB type,
+        // run it for all CGB types
+        if (result.empty())
+        {
+            result = {
+                age::gb_device_type::cgb_abcd,
+                age::gb_device_type::cgb_e,
+            };
+        }
+        return result;
+    }
+
+
+
+    std::unordered_set<age::gb_device_type> parse_decive_types(const std::string& filename)
+    {
+        std::unordered_set<age::gb_device_type> result;
+
+        // test runs on all CGB types
+        if (filename.find("-C") != std::string::npos)
+        {
+            result.insert(age::gb_device_type::cgb_abcd);
+            result.insert(age::gb_device_type::cgb_e);
+        }
+
+        // test runs on specific CGB types
+        std::string cgb_prefix("-cgb");
+        auto        cgb_hint = filename.find(cgb_prefix);
+        if (cgb_hint != std::string::npos)
+        {
+            auto cgb_types = parse_cgb_types(filename, cgb_hint + cgb_prefix.size());
+            result.insert(begin(cgb_types), end(cgb_types));
+        }
+
+        // test runs on all DMG types
+        // (we don't distinguish DMG types at the moment)
+        if ((filename.find("-G") != std::string::npos) || (filename.find("-dmg") != std::string::npos))
+        {
+            result.insert(age::gb_device_type::dmg);
+        }
+
+        // if this test is not constrained to any device type,
+        // run it for all device types
+        if (result.empty())
+        {
+            result = {
+                age::gb_device_type::dmg,
+                age::gb_device_type::cgb_abcd,
+                age::gb_device_type::cgb_e,
+            };
+        }
+        return result;
+    }
+
+} // namespace
+
 
 
 void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path& rom_path,
                                           const schedule_test_t&       schedule)
 {
     auto filename     = rom_path.filename().string();
-    bool explicit_cgb = (filename.find("-cgb") != std::string::npos) || (filename.find("-C") != std::string::npos);
-    bool explicit_dmg = (filename.find("-dmg") != std::string::npos) || (filename.find("-G") != std::string::npos);
-
     auto rom_contents = load_rom_file(rom_path);
-    if (explicit_cgb || !explicit_dmg)
-    {
-        schedule(rom_contents, gb_hardware::cgb, gb_colors_hint::default_colors, run_common_test);
-    }
-    if (explicit_dmg || !explicit_cgb)
-    {
-        schedule(rom_contents, gb_hardware::dmg, gb_colors_hint::default_colors, run_common_test);
-    }
+
+    auto device_types = parse_decive_types(filename);
+    std::for_each(begin(device_types),
+                  end(device_types),
+                  [&](const auto& dev_type) {
+                      schedule(rom_contents, dev_type, gb_colors_hint::default_colors, run_common_test);
+                  });
 }

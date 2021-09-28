@@ -43,20 +43,24 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device& device,
     : m_device(device),
       m_colors_hint(colors_hint)
 {
-    if (device.get_cart_mode() == gb_cart_mode::dmg_on_cgb)
+    if (!m_device.cgb_mode())
     {
-        init_dmg_colors(rom_header);
-    }
-    else if ((device.get_cart_mode() == gb_cart_mode::dmg) && (m_colors_hint == gb_colors_hint::dmg_greyscale))
-    {
-        m_bgp_colors  = {{pixel(0xFFFFFF), pixel(0xAAAAAA), pixel(0x555555), pixel(0x000000)}};
-        m_obp0_colors = m_bgp_colors;
-        m_obp1_colors = m_bgp_colors;
-    }
+        // setup DMG palettes
+        if (device.cgb_in_dmg_mode())
+        {
+            init_dmg_colors(rom_header);
+        }
+        else if (m_colors_hint == gb_colors_hint::dmg_greyscale)
+        {
+            m_bgp_colors  = {{pixel(0xFFFFFF), pixel(0xAAAAAA), pixel(0x555555), pixel(0x000000)}};
+            m_obp0_colors = m_bgp_colors;
+            m_obp1_colors = m_bgp_colors;
+        }
 
-    update_dmg_palette(gb_palette_bgp, m_bgp);
-    update_dmg_palette(gb_palette_obp0, m_obp0);
-    update_dmg_palette(gb_palette_obp1, m_obp1);
+        update_dmg_palette(gb_palette_bgp, m_bgp);
+        update_dmg_palette(gb_palette_obp0, m_obp0);
+        update_dmg_palette(gb_palette_obp1, m_obp1);
+    }
 }
 
 
@@ -84,25 +88,25 @@ age::uint8_t age::gb_lcd_palettes::read_obp1() const
 
 age::uint8_t age::gb_lcd_palettes::read_bcps() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     return m_bcps;
 }
 
 age::uint8_t age::gb_lcd_palettes::read_bcpd() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     return m_cpd[m_bcps & 0x3F];
 }
 
 age::uint8_t age::gb_lcd_palettes::read_ocps() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     return m_ocps;
 }
 
 age::uint8_t age::gb_lcd_palettes::read_ocpd() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     return m_cpd[0x40 + (m_ocps & 0x3F)];
 }
 
@@ -128,13 +132,13 @@ void age::gb_lcd_palettes::write_obp1(uint8_t value)
 
 void age::gb_lcd_palettes::write_bcps(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     m_bcps = value | 0x40;
 }
 
 void age::gb_lcd_palettes::write_bcpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
 
     unsigned cpd_index = m_bcps & 0x3F;
     m_cpd[cpd_index]   = value;
@@ -145,13 +149,13 @@ void age::gb_lcd_palettes::write_bcpd(uint8_t value)
 
 void age::gb_lcd_palettes::write_ocps(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     m_ocps = value | 0x40;
 }
 
 void age::gb_lcd_palettes::write_ocpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
 
     unsigned cpd_index = 0x40 + (m_ocps & 0x3F);
     m_cpd[cpd_index]   = value;
@@ -164,7 +168,7 @@ void age::gb_lcd_palettes::write_ocpd(uint8_t value)
 
 void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t value)
 {
-    if (m_device.is_cgb())
+    if (m_device.cgb_mode())
     {
         return;
     }
@@ -196,7 +200,7 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
 
 void age::gb_lcd_palettes::update_cgb_color(unsigned color_index)
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     AGE_ASSERT(color_index < gb_total_color_count)
 
     unsigned cpd_index = color_index << 1;

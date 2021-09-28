@@ -304,7 +304,7 @@ age::uint8_t age::gb_lcd::read_bcps() const
 
 age::uint8_t age::gb_lcd::read_bcpd() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     auto result = m_palettes.read_bcpd();
     log_reg() << "read BCPD == " << log_hex8(result);
     return result;
@@ -312,7 +312,7 @@ age::uint8_t age::gb_lcd::read_bcpd() const
 
 age::uint8_t age::gb_lcd::read_ocps() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     auto result = m_palettes.read_ocps();
     log_reg() << "read OCPS == " << log_hex8(result);
     return result;
@@ -320,7 +320,7 @@ age::uint8_t age::gb_lcd::read_ocps() const
 
 age::uint8_t age::gb_lcd::read_ocpd() const
 {
-    AGE_ASSERT(m_device.is_cgb())
+    AGE_ASSERT(m_device.cgb_mode())
     auto result = m_palettes.read_ocpd();
     log_reg() << "read OCPD == " << log_hex8(result);
     return result;

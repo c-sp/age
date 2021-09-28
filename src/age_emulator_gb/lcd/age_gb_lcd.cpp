@@ -31,7 +31,7 @@ age::gb_lcd::gb_lcd(const gb_device&      device,
       m_line(device, clock),
       m_lcd_irqs(device, clock, m_line, events, interrupts),
       m_palettes(device, rom_header, colors_hint),
-      m_sprites(m_device.is_cgb()),
+      m_sprites(m_device.cgb_mode()),
       m_render(device, m_palettes, m_sprites, video_ram, screen_buffer)
 {
 }
@@ -97,7 +97,7 @@ bool age::gb_lcd::is_oam_writable(gb_current_line& line)
     {
         return true;
     }
-    if (m_device.is_cgb_hardware())
+    if (m_device.is_cgb_device())
     {
         return is_oam_readable(line);
     }
@@ -146,7 +146,7 @@ bool age::gb_lcd::is_video_ram_accessible()
         // DMG-C:                < 83 cycles
         // CGB-B/E single speed: < 84 cycles
         // CGB-B/E double speed: < 82 cycles
-        int m3_edge = !m_device.is_cgb_hardware() ? 83
+        int m3_edge = !m_device.is_cgb_device() ? 83
                       : m_clock.is_double_speed() ? 82
                                                   : 84;
         accessible  = (line.m_line_clks < m3_edge)
@@ -154,7 +154,7 @@ bool age::gb_lcd::is_video_ram_accessible()
     }
     else
     {
-        int m3_edge = m_device.is_cgb_hardware() ? 80 : 78;
+        int m3_edge = m_device.is_cgb_device() ? 80 : 78;
         accessible  = (line.m_line >= gb_screen_height)
                      || (line.m_line_clks < m3_edge)
                      || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));

@@ -37,7 +37,7 @@ namespace age
     class qt_emulator
     {
     public:
-        qt_emulator(const QByteArray& rom, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store);
+        qt_emulator(const QByteArray& rom, gb_device_type device_type, QSharedPointer<qt_user_value_store> user_value_store);
         ~qt_emulator();
 
         QSharedPointer<gb_emulator> get_emulator();

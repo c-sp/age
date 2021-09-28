@@ -25,12 +25,13 @@ age::gb_lcd_line::gb_lcd_line(const gb_device& device,
     : m_clock(clock),
       m_clk_frame_start(m_clock.get_clock_cycle())
 {
-    if (device.is_cgb())
+    if (device.cgb_mode())
     {
         m_clk_frame_start += 4396 - gb_clock_cycles_per_lcd_frame;
     }
     else
     {
+        //! \todo check CGB-in-DMG-mode
         m_clk_frame_start += 60 - gb_clock_cycles_per_lcd_frame;
     }
     m_clk_frame_start += gb_lcd_initial_alignment;

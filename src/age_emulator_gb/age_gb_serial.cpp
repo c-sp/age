@@ -64,7 +64,7 @@ age::uint8_t age::gb_serial::read_sb()
 age::uint8_t age::gb_serial::read_sc() const
 {
     // unused bits are always high
-    uint8_t unused = m_device.is_cgb() ? 0x7C : 0x7E;
+    uint8_t unused = m_device.cgb_mode() ? 0x7C : 0x7E;
 
     // serial transfer currently in progress?
     uint8_t transfer_flag = (m_sio_state == gb_sio_state::no_transfer) ? 0 : sc_start_transfer;
@@ -147,7 +147,7 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     //      serial/nopx2_start_wait_read_if_1_dmg08_cgb04c_outE0
     //      serial/nopx2_start_wait_read_if_2_dmg08_cgb04c_outE8
 
-    bool fast_sio    = m_device.is_cgb() && ((value_sc & sc_shift_clock_switch) != 0);
+    bool fast_sio    = m_device.cgb_mode() && ((value_sc & sc_shift_clock_switch) != 0);
     int  clock_shift = fast_sio ? (sio_clock_shift - 5) : sio_clock_shift;
 
     // adjust to CGB double speed

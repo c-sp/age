@@ -28,14 +28,14 @@
 
 namespace
 {
-    std::string log_header(const std::filesystem::path& rom_path, age::gb_hardware hardware)
+    std::string log_header(const std::filesystem::path& rom_path, age::gb_device_type device_type)
     {
         std::time_t t  = std::time(nullptr);
         auto*       tm = std::gmtime(&t);
 
         std::stringstream result;
         result << "--------------------------------------------------------------------------------\n"
-               << "   emulation logs for: " << rom_path.filename().string() << " " << age::tester::get_hardware_string(hardware) << '\n'
+               << "   emulation logs for: " << rom_path.filename().string() << " " << age::tester::get_device_type_string(device_type) << '\n'
                << "           created on: " << std::put_time(tm, "%Y-%m-%dT%H:%M:%SZ") << '\n'
                << "     AGE git revision: " << GIT_REV << " (" << GIT_DATE << ")\n"
                << "--------------------------------------------------------------------------------\n"
@@ -111,18 +111,21 @@ namespace
 
 
 
-std::string age::tester::get_hardware_string(age::gb_hardware hardware)
+std::string age::tester::get_device_type_string(age::gb_device_type device_type)
 {
-    switch (hardware)
+    switch (device_type)
     {
-        case age::gb_hardware::auto_detect:
+        case age::gb_device_type::auto_detect:
             return "(auto-detect)";
 
-        case age::gb_hardware::dmg:
+        case age::gb_device_type::dmg:
             return "(dmg)";
 
-        case age::gb_hardware::cgb:
-            return "(cgb)";
+        case age::gb_device_type::cgb_abcd:
+            return "(cgb-a/b/c/d)";
+
+        case age::gb_device_type::cgb_e:
+            return "(cgb-e)";
     }
     return "(unknown)";
 }
@@ -132,7 +135,7 @@ std::string age::tester::get_hardware_string(age::gb_hardware hardware)
 void age::tester::write_log(const std::filesystem::path&     log_path,
                             const std::vector<gb_log_entry>& log_entries,
                             const std::filesystem::path&     rom_path,
-                            gb_hardware                      hardware)
+                            gb_device_type                   device_type)
 {
     if (log_entries.empty())
     {
@@ -140,7 +143,7 @@ void age::tester::write_log(const std::filesystem::path&     log_path,
     }
 
     std::stringstream log;
-    log << log_header(rom_path, hardware);
+    log << log_header(rom_path, device_type);
 
     std::for_each(begin(log_entries),
                   end(log_entries),

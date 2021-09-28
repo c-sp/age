@@ -256,14 +256,14 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
 //
 //---------------------------------------------------------
 
-void age::gb_memory::init_vram(bool for_cgb_hardware)
+void age::gb_memory::init_vram(bool for_cgb_device)
 {
     for (uint16_t i = 0, end = gb_sparse_vram_0010_dump.size(); i < end; ++i)
     {
         set_memory(m_memory, m_video_ram_offset + 0x10 + i * 2, gb_sparse_vram_0010_dump[i]);
     }
 
-    if (!for_cgb_hardware)
+    if (!for_cgb_device)
     {
         set_memory(m_memory, m_video_ram_offset + 0x1910, 0x19);
         for (uint8_t i = 1; i <= 0x0C; ++i)

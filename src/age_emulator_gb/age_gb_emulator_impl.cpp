@@ -171,7 +171,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 
         if (m_bus.during_dma())
         {
-            AGE_ASSERT(m_device.is_cgb())
+            AGE_ASSERT(m_device.cgb_mode())
             m_bus.handle_dma();
         }
         else if (m_interrupts.halted())
@@ -233,24 +233,24 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 //---------------------------------------------------------
 
 age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
-                                        gb_hardware         hardware,
+                                        gb_device_type      device_type,
                                         gb_colors_hint      colors_hint,
                                         gb_log_categories   log_categories)
 
     : m_screen_buffer(gb_screen_width, gb_screen_height),
       m_logger(std::move(log_categories)),
-      m_device(rom, hardware),
+      m_device(rom, device_type),
       m_clock(m_logger, m_device),
       m_memory(rom, m_clock),
       m_interrupts(m_device, m_clock),
       m_events(m_clock),
-      m_sound(m_clock, m_device.is_cgb(), m_audio_buffer),
+      m_sound(m_clock, m_device.cgb_mode(), m_audio_buffer),
       m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, m_screen_buffer, colors_hint),
-      m_timer(m_clock, m_interrupts, m_events),
+      m_timer(m_device, m_clock, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_interrupts, m_events),
       m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
       m_cpu(m_device, m_clock, m_interrupts, m_bus)
 {
-    m_memory.init_vram(m_device.is_cgb_hardware());
+    m_memory.init_vram(m_device.is_cgb_device());
 }

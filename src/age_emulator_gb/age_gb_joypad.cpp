@@ -93,6 +93,6 @@ void age::gb_joypad::set_buttons_down(int buttons)
 age::gb_joypad::gb_joypad(const gb_device&      device,
                           gb_interrupt_trigger& interrupts)
     : m_interrupts(interrupts),
-      m_p1(device.is_cgb_hardware() ? 0xFF : 0xCF)
+      m_p1(device.is_cgb_device() ? 0xFF : 0xCF)
 {
 }

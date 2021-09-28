@@ -71,16 +71,17 @@ namespace age
         [[nodiscard]] bool is_fullscreen() const;
         void               fill_menu(QMenu* menu);
         qt_key_event       get_event_for_key(int key);
-        void               open_file(gb_hardware hardware = gb_hardware::auto_detect);
+        void               open_file(gb_device_type device_type = gb_device_type::auto_detect);
 
         QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
 
-        QAction* m_action_open       = nullptr;
-        QAction* m_action_open_dmg   = nullptr;
-        QAction* m_action_open_cgb   = nullptr;
-        QAction* m_action_settings   = nullptr;
-        QAction* m_action_fullscreen = nullptr;
-        QAction* m_action_exit       = nullptr;
+        QAction* m_action_open          = nullptr;
+        QAction* m_action_open_dmg      = nullptr;
+        QAction* m_action_open_cgb_abcd = nullptr;
+        QAction* m_action_open_cgb_e    = nullptr;
+        QAction* m_action_settings      = nullptr;
+        QAction* m_action_fullscreen    = nullptr;
+        QAction* m_action_exit          = nullptr;
 
         qt_settings_dialog* m_settings = nullptr;
 
@@ -99,7 +100,8 @@ namespace age
 
         void menu_emulator_open();
         void menu_emulator_open_dmg();
-        void menu_emulator_open_cgb();
+        void menu_emulator_open_cgb_abcd();
+        void menu_emulator_open_cgb_e();
         void menu_emulator_settings();
         void menu_emulator_fullscreen();
         void menu_emulator_exit();

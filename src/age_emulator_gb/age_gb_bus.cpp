@@ -89,17 +89,17 @@ age::gb_bus::gb_bus(const gb_device&        device,
       m_timer(timer),
       m_joypad(joypad),
       m_serial(serial),
-      m_oam_dma_byte(m_device.is_cgb() ? 0x00 : 0xFF)
+      m_oam_dma_byte(m_device.is_cgb_device() ? 0x00 : 0xFF)
 {
     // clear high ram
     std::fill(begin(m_high_ram), end(m_high_ram), 0);
 
     // init 0xFF80 - 0xFFFE
-    const uint8_array<0x80>& src = m_device.is_cgb() ? cgb_FF80_dump : dmg_FF80_dump;
+    const uint8_array<0x80>& src = m_device.is_cgb_device() ? cgb_FF80_dump : dmg_FF80_dump;
     std::copy(begin(src), end(src), begin(m_high_ram) + 0x180);
 
     // init 0xFEA0 - 0xFEFF
-    if (m_device.is_cgb())
+    if (m_device.is_cgb_device())
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -236,7 +236,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         }
 
         // CGB registers
-        if (m_device.is_cgb())
+        if (m_device.cgb_mode())
         {
             switch (address)
             {
@@ -260,8 +260,8 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             }
         }
 
-        // CGB registers when running a DMG rom
-        else if (m_device.is_cgb_hardware())
+        // CGB registers when running in DMG mode
+        else if (m_device.cgb_in_dmg_mode())
         {
             switch (address)
             {
@@ -404,7 +404,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         }
 
         // CGB registers
-        if (m_device.is_cgb())
+        if (m_device.cgb_mode())
         {
             switch (address)
             {
@@ -430,8 +430,8 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             }
         }
 
-        // CGB registers when running a DMG rom
-        else if (m_device.is_cgb_hardware())
+        // CGB registers when running in DMG mode
+        else if (m_device.cgb_in_dmg_mode())
         {
             switch (address)
             {
@@ -690,7 +690,7 @@ void age::gb_bus::write_dma(uint8_t value)
     //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
     //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
     //
-    int factor = m_device.is_cgb() ? 1 : 2;
+    int factor = m_device.cgb_mode() ? 1 : 2;
     m_events.schedule_event(gb_event::start_oam_dma, m_clock.get_machine_cycle_clocks() * factor);
 }
 

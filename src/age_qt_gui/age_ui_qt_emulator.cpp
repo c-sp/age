@@ -38,12 +38,12 @@
 //
 //---------------------------------------------------------
 
-age::qt_emulator::qt_emulator(const QByteArray& rom_contents, gb_hardware hardware, QSharedPointer<qt_user_value_store> user_value_store)
+age::qt_emulator::qt_emulator(const QByteArray& rom_contents, gb_device_type device_type, QSharedPointer<qt_user_value_store> user_value_store)
     : m_user_value_store(std::move(user_value_store))
 {
     // create emulator
     uint8_vector                rom(rom_contents.begin(), rom_contents.end());
-    QSharedPointer<gb_emulator> gb_emu = QSharedPointer<gb_emulator>(new gb_emulator(rom, hardware, gb_colors_hint::default_colors));
+    QSharedPointer<gb_emulator> gb_emu = QSharedPointer<gb_emulator>(new gb_emulator(rom, device_type, gb_colors_hint::default_colors));
     LOG("emulator created");
 
     // load persistent ram, if supported by this cartridge

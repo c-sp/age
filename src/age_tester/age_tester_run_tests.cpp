@@ -151,10 +151,10 @@ namespace
 
 
 
-    std::string with_hardware_indicator(const std::filesystem::path& rom_path,
-                                        age::gb_hardware             hardware)
+    std::string with_device_type(const std::filesystem::path& rom_path,
+                                 age::gb_device_type          device_type)
     {
-        return rom_path.string() + " " + age::tester::get_hardware_string(hardware);
+        return rom_path.string() + " " + age::tester::get_device_type_string(device_type);
     }
 
 } // namespace
@@ -186,32 +186,53 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                 schedule_rom(
                     rom_path,
                     [&pool, &results, &opts, rom_path, &scheduled_count](const std::shared_ptr<age::uint8_vector>& rom_contents,
-                                                                         age::gb_hardware                          hardware,
+                                                                         age::gb_device_type                       device_type,
                                                                          age::gb_colors_hint                       colors_hint,
                                                                          const run_test_t&                         run) {
-                        if (hardware == gb_hardware::auto_detect)
+                        switch (device_type)
                         {
-                            return;
-                        }
-                        if ((hardware == gb_hardware::cgb) && opts.m_dmg_only)
-                        {
-                            return;
-                        }
-                        if ((hardware == gb_hardware::dmg) && opts.m_cgb_only)
-                        {
-                            return;
+                            case gb_device_type::auto_detect:
+                                return;
+
+                            case gb_device_type::dmg:
+                                if (opts.m_cgb_only)
+                                {
+                                    return;
+                                }
+                                break;
+
+                            case gb_device_type::cgb_abcd:
+                            case gb_device_type::cgb_e:
+                                if (opts.m_dmg_only)
+                                {
+                                    return;
+                                }
+                                break;
                         }
 
-                        pool.queue_task([&results, &opts, rom_path, rom_contents, hardware, colors_hint, run]() {
-                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, hardware, colors_hint, opts.m_log_categories));
+                        pool.queue_task([&results, &opts, rom_path, rom_contents, device_type, colors_hint, run]() {
+                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, device_type, colors_hint, opts.m_log_categories));
                             auto                              passed = run(*emulator);
-                            results.push({with_hardware_indicator(rom_path, hardware), passed});
+                            results.push({with_device_type(rom_path, device_type), passed});
 
                             if (opts.m_write_logs)
                             {
                                 std::filesystem::path log_path = rom_path;
-                                log_path.replace_extension((hardware == gb_hardware::cgb) ? ".cgb.log" : ".dmg.log");
-                                write_log(log_path, emulator->get_log_entries(), rom_path, hardware);
+                                const auto*           log_ext  = [&]() {
+                                    switch (device_type)
+                                    {
+                                        case gb_device_type::dmg:
+                                            return ".dmg.log";
+                                        case gb_device_type::cgb_abcd:
+                                            return ".cgb-abcd.log";
+                                        case gb_device_type::cgb_e:
+                                            return ".cgb-e.log";
+                                        default:
+                                            return ".log";
+                                    }
+                                }();
+                                log_path.replace_extension(log_ext);
+                                write_log(log_path, emulator->get_log_entries(), rom_path, device_type);
                             }
                         });
                         ++scheduled_count;

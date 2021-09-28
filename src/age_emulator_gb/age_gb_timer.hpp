@@ -24,6 +24,7 @@
 #include <age_types.hpp>
 
 #include "common/age_gb_clock.hpp"
+#include "common/age_gb_device.hpp"
 #include "common/age_gb_events.hpp"
 #include "common/age_gb_interrupts.hpp"
 
@@ -38,9 +39,11 @@ namespace age
         AGE_DISABLE_MOVE(gb_timer);
 
     public:
-        gb_timer(const gb_clock&       clock,
+        gb_timer(const gb_device&      device,
+                 const gb_clock&       clock,
                  gb_interrupt_trigger& interrupts,
                  gb_events&            events);
+
         ~gb_timer() = default;
 
         uint8_t               read_tima();
@@ -72,6 +75,7 @@ namespace age
         void stop_timer();
         void set_clk_timer_zero(int new_clk_timer_zero);
 
+        const gb_device&      m_device;
         const gb_clock&       m_clock;
         gb_interrupt_trigger& m_interrupts;
         gb_events&            m_events;

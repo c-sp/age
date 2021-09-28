@@ -21,11 +21,11 @@
 
 
 age::gb_emulator::gb_emulator(const uint8_vector& rom,
-                              gb_hardware         hardware,
+                              gb_device_type      device_type,
                               gb_colors_hint      colors_hint,
                               gb_log_categories   log_categories)
 
-    : m_impl(new gb_emulator_impl(rom, hardware, colors_hint, std::move(log_categories)))
+    : m_impl(new gb_emulator_impl(rom, device_type, colors_hint, std::move(log_categories)))
 {
 }
 

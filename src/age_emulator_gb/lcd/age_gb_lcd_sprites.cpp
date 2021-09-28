@@ -31,7 +31,7 @@ namespace
 
 
 age::gb_lcd_sprites::gb_lcd_sprites(bool cgb_features)
-    : m_cgb_features(cgb_features),
+    : m_cgb_mode(cgb_features),
       m_attribute_mask(cgb_features ? 0xFF : 0xF0)
 {
 }
@@ -83,7 +83,7 @@ std::vector<age::gb_sprite> age::gb_lcd_sprites::get_line_sprites(int line)
         sprite.m_data.m_sprite_id = sprite_id;
         sprite.m_data.m_attributes &= m_attribute_mask;
 
-        sprite.m_data.m_palette_idx = m_cgb_features
+        sprite.m_data.m_palette_idx = m_cgb_mode
                                           ? (8 + (sprite.m_data.m_attributes & gb_tile_attrib_palette))
                                           : ((sprite.m_data.m_attributes & oam_palette) ? gb_palette_obp1 : gb_palette_obp0);
 
@@ -101,7 +101,7 @@ std::vector<age::gb_sprite> age::gb_lcd_sprites::get_line_sprites(int line)
     }
 
     // non-CGB mode: sort sprites by X coordinate
-    if (!m_cgb_features)
+    if (!m_cgb_mode)
     {
         std::sort(begin(sprites),
                   end(sprites),

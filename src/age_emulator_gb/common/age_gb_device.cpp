@@ -22,37 +22,57 @@ namespace
 {
     constexpr age::uint16_t gb_cia_ofs_cgb = 0x0143;
 
-    age::gb_cart_mode calculate_cart_mode(const age::uint8_vector& rom,
-                                          const age::gb_hardware   hardware)
+
+
+    age::gb_device_mode calculate_device_mode(const age::uint8_vector&  rom,
+                                              const age::gb_device_type device_type)
     {
         auto rom_byte_0x143 = (rom.size() > gb_cia_ofs_cgb) ? rom[gb_cia_ofs_cgb] : 0;
 
         const bool cgb_flag = rom_byte_0x143 >= 0x80;
-        switch (hardware)
+        switch (device_type)
         {
-            case age::gb_hardware::dmg:
-                return age::gb_cart_mode::dmg;
+            case age::gb_device_type::dmg:
+                return age::gb_device_mode::dmg;
 
-            case age::gb_hardware::cgb:
+            case age::gb_device_type::cgb_abcd:
+            case age::gb_device_type::cgb_e:
                 return cgb_flag
-                           ? age::gb_cart_mode::cgb
-                           : age::gb_cart_mode::dmg_on_cgb;
+                           ? age::gb_device_mode::cgb
+                           : age::gb_device_mode::cgb_in_dmg_mode;
 
             default:
-                // auto-detect hardware
+                // auto-detect device mode from cartridge CGB flag
                 return cgb_flag
-                           ? age::gb_cart_mode::cgb
-                           : age::gb_cart_mode::dmg;
+                           ? age::gb_device_mode::cgb
+                           : age::gb_device_mode::dmg;
         }
+    }
+
+
+
+    age::gb_device_type calculate_device_type(const age::gb_device_type device_type,
+                                              const age::gb_device_mode device_mode)
+    {
+        if (device_type != age::gb_device_type::auto_detect)
+        {
+            return device_type;
+        }
+
+        // auto-detect device type by mode
+        return (device_mode == age::gb_device_mode::dmg)
+                   ? age::gb_device_type::dmg
+                   : age::gb_device_type::cgb_e;
     }
 
 } // namespace
 
 
 
-age::gb_device::gb_device(const uint8_vector& rom,
-                          const gb_hardware   hardware)
+age::gb_device::gb_device(const uint8_vector&  rom,
+                          const gb_device_type device_type)
 
-    : m_cart_mode(calculate_cart_mode(rom, hardware))
+    : m_device_mode(calculate_device_mode(rom, device_type)),
+      m_device_type(calculate_device_type(device_type, m_device_mode))
 {
 }

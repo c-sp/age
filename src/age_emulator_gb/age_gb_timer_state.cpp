@@ -184,13 +184,19 @@ void age::gb_timer::after_div_reset(bool during_stop)
     auto msg = log();
     msg << "timer at DIV reset:";
 
-    // speed change TAC 00 glitch (see age-test-roms/speed-switch/switch-speed-tima-00-cgb):
-    // no immediate action by div reset on the exact first machine cycle
-    if (during_stop && ((m_tac & 0x03) == 0) && (reset_details.m_clk_adjust == -clks_per_inc / 2))
+    // speed change glitch:
+    // no immediate action by div reset on the exact first machine cycle for some timers
+    if (during_stop && (reset_details.m_clk_adjust == -clks_per_inc / 2))
     {
-        msg << "\n    * TAC-00-STOP glitch: immediate increment by DIV reset not on this machine cycle";
-        AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
-        reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
+        auto glitch = m_device.is_cgb_e_device()
+                          ? (m_tac & 0x03) != 1
+                          : (m_tac & 0x03) == 0;
+        if (glitch)
+        {
+            msg << "\n    * speed change glitch: immediate increment by DIV reset not on this machine cycle";
+            AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
+            reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
+        }
     }
 
     AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) > m_clock.get_clock_cycle())
