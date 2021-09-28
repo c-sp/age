@@ -21,10 +21,11 @@
 //! \file
 //!
 
-#include <vector>
-
 #include <age_debug.hpp>
 #include <age_types.hpp>
+
+#include <cstring> // memcpy
+#include <vector>
 
 
 
