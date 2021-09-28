@@ -171,7 +171,7 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
     AGE_ASSERT((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1))
     unsigned color_index = palette_index << 2;
 
-    const std::array<pixel, 4>& color_src = [&]() {
+    const auto& color_src = [&]() {
         switch (palette_index)
         {
             case gb_palette_obp0:

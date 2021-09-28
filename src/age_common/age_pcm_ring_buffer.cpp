@@ -37,7 +37,7 @@
 
 age::pcm_ring_buffer::pcm_ring_buffer(int max_buffered_samples)
     : m_buffer_size(std::max(1, max_buffered_samples)),
-      m_buffer(static_cast<unsigned>(m_buffer_size), pcm_sample())
+      m_buffer(static_cast<unsigned>(m_buffer_size), pcm_frame())
 {
 }
 
@@ -59,9 +59,9 @@ int age::pcm_ring_buffer::get_buffered_samples() const
     return m_buffered_samples;
 }
 
-const age::pcm_sample* age::pcm_ring_buffer::get_buffered_samples_ptr(int& available_stereo_samples) const
+const age::pcm_frame* age::pcm_ring_buffer::get_buffered_samples_ptr(int& available_stereo_samples) const
 {
-    const pcm_sample* result    = nullptr;
+    const pcm_frame* result    = nullptr;
     int               available = 0;
 
     if (m_buffered_samples > 0)
@@ -135,7 +135,7 @@ void age::pcm_ring_buffer::add_samples(const pcm_vector& samples_to_add, int num
 
 
 
-void age::pcm_ring_buffer::set_to(pcm_sample sample)
+void age::pcm_ring_buffer::set_to(pcm_frame sample)
 {
     AGE_ASSERT_BUFFERED_SAMPLES
 

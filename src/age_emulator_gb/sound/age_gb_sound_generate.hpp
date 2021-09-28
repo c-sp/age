@@ -58,7 +58,7 @@ namespace age
                 for (int max = buffer_index + samples; buffer_index < max; ++buffer_index)
                 {
                     auto idx = static_cast<unsigned>(buffer_index);
-                    buffer[idx].m_stereo_sample += output_sample;
+                    buffer[idx].set_32bits(buffer[idx].get_32bits() + output_sample);
                 }
 
                 samples_remaining -= samples;

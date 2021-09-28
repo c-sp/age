@@ -329,7 +329,7 @@ namespace
             const age::pcm_vector& audio_buffer = emulator.get_audio_buffer();
             AGE_ASSERT(audio_buffer.size() >= samples_per_frame)
 
-            const age::pcm_sample first_sample = emulator.get_audio_buffer()[0];
+            const age::pcm_frame first_sample = emulator.get_audio_buffer()[0];
 
             auto count = std::count(begin(audio_buffer),
                                     begin(audio_buffer) + samples_per_frame,

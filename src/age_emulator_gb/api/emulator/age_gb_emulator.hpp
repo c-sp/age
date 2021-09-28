@@ -27,7 +27,7 @@
 #include <emulator/age_gb_types.hpp>
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
-#include <pcm/age_pcm_sample.hpp>
+#include <pcm/age_pcm_frame.hpp>
 
 
 
@@ -94,7 +94,7 @@ namespace age
         [[nodiscard]] const pixel_vector& get_screen_front_buffer() const;
 
         //!
-        //! \brief Get the vector of {@link pcm_sample}s calculated by the last
+        //! \brief Get the vector of {@link pcm_frame}s calculated by the last
         //! call to emulate().
         //!
         //! You will have to handle these samples before the next call to

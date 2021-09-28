@@ -63,7 +63,7 @@ namespace age
 
 
 
-    // typedefs
+    // types
     // (define the STL integer types as part of the age namespace for less verbose code)
 
     using uint8_t  = std::uint8_t;
@@ -92,6 +92,10 @@ namespace age
     constexpr int16_t int16_t_min = std::numeric_limits<int16_t>::min();
     constexpr int32_t int32_t_max = std::numeric_limits<int32_t>::max();
 
+
+
+    // utility functions
+
     //!
     //! Convert the specified enum value to the associated value of the underlying type.
     //! See also: https://stackoverflow.com/a/14589519
@@ -102,6 +106,17 @@ namespace age
     constexpr auto to_underlying(Enum e) -> typename std::underlying_type<Enum>::type
     {
         return static_cast<typename std::underlying_type<Enum>::type>(e);
+    }
+
+    //!
+    //! Return the size in bytes of the specified array's data.
+    //! This is not necessarily equal to sizeof(arr) as the latter may include
+    //! additional members in std::array after the actual array data.
+    //!
+    template<typename Type, size_t Size>
+    constexpr auto sizeof_array(std::array<Type, Size> arr) -> std::size_t
+    {
+        return arr.size() * sizeof(typename std::array<Type, Size>::value_type);
     }
 
 } // namespace age

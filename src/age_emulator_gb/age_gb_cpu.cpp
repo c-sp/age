@@ -43,26 +43,25 @@ namespace
             0x60,
         }};
 
-    constexpr const std::array<const char*, 17> interrupt_name
-        = {{
-            "",
-            "v-blank",
-            "lcd",
-            "",
-            "timer",
-            "",
-            "",
-            "",
-            "serial transfer",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "joypad",
-        }};
+    constexpr const std::array interrupt_name{
+        "",
+        "v-blank",
+        "lcd",
+        "",
+        "timer",
+        "",
+        "",
+        "",
+        "serial transfer",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "joypad",
+    };
 
 } // namespace
 

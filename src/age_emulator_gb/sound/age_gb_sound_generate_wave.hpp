@@ -114,7 +114,7 @@ namespace age
         void generate_samples(pcm_vector& buffer, int buffer_index, int samples_to_generate)
         {
             m_wave_ram_just_read = false;
-            gb_sample_generator<gb_wave_generator>::generate_samples(buffer, buffer_index, samples_to_generate);
+            gb_sample_generator<gb_wave_generator<ChannelId>>::generate_samples(buffer, buffer_index, samples_to_generate);
             m_wave_ram_just_read &= gb_sample_generator<gb_wave_generator<ChannelId>>::frequency_timer_just_reloaded();
         }
 

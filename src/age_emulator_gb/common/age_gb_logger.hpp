@@ -199,7 +199,7 @@ namespace age
             AGE_UNUSED(category);
             AGE_UNUSED(clock);
             AGE_UNUSED(div_offset);
-            return gb_log_message_stream();
+            return {};
         }
 
         [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const

@@ -29,8 +29,8 @@
 
 #include <age_types.hpp>
 #include <pcm/age_downsampler.hpp>
+#include <pcm/age_pcm_frame.hpp>
 #include <pcm/age_pcm_ring_buffer.hpp>
-#include <pcm/age_pcm_sample.hpp>
 
 #include "age_ui_qt.hpp"
 
@@ -154,7 +154,7 @@ namespace age
         //! - the specified format's sample rate is greater than 1
         //!
         //! The root cause of these expectations is that we are streaming audio data
-        //! in form of {@link pcm_sample}s.
+        //! in form of {@link pcm_frame}s.
         //! The behaviour when specifying parameters that do not meet these expectations
         //! is undefined.
         //!
@@ -170,18 +170,18 @@ namespace age
 
 
         //!
-        //! \brief Copy the audio data specified as {@link pcm_sample}s
+        //! \brief Copy the audio data specified as {@link pcm_frame}s
         //! to the intermediate buffer.
         //!
         //! To stream audio data from the intermediate buffer to the audio output
         //! device, call stream_audio_data().
         //!
-        //! \param samples The {@link pcm_sample}s to be buffered.
+        //! \param samples The {@link pcm_frame}s to be buffered.
         //!
         void buffer_samples(const pcm_vector& samples);
 
         //!
-        //! \brief Copy a specific amount of silent {@link pcm_sample}s
+        //! \brief Copy a specific amount of silent {@link pcm_frame}s
         //! to the intermediate buffer.
         //!
         //! The amount of silent samples copied is calculated automatically, so that

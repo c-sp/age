@@ -25,7 +25,7 @@
 #include <vector>
 
 #include <age_types.hpp>
-#include <pcm/age_pcm_sample.hpp>
+#include <pcm/age_pcm_frame.hpp>
 
 
 
@@ -48,8 +48,8 @@ namespace age
         virtual void add_input_samples(const pcm_vector& samples) = 0;
 
     protected:
-        void add_output_sample(int16_t left, int16_t right);
-        void add_output_sample(pcm_sample sample);
+        void add_output_samples(int16_t left_sample, int16_t right_sample);
+        void add_output_samples(pcm_frame frame);
 
         //!
         //! This variable contains the number of input samples required for
@@ -73,6 +73,9 @@ namespace age
     //!
     class downsampler_linear : public downsampler
     {
+        AGE_DISABLE_COPY(downsampler_linear);
+        AGE_DISABLE_MOVE(downsampler_linear);
+
     public:
         using downsampler::downsampler;
         ~downsampler_linear() override = default;
@@ -80,18 +83,21 @@ namespace age
         void add_input_samples(const pcm_vector& samples) override;
 
     private:
-        void add_output_sample(const pcm_sample& left_sample, const pcm_sample& right_sample);
+        void add_output_sample(const pcm_frame& left_frame, const pcm_frame& right_frame);
 
         int m_right_sample_index    = 1; // 0 = use last sample as left, 1 = use first sample of new samples as left
         int m_right_sample_fraction = 0;
 
-        pcm_sample m_last_input_sample;
+        pcm_frame m_last_input_sample;
     };
 
 
 
     class downsampler_low_pass : public downsampler
     {
+        AGE_DISABLE_COPY(downsampler_low_pass);
+        AGE_DISABLE_MOVE(downsampler_low_pass);
+
     public:
         using downsampler::downsampler;
         ~downsampler_low_pass() override = default;
@@ -117,6 +123,9 @@ namespace age
 
     class downsampler_kaiser_low_pass : public downsampler_low_pass
     {
+        AGE_DISABLE_COPY(downsampler_kaiser_low_pass);
+        AGE_DISABLE_MOVE(downsampler_kaiser_low_pass);
+
     public:
         downsampler_kaiser_low_pass(int input_sampling_rate, int output_sampling_rate, double ripple);
         ~downsampler_kaiser_low_pass() override = default;

@@ -55,15 +55,15 @@ void age::downsampler::set_volume(float volume)
     m_volume = std::min(1.F, std::max(0.F, volume));
 }
 
-void age::downsampler::add_output_sample(int16_t left, int16_t right)
+void age::downsampler::add_output_samples(int16_t left_sample, int16_t right_sample)
 {
-    add_output_sample(pcm_sample(left, right));
+    add_output_samples(pcm_frame(left_sample, right_sample));
 }
 
-void age::downsampler::add_output_sample(pcm_sample sample)
+void age::downsampler::add_output_samples(pcm_frame frame)
 {
-    sample *= m_volume;
-    m_output_samples.push_back(sample);
+    frame *= m_volume;
+    m_output_samples.push_back(frame);
 }
 
 
@@ -132,21 +132,21 @@ void age::downsampler_linear::add_input_samples(const pcm_vector& samples)
 
 
 
-void age::downsampler_linear::add_output_sample(const pcm_sample& left_sample, const pcm_sample& right_sample)
+void age::downsampler_linear::add_output_sample(const pcm_frame& left_frame, const pcm_frame& right_frame)
 {
     AGE_ASSERT(m_right_sample_fraction < 0x10000)
 
     int diff[2], interpolated[2];
 
-    diff[0] = right_sample.m_samples[0];
-    diff[1] = right_sample.m_samples[1];
-    diff[0] -= left_sample.m_samples[0];
-    diff[1] -= left_sample.m_samples[1];
+    diff[0] = right_frame.m_left_sample;
+    diff[1] = right_frame.m_right_sample;
+    diff[0] -= left_frame.m_left_sample;
+    diff[1] -= left_frame.m_right_sample;
 
-    interpolated[0] = left_sample.m_samples[0] + ((diff[0] * m_right_sample_fraction) >> 16);
-    interpolated[1] = left_sample.m_samples[1] + ((diff[1] * m_right_sample_fraction) >> 16);
+    interpolated[0] = left_frame.m_left_sample + ((diff[0] * m_right_sample_fraction) >> 16);
+    interpolated[1] = left_frame.m_right_sample + ((diff[1] * m_right_sample_fraction) >> 16);
 
-    downsampler::add_output_sample(static_cast<int16_t>(interpolated[0]), static_cast<int16_t>(interpolated[1]));
+    downsampler::add_output_samples(static_cast<int16_t>(interpolated[0]), static_cast<int16_t>(interpolated[1]));
 
     m_right_sample_fraction += m_input_output_ratio;
     AGE_ASSERT(m_right_sample_fraction > 0)
@@ -195,12 +195,12 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector& samples)
             for (size_t i = 0; i < m_fir_values.size(); ++i)
             {
                 AGE_ASSERT(m_next_output_index >= 0)
-                const pcm_sample& sample = m_prev_samples[static_cast<unsigned>(m_next_output_index) + i];
+                const pcm_frame& sample = m_prev_samples[static_cast<unsigned>(m_next_output_index) + i];
 
                 // this is no accurate downsampling as we ignore the sample index fraction
                 //  => we don't reconstruct the actual data for non-integer downsampling
-                int64_t sample0 = sample.m_samples[0];
-                int64_t sample1 = sample.m_samples[1];
+                int64_t sample0 = sample.m_left_sample;
+                int64_t sample1 = sample.m_right_sample;
 
                 int32_t fir_value = m_fir_values[i];
                 sample0 *= fir_value;
@@ -212,7 +212,7 @@ void age::downsampler_low_pass::add_input_samples(const pcm_vector& samples)
 
             result0 >>= 31;
             result1 >>= 31;
-            add_output_sample(static_cast<int16_t>(result0), static_cast<int16_t>(result1));
+            add_output_samples(static_cast<int16_t>(result0), static_cast<int16_t>(result1));
 
             m_next_output_fraction += m_input_output_ratio;
             AGE_ASSERT(m_next_output_fraction > 0)

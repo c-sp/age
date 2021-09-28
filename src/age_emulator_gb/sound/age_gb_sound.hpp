@@ -23,7 +23,7 @@
 
 #include <age_debug.hpp>
 #include <age_types.hpp>
-#include <pcm/age_pcm_sample.hpp>
+#include <pcm/age_pcm_frame.hpp>
 
 #include "../common/age_gb_clock.hpp"
 #include "../common/age_gb_device.hpp"
@@ -140,7 +140,7 @@ namespace age
         gb_sound_channel2 m_c2{0x3F, this};
 
         uint8_t           m_nr30 = 0, m_nr32 = 0, m_nr34 = 0;
-        uint8_array<16>   m_c3_wave_ram;
+        uint8_array<16>   m_c3_wave_ram{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         gb_sound_channel3 m_c3{0xFF, this};
 
         uint8_t           m_nr44 = 0;

@@ -30,7 +30,7 @@
 #define LOG_STREAM(x)
 #endif
 
-constexpr int sizeof_pcm_sample = sizeof(age::pcm_sample);
+constexpr int sizeof_pcm_frame = sizeof(age::pcm_frame);
 
 
 
@@ -149,7 +149,7 @@ void age::qt_audio_output::buffer_silence()
 
         if (bytes_free > 0)
         {
-            int samples_free = bytes_free / sizeof_pcm_sample;
+            int samples_free = bytes_free / sizeof_pcm_frame;
 
             if (m_buffer.get_buffered_samples() < samples_free)
             {
@@ -165,7 +165,7 @@ void age::qt_audio_output::stream_audio_data()
     if (m_output != nullptr)
     {
         LOG_STREAM("free bytes: " << m_output->bytesFree() << ", buffered bytes "
-                                  << m_buffer.get_buffered_samples() * sizeof_pcm_sample);
+                                  << m_buffer.get_buffered_samples() * sizeof_pcm_frame);
 
         // wait for ring buffer to fill up on buffer underflow
         if (m_output->bytesFree() == m_output->bufferSize())
@@ -227,7 +227,7 @@ void age::qt_audio_output::reset()
 
         LOG("current latency is " << m_latency_milliseconds);
         int buffered_samples = m_latency_milliseconds * sample_rate / 1000;
-        int buffered_bytes   = buffered_samples * sizeof_pcm_sample;
+        int buffered_bytes   = buffered_samples * sizeof_pcm_frame;
 
         m_output->setBufferSize(buffered_bytes);
 
@@ -237,7 +237,7 @@ void age::qt_audio_output::reset()
             LOG("changing ring buffer size from " << m_buffer.get_max_buffered_samples() << " to " << buffered_samples);
             m_buffer = pcm_ring_buffer(buffered_samples);
         }
-        m_buffer.set_to(pcm_sample());
+        m_buffer.set_to(pcm_frame());
 
         // create a new downsampler
         create_downsampler();
@@ -252,7 +252,7 @@ void age::qt_audio_output::reset()
 
         // create the silence buffer
         AGE_ASSERT(buffered_samples >= 0);
-        m_silence = pcm_vector(static_cast<unsigned>(buffered_samples), pcm_sample());
+        m_silence = pcm_vector(static_cast<unsigned>(buffered_samples), pcm_frame());
     }
 }
 
@@ -309,20 +309,20 @@ int age::qt_audio_output::write_samples()
         int bytes_free = m_output->bytesFree();
         if (bytes_free > 0)
         {
-            int samples_free = bytes_free / sizeof_pcm_sample;
+            int samples_free = bytes_free / sizeof_pcm_frame;
 
             // check how many samples we have available for streaming
             int               samples_available = 0;
-            const pcm_sample* buffer            = m_buffer.get_buffered_samples_ptr(samples_available);
+            const pcm_frame* buffer            = m_buffer.get_buffered_samples_ptr(samples_available);
 
             // write samples to audio output device
             int         samples_to_write = qMin(samples_available, samples_free);
             const char* char_buffer      = reinterpret_cast<const char*>(buffer);
 
-            qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_sample);
+            qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_frame);
 
             // calculate the number of samples that were written
-            qint64 tmp = bytes_written / sizeof_pcm_sample;
+            qint64 tmp = bytes_written / sizeof_pcm_frame;
             AGE_ASSERT((tmp >= 0) && (tmp <= samples_to_write));
             samples_written = static_cast<int>(tmp);
 

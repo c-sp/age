@@ -108,7 +108,7 @@ namespace age
             volume_SO2 *= (shifted_nr51 >> 4) & 1;
 
             // SO1 is the right channel, SO2 is the left channel
-            m_multiplier = pcm_sample(static_cast<int16_t>(volume_SO2), static_cast<int16_t>(volume_SO1)).m_stereo_sample;
+            m_multiplier = pcm_frame(static_cast<int16_t>(volume_SO2), static_cast<int16_t>(volume_SO1)).get_32bits();
         }
 
         // logging code is header-only to allow compile time optimization

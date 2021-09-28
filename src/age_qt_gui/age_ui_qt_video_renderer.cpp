@@ -39,23 +39,23 @@ age::qt_video_renderer::qt_video_renderer()
     qt_init_shader_program(m_program, ":/age_ui_qt_render_vsh.glsl", ":/age_ui_qt_render_fsh.glsl");
 
     // vertex buffer
-    qt_vertex_data vertices[] = {
-        {QVector3D(0, 0, 0), QVector2D(0, 0)},
-        {QVector3D(0, 1, 0), QVector2D(0, 1)},
-        {QVector3D(1, 0, 0), QVector2D(1, 0)},
-        {QVector3D(1, 1, 0), QVector2D(1, 1)},
+    std::array vertices{
+        qt_vertex_data{QVector3D(0, 0, 0), QVector2D(0, 0)},
+        qt_vertex_data{QVector3D(0, 1, 0), QVector2D(0, 1)},
+        qt_vertex_data{QVector3D(1, 0, 0), QVector2D(1, 0)},
+        qt_vertex_data{QVector3D(1, 1, 0), QVector2D(1, 1)},
     };
 
     m_vertices.create();
     m_vertices.bind();
-    m_vertices.allocate(vertices, 4 * sizeof(qt_vertex_data));
+    m_vertices.allocate(vertices.data(), static_cast<int>(sizeof_array(vertices)));
 
     // index buffer
-    GLushort indices[] = {0, 1, 2, 3};
+    std::array<GLushort, 4> indices{0, 1, 2, 3};
 
     m_indices.create();
     m_indices.bind();
-    m_indices.allocate(indices, 4 * sizeof(GLushort));
+    m_indices.allocate(indices.data(), static_cast<int>(sizeof_array(indices)));
 }
 
 age::qt_video_renderer::~qt_video_renderer()
@@ -107,7 +107,7 @@ void age::qt_video_renderer::render(const QList<GLuint>& textures_to_render)
 
     for (int i = 0; i < textures_to_render.size(); ++i)
     {
-        m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1.F / (i + 1)));
+        m_program.setUniformValue("u_color", QVector4D(1, 1, 1, 1.F / (static_cast<float>(i) + 1)));
         glBindTexture(GL_TEXTURE_2D, textures_to_render[i]);
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
     }

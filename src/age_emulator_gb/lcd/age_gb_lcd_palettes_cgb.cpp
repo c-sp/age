@@ -72,14 +72,14 @@ namespace
     //                    (1.0 - sat) * 0.0820,       (1.0 - sat) * 0.0820,       (1.0 - sat) * 0.0820 + sat, 1.0,
     //                    0.0,                        0.0,                        0.0,                        1.0);
     // color *= adjust;
-    constexpr std::array<float, 16> color = mult_4x4({0.82, 0.24, -0.06, 0,
-                                                      0.125, 0.665, 0.21, 0,
-                                                      0.195, 0.075, 0.73, 0,
-                                                      0, 0, 0, 0},
-                                                     {(1.0 - sat) * 0.3086 + sat, (1.0 - sat) * 0.6094, (1.0 - sat) * 0.0820, 0,
-                                                      (1.0 - sat) * 0.3086, (1.0 - sat) * 0.6094 + sat, (1.0 - sat) * 0.0820, 0,
-                                                      (1.0 - sat) * 0.3086, (1.0 - sat) * 0.6094, (1.0 - sat) * 0.0820 + sat, 0,
-                                                      1, 1, 1, 1});
+    constexpr auto color = mult_4x4({0.82, 0.24, -0.06, 0,
+                                     0.125, 0.665, 0.21, 0,
+                                     0.195, 0.075, 0.73, 0,
+                                     0, 0, 0, 0},
+                                    {(1.0 - sat) * 0.3086 + sat, (1.0 - sat) * 0.6094, (1.0 - sat) * 0.0820, 0,
+                                     (1.0 - sat) * 0.3086, (1.0 - sat) * 0.6094 + sat, (1.0 - sat) * 0.0820, 0,
+                                     (1.0 - sat) * 0.3086, (1.0 - sat) * 0.6094, (1.0 - sat) * 0.0820 + sat, 0,
+                                     1, 1, 1, 1});
 
     float gb_to_float(unsigned gb)
     {
@@ -143,8 +143,8 @@ age::pixel age::correct_cgb_color(unsigned cgb_rgb15)
     // a = clamp(a * lum, 0, 1);
 
     // screen = color * screen;
-    r = color[0] * r + color[1] * g + color[2] * b; // + color[3] * a;
-    g = color[4] * r + color[5] * g + color[6] * b; // + color[7] * a;
+    r = color[0] * r + color[1] * g + color[2] * b;  // + color[3] * a;
+    g = color[4] * r + color[5] * g + color[6] * b;  // + color[7] * a;
     b = color[8] * r + color[9] * g + color[10] * b; // + color[11] * a;
     // a = color[12] * r + color[13] * g + color[14] * b + color[15] * a;
 

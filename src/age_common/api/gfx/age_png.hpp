@@ -24,6 +24,7 @@
 // the following code requires libpng
 #ifdef LIBPNG_FOUND
 
+#include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
 
 #include <csetjmp>
@@ -94,9 +95,9 @@ namespace age
                                     int   screen_height)
     {
         // check png signature
-        std::uint8_t sig[8];
-        fread(sig, 1, 8, fp);
-        if (!png_check_sig(sig, 8))
+        uint8_array<8> sig;
+        fread(sig.data(), 1, 8, fp);
+        if (!png_check_sig(sig.data(), 8))
         {
             return {}; // bad png signature
         }

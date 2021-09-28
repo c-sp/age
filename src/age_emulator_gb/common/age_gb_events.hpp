@@ -52,11 +52,12 @@ namespace age
     public:
         gb_sorted_events();
 
-        void              schedule_event(gb_event event, int for_clock_cycle);
-        bool              remove_event(gb_event event);
-        [[nodiscard]] int get_event_cycle(gb_event event) const;
-        gb_event          poll_next_event(int for_clock_cycle);
-        void              set_back_clock(int clock_cycle_offset);
+        void                 schedule_event(gb_event event, int for_clock_cycle);
+        bool                 remove_event(gb_event event);
+        [[nodiscard]] int    get_event_cycle(gb_event event) const;
+        [[nodiscard]] size_t get_events_schuled() const;
+        gb_event             poll_next_event(int for_clock_cycle);
+        void                 set_back_clock(int clock_cycle_offset);
 
     private:
         union scheduled_event
@@ -71,7 +72,7 @@ namespace age
 
         std::array<int, to_underlying(gb_event::none)> m_active_events{};
 
-        static_assert(sizeof(int) == 4, "gb_events requires int to be exactly 32 bits wide");
+        static_assert(sizeof(int) == 4, "gb_sorted_events requires int to be exactly 32 bits wide");
         std::vector<scheduled_event> m_events;
     };
 
@@ -99,22 +100,7 @@ namespace age
             return m_clock.log(gb_log_category::lc_events);
         }
 
-        union scheduled_event
-        {
-            struct
-            {
-                gb_event m_event;
-                int      m_clock_cycle;
-            } m_struct;
-            int64_t m_int;
-        };
-
         const gb_clock& m_clock;
-
-        std::array<int, to_underlying(gb_event::none)> m_active_events{};
-
-        static_assert(sizeof(int) == 4, "gb_events requires int to be exactly 32 bits wide");
-        std::vector<scheduled_event> m_events;
     };
 
 } // namespace age

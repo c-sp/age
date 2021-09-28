@@ -106,6 +106,11 @@ int age::gb_sorted_events::get_event_cycle(gb_event event) const
     return m_active_events[to_underlying(event)];
 }
 
+age::size_t age::gb_sorted_events::get_events_schuled() const
+{
+    return m_events.size();
+}
+
 
 
 age::gb_event age::gb_sorted_events::poll_next_event(int for_clock_cycle)
@@ -168,7 +173,7 @@ void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
 
     log() << "event " << log_dec(to_underlying(event))
           << " scheduled for clock cycle " << ev_cycle
-          << ", " << m_events.size() << " event(s) scheduled total";
+          << ", " << get_events_schuled() << " event(s) scheduled total";
 }
 
 
@@ -179,7 +184,7 @@ void age::gb_events::remove_event(gb_event event)
     if (removed)
     {
         log() << "event " << log_dec(to_underlying(event)) << " removed"
-              << ", " << m_events.size() << " event(s) still scheduled";
+              << ", " << get_events_schuled() << " event(s) still scheduled";
     }
 }
 
@@ -198,7 +203,7 @@ age::gb_event age::gb_events::poll_event()
     if (event != gb_event::none)
     {
         log() << "event " << to_underlying(event) << " polled"
-              << ", " << m_events.size() << " event(s) still scheduled";
+              << ", " << get_events_schuled() << " event(s) still scheduled";
     }
     return event;
 }

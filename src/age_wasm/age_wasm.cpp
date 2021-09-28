@@ -191,7 +191,7 @@ const age::pixel* gb_get_screen_front_buffer()
 
 
 EMSCRIPTEN_KEEPALIVE
-const age::pcm_sample* gb_get_audio_buffer()
+const age::pcm_frame* gb_get_audio_buffer()
 {
     return (downsampler != nullptr) ? downsampler->get_output_samples().data() : nullptr;
 }

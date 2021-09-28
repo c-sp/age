@@ -131,8 +131,8 @@ namespace
                    const path_matcher&                                      use_file,
                    const std::function<void(const std::filesystem::path&)>& file_callback)
     {
-        const std::array<std::string, 3> rom_file_extensions = {{".gb", ".gbc", ".cgb"}};
-        const auto*                      ext_end             = end(rom_file_extensions);
+        const std::array<std::string, 3> rom_file_extensions{".gb", ".gbc", ".cgb"};
+        const auto*                      ext_end = end(rom_file_extensions);
 
         traverse_directory(path, [&](const std::filesystem::path& file_path) {
             auto file_extension = file_path.extension().string();
@@ -266,7 +266,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
         if (opts.m_same_suite)
         {
             find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
-              schedule_rom(rom_path, schedule_rom_same_suite);
+                schedule_rom(rom_path, schedule_rom_same_suite);
             });
         }
 

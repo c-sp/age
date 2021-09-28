@@ -41,13 +41,13 @@ void age::gb_joypad::write_p1(uint8_t byte)
     // p14 low?
     if ((byte & gb_p14) == 0)
     {
-        byte &= 0xF0 | m_p14;
+        byte &= 0xF0U | m_p14;
     }
 
     // p15 low?
     if ((byte & gb_p15) == 0)
     {
-        byte &= 0xF0 | m_p15;
+        byte &= 0xF0U | m_p15;
     }
 
     // interrupt: p10-p13 changed from high to low

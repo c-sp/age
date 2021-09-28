@@ -35,8 +35,8 @@
 namespace age
 {
 
-    constexpr int8_t gb_cpu_state_ei     = 0x01;
-    constexpr int8_t gb_cpu_state_frozen = 0x02;
+    constexpr uint8_t gb_cpu_state_ei     = 0x01;
+    constexpr uint8_t gb_cpu_state_frozen = 0x02;
 
 
 
@@ -90,7 +90,7 @@ namespace age
         uint8_t m_l = 0;
 
         uint8_t m_prefetched_opcode = 0;
-        int8_t  m_cpu_state         = 0;
+        uint8_t m_cpu_state         = 0;
 
         bool m_ld_b_b = false; //!< used to indicate a finished test rom
     };
