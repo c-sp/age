@@ -21,6 +21,7 @@
 //! \file
 //!
 
+#include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 
 
@@ -45,24 +46,37 @@ namespace age
     public:
         gb_device(const uint8_vector& rom, gb_device_type device_type);
 
-        [[nodiscard]] bool cgb_in_dmg_mode() const
-        {
-            return m_device_mode == gb_device_mode::cgb_in_dmg_mode;
-        }
-
-        [[nodiscard]] bool cgb_mode() const
-        {
-            return m_device_mode == gb_device_mode::cgb;
-        }
-
+        //!
+        //! The emulated device is a Game Boy Color.
+        //!
         [[nodiscard]] bool is_cgb_device() const
         {
             return m_device_mode != gb_device_mode::dmg;
         }
 
+        //!
+        //! The emulated device is a Game Boy Color with CPU-CGB-E.
+        //!
         [[nodiscard]] bool is_cgb_e_device() const
         {
             return m_device_type == gb_device_type::cgb_e;
+        }
+
+        //!
+        //! The emulated Game Boy Color is running in DMG mode.
+        //!
+        [[nodiscard]] bool cgb_in_dmg_mode() const
+        {
+            return m_device_mode == gb_device_mode::cgb_in_dmg_mode;
+        }
+
+        //!
+        //! All Game Boy Color features are available.
+        //! The emulated Game Boy Color is NOT running in DMG mode.
+        //!
+        [[nodiscard]] bool cgb_mode() const
+        {
+            return m_device_mode == gb_device_mode::cgb;
         }
 
     private:

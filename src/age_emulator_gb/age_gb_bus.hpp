@@ -32,6 +32,7 @@
 
 #include "age_gb_joypad.hpp"
 #include "age_gb_memory.hpp"
+#include "age_gb_oam_dma.hpp"
 #include "age_gb_serial.hpp"
 #include "age_gb_timer.hpp"
 
@@ -143,6 +144,7 @@ namespace age
                gb_timer&               timer,
                gb_joypad&              joypad,
                gb_serial&              serial);
+
         ~gb_bus() = default;
 
         uint8_t read_byte(uint16_t address);
@@ -157,10 +159,7 @@ namespace age
 
     private:
         void reset_div(bool during_stop);
-        void write_dma(uint8_t value);
         void write_hdma5(uint8_t value);
-
-        void handle_oam_dma();
 
         const gb_device&        m_device;
         gb_clock&               m_clock;
@@ -172,6 +171,7 @@ namespace age
         gb_timer&               m_timer;
         gb_joypad&              m_joypad;
         gb_serial&              m_serial;
+        gb_oam_dma              m_oam_dma;
 
         uint8_array<0x200> m_high_ram; // 0xFE00 - 0xFFFF (including OAM ram and registers for easier handling)
         uint8_t            m_rp   = 0x3E;
@@ -179,12 +179,6 @@ namespace age
         uint8_t            m_un72 = 0;
         uint8_t            m_un73 = 0;
         uint8_t            m_un75 = 0x8F;
-
-        uint8_t m_oam_dma_byte;
-        bool    m_oam_dma_active     = false;
-        int     m_oam_dma_address    = 0;
-        int     m_oam_dma_offset     = 0;
-        int     m_oam_dma_last_cycle = gb_no_clock_cycle;
 
         uint8_t m_hdma5           = 0xFF;
         int     m_dma_source      = 0;

@@ -53,18 +53,23 @@ age::uint8_t age::gb_lcd::read_oam(int offset)
     return result;
 }
 
-void age::gb_lcd::write_oam(int offset, uint8_t value, bool during_oam_dma)
+void age::gb_lcd::write_oam(int offset, uint8_t value)
 {
     gb_current_line line{};
-    if (!is_oam_writable(line) && !during_oam_dma)
+    if (!is_oam_writable(line))
     {
         m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value) << " ignored"
                                                  << " (OAM not writable, " << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
         return;
     }
-    update_state(); // make sure everything is rendered up to now
     m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value)
                                              << " (OAM writable, " << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+    write_oam_dma(offset, value);
+}
+
+void age::gb_lcd::write_oam_dma(int offset, uint8_t value)
+{
+    update_state(); // make sure everything is rendered up to now
     m_sprites.write_oam(offset, value);
 }
 
@@ -74,21 +79,24 @@ bool age::gb_lcd::is_oam_readable(gb_current_line& line)
     {
         return true;
     }
-
     line = calculate_line();
-    AGE_ASSERT(line.m_line < gb_lcd_line_count)
 
-    if (line.m_line_clks == gb_clock_cycles_per_lcd_line - 1)
+    int cgb_e_ofs = m_device.is_cgb_e_device() && m_clock.is_double_speed() ? 1 : 0;
+    if (line.m_line_clks >= gb_clock_cycles_per_lcd_line - 1 - cgb_e_ofs)
     {
+        //! \todo not during v-blank
         return false;
     }
+    cgb_e_ofs = m_device.is_cgb_e_device() && !m_clock.is_double_speed() ? 1 : 0;
+    // different timing for frame 0 line 0
     if (m_line.is_first_frame() && !line.m_line)
     {
         return (line.m_line_clks < 82)
-               || (line.m_line_clks >= (82 + 172 + (m_render.m_scx & 7)));
+               || (line.m_line_clks >= (82 + 172 + (m_render.m_scx & 7) + cgb_e_ofs));
     }
+    // timing for lines 1-153
     return (line.m_line >= gb_screen_height)
-           || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));
+           || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7) + cgb_e_ofs));
 }
 
 bool age::gb_lcd::is_oam_writable(gb_current_line& line)
@@ -97,33 +105,26 @@ bool age::gb_lcd::is_oam_writable(gb_current_line& line)
     {
         return true;
     }
-    if (m_device.is_cgb_device())
-    {
-        return is_oam_readable(line);
-    }
-
     line = calculate_line();
-    AGE_ASSERT(line.m_line < gb_lcd_line_count)
 
-    if (line.m_line_clks == gb_clock_cycles_per_lcd_line - 1)
+    if (line.m_line_clks >= gb_clock_cycles_per_lcd_line - 1)
     {
+        //! \todo not during v-blank
         return false;
     }
+    // different timing for frame 0 line 0
     if (m_line.is_first_frame() && !line.m_line)
     {
-        // What's going on here? (write-timing-oam-dmgC.asm)
-        // DMG-C: < 84 cycles
-        //        > 255 cycles, < 259 (scx 0)
-        //        > 255 cycles, < 259 (scx 1)
-        //        > 255 cycles, < 259 (scx 2)
-        //        > 255 cycles, < 259 (scx 3)
-        //        > 255 cycles, < 259 (scx 4)
-        //        > 255 cycles, < 259 (scx 5)
-        //        > 259 cycles, < 263 (scx 6)
-        //        > 259 cycles, < 263 (scx 7)
+        if (m_device.is_cgb_device())
+        {
+            return (line.m_line_clks < 82)
+                   || (line.m_line_clks >= (82 + 172 + (m_render.m_scx & 7)));
+        }
+        // This is odd (write-timing-oam-dmgC.asm) ...
         return (line.m_line_clks < 84)
                || (line.m_line_clks >= (84 + 172 + (m_render.m_scx >= 6 ? 4 : 0)));
     }
+    // timing for lines 1-153
     return (line.m_line >= gb_screen_height)
            || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));
 }
@@ -146,7 +147,7 @@ bool age::gb_lcd::is_video_ram_accessible()
         // DMG-C:                < 83 cycles
         // CGB-B/E single speed: < 84 cycles
         // CGB-B/E double speed: < 82 cycles
-        int m3_edge = !m_device.is_cgb_device() ? 83
+        int m3_edge = !m_device.is_cgb_device()   ? 83
                       : m_clock.is_double_speed() ? 82
                                                   : 84;
         accessible  = (line.m_line_clks < m3_edge)

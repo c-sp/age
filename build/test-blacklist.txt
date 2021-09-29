@@ -11,11 +11,9 @@
 ###   age
 ###
 
-age-test-roms/lcd/ly-timing-cgbE.gb
-age-test-roms/lcd/mode-timing-cgbE.gb
 age-test-roms/lcd/mode2-obj-size-ds-cgb.gb
 age-test-roms/lcd/mode2-obj-size.gb
-age-test-roms/lcd/read-timing-oam-cgbE.gb
+age-test-roms/lcd/write-timing-oam-cgbBE.gb
 age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 
@@ -139,9 +137,6 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx3_2_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_vramr_2_dmg08_outFF_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_vramr_ds_1_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_vramw_2_dmg08_out55_cgb04c_outAA.gbc
 /gambatte/enable_display/ly0_m0irq_scx0_ds_1_cgb04c_outE0.gbc
 /gambatte/enable_display/ly0_m0irq_scx1_1_dmg08_cgb04c_outE0.gbc
 /gambatte/enable_display/ly0_m0irq_scx1_ds_1_cgb04c_outE0.gbc
@@ -180,10 +175,8 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 /gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
-/gambatte/oam_access/preread_ds_lcdoffset1_2_cgb04c_out3.gbc
 /gambatte/oam_access/prewrite_2_dmg08_out1_cgb04c_out0.gbc
 /gambatte/oam_access/prewrite_ds_2_cgb04c_out0.gbc
-/gambatte/oam_access/prewrite_ds_lcdoffset1_2_cgb04c_out0.gbc
 
 /gambatte/oamdma/
 /gambatte/scx_during_m3/
@@ -210,28 +203,18 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 ### failing tests
 
-/same-suite/apu/channel_1/channel_1_align.gb
-/same-suite/apu/channel_1/channel_1_align_cpu.gb
-/same-suite/apu/channel_1/channel_1_duty.gb
 /same-suite/apu/channel_1/channel_1_extra_length_clocking-cgb0B.gb
 /same-suite/apu/channel_1/channel_1_freq_change_timing-A.gb
 /same-suite/apu/channel_1/channel_1_freq_change_timing-cgb0BC.gb
 /same-suite/apu/channel_1/channel_1_freq_change_timing-cgbDE.gb
 /same-suite/apu/channel_1/channel_1_nrx2_glitch.gb
 /same-suite/apu/channel_1/channel_1_nrx2_speed_change.gb
-/same-suite/apu/channel_1/channel_1_restart.gb
-/same-suite/apu/channel_1/channel_1_restart_nrx2_glitch.gb
 /same-suite/apu/channel_1/channel_1_sweep.gb
 /same-suite/apu/channel_1/channel_1_sweep_restart.gb
 /same-suite/apu/channel_1/channel_1_volume.gb
-/same-suite/apu/channel_2/channel_2_align.gb
-/same-suite/apu/channel_2/channel_2_align_cpu.gb
-/same-suite/apu/channel_2/channel_2_duty.gb
 /same-suite/apu/channel_2/channel_2_extra_length_clocking-cgb0B.gb
 /same-suite/apu/channel_2/channel_2_nrx2_glitch.gb
 /same-suite/apu/channel_2/channel_2_nrx2_speed_change.gb
-/same-suite/apu/channel_2/channel_2_restart.gb
-/same-suite/apu/channel_2/channel_2_restart_nrx2_glitch.gb
 /same-suite/apu/channel_2/channel_2_volume.gb
 /same-suite/apu/channel_3/channel_3_and_glitch.gb
 /same-suite/apu/channel_3/channel_3_delay.gb
@@ -258,4 +241,3 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 /same-suite/apu/channel_4/channel_4_lfsr_restart_fast.gb
 
 /same-suite/dma
-/same-suite/ppu

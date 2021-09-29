@@ -59,7 +59,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
     if (m_c3.active())
     {
         update_state();
-        if (!m_cgb && !m_c3.wave_ram_just_read())
+        if (!m_device.cgb_mode() && !m_c3.wave_ram_just_read())
         {
             return 0xFF;
         }
@@ -80,7 +80,7 @@ void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
     if (m_c3.active())
     {
         update_state();
-        if (!m_cgb && !m_c3.wave_ram_just_read())
+        if (!m_device.cgb_mode() && !m_c3.wave_ram_just_read())
         {
             return;
         }
@@ -344,13 +344,13 @@ bool age::gb_sound::should_align_frequency_timer() const
     //            0/0       0  459656  7-8       speedchange5_ch1_duty0_pos6_to_pos7_timing_nop_1/2  (64 sample period)
     //            0/2       0  459656  7-8       speedchange5_nop_ch1_duty0_pos6_to_pos7_timing_1/2  (64 sample period)
 
-    return m_clock.is_double_speed() && (((m_clk_current_state + m_clock.get_div_offset()) & 2) != 0);
+    // CGB-E: align frequency timer to 1mhz
+    if (m_device.is_cgb_e_device())
+    {
+        return (((m_clk_bits_apu_on ^ m_clk_current_state) & 2) != 0);
+    }
 
-    //! \todo implement CGB model specific behaviour
-//    // align frequency timer to 1mhz
-//    int master_on_diff_bit = (m_clk_bits_apu_on ^ m_clk_current_state) & 2;
-//
-//    return (master_on_diff_bit != 0);
+    return m_clock.is_double_speed() && (((m_clk_current_state + m_clock.get_div_offset()) & 2) != 0);
 }
 
 
@@ -481,22 +481,22 @@ void age::gb_sound::set_wave_ram_byte(unsigned offset, uint8_t value)
 //
 //---------------------------------------------------------
 
-age::gb_sound::gb_sound(const gb_clock& clock,
-                        bool            cgb_features,
-                        pcm_vector&     samples)
-    : gb_sound_logger(clock, clock.get_clock_cycle()),
+age::gb_sound::gb_sound(const gb_device& device,
+                        const gb_clock&  clock,
+                        pcm_vector&      samples)
+    : gb_sound_logger(device, clock, clock.get_clock_cycle()),
       m_samples(samples),
-      m_cgb(cgb_features),
+      m_device(device),
       // initialize frame sequencer
       // (see test rom analysis)
       m_clk_next_apu_event((m_clk_current_state / gb_apu_event_clock_cycles + 1) * gb_apu_event_clock_cycles),
-      m_next_frame_sequencer_step(m_cgb ? 0 : 1)
+      m_next_frame_sequencer_step(m_device.cgb_mode() ? 0 : 1)
 {
     log() << "first frame sequencer step (" << log_dec(m_next_frame_sequencer_step)
           << ") at clock cycle " << m_clk_next_apu_event;
 
     // initialize wave ram
-    const uint8_array<0x10>& src = m_cgb ? cgb_wave_ram : dmg_wave_ram;
+    const uint8_array<0x10>& src = m_device.cgb_mode() ? cgb_wave_ram : dmg_wave_ram;
     std::copy(begin(src), end(src), begin(m_c3_wave_ram));
 
     // initialize channel 1
@@ -509,7 +509,7 @@ age::gb_sound::gb_sound(const gb_clock& clock,
     // the duty waveform reaches position 5
     // and that each waveform step takes 126 samples
     // (see test rom analysis)
-    int duty_pos5_clk = m_cgb ? 9500 : 44508;
+    int duty_pos5_clk = m_device.cgb_mode() ? 9500 : 44508;
     AGE_ASSERT(m_clk_current_state < duty_pos5_clk)
 
     int duty_clks_diff   = duty_pos5_clk - m_clk_current_state;

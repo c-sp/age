@@ -74,9 +74,21 @@ namespace age
         //!
         //! This clock runs at 4Mhz regardless of the current
         //! Game Boy Color speed setting.
-        [[nodiscard]] int    get_clock_cycle() const;
-        [[nodiscard]] int8_t get_machine_cycle_clocks() const;
-        [[nodiscard]] bool   is_double_speed() const;
+        [[nodiscard]] int get_clock_cycle() const
+        {
+            AGE_ASSERT(m_clock_cycle >= 0)
+            return m_clock_cycle;
+        }
+
+        [[nodiscard]] int8_t get_machine_cycle_clocks() const
+        {
+            return m_machine_cycle_clocks;
+        }
+
+        [[nodiscard]] bool is_double_speed() const
+        {
+            return m_machine_cycle_clocks == 2;
+        }
 
         void tick_machine_cycle();
         void tick_2_clock_cycles();

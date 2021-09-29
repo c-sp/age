@@ -58,6 +58,7 @@ namespace
             case age::gb_log_category::lc_interrupts: return "interrupts";
             case age::gb_log_category::lc_lcd: return "lcd";
             case age::gb_log_category::lc_lcd_oam: return "lcd-oam";
+            case age::gb_log_category::lc_lcd_oam_dma: return "lcd-oam-dma";
             case age::gb_log_category::lc_lcd_registers: return "lcd-reg";
             case age::gb_log_category::lc_lcd_vram: return "lcd-vram";
             case age::gb_log_category::lc_mbc: return "mbc";
@@ -83,7 +84,7 @@ namespace
         std::stringstream prefix_str;
         prefix_str << std::setw(8) << entry.m_clock << std::setw(0)
                    << "  " << div4 << "'" << div3 << "'" << div2 << "'" << div1
-                   << "  " << std::left << std::setw(10) << category_str(entry.m_category) << std::setw(0) << std::right
+                   << "  " << std::left << std::setw(11) << category_str(entry.m_category) << std::setw(0) << std::right
                    << "  ";
 
         auto prefix = prefix_str.str();

@@ -197,7 +197,8 @@ namespace age
         void write_ocpd(uint8_t value);
 
         uint8_t read_oam(int offset);
-        void    write_oam(int offset, uint8_t value, bool during_oam_dma = false);
+        void    write_oam(int offset, uint8_t value);
+        void    write_oam_dma(int offset, uint8_t value);
         bool    is_video_ram_accessible();
 
         void after_speed_change();

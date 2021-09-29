@@ -18,18 +18,33 @@
 
 
 
+namespace
+{
+    constexpr std::array dmg_tests{
+        "/apu/div_write_trigger.gb",
+        "/apu/div_write_trigger_10.gb"};
+
+    bool allow_dmg_test(std::string normalized_rom_path)
+    {
+        return std::any_of(begin(dmg_tests),
+                           end(dmg_tests),
+                           [&](const auto* allowed) {
+                               return normalized_rom_path.find(allowed) != std::string::npos;
+                           });
+    }
+
+} // namespace
+
+
+
 void age::tester::schedule_rom_same_suite(const std::filesystem::path& rom_path,
                                           const schedule_test_t&       schedule)
 {
-    std::string normalized_rom_path = age::tester::normalize_path_separator(rom_path.string());
+    auto normalized_rom_path = age::tester::normalize_path_separator(rom_path.string());
+    auto rom_contents        = load_rom_file(rom_path);
 
-    bool allow_dmg = (normalized_rom_path.find("/apu/") == std::string::npos)
-                     || (rom_path.filename() == "div_write_trigger.gb")
-                     || (rom_path.filename() == "div_write_trigger_10.gb");
-
-    auto rom_contents = load_rom_file(rom_path);
     schedule(rom_contents, gb_device_type::cgb_e, gb_colors_hint::default_colors, run_common_test);
-    if (allow_dmg)
+    if (allow_dmg_test(normalized_rom_path))
     {
         schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::default_colors, run_common_test);
     }

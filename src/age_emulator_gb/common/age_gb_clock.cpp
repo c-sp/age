@@ -69,24 +69,6 @@ age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
 
 
 
-int age::gb_clock::get_clock_cycle() const
-{
-    AGE_ASSERT(m_clock_cycle >= 0)
-    return m_clock_cycle;
-}
-
-age::int8_t age::gb_clock::get_machine_cycle_clocks() const
-{
-    return m_machine_cycle_clocks;
-}
-
-bool age::gb_clock::is_double_speed() const
-{
-    return m_machine_cycle_clocks == 2;
-}
-
-
-
 void age::gb_clock::tick_machine_cycle()
 {
     m_clock_cycle += get_machine_cycle_clocks();

@@ -35,8 +35,9 @@ namespace age
         AGE_DISABLE_MOVE(gb_sound_logger);
 
     public:
-        explicit gb_sound_logger(const gb_clock& clock, int clk_current_state)
-            : m_clock(clock),
+        explicit gb_sound_logger(const gb_device& device, const gb_clock& clock, int clk_current_state)
+            : m_device(device),
+              m_clock(clock),
               m_clk_current_state(clk_current_state)
         {}
         ~gb_sound_logger() = default;
@@ -52,6 +53,8 @@ namespace age
         {
             return m_clock.log(gb_log_category::lc_sound_registers, m_clk_current_state);
         }
+
+        const gb_device& m_device;
 
     protected:
         const gb_clock& m_clock;
@@ -109,6 +112,11 @@ namespace age
 
             // SO1 is the right channel, SO2 is the left channel
             m_multiplier = pcm_frame(static_cast<int16_t>(volume_SO2), static_cast<int16_t>(volume_SO1)).get_32bits();
+        }
+
+        const gb_device& device()
+        {
+            return m_logger->m_device;
         }
 
         // logging code is header-only to allow compile time optimization

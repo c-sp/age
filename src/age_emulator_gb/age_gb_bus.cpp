@@ -89,7 +89,7 @@ age::gb_bus::gb_bus(const gb_device&        device,
       m_timer(timer),
       m_joypad(joypad),
       m_serial(serial),
-      m_oam_dma_byte(m_device.is_cgb_device() ? 0x00 : 0xFF)
+      m_oam_dma(device, clock, memory, events, lcd)
 {
     // clear high ram
     std::fill(begin(m_high_ram), end(m_high_ram), 0);
@@ -126,166 +126,156 @@ age::gb_bus::gb_bus(const gb_device&        device,
 
 age::uint8_t age::gb_bus::read_byte(uint16_t address)
 {
-    uint8_t result = 0xFF;
+    // handle pending events to keep the system consistent
+    // before writing any value
+    //! \todo this might be optimized after OAM DMA is fully understood & implemented
+    handle_events();
 
-    if ((address & 0xE000) == 0x8000)
+    if (address < 0xFE00)
     {
-        if (!m_lcd.is_video_ram_accessible())
+        if (((address & 0xE000) == 0x8000) && !m_lcd.is_video_ram_accessible())
         {
-            m_clock.log(gb_log_category::lc_lcd_vram)
-                << "read VRAM [" << log_hex16(address) << "] == 0xFF (VRAM not accessible)";
+            m_clock.log(gb_log_category::lc_lcd_vram) << "read VRAM [" << log_hex16(address)
+                                                      << "] == 0xFF (VRAM not accessible)";
             return 0xFF;
         }
-        result = m_memory.read_byte(address);
+        return m_memory.read_byte(address);
     }
-    else if (address < 0xFE00)
-    {
-        result = m_memory.read_byte(address);
-    }
+
     // 0xFE00 - 0xFE9F : object attribute memory
-    else if (address < 0xFEA0)
+    if (address < 0xFEA0)
     {
-        handle_events();
         int oam_offset = address - 0xFE00;
-        if (m_oam_dma_active)
+        if (m_oam_dma.dma_active())
         {
             m_clock.log(gb_log_category::lc_lcd_oam) << "read OAM[" << log_hex8(oam_offset)
                                                      << "] == 0xFF (OAM DMA running)";
+            return 0xFF;
         }
-        else
-        {
-            result = m_lcd.read_oam(oam_offset);
-        }
+        return m_lcd.read_oam(oam_offset);
     }
+
     // 0xFEA0 - 0xFFFF : high ram & IE
-    else if ((address & 0x0180) != 0x0100)
+    if ((address & 0x0180) != 0x0100)
     {
-        handle_events();
-        result = (to_underlying(gb_register::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
+        return (to_underlying(gb_register::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
     }
+
     // 0xFF00 - 0xFF7F : registers & wave ram
-    else
+    switch (address)
     {
-        handle_events();
-        // registers & wave ram
+        case to_underlying(gb_register::p1): return m_joypad.read_p1();
+        case to_underlying(gb_register::sb): return m_serial.read_sb();
+        case to_underlying(gb_register::sc): return m_serial.read_sc();
+        case to_underlying(gb_register::div): return m_clock.read_div();
+        case to_underlying(gb_register::tima): return m_timer.read_tima();
+        case to_underlying(gb_register::tma): return m_timer.read_tma();
+        case to_underlying(gb_register::tac): return m_timer.read_tac();
+        case to_underlying(gb_register::if_): return m_interrupts.read_if();
+
+        case to_underlying(gb_register::nr10): return m_sound.read_nr10();
+        case to_underlying(gb_register::nr11): return m_sound.read_nr11();
+        case to_underlying(gb_register::nr12): return m_sound.read_nr12();
+        case to_underlying(gb_register::nr14): return m_sound.read_nr14();
+        case to_underlying(gb_register::nr21): return m_sound.read_nr21();
+        case to_underlying(gb_register::nr22): return m_sound.read_nr22();
+        case to_underlying(gb_register::nr24): return m_sound.read_nr24();
+        case to_underlying(gb_register::nr30): return m_sound.read_nr30();
+        case to_underlying(gb_register::nr32): return m_sound.read_nr32();
+        case to_underlying(gb_register::nr34): return m_sound.read_nr34();
+        case to_underlying(gb_register::nr42): return m_sound.read_nr42();
+        case to_underlying(gb_register::nr43): return m_sound.read_nr43();
+        case to_underlying(gb_register::nr44): return m_sound.read_nr44();
+        case to_underlying(gb_register::nr50): return m_sound.read_nr50();
+        case to_underlying(gb_register::nr51): return m_sound.read_nr51();
+        case to_underlying(gb_register::nr52): return m_sound.read_nr52();
+        case 0xFF30:
+        case 0xFF31:
+        case 0xFF32:
+        case 0xFF33:
+        case 0xFF34:
+        case 0xFF35:
+        case 0xFF36:
+        case 0xFF37:
+        case 0xFF38:
+        case 0xFF39:
+        case 0xFF3A:
+        case 0xFF3B:
+        case 0xFF3C:
+        case 0xFF3D:
+        case 0xFF3E:
+        case 0xFF3F:
+            return m_sound.read_wave_ram(address - 0xFF30);
+
+        case to_underlying(gb_register::lcdc): return m_lcd.read_lcdc();
+        case to_underlying(gb_register::stat): return m_lcd.read_stat();
+        case to_underlying(gb_register::scy): return m_lcd.read_scy();
+        case to_underlying(gb_register::scx): return m_lcd.read_scx();
+        case to_underlying(gb_register::ly): return m_lcd.read_ly();
+        case to_underlying(gb_register::lyc): return m_lcd.read_lyc();
+        case to_underlying(gb_register::dma): return m_oam_dma.read_dma_reg();
+        case to_underlying(gb_register::bgp): return m_lcd.read_bgp();
+        case to_underlying(gb_register::obp0): return m_lcd.read_obp0();
+        case to_underlying(gb_register::obp1): return m_lcd.read_obp1();
+        case to_underlying(gb_register::wy): return m_lcd.read_wy();
+        case to_underlying(gb_register::wx): return m_lcd.read_wx();
+        case to_underlying(gb_register::ie): return m_interrupts.read_ie();
+        default: break;
+    }
+
+    // CGB registers
+    if (m_device.cgb_mode())
+    {
         switch (address)
         {
-            case to_underlying(gb_register::p1): result = m_joypad.read_p1(); break;
-            case to_underlying(gb_register::sb): result = m_serial.read_sb(); break;
-            case to_underlying(gb_register::sc): result = m_serial.read_sc(); break;
-
-            case to_underlying(gb_register::div): result = m_clock.read_div(); break;
-            case to_underlying(gb_register::tima): result = m_timer.read_tima(); break;
-            case to_underlying(gb_register::tma): result = m_timer.read_tma(); break;
-            case to_underlying(gb_register::tac): result = m_timer.read_tac(); break;
-
-            case to_underlying(gb_register::if_): result = m_interrupts.read_if(); break;
-
-            case to_underlying(gb_register::nr10): result = m_sound.read_nr10(); break;
-            case to_underlying(gb_register::nr11): result = m_sound.read_nr11(); break;
-            case to_underlying(gb_register::nr12): result = m_sound.read_nr12(); break;
-            case to_underlying(gb_register::nr14): result = m_sound.read_nr14(); break;
-            case to_underlying(gb_register::nr21): result = m_sound.read_nr21(); break;
-            case to_underlying(gb_register::nr22): result = m_sound.read_nr22(); break;
-            case to_underlying(gb_register::nr24): result = m_sound.read_nr24(); break;
-            case to_underlying(gb_register::nr30): result = m_sound.read_nr30(); break;
-            case to_underlying(gb_register::nr32): result = m_sound.read_nr32(); break;
-            case to_underlying(gb_register::nr34): result = m_sound.read_nr34(); break;
-            case to_underlying(gb_register::nr42): result = m_sound.read_nr42(); break;
-            case to_underlying(gb_register::nr43): result = m_sound.read_nr43(); break;
-            case to_underlying(gb_register::nr44): result = m_sound.read_nr44(); break;
-            case to_underlying(gb_register::nr50): result = m_sound.read_nr50(); break;
-            case to_underlying(gb_register::nr51): result = m_sound.read_nr51(); break;
-            case to_underlying(gb_register::nr52): result = m_sound.read_nr52(); break;
-
-            case 0xFF30:
-            case 0xFF31:
-            case 0xFF32:
-            case 0xFF33:
-            case 0xFF34:
-            case 0xFF35:
-            case 0xFF36:
-            case 0xFF37:
-            case 0xFF38:
-            case 0xFF39:
-            case 0xFF3A:
-            case 0xFF3B:
-            case 0xFF3C:
-            case 0xFF3D:
-            case 0xFF3E:
-            case 0xFF3F:
-                result = m_sound.read_wave_ram(address - 0xFF30);
-                break;
-
-            case to_underlying(gb_register::lcdc): result = m_lcd.read_lcdc(); break;
-            case to_underlying(gb_register::stat): result = m_lcd.read_stat(); break;
-            case to_underlying(gb_register::scy): result = m_lcd.read_scy(); break;
-            case to_underlying(gb_register::scx): result = m_lcd.read_scx(); break;
-            case to_underlying(gb_register::ly): result = m_lcd.read_ly(); break;
-            case to_underlying(gb_register::lyc): result = m_lcd.read_lyc(); break;
-            case to_underlying(gb_register::dma): result = m_oam_dma_byte; break;
-            case to_underlying(gb_register::bgp): result = m_lcd.read_bgp(); break;
-            case to_underlying(gb_register::obp0): result = m_lcd.read_obp0(); break;
-            case to_underlying(gb_register::obp1): result = m_lcd.read_obp1(); break;
-            case to_underlying(gb_register::wy): result = m_lcd.read_wy(); break;
-            case to_underlying(gb_register::wx): result = m_lcd.read_wx(); break;
-
-            case to_underlying(gb_register::ie): result = m_interrupts.read_ie(); break;
-
+            case to_underlying(gb_register::key1): return m_clock.read_key1();
+            case to_underlying(gb_register::vbk): return m_memory.read_vbk();
+            case to_underlying(gb_register::hdma5): return m_hdma5;
+            case to_underlying(gb_register::rp): return m_rp;
+            case to_underlying(gb_register::bcps): return m_lcd.read_bcps();
+            case to_underlying(gb_register::bcpd): return m_lcd.read_bcpd();
+            case to_underlying(gb_register::ocps): return m_lcd.read_ocps();
+            case to_underlying(gb_register::ocpd): return m_lcd.read_ocpd();
+            case to_underlying(gb_register::un6c): return m_un6c;
+            case to_underlying(gb_register::svbk): return m_memory.read_svbk();
+            case to_underlying(gb_register::un72): return m_un72;
+            case to_underlying(gb_register::un73): return m_un73;
+            case to_underlying(gb_register::un75): return m_un75;
+            case to_underlying(gb_register::pcm12): return m_sound.read_pcm12();
+            case to_underlying(gb_register::pcm34): return m_sound.read_pcm34();
             default: break;
-        }
-
-        // CGB registers
-        if (m_device.cgb_mode())
-        {
-            switch (address)
-            {
-                case to_underlying(gb_register::key1): result = m_clock.read_key1(); break;
-                case to_underlying(gb_register::vbk): result = m_memory.read_vbk(); break;
-                case to_underlying(gb_register::hdma5): result = m_hdma5; break;
-                case to_underlying(gb_register::rp): result = m_rp; break;
-                case to_underlying(gb_register::bcps): result = m_lcd.read_bcps(); break;
-                case to_underlying(gb_register::bcpd): result = m_lcd.read_bcpd(); break;
-                case to_underlying(gb_register::ocps): result = m_lcd.read_ocps(); break;
-                case to_underlying(gb_register::ocpd): result = m_lcd.read_ocpd(); break;
-                case to_underlying(gb_register::un6c): result = m_un6c; break;
-                case to_underlying(gb_register::svbk): result = m_memory.read_svbk(); break;
-                case to_underlying(gb_register::un72): result = m_un72; break;
-                case to_underlying(gb_register::un73): result = m_un73; break;
-                case to_underlying(gb_register::un75): result = m_un75; break;
-                case to_underlying(gb_register::pcm12): result = m_sound.read_pcm12(); break;
-                case to_underlying(gb_register::pcm34): result = m_sound.read_pcm34(); break;
-
-                default: break;
-            }
-        }
-
-        // CGB registers when running in DMG mode
-        else if (m_device.cgb_in_dmg_mode())
-        {
-            switch (address)
-            {
-                case to_underlying(gb_register::vbk): result = 0xFE; break;
-                case to_underlying(gb_register::bcps): result = 0xC8; break;
-                case to_underlying(gb_register::ocps): result = 0xD0; break;
-                case to_underlying(gb_register::un72): result = m_un72; break;
-                case to_underlying(gb_register::un73): result = m_un73; break;
-                case to_underlying(gb_register::un75): result = m_un75; break;
-                case to_underlying(gb_register::pcm12): result = m_sound.read_pcm12(); break;
-                case to_underlying(gb_register::pcm34): result = m_sound.read_pcm34(); break;
-
-                default: break;
-            }
         }
     }
 
-    return result;
+    // CGB registers when running in DMG mode
+    if (m_device.cgb_in_dmg_mode())
+    {
+        switch (address)
+        {
+            case to_underlying(gb_register::vbk): return 0xFE;
+            case to_underlying(gb_register::bcps): return 0xC8;
+            case to_underlying(gb_register::ocps): return 0xD0;
+            case to_underlying(gb_register::un72): return m_un72;
+            case to_underlying(gb_register::un73): return m_un73;
+            case to_underlying(gb_register::un75): return m_un75;
+            case to_underlying(gb_register::pcm12): return m_sound.read_pcm12();
+            case to_underlying(gb_register::pcm34): return m_sound.read_pcm34();
+            default: break;
+        }
+    }
+
+    return 0xFF;
 }
 
 
 
 void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 {
+    // handle pending events to keep the system consistent
+    // before writing any value
+    //! \todo this might be optimized after OAM DMA is fully understood & implemented
+    handle_events();
+
     if ((address & 0xE000) == 0x8000)
     {
         if (!m_lcd.is_video_ram_accessible())
@@ -297,150 +287,145 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         }
         m_lcd.update_state();
         m_memory.write_byte(address, byte);
+        return;
     }
-    else if (address < 0xFE00)
+
+    if (address < 0xFE00)
     {
         m_memory.write_byte(address, byte);
+        return;
     }
+
     // 0xFE00 - 0xFE9F : object attribute memory
-    else if (address < 0xFEA0)
+    if (address < 0xFEA0)
     {
-        handle_events();
         int oam_offset = address - 0xFE00;
-        if (m_oam_dma_active)
+        if (m_oam_dma.dma_active())
         {
             m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(oam_offset)
                                                      << "] = " << log_hex8(byte) << " ignored (OAM DMA running)";
             return;
         }
         m_lcd.write_oam(oam_offset, byte);
+        return;
     }
+
     // 0xFEA0 - 0xFFFF : high ram & IE
-    else if ((address & 0x0180) != 0x0100)
+    if ((address & 0x0180) != 0x0100)
     {
         if (to_underlying(gb_register::ie) == address)
         {
-            handle_events();
             m_interrupts.write_ie(byte);
         }
         else
         {
             m_high_ram[address - 0xFE00] = byte;
         }
+        return;
     }
+
     // 0xFF00 - 0xFF7F : registers & wave ram
-    else
+    switch (address)
     {
-        handle_events();
+        case to_underlying(gb_register::p1): m_joypad.write_p1(byte); return;
+        case to_underlying(gb_register::sb): m_serial.write_sb(byte); return;
+        case to_underlying(gb_register::sc): m_serial.write_sc(byte); return;
+        case to_underlying(gb_register::div): reset_div(false); return;
+        case to_underlying(gb_register::tima): m_timer.write_tima(byte); return;
+        case to_underlying(gb_register::tma): m_timer.write_tma(byte); return;
+        case to_underlying(gb_register::tac): m_timer.write_tac(byte); return;
+        case to_underlying(gb_register::if_): m_interrupts.write_if(byte); return;
+
+        case to_underlying(gb_register::nr10): m_sound.write_nr10(byte); return;
+        case to_underlying(gb_register::nr11): m_sound.write_nr11(byte); return;
+        case to_underlying(gb_register::nr12): m_sound.write_nr12(byte); return;
+        case to_underlying(gb_register::nr13): m_sound.write_nr13(byte); return;
+        case to_underlying(gb_register::nr14): m_sound.write_nr14(byte); return;
+        case to_underlying(gb_register::nr21): m_sound.write_nr21(byte); return;
+        case to_underlying(gb_register::nr22): m_sound.write_nr22(byte); return;
+        case to_underlying(gb_register::nr23): m_sound.write_nr23(byte); return;
+        case to_underlying(gb_register::nr24): m_sound.write_nr24(byte); return;
+        case to_underlying(gb_register::nr30): m_sound.write_nr30(byte); return;
+        case to_underlying(gb_register::nr31): m_sound.write_nr31(byte); return;
+        case to_underlying(gb_register::nr32): m_sound.write_nr32(byte); return;
+        case to_underlying(gb_register::nr33): m_sound.write_nr33(byte); return;
+        case to_underlying(gb_register::nr34): m_sound.write_nr34(byte); return;
+        case to_underlying(gb_register::nr41): m_sound.write_nr41(byte); return;
+        case to_underlying(gb_register::nr42): m_sound.write_nr42(byte); return;
+        case to_underlying(gb_register::nr43): m_sound.write_nr43(byte); return;
+        case to_underlying(gb_register::nr44): m_sound.write_nr44(byte); return;
+        case to_underlying(gb_register::nr50): m_sound.write_nr50(byte); return;
+        case to_underlying(gb_register::nr51): m_sound.write_nr51(byte); return;
+        case to_underlying(gb_register::nr52): m_sound.write_nr52(byte); return;
+        case 0xFF30:
+        case 0xFF31:
+        case 0xFF32:
+        case 0xFF33:
+        case 0xFF34:
+        case 0xFF35:
+        case 0xFF36:
+        case 0xFF37:
+        case 0xFF38:
+        case 0xFF39:
+        case 0xFF3A:
+        case 0xFF3B:
+        case 0xFF3C:
+        case 0xFF3D:
+        case 0xFF3E:
+        case 0xFF3F:
+            m_sound.write_wave_ram(address - 0xFF30, byte);
+            return;
+
+        case to_underlying(gb_register::lcdc): m_lcd.write_lcdc(byte); return;
+        case to_underlying(gb_register::stat): m_lcd.write_stat(byte); return;
+        case to_underlying(gb_register::scy): m_lcd.write_scy(byte); return;
+        case to_underlying(gb_register::scx): m_lcd.write_scx(byte); return;
+        case to_underlying(gb_register::ly): return; // cannot be written
+        case to_underlying(gb_register::lyc): m_lcd.write_lyc(byte); return;
+        case to_underlying(gb_register::dma): m_oam_dma.write_dma_reg(byte); return;
+        case to_underlying(gb_register::bgp): m_lcd.write_bgp(byte); return;
+        case to_underlying(gb_register::obp0): m_lcd.write_obp0(byte); return;
+        case to_underlying(gb_register::obp1): m_lcd.write_obp1(byte); return;
+        case to_underlying(gb_register::wy): m_lcd.write_wy(byte); return;
+        case to_underlying(gb_register::wx): m_lcd.write_wx(byte); return;
+        default: break;
+    }
+
+    // CGB registers
+    if (m_device.cgb_mode())
+    {
         switch (address)
         {
-            case to_underlying(gb_register::p1): m_joypad.write_p1(byte); break;
-            case to_underlying(gb_register::sb): m_serial.write_sb(byte); break;
-            case to_underlying(gb_register::sc): m_serial.write_sc(byte); break;
-
-            case to_underlying(gb_register::div): reset_div(false); break;
-
-            case to_underlying(gb_register::tima): m_timer.write_tima(byte); break;
-            case to_underlying(gb_register::tma): m_timer.write_tma(byte); break;
-            case to_underlying(gb_register::tac): m_timer.write_tac(byte); break;
-
-            case to_underlying(gb_register::if_): m_interrupts.write_if(byte); break;
-
-            case to_underlying(gb_register::nr10): m_sound.write_nr10(byte); break;
-            case to_underlying(gb_register::nr11): m_sound.write_nr11(byte); break;
-            case to_underlying(gb_register::nr12): m_sound.write_nr12(byte); break;
-            case to_underlying(gb_register::nr13): m_sound.write_nr13(byte); break;
-            case to_underlying(gb_register::nr14): m_sound.write_nr14(byte); break;
-            case to_underlying(gb_register::nr21): m_sound.write_nr21(byte); break;
-            case to_underlying(gb_register::nr22): m_sound.write_nr22(byte); break;
-            case to_underlying(gb_register::nr23): m_sound.write_nr23(byte); break;
-            case to_underlying(gb_register::nr24): m_sound.write_nr24(byte); break;
-            case to_underlying(gb_register::nr30): m_sound.write_nr30(byte); break;
-            case to_underlying(gb_register::nr31): m_sound.write_nr31(byte); break;
-            case to_underlying(gb_register::nr32): m_sound.write_nr32(byte); break;
-            case to_underlying(gb_register::nr33): m_sound.write_nr33(byte); break;
-            case to_underlying(gb_register::nr34): m_sound.write_nr34(byte); break;
-            case to_underlying(gb_register::nr41): m_sound.write_nr41(byte); break;
-            case to_underlying(gb_register::nr42): m_sound.write_nr42(byte); break;
-            case to_underlying(gb_register::nr43): m_sound.write_nr43(byte); break;
-            case to_underlying(gb_register::nr44): m_sound.write_nr44(byte); break;
-            case to_underlying(gb_register::nr50): m_sound.write_nr50(byte); break;
-            case to_underlying(gb_register::nr51): m_sound.write_nr51(byte); break;
-            case to_underlying(gb_register::nr52): m_sound.write_nr52(byte); break;
-
-            case 0xFF30:
-            case 0xFF31:
-            case 0xFF32:
-            case 0xFF33:
-            case 0xFF34:
-            case 0xFF35:
-            case 0xFF36:
-            case 0xFF37:
-            case 0xFF38:
-            case 0xFF39:
-            case 0xFF3A:
-            case 0xFF3B:
-            case 0xFF3C:
-            case 0xFF3D:
-            case 0xFF3E:
-            case 0xFF3F:
-                m_sound.write_wave_ram(address - 0xFF30, byte);
-                break;
-
-            case to_underlying(gb_register::lcdc): m_lcd.write_lcdc(byte); break;
-            case to_underlying(gb_register::stat): m_lcd.write_stat(byte); break;
-            case to_underlying(gb_register::scy): m_lcd.write_scy(byte); break;
-            case to_underlying(gb_register::scx): m_lcd.write_scx(byte); break;
-            case to_underlying(gb_register::ly): break; // cannot be written
-            case to_underlying(gb_register::lyc): m_lcd.write_lyc(byte); break;
-            case to_underlying(gb_register::dma): write_dma(byte); break;
-            case to_underlying(gb_register::bgp): m_lcd.write_bgp(byte); break;
-            case to_underlying(gb_register::obp0): m_lcd.write_obp0(byte); break;
-            case to_underlying(gb_register::obp1): m_lcd.write_obp1(byte); break;
-            case to_underlying(gb_register::wy): m_lcd.write_wy(byte); break;
-            case to_underlying(gb_register::wx): m_lcd.write_wx(byte); break;
-
+            case to_underlying(gb_register::key1): m_clock.write_key1(byte); return;
+            case to_underlying(gb_register::vbk): m_memory.write_vbk(byte); return;
+            case to_underlying(gb_register::hdma1): m_dma_source = (m_dma_source & 0xFF) + (byte << 8); return;
+            case to_underlying(gb_register::hdma2): m_dma_source = (m_dma_source & 0xFF00) + (byte & 0xF0); return;
+            case to_underlying(gb_register::hdma3): m_dma_destination = (m_dma_destination & 0xFF) + (byte << 8); return;
+            case to_underlying(gb_register::hdma4): m_dma_destination = (m_dma_destination & 0xFF00) + (byte & 0xF0); return;
+            case to_underlying(gb_register::hdma5): write_hdma5(byte); return;
+            case to_underlying(gb_register::rp): m_rp = byte | 0x3E; return;
+            case to_underlying(gb_register::bcps): m_lcd.write_bcps(byte); return;
+            case to_underlying(gb_register::bcpd): m_lcd.write_bcpd(byte); return;
+            case to_underlying(gb_register::ocps): m_lcd.write_ocps(byte); return;
+            case to_underlying(gb_register::ocpd): m_lcd.write_ocpd(byte); return;
+            case to_underlying(gb_register::un6c): m_un6c = byte | 0xFE; return;
+            case to_underlying(gb_register::svbk): m_memory.write_svbk(byte); return;
+            case to_underlying(gb_register::un72): m_un72 = byte; return;
+            case to_underlying(gb_register::un73): m_un73 = byte; return;
+            case to_underlying(gb_register::un75): m_un75 = byte | 0x8F; return;
             default: break;
         }
+    }
 
-        // CGB registers
-        if (m_device.cgb_mode())
+    // CGB registers when running in DMG mode
+    if (m_device.cgb_in_dmg_mode())
+    {
+        switch (address)
         {
-            switch (address)
-            {
-                case to_underlying(gb_register::key1): m_clock.write_key1(byte); break;
-                case to_underlying(gb_register::vbk): m_memory.write_vbk(byte); break;
-                case to_underlying(gb_register::hdma1): m_dma_source = (m_dma_source & 0xFF) + (byte << 8); break;
-                case to_underlying(gb_register::hdma2): m_dma_source = (m_dma_source & 0xFF00) + (byte & 0xF0); break;
-                case to_underlying(gb_register::hdma3): m_dma_destination = (m_dma_destination & 0xFF) + (byte << 8); break;
-                case to_underlying(gb_register::hdma4): m_dma_destination = (m_dma_destination & 0xFF00) + (byte & 0xF0); break;
-                case to_underlying(gb_register::hdma5): write_hdma5(byte); break;
-                case to_underlying(gb_register::rp): m_rp = byte | 0x3E; break;
-                case to_underlying(gb_register::bcps): m_lcd.write_bcps(byte); break;
-                case to_underlying(gb_register::bcpd): m_lcd.write_bcpd(byte); break;
-                case to_underlying(gb_register::ocps): m_lcd.write_ocps(byte); break;
-                case to_underlying(gb_register::ocpd): m_lcd.write_ocpd(byte); break;
-                case to_underlying(gb_register::un6c): m_un6c = byte | 0xFE; break;
-                case to_underlying(gb_register::svbk): m_memory.write_svbk(byte); break;
-                case to_underlying(gb_register::un72): m_un72 = byte; break;
-                case to_underlying(gb_register::un73): m_un73 = byte; break;
-                case to_underlying(gb_register::un75): m_un75 = byte | 0x8F; break;
-
-                default: break;
-            }
-        }
-
-        // CGB registers when running in DMG mode
-        else if (m_device.cgb_in_dmg_mode())
-        {
-            switch (address)
-            {
-                case to_underlying(gb_register::un72): m_un72 = byte; break;
-                case to_underlying(gb_register::un73): m_un73 = byte; break;
-                case to_underlying(gb_register::un75): m_un75 = byte | 0x8F; break;
-
-                default: break;
-            }
+            case to_underlying(gb_register::un72): m_un72 = byte; return;
+            case to_underlying(gb_register::un73): m_un73 = byte; return;
+            case to_underlying(gb_register::un75): m_un75 = byte | 0x8F; return;
+            default: break;
         }
     }
 }
@@ -490,32 +475,17 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::start_oam_dma:
-                m_oam_dma_last_cycle = m_clock.get_clock_cycle();
-                m_oam_dma_active     = true;
-                //
-                // verified by mooneye-gb tests
-                //
-                // Trying to trigger an OAM DMA transfer for a memory address
-                // greater than 0xDFFF will instead trigger an OAM DMA transfer
-                // for the corresponding 0xC000-0xDFFF memory range.
-                //
-                //      acceptance/oam_dma/sources-dmgABCmgbS
-                //
-                m_oam_dma_address = (m_oam_dma_byte * 0x100) & ((m_oam_dma_byte > 0xDF) ? 0xDF00 : 0xFF00);
-                m_oam_dma_offset  = 0;
+                m_oam_dma.handle_start_dma_event();
                 break;
 
-            default:
+            case gb_event::none:
                 AGE_ASSERT(false)
                 break;
         }
     }
 
-    // emulate DMA, if necessary
-    if (m_oam_dma_active)
-    {
-        handle_oam_dma();
-    }
+    // continue OAM DMA, if active
+    m_oam_dma.continue_dma();
 }
 
 
@@ -634,7 +604,7 @@ void age::gb_bus::execute_stop()
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)
 {
-    gb_set_back_clock_cycle(m_oam_dma_last_cycle, clock_cycle_offset);
+    m_oam_dma.set_back_clock(clock_cycle_offset);
 }
 
 
@@ -655,43 +625,6 @@ void age::gb_bus::reset_div(bool during_stop)
     m_serial.after_div_reset();
     m_sound.after_div_reset(during_stop);
     m_timer.after_div_reset(during_stop);
-}
-
-
-
-void age::gb_bus::write_dma(uint8_t value)
-{
-    // AGE_GB_CLOG_LCD_PORTS("write DMA = " << AGE_LOG_HEX8(value))
-
-    //
-    // verified by mooneye-gb tests
-    //
-    // Reading the DMA register will always return the last value
-    // written to it even if it did not trigger any DMA transfer.
-    //
-    //      acceptance/oam_dma/reg_read
-    //
-    m_oam_dma_byte = value;
-
-    //
-    // verified by mooneye-gb tests
-    //
-    // OAM DMA starts after the next cpu cycle finishes
-    //
-    //      acceptance/oam_dma_start
-    //
-    // verified by gambatte tests
-    //
-    // there is no delay for CGB, the OAM DMA starts after
-    // the current cpu cycle finishes
-    //
-    //      oamdma/oamdma_src8000_vrambankchange_1_cgb04c_out0
-    //      oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
-    //      oamdma/oamdma_src8000_vrambankchange_3_cgb04c_out0
-    //      oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
-    //
-    int factor = m_device.cgb_mode() ? 1 : 2;
-    m_events.schedule_event(gb_event::start_oam_dma, m_clock.get_machine_cycle_clocks() * factor);
 }
 
 void age::gb_bus::write_hdma5(uint8_t value)
@@ -739,37 +672,5 @@ void age::gb_bus::write_hdma5(uint8_t value)
                 m_events.remove_event(gb_event::start_hdma);
             }
         }
-    }
-}
-
-
-
-void age::gb_bus::handle_oam_dma()
-{
-    AGE_ASSERT(m_oam_dma_active)
-
-    int current_clk    = m_clock.get_clock_cycle();
-    int cycles_elapsed = current_clk - m_oam_dma_last_cycle;
-    cycles_elapsed &= ~(m_clock.get_machine_cycle_clocks() - 1);
-    m_oam_dma_last_cycle += cycles_elapsed;
-    cycles_elapsed <<= m_clock.is_double_speed() ? 1 : 0;
-
-    AGE_ASSERT((cycles_elapsed & 3) == 0)
-    int bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
-
-    for (int i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
-    {
-        uint8_t byte = read_byte((m_oam_dma_address + i) & 0xFFFF);
-        //! \todo apparently oam dma is not blocked by mode 2 and 3, is there any test rom for this?
-        //        (see e.g. Zelda on DMG: sprites bugs when blocking oam writes here)
-        m_lcd.write_oam(i, byte, true);
-    }
-
-    m_oam_dma_offset += bytes;
-    AGE_ASSERT(m_oam_dma_offset <= 160)
-    if (m_oam_dma_offset >= 160)
-    {
-        m_oam_dma_active     = false;
-        m_oam_dma_last_cycle = gb_no_clock_cycle;
     }
 }

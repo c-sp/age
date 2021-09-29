@@ -24,6 +24,7 @@ add_library(
         lcd/age_gb_lcd_sprites.cpp
         age_gb_memory.cpp
         age_gb_memory_init.cpp
+        age_gb_oam_dma.cpp
         age_gb_serial.cpp
         age_gb_timer.cpp
         age_gb_timer_state.cpp

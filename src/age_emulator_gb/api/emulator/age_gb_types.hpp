@@ -129,6 +129,7 @@ namespace age
         lc_interrupts,
         lc_lcd,
         lc_lcd_oam,
+        lc_lcd_oam_dma,
         lc_lcd_registers,
         lc_lcd_vram,
         lc_mbc,

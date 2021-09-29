@@ -54,7 +54,7 @@ namespace age
         AGE_DISABLE_MOVE(gb_sound);
 
     public:
-        gb_sound(const gb_clock& clock, bool cgb_features, pcm_vector& samples);
+        gb_sound(const gb_device& device, const gb_clock& clock, pcm_vector& samples);
         ~gb_sound() = default;
 
         [[nodiscard]] uint8_t read_nr10() const;
@@ -118,13 +118,13 @@ namespace age
 
         pcm_vector& m_samples;
 
-        const bool m_cgb;
-        int        m_clk_bits_apu_on           = 0;
-        int        m_clk_next_apu_event        = 0;
-        int8_t     m_next_frame_sequencer_step = 0;
-        bool       m_delayed_disable_c1        = false;
-        bool       m_skip_frame_sequencer_step = false;
-        int8_t     m_current_ds_delay          = 0;
+        const gb_device& m_device;
+        int              m_clk_bits_apu_on           = 0;
+        int              m_clk_next_apu_event        = 0;
+        int8_t           m_next_frame_sequencer_step = 0;
+        bool             m_delayed_disable_c1        = false;
+        bool             m_skip_frame_sequencer_step = false;
+        int8_t           m_current_ds_delay          = 0;
 
         // channel control
 

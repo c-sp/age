@@ -167,7 +167,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     // we usually emulate a little bit past that cycle)
     while (m_clock.get_clock_cycle() < cycle_to_go)
     {
-        m_bus.handle_events(); // may change the current "halted" state
+        m_bus.handle_events(); // may change the current HALT state and start DMAs
 
         if (m_bus.during_dma())
         {
@@ -244,7 +244,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
       m_memory(rom, m_clock),
       m_interrupts(m_device, m_clock),
       m_events(m_clock),
-      m_sound(m_clock, m_device.cgb_mode(), m_audio_buffer),
+      m_sound(m_device, m_clock, m_audio_buffer),
       m_lcd(m_device, m_clock, m_memory.get_video_ram(), m_memory.get_rom_header(), m_events, m_interrupts, m_screen_buffer, colors_hint),
       m_timer(m_device, m_clock, m_interrupts, m_events),
       m_joypad(m_device, m_interrupts),

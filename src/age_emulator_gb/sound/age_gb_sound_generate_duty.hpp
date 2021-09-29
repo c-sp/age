@@ -76,19 +76,16 @@ namespace age
 
         void init_frequency_timer(bool align_to_1mhz)
         {
-            //! \todo implement CGB model specific behaviour
-//            // frequency timer delay on channel initialization
-//            // (based on SameSuite test roms)
-//            int sample_delay = align_to_1mhz ? 5 : 4;
-//
-//            // frequency timer delay reduced for already active channel
-//            // (based on SameSuite test roms)
-//            if (gb_sound_channel<ChannelId>::active())
-//            {
-//                sample_delay -= 2;
-//            }
+            int sample_delay = (align_to_1mhz ? 4 : 3)
+                               + (gb_sound_channel<ChannelId>::device().is_cgb_e_device() ? 1 : 0);
 
-            int sample_delay = align_to_1mhz ? 4 : 3;
+            // frequency timer delay reduced for already active channel
+            // (based on SameSuite test roms)
+            if (gb_sound_channel<ChannelId>::active())
+            {
+                sample_delay -= 2;
+            }
+
             gb_sample_generator<gb_duty_generator<ChannelId>>::reset_frequency_timer(sample_delay);
         }
 

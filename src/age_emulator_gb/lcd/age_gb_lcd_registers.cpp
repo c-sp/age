@@ -124,8 +124,8 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line, int
     if (current_line.m_line >= gb_screen_height)
     {
         // mode 0 is signalled for v-blank's last machine cycle
-        // (not for double speed though)
-        if (m_clock.is_double_speed() || (current_line.m_line < 153))
+        // (not for double speed and not on CGB-E though)
+        if (m_clock.is_double_speed() || m_device.is_cgb_e_device() || (current_line.m_line < 153))
         {
             return 1;
         }
@@ -222,7 +222,7 @@ age::uint8_t age::gb_lcd::read_ly()
     auto line = calculate_line();
 
     // LY = 153 only for 2-3 T4-cycles
-    if ((line.m_line >= 153) && (line.m_line_clks > 2 + (m_clock.is_double_speed() ? 1 : 0)))
+    if ((line.m_line >= 153) && (line.m_line_clks > 2 + (m_clock.is_double_speed() || m_device.is_cgb_e_device() ? 1 : 0)))
     {
         log_reg() << "read LY == 0 (line 153 shortened)";
         return 0;
