@@ -56,9 +56,9 @@ void age::gb_oam_dma::write_dma_reg(uint8_t value)
     int clk_start = m_clock.get_machine_cycle_clocks() * 2;
     m_events.schedule_event(gb_event::start_oam_dma, clk_start);
 
-    m_clock.log(gb_log_category::lc_lcd_oam_dma) << "write DMA = " << log_hex8(value)
-                                                 << ", OAM DMA will start on clock cycle " << clk_start
-                                                 << (m_oam_dma_active ? " and terminate the current OAM DMA" : "");
+    log() << "write DMA = " << log_hex8(value)
+          << ", OAM DMA will start on clock cycle " << clk_start
+          << (m_oam_dma_active ? " and terminate the current OAM DMA" : "");
 }
 
 
@@ -77,7 +77,7 @@ void age::gb_oam_dma::handle_start_dma_event()
     m_oam_dma_address = (m_oam_dma_reg * 0x100) & ((m_oam_dma_reg > 0xDF) ? 0xDF00 : 0xFF00);
     m_oam_dma_offset  = 0;
 
-    m_clock.log(gb_log_category::lc_lcd_oam_dma) << "starting OAM DMA, reading from " << log_hex16(m_oam_dma_address);
+    log() << "starting OAM DMA, reading from " << log_hex16(m_oam_dma_address);
 }
 
 
@@ -105,8 +105,7 @@ void age::gb_oam_dma::continue_dma()
         //! \todo apparently oam dma is not blocked by mode 2 and 3, is there any test rom for this?
         //        (see e.g. Zelda on DMG: sprites bugs when blocking oam writes here)
         m_lcd.write_oam_dma(i, byte);
-        m_clock.log(gb_log_category::lc_lcd_oam_dma) << "write OAM[" << log_hex8(i)
-                                                     << "] = " << log_hex8(byte);
+        log() << "write OAM[" << log_hex8(i) << "] = " << log_hex8(byte);
     }
 
     m_oam_dma_offset += bytes;
@@ -116,6 +115,10 @@ void age::gb_oam_dma::continue_dma()
         m_oam_dma_active     = false;
         m_oam_dma_last_cycle = gb_no_clock_cycle;
 
-        m_clock.log(gb_log_category::lc_lcd_oam_dma) << "OAM DMA finished";
+        log() << "OAM DMA finished";
+    }
+    else
+    {
+        m_next_oam_byte = m_memory.read_byte(m_oam_dma_address + m_oam_dma_offset);
     }
 }

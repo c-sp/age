@@ -54,6 +54,20 @@ namespace age
             return m_oam_dma_active;
         }
 
+        //!
+        //! According to Gekkio's "Game Boy: Complete Technical Reference" OAM DMA
+        //! uses either the external bus or the video bus.
+        //!
+        [[nodiscard]] bool on_video_bus() const
+        {
+            return (m_oam_dma_address & 0xE000) == 0x8000;
+        }
+
+        [[nodiscard]] uint8_t next_oam_byte() const
+        {
+            return m_next_oam_byte;
+        }
+
         [[nodiscard]] uint8_t read_dma_reg() const
         {
             return m_oam_dma_reg;
@@ -64,6 +78,12 @@ namespace age
         void handle_start_dma_event();
         void continue_dma();
 
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log() const
+        {
+            return m_clock.log(gb_log_category::lc_lcd_oam_dma);
+        }
+
     private:
         const gb_clock&  m_clock;
         const gb_memory& m_memory;
@@ -72,6 +92,7 @@ namespace age
 
         uint8_t m_oam_dma_reg;
         bool    m_oam_dma_active     = false;
+        uint8_t m_next_oam_byte      = 0;
         int     m_oam_dma_address    = 0;
         int     m_oam_dma_offset     = 0;
         int     m_oam_dma_last_cycle = gb_no_clock_cycle;

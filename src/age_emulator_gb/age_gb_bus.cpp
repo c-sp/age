@@ -133,6 +133,12 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
 
     if (address < 0xFE00)
     {
+        if (m_oam_dma.dma_active() && (m_oam_dma.on_video_bus() == ((address & 0xE000) == 0x8000)))
+        {
+            auto result = m_oam_dma.next_oam_byte();
+            m_oam_dma.log() << "OAM DMA bus conflict, reading [" << log_hex16(address) << "] == " << log_hex8(result);
+            return result;
+        }
         if (((address & 0xE000) == 0x8000) && !m_lcd.is_video_ram_accessible())
         {
             m_clock.log(gb_log_category::lc_lcd_vram) << "read VRAM [" << log_hex16(address)

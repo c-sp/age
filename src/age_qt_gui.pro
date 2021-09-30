@@ -91,6 +91,7 @@ SOURCES += \
     age_emulator_gb/age_gb_joypad.cpp \
     age_emulator_gb/lcd/age_gb_lcd.cpp \
     age_emulator_gb/lcd/age_gb_lcd_irqs.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_oam_access.cpp \
     age_emulator_gb/lcd/age_gb_lcd_palettes.cpp \
     age_emulator_gb/lcd/age_gb_lcd_palettes_cgb.cpp \
     age_emulator_gb/lcd/age_gb_lcd_palettes_compat.cpp \

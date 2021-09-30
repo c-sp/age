@@ -15,6 +15,7 @@ add_library(
         age_gb_joypad.cpp
         lcd/age_gb_lcd.cpp
         lcd/age_gb_lcd_irqs.cpp
+        lcd/age_gb_lcd_oam_access.cpp
         lcd/age_gb_lcd_palettes.cpp
         lcd/age_gb_lcd_palettes_cgb.cpp
         lcd/age_gb_lcd_palettes_compat.cpp

@@ -13,7 +13,6 @@
 
 age-test-roms/lcd/mode2-obj-size-ds-cgb.gb
 age-test-roms/lcd/mode2-obj-size.gb
-age-test-roms/lcd/write-timing-oam-cgbBE.gb
 age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 
@@ -175,8 +174,6 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 /gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
-/gambatte/oam_access/prewrite_2_dmg08_out1_cgb04c_out0.gbc
-/gambatte/oam_access/prewrite_ds_2_cgb04c_out0.gbc
 
 /gambatte/oamdma/
 /gambatte/scx_during_m3/
