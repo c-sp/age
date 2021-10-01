@@ -160,12 +160,12 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     int starting_cycle = m_clock.get_clock_cycle();
     AGE_ASSERT(starting_cycle < cycle_setback_limit)
 
-    int cycle_to_go = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
+    int cycle_to_reach = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
 
     // emulate until we reach the calculated cycle
     // (depending on CPU instruction length or running DMA
-    // we usually emulate a little bit past that cycle)
-    while (m_clock.get_clock_cycle() < cycle_to_go)
+    // we usually emulate a bit past that cycle)
+    while (m_clock.get_clock_cycle() < cycle_to_reach)
     {
         if (m_bus.handle_gp_dma())
         {
@@ -173,7 +173,9 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         }
         else if (m_interrupts.halted())
         {
-            m_clock.tick_machine_cycle();
+            int fast_forward_cycle = get_fast_forward_halt_cycles(cycle_to_reach);
+            AGE_ASSERT(fast_forward_cycle >= m_clock.get_clock_cycle());
+            m_clock.tick_clock_cycles(fast_forward_cycle - m_clock.get_clock_cycle());
             m_bus.handle_events(); // interrupt may terminate HALT
         }
         else
@@ -220,6 +222,25 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     }
 
     return cycles_emulated;
+}
+
+int age::gb_emulator_impl::get_fast_forward_halt_cycles(int cycle_to_reach) const
+{
+    // get the maximal cycle we can fast-forward to
+    int next_event_cycles  = m_events.get_next_event_cycle();
+    int fast_forward_cycle = (next_event_cycles == gb_no_clock_cycle)
+                                 ? cycle_to_reach
+                                 : std::min(cycle_to_reach, next_event_cycles);
+
+    // make sure we fast-forward in complete m-cycles
+    int m_cycle_clocks = m_clock.get_machine_cycle_clocks();
+    int fraction = fast_forward_cycle & (m_cycle_clocks - 1);
+    if (fraction)
+    {
+        fast_forward_cycle += m_cycle_clocks - fraction;
+    }
+
+    return fast_forward_cycle;
 }
 
 

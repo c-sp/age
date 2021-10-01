@@ -91,7 +91,7 @@ namespace age
         }
 
         void tick_machine_cycle();
-        void tick_2_clock_cycles();
+        void tick_clock_cycles(int clock_cycles);
         void set_back_clock(int clock_cycle_offset);
 
         void tick_speed_change_delay();

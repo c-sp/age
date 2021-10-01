@@ -202,6 +202,11 @@ int age::gb_events::get_event_cycle(gb_event event) const
     return gb_sorted_events::get_event_cycle(event);
 }
 
+int age::gb_events::get_next_event_cycle() const
+{
+    return gb_sorted_events::get_next_event_cycle();
+}
+
 
 
 age::gb_event age::gb_events::poll_event()

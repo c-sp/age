@@ -82,6 +82,7 @@ namespace age
 
     private:
         int emulate_cycles(int cycles_to_emulate);
+        int get_fast_forward_halt_cycles(int cycle_to_reach) const;
 
         screen_buffer m_screen_buffer;
         pcm_vector    m_audio_buffer;

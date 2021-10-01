@@ -546,7 +546,7 @@ bool age::gb_bus::handle_gp_dma()
     //
     for (int i = 0; i < bytes; ++i)
     {
-        m_clock.tick_2_clock_cycles();
+        m_clock.tick_clock_cycles(2);
 
         uint16_t src = m_hdma_source & 0xFFFF; // may wrap around
         uint16_t dst = 0x8000 + (m_hdma_destination & 0x1FFF);

@@ -74,9 +74,11 @@ void age::gb_clock::tick_machine_cycle()
     m_clock_cycle += get_machine_cycle_clocks();
 }
 
-void age::gb_clock::tick_2_clock_cycles()
+void age::gb_clock::tick_clock_cycles(int clock_cycles)
 {
-    m_clock_cycle += 2;
+    AGE_ASSERT(clock_cycles >= 0);
+    AGE_ASSERT(!(clock_cycles & 1));
+    m_clock_cycle += clock_cycles;
 }
 
 void age::gb_clock::set_back_clock(int clock_cycle_offset)
