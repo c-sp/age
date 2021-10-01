@@ -126,6 +126,7 @@ namespace age
         lc_clock,
         lc_cpu,
         lc_events,
+        lc_hdma,
         lc_interrupts,
         lc_lcd,
         lc_lcd_oam,

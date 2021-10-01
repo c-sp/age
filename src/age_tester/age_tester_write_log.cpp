@@ -55,6 +55,7 @@ namespace
             case age::gb_log_category::lc_clock: return "clock";
             case age::gb_log_category::lc_cpu: return "cpu";
             case age::gb_log_category::lc_events: return "events";
+            case age::gb_log_category::lc_hdma: return "hdma";
             case age::gb_log_category::lc_interrupts: return "interrupts";
             case age::gb_log_category::lc_lcd: return "lcd";
             case age::gb_log_category::lc_lcd_oam: return "lcd-oam";

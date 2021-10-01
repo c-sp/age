@@ -133,6 +133,7 @@ void age::gb_cpu::emulate()
     }
 
     // look for any interrupt to dispatch
+    m_bus.handle_events(); // make sure the IF register is up to date
     if (m_interrupts.next_interrupt_bit())
     {
         dispatch_interrupt();
@@ -181,8 +182,7 @@ void age::gb_cpu::handle_state()
 void age::gb_cpu::dispatch_interrupt()
 {
     m_interrupts.log() << "about to dispatch interrupt"
-                       << ", PC == " << log_hex16(m_pc)
-                       << ", [PC] == " << log_hex8(m_bus.read_byte(m_pc));
+                       << ", current PC == " << log_hex16(m_pc);
 
     m_clock.tick_machine_cycle();
     m_clock.tick_machine_cycle();
@@ -197,7 +197,7 @@ void age::gb_cpu::dispatch_interrupt()
     // Writing IF here will influence interrupt dispatching.
     tick_push_byte(m_pc >> 8);
 
-    m_bus.handle_events();
+    m_bus.handle_events(); // make sure the IF register is up to date
     uint8_t intr_bit = m_interrupts.next_interrupt_bit();
     AGE_ASSERT((intr_bit == 0x00)
                || (intr_bit == 0x01)
@@ -210,13 +210,11 @@ void age::gb_cpu::dispatch_interrupt()
     // IF bit (checked by pushing to IF).
     tick_push_byte(m_pc);
 
-    m_bus.handle_events();
     m_interrupts.clear_interrupt_flag(intr_bit);
 
     m_pc                = interrupt_pc_lookup[intr_bit];
     m_prefetched_opcode = tick_read_byte(m_pc);
 
-    m_bus.handle_events();
     m_interrupts.finish_dispatch();
 
     m_interrupts.log() << "interrupt " << log_hex8(intr_bit)

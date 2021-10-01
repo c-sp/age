@@ -106,6 +106,13 @@ int age::gb_sorted_events::get_event_cycle(gb_event event) const
     return m_active_events[to_underlying(event)];
 }
 
+int age::gb_sorted_events::get_next_event_cycle() const
+{
+    return m_events.empty()
+        ? gb_no_clock_cycle
+        : m_events.back().m_struct.m_clock_cycle;
+}
+
 age::size_t age::gb_sorted_events::get_events_schuled() const
 {
     return m_events.size();

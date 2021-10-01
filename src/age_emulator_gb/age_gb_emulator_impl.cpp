@@ -152,8 +152,8 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 
     // make sure we have some headroom since we usually emulate
     // a few more cycles than requested
-    constexpr int cycle_limit         = int_max - gb_clock_cycles_per_second;
     constexpr int cycle_setback_limit = 2 * gb_clock_cycles_per_second;
+    constexpr int cycle_limit         = int_max - cycle_setback_limit - gb_clock_cycles_per_second;
 
     // calculate the number of cycles to emulate based on the current
     // cycle and the cycle limit
@@ -167,16 +167,14 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     // we usually emulate a little bit past that cycle)
     while (m_clock.get_clock_cycle() < cycle_to_go)
     {
-        m_bus.handle_events(); // may change the current HALT state and start DMAs
-
-        if (m_bus.during_dma())
+        if (m_bus.handle_gp_dma())
         {
             AGE_ASSERT(m_device.cgb_mode())
-            m_bus.handle_dma();
         }
         else if (m_interrupts.halted())
         {
             m_clock.tick_machine_cycle();
+            m_bus.handle_events(); // interrupt may terminate HALT
         }
         else
         {

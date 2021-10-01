@@ -150,14 +150,18 @@ namespace age
         uint8_t read_byte(uint16_t address);
         void    write_byte(uint16_t address, uint8_t byte);
 
-        void               handle_events();
-        void               handle_dma();
-        [[nodiscard]] bool during_dma() const;
-
+        void handle_events();
+        bool handle_gp_dma();
         void execute_stop();
         void set_back_clock(int clock_cycle_offset);
 
     private:
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log_hdma() const
+        {
+            return m_clock.log(gb_log_category::lc_hdma);
+        }
+
         void reset_div(bool during_stop);
         void write_hdma5(uint8_t value);
 
@@ -180,11 +184,10 @@ namespace age
         uint8_t            m_un73 = 0;
         uint8_t            m_un75 = 0x8F;
 
-        uint8_t m_hdma5           = 0xFF;
-        int     m_dma_source      = 0;
-        int     m_dma_destination = 0;
-        bool    m_during_dma      = false;
-        bool    m_hdma_active     = false;
+        int     m_hdma_source      = 0;
+        int     m_hdma_destination = 0;
+        uint8_t m_hdma5            = 0xFF;
+        bool    m_gp_dma_active    = false;
     };
 
 } // namespace age

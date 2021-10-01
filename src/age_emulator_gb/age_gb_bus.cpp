@@ -404,10 +404,10 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         {
             case to_underlying(gb_register::key1): m_clock.write_key1(byte); return;
             case to_underlying(gb_register::vbk): m_memory.write_vbk(byte); return;
-            case to_underlying(gb_register::hdma1): m_dma_source = (m_dma_source & 0xFF) + (byte << 8); return;
-            case to_underlying(gb_register::hdma2): m_dma_source = (m_dma_source & 0xFF00) + (byte & 0xF0); return;
-            case to_underlying(gb_register::hdma3): m_dma_destination = (m_dma_destination & 0xFF) + (byte << 8); return;
-            case to_underlying(gb_register::hdma4): m_dma_destination = (m_dma_destination & 0xFF00) + (byte & 0xF0); return;
+            case to_underlying(gb_register::hdma1): m_hdma_source = (m_hdma_source & 0xFF) + (byte << 8); return;
+            case to_underlying(gb_register::hdma2): m_hdma_source = (m_hdma_source & 0xFF00) + (byte & 0xF0); return;
+            case to_underlying(gb_register::hdma3): m_hdma_destination = (m_hdma_destination & 0xFF) + (byte << 8); return;
+            case to_underlying(gb_register::hdma4): m_hdma_destination = (m_hdma_destination & 0xFF00) + (byte & 0xF0); return;
             case to_underlying(gb_register::hdma5): write_hdma5(byte); return;
             case to_underlying(gb_register::rp): m_rp = byte | 0x3E; return;
             case to_underlying(gb_register::bcps): m_lcd.write_bcps(byte); return;
@@ -469,15 +469,11 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::serial_transfer_finished:
-                m_serial.update_state();
+                m_serial.update_state(); // triggers serial i/o interrupt
                 break;
 
             case gb_event::timer_interrupt:
                 m_timer.trigger_interrupt();
-                break;
-
-            case gb_event::start_hdma:
-                m_during_dma = true;
                 break;
 
             case gb_event::start_oam_dma:
@@ -496,91 +492,83 @@ void age::gb_bus::handle_events()
 
 
 
-void age::gb_bus::handle_dma()
+bool age::gb_bus::handle_gp_dma()
 {
-    // during HDMA/GDMA the CPU is halted, so we just copy
-    // the required bytes in one go and increase the
-    // clock accordingly
+    if (!m_gp_dma_active)
+    {
+        return false;
+    }
+
+    // during general purpose DMA the CPU is halted,
+    // so we just copy the required bytes all at once
+    // and increase the clock accordingly
 
     // calculate remaining DMA length
-    uint8_t dma_length = (m_hdma5 & ~gb_hdma_start) + 1;
+    uint8_t dma_length = (m_hdma5 & 0x7F) + 1;
 
     // calculate number of bytes to copy and update remaining DMA length
-    unsigned bytes = m_hdma_active ? 0x10 : dma_length * 0x10;
+    int bytes = dma_length * 0x10;
+    AGE_ASSERT(bytes > 0)
     AGE_ASSERT(bytes <= 0x800)
-    AGE_ASSERT((bytes & 0xFU) == 0)
+    AGE_ASSERT((bytes % 0x10) == 0)
+    auto msg = log_hdma();
+    msg << "starting general purpose DMA"
+        << "\n    * from " << log_hex16(m_hdma_source) << " to " << log_hex16(m_hdma_destination)
+        << "\n    * DMA length == " << log_hex8(m_hdma5 & 0x7F) << " => " << log_hex16(bytes) << " bytes";
 
-    //
-    // verified by gambatte tests
-    //
-    // If the DMA destination wraps around from 0xFFFF to 0x0000
-    // during copying, the DMA transfer will be stopped at that
-    // point.
-    //
-    //      dma/dma_dst_wrap_1_out1
-    //      dma/dma_dst_wrap_2_out0
-    //
-    if ((m_dma_destination + bytes) > 0xFFFF)
+    if (m_hdma_source + bytes > 0x10000)
     {
-        bytes = 0x10000 - m_dma_destination;
+        msg << "\n    * source address will wrap around to 0x0000";
     }
-    AGE_ASSERT(bytes <= 0x800)
-    AGE_ASSERT((bytes & 0xF) == 0)
 
+    // If the general purpose DMA destination wraps around
+    // from 0xFFFF to 0x0000 during copying,
+    // the DMA transfer will be stopped at that point.
     //
-    // verified by gambatte tests
+    //      (gambatte) dma/dma_dst_wrap_1_out1
+    //      (gambatte) dma/dma_dst_wrap_2_out0
     //
-    // DMA transfer takes 2 cycles per transferred byte and an
-    // additional 4 cycles (2 cycles if running at double speed).
-    //
-    //      dma/gdma_cycles_long_1_out3
-    //      dma/gdma_cycles_long_2_out0
-    //      dma/gdma_cycles_long_ds_1_out3
-    //      dma/gdma_cycles_long_ds_2_out0
-    //      dma/gdma_weird_1_out3
-    //      dma/gdma_weird_2_out0
-    //
+    if ((m_hdma_destination + bytes) > 0x10000)
+    {
+        bytes = 0x10000 - m_hdma_destination;
+        msg << "\n    * reducing to " << log_hex16(bytes) << " bytes to prevent destination address from wrapping around to 0x0000";
+    }
 
-    // copy bytes
+    // general purpose DMA transfer takes 2 clock cycles per transferred byte
+    // and an additional m-cycle at the end.
+    //
+    //      (gambatte) dma/gdma_cycles_long_1_out3
+    //      (gambatte) dma/gdma_cycles_long_2_out0
+    //      (gambatte) dma/gdma_cycles_long_ds_1_out3
+    //      (gambatte) dma/gdma_cycles_long_ds_2_out0
+    //      (gambatte) dma/gdma_weird_1_out3
+    //      (gambatte) dma/gdma_weird_2_out0
+    //
     for (int i = 0; i < bytes; ++i)
     {
-        uint8_t  byte = 0xFF;
-        uint16_t src  = m_dma_source & 0xFFFF;
-        if (((src & 0xE000) != 0x8000) && (src < 0xFE00))
-        {
-            byte = read_byte(src);
-        }
-
-        uint16_t dest = 0x8000 + (m_dma_destination & 0x1FFF);
-        handle_events();
-        write_byte(dest, byte);
         m_clock.tick_2_clock_cycles();
 
-        ++m_dma_source;
-        ++m_dma_destination;
+        uint16_t src = m_hdma_source & 0xFFFF; // may wrap around
+        uint16_t dst = 0x8000 + (m_hdma_destination & 0x1FFF);
+
+        uint8_t byte = (((src & 0xE000) != 0x8000) && (src < 0xFE00)) ? read_byte(src) : 0xFF;
+        write_byte(dst, byte);
+
+        ++m_hdma_source;
+        ++m_hdma_destination;
+        AGE_ASSERT(m_hdma_destination <= 0x10000);
     }
 
     m_clock.tick_machine_cycle();
 
     // update HDMA5
-    uint8_t remaining_dma_length = (dma_length - 1 - (bytes >> 4)) & 0x7F;
-    if (remaining_dma_length == 0x7F)
-    {
-        m_hdma_active = false;
-        AGE_ASSERT(m_events.get_event_cycle(gb_event::start_hdma) == gb_no_clock_cycle)
-    }
-    m_hdma5 = (m_hdma5 & gb_hdma_start) + remaining_dma_length;
+    m_hdma5         = 0xFF;
+    m_gp_dma_active = false;
 
-    AGE_ASSERT((m_dma_source & 0xF) == 0)
-    AGE_ASSERT((m_dma_destination & 0xF) == 0)
-    m_during_dma = false;
-}
-
-
-
-bool age::gb_bus::during_dma() const
-{
-    return m_during_dma;
+    // create new log entry for "finished" message instead of using msg
+    // as reading/writing data may have caused additional logging
+    log_hdma() << "general purpose DMA finished";
+    return true;
 }
 
 
@@ -635,48 +623,51 @@ void age::gb_bus::reset_div(bool during_stop)
 
 void age::gb_bus::write_hdma5(uint8_t value)
 {
-    m_hdma5 = value & 0x7F; // store DMA data length
+    m_hdma5 = value;
 
-    if ((value & gb_hdma_start) > 0)
+    if (!(value & gb_hdma_start))
     {
-        m_hdma_active = true;
-        m_hdma5 |= gb_hdma_start;
+        // start general purpose DMA after the current CPU instruction
+        m_gp_dma_active = true;
+        log_hdma() << "starting general purpose DMA after this CPU instruction";
     }
-    else
-    {
-        // HDMA not running: start GDMA
-        if (!m_hdma_active)
-        {
-            m_during_dma = true;
-        }
-        // HDMA running: stop it
-        else
-        {
-            m_hdma_active = false;
+    //! \todo implement h-blank DMA
 
-            //
-            // verified by gambatte tests
-            //
-            // An upcoming HDMA can only be aborted, if it does
-            // not start on the current cycle.
-            //
-            //      dma/hdma_late_disable_1_out0
-            //      dma/hdma_late_disable_2_out1
-            //      dma/hdma_late_disable_ds_1_out0
-            //      dma/hdma_late_disable_ds_2_out1
-            //      dma/hdma_late_disable_scx2_1_out0
-            //      dma/hdma_late_disable_scx2_2_out1
-            //      dma/hdma_late_disable_scx3_1_out0
-            //      dma/hdma_late_disable_scx3_2_out1
-            //      dma/hdma_late_disable_scx5_1_out0
-            //      dma/hdma_late_disable_scx5_2_out1
-            //      dma/hdma_late_disable_scx5_ds_1_out0
-            //      dma/hdma_late_disable_scx5_ds_2_out1
-            //
-            if (m_events.get_event_cycle(gb_event::start_hdma) > m_clock.get_clock_cycle())
-            {
-                m_events.remove_event(gb_event::start_hdma);
-            }
-        }
-    }
+    //    else
+    //    {
+    //        // HDMA not running: start general purpose DMA
+    //        if (!m_hdma_active)
+    //        {
+    //            m_during_dma = true;
+    //        }
+    //        // HDMA running: stop it
+    //        else
+    //        {
+    //            m_hdma_active = false;
+    //
+    //            //
+    //            // verified by gambatte tests
+    //            //
+    //            // An upcoming HDMA can only be aborted, if it does
+    //            // not start on the current cycle.
+    //            //
+    //            //      dma/hdma_late_disable_1_out0
+    //            //      dma/hdma_late_disable_2_out1
+    //            //      dma/hdma_late_disable_ds_1_out0
+    //            //      dma/hdma_late_disable_ds_2_out1
+    //            //      dma/hdma_late_disable_scx2_1_out0
+    //            //      dma/hdma_late_disable_scx2_2_out1
+    //            //      dma/hdma_late_disable_scx3_1_out0
+    //            //      dma/hdma_late_disable_scx3_2_out1
+    //            //      dma/hdma_late_disable_scx5_1_out0
+    //            //      dma/hdma_late_disable_scx5_2_out1
+    //            //      dma/hdma_late_disable_scx5_ds_1_out0
+    //            //      dma/hdma_late_disable_scx5_ds_2_out1
+    //            //
+    //            if (m_events.get_event_cycle(gb_event::start_hdma) > m_clock.get_clock_cycle())
+    //            {
+    //                m_events.remove_event(gb_event::start_hdma);
+    //            }
+    //        }
+    //    }
 }

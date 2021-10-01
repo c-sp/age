@@ -163,6 +163,7 @@ namespace age
                gb_interrupt_trigger& interrupts,
                screen_buffer&        screen_buffer,
                gb_colors_hint        colors_hint);
+
         ~gb_lcd() = default;
 
         uint8_t read_lcdc() const;
@@ -214,6 +215,12 @@ namespace age
         [[nodiscard]] gb_log_message_stream log_reg() const
         {
             return m_clock.log(gb_log_category::lc_lcd_registers);
+        }
+
+        // logging code is header-only to allow compile time optimization
+        [[nodiscard]] gb_log_message_stream log_vram() const
+        {
+            return m_clock.log(gb_log_category::lc_lcd_vram);
         }
 
         bool            is_oam_readable(gb_current_line &line);

@@ -1315,40 +1315,31 @@ void age::gb_cpu::execute_prefetched()
         case 0x76: { // HALT
             auto msg = m_interrupts.log();
             msg << "executing HALT instruction";
-            // In case of any irq during HALT the "HALT bug" is triggered
-            // even if interrupt dispatching is enabled.
-            //
-            //! \todo examine this further (Gambatte test roms):
-            //      late_m0int_halt_m0stat_scx2_*
-            //      late_m0int_halt_m0stat_scx3_*
+
             m_clock.tick_machine_cycle();
-            m_bus.handle_events();
             m_prefetched_opcode = m_bus.read_byte(m_pc);
 
+            m_bus.handle_events(); // make sure the IF register is up to date
             bool halted = m_interrupts.halt();
             if (halted)
             {
                 msg << "\n    * CPU HALTed";
-            }
-            else
-            {
-                msg << "\n    * HALT immediately terminated by pending interrupts";
+                if (!m_device.is_cgb_device())
+                {
+                    msg << "\n    * applying extra DMG HALT delay (2 m-cycles)";
+                    m_clock.tick_machine_cycle();
+                    m_clock.tick_machine_cycle();
+                    m_bus.handle_events(); // interrupt may terminate HALT
+                }
+                return;
             }
 
-            if (!m_interrupts.halted())
-            {
-                msg << "\n    * \"HALT bug\", decrementing PC";
-                // IRQ: handler returns to HALT instruction
-                // else: PC is incremented for next instruction
-                //       and points to the byte after HALT
-                --m_pc;
-            }
-            else if (!m_device.is_cgb_device())
-            {
-                m_clock.tick_machine_cycle();
-                m_clock.tick_machine_cycle();
-                msg << "\n    * applying extra DMG HALT delay (2 m-cycles)";
-            }
+            msg << "\n    * HALT immediately terminated by pending interrupts"
+                << "\n    * \"HALT bug\", decrementing PC";
+            // IRQ: handler returns to HALT instruction
+            // else: PC is incremented for next instruction
+            //       and points to the byte after HALT
+            --m_pc;
             return;
         }
 

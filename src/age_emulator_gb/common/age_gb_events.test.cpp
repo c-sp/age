@@ -119,7 +119,7 @@ TEST(AgeGbSortedEvents, RemovesScheduledEvent)
     EXPECT_EQ(events.poll_next_event(15), age::gb_event::none);
 }
 
-TEST(AgeGbSortedEvents, IgnoredNotScheduledEventOnRemove)
+TEST(AgeGbSortedEvents, IgnoresNotScheduledEventOnRemove)
 {
     age::gb_sorted_events events;
 
@@ -128,4 +128,46 @@ TEST(AgeGbSortedEvents, IgnoredNotScheduledEventOnRemove)
 
     events.remove_event(age::gb_event::lcd_interrupt_vblank);
     EXPECT_EQ(events.poll_next_event(15), age::gb_event::lcd_interrupt_mode0);
+}
+
+
+
+TEST(AgeGbSortedEvents, NextEventCycleEmpty)
+{
+    age::gb_sorted_events events;
+    EXPECT_EQ(events.get_next_event_cycle(), age::gb_no_clock_cycle);
+}
+
+TEST(AgeGbSortedEvents, NextEventCycleSingleEvent)
+{
+    age::gb_sorted_events events;
+    events.schedule_event(age::gb_event::lcd_interrupt_mode0, 50);
+    EXPECT_EQ(events.get_next_event_cycle(), 50);
+}
+
+TEST(AgeGbSortedEvents, NextEventCycleSorted)
+{
+    age::gb_sorted_events events;
+    events.schedule_event(age::gb_event::lcd_interrupt_mode0, 50);
+    events.schedule_event(age::gb_event::lcd_interrupt_mode2, 20);
+    EXPECT_EQ(events.get_next_event_cycle(), 20);
+}
+
+TEST(AgeGbSortedEvents, NextEventCyclePoll)
+{
+    age::gb_sorted_events events;
+    events.schedule_event(age::gb_event::lcd_interrupt_mode0, 50);
+    events.schedule_event(age::gb_event::lcd_interrupt_mode2, 20);
+    events.poll_next_event(max_clock_cycle);
+    EXPECT_EQ(events.get_next_event_cycle(), 50);
+}
+
+TEST(AgeGbSortedEvents, NextEventCycleRemove)
+{
+    age::gb_sorted_events events;
+    events.schedule_event(age::gb_event::lcd_interrupt_mode0, 50);
+    events.schedule_event(age::gb_event::lcd_interrupt_mode2, 20);
+    events.schedule_event(age::gb_event::lcd_interrupt_vblank, 30);
+    events.remove_event(age::gb_event::lcd_interrupt_mode2);
+    EXPECT_EQ(events.get_next_event_cycle(), 30);
 }

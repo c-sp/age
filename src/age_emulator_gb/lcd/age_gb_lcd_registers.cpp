@@ -134,9 +134,6 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line, int
 
     // first line after restarting the LCD:
     // mode 0 instead of mode 2.
-    // Note that this line also is a bit shorter than usual
-    // which we handle by offsetting the frame
-    // (see m_line.lcd_on).
     int m3_end = 80 + 172 + (scx & 7);
     if (m_line.is_first_frame() && !current_line.m_line)
     {

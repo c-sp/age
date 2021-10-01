@@ -39,10 +39,9 @@ namespace age
         serial_transfer_finished = 4,
         timer_interrupt          = 5,
 
-        start_hdma    = 6,
-        start_oam_dma = 7,
+        start_oam_dma = 6,
 
-        none = 8 // must be the last value
+        none = 7 // must be the last value
     };
 
 
@@ -55,6 +54,7 @@ namespace age
         void                 schedule_event(gb_event event, int for_clock_cycle);
         bool                 remove_event(gb_event event);
         [[nodiscard]] int    get_event_cycle(gb_event event) const;
+        [[nodiscard]] int    get_next_event_cycle() const;
         [[nodiscard]] size_t get_events_schuled() const;
         gb_event             poll_next_event(int for_clock_cycle);
         void                 set_back_clock(int clock_cycle_offset);

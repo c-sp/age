@@ -197,8 +197,8 @@ run_tests()
         echo "test suite not found at: $SUITE_DIR"
         echo "downloading test suites zip file"
         switch_to_out_dir test-suites
-        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v2.0/gameboy-test-roms-v2.0.zip
-        unzip -q gameboy-test-roms-v2.0.zip
+        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v3.1/gameboy-test-roms-v3.1.zip
+        unzip -q gameboy-test-roms-v3.1.zip
     fi
 
     # run the tests

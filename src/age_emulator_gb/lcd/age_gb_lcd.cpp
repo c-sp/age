@@ -68,8 +68,8 @@ bool age::gb_lcd::is_video_ram_accessible()
                      || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));
     }
 
-    log_reg() << "VRAM accessible: " << accessible
-              << " (" << line.m_line_clks << " clks into line " << line.m_line << ")";
+    log_vram() << "VRAM accessible: " << accessible
+               << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
     return accessible;
 }
 
