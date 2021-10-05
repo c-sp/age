@@ -26,8 +26,7 @@
 
 namespace
 {
-    constexpr int gb_internal_ram_size = 8 * age::gb_internal_ram_bank_size;
-    constexpr int gb_video_ram_size    = 2 * age::gb_video_ram_bank_size;
+    constexpr int gb_video_ram_size = 2 * age::gb_video_ram_bank_size;
 
     // memory dumps,
     // based on *.bin files used by gambatte tests and gambatte source code (initstate.cpp)
@@ -242,6 +241,8 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
     }
 
     log() << "cartridge:"
+          << "\n    * type: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
+          << "\n    * cgb compatibility: " << log_hex8(safe_get(cart_rom, 0x143))
           << "\n    * has " << m_num_cart_rom_banks << " rom bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_rom_size))
           << "\n    * has " << m_num_cart_ram_banks << " ram bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_ram_size))
           << "\n    * has " << (m_has_battery ? "a" : "no") << " battery: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))

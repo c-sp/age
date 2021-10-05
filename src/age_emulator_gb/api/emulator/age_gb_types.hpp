@@ -133,7 +133,7 @@ namespace age
         lc_lcd_oam_dma,
         lc_lcd_registers,
         lc_lcd_vram,
-        lc_mbc,
+        lc_memory,
         lc_serial,
         lc_sound,
         lc_sound_registers,

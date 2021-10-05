@@ -125,8 +125,9 @@ age::uint8_t age::gb_memory::read_byte(uint16_t address) const
         return m_memory[get_offset(address)];
     }
     // cartridge ram not readable
-    if (!m_mbc_ram_accessible)
+    if (!m_cart_ram_enabled)
     {
+        log() << "read [" << log_hex16(address) << "] = 0xFF: cartridge RAM disabled";
         return 0xFF;
     }
     // read MBC2 ram
@@ -136,6 +137,12 @@ age::uint8_t age::gb_memory::read_byte(uint16_t address) const
     }
     // read regular cartridge ram
     return m_memory[get_offset(address)];
+}
+
+age::uint8_t age::gb_memory::read_internal_ram_byte(uint16_t offset) const
+{
+    AGE_ASSERT(offset < gb_internal_ram_size);
+    return m_memory[m_internal_ram_offset + offset];
 }
 
 age::uint8_t age::gb_memory::read_svbk() const
@@ -166,8 +173,9 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
         return;
     }
     // cartridge ram not writable
-    if (!m_mbc_ram_accessible)
+    if (!m_cart_ram_enabled)
     {
+        log() << "write [" << log_hex16(address) << "] = " << log_hex8(value) << " ignored: cartridge RAM disabled";
         return;
     }
     // write MBC2 ram
@@ -230,7 +238,9 @@ unsigned age::gb_memory::get_offset(uint16_t address) const
 
 void age::gb_memory::set_ram_accessible(uint8_t value)
 {
-    m_mbc_ram_accessible = ((value & 0x0F) == 0x0A) && (m_num_cart_ram_banks > 0);
+    m_cart_ram_enabled = ((value & 0x0F) == 0x0A) && (m_num_cart_ram_banks > 0);
+    log() << "enable cartridge ram = " << log_hex8(value)
+          << " (cartridge ram " << (m_cart_ram_enabled ? "enabled" : "disabled") << ")";
 }
 
 void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
@@ -253,7 +263,7 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
     m_offsets[7] = m_offsets[4];
 
     log() << "switch to rom banks " << log_hex(low_bank_id) << " @ 0x0000-0x3FFF, "
-          << log_hex(low_bank_id) << " @ 0x4000-0x7FFF";
+          << log_hex(high_bank_id) << " @ 0x4000-0x7FFF";
 }
 
 void age::gb_memory::set_ram_bank(int bank_id)
@@ -328,6 +338,7 @@ void age::gb_memory::write_to_mbc_no_op(gb_memory& memory, uint16_t offset, uint
     AGE_UNUSED(memory);
     AGE_UNUSED(offset);
     AGE_UNUSED(value);
+    memory.log() << "write to [" << log_hex16(offset) << "] = " << log_hex8(value) << " ignored: no MBC configured";
 }
 
 

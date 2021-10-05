@@ -37,6 +37,7 @@ namespace age
     constexpr int gb_cart_rom_bank_size     = 0x4000;
     constexpr int gb_cart_ram_bank_size     = 0x2000;
     constexpr int gb_internal_ram_bank_size = 0x1000;
+    constexpr int gb_internal_ram_size      = 8 * age::gb_internal_ram_bank_size;
     constexpr int gb_video_ram_bank_size    = 0x2000;
 
 
@@ -60,6 +61,7 @@ namespace age
         void                       set_persistent_ram(const uint8_vector& source);
 
         [[nodiscard]] uint8_t read_byte(uint16_t address) const;
+        [[nodiscard]] uint8_t read_internal_ram_byte(uint16_t offset) const;
         [[nodiscard]] uint8_t read_svbk() const;
         [[nodiscard]] uint8_t read_vbk() const;
 
@@ -105,7 +107,7 @@ namespace age
         // logging code is header-only to allow compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
-            return m_clock.log(gb_log_category::lc_mbc);
+            return m_clock.log(gb_log_category::lc_memory);
         }
 
         const gb_clock& m_clock; //!< used only for logging
@@ -120,10 +122,10 @@ namespace age
         const int16_t m_num_cart_ram_banks;
         const bool    m_has_battery;
         const bool    m_is_mbc2; //!< special RAM addressing
-        bool          m_mbc1_multi_cart    = false;
-        bool          m_mbc_ram_accessible = false;
-        uint8_t       m_svbk               = 0xF8;
-        uint8_t       m_vbk                = 0xF8;
+        bool          m_mbc1_multi_cart  = false;
+        bool          m_cart_ram_enabled = false;
+        uint8_t       m_svbk             = 0xF8;
+        uint8_t       m_vbk              = 0xF8;
 
         const int           m_cart_ram_offset;
         const int           m_internal_ram_offset;

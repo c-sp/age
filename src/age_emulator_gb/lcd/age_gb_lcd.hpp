@@ -217,12 +217,6 @@ namespace age
             return m_clock.log(gb_log_category::lc_lcd_registers);
         }
 
-        // logging code is header-only to allow compile time optimization
-        [[nodiscard]] gb_log_message_stream log_vram() const
-        {
-            return m_clock.log(gb_log_category::lc_lcd_vram);
-        }
-
         bool            is_oam_readable(gb_current_line &line);
         bool            is_oam_writable(gb_current_line &line);
         gb_current_line calculate_line();

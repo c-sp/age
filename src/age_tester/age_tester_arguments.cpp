@@ -364,7 +364,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
         gb_log_category::lc_lcd_oam_dma,
         gb_log_category::lc_lcd_registers,
         gb_log_category::lc_lcd_vram,
-        gb_log_category::lc_mbc,
+        gb_log_category::lc_memory,
         gb_log_category::lc_serial,
         gb_log_category::lc_sound,
         gb_log_category::lc_sound_registers,

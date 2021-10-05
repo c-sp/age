@@ -41,7 +41,7 @@ namespace
                << "--------------------------------------------------------------------------------\n"
                << '\n'
                << "T4-cycle  T4-16-bit-divider    category    comments" << '\n'
-               << "--------  -------------------  ----------  ---------------------------------------\n";
+               << "--------  -------------------  ----------  -------------------------------------\n";
 
         return result.str();
     }
@@ -62,7 +62,7 @@ namespace
             case age::gb_log_category::lc_lcd_oam_dma: return "lcd-oam-dma";
             case age::gb_log_category::lc_lcd_registers: return "lcd-reg";
             case age::gb_log_category::lc_lcd_vram: return "lcd-vram";
-            case age::gb_log_category::lc_mbc: return "mbc";
+            case age::gb_log_category::lc_memory: return "memory";
             case age::gb_log_category::lc_serial: return "serial";
             case age::gb_log_category::lc_sound: return "sound";
             case age::gb_log_category::lc_sound_registers: return "sound-reg";
