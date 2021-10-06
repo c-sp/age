@@ -35,6 +35,12 @@
 
 namespace age
 {
+    constexpr bool is_video_ram(uint16_t address)
+    {
+        return (address & 0xE000) == 0x8000;
+    }
+
+
     class gb_oam_dma
     {
         AGE_DISABLE_COPY(gb_oam_dma);
@@ -43,7 +49,7 @@ namespace age
     public:
         gb_oam_dma(const gb_device& device,
                    const gb_clock&  clock,
-                   const gb_memory& memory,
+                   gb_memory&       memory,
                    gb_events&       events,
                    gb_lcd&          lcd);
 
@@ -54,34 +60,31 @@ namespace age
             return m_oam_dma_active;
         }
 
-        [[nodiscard]] uint8_t next_oam_byte() const
-        {
-            return m_next_oam_byte;
-        }
-
         [[nodiscard]] uint8_t read_dma_reg() const
         {
             return m_oam_dma_reg;
         }
 
-        [[nodiscard]] bool is_on_dma_bus(uint16_t address) const;
+        [[nodiscard]] int16_t conflicting_read(uint16_t address);
+        bool                  conflicting_write(uint16_t address, uint8_t value);
 
         void set_back_clock(int clock_cycle_offset);
         void write_dma_reg(uint8_t value);
         void handle_start_dma_event();
-        void override_next_oam_byte(uint8_t value);
         void continue_dma();
 
+    private:
         // logging code is header-only to allow compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_lcd_oam_dma);
         }
 
-    private:
+        uint8_t read_dma_byte(int offset) const;
+
         const gb_device& m_device;
         const gb_clock&  m_clock;
-        const gb_memory& m_memory;
+        gb_memory&       m_memory;
         gb_events&       m_events;
         gb_lcd&          m_lcd;
 

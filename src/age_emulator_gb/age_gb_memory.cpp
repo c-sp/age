@@ -139,12 +139,6 @@ age::uint8_t age::gb_memory::read_byte(uint16_t address) const
     return m_memory[get_offset(address)];
 }
 
-age::uint8_t age::gb_memory::read_internal_ram_byte(uint16_t offset) const
-{
-    AGE_ASSERT(offset < gb_internal_ram_size);
-    return m_memory[m_internal_ram_offset + offset];
-}
-
 age::uint8_t age::gb_memory::read_svbk() const
 {
     return m_svbk;

@@ -133,38 +133,12 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
 
     if (address < 0xFE00)
     {
-        if (m_oam_dma.dma_active())
+        auto conflicting_read = m_oam_dma.conflicting_read(address);
+        if (conflicting_read >= 0)
         {
-            if (m_oam_dma.is_on_dma_bus(address))
-            {
-                auto result = m_oam_dma.next_oam_byte();
-                m_oam_dma.log() << "OAM DMA bus conflict, read [" << log_hex16(address) << "] == " << log_hex8(result);
-                return result;
-            }
-            // During OAM DMA internal ram at 0xD000 - 0xDFFF and 0xF000 - 0xFDFF
-            // seems to be mapped to internal ram bank 0:
-            //      (gambatte) oamdma/oamdma_src0000_busypopDFFF_dmg08_out65766576_cgb04c_out657655AA
-            //      (gambatte) oamdma/oamdma_src0000_busypopEFFF_dmg08_out65766576_cgb04c_out657655AA
-            //      (gambatte) oamdma/oamdma_src7F00_busypopBFFF_2_dmg08_out65766576_cgb04c_out657665AA
-            //      (gambatte) oamdma/oamdma_src7F00_busypopBFFF_dmg08_out65766576_cgb04c_out657665AA
-            //      (gambatte) oamdma/oamdma_src7F00_busypopFDFF_dmg08_out657665FF_cgb04c_out657655FF
-            //      (gambatte) oamdma/oamdma_srcBF00_busypopDFFF_dmg08_out65766576_cgb04c_out657655AA
-            //      (gambatte) oamdma/oamdma_srcBF00_busypopEFFF_dmg08_out65766576_cgb04c_out657655AA
-            //
-            // (not for CGB-in-DMG-mode though,
-            // otherwise a lot of Mooneye GB CPU instruction timing tests fail)
-            //
-            if (m_device.cgb_mode() && (address >= 0xC000))
-            {
-                int internal_ram_bank = (m_oam_dma.read_dma_reg() >> 4) & 1;
-                int internal_ram_offset = (address & 0xFFF) + internal_ram_bank * 0x1000;
-                auto result = m_memory.read_internal_ram_byte(internal_ram_offset);
-                m_oam_dma.log() << "(CGB) rewire to internal ram bank " << internal_ram_bank
-                                << ": read [" << log_hex16(address) << "] == " << log_hex8(result);
-                return result;
-            }
+            return conflicting_read;
         }
-        if (((address & 0xE000) == 0x8000) && !m_lcd.is_video_ram_accessible())
+        if (is_video_ram(address) && !m_lcd.is_video_ram_accessible())
         {
             m_clock.log(gb_log_category::lc_lcd_vram) << "read VRAM [" << log_hex16(address)
                                                       << "] == 0xFF (VRAM not accessible)";
@@ -179,7 +153,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         int oam_offset = address - 0xFE00;
         if (m_oam_dma.dma_active())
         {
-            m_clock.log(gb_log_category::lc_lcd_oam) << "read OAM[" << log_hex8(oam_offset)
+            m_clock.log(gb_log_category::lc_lcd_oam) << "read OAM [" << log_hex16(address)
                                                      << "] == 0xFF (OAM DMA running)";
             return 0xFF;
         }
@@ -189,16 +163,24 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     // 0xFEA0 - 0xFFFF : prohibited, high ram & IE
     if ((address & 0x0180) != 0x0100)
     {
+        // prohibited area
         if (address < 0xFF00)
         {
             if (m_oam_dma.dma_active())
             {
-                m_clock.log(gb_log_category::lc_lcd_oam) << "read [" << log_hex16(address)
-                                                         << "] == 0xFF (OAM DMA running)";
+                m_clock.log(gb_log_category::lc_memory) << "read [" << log_hex16(address)
+                                                        << "] == 0xFF (OAM DMA running)";
                 return 0xFF;
             }
-            return 0;
+            uint8_t result = !m_device.is_cgb_device()    ? 0
+                             : m_device.is_cgb_e_device() ? ((address & 0xF0) + ((address & 0xF0) >> 4))
+                                                          : m_high_ram[address - 0xFE00];
+
+            m_clock.log(gb_log_category::lc_memory) << "read [" << log_hex16(address)
+                                                    << "] == " << log_hex8(result);
+            return result;
         }
+        // high ram & ie
         return (to_underlying(gb_register::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
     }
 
@@ -319,31 +301,11 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 
     if (address < 0xFE00)
     {
-        if (m_oam_dma.dma_active())
+        if (m_oam_dma.conflicting_write(address, byte))
         {
-            if (m_oam_dma.is_on_dma_bus(address))
-            {
-                m_oam_dma.log() << "OAM DMA bus conflict"
-                                << "\n    * will write " << log_hex8(byte) << " to OAM next"
-                                << "\n    * will NOT write [" << log_hex16(address) << "] = " << log_hex8(byte);
-                m_oam_dma.override_next_oam_byte(byte);
-                return;
-            }
-
-            // During OAM DMA internal ram at 0xD000 - 0xDFFF and 0xF000 - 0xFDFF
-            // seems to be mapped to internal ram bank 0:
-            //      (gambatte) oamdma/oamdma_src0000_busypushE001_dmg08_out55AA1234_cgb04c_out6576AA55
-            //      (gambatte) oamdma/oamdma_src0000_busypushF001_dmg08_out55AA1234_cgb04c_out6576AA55
-            //
-            if (m_device.cgb_mode() && ((address & 0xD000) == 0xD000))
-            {
-                m_oam_dma.log() << "(CGB) rewire to internal ram bank 0: write [" << log_hex16(address) << "] = " << log_hex8(byte);
-                m_memory.write_byte(address - 0x1000, byte);
-                return;
-            }
+            return;
         }
-
-        if ((address & 0xE000) == 0x8000)
+        if (is_video_ram(address))
         {
             if (!m_lcd.is_video_ram_accessible())
             {
@@ -354,7 +316,6 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             }
             m_lcd.update_state();
         }
-
         m_memory.write_byte(address, byte);
         return;
     }
@@ -365,7 +326,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
         int oam_offset = address - 0xFE00;
         if (m_oam_dma.dma_active())
         {
-            m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(oam_offset)
+            m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM [" << log_hex16(address)
                                                      << "] = " << log_hex8(byte) << " ignored (OAM DMA running)";
             return;
         }
@@ -376,6 +337,21 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFEA0 - 0xFFFF : high ram & IE
     if ((address & 0x0180) != 0x0100)
     {
+        if (address < 0xFF00)
+        {
+            // 0xFEA0 - 0xFEFF not writable during OAM DMA:
+            //      (gambatte) oamdma/oamdma_src0000_busypushFEA1_dmg08_out65768700_cgb04c_out65768734
+            //      (gambatte) oamdma/oamdma_src0000_busypushFF01_dmg08_out657600DF_cgb04c_out657612DF
+            //      (gambatte) oamdma/oamdma_src8000_busypushFEA1_dmg08_out65768700_cgb04c_out65768734
+            //      (gambatte) oamdma/oamdma_src8000_busypushFF01_dmg08_out657600DF_cgb04c_out657612DF
+            //
+            if (m_oam_dma.dma_active())
+            {
+                m_clock.log(gb_log_category::lc_memory) << "write [" << log_hex16(address)
+                                                        << "] = " << log_hex8(byte) << " ignored (OAM DMA running)";
+                return;
+            }
+        }
         if (to_underlying(gb_register::ie) == address)
         {
             m_interrupts.write_ie(byte);

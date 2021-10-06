@@ -92,6 +92,7 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 /gambatte/ioregs_reset_dumper.gbc
 /gambatte/jpadirq_1.gbc
 /gambatte/jpadirq_2.gbc
+/gambatte/oamdma/oamdma.*dumper_.*
 /gambatte/sram.gbc
 /gambatte/vram_dumper.gbc
 /gambatte/wram_dumper.gbc

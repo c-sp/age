@@ -61,7 +61,6 @@ namespace age
         void                       set_persistent_ram(const uint8_vector& source);
 
         [[nodiscard]] uint8_t read_byte(uint16_t address) const;
-        [[nodiscard]] uint8_t read_internal_ram_byte(uint16_t offset) const;
         [[nodiscard]] uint8_t read_svbk() const;
         [[nodiscard]] uint8_t read_vbk() const;
 
