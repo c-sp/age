@@ -174,7 +174,22 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 /gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
 
-/gambatte/oamdma/
+/gambatte/oamdma/late_sp.*
+/gambatte/oamdma/oamdma_late_halt_stat_2_dmg08_cgb04c_out3
+/gambatte/oamdma/oamdma_late_speedchange_stat_2_cgb04c_out3
+/gambatte/oamdma/oamdma_src8000_srcchange0000_busyinc_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
+/gambatte/oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
+/gambatte/oamdma/oamdma_srcD000_wrambankchange_2_cgb04c_out4
+/gambatte/oamdma/oamdma_srcFE00_busyread0000_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdma_srcFE00_busyreadA000_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdma_srcFE00_busyreadC000_dmg08_out0_cgb_xoutblank
+/gambatte/oamdma/oamdma_srcFE00_readFE00_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdmasrc80_halt_lycirq_read8000_dmg08_cgb04c_out81
+/gambatte/oamdma/oamdmasrc80_halt_m2irq_read8000_dmg08_cgb04c_out81
+/gambatte/oamdma/oamdmasrcC000_hdmasrc0000_cgb04c_out0A940C0D
+/gambatte/oamdma/oamdmasrcC0_speedchange_readC000_cgb04c_out11
+
 /gambatte/scx_during_m3/
 /gambatte/scy/
 /gambatte/sprites/
