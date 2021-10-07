@@ -45,13 +45,21 @@ namespace
         {
             return 31;
         }
+        if (screenshot_filename == "cgb_halt_bug.png")
+        {
+            return 2;
+        }
+        if (screenshot_filename == "cgb_interrupt_time.png")
+        {
+            return 2;
+        }
         if (screenshot_filename == "cgb_instr_timing.png")
         {
             return 1;
         }
         if (screenshot_filename == "cgb_mem_timing.png")
         {
-            return 4;
+            return 4; // == max(3, 4)  =>  mem-timing and mem-timing-2
         }
         if (screenshot_filename == "cgb_sound.png")
         {
@@ -62,28 +70,23 @@ namespace
         {
             return 55;
         }
+        if (screenshot_filename == "dmg_halt_bug.png")
+        {
+            return 2;
+        }
         if (screenshot_filename == "dmg_instr_timing.png")
         {
             return 1;
         }
         if (screenshot_filename == "dmg_mem_timing.png")
         {
-            return 4;
+            return 4; // == max(3, 4)  =>  mem-timing and mem-timing-2
         }
         if (screenshot_filename == "dmg_sound.png")
         {
             return 36;
         }
         return 0;
-    }
-
-    age::tester::test_finished_t blargg_test_finished(const std::filesystem::path& rom_path)
-    {
-        age::int64_t seconds = get_test_seconds(rom_path.filename().string());
-
-        return [=](const age::gb_emulator& emulator) {
-            return emulator.get_emulated_cycles() >= seconds * emulator.get_cycles_per_second();
-        };
     }
 
 } // namespace
@@ -95,26 +98,31 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
 {
     auto rom_contents = load_rom_file(rom_path);
 
+    auto schedule_test = [&](gb_device_type device_type, gb_colors_hint colors_hint, const std::filesystem::path& screenshot_path) {
+        age::int64_t seconds = get_test_seconds(screenshot_path.filename().string());
+
+        if (seconds > 0)
+        {
+            schedule(rom_contents,
+                     device_type,
+                     colors_hint,
+                     new_screenshot_test(screenshot_path,
+                                         [=](const age::gb_emulator& emulator) {
+                                             return emulator.get_emulated_cycles() >= seconds * emulator.get_cycles_per_second();
+                                         }));
+        }
+    };
+
     auto cgb_screenshot = find_screenshot(rom_path, "cgb_");
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents,
-                 gb_device_type::cgb_abcd,
-                 gb_colors_hint::cgb_gambatte,
-                 new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
-
-        schedule(rom_contents,
-                 gb_device_type::cgb_e,
-                 gb_colors_hint::cgb_gambatte,
-                 new_screenshot_test(cgb_screenshot, blargg_test_finished(cgb_screenshot)));
+        schedule_test(gb_device_type::cgb_abcd, gb_colors_hint::cgb_gambatte, cgb_screenshot);
+        schedule_test(gb_device_type::cgb_e, gb_colors_hint::cgb_gambatte, cgb_screenshot);
     }
 
     auto dmg_screenshot = find_screenshot(rom_path, "dmg_");
     if (!dmg_screenshot.empty())
     {
-        schedule(rom_contents,
-                 gb_device_type::dmg,
-                 gb_colors_hint::dmg_greyscale,
-                 new_screenshot_test(dmg_screenshot, blargg_test_finished(dmg_screenshot)));
+        schedule_test(gb_device_type::dmg, gb_colors_hint::dmg_greyscale, dmg_screenshot);
     }
 }

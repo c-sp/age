@@ -119,7 +119,7 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
 age::uint8_t age::gb_memory::read_byte(uint16_t address) const
 {
     AGE_ASSERT(address < 0xFE00)
-    // rom & internal ram
+    // rom, video ram & work ram
     if (!is_cartridge_ram(address))
     {
         return m_memory[get_offset(address)];
@@ -160,7 +160,7 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
         m_mbc_writer(*this, address, value);
         return;
     }
-    // write internal ram
+    // write video ram & work ram
     if (!is_cartridge_ram(address))
     {
         m_memory[get_offset(address)] = value;
@@ -192,9 +192,9 @@ void age::gb_memory::write_svbk(uint8_t value)
     }
     log() << "switch to SVBK bank " << bank_id;
 
-    int offset     = bank_id * gb_internal_ram_bank_size;
-    m_offsets[0xD] = m_internal_ram_offset + offset - 0xD000;
-    m_offsets[0xF] = m_internal_ram_offset + offset - 0xF000;
+    int offset     = bank_id * gb_work_ram_bank_size;
+    m_offsets[0xD] = m_work_ram_offset + offset - 0xD000;
+    m_offsets[0xF] = m_work_ram_offset + offset - 0xF000;
 }
 
 void age::gb_memory::write_vbk(uint8_t value)

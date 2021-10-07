@@ -34,11 +34,11 @@
 namespace age
 {
 
-    constexpr int gb_cart_rom_bank_size     = 0x4000;
-    constexpr int gb_cart_ram_bank_size     = 0x2000;
-    constexpr int gb_internal_ram_bank_size = 0x1000;
-    constexpr int gb_internal_ram_size      = 8 * age::gb_internal_ram_bank_size;
-    constexpr int gb_video_ram_bank_size    = 0x2000;
+    constexpr int gb_cart_rom_bank_size  = 0x4000;
+    constexpr int gb_cart_ram_bank_size  = 0x2000;
+    constexpr int gb_work_ram_bank_size  = 0x1000;
+    constexpr int gb_work_ram_size       = 8 * age::gb_work_ram_bank_size;
+    constexpr int gb_video_ram_bank_size = 0x2000;
 
 
 
@@ -127,7 +127,7 @@ namespace age
         uint8_t       m_vbk              = 0xF8;
 
         const int           m_cart_ram_offset;
-        const int           m_internal_ram_offset;
+        const int           m_work_ram_offset;
         const int           m_video_ram_offset;
         uint8_vector        m_memory;
         std::array<int, 16> m_offsets{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

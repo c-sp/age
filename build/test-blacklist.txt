@@ -22,11 +22,6 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 ###   blargg
 ###
 
-### outdated tests
-### (we run the "-2" test instead)
-
-/blargg/mem_timing/
-
 ### single test roms
 ### (we run the test suites instead)
 
@@ -35,8 +30,6 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 ### failing tests
 
-/blargg/halt_bug.gb
-/blargg/interrupt_time/
 /blargg/oam_bug/
 
 
@@ -74,7 +67,6 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 /mooneye-gb/acceptance/ppu/stat_irq_blocking.gb
 /mooneye-gb/acceptance/ppu/stat_lyc_onoff.gb
 /mooneye-gb/manual-only/sprite_priority.gb
-/mooneye-gb/misc/ppu/vblank_stat_intr-C.gb
 
 
 
@@ -251,4 +243,6 @@ age-test-roms/lcd/write-timing-oam-dmgC.gb
 /same-suite/apu/channel_4/channel_4_lfsr_restart.gb
 /same-suite/apu/channel_4/channel_4_lfsr_restart_fast.gb
 
-/same-suite/dma
+/same-suite/dma/gdma_addr_mask.gb
+/same-suite/dma/hdma_lcd_off.gb
+/same-suite/dma/hdma_mode0.gb

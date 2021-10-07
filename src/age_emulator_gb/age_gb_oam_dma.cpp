@@ -20,7 +20,7 @@
 
 namespace
 {
-    bool is_internal_ram_dma_source(int oam_dma_src_address)
+    bool is_work_ram_dma_source(int oam_dma_src_address)
     {
         return (oam_dma_src_address >= 0xC000) && (oam_dma_src_address < 0xE000);
     }
@@ -28,7 +28,7 @@ namespace
     bool oam_dma_conflict(uint16_t address, int oam_dma_src_address, const age::gb_device& device)
     {
         // CGB:
-        // using internal ram as OAM DMA source will not cause conflicts when
+        // using work ram as OAM DMA source will not cause conflicts when
         // accessing the external bus or the video bus:
         //      (gambatte) oamdma/oamdma_srcC000_busypop7FFF_dmg08_out657665AA_cgb04c_out657655AA
         //      (gambatte) oamdma/oamdma_srcC000_busypop9FFF_dmg08_out65765576_cgb04c_out657655AA
@@ -38,7 +38,7 @@ namespace
         //
         if (device.cgb_mode())
         {
-            return is_internal_ram_dma_source(oam_dma_src_address)
+            return is_work_ram_dma_source(oam_dma_src_address)
                        ? (address >= 0xC000)
                        : (age::is_video_ram(address) == age::is_video_ram(oam_dma_src_address));
         }
@@ -84,8 +84,8 @@ age::int16_t age::gb_oam_dma::conflicting_read(uint16_t address)
     auto result = m_next_oam_byte;
 
     // CGB OAM DMA conflict:
-    // when internal ram is not used as OAM DMA source,
-    // reading from CGB internal ram at 0xC000 - 0xDFFF will read either always
+    // when work ram is not used as OAM DMA source,
+    // reading from CGB work ram at 0xC000 - 0xDFFF will read either always
     // from 0xC000 - 0xCFFF or always from 0xD000 - 0xDFFF,
     // depending on 0xFF46 & 0x10:
     //      (gambatte) oamdma/oamdma_src0000_busypopDFFF_dmg08_out65766576_cgb04c_out657655AA
@@ -99,12 +99,12 @@ age::int16_t age::gb_oam_dma::conflicting_read(uint16_t address)
     //      (gambatte) oamdma/oamdma_srcE000_busypopDFFF_dmg08_out65766576_cgb04c_outFFFF55AA
     //      (gambatte) oamdma/oamdma_srcE000_busypopEFFF_dmg08_out65766576_cgb04c_outFFFF55AA
     //
-    if (m_device.cgb_mode() && (address >= 0xC000) && !is_internal_ram_dma_source(m_oam_dma_src_address))
+    if (m_device.cgb_mode() && (address >= 0xC000) && !is_work_ram_dma_source(m_oam_dma_src_address))
     {
-        int internal_ram_offset = (m_oam_dma_reg & 0x10) ? 0xD000 : 0xC000;
-        result                  = m_memory.read_byte(internal_ram_offset + (address & 0xFFF));
+        int work_ram_offset = (m_oam_dma_reg & 0x10) ? 0xD000 : 0xC000;
+        result              = m_memory.read_byte(work_ram_offset + (address & 0xFFF));
 
-        msg << "\n    * CGB: rewire to internal ram at " << log_hex16(internal_ram_offset);
+        msg << "\n    * CGB: rewire to work ram at " << log_hex16(work_ram_offset);
     }
 
     // CGB:
@@ -145,8 +145,8 @@ bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
     msg << "OAM DMA conflict while trying to write [" << log_hex16(address) << "] = " << log_hex8(value);
 
     // CGB OAM DMA conflict:
-    // when internal ram is not used as OAM DMA source,
-    // writing to CGB internal ram at 0xC000 - 0xDFFF will write either always
+    // when work ram is not used as OAM DMA source,
+    // writing to CGB work ram at 0xC000 - 0xDFFF will write either always
     // to 0xC000 - 0xCFFF or always to 0xD000 - 0xDFFF,
     // depending on 0xFF46 & 0x10:
     //      (gambatte) oamdma/oamdma_src0000_busypushC001_dmg08_out55AA1234_cgb04c_out65AA1255
@@ -162,23 +162,23 @@ bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
     //
     if (m_device.cgb_mode() && (address >= 0xC000))
     {
-        if (!is_internal_ram_dma_source(m_oam_dma_src_address))
+        if (!is_work_ram_dma_source(m_oam_dma_src_address))
         {
-            int internal_ram_offset  = (m_oam_dma_reg & 0x10) ? 0xD000 : 0xC000;
-            int internal_ram_address = internal_ram_offset + (address & 0xFFF);
-            m_memory.write_byte(internal_ram_address, value);
+            int work_ram_offset  = (m_oam_dma_reg & 0x10) ? 0xD000 : 0xC000;
+            int work_ram_address = work_ram_offset + (address & 0xFFF);
+            m_memory.write_byte(work_ram_address, value);
 
-            msg << "\n    * CGB: will write [" << log_hex16(internal_ram_address) << "] = " << log_hex8(value) << " instead";
+            msg << "\n    * CGB: will write [" << log_hex16(work_ram_address) << "] = " << log_hex8(value) << " instead";
             return true;
         }
-        // When internal ram is used as OAM DMA source,
-        // writing to internal ram during DMA has no effect:
+        // When work ram is used as OAM DMA source,
+        // writing to work ram during DMA has no effect:
         //      (gambatte) oamdma/oamdma_srcC000_busypushC001_dmg08_out45221234_cgb04c_out6576AA34
         //      (gambatte) oamdma/oamdma_srcC000_busypushE001_dmg08_out45221234_cgb04c_out65761234
         //      (gambatte) oamdma/oamdma_srcDF00_busypushC001_dmg08_out45221234_cgb04c_out6576AA34
         //      (gambatte) oamdma/oamdma_srcDF00_busypushE001_dmg08_out45221234_cgb04c_out65761234
         //
-        msg << "\n    * CGB: writes to internal ram won't affect OAM DMA from internal ram";
+        msg << "\n    * CGB: work ram write ignored, won't affect OAM DMA from work ram";
         return true;
     }
 
@@ -202,13 +202,13 @@ bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
     }
 
     // DMG:
-    // any writes during OAM DMA transfer from internal ram will mix up existing
+    // any writes during OAM DMA transfer from work ram will mix up existing
     // OAM data and the data to be written:
     //      (gambatte) oamdma/oamdma_srcC000_busypush0001_dmg08_out4576AA34_cgb04c_out6576AA34
     //      (gambatte) oamdma/oamdma_srcC000_busypush8001_dmg08_out65221255_cgb04c_out65761255
     //      (gambatte) oamdma/oamdma_srcC000_busypushC001_dmg08_out45221234_cgb04c_out6576AA34
     //      (gambatte) oamdma/oamdma_srcC000_busypushE001_dmg08_out45221234_cgb04c_out65761234
-    //! \todo DMG: mixing OAM data & internal ram writes: we should probably examine this further
+    //! \todo DMG: mixing OAM data & work ram writes: we should probably examine this further
     //
     else
     {
@@ -217,7 +217,7 @@ bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
             m_override_next_oam_byte = m_next_oam_byte & value;
             msg << "\n    * DMG: replacing " << log_hex8(value)
                 << " with " << log_hex8(m_override_next_oam_byte)
-                << " (mixing OAM data when writing to internal ram)";
+                << " (mixing OAM data when writing to work ram)";
         }
     }
 
@@ -317,7 +317,7 @@ void age::gb_oam_dma::continue_dma()
         m_override_next_oam_byte = -1;
 
         auto msg = log();
-        msg << "write OAM [" << log_hex16(0xFF00 + i) << "] = " << log_hex8(byte);
+        msg << "write OAM [" << log_hex16(0xFE00 + i) << "] = " << log_hex8(byte);
         if (m_oam_dma_src_address >= 0xE000)
         {
             msg << " (CGB: OAM DMA source >= 0xE000 invalid)";

@@ -223,7 +223,7 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
     AGE_ASSERT(m_clk_next_irq_lyc > clk_current)
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, m_clk_next_irq_lyc - clk_current);
 
-    // immediate interrupt, id we're still on this line
+    // immediate interrupt, if we're still on this line
     //! \todo what's the exact timing?
     auto line      = m_line.current_line();
     int  lyc_limit = gb_clock_cycles_per_lcd_line - (m_device.is_cgb_device() ? 2 : 0);

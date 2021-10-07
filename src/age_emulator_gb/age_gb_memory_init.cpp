@@ -178,14 +178,14 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
       m_has_battery(has_battery(cart_rom)),
       m_is_mbc2(is_mbc2(cart_rom)),
       m_cart_ram_offset(m_num_cart_rom_banks * gb_cart_rom_bank_size),
-      m_internal_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
-      m_video_ram_offset(m_internal_ram_offset + gb_internal_ram_size)
+      m_work_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
+      m_video_ram_offset(m_work_ram_offset + gb_work_ram_size)
 {
     AGE_ASSERT(m_num_cart_rom_banks > 0)
     AGE_ASSERT(m_num_cart_ram_banks >= 0)
     AGE_ASSERT(m_cart_ram_offset > 0)
-    AGE_ASSERT(m_internal_ram_offset >= m_cart_ram_offset)
-    AGE_ASSERT(m_video_ram_offset > m_internal_ram_offset)
+    AGE_ASSERT(m_work_ram_offset >= m_cart_ram_offset)
+    AGE_ASSERT(m_video_ram_offset > m_work_ram_offset)
 
     // 0x0000 - 0x3FFF : rom bank 0
     // 0x4000 - 0x7FFF : switchable rom bank
@@ -194,16 +194,16 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
     write_vbk(0);
     // 0xA000 - 0xBFFF : switchable ram bank
     set_ram_bank(0);
-    // 0xC000 - 0xDFFF : internal ram
-    // 0xE000 - 0xFE00 : internal ram echo
-    m_offsets[0xC] = m_internal_ram_offset - 0xC000;
-    m_offsets[0xE] = m_internal_ram_offset - 0xE000;
+    // 0xC000 - 0xDFFF : work ram
+    // 0xE000 - 0xFE00 : work ram echo
+    m_offsets[0xC] = m_work_ram_offset - 0xC000;
+    m_offsets[0xE] = m_work_ram_offset - 0xE000;
     write_svbk(0);
 
     // allocate memory
     int cart_rom_size = m_num_cart_rom_banks * gb_cart_rom_bank_size;
     int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
-    int memory_size   = cart_rom_size + cart_ram_size + gb_internal_ram_size + gb_video_ram_size;
+    int memory_size   = cart_rom_size + cart_ram_size + gb_work_ram_size + gb_video_ram_size;
     AGE_ASSERT(memory_size > 0)
 
     log() << "allocating " << memory_size << " bytes total";
