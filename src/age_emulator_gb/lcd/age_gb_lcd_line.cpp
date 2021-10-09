@@ -20,6 +20,13 @@
 
 
 
+namespace
+{
+    constexpr int gb_lcd_initial_alignment = -3;
+}
+
+
+
 age::gb_lcd_line::gb_lcd_line(const gb_device& device,
                               const gb_clock&  clock)
     : m_clock(clock),

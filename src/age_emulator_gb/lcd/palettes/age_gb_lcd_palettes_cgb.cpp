@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_gb_lcd_render.hpp"
+#include "age_gb_lcd_palettes.hpp"
 
 #include <cmath>
 
@@ -108,7 +108,7 @@ age::pixel age::gb_lcd_palettes::lookup_cgb_color(unsigned cgb_rgb15)
         m_cgb_color_lut.reserve(0x8000);
         for (int gb_rgb15 = 0; gb_rgb15 < 0x8000; ++gb_rgb15)
         {
-            m_cgb_color_lut.emplace_back(correct_cgb_color(gb_rgb15));
+            m_cgb_color_lut.emplace_back(cgb_color_correction(gb_rgb15));
         }
     }
     return m_cgb_color_lut[cgb_rgb15 & 0x7FFFU];
@@ -116,7 +116,7 @@ age::pixel age::gb_lcd_palettes::lookup_cgb_color(unsigned cgb_rgb15)
 
 
 
-age::pixel age::correct_cgb_color(unsigned cgb_rgb15)
+age::pixel age::cgb_color_correction(unsigned cgb_rgb15)
 {
     float r = gb_to_float(cgb_rgb15);
     float g = gb_to_float(cgb_rgb15 >> 5);

@@ -84,33 +84,6 @@ void age::gb_lcd::after_speed_change()
     }
 }
 
-void age::gb_lcd::update_state()
-{
-    // LCD on?
-    if (!m_line.lcd_is_on())
-    {
-        return;
-    }
-
-    // Continue unfinished frame.
-    // During a line's mode 0 the emulated program may already prepare
-    // data for the next line.
-    // We thus render each line before it enters mode 0.
-    auto line = m_line.current_line();
-
-    m_render.render(line.m_line + ((line.m_line_clks >= 80) ? 1 : 0));
-
-    // start new frame?
-    if (line.m_line >= gb_lcd_line_count)
-    {
-        m_line.fast_forward_frames();
-        m_render.new_frame();
-        update_state();
-    }
-}
-
-
-
 void age::gb_lcd::trigger_irq_vblank()
 {
     m_lcd_irqs.trigger_irq_vblank();
@@ -135,4 +108,56 @@ void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 {
     m_line.set_back_clock(clock_cycle_offset);
     m_lcd_irqs.set_back_clock(clock_cycle_offset);
+}
+
+
+
+void age::gb_lcd::update_state()
+{
+    if (!m_line.lcd_is_on())
+    {
+        return;
+    }
+    bool new_frame = update_frame();
+    if (new_frame)
+    {
+        new_frame = update_frame();
+        AGE_ASSERT(!new_frame);
+    }
+}
+
+void age::gb_lcd::check_for_finished_frame()
+{
+    if (!m_line.lcd_is_on())
+    {
+        return;
+    }
+    auto line = m_line.current_line();
+    if (line.m_line >= gb_lcd_line_count)
+    {
+        update_frame();
+    }
+}
+
+bool age::gb_lcd::update_frame()
+{
+    AGE_ASSERT(m_line.lcd_is_on());
+
+    // Continue unfinished frame.
+    // During a line's mode 0 the emulated program may already prepare
+    // data for the next line.
+    // We thus render each line before it enters mode 0.
+    auto line = m_line.current_line();
+    m_render.render(line);
+
+    if (line.m_line < gb_lcd_line_count)
+    {
+        return false;
+    }
+
+    // start new frame
+    // (we do NOT update the new frame here though)
+    m_line.fast_forward_frames();
+    m_render.new_frame();
+    return true;
 }

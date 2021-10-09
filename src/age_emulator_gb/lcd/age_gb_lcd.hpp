@@ -29,19 +29,12 @@
 #include "../common/age_gb_events.hpp"
 #include "../common/age_gb_interrupts.hpp"
 
-#include "age_gb_lcd_render.hpp"
+#include "render/age_gb_lcd_render.hpp"
 
 
 
 namespace age
 {
-
-    constexpr int gb_clock_cycles_per_lcd_line  = 456;
-    constexpr int gb_lcd_line_count             = 154;
-    constexpr int gb_clock_cycles_per_lcd_frame = gb_lcd_line_count * gb_clock_cycles_per_lcd_line;
-
-    constexpr int gb_lcd_initial_alignment = -3;
-
     constexpr uint8_t gb_stat_irq_ly_match = 0x40;
     constexpr uint8_t gb_stat_irq_mode2    = 0x20;
     constexpr uint8_t gb_stat_irq_mode1    = 0x10;
@@ -50,12 +43,6 @@ namespace age
     constexpr uint8_t gb_stat_modes        = 0x03;
 
 
-
-    struct gb_current_line
-    {
-        int m_line;
-        int m_line_clks;
-    };
 
     class gb_lcd_line
     {
@@ -112,6 +99,7 @@ namespace age
                     const gb_lcd_line&    line,
                     gb_events&            events,
                     gb_interrupt_trigger& interrupts);
+
         ~gb_lcd_irqs() = default;
 
         [[nodiscard]] uint8_t read_stat() const;
@@ -203,12 +191,14 @@ namespace age
         bool    is_video_ram_accessible();
 
         void after_speed_change();
-        void update_state();
         void trigger_irq_vblank();
         void trigger_irq_lyc();
         void trigger_irq_mode2();
         void trigger_irq_mode0();
         void set_back_clock(int clock_cycle_offset);
+
+        void update_state();
+        void check_for_finished_frame();
 
     private:
         // logging code is header-only to allow compile time optimization
@@ -217,8 +207,9 @@ namespace age
             return m_clock.log(gb_log_category::lc_lcd_registers);
         }
 
-        bool            is_oam_readable(gb_current_line &line);
-        bool            is_oam_writable(gb_current_line &line);
+        bool            is_oam_readable(gb_current_line& line);
+        bool            is_oam_writable(gb_current_line& line);
+        bool            update_frame();
         gb_current_line calculate_line();
 
         uint8_t get_stat_mode(const gb_current_line& current_line, int scx) const;

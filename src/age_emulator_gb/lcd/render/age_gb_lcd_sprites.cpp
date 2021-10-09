@@ -14,9 +14,10 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
+#include "age_gb_lcd_sprites.hpp"
+#include "../palettes/age_gb_lcd_palettes.hpp" // gb_palette_obp0, gb_palette_obp1
 
-#include "age_gb_lcd_render.hpp"
+#include <age_debug.hpp>
 
 #include <algorithm> // std::sort
 
@@ -69,7 +70,7 @@ void age::gb_lcd_sprites::set_sprite_size(uint8_t sprite_size)
 
 
 
-std::vector<age::gb_sprite> age::gb_lcd_sprites::get_line_sprites(int line)
+std::vector<age::gb_sprite> age::gb_lcd_sprites::get_line_sprites(int line) const
 {
     // find the first 10 sprites on this line
     std::vector<gb_sprite> sprites;

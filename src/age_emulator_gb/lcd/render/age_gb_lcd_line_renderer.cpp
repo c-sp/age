@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Christoph Sprenger
+// Copyright 2021 Christoph Sprenger
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,118 +14,32 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_lcd_render.hpp"
+
+#include <age_debug.hpp>
 
 #include <algorithm> // std::fill
 
 
 
-namespace
-{
-    void calculate_xflip(age::uint8_array<256>& xflip)
-    {
-        for (unsigned byte = 0; byte < 256; ++byte)
-        {
-            age::uint8_t flip_byte = 0;
-
-            for (unsigned bit = 0x01, flip_bit = 0x80;
-                 bit < 0x100;
-                 bit += bit, flip_bit >>= 1)
-            {
-                if ((byte & bit) > 0)
-                {
-                    flip_byte |= flip_bit;
-                }
-            }
-
-            xflip[byte] = flip_byte;
-        }
-    }
-
-} // namespace
-
-
-
-age::gb_lcd_render::gb_lcd_render(const gb_device&       device,
-                                  const gb_lcd_palettes& palettes,
-                                  gb_lcd_sprites&        sprites,
-                                  const uint8_t*         video_ram,
-                                  screen_buffer&         screen_buffer)
-    : m_device(device),
+age::gb_lcd_line_renderer::gb_lcd_line_renderer(const gb_lcd_render_common& common,
+                                                const gb_device&            device,
+                                                const gb_lcd_palettes&      palettes,
+                                                const gb_lcd_sprites&       sprites,
+                                                const uint8_t*              video_ram,
+                                                screen_buffer&              screen_buffer)
+    : m_common(common),
+      m_device(device),
       m_palettes(palettes),
       m_sprites(sprites),
-      m_screen_buffer(screen_buffer),
-      m_video_ram(video_ram)
+      m_video_ram(video_ram),
+      m_screen_buffer(screen_buffer)
 {
-    calculate_xflip(m_xflip_cache);
-    set_lcdc(0x91);
 }
 
 
 
-age::uint8_t age::gb_lcd_render::get_lcdc() const
-{
-    return m_lcdc;
-}
-
-void age::gb_lcd_render::set_lcdc(uint8_t lcdc)
-{
-    m_lcdc = lcdc;
-
-    m_sprites.set_sprite_size((lcdc & gb_lcdc_obj_size) ? 16 : 8);
-
-    m_bg_tile_map_offset  = (lcdc & gb_lcdc_bg_map) ? 0x1C00 : 0x1800;
-    m_win_tile_map_offset = (lcdc & gb_lcdc_win_map) ? 0x1C00 : 0x1800;
-
-    m_tile_data_offset = (lcdc & gb_lcdc_bg_win_data) ? 0x0000 : 0x0800;
-    m_tile_xor         = (lcdc & gb_lcdc_bg_win_data) ? 0 : 0x80;
-
-    if (m_device.cgb_mode())
-    {
-        // CGB: if LCDC bit 0 is 0, sprites are always displayed above
-        // BG & window regardless of any priority flags
-        m_priority_mask = (lcdc & gb_lcdc_bg_enable) ? 0xFF : 0x00;
-    }
-}
-
-
-
-void age::gb_lcd_render::new_frame()
-{
-    m_screen_buffer.switch_buffers();
-    m_rendered_lines = 0;
-    m_wline          = -1;
-}
-
-void age::gb_lcd_render::render(int until_line)
-{
-    AGE_ASSERT(until_line >= m_rendered_lines)
-    AGE_ASSERT(m_rendered_lines <= gb_screen_height)
-
-    int sanitized = std::min<int>(gb_screen_height, until_line);
-    int to_render = sanitized - m_rendered_lines;
-
-    // new lines to render?
-    if (to_render <= 0)
-    {
-        return;
-    }
-
-    // render lines
-    int line = m_rendered_lines;
-    m_rendered_lines += to_render;
-
-    for (; line < m_rendered_lines; ++line)
-    {
-        render_line(line);
-    }
-}
-
-
-
-void age::gb_lcd_render::render_line(int line)
+void age::gb_lcd_line_renderer::render_line(int line)
 {
     // We use the pixel alpha channel temporary for priority
     // information.
@@ -140,10 +54,10 @@ void age::gb_lcd_render::render_line(int line)
     //  => render sprite pixel only for priority <= 0x80
 
     // first visible pixel
-    int px0 = 8 + (m_scx & 0b111);
+    int px0 = 8 + (m_common.m_scx & 0b111);
 
     // BG & windows not visible
-    if (!m_device.cgb_mode() && !(m_lcdc & gb_lcdc_bg_enable))
+    if (!m_device.cgb_mode() && !(m_common.get_lcdc() & gb_lcdc_bg_enable))
     {
         pixel fill_color = m_palettes.get_palette(gb_palette_bgp)[0];
         fill_color.m_a   = 0; // sprites are prioritized
@@ -153,19 +67,19 @@ void age::gb_lcd_render::render_line(int line)
     // render BG & window
     else
     {
-        bool render_window = window_visible(line);
+        bool render_window = m_common.window_visible(line);
 
         // render BG
-        int    bg_y          = m_scy + line;
-        int    tile_vram_ofs = m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
+        int    bg_y          = m_common.m_scy + line;
+        int    tile_vram_ofs = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
         int    tile_line     = bg_y & 0b111;
         pixel* px            = &m_line[8];
 
         int tiles = render_window
-                        ? 1 + std::min<int>(20, std::max<int>(0, m_wx - 7) >> 3)
+                        ? 1 + std::min<int>(20, std::max<int>(0, m_common.m_wx - 7) >> 3)
                         : 21;
 
-        for (int tx = m_scx >> 3, max = tx + tiles; tx < max; ++tx)
+        for (int tx = m_common.m_scx >> 3, max = tx + tiles; tx < max; ++tx)
         {
             px = render_bg_tile(px, tile_line, tile_vram_ofs + (tx & 0b11111));
         }
@@ -173,21 +87,20 @@ void age::gb_lcd_render::render_line(int line)
         // render window
         if (render_window)
         {
-            tile_vram_ofs = m_win_tile_map_offset + ((m_wline & 0b11111000) << 2);
-            tile_line     = m_wline & 0b111;
-            px            = &m_line[px0 + m_wx - 7];
+            int wline     = m_common.get_next_window_line();
+            tile_vram_ofs = m_common.m_win_tile_map_offset + ((wline & 0b11111000) << 2);
+            tile_line     = wline & 0b111;
+            px            = &m_line[px0 + m_common.m_wx - 7];
 
-            for (int tx = 0, max = ((gb_screen_width + 7 - m_wx) >> 3) + 1; tx < max; ++tx)
+            for (int tx = 0, max = ((gb_screen_width + 7 - m_common.m_wx) >> 3) + 1; tx < max; ++tx)
             {
                 px = render_bg_tile(px, tile_line, tile_vram_ofs + tx);
             }
-
-            ++m_wline;
         }
     }
 
     // render sprites
-    if (m_lcdc & gb_lcdc_obj_enable)
+    if (m_common.get_lcdc() & gb_lcdc_obj_enable)
     {
         auto sprites = m_sprites.get_line_sprites(line);
         std::for_each(rbegin(sprites),
@@ -220,35 +133,14 @@ void age::gb_lcd_render::render_line(int line)
 
 
 
-bool age::gb_lcd_render::window_visible(int line)
-{
-    bool win_x_visible = ((m_lcdc & gb_lcdc_win_enable) != 0) && (m_wx < 167);
-
-    // window was already active
-    if (m_wline >= 0)
-    {
-        return win_x_visible;
-    }
-
-    // start rendering window on this line?
-    if (win_x_visible && (m_wy <= line))
-    {
-        m_wline = 0;
-        return true;
-    }
-    return false;
-}
-
-
-
-age::pixel* age::gb_lcd_render::render_bg_tile(pixel* dst,
-                                               int    tile_line,
-                                               int    tile_vram_ofs)
+age::pixel* age::gb_lcd_line_renderer::render_bg_tile(pixel* dst,
+                                                      int    tile_line,
+                                                      int    tile_vram_ofs)
 {
     AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < 0x2000))
     AGE_ASSERT((tile_line >= 0) && (tile_line < 8))
 
-    int tile_nr = m_video_ram[tile_vram_ofs] ^ m_tile_xor; // bank 0
+    int tile_nr = m_video_ram[tile_vram_ofs] ^ m_common.m_tile_xor; // bank 0
 
     // tile attributes (for DMG always zero)
     int attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1
@@ -261,7 +153,7 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel* dst,
 
     // read tile data
     int tile_data_ofs = tile_nr << 4; // 16 bytes per tile
-    tile_data_ofs += m_tile_data_offset;
+    tile_data_ofs += m_common.m_tile_data_offset;
     tile_data_ofs += (attributes & gb_tile_attrib_vram_bank) << 10;
     tile_data_ofs += tile_line << 1; // 2 bytes per line
 
@@ -273,8 +165,8 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel* dst,
     // this way bit 0 is used for the leftmost pixel)
     if (!(attributes & gb_tile_attrib_flip_x))
     {
-        tile_byte1 = m_xflip_cache[tile_byte1];
-        tile_byte2 = m_xflip_cache[tile_byte2];
+        tile_byte1 = m_common.m_xflip_cache[tile_byte1];
+        tile_byte2 = m_common.m_xflip_cache[tile_byte2];
     }
 
     // bg palette
@@ -303,9 +195,9 @@ age::pixel* age::gb_lcd_render::render_bg_tile(pixel* dst,
 
 
 
-void age::gb_lcd_render::render_sprite_tile(pixel*           dst,
-                                            int              tile_line,
-                                            const gb_sprite& sprite)
+void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
+                                                   int              tile_line,
+                                                   const gb_sprite& sprite)
 {
     AGE_ASSERT((tile_line >= 0) && (tile_line < 16))
 
@@ -330,8 +222,8 @@ void age::gb_lcd_render::render_sprite_tile(pixel*           dst,
     // this way bit 0 is used for the leftmost pixel)
     if (!(oam_attr & gb_tile_attrib_flip_x))
     {
-        tile_byte1 = m_xflip_cache[tile_byte1];
-        tile_byte2 = m_xflip_cache[tile_byte2];
+        tile_byte1 = m_common.m_xflip_cache[tile_byte1];
+        tile_byte2 = m_common.m_xflip_cache[tile_byte2];
     }
 
     // palette
@@ -351,7 +243,7 @@ void age::gb_lcd_render::render_sprite_tile(pixel*           dst,
         // sprite pixel visible?
         int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
 
-        int px_priority = (px.m_a | priority) & m_priority_mask;
+        int px_priority = (px.m_a | priority) & m_common.m_priority_mask;
         if ((px_priority <= 0x80) && color_idx)
         {
             pixel color = palette[color_idx];

@@ -70,6 +70,8 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         // the last v-blank line)
         if (line.m_line >= gb_screen_height)
         {
+            //! \todo blank frame
+            update_state();
             m_render.new_frame();
         }
 
@@ -202,7 +204,7 @@ age::gb_current_line age::gb_lcd::calculate_line()
     auto line = m_line.current_line();
     if (line.m_line >= gb_lcd_line_count)
     {
-        update_state();
+        update_frame();
         line = m_line.current_line();
     }
     AGE_ASSERT(line.m_line < gb_lcd_line_count)

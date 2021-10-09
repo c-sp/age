@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <gtest/gtest.h>
+#include "age_gb_lcd_palettes.hpp"
 
-#include "age_gb_lcd_render.hpp"
+#include <gtest/gtest.h>
 
 
 
@@ -24,14 +24,14 @@ namespace
 {
     age::pixel correct_color(int r, int g, int b)
     {
-        int gb_rgb15 = r + (g << 5) + (b << 10);
-        return age::correct_cgb_color(gb_rgb15);
+        int gb_rgb15 = r + g * 32 + b * 1024;
+        return age::cgb_color_correction(gb_rgb15);
     }
 } // namespace
 
 
 
-TEST(AgeGbCorrectGbcColor, Color000000)
+TEST(AgeCgbColorCorrection, Color000000)
 {
     auto color = correct_color(0, 0, 0);
     EXPECT_EQ(color.m_r, 0x00);
@@ -40,10 +40,10 @@ TEST(AgeGbCorrectGbcColor, Color000000)
     EXPECT_EQ(color.m_a, 0xFF);
 }
 
-// TODO the tests below fail,
-//      apparently we don't use the same color correction as the LUT texture
+//! \todo the tests below fail,
+//        apparently we don't use the same color correction as the LUT texture
 
-//TEST(AgeGbCorrectGbcColor, Color1F1F1F)
+//TEST(AgeCgbColorCorrection, Color1F1F1F)
 //{
 //    auto color = correct_color(0x1F, 0x1F, 0x1F);
 //    EXPECT_EQ(color.m_r, 0xF8);
@@ -54,7 +54,7 @@ TEST(AgeGbCorrectGbcColor, Color000000)
 //
 //
 //
-//TEST(AgeGbCorrectGbcColor, Color010000)
+//TEST(AgeCgbColorCorrection, Color010000)
 //{
 //    auto color = correct_color(1, 0, 0);
 //    EXPECT_EQ(color.m_r, 0x0A);
@@ -63,7 +63,7 @@ TEST(AgeGbCorrectGbcColor, Color000000)
 //    EXPECT_EQ(color.m_a, 0xFF);
 //}
 //
-//TEST(AgeGbCorrectGbcColor, Color1F0000)
+//TEST(AgeCgbColorCorrection, Color1F0000)
 //{
 //    auto color = correct_color(0x1F, 0, 0);
 //    EXPECT_EQ(color.m_r, 0xE2);
@@ -74,7 +74,7 @@ TEST(AgeGbCorrectGbcColor, Color000000)
 //
 //
 //
-//TEST(AgeGbCorrectGbcColor, Color000100)
+//TEST(AgeCgbColorCorrection, Color000100)
 //{
 //    auto color = correct_color(0, 1, 0);
 //    EXPECT_EQ(color.m_r, 0x06);
@@ -83,7 +83,7 @@ TEST(AgeGbCorrectGbcColor, Color000000)
 //    EXPECT_EQ(color.m_a, 0xFF);
 //}
 //
-//TEST(AgeGbCorrectGbcColor, Color001F00)
+//TEST(AgeCgbColorCorrection, Color001F00)
 //{
 //    auto color = correct_color(0, 0x1F, 0);
 //    EXPECT_EQ(color.m_r, 0x81);
@@ -94,7 +94,7 @@ TEST(AgeGbCorrectGbcColor, Color000000)
 //
 //
 //
-//TEST(AgeGbCorrectGbcColor, Color000001)
+//TEST(AgeCgbColorCorrection, Color000001)
 //{
 //    auto color = correct_color(0, 0, 1);
 //    EXPECT_EQ(color.m_r, 0x00);
@@ -103,7 +103,7 @@ TEST(AgeGbCorrectGbcColor, Color000000)
 //    EXPECT_EQ(color.m_a, 0xFF);
 //}
 //
-//TEST(AgeGbCorrectGbcColor, Color00001F)
+//TEST(AgeCgbColorCorrection, Color00001F)
 //{
 //    auto color = correct_color(0, 0, 0x1F);
 //    EXPECT_EQ(color.m_r, 0x00);

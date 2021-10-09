@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
+#include "age_gb_lcd_palettes.hpp"
 
-#include "age_gb_lcd_render.hpp"
+#include <age_debug.hpp>
 
 
 

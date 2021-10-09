@@ -184,9 +184,12 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         }
     }
 
-    // sync output
+    // generate remaining sound samples
     m_sound.update_state();
-    m_lcd.update_state();
+
+    // finish the next LCD frame, if possible
+    // (not using m_lcd.update_state() reduces dot-rendering for some roms)
+    m_lcd.check_for_finished_frame();
 
     // calculate the cycles actually emulated
     int current_cycle   = m_clock.get_clock_cycle();

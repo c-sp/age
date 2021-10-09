@@ -13,16 +13,18 @@ add_library(
         age_gb_emulator.cpp
         age_gb_emulator_impl.cpp
         age_gb_joypad.cpp
+        lcd/palettes/age_gb_lcd_palettes.cpp
+        lcd/palettes/age_gb_lcd_palettes_cgb.cpp
+        lcd/palettes/age_gb_lcd_palettes_compat.cpp
+        lcd/render/age_gb_lcd_render.cpp
+        lcd/render/age_gb_lcd_dot_renderer.cpp
+        lcd/render/age_gb_lcd_line_renderer.cpp
+        lcd/render/age_gb_lcd_sprites.cpp
         lcd/age_gb_lcd.cpp
         lcd/age_gb_lcd_irqs.cpp
-        lcd/age_gb_lcd_oam_access.cpp
-        lcd/age_gb_lcd_palettes.cpp
-        lcd/age_gb_lcd_palettes_cgb.cpp
-        lcd/age_gb_lcd_palettes_compat.cpp
-        lcd/age_gb_lcd_registers.cpp
-        lcd/age_gb_lcd_render.cpp
         lcd/age_gb_lcd_line.cpp
-        lcd/age_gb_lcd_sprites.cpp
+        lcd/age_gb_lcd_oam_access.cpp
+        lcd/age_gb_lcd_registers.cpp
         age_gb_memory.cpp
         age_gb_memory_init.cpp
         age_gb_oam_dma.cpp

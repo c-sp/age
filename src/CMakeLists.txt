@@ -18,6 +18,17 @@ else ()
     message("compiling AGE with logging disabled")
 endif (COMPILE_LOGGER)
 
+# Compile AGE with (experimental & unfinished) dot rendering enabled?
+OPTION(COMPILE_DOT_RENDERER "compile AGE with dot rendering enabled") # disabled by default
+if (COMPILE_DOT_RENDERER)
+    message("compiling AGE with dot rendering enabled")
+    ADD_DEFINITIONS(-DAGE_COMPILE_DOT_RENDERER)
+else ()
+    message("compiling AGE with dot rendering disabled")
+endif (COMPILE_DOT_RENDERER)
+
+
+
 # include common code:
 #   - utility code
 #   - emulator core
@@ -70,7 +81,7 @@ include(GoogleTest)
 add_executable(
         age_gtest
         age_emulator_gb/common/age_gb_events.test.cpp
-        age_emulator_gb/lcd/age_gb_lcd_palettes_cgb.test.cpp
+        age_emulator_gb/lcd/palettes/age_gb_lcd_palettes_cgb.test.cpp
 )
 target_link_libraries(age_gtest age_emulator_gb age_common gtest_main)
 target_include_directories(age_gtest PUBLIC api)
