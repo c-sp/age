@@ -118,7 +118,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
     }
 
     // copy line
-    auto* dst = &m_screen_buffer.get_back_buffer()[0] + line * gb_screen_width;
+    auto* dst = &m_screen_buffer.get_back_buffer()[line * gb_screen_width];
     auto* src = &m_line[px0];
 
     auto alpha_bits = pixel{0, 0, 0, 255}.get_32bits();

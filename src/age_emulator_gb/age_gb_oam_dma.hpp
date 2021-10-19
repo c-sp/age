@@ -80,7 +80,7 @@ namespace age
             return m_clock.log(gb_log_category::lc_lcd_oam_dma);
         }
 
-        uint8_t read_dma_byte(int offset) const;
+        [[nodiscard]] uint8_t read_dma_byte(int offset) const;
 
         const gb_device& m_device;
         const gb_clock&  m_clock;

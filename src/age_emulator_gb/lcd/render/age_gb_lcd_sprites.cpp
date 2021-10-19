@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#include "age_gb_lcd_sprites.hpp"
 #include "../palettes/age_gb_lcd_palettes.hpp" // gb_palette_obp0, gb_palette_obp1
+#include "age_gb_lcd_sprites.hpp"
 
 #include <age_debug.hpp>
 

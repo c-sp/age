@@ -153,4 +153,4 @@ namespace age
 
 
 
-#endif // AGE_GB_SOUND_UTILITIES_HPP
+#endif // AGE_GB_SOUND_VOLUME_HPP

@@ -86,9 +86,9 @@ namespace
         return static_cast<float>(gb & 0x1FU) / 31.0F;
     }
 
-    float clamp(float value, float min, float max)
+    float clamp(float value)
     {
-        return std::min(std::max(value, min), max);
+        return std::min(std::max(value, 0.F), 1.F);
     }
 
     int clamp_to_uint8(float value)
@@ -137,10 +137,10 @@ age::pixel age::cgb_color_correction(unsigned cgb_rgb15)
     // a = a * contrast + 0.5F * (1 - contrast);
 
     // screen = clamp(screen * lum, 0.0, 1.0);
-    r = clamp(r * lum, 0, 1);
-    g = clamp(g * lum, 0, 1);
-    b = clamp(b * lum, 0, 1);
-    // a = clamp(a * lum, 0, 1);
+    b = clamp(b * lum);
+    g = clamp(g * lum);
+    r = clamp(r * lum);
+    // a = clamp(a * lum);
 
     // screen = color * screen;
     r = color[0] * r + color[1] * g + color[2] * b;  // + color[3] * a;

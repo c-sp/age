@@ -76,6 +76,14 @@ namespace
         return hash;
     }
 
+    void fill_buffer(age::pixel* buffer, int pixels, age::pixel color)
+    {
+        for (auto* max = buffer + pixels; buffer < max; ++buffer)
+        {
+            buffer->set_32bits(color.get_32bits());
+        }
+    }
+
 } // namespace
 
 
@@ -100,23 +108,10 @@ namespace
     {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define END_DEFERRED_EXECUTION        \
-    m_next_fetcher_clks = gb_no_line; \
-    return true;                      \
-    } /* close case */                \
+#define END_DEFERRED_EXECUTION \
+    break;                     \
+    } /* close case */         \
     } /* close switch */
-
-namespace
-{
-    void fill_buffer(age::pixel* buffer, int pixels, age::pixel color)
-    {
-        for (auto* max = buffer + pixels; buffer < max; ++buffer)
-        {
-            buffer->set_32bits(color.get_32bits());
-        }
-    }
-
-} // namespace
 
 
 
@@ -131,21 +126,28 @@ bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
 
     //! \todo implement dot rendering, the following is just dummy code
 
+    if (m_next_fetcher_clks.m_line_clks > line_clks)
+    {
+        return false;
+    }
+
     BEGIN_DEFERRED_EXECUTION
 
     DEFER_NEXT(render_black, 80) // skip mode 2
-    fill_buffer(&m_screen_buffer.get_back_buffer()[until.m_line * gb_screen_width], 40, pixel{0, 0, 0});
+    fill_buffer(&m_screen_buffer.get_back_buffer()[m_next_fetcher_clks.m_line * gb_screen_width], 40, pixel{0, 0, 0});
 
     DEFER_NEXT(render_red, 40)
-    fill_buffer(&m_screen_buffer.get_back_buffer()[until.m_line * gb_screen_width + 40], 40, pixel{255, 0, 0});
+    fill_buffer(&m_screen_buffer.get_back_buffer()[m_next_fetcher_clks.m_line * gb_screen_width + 40], 40, pixel{255, 0, 0});
 
     DEFER_NEXT(render_green, 40)
-    fill_buffer(&m_screen_buffer.get_back_buffer()[until.m_line * gb_screen_width + 80], 40, pixel{0, 255, 0});
+    fill_buffer(&m_screen_buffer.get_back_buffer()[m_next_fetcher_clks.m_line * gb_screen_width + 80], 40, pixel{0, 255, 0});
 
     DEFER_NEXT(render_blue, 40)
-    fill_buffer(&m_screen_buffer.get_back_buffer()[until.m_line * gb_screen_width + 120], 40, pixel{0, 0, 255});
+    fill_buffer(&m_screen_buffer.get_back_buffer()[m_next_fetcher_clks.m_line * gb_screen_width + 120], 40, pixel{0, 0, 255});
 
     DEFER_NEXT(finished, 256)
 
     END_DEFERRED_EXECUTION
+    m_next_fetcher_clks = gb_no_line;
+    return true;
 }

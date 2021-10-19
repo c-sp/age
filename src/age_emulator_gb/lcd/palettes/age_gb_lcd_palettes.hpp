@@ -85,7 +85,7 @@ namespace age
 
         // CGB:     0x00 - 0x3F  BG
         //          0x40 - 0x7F  OBJ
-        uint8_array<gb_total_color_count * 2ULL> m_cpd; // 2 bytes per color
+        uint8_array<gb_total_color_count * 2ULL> m_cpd{}; // 2 bytes per color
         //
         // DMG:     0x00 - 0x03  BGP
         //          0x20 - 0x23  OBP0

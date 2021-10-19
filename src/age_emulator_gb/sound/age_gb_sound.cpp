@@ -128,14 +128,14 @@ void age::gb_sound::after_div_reset(bool during_stop)
     }
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     AGE_ASSERT(m_clk_current_state < m_clk_next_apu_event)
 
     auto reset_details = m_clock.get_div_reset_details(gb_apu_event_clock_cycles);
     AGE_ASSERT((m_clk_next_apu_event == m_clk_current_state + reset_details.m_old_next_increment)
-               || (m_clk_next_apu_event - 2 == m_clk_current_state + reset_details.m_old_next_increment));
+               || (m_clk_next_apu_event - 2 == m_clk_current_state + reset_details.m_old_next_increment))
 
     if (!during_stop)
     {
@@ -181,7 +181,7 @@ void age::gb_sound::after_speed_change()
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
     auto msg = log();
     msg << "sound at speed change:";
@@ -255,7 +255,7 @@ bool age::gb_sound::should_inc_period() const
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
     // the initial volume envelope period is increased by one,
     // if the next frame sequencer step 7 is near
@@ -275,7 +275,7 @@ bool age::gb_sound::should_dec_length_counter() const
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
     return (m_next_frame_sequencer_step & 1) != 0;
 }
@@ -286,7 +286,7 @@ bool age::gb_sound::should_align_frequency_timer() const
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
     //! \todo this needs more test roms (find them or write them)
     //

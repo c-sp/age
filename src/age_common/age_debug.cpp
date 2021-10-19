@@ -14,14 +14,15 @@
 // limitations under the License.
 //
 
-#include <chrono>
-#include <iostream> // std::cout
-
 #include <age_debug.hpp>
 
 
 
 #ifdef AGE_DEBUG
+
+#include <array>
+#include <chrono>
+#include <iostream> // std::cout
 
 std::mutex age::concurrent_cout::M_mutex;
 
@@ -54,13 +55,13 @@ std::string age::age_log_time::get_timestamp()
     int64_t milliseconds = dtn.count()
                            * std::chrono::system_clock::period::num * 1000
                            / std::chrono::system_clock::period::den;
-    char tmp[80];
-    strftime(tmp, 80, "%H:%M:%S", time_info);
+    std::array<char, 80> tmp{};
+    strftime(tmp.data(), 80, "%H:%M:%S", time_info);
 
-    char tmp_millis[84] = "";
-    sprintf(tmp_millis, "%s.%03d", tmp, static_cast<int>(milliseconds % 1000));
+    std::array<char, 84> tmp_millis{};
+    sprintf(tmp_millis.data(), "%s.%03d", tmp.data(), static_cast<int>(milliseconds % 1000));
 
-    return std::string(tmp_millis);
+    return {tmp_millis.data()};
 }
 
 #endif // AGE_DEBUG

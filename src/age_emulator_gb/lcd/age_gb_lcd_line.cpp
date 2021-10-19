@@ -23,7 +23,8 @@
 namespace
 {
     constexpr int gb_lcd_initial_alignment = -3;
-}
+
+} // namespace
 
 
 

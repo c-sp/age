@@ -15,7 +15,6 @@
 //
 
 #include <algorithm>
-#include <array>
 
 #include <age_debug.hpp>
 #include <age_utilities.hpp>

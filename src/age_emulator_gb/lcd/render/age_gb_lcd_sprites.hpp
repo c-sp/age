@@ -77,7 +77,7 @@ namespace age
         [[nodiscard]] std::vector<gb_sprite> get_line_sprites(int line) const;
 
     private:
-        uint8_array<160> m_oam;
+        uint8_array<160> m_oam{};
 
         uint8_t m_sprite_size  = 8;
         uint8_t m_tile_nr_mask = 0xFF;
