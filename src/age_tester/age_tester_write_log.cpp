@@ -156,5 +156,7 @@ void age::tester::write_log(const std::filesystem::path&     log_path,
 #ifdef AGE_COMPILE_LOGGER
     std::ofstream file(log_path);
     file << log.str();
+#else
+    AGE_UNUSED(log_path);
 #endif
 }

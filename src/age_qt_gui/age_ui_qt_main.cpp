@@ -60,12 +60,12 @@ static void evaluate_opengl_args(int argc, char* argv[])
 
     if (force_opengl)
     {
-        AGE_LOG("setting attribute Qt::AA_UseDesktopOpenGL");
+        AGE_LOG("setting attribute Qt::AA_UseDesktopOpenGL")
         QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     }
     if (force_opengl_es)
     {
-        AGE_LOG("setting attribute Qt::AA_UseOpenGLES");
+        AGE_LOG("setting attribute Qt::AA_UseOpenGLES")
         QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
     }
 }

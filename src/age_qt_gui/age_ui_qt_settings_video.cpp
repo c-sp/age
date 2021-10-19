@@ -24,22 +24,21 @@
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QStringList>
-#include <QVBoxLayout>
 #include <QVariant>
-
-#include <age_debug.hpp>
 
 #include "age_ui_qt_settings.hpp"
 
 #include <utility> // std::move
 
 #if 0
+#include <age_debug.hpp>
 #define LOG(x) AGE_LOG(x)
 #else
 #define LOG(x)
 #endif
 
 #if 0
+#include <age_debug.hpp>
 #define LOG_DRAG(x) LOG(x)
 #else
 #define LOG_DRAG(x)
@@ -264,7 +263,7 @@ void age::qt_settings_video::cycle_frames_to_blend()
 
 void age::qt_settings_video::emit_settings_signals()
 {
-    LOG("emitting video settings signals");
+    LOG("emitting video settings signals")
 
     emit use_bilinear_filter_changed(m_use_bilinear_filter->isChecked());
     emit frames_to_blend_changed(m_frames_to_blend);
@@ -306,7 +305,7 @@ void age::qt_settings_video::filter_chain_state_changed(int state)
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_video_use_filter_chain, checked);
 
-    LOG(checked);
+    LOG(checked)
     emit_filter_chain_changed();
 }
 
@@ -315,7 +314,7 @@ void age::qt_settings_video::bilinear_filter_state_changed(int state)
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_video_bilinear_filter, checked);
 
-    LOG(checked);
+    LOG(checked)
     emit use_bilinear_filter_changed(checked);
 }
 
@@ -327,7 +326,7 @@ void age::qt_settings_video::frames_to_blend_toggled(bool checked)
         QVariant frames_to_blend_var = obj->property(qt_settings_property_frames_to_blend);
         m_frames_to_blend            = frames_to_blend_var.toInt();
 
-        LOG(m_frames_to_blend);
+        LOG(m_frames_to_blend)
         m_user_value_store->set_value(qt_settings_video_frames_to_blend, m_frames_to_blend);
         emit frames_to_blend_changed(m_frames_to_blend);
     }
@@ -340,7 +339,7 @@ void age::qt_settings_video::add_filter_clicked()
         QObject* obj             = sender();
         QVariant filter_name_var = obj->property(qt_settings_property_filter);
         QString  filter_name     = filter_name_var.toString();
-        LOG(filter_name);
+        LOG(filter_name)
 
         qt_filter filter = get_qt_filter_for_name(filter_name);
 
@@ -356,28 +355,28 @@ void age::qt_settings_video::add_filter_clicked()
 
 void age::qt_settings_video::remove(int index)
 {
-    LOG(index);
+    LOG(index)
     m_filter_list.erase(m_filter_list.begin() + index);
     update_filter_chain_controls(false);
 }
 
 void age::qt_settings_video::drag_start(int drag_index)
 {
-    LOG("drag_start " << drag_index);
+    LOG("drag_start " << drag_index)
     m_dnd_original_filter_chain = m_filter_list;
     m_dnd_index                 = drag_index;
 }
 
 void age::qt_settings_video::drag_clear()
 {
-    LOG("drag_clear");
+    LOG("drag_clear")
     m_filter_list = m_dnd_original_filter_chain;
     update_filter_chain_controls(false);
 }
 
 void age::qt_settings_video::drag_update(int insert_at_index)
 {
-    LOG("drag_update " << insert_at_index);
+    LOG("drag_update " << insert_at_index)
 
     m_filter_list    = m_dnd_original_filter_chain;
     qt_filter filter = m_filter_list[m_dnd_index];
@@ -389,7 +388,7 @@ void age::qt_settings_video::drag_update(int insert_at_index)
 
 void age::qt_settings_video::drag_finish(bool keep)
 {
-    LOG("drag_finish " << keep);
+    LOG("drag_finish " << keep)
 
     if (!keep)
     {
@@ -556,7 +555,7 @@ void age::qt_filter_widget::set_filter(qt_filter filter, GLint width, GLint heig
 
 void age::qt_filter_widget::dragEnterEvent(QDragEnterEvent* event)
 {
-    LOG_DRAG("dragEnterEvent " << m_widget_index);
+    LOG_DRAG("dragEnterEvent " << m_widget_index)
     bool handled = handle_drag_event(event);
     if (handled)
     {
@@ -566,19 +565,19 @@ void age::qt_filter_widget::dragEnterEvent(QDragEnterEvent* event)
 
 void age::qt_filter_widget::dragLeaveEvent(QDragLeaveEvent*)
 {
-    LOG_DRAG("dragLeaveEvent " << m_widget_index);
+    LOG_DRAG("dragLeaveEvent " << m_widget_index)
     emit drag_clear();
 }
 
 void age::qt_filter_widget::dropEvent(QDropEvent* event)
 {
-    LOG_DRAG("dropEvent " << m_widget_index);
+    LOG_DRAG("dropEvent " << m_widget_index)
     handle_drag_event(event);
 }
 
 void age::qt_filter_widget::mousePressEvent(QMouseEvent*)
 {
-    LOG_DRAG("mousePressEvent " << m_widget_index);
+    LOG_DRAG("mousePressEvent " << m_widget_index)
 
     if (m_has_content)
     {
@@ -604,7 +603,7 @@ void age::qt_filter_widget::mousePressEvent(QMouseEvent*)
         Qt::DropAction action = drag->exec();
 
         // finish
-        LOG_DRAG("action " << action);
+        LOG_DRAG("action " << action)
         emit drag_finish(action > 0);
     }
 }

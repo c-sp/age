@@ -242,16 +242,16 @@ void age::qt_settings_audio::devices_index_changed(const QString& device_name)
     {
         // check,if the audio device info is available
         QAudioDeviceInfo device_info = get_device_info(device_name);
-        LOG("audio output device set to " << device_name << " (device is null: " << device_info.isNull() << ")");
+        LOG("audio output device set to " << device_name << " (device is null: " << device_info.isNull() << ")")
         if (!device_info.isNull())
         {
             // store the selected device name before we change it
             m_user_value_store->set_value(qt_settings_audio_device, device_name);
 
             // find a suitable audio format
-            LOG("looking for suitable audio format using device " << device_name);
+            LOG("looking for suitable audio format using device " << device_name)
             QAudioFormat format = find_suitable_format(device_info);
-            LOG("format valid: " << format.isValid());
+            LOG("format valid: " << format.isValid())
 
             // allocate and use the specified audio output, if the format is valid
             if (format.isValid())
@@ -259,7 +259,7 @@ void age::qt_settings_audio::devices_index_changed(const QString& device_name)
                 m_selected_device        = device_info;
                 m_selected_device_format = format;
 
-                LOG("emitting output_changed signal with " << device_info.deviceName());
+                LOG("emitting output_changed signal with " << device_info.deviceName())
                 emit output_changed(m_selected_device, m_selected_device_format);
             }
         }
@@ -327,19 +327,19 @@ void age::qt_settings_audio::populate_devices_box(const QString& device_to_selec
     for (int i = 0; i < output_devices.size(); ++i)
     {
         auto& device_info = output_devices.at(i);
-        LOG("available audio output device: " << device_info.deviceName());
+        LOG("available audio output device: " << device_info.deviceName())
         m_combo_devices->addItem(device_info.deviceName());
 
         if (device_to_select == device_info.deviceName())
         {
-            LOG("found device_to_select at index " << i << ": " << device_to_select);
+            LOG("found device_to_select at index " << i << ": " << device_to_select)
             current_device_index = i + 1;
         }
     }
 
     // select the requested audio output device, if available
     // (select "default" otherwise)
-    LOG("setting device combo box currentIndex to " << current_device_index);
+    LOG("setting device combo box currentIndex to " << current_device_index)
     m_combo_devices->setCurrentIndex(current_device_index);
 }
 

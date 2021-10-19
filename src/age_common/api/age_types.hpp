@@ -29,11 +29,13 @@
 
 
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define AGE_DISABLE_COPY(Class)   \
 private:                          \
     Class(const Class&) = delete; \
     Class& operator=(const Class&) = delete
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define AGE_DISABLE_MOVE(Class)    \
 private:                           \
     Class(const Class&&) = delete; \
@@ -46,6 +48,7 @@ private:                           \
 //
 // See also:
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables#comment51105057_1486931
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define AGE_UNUSED(arg) ((void) &(arg))
 
 

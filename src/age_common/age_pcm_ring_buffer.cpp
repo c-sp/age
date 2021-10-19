@@ -19,6 +19,7 @@
 #include <age_debug.hpp>
 #include <pcm/age_pcm_ring_buffer.hpp>
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define BUFFER_SIZE_MATCHES  (m_buffer_size == static_cast<int>(m_buffer.size()))
 #define BUFFER_FILLED        ((m_buffered_samples == m_buffer_size) && (m_first_buffered_sample == m_first_new_sample))
 #define BUFFER_EMPTY         ((m_buffered_samples == 0) && (m_first_buffered_sample == m_first_new_sample))
@@ -26,6 +27,7 @@
 #define SAMPLES_WRAPPING     ((m_buffered_samples == m_buffer_size - (m_first_buffered_sample - m_first_new_sample)) && (m_first_buffered_sample > m_first_new_sample))
 
 #define AGE_ASSERT_BUFFERED_SAMPLES AGE_ASSERT(BUFFER_SIZE_MATCHES && (BUFFER_FILLED || BUFFER_EMPTY || SAMPLES_NOT_WRAPPING || SAMPLES_WRAPPING))
+// NOLINTEND
 
 
 

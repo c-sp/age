@@ -99,7 +99,9 @@ namespace age
 
 // AGE_LOG is concluded with a semicolon to prevent "empty statement" warnings for release builds
 // triggered by lone semicolons
-#define AGE_LOG(x)        (age::concurrent_cout() << age::age_log_time() << " " << x).log_line(); // NOLINT(bugprone-macro-parentheses)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define AGE_LOG(x) (age::concurrent_cout() << age::age_log_time() << " " << x).log_line(); // NOLINT(bugprone-macro-parentheses)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define AGE_LOG_QUOTED(x) std::quoted(x)
 
 #else // #ifdef AGE_DEBUG

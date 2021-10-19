@@ -32,7 +32,7 @@
 age::qt_video_renderer::qt_video_renderer()
     : m_indices(QOpenGLBuffer::IndexBuffer)
 {
-    LOG("");
+    LOG("")
     initializeOpenGLFunctions();
 
     // shader program
@@ -62,14 +62,14 @@ age::qt_video_renderer::~qt_video_renderer()
 {
     m_indices.destroy();
     m_vertices.destroy();
-    LOG("");
+    LOG("")
 }
 
 
 
 void age::qt_video_renderer::update_matrix(const QSize& emulator_screen, const QSize& viewport)
 {
-    LOG(emulator_screen.width() << " x " << emulator_screen.height() << " on " << viewport.width() << " x " << viewport.height());
+    LOG(emulator_screen.width() << " x " << emulator_screen.height() << " on " << viewport.width() << " x " << viewport.height())
 
     double viewport_ratio = 1. * viewport.width() / viewport.height();
     double screen_ratio   = 1. * emulator_screen.width() / emulator_screen.height();

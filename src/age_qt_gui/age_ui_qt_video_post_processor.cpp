@@ -49,7 +49,7 @@ namespace
 age::qt_video_post_processor::qt_video_post_processor()
     : m_indices(QOpenGLBuffer::IndexBuffer)
 {
-    LOG("");
+    LOG("")
     initializeOpenGLFunctions();
 
     set_native_frame_size(m_native_frame_size);
@@ -93,7 +93,7 @@ age::qt_video_post_processor::~qt_video_post_processor()
 {
     m_indices.destroy();
     m_vertices.destroy();
-    LOG("");
+    LOG("")
 }
 
 
@@ -106,7 +106,7 @@ age::qt_video_post_processor::~qt_video_post_processor()
 
 void age::qt_video_post_processor::set_native_frame_size(const QSize& size)
 {
-    LOG(size.width() << " x " << size.height());
+    LOG(size.width() << " x " << size.height())
     m_native_frame_size = size;
 
     m_new_frame_idx = 0;
@@ -130,7 +130,7 @@ void age::qt_video_post_processor::set_native_frame_size(const QSize& size)
 
 void age::qt_video_post_processor::set_texture_filter(bool bilinear_filter)
 {
-    LOG(bilinear_filter);
+    LOG(bilinear_filter)
     m_bilinear_filter = bilinear_filter;
 
     // set min/mag filter for native frames
@@ -148,7 +148,7 @@ void age::qt_video_post_processor::set_texture_filter(bool bilinear_filter)
 
 void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_list& filter_list)
 {
-    LOG("#filters: " << filter_list.size());
+    LOG("#filters: " << filter_list.size())
     m_filter_list = filter_list;
 
     create_post_processor();
@@ -328,45 +328,44 @@ void age::qt_video_post_processor::create_post_processor()
         {
             case qt_filter::scale2x:
                 step_added = add_step(post_processor, &m_program_scale2x, result_frame_size);
-                LOG("add scale2x: " << step_added);
+                LOG("add scale2x: " << step_added)
                 break;
 
             case qt_filter::scale2x_age:
                 step_added = add_step(post_processor, &m_program_scale2x_age, result_frame_size);
-                LOG("add scale2x-age: " << step_added);
+                LOG("add scale2x-age: " << step_added)
                 break;
 
             case qt_filter::gauss3x3:
                 step_added = add_step(post_processor, &m_program_gauss3x3_s, result_frame_size)
                              && add_step(post_processor, &m_program_gauss3x3_t, result_frame_size);
-                LOG("add gauss3x3: " << step_added);
+                LOG("add gauss3x3: " << step_added)
                 break;
 
             case qt_filter::gauss5x5:
                 step_added = add_step(post_processor, &m_program_gauss5x5_s, result_frame_size)
                              && add_step(post_processor, &m_program_gauss5x5_t, result_frame_size);
-                LOG("add gauss5x5: " << step_added);
+                LOG("add gauss5x5: " << step_added)
                 break;
 
             case qt_filter::emboss3x3:
                 step_added = add_step(post_processor, &m_program_emboss3x3, result_frame_size);
-                LOG("add emboss3x3: " << step_added);
+                LOG("add emboss3x3: " << step_added)
                 break;
 
             case qt_filter::emboss5x5:
                 step_added = add_step(post_processor, &m_program_emboss5x5, result_frame_size);
-                LOG("add emboss5x5: " << step_added);
+                LOG("add emboss5x5: " << step_added)
                 break;
 
             default:
                 AGE_ASSERT(false)
-                break;
         }
 
         if (!step_added)
         {
             post_processor.clear(); // indicate failure
-            LOG("post processor could not be created");
+            LOG("post processor could not be created")
             break;
         }
     }
@@ -378,7 +377,7 @@ void age::qt_video_post_processor::create_post_processor()
     if (!post_processor.empty())
     {
         post_processor.last().m_buffer = nullptr; // the last buffer is created for every frame
-        LOG("creating " << m_native_frames.size() << " frame buffer objects (" << result_frame_size.width() << " x " << result_frame_size.height() << ")");
+        LOG("creating " << m_native_frames.size() << " frame buffer objects (" << result_frame_size.width() << " x " << result_frame_size.height() << ")")
 
         processed_frames = create_frame_buffers(m_native_frames.size(), result_frame_size);
         AGE_ASSERT(processed_frames.size() == m_native_frames.size())
@@ -387,7 +386,7 @@ void age::qt_video_post_processor::create_post_processor()
     // post-process current frames if creating the post processor was successful
     if (!post_processor.empty() && !processed_frames.empty())
     {
-        LOG("activating post-processor, processing current frames");
+        LOG("activating post-processor, processing current frames")
 
         m_post_processor   = post_processor;
         m_processed_frames = processed_frames;
@@ -434,7 +433,7 @@ bool age::qt_video_post_processor::add_step(QList<processing_step>& post_process
     set_min_mag_filter(buffer->texture(), false, false);
     set_wrap_mode(step.m_buffer->texture());
 
-    LOG("create frame buffer object (" << step.m_buffer->width() << " x " << step.m_buffer->height() << ")");
+    LOG("create frame buffer object (" << step.m_buffer->width() << " x " << step.m_buffer->height() << ")")
     post_processor.append(step);
     return true;
 }

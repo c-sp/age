@@ -95,7 +95,7 @@ namespace
         m_next_fetcher_hash = fnv_hash(#next_step_name);                        \
         return false; /* line not finished yet */                               \
     }                                                                           \
-    } /* close previous case */                                                 \
+    } /* close previous case and fall through to the next step*/                \
     label_##next_step_name : case fnv_hash(#next_step_name) :                   \
     {
 

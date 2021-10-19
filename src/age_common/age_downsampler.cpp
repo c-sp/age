@@ -70,7 +70,7 @@ void age::downsampler::add_output_samples(pcm_frame frame)
 
 int age::downsampler::calculate_ratio(int value1, int value2)
 {
-    AGE_ASSERT(value1 > 0);
+    AGE_ASSERT(value1 > 0)
     AGE_ASSERT(value2 > 0)
 
     double fp_ratio = value1;
@@ -399,23 +399,16 @@ int age::downsampler_kaiser_low_pass::calculate_filter_order(double A, double tw
 
 double age::downsampler_kaiser_low_pass::calculate_beta(double A)
 {
-    double beta;
-
     if (A > 50)
     {
-        beta = 0.1102 * (A - 8.7);
+        return 0.1102 * (A - 8.7);
     }
-    else if (A > 21)
+    if (A > 21)
     {
-        beta = 0.5842 * std::pow(A - 21, 0.4);
-        beta += 0.07886 * (A - 21);
+        double beta = 0.5842 * std::pow(A - 21, 0.4);
+        return beta + (0.07886 * (A - 21));
     }
-    else
-    {
-        beta = 0;
-    }
-
-    return beta;
+    return 0;
 }
 
 
