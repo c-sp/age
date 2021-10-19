@@ -166,7 +166,8 @@ namespace age
         const uint8_t*              m_video_ram;
         screen_buffer&              m_screen_buffer;
 
-        gb_current_line m_rendering_line = gb_no_line;
+        gb_current_line m_next_fetcher_clks = gb_no_line;
+        uint32_t        m_next_fetcher_hash = 0;
     };
 
 

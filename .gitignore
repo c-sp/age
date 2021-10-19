@@ -10,8 +10,7 @@ src/age_common/api/git_revision.hpp
 build/doxygen/html
 build/artifacts
 cmake-build-*
-build*Qt*Debug
-build*Qt*Release
+build*Qt*
 
 # miscellaneous files
 Thumbs.db
