@@ -133,8 +133,8 @@ void age::gb_lcd_render::new_frame()
 {
     m_dot_renderer.reset(); //! \todo maybe we can remove this after fixing LCD off/on
 
-    AGE_ASSERT(!m_dot_renderer.in_progress());
-    //! \todo AGE_ASSERT(m_rendered_lines == gb_screen_height); (does not work for LCD off/on)
+    AGE_ASSERT(!m_dot_renderer.in_progress())
+    //! \todo AGE_ASSERT(m_rendered_lines == gb_screen_height) (does not work for LCD off/on)
 
     reset_window();
     m_screen_buffer.switch_buffers();
@@ -172,7 +172,7 @@ void age::gb_lcd_render::render(gb_current_line until)
     {
         return;
     }
-    AGE_ASSERT(m_rendered_lines >= until.m_line);
+    AGE_ASSERT(m_rendered_lines >= until.m_line)
     if (m_rendered_lines == until.m_line)
     {
         m_dot_renderer.begin_new_line(until);

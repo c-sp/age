@@ -122,7 +122,7 @@ void age::gb_lcd::update_state()
     if (new_frame)
     {
         new_frame = update_frame();
-        AGE_ASSERT(!new_frame);
+        AGE_ASSERT(!new_frame)
     }
 }
 
@@ -141,7 +141,7 @@ void age::gb_lcd::check_for_finished_frame()
 
 bool age::gb_lcd::update_frame()
 {
-    AGE_ASSERT(m_line.lcd_is_on());
+    AGE_ASSERT(m_line.lcd_is_on())
 
     // Continue unfinished frame.
     // During a line's mode 0 the emulated program may already prepare

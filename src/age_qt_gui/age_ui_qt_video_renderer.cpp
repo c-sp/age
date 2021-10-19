@@ -78,13 +78,13 @@ void age::qt_video_renderer::update_matrix(const QSize& emulator_screen, const Q
     if (viewport_ratio > screen_ratio)
     {
         double diff = viewport_ratio - screen_ratio;
-        AGE_ASSERT(diff > 0);
+        AGE_ASSERT(diff > 0)
         proj = QRectF(-.5 * diff, 0, 1 + diff, 1); // x, y, width, height
     }
     else
     {
         double diff = (1 / viewport_ratio) - (1 / screen_ratio);
-        AGE_ASSERT(diff >= 0);
+        AGE_ASSERT(diff >= 0)
         proj = QRectF(0, -.5 * diff, 1, 1 + diff); // x, y, width, height
     }
 

@@ -54,15 +54,15 @@ namespace age
               m_b(static_cast<uint8_t>(b)),
               m_a(static_cast<uint8_t>(a))
         {
-            AGE_ASSERT(r >= 0);
-            AGE_ASSERT(g >= 0);
-            AGE_ASSERT(b >= 0);
-            AGE_ASSERT(a >= 0);
+            AGE_ASSERT(r >= 0)
+            AGE_ASSERT(g >= 0)
+            AGE_ASSERT(b >= 0)
+            AGE_ASSERT(a >= 0)
 
-            AGE_ASSERT(r <= 255);
-            AGE_ASSERT(g <= 255);
-            AGE_ASSERT(b <= 255);
-            AGE_ASSERT(a <= 255);
+            AGE_ASSERT(r <= 255)
+            AGE_ASSERT(g <= 255)
+            AGE_ASSERT(b <= 255)
+            AGE_ASSERT(a <= 255)
         }
 
 

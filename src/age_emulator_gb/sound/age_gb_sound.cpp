@@ -105,7 +105,7 @@ void age::gb_sound::update_state()
     }
 
     // apu on
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     while (current_clk >= m_clk_next_apu_event)
     {
         generate_samples(m_clk_next_apu_event);
@@ -152,7 +152,7 @@ void age::gb_sound::after_div_reset(bool during_stop)
     if (during_stop && (reset_details.m_clk_adjust == -gb_apu_event_clock_cycles / 2))
     {
         msg << "\n    * sound STOP glitch: immediate frame sequencer step by DIV reset not on this machine cycle";
-        AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
+        AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2)
         reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
     }
 
@@ -236,7 +236,7 @@ void age::gb_sound::set_back_clock(int clock_cycle_offset)
     gb_set_back_clock_cycle(m_clk_current_state, clock_cycle_offset);
     gb_set_back_clock_cycle(m_clk_next_apu_event, clock_cycle_offset);
 
-    AGE_ASSERT((m_clk_next_apu_event == gb_no_clock_cycle) || (m_clk_next_apu_event > m_clk_current_state));
+    AGE_ASSERT((m_clk_next_apu_event == gb_no_clock_cycle) || (m_clk_next_apu_event > m_clk_current_state))
 }
 
 
@@ -251,8 +251,8 @@ void age::gb_sound::set_back_clock(int clock_cycle_offset)
 
 bool age::gb_sound::should_inc_period() const
 {
-    AGE_ASSERT(m_master_on);
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+    AGE_ASSERT(m_master_on)
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
@@ -271,8 +271,8 @@ bool age::gb_sound::should_inc_period() const
 
 bool age::gb_sound::should_dec_length_counter() const
 {
-    AGE_ASSERT(m_master_on);
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+    AGE_ASSERT(m_master_on)
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
@@ -282,8 +282,8 @@ bool age::gb_sound::should_dec_length_counter() const
 
 bool age::gb_sound::should_align_frequency_timer() const
 {
-    AGE_ASSERT(m_master_on);
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+    AGE_ASSERT(m_master_on)
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     // everything must be up to date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
@@ -357,8 +357,8 @@ bool age::gb_sound::should_align_frequency_timer() const
 
 int age::gb_sound::apu_event()
 {
-    AGE_ASSERT(m_master_on);
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+    AGE_ASSERT(m_master_on)
+    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
     AGE_ASSERT((m_next_frame_sequencer_step >= 0) && (m_next_frame_sequencer_step <= 7))
 
     // skip this frame sequencer step

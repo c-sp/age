@@ -318,7 +318,7 @@ void age::qt_video_output::new_frame_slot(QSharedPointer<const pixel_vector> new
 void age::qt_video_output::process_new_frame()
 {
     run_if_initialized([this] {
-        AGE_ASSERT(nullptr != m_new_frame);
+        AGE_ASSERT(nullptr != m_new_frame)
         m_post_processor->add_new_frame(*m_new_frame);
         ++m_frame_counter;
     });

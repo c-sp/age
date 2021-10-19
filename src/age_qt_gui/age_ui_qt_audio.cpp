@@ -93,7 +93,7 @@ void age::qt_audio_output::set_volume(int volume_percent)
 void age::qt_audio_output::set_input_sampling_rate(int sampling_rate)
 {
     LOG(sampling_rate);
-    AGE_ASSERT(sampling_rate > 1);
+    AGE_ASSERT(sampling_rate > 1)
     m_input_sampling_rate = sampling_rate;
 
     create_downsampler();
@@ -119,7 +119,7 @@ void age::qt_audio_output::set_latency(int latency_milliseconds)
 void age::qt_audio_output::set_output(QAudioDeviceInfo device_info, QAudioFormat format)
 {
     LOG(device_info.deviceName() << " @ " << format.sampleRate() << "hz");
-    AGE_ASSERT(format.sampleRate() > 1);
+    AGE_ASSERT(format.sampleRate() > 1)
 
     m_device_info = device_info;
     m_format      = format;
@@ -133,7 +133,7 @@ void age::qt_audio_output::buffer_samples(const pcm_vector& samples)
 {
     if (m_output != nullptr)
     {
-        AGE_ASSERT(m_downsampler != nullptr);
+        AGE_ASSERT(m_downsampler != nullptr)
 
         m_downsampler->add_input_samples(samples);
         m_buffer.add_samples(m_downsampler->get_output_samples());
@@ -251,7 +251,7 @@ void age::qt_audio_output::reset()
         LOG("output.periodSize     " << m_output->periodSize());
 
         // create the silence buffer
-        AGE_ASSERT(buffered_samples >= 0);
+        AGE_ASSERT(buffered_samples >= 0)
         m_silence = pcm_vector(static_cast<unsigned>(buffered_samples), pcm_frame());
     }
 }
@@ -297,7 +297,7 @@ void age::qt_audio_output::create_downsampler()
 
 int age::qt_audio_output::write_samples()
 {
-    AGE_ASSERT(m_output != nullptr);
+    AGE_ASSERT(m_output != nullptr)
 
     int samples_written = 0;
 
@@ -323,7 +323,7 @@ int age::qt_audio_output::write_samples()
 
             // calculate the number of samples that were written
             qint64 tmp = bytes_written / sizeof_pcm_frame;
-            AGE_ASSERT((tmp >= 0) && (tmp <= samples_to_write));
+            AGE_ASSERT((tmp >= 0) && (tmp <= samples_to_write))
             samples_written = static_cast<int>(tmp);
 
             m_buffer.discard_buffered_samples(samples_written);

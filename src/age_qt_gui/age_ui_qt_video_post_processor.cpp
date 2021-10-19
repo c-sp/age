@@ -53,7 +53,7 @@ age::qt_video_post_processor::qt_video_post_processor()
     initializeOpenGLFunctions();
 
     set_native_frame_size(m_native_frame_size);
-    AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size);
+    AGE_ASSERT(m_native_frames.size() == qt_video_frame_history_size)
 
     qt_init_shader_program(m_program_scale2x, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_scale2x_fsh.glsl");
     qt_init_shader_program(m_program_scale2x_age, ":/age_ui_qt_pp_vsh.glsl", ":/age_ui_qt_pp_scale2x_age_fsh.glsl");
@@ -158,9 +158,9 @@ void age::qt_video_post_processor::set_post_processing_filter(const qt_filter_li
 
 void age::qt_video_post_processor::add_new_frame(const pixel_vector& pixel_data)
 {
-    AGE_ASSERT(!m_native_frames.empty());
-    AGE_ASSERT(m_new_frame_idx >= 0);
-    AGE_ASSERT(m_new_frame_idx < m_native_frames.size());
+    AGE_ASSERT(!m_native_frames.empty())
+    AGE_ASSERT(m_new_frame_idx >= 0)
+    AGE_ASSERT(m_new_frame_idx < m_native_frames.size())
 
     m_native_frames[m_new_frame_idx]->bind();
     m_native_frames[m_new_frame_idx]->setData(tx_pixel_format, tx_pixel_type, pixel_data.data());
@@ -180,8 +180,8 @@ QList<GLuint> age::qt_video_post_processor::get_frame_textures(int last_N_frames
 {
     last_N_frames = qMax(last_N_frames, 1);
     last_N_frames = qMin(last_N_frames, m_native_frames.size());
-    AGE_ASSERT(last_N_frames > 0);
-    AGE_ASSERT(last_N_frames <= m_native_frames.size());
+    AGE_ASSERT(last_N_frames > 0)
+    AGE_ASSERT(last_N_frames <= m_native_frames.size())
 
     QList<GLuint> result;
     int           frame_idx = m_new_frame_idx;
@@ -232,16 +232,16 @@ void age::qt_video_post_processor::set_wrap_mode(GLuint texture_id)
 
 bool age::qt_video_post_processor::post_process_frames() const
 {
-    AGE_ASSERT(m_post_processor.empty() == m_processed_frames.empty());
+    AGE_ASSERT(m_post_processor.empty() == m_processed_frames.empty())
     return !m_post_processor.empty();
 }
 
 void age::qt_video_post_processor::post_process_frame(int frame_idx)
 {
-    AGE_ASSERT(!m_post_processor.empty());
-    AGE_ASSERT(m_native_frames.size() == m_processed_frames.size());
-    AGE_ASSERT(frame_idx >= 0);
-    AGE_ASSERT(frame_idx < m_native_frames.size());
+    AGE_ASSERT(!m_post_processor.empty())
+    AGE_ASSERT(m_native_frames.size() == m_processed_frames.size())
+    AGE_ASSERT(frame_idx >= 0)
+    AGE_ASSERT(frame_idx < m_native_frames.size())
 
     // store the current viewport as we adjust viewport size
     // during post processing
@@ -311,7 +311,7 @@ void age::qt_video_post_processor::create_post_processor()
     // cleanup current post-processing data
     m_processed_frames.clear();
     m_post_processor.clear();
-    AGE_ASSERT(!post_process_frames());
+    AGE_ASSERT(!post_process_frames())
 
     // create a new post-processor
     // (disable post-processing if that fails)
@@ -359,7 +359,7 @@ void age::qt_video_post_processor::create_post_processor()
                 break;
 
             default:
-                AGE_ASSERT(false);
+                AGE_ASSERT(false)
                 break;
         }
 
@@ -381,7 +381,7 @@ void age::qt_video_post_processor::create_post_processor()
         LOG("creating " << m_native_frames.size() << " frame buffer objects (" << result_frame_size.width() << " x " << result_frame_size.height() << ")");
 
         processed_frames = create_frame_buffers(m_native_frames.size(), result_frame_size);
-        AGE_ASSERT(processed_frames.size() == m_native_frames.size());
+        AGE_ASSERT(processed_frames.size() == m_native_frames.size())
     }
 
     // post-process current frames if creating the post processor was successful
@@ -391,7 +391,7 @@ void age::qt_video_post_processor::create_post_processor()
 
         m_post_processor   = post_processor;
         m_processed_frames = processed_frames;
-        AGE_ASSERT(post_process_frames());
+        AGE_ASSERT(post_process_frames())
 
         for (int i = 0; i < m_native_frames.size(); ++i)
         {

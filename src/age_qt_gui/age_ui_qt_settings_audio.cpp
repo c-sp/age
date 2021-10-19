@@ -184,7 +184,7 @@ void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo& dev
 
     m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
 
-    AGE_ASSERT(sizeof(pcm_frame) <= int_max);
+    AGE_ASSERT(sizeof(pcm_frame) <= int_max)
     int samples = buffer_size / static_cast<int>(sizeof(pcm_frame));
     int millis  = samples * 1000 / format.sampleRate();
     m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("

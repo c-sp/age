@@ -589,7 +589,7 @@ bool age::gb_bus::handle_gp_dma()
 
         ++m_hdma_source;
         ++m_hdma_destination;
-        AGE_ASSERT(m_hdma_destination <= 0x10000);
+        AGE_ASSERT(m_hdma_destination <= 0x10000)
     }
 
     m_clock.tick_machine_cycle();

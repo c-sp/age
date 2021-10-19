@@ -174,7 +174,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         else if (m_interrupts.halted())
         {
             int fast_forward_cycle = get_fast_forward_halt_cycles(cycle_to_reach);
-            AGE_ASSERT(fast_forward_cycle >= m_clock.get_clock_cycle());
+            AGE_ASSERT(fast_forward_cycle >= m_clock.get_clock_cycle())
             m_clock.tick_clock_cycles(fast_forward_cycle - m_clock.get_clock_cycle());
             m_bus.handle_events(); // interrupt may terminate HALT
         }

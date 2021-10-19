@@ -93,16 +93,18 @@ namespace age
 
 
 
-#define AGE_ASSERT(x)             assert(x);
-#define AGE_ASSERT_ONE_BIT_SET(x) AGE_ASSERT(((x) > 0) && (((x) & ((x) -1)) == 0));
+// AGE_ASSERT is concluded with a semicolon to prevent "empty statement" warnings for release builds
+// triggered by lone semicolons
+#define AGE_ASSERT(x) /* NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay) */ assert(x); /* NOLINTEND */
 
+// AGE_LOG is concluded with a semicolon to prevent "empty statement" warnings for release builds
+// triggered by lone semicolons
 #define AGE_LOG(x)        (age::concurrent_cout() << age::age_log_time() << " " << x).log_line(); // NOLINT(bugprone-macro-parentheses)
 #define AGE_LOG_QUOTED(x) std::quoted(x)
 
 #else // #ifdef AGE_DEBUG
 
 #define AGE_ASSERT(x)
-#define AGE_ASSERT_ONE_BIT_SET(x)
 
 #define AGE_LOG(x)
 #define AGE_LOG_QUOTED(x)

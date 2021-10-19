@@ -122,8 +122,8 @@ namespace age
             //   / 32  ->  4 channels, SOx volume up to 8
             int value = m_current_pcm_amplitude * int16_t_max;
             int output = value / (15 * 32);
-            AGE_ASSERT(output >= 0);
-            AGE_ASSERT(output <= int16_t_max / 32);
+            AGE_ASSERT(output >= 0)
+            AGE_ASSERT(output <= int16_t_max / 32)
 
             m_output_value = static_cast<int16_t>(output);
         }

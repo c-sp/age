@@ -92,9 +92,9 @@ void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emul
 {
     LOG("");
 
-    AGE_ASSERT(new_emulator != nullptr);
+    AGE_ASSERT(new_emulator != nullptr)
     auto emu = new_emulator->get_emulator();
-    AGE_ASSERT(emu != nullptr);
+    AGE_ASSERT(emu != nullptr)
 
     m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
 
@@ -257,14 +257,14 @@ void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
     LOG("nanos_to_emulate " << nanos_to_emulate);
 
     // convert nanoseconds to emulation cycles
-    AGE_ASSERT(qint64_max / nanos_to_emulate > emu->get_cycles_per_second());
+    AGE_ASSERT(qint64_max / nanos_to_emulate > emu->get_cycles_per_second())
     qint64 cycles_to_emulate = nanos_to_emulate * emu->get_cycles_per_second() / 1000000000;
 
     // save the nanoseconds that make up just a fraction of an emulation cycle
     // for the next emulate() iteration
     m_last_emulate_nanos = current_timer_nanos - (nanos_to_emulate - cycles_to_emulate * 1000000000 / emu->get_cycles_per_second());
-    AGE_ASSERT(m_last_emulate_nanos <= current_timer_nanos);
-    AGE_ASSERT(m_last_emulate_nanos >= current_timer_nanos - 1000000000 / emu->get_cycles_per_second() - 1);
+    AGE_ASSERT(m_last_emulate_nanos <= current_timer_nanos)
+    AGE_ASSERT(m_last_emulate_nanos >= current_timer_nanos - 1000000000 / emu->get_cycles_per_second() - 1)
 
     // Calculate the number of emulation cycles we should have reached by now.
     // Since the last call to emulator::emulate() may have emulated more cycles
@@ -277,9 +277,9 @@ void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
         return;
     }
 
-    AGE_ASSERT(cycles_left <= int_max);
+    AGE_ASSERT(cycles_left <= int_max)
     bool new_frame = emu->emulate(static_cast<int>(cycles_left));
-    AGE_ASSERT(emu->get_emulated_cycles() >= m_emulated_cycles);
+    AGE_ASSERT(emu->get_emulated_cycles() >= m_emulated_cycles)
 
     // update video & audio
     if (new_frame)
@@ -291,7 +291,7 @@ void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
     m_audio_output.buffer_samples(emu->get_audio_buffer());
 
     // calculate emulation speed
-    AGE_ASSERT(current_timer_nanos >= m_speed_last_nanos);
+    AGE_ASSERT(current_timer_nanos >= m_speed_last_nanos)
     qint64 speed_diff_nanos = current_timer_nanos - m_speed_last_nanos;
 
     if (speed_diff_nanos >= emulation_speed_interval_nanos)

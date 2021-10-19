@@ -49,12 +49,12 @@ void age::gb_lcd_dot_renderer::reset()
 
 void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line)
 {
-    AGE_ASSERT(!in_progress());
+    AGE_ASSERT(!in_progress())
     m_next_fetcher_clks = {.m_line = line.m_line, .m_line_clks = 0};
     m_next_fetcher_hash = 0;
 
     bool line_finished = continue_line(line);
-    AGE_ASSERT(!line_finished);
+    AGE_ASSERT(!line_finished)
     AGE_UNUSED(line_finished); // for release builds
 }
 
@@ -87,16 +87,16 @@ namespace
         case 0: {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFER_NEXT(next_step_name, t4_cycles)                                    \
-    m_next_fetcher_clks.m_line_clks += (t4_cycles);                              \
-    AGE_ASSERT(m_next_fetcher_clks.m_line_clks <= gb_clock_cycles_per_lcd_line); \
-    if (m_next_fetcher_clks.m_line_clks > line_clks)                             \
-    {                                                                            \
-        m_next_fetcher_hash = fnv_hash(#next_step_name);                         \
-        return false; /* line not finished yet */                                \
-    }                                                                            \
-    } /* close previous case */                                                  \
-    label_##next_step_name : case fnv_hash(#next_step_name) :                    \
+#define DEFER_NEXT(next_step_name, t4_cycles)                                   \
+    m_next_fetcher_clks.m_line_clks += (t4_cycles);                             \
+    AGE_ASSERT(m_next_fetcher_clks.m_line_clks <= gb_clock_cycles_per_lcd_line) \
+    if (m_next_fetcher_clks.m_line_clks > line_clks)                            \
+    {                                                                           \
+        m_next_fetcher_hash = fnv_hash(#next_step_name);                        \
+        return false; /* line not finished yet */                               \
+    }                                                                           \
+    } /* close previous case */                                                 \
+    label_##next_step_name : case fnv_hash(#next_step_name) :                   \
     {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -122,8 +122,8 @@ namespace
 
 bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
 {
-    AGE_ASSERT(in_progress());
-    AGE_ASSERT(until.m_line >= m_next_fetcher_clks.m_line);
+    AGE_ASSERT(in_progress())
+    AGE_ASSERT(until.m_line >= m_next_fetcher_clks.m_line)
 
     int line_clks = (until.m_line > m_next_fetcher_clks.m_line)
                         ? gb_clock_cycles_per_lcd_line

@@ -309,7 +309,7 @@ void age::gb_sound::write_nr14(uint8_t value)
         // one frequency sweep step is skipped if the next frame sequencer
         // step 2 or 6 is near
         // (see test rom analysis)
-        AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle);
+        AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
         int  clks_next_event = m_clk_next_apu_event - m_clk_current_state; // were updated by update_state()
         bool skip_sweep_step = ((m_next_frame_sequencer_step & 2) != 0)
                                && (clks_next_event <= (m_device.cgb_mode() ? 8 : 4));

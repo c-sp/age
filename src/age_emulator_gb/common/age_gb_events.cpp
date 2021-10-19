@@ -40,7 +40,7 @@ age::gb_sorted_events::gb_sorted_events()
 void age::gb_sorted_events::schedule_event(gb_event event, int for_clock_cycle)
 {
     AGE_ASSERT(for_clock_cycle >= 0)
-    AGE_ASSERT(event != gb_event::none);
+    AGE_ASSERT(event != gb_event::none)
 
     int ev_idx = to_underlying(event);
 

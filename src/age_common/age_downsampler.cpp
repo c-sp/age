@@ -70,7 +70,7 @@ void age::downsampler::add_output_samples(pcm_frame frame)
 
 int age::downsampler::calculate_ratio(int value1, int value2)
 {
-    AGE_ASSERT(value1 > 0)
+    AGE_ASSERT(value1 > 0);
     AGE_ASSERT(value2 > 0)
 
     double fp_ratio = value1;

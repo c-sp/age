@@ -41,13 +41,13 @@ age::gb_lcd_sprites::gb_lcd_sprites(bool cgb_features)
 
 age::uint8_t age::gb_lcd_sprites::read_oam(int offset) const
 {
-    AGE_ASSERT((offset >= 0) && (offset < 160));
+    AGE_ASSERT((offset >= 0) && (offset < 160))
     return m_oam[offset];
 }
 
 void age::gb_lcd_sprites::write_oam(int offset, uint8_t value)
 {
-    AGE_ASSERT((offset >= 0) && (offset < 160));
+    AGE_ASSERT((offset >= 0) && (offset < 160))
     m_oam[offset] = value;
 }
 

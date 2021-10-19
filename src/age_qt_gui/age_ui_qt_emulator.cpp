@@ -83,7 +83,7 @@ age::qt_emulator::~qt_emulator()
 
         uint8_vector ram = m_emulator->get_persistent_ram();
 
-        AGE_ASSERT(ram.size() <= int_max);
+        AGE_ASSERT(ram.size() <= int_max)
         int         ram_size = static_cast<int>(ram.size());
         const char* ram_data = reinterpret_cast<const char*>(ram.data());
 
