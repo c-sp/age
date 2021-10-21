@@ -57,21 +57,24 @@ void age::tester::schedule_rom_age(const std::filesystem::path& rom_path,
     }
 
     // parse CGB device types
-    std::string cgb_prefix("-cgb");
-
-    auto cgb_hint = filename.find(cgb_prefix);
-    if (cgb_hint != std::string::npos)
-    {
-        cgb_hint += cgb_prefix.size();
-
-        for (; cgb_hint < filename.size(); ++cgb_hint)
+    auto schedule_cgb_tests = [&](const std::string& prefix) {
+        auto cgb_hint = filename.find(prefix);
+        if (cgb_hint != std::string::npos)
         {
-            auto dev_type = parse_cgb_type(filename.at(cgb_hint));
-            if (!dev_type.has_value())
+            cgb_hint += prefix.size();
+
+            for (; cgb_hint < filename.size(); ++cgb_hint)
             {
-                break;
+                auto dev_type = parse_cgb_type(filename.at(cgb_hint));
+                if (!dev_type.has_value())
+                {
+                    break;
+                }
+                schedule(rom_contents, dev_type.value(), gb_colors_hint::default_colors, run_common_test);
             }
-            schedule(rom_contents, dev_type.value(), gb_colors_hint::default_colors, run_common_test);
         }
-    }
+    };
+
+    schedule_cgb_tests("-cgb");
+    schedule_cgb_tests("-ncm");
 }
