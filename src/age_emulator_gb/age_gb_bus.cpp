@@ -271,7 +271,7 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     }
 
     // CGB registers when running in DMG mode
-    if (m_device.cgb_in_dmg_mode())
+    if (m_device.non_cgb_mode())
     {
         switch (address)
         {
@@ -457,7 +457,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     }
 
     // CGB registers when running in DMG mode
-    if (m_device.cgb_in_dmg_mode())
+    if (m_device.non_cgb_mode())
     {
         switch (address)
         {

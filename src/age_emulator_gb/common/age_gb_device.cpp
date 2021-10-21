@@ -39,7 +39,7 @@ namespace
             case age::gb_device_type::cgb_e:
                 return cgb_flag
                            ? age::gb_device_mode::cgb
-                           : age::gb_device_mode::cgb_in_dmg_mode;
+                           : age::gb_device_mode::non_cgb_mode;
 
             default:
                 // auto-detect device mode from cartridge CGB flag

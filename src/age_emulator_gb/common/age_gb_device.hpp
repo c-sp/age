@@ -35,7 +35,7 @@ namespace age
     enum class gb_device_mode
     {
         dmg,
-        cgb_in_dmg_mode,
+        non_cgb_mode,
         cgb
     };
 
@@ -65,9 +65,9 @@ namespace age
         //!
         //! The emulated Game Boy Color is running in DMG mode.
         //!
-        [[nodiscard]] bool cgb_in_dmg_mode() const
+        [[nodiscard]] bool non_cgb_mode() const
         {
-            return m_device_mode == gb_device_mode::cgb_in_dmg_mode;
+            return m_device_mode == gb_device_mode::non_cgb_mode;
         }
 
         //!

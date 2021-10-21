@@ -46,7 +46,7 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device& device,
     if (!m_device.cgb_mode())
     {
         // setup DMG palettes
-        if (device.cgb_in_dmg_mode())
+        if (device.non_cgb_mode())
         {
             init_dmg_colors(rom_header);
         }
