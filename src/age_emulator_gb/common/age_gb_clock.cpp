@@ -45,7 +45,7 @@ age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
         m_clock_cycle = 0x1F * 0x100;
         m_clock_cycle -= 96;
     }
-^    else if (device.non_cgb_mode())
+    else if (device.non_cgb_mode())
     {
         // Mooneye GB tests:
         // misc/boot_div-cgbABCDE
