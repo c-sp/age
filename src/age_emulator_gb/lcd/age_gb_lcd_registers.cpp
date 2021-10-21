@@ -236,7 +236,7 @@ age::uint8_t age::gb_lcd::read_ly()
     int ly = line.m_line + ((line.m_line_clks >= gb_clock_cycles_per_lcd_line - 2) ? 1 : 0);
 
     log_reg() << "read LY == " << log_hex8(ly)
-              << " (" << line.m_line_clks << " clock cylces into line " << line.m_line << ")";
+              << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
     return ly;
 }
 

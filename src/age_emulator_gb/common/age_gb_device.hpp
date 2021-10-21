@@ -63,7 +63,7 @@ namespace age
         }
 
         //!
-        //! The emulated Game Boy Color is running in DMG mode.
+        //! The emulated Game Boy Color is running in non-CGB mode.
         //!
         [[nodiscard]] bool non_cgb_mode() const
         {
@@ -72,7 +72,7 @@ namespace age
 
         //!
         //! All Game Boy Color features are available.
-        //! The emulated Game Boy Color is NOT running in DMG mode.
+        //! The emulated Game Boy Color is NOT running in non-CGB mode.
         //!
         [[nodiscard]] bool cgb_mode() const
         {
