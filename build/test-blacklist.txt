@@ -11,8 +11,8 @@
 ###   age
 ###
 
-age-test-roms/lcd/mode2-obj-size-ds-cgb.gb
-age-test-roms/lcd/mode2-obj-size.gb
+age-test-roms/.*/mode2-obj-size-ds-cgb.gb
+age-test-roms/.*/mode2-obj-size.gb
 age-test-roms/lcd/write-timing-oam-dmgC.gb
 
 

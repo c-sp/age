@@ -44,9 +44,12 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
     if (!(diff & gb_lcdc_enable))
     {
-        auto line = calculate_line();
-        msg << "\n    * " << line.m_line_clks << " clock cycles into line " << line.m_line
-            << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
+        if (m_line.lcd_is_on())
+        {
+            auto line = calculate_line();
+            msg << "\n    * " << line.m_line_clks << " clock cycles into line " << line.m_line
+                << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
+        }
         return;
     }
 
