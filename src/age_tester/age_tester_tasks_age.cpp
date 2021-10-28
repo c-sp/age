@@ -40,6 +40,77 @@ namespace
         }
     }
 
+    std::optional<age::gb_device_type> parse_dmg_type(char c)
+    {
+        if (c == 'C')
+        {
+            return {age::gb_device_type::dmg};
+        }
+        return {};
+    }
+
+    void for_each_device_type(const std::filesystem::path&                                   file_path,
+                              const std::string&                                             type_prefix,
+                              const std::function<std::optional<age::gb_device_type>(char)>& parse_type,
+                              const std::function<void(age::gb_device_type)>&                callback)
+    {
+        auto filename  = file_path.filename().string();
+        auto type_hint = filename.find(type_prefix);
+        if (type_hint != std::string::npos)
+        {
+            type_hint += type_prefix.size();
+
+            for (; type_hint < filename.size(); ++type_hint)
+            {
+                auto dev_type = parse_type(filename.at(type_hint));
+                if (!dev_type.has_value())
+                {
+                    break;
+                }
+                callback(dev_type.value());
+            }
+        }
+    }
+
+
+
+    constexpr const char* prefix_dmg = "-dmg";
+    constexpr const char* prefix_cgb = "-cgb";
+    constexpr const char* prefix_ncm = "-ncm";
+
+    std::vector<std::string> find_screenshots(const std::filesystem::path& rom_path)
+    {
+        std::vector<std::string> screenshots;
+
+        auto rom_path_no_ext = std::filesystem::path{rom_path}.replace_extension().string(); // discard file extension
+        auto path_dmg        = rom_path_no_ext + prefix_dmg;
+        auto path_cgb        = rom_path_no_ext + prefix_cgb;
+        auto path_ncm        = rom_path_no_ext + prefix_ncm;
+
+        for (const auto& entry : std::filesystem::directory_iterator{rom_path.parent_path()})
+        {
+            if (!entry.is_regular_file() || (entry.path().extension().string() != ".png"))
+            {
+                continue;
+            }
+
+            auto path = entry.path().string();
+            if ((path.find(path_dmg) == 0) || (path.find(path_cgb) == 0) || (path.find(path_ncm) == 0))
+            {
+                screenshots.emplace_back(path);
+            }
+        }
+
+        return screenshots;
+    }
+
+    age::tester::run_test_t run_screenshot_test(const std::filesystem::path& screenshot_path)
+    {
+        return age::tester::new_screenshot_test(screenshot_path, [](const age::gb_emulator& emulator) {
+            return emulator.get_test_info().m_ld_b_b;
+        });
+    }
+
 } // namespace
 
 
@@ -50,31 +121,30 @@ void age::tester::schedule_rom_age(const std::filesystem::path& rom_path,
     auto filename     = rom_path.filename().string();
     auto rom_contents = load_rom_file(rom_path);
 
-    // no need to parse DMG device types
-    if (filename.find("-dmg") != std::string::npos)
-    {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::default_colors, run_common_test);
-    }
+    // schedule "regular" tests
 
-    // parse CGB device types
-    auto schedule_cgb_tests = [&](const std::string& prefix) {
-        auto cgb_hint = filename.find(prefix);
-        if (cgb_hint != std::string::npos)
-        {
-            cgb_hint += prefix.size();
+    for_each_device_type(rom_path, prefix_dmg, parse_dmg_type, [&](gb_device_type type) {
+        schedule(rom_contents, type, gb_colors_hint::default_colors, run_common_test);
+    });
+    for_each_device_type(rom_path, prefix_cgb, parse_cgb_type, [&](gb_device_type type) {
+        schedule(rom_contents, type, gb_colors_hint::default_colors, run_common_test);
+    });
+    for_each_device_type(rom_path, prefix_ncm, parse_cgb_type, [&](gb_device_type type) {
+        schedule(rom_contents, type, gb_colors_hint::default_colors, run_common_test);
+    });
 
-            for (; cgb_hint < filename.size(); ++cgb_hint)
-            {
-                auto dev_type = parse_cgb_type(filename.at(cgb_hint));
-                if (!dev_type.has_value())
-                {
-                    break;
-                }
-                schedule(rom_contents, dev_type.value(), gb_colors_hint::default_colors, run_common_test);
-            }
-        }
-    };
+    // schedule screenshot tests
 
-    schedule_cgb_tests("-cgb");
-    schedule_cgb_tests("-ncm");
+    auto screenshots = find_screenshots(rom_path);
+    std::for_each(begin(screenshots), end(screenshots), [&](const auto& screenshot_path) {
+        for_each_device_type(screenshot_path, prefix_dmg, parse_dmg_type, [&](gb_device_type type) {
+            schedule(rom_contents, type, gb_colors_hint::dmg_greyscale, run_screenshot_test(screenshot_path));
+        });
+        for_each_device_type(screenshot_path, prefix_cgb, parse_cgb_type, [&](gb_device_type type) {
+            schedule(rom_contents, type, gb_colors_hint::cgb_acid2, run_screenshot_test(screenshot_path));
+        });
+        for_each_device_type(screenshot_path, prefix_ncm, parse_cgb_type, [&](gb_device_type type) {
+            schedule(rom_contents, type, gb_colors_hint::cgb_acid2, run_screenshot_test(screenshot_path));
+        });
+    });
 }
