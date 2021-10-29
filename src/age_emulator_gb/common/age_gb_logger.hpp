@@ -55,6 +55,15 @@ namespace age
         Clock  m_current_clock_cycle;
     };
 
+    template<typename Line>
+    struct log_line_clks
+    {
+        explicit log_line_clks(Line& line)
+            : m_line(line)
+        {}
+        Line& m_line;
+    };
+
     template<int Bits, typename Value>
     struct log_hex_v
     {
@@ -120,6 +129,21 @@ namespace age
         {
             *m_stream << static_cast<int64_t>(value.m_clock_cycles) << " clock cycles"
                       << " (on clock cycle " << static_cast<int64_t>(value.m_current_clock_cycle + value.m_clock_cycles) << ")";
+            return *this;
+        }
+
+        template<typename Line>
+        gb_log_message_stream& operator<<(const log_line_clks<Line>& value)
+        {
+            if (value.m_line.lcd_is_on())
+            {
+                auto line = value.m_line.current_line();
+                *m_stream << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+            }
+            else
+            {
+                *m_stream << " (lcd off)";
+            }
             return *this;
         }
 
@@ -194,6 +218,7 @@ namespace age
     public:
         explicit gb_logger(gb_log_categories log_categories = {}) { AGE_UNUSED(log_categories); }
 
+        // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
         [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_offset)
         {
             AGE_UNUSED(category);

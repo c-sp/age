@@ -56,6 +56,7 @@ namespace age
         ~gb_lcd_palettes() = default;
 
         [[nodiscard]] const pixel* get_palette(unsigned palette_index) const;
+        [[nodiscard]] pixel        get_color(unsigned color_index) const;
 
         [[nodiscard]] uint8_t read_bgp() const;
         [[nodiscard]] uint8_t read_obp0() const;

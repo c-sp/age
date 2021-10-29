@@ -68,8 +68,7 @@ bool age::gb_lcd::is_video_ram_accessible()
                      || (line.m_line_clks >= (80 + 172 + (m_render.m_scx & 7)));
     }
 
-    m_clock.log(gb_log_category::lc_lcd_vram) << "VRAM accessible: " << accessible
-                                              << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+    m_clock.log(gb_log_category::lc_lcd_vram) << "VRAM accessible: " << accessible << log_line_clks(m_line);
     return accessible;
 }
 
@@ -143,10 +142,7 @@ bool age::gb_lcd::update_frame()
 {
     AGE_ASSERT(m_line.lcd_is_on())
 
-    // Continue unfinished frame.
-    // During a line's mode 0 the emulated program may already prepare
-    // data for the next line.
-    // We thus render each line before it enters mode 0.
+    // continue rendering the current unfinished frame
     auto line = m_line.current_line();
     m_render.render(line);
 
@@ -155,8 +151,9 @@ bool age::gb_lcd::update_frame()
         return false;
     }
 
-    // start new frame
-    // (we do NOT update the new frame here though)
+    // begin a new frame, if the current frame is finished
+    // (we do NOT start rendering the new frame here,
+    // call update_frame() a second time to do this)
     m_line.fast_forward_frames();
     m_render.new_frame();
     return true;

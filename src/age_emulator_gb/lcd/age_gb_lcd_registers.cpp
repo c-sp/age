@@ -37,19 +37,14 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 {
     update_state();
     auto msg = log_reg();
-    msg << "write LCDC = " << log_hex8(value);
+    msg << "write LCDC = " << log_hex8(value) << log_line_clks(m_line);
 
     int diff = m_render.get_lcdc() ^ value;
     m_render.set_lcdc(value);
 
     if (!(diff & gb_lcdc_enable))
     {
-        if (m_line.lcd_is_on())
-        {
-            auto line = calculate_line();
-            msg << "\n    * " << line.m_line_clks << " clock cycles into line " << line.m_line
-                << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
-        }
+        msg << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
         return;
     }
 
@@ -68,7 +63,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
     {
         msg << "\n    * LCD switched off";
 
-        auto line = calculate_line();
+        auto line = m_line.current_line();
 
         // switch frame buffers, if the current frame is finished
         // (otherwise it would be lost because we did not reach
@@ -116,14 +111,13 @@ age::uint8_t age::gb_lcd::read_stat()
     // LCD on: calculate current mode and LY match flag
     auto line = calculate_line();
 
-    result |= get_stat_ly_match(line) | get_stat_mode(line, m_render.m_scx);
+    result |= get_stat_ly_match(line) | get_stat_mode(line);
 
-    log_reg() << "read STAT == " << log_hex8(result)
-              << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+    log_reg() << "read STAT == " << log_hex8(result) << log_line_clks(m_line);
     return result;
 }
 
-age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line, int scx) const
+age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line) const
 {
     AGE_ASSERT(current_line.m_line < gb_lcd_line_count)
 
@@ -141,7 +135,7 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line, int
 
     // first line after restarting the LCD:
     // mode 0 instead of mode 2.
-    int m3_end = 80 + 172 + (scx & 7);
+    int m3_end = 80 + 172 + (m_render.m_scx & 7);
     if (m_line.is_first_frame() && !current_line.m_line)
     {
         return ((current_line.m_line_clks < 80 + 2) || (current_line.m_line_clks >= m3_end + 2)) ? 0 : 3;
@@ -154,7 +148,7 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line, int
     }
 
     // mode 3 and mode 0
-    //! \todo too simple: mode 3 timing also depends on sprites & window
+    //! \todo mode 3 timing also depends on sprites & window
     return (current_line.m_line_clks >= m3_end) ? 0 : 3;
 }
 
@@ -191,7 +185,7 @@ age::uint8_t age::gb_lcd::get_stat_ly_match(const gb_current_line& current_line)
 void age::gb_lcd::write_stat(uint8_t value)
 {
     update_state();
-    log_reg() << "write STAT = " << log_hex8(value);
+    log_reg() << "write STAT = " << log_hex8(value) << log_line_clks(m_line);
     m_lcd_irqs.write_stat(value, m_render.m_scx);
 }
 
@@ -228,15 +222,14 @@ age::uint8_t age::gb_lcd::read_ly()
     // LY = 153 only for 2-3 T4-cycles
     if ((line.m_line >= 153) && (line.m_line_clks > 2 + (m_clock.is_double_speed() || m_device.is_cgb_e_device() ? 1 : 0)))
     {
-        log_reg() << "read LY == 0 (line 153 shortened)";
+        log_reg() << "read LY == 0" << log_line_clks(m_line);
         return 0;
     }
 
-    // Ly is incremented 2 clock cycles earlier than the respective line
+    // LY is incremented 2 clock cycles early
     int ly = line.m_line + ((line.m_line_clks >= gb_clock_cycles_per_lcd_line - 2) ? 1 : 0);
 
-    log_reg() << "read LY == " << log_hex8(ly)
-              << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+    log_reg() << "read LY == " << log_hex8(ly) << log_line_clks(m_line);
     return ly;
 }
 
@@ -335,14 +328,14 @@ age::uint8_t age::gb_lcd::read_ocpd() const
 void age::gb_lcd::write_scy(uint8_t value)
 {
     update_state();
-    log_reg() << "write SCY = " << log_hex8(value);
+    log_reg() << "write SCY = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_scy = value;
 }
 
 void age::gb_lcd::write_scx(uint8_t value)
 {
     update_state();
-    log_reg() << "write SCX = " << log_hex8(value);
+    log_reg() << "write SCX = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_scx = value;
 }
 
@@ -368,21 +361,21 @@ void age::gb_lcd::write_lyc(uint8_t value)
 void age::gb_lcd::write_bgp(uint8_t value)
 {
     update_state();
-    log_reg() << "write BGP = " << log_hex8(value);
+    log_reg() << "write BGP = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_bgp(value);
 }
 
 void age::gb_lcd::write_obp0(uint8_t value)
 {
     update_state();
-    log_reg() << "write OBP0 = " << log_hex8(value);
+    log_reg() << "write OBP0 = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_obp0(value);
 }
 
 void age::gb_lcd::write_obp1(uint8_t value)
 {
     update_state();
-    log_reg() << "write OBP1 = " << log_hex8(value);
+    log_reg() << "write OBP1 = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_obp1(value);
 }
 
@@ -391,14 +384,14 @@ void age::gb_lcd::write_obp1(uint8_t value)
 void age::gb_lcd::write_wy(uint8_t value)
 {
     update_state();
-    log_reg() << "write WY = " << log_hex8(value);
+    log_reg() << "write WY = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_wy = value;
 }
 
 void age::gb_lcd::write_wx(uint8_t value)
 {
     update_state();
-    log_reg() << "write WX = " << log_hex8(value);
+    log_reg() << "write WX = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_wx = value;
 }
 
@@ -406,26 +399,26 @@ void age::gb_lcd::write_wx(uint8_t value)
 
 void age::gb_lcd::write_bcps(uint8_t value)
 {
-    log_reg() << "write BCPS = " << log_hex8(value);
+    log_reg() << "write BCPS = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_bcps(value);
 }
 
 void age::gb_lcd::write_bcpd(uint8_t value)
 {
     update_state();
-    log_reg() << "write BCPD = " << log_hex8(value);
+    log_reg() << "write BCPD = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_bcpd(value);
 }
 
 void age::gb_lcd::write_ocps(uint8_t value)
 {
-    log_reg() << "write OCPS = " << log_hex8(value);
+    log_reg() << "write OCPS = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_ocps(value);
 }
 
 void age::gb_lcd::write_ocpd(uint8_t value)
 {
     update_state();
-    log_reg() << "write OCPD = " << log_hex8(value);
+    log_reg() << "write OCPD = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_ocpd(value);
 }

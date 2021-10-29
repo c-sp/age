@@ -24,22 +24,13 @@ age::uint8_t age::gb_lcd::read_oam(int offset)
     if (!is_oam_readable(line))
     {
         m_clock.log(gb_log_category::lc_lcd_oam) << "read OAM[" << log_hex8(offset) << "] == " << log_hex8(0xFF)
-                                                 << " (OAM not readable, " << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+                                                 << " - OAM not readable" << log_line_clks(m_line);
         return 0xFF;
     }
     auto result = m_sprites.read_oam(offset);
 
-    auto msg = m_clock.log(gb_log_category::lc_lcd_oam);
-    msg << "read OAM[" << log_hex8(offset) << "] == " << log_hex8(result) << " (OAM readable, ";
-    if (m_line.lcd_is_on())
-    {
-        msg << line.m_line_clks << " clock cycles into line " << line.m_line;
-    }
-    else
-    {
-        msg << "lcd off";
-    }
-    msg << ")";
+    m_clock.log(gb_log_category::lc_lcd_oam) << "read OAM[" << log_hex8(offset) << "] == " << log_hex8(result)
+                                             << " - OAM readable" << log_line_clks(m_line);
     return result;
 }
 
@@ -76,21 +67,12 @@ void age::gb_lcd::write_oam(int offset, uint8_t value)
     gb_current_line line{};
     if (!is_oam_writable(line))
     {
-        m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value) << " ignored"
-                                                 << " (OAM not writable, " << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+        m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value)
+                                                 << " ignored - OAM not writable" << log_line_clks(m_line);
         return;
     }
-    auto msg = m_clock.log(gb_log_category::lc_lcd_oam);
-    msg << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value) << " (OAM writable, ";
-    if (m_line.lcd_is_on())
-    {
-        msg << line.m_line_clks << " clock cycles into line " << line.m_line;
-    }
-    else
-    {
-        msg << "lcd off";
-    }
-    msg << ")";
+    m_clock.log(gb_log_category::lc_lcd_oam) << "write OAM[" << log_hex8(offset) << "] = " << log_hex8(value)
+                                             << " - OAM writable" << log_line_clks(m_line);
     write_oam_dma(offset, value);
 }
 

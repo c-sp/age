@@ -21,13 +21,16 @@
 //! \file
 //!
 
+#include "../../common/age_gb_clock.hpp"
+#include "../../common/age_gb_device.hpp"
+#include "../palettes/age_gb_lcd_palettes.hpp"
+#include "age_gb_lcd_sprites.hpp"
+
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
-#include "../../common/age_gb_device.hpp"
-#include "../palettes/age_gb_lcd_palettes.hpp"
-#include "age_gb_lcd_sprites.hpp"
+#include <deque>
 
 
 
@@ -135,7 +138,7 @@ namespace age
         int m_line_clks;
     };
 
-    constexpr gb_current_line gb_no_line = {.m_line = -1, .m_line_clks = -1};
+    constexpr gb_current_line gb_no_line = {.m_line = -1, .m_line_clks = gb_no_clock_cycle};
 
     class gb_lcd_dot_renderer
     {
@@ -159,6 +162,11 @@ namespace age
         bool continue_line(gb_current_line until);
 
     private:
+        void fetch_bg_tile_id();
+        void fetch_bg_bitplane(int bitplane_offset);
+        void push_bg_bitplanes();
+        void render_dots(int current_line_clks);
+
         const gb_lcd_render_common& m_common;
         const gb_device&            m_device;
         const gb_lcd_palettes&      m_palettes;
@@ -166,8 +174,17 @@ namespace age
         const uint8_t*              m_video_ram;
         screen_buffer&              m_screen_buffer;
 
-        gb_current_line m_next_fetcher_clks = gb_no_line;
-        uint32_t        m_next_fetcher_hash = 0;
+        std::deque<uint8_t> m_bg_fifo{};
+        gb_current_line     m_fifo_clks    = gb_no_line;
+        pixel*              m_current_line = nullptr;
+        int                 m_next_dot_idx = 0;
+
+        gb_current_line m_fetcher_clks            = gb_no_line;
+        uint32_t        m_fetcher_step_hash       = 0;
+        int             m_next_bg_tile_to_fetch   = 0;
+        uint8_t         m_fetched_tile_id         = 0;
+        uint8_t         m_fetched_tile_attributes = 0;
+        uint8_array<2>  m_fetched_bitplane{};
     };
 
 

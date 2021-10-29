@@ -71,6 +71,12 @@ const age::pixel* age::gb_lcd_palettes::get_palette(unsigned palette_index) cons
     return &m_colors[palette_index << 2];
 }
 
+age::pixel age::gb_lcd_palettes::get_color(unsigned color_index) const
+{
+    AGE_ASSERT(color_index < gb_total_color_count)
+    return m_colors[color_index];
+}
+
 age::uint8_t age::gb_lcd_palettes::read_bgp() const
 {
     return m_bgp;

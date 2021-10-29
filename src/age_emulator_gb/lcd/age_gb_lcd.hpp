@@ -210,9 +210,13 @@ namespace age
         bool            is_oam_readable(gb_current_line& line);
         bool            is_oam_writable(gb_current_line& line);
         bool            update_frame();
+
+        //! This function should be used when update_state() has not been
+        //! called before.
+        //! In all other cases we can rely on m_line.current_line().
         gb_current_line calculate_line();
 
-        uint8_t get_stat_mode(const gb_current_line& current_line, int scx) const;
+        uint8_t get_stat_mode(const gb_current_line& current_line) const;
         uint8_t get_stat_ly_match(const gb_current_line& current_line) const;
 
         const gb_device& m_device;
