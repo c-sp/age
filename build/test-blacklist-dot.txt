@@ -1,0 +1,262 @@
+###
+###   gameboy-test-roms blacklist
+###
+###   see also: https://github.com/c-sp/gameboy-test-roms
+###
+
+
+
+cgb-acid2/
+dmg-acid2/
+
+
+
+##################################################################
+###
+###   age
+###
+
+age-test-roms/.*/mode2-obj-size-ds-cgb.gb
+age-test-roms/.*/mode2-obj-size.gb
+age-test-roms/.*/write-timing-oam-dmgC.gb
+
+
+
+##################################################################
+###
+###   blargg
+###
+
+### single test roms
+### (we run the test suites instead)
+
+/blargg/.*/rom_singles/
+/blargg/.*/individual/
+
+### failing tests
+
+/blargg/oam_bug/
+
+
+
+##################################################################
+###
+###   mooneye-gb
+###
+
+### non-test roms
+
+/mooneye-gb/utils/dump_boot_hwio.gb
+/mooneye-gb/utils/bootrom_dumper.gb
+
+### Gameboy hardware not supported by AGE
+
+/mooneye-gb/acceptance/boot_div2-S.gb            # SGB not supported
+/mooneye-gb/acceptance/boot_div-dmg0.gb          # DMG0 not supported
+/mooneye-gb/acceptance/boot_div-S.gb             # SGB not supported
+/mooneye-gb/acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
+/mooneye-gb/acceptance/boot_hwio-S.gb            # SGB not supported
+/mooneye-gb/acceptance/boot_regs-dmg0.gb         # DMG0 not supported
+/mooneye-gb/acceptance/boot_regs-mgb.gb          # MGB not supported
+/mooneye-gb/acceptance/boot_regs-sgb.gb          # SGB not supported
+/mooneye-gb/acceptance/boot_regs-sgb2.gb         # SGB not supported
+/mooneye-gb/madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
+/mooneye-gb/misc/boot_div-A.gb                   # GBA not supported
+/mooneye-gb/misc/boot_div-cgb0.gb                # CGB0 not supported
+/mooneye-gb/misc/boot_regs-A.gb                  # GBA not supported
+
+### failing tests
+
+/mooneye-gb/acceptance/ppu/intr_2_mode0_timing_sprites.gb
+/mooneye-gb/acceptance/ppu/lcdon_write_timing-GS.gb
+/mooneye-gb/acceptance/ppu/stat_irq_blocking.gb
+/mooneye-gb/acceptance/ppu/stat_lyc_onoff.gb
+/mooneye-gb/manual-only/sprite_priority.gb
+
+
+
+##################################################################
+###
+###   gambatte
+###
+
+### non-test roms
+
+/gambatte/cgb_bgp_dumper.gbc
+/gambatte/cgb_objp_dumper.gbc
+/gambatte/fexx_ffxx_dumper.gbc
+/gambatte/fexx_read_reset_set_dumper.gbc
+/gambatte/ioregs_reset_dumper.gbc
+/gambatte/jpadirq_1.gbc
+/gambatte/jpadirq_2.gbc
+/gambatte/oamdma/oamdma.*dumper_.*
+/gambatte/sram.gbc
+/gambatte/vram_dumper.gbc
+/gambatte/wram_dumper.gbc
+
+### unknown or "x'd" test result
+
+/gambatte/bgtiledata/bgtiledata_spx08_ds_1.gbc
+/gambatte/bgtiledata/bgtiledata_spx08_ds_2.gbc
+/gambatte/halt/ime_noie_nolcdirq_readstat_dmg08_cgb_blank.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_1.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_2.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_3.gb
+/gambatte/halt/lycint_dmgpalette_during_m3_4.gb
+/gambatte/halt/noime_noie_nolcdirq_readstat_dmg08_cgb_blank.gb
+/gambatte/m0enable/lycdisable_ff45_ds_2_xout0.gbc
+/gambatte/scx_during_m3/old/
+/gambatte/scx_during_m3/scx_attrib_during_m3_spx0.gbc
+/gambatte/scx_during_m3/scx_attrib_during_m3_spx1.gbc
+/gambatte/sound/ch1_duty0_to_duty3_pos3_1_dmg08_cgb_xoutaudio1.gbc
+
+### failing tests
+
+/gambatte/bgen/
+/gambatte/bgtiledata/
+/gambatte/bgtilemap/
+/gambatte/cgbpal_m3/
+
+/gambatte/dma/.*hdma.*
+
+/gambatte/dmgpalette_during_m3/
+
+/gambatte/enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc
+/gambatte/enable_display/frame0_m0irq_count_scx2_1_dmg08_cgb04c_out90.gbc
+/gambatte/enable_display/frame0_m0irq_count_scx2_ds_1_cgb04c_out90.gbc
+/gambatte/enable_display/frame0_m0irq_count_scx3_ds_1_cgb04c_out90.gbc
+/gambatte/enable_display/lcdcenable_lyc0irq_2_dmg08_cgb04c_out0.gbc
+/gambatte/enable_display/ly0_late_cgbpr_2_cgb04c_outFF.gbc
+/gambatte/enable_display/ly0_late_cgbpr_ds_2_cgb04c_outFF.gbc
+/gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_oamw_2_dmg08_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_late_scx7_m3stat_scx3_2_dmg08_cgb04c_out84.gbc
+/gambatte/enable_display/ly0_m0irq_scx0_ds_1_cgb04c_outE0.gbc
+/gambatte/enable_display/ly0_m0irq_scx1_1_dmg08_cgb04c_outE0.gbc
+/gambatte/enable_display/ly0_m0irq_scx1_ds_1_cgb04c_outE0.gbc
+/gambatte/enable_display/ly1_late_cgbpw_2_cgb04c_out55.gbc
+
+/gambatte/irq_precedence/
+/gambatte/lcd_offset/
+/gambatte/lcdirq_precedence/
+/gambatte/ly0/
+/gambatte/lyc0int_m0irq/
+/gambatte/lyc153int_m2irq/lyc153int_m2irq_late_retrigger_2_dmg08_cgb04c_out0.gbc
+/gambatte/lycEnable/
+/gambatte/lycint_ly/lycint_ly_2_dmg08_cgb04c_out6.gbc
+/gambatte/lycint_lycflag/lycint_lycflag_4_dmg08_cgb04c_out0.gbc
+/gambatte/lycm2int/lyc0m2int_m2irq_1_dmg08_cgb04c_out0.gbc
+/gambatte/lycm2int/lyc0m2int_stat_dmg08_cgb04c_out1.gbc
+/gambatte/lycm2int/lycm2int_m0stat_1_dmg08_cgb04c_out0.gbc
+/gambatte/lycm2int/lycm2int_m2irq_1_dmg08_cgb04c_out1.gbc
+/gambatte/lywrite/lywrite77_ly44_m3_stat_dmg08_cgb04c_outC7.gbc
+/gambatte/m0enable/
+/gambatte/m1/
+/gambatte/m2enable/
+
+/gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_2_dmg08_cgb04c_out0.gbc
+/gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_4_dmg08_cgb04c_out0.gbc
+/gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_ds_2_cgb04c_out0.gbc
+
+/gambatte/m2int_m3stat/scx/late_scx4_2_dmg08_cgb04c_out0.gbc
+/gambatte/m2int_m3stat/scx/late_scx4_ds_2_cgb04c_out0.gbc
+
+/gambatte/miscmstatirq/
+
+/gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
+/gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
+
+/gambatte/oamdma/late_sp.*
+/gambatte/oamdma/oamdma_late_halt_stat_2_dmg08_cgb04c_out3
+/gambatte/oamdma/oamdma_late_speedchange_stat_2_cgb04c_out3
+/gambatte/oamdma/oamdma_src8000_srcchange0000_busyinc_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
+/gambatte/oamdma/oamdma_src8000_vrambankchange_4_cgb04c_out3
+/gambatte/oamdma/oamdma_srcD000_wrambankchange_2_cgb04c_out4
+/gambatte/oamdma/oamdma_srcFE00_busyread0000_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdma_srcFE00_busyreadA000_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdma_srcFE00_busyreadC000_dmg08_out0_cgb_xoutblank
+/gambatte/oamdma/oamdma_srcFE00_readFE00_dmg08_cgb04c_out0
+/gambatte/oamdma/oamdmasrc80_halt_lycirq_read8000_dmg08_cgb04c_out81
+/gambatte/oamdma/oamdmasrc80_halt_m2irq_read8000_dmg08_cgb04c_out81
+/gambatte/oamdma/oamdmasrcC000_hdmasrc0000_cgb04c_out0A940C0D
+/gambatte/oamdma/oamdmasrcC0_speedchange_readC000_cgb04c_out11
+
+/gambatte/scx_during_m3/.*spx
+/gambatte/scx_during_m3/scx_0360c0/
+/gambatte/scx_during_m3/scx_0367c0/
+/gambatte/scx_during_m3/scx_0761c0/
+/gambatte/scx_during_m3/scx_m3_extend_.*
+
+/gambatte/scy/.*scy_during_m3_2
+/gambatte/scy/.*scy_during_m3_4
+/gambatte/scy/.*scy_during_m3_6
+/gambatte/scy/.*spx
+
+/gambatte/sprites/
+
+/gambatte/vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
+/gambatte/vram_m3/preread_lcdoffset2_1_cgb04c_out0.gbc
+/gambatte/vram_m3/prewrite_lcdoffset2_1_cgb04c_out1.gbc
+/gambatte/vram_m3/vramw_m3start_1_dmg08_cgb04c_out1.gbc
+
+/gambatte/window/
+
+
+
+##################################################################
+###
+###   same suite
+###
+
+### Gameboy hardware not supported by AGE
+
+/same-suite/sgb
+
+### failing tests
+
+/same-suite/apu/channel_1/channel_1_extra_length_clocking-cgb0B.gb
+/same-suite/apu/channel_1/channel_1_freq_change_timing-A.gb
+/same-suite/apu/channel_1/channel_1_freq_change_timing-cgb0BC.gb
+/same-suite/apu/channel_1/channel_1_freq_change_timing-cgbDE.gb
+/same-suite/apu/channel_1/channel_1_nrx2_glitch.gb
+/same-suite/apu/channel_1/channel_1_nrx2_speed_change.gb
+/same-suite/apu/channel_1/channel_1_sweep.gb
+/same-suite/apu/channel_1/channel_1_sweep_restart.gb
+/same-suite/apu/channel_1/channel_1_volume.gb
+/same-suite/apu/channel_2/channel_2_extra_length_clocking-cgb0B.gb
+/same-suite/apu/channel_2/channel_2_nrx2_glitch.gb
+/same-suite/apu/channel_2/channel_2_nrx2_speed_change.gb
+/same-suite/apu/channel_2/channel_2_volume.gb
+/same-suite/apu/channel_3/channel_3_and_glitch.gb
+/same-suite/apu/channel_3/channel_3_delay.gb
+/same-suite/apu/channel_3/channel_3_extra_length_clocking-cgb0.gb
+/same-suite/apu/channel_3/channel_3_extra_length_clocking-cgbB.gb
+/same-suite/apu/channel_3/channel_3_first_sample.gb
+/same-suite/apu/channel_3/channel_3_freq_change_delay.gb
+/same-suite/apu/channel_3/channel_3_restart_during_delay.gb
+/same-suite/apu/channel_3/channel_3_restart_stop_delay.gb
+/same-suite/apu/channel_3/channel_3_shift_skip_delay.gb
+/same-suite/apu/channel_3/channel_3_wave_ram_locked_write.gb
+/same-suite/apu/channel_3/channel_3_wave_ram_sync.gb
+/same-suite/apu/channel_4/channel_4_align.gb
+/same-suite/apu/channel_4/channel_4_delay.gb
+/same-suite/apu/channel_4/channel_4_equivalent_frequencies.gb
+/same-suite/apu/channel_4/channel_4_extra_length_clocking-cgb0B.gb
+/same-suite/apu/channel_4/channel_4_freq_change.gb
+/same-suite/apu/channel_4/channel_4_frequency_alignment.gb
+/same-suite/apu/channel_4/channel_4_lfsr.gb
+/same-suite/apu/channel_4/channel_4_lfsr15.gb
+/same-suite/apu/channel_4/channel_4_lfsr_15_7.gb
+/same-suite/apu/channel_4/channel_4_lfsr_7_15.gb
+/same-suite/apu/channel_4/channel_4_lfsr_restart.gb
+/same-suite/apu/channel_4/channel_4_lfsr_restart_fast.gb
+
+/same-suite/dma/gdma_addr_mask.gb
+/same-suite/dma/hdma_lcd_off.gb
+/same-suite/dma/hdma_mode0.gb
