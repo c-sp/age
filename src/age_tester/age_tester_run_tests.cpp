@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <regex>
@@ -88,8 +89,10 @@ namespace
         auto regex_strings = read_list_file(file);
 
         std::vector<path_matcher> matcher_list;
-        std::transform(begin(regex_strings), end(regex_strings), std::back_inserter(matcher_list), [](auto s) {
-            return new_regex_matcher(s);
+        std::transform(begin(regex_strings), end(regex_strings), std::back_inserter(matcher_list), [](const std::string &s) {
+            return [=](const std::string& absolute_path){
+                return absolute_path.find(s) != std::string::npos;
+            };
         });
 
         return [=](const std::string& absolute_path) {
@@ -161,7 +164,7 @@ namespace
 
 
 
-std::vector<age::tester::test_result> age::tester::run_tests(const options& opts)
+std::vector<age::tester::test_result> age::tester::run_tests(const options& opts, unsigned threads)
 {
     auto whitelist = opts.m_whitelist.length() ? new_matcher(opts.m_whitelist) : match_everything;
     auto blacklist = opts.m_blacklist.length() ? new_matcher(opts.m_blacklist) : match_nothing;
@@ -173,7 +176,20 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
     blocking_vector<test_result> results;
     int                          rom_count = 0;
     {
-        thread_pool pool;
+        auto        last_update = std::chrono::system_clock::now();
+        thread_pool pool(threads, [&](size_t task_queue_size, size_t tasks_running, size_t tasks_finished) {
+            auto                          now   = std::chrono::system_clock::now();
+            std::chrono::duration<double> diff  = now - last_update;
+            auto                          total = task_queue_size + tasks_running + tasks_finished;
+            if ((diff.count() > 0.3) || (total == tasks_finished))
+            {
+                last_update = now;
+                std::cout << "\rfinished " << tasks_finished << " of " << total << " tasks" << std::flush;
+                if (total == tasks_finished) {
+                    std::cout << std::endl;
+                }
+            }
+        });
 
         using schedule_rom_t = std::function<void(const std::filesystem::path&, const schedule_test_t&)>;
 
@@ -245,55 +261,58 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
             });
         };
 
-        if (opts.m_acid2)
-        {
-            find_roms(opts.m_test_suite_path / "cgb-acid2", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_acid2_cgb);
-            });
-            find_roms(opts.m_test_suite_path / "dmg-acid2", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_acid2_dmg);
-            });
-        }
-        if (opts.m_age)
-        {
-            find_roms(opts.m_test_suite_path / "age-test-roms", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_age);
-            });
-        }
-        if (opts.m_blargg)
-        {
-            find_roms(opts.m_test_suite_path / "blargg", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_blargg);
-            });
-        }
-        if (opts.m_gambatte)
-        {
-            find_roms(opts.m_test_suite_path / "gambatte", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_gambatte);
-            });
-        }
-        if (opts.m_mealybug)
-        {
-            find_roms(opts.m_test_suite_path / "mealybug-tearoom-tests", matcher, [&](const std::filesystem::path& rom_path) {
-                //! \todo schedule mealybug-tearoom-tests
-            });
-        }
-        if (opts.m_mooneye_gb)
-        {
-            find_roms(opts.m_test_suite_path / "mooneye-gb", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_mooneye_gb);
-            });
-        }
-        if (opts.m_same_suite)
-        {
-            find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
-                schedule_rom(rom_path, schedule_rom_same_suite);
-            });
-        }
+        pool.queue_task([&](){
+            if (opts.m_acid2)
+            {
+                find_roms(opts.m_test_suite_path / "cgb-acid2", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_acid2_cgb);
+                });
+                find_roms(opts.m_test_suite_path / "dmg-acid2", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_acid2_dmg);
+                });
+            }
+            if (opts.m_age)
+            {
+                find_roms(opts.m_test_suite_path / "age-test-roms", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_age);
+                });
+            }
+            if (opts.m_blargg)
+            {
+                find_roms(opts.m_test_suite_path / "blargg", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_blargg);
+                });
+            }
+            if (opts.m_gambatte)
+            {
+                find_roms(opts.m_test_suite_path / "gambatte", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_gambatte);
+                });
+            }
+            if (opts.m_mealybug)
+            {
+                find_roms(opts.m_test_suite_path / "mealybug-tearoom-tests", matcher, [&](const std::filesystem::path& rom_path) {
+                    //! \todo schedule mealybug-tearoom-tests
+                });
+            }
+            if (opts.m_mooneye_gb)
+            {
+                find_roms(opts.m_test_suite_path / "mooneye-gb", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_mooneye_gb);
+                });
+            }
+            if (opts.m_same_suite)
+            {
+                find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_same_suite);
+                });
+            }
+        });
 
-        std::cout << "found " << rom_count << " rom(s)" << std::endl;
         // by letting the thread pool go out of scope we wait for it to finish
     }
+    // wait for "finished X of Y tasks" logs to finish before logging this
+    std::cout << "found " << rom_count << " rom(s)" << std::endl;
 
     return results.copy();
 }

@@ -19,6 +19,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <vector>
 
@@ -55,7 +56,8 @@ namespace age::tester
 
 
 
-    using task_t = std::function<void(void)>;
+    using task_t            = std::function<void(void)>;
+    using status_callback_t = std::function<void(size_t task_queue_size, size_t tasks_running, size_t tasks_finished)>;
 
     class thread_pool
     {
@@ -63,9 +65,11 @@ namespace age::tester
         AGE_DISABLE_MOVE(thread_pool);
 
     public:
-        explicit thread_pool(size_t num_threads = std::thread::hardware_concurrency())
+        explicit thread_pool(unsigned                         num_threads     = std::thread::hardware_concurrency(),
+                             std::optional<status_callback_t> status_callback = std::nullopt)
+            : m_status_callback(std::move(status_callback))
         {
-            for (size_t i = 0; i < num_threads; ++i)
+            for (unsigned i = 0; i < num_threads; ++i)
             {
                 m_threads.emplace_back(std::thread([this]() {
                     while (true)
@@ -102,7 +106,14 @@ namespace age::tester
                             task();
                             {
                                 std::unique_lock lock(m_mutex);
-                                --m_working_threads_count; // possible should_terminate() change => notify all other threads
+                                ++m_finished_task_count;
+                                // possible should_terminate() change => notify other threads
+                                --m_working_threads_count;
+                                // execute callback, if set
+                                if (m_status_callback.has_value())
+                                {
+                                    m_status_callback.value()(m_tasks.size(), m_working_threads_count, m_finished_task_count);
+                                }
                             }
                             m_cv.notify_all();
                         }
@@ -139,11 +150,13 @@ namespace age::tester
     private:
         std::vector<std::thread> m_threads;
 
-        std::mutex              m_mutex;
-        std::condition_variable m_cv;
-        std::vector<task_t>     m_tasks;
-        bool                    m_terminate_when_idle   = false;
-        int                     m_working_threads_count = 0;
+        std::mutex                       m_mutex;
+        std::condition_variable          m_cv;
+        std::vector<task_t>              m_tasks;
+        std::optional<status_callback_t> m_status_callback;
+        bool                             m_terminate_when_idle   = false;
+        int                              m_working_threads_count = 0;
+        int                              m_finished_task_count   = 0;
 
         [[nodiscard]] bool should_terminate() const
         {

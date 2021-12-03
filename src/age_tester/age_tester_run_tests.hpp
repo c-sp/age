@@ -37,7 +37,7 @@ namespace age::tester
         {}
     };
 
-    std::vector<test_result> run_tests(const options& opts);
+    std::vector<test_result> run_tests(const options& opts, unsigned threads);
 
 } // namespace age::tester
 

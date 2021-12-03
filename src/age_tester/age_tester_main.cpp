@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <thread>
 
 
 
@@ -126,8 +127,12 @@ int main(int argc, char** argv)
         std::cout << "blacklist: " << opts.m_blacklist << std::endl;
     }
 
+    // check hardware concurrency
+    unsigned threads = std::max(4U, std::thread::hardware_concurrency());
+    std::cout << "using " << threads << " threads to run tests" << std::endl;
+
     // find test rom files & schedule test tasks
-    auto results = age::tester::run_tests(opts);
+    auto results = age::tester::run_tests(opts, threads);
     if (results.empty())
     {
         std::cout << "no tests found!" << std::endl;

@@ -162,6 +162,13 @@ namespace age
         bool continue_line(gb_current_line until);
 
     private:
+        enum class line_state
+        {
+            mode2,
+            mode3_align_scx,
+            mode3_render,
+        };
+
         enum class fetcher_step
         {
             fetch_first_bg_tile_id,
@@ -173,11 +180,11 @@ namespace age
             finish_line,
         };
 
+        void update_line_state(int until_line_clks);
+        void schedule_next_fetcher_step(int clks, fetcher_step step);
         void fetch_bg_tile_id();
         void fetch_bg_bitplane(int bitplane_offset);
         void push_bg_bitplanes();
-        void render_dots(int current_line_clks);
-        void schedule_next_fetcher_step(int clks, fetcher_step step);
 
         const gb_lcd_render_common& m_common;
         const gb_device&            m_device;
@@ -188,8 +195,9 @@ namespace age
 
         std::deque<uint8_t> m_bg_fifo{};
 
-        gb_current_line m_fifo_clks      = gb_no_line;
-        pixel*          m_line           = nullptr;
+        gb_current_line m_current_line   = gb_no_line;
+        line_state      m_line_state     = line_state::mode2;
+        pixel*          m_line_buffer    = nullptr;
         int             m_x_pos          = 0;
         int             m_first_dot_clks = gb_clock_cycles_per_lcd_line;
         uint8_t         m_line_scx       = 0;

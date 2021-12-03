@@ -16,9 +16,9 @@ dmg-acid2/
 ###   age
 ###
 
-age-test-roms/.*/mode2-obj-size-ds-cgb.gb
-age-test-roms/.*/mode2-obj-size.gb
-age-test-roms/.*/write-timing-oam-dmgC.gb
+/age-test-roms/_in-progress
+/age-test-roms/m3-bg-bgp
+/age-test-roms/m3-bg-lcdc
 
 
 
@@ -30,8 +30,11 @@ age-test-roms/.*/write-timing-oam-dmgC.gb
 ### single test roms
 ### (we run the test suites instead)
 
-/blargg/.*/rom_singles/
-/blargg/.*/individual/
+/blargg/cgb_sound/rom_singles
+/blargg/cpu_instrs/individual
+/blargg/dmg_sound/rom_singles
+/blargg/mem_timing-2/rom_singles
+/blargg/mem_timing/individual
 
 ### failing tests
 
@@ -89,7 +92,27 @@ age-test-roms/.*/write-timing-oam-dmgC.gb
 /gambatte/ioregs_reset_dumper.gbc
 /gambatte/jpadirq_1.gbc
 /gambatte/jpadirq_2.gbc
-/gambatte/oamdma/oamdma.*dumper_.*
+/gambatte/oamdma/oamdma_src80_oambusy_dumper_1.gbc
+/gambatte/oamdma/oamdma_srcC0_oambusy_dumper_1.gbc
+/gambatte/oamdma/oamdmasrc8000_gdmasrcC000_2xgdmalen09_oamdumper_1.gbc
+/gambatte/oamdma/oamdmasrc8000_gdmasrcC000_2xgdmalen09_vramdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrc0000_gdmalen04_oamdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrc0000_gdmalen04_oamdumper_ds_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrc0000_gdmalen13_oamdumper_ds_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrc0000_gdmalen13_vramdumper_ds_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_2xgdmalen09_oamdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_2xgdmalen09_vramdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen09_oamdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen09_vramdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_oamdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_oamdumper_2.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_oamdumper_ds_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_oamdumper_ds_2.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_oamdumper_ds_3.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_vramdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC000_gdmalen13_vramdumper_ds_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC0F0_gdmalen13_oamdumper_1.gbc
+/gambatte/oamdma/oamdmasrcC000_gdmasrcC0F0_gdmalen13_vramdumper_1.gbc
 /gambatte/sram.gbc
 /gambatte/vram_dumper.gbc
 /gambatte/wram_dumper.gbc
@@ -117,7 +140,7 @@ age-test-roms/.*/write-timing-oam-dmgC.gb
 /gambatte/bgtilemap/
 /gambatte/cgbpal_m3/
 
-/gambatte/dma/.*hdma.*
+/gambatte/dma/hdma
 
 /gambatte/dmgpalette_during_m3/
 
@@ -171,7 +194,7 @@ age-test-roms/.*/write-timing-oam-dmgC.gb
 /gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
 
-/gambatte/oamdma/late_sp.*
+/gambatte/oamdma/late_sp
 /gambatte/oamdma/oamdma_late_halt_stat_2_dmg08_cgb04c_out3
 /gambatte/oamdma/oamdma_late_speedchange_stat_2_cgb04c_out3
 /gambatte/oamdma/oamdma_src8000_srcchange0000_busyinc_dmg08_cgb04c_out0
@@ -187,16 +210,20 @@ age-test-roms/.*/write-timing-oam-dmgC.gb
 /gambatte/oamdma/oamdmasrcC000_hdmasrc0000_cgb04c_out0A940C0D
 /gambatte/oamdma/oamdmasrcC0_speedchange_readC000_cgb04c_out11
 
-/gambatte/scx_during_m3/.*spx
+/gambatte/scx_during_m3/scx_attrib_during_m3_spx
+/gambatte/scx_during_m3/scx_during_m3_spx
 /gambatte/scx_during_m3/scx_0360c0/
 /gambatte/scx_during_m3/scx_0367c0/
 /gambatte/scx_during_m3/scx_0761c0/
-/gambatte/scx_during_m3/scx_m3_extend_.*
+/gambatte/scx_during_m3/scx_m3_extend_
 
-/gambatte/scy/.*scy_during_m3_2
-/gambatte/scy/.*scy_during_m3_4
-/gambatte/scy/.*scy_during_m3_6
-/gambatte/scy/.*spx
+/gambatte/scy/scx3/scy_during_m3_2.gbc
+/gambatte/scy/scx3/scy_during_m3_4.gbc
+/gambatte/scy/scx3/scy_during_m3_6.gbc
+/gambatte/scy/scy_during_m3_2.gbc
+/gambatte/scy/scy_during_m3_4.gbc
+/gambatte/scy/scy_during_m3_6.gbc
+/gambatte/scy/scy_during_m3_spx
 
 /gambatte/sprites/
 
