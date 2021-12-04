@@ -39,6 +39,7 @@ namespace age
     constexpr int16_t gb_clock_cycles_per_lcd_line  = 456;
     constexpr int16_t gb_lcd_line_count             = 154;
     constexpr int     gb_clock_cycles_per_lcd_frame = gb_lcd_line_count * gb_clock_cycles_per_lcd_line;
+    constexpr int     gb_clks_mode3_begin           = 85;
 
     constexpr int16_t gb_screen_width  = 160;
     constexpr int16_t gb_screen_height = 144;
@@ -162,11 +163,13 @@ namespace age
         bool continue_line(gb_current_line until);
 
     private:
-        enum class line_state
+        enum class line_stage
         {
             mode2,
             mode3_align_scx,
+            mode3_skip_first_8_dots,
             mode3_render,
+            mode0,
         };
 
         enum class fetcher_step
@@ -180,7 +183,7 @@ namespace age
             finish_line,
         };
 
-        void update_line_state(int until_line_clks);
+        void update_line_stage(int until_line_clks);
         void schedule_next_fetcher_step(int clks, fetcher_step step);
         void fetch_bg_tile_id();
         void fetch_bg_bitplane(int bitplane_offset);
@@ -195,12 +198,11 @@ namespace age
 
         std::deque<uint8_t> m_bg_fifo{};
 
-        gb_current_line m_current_line   = gb_no_line;
-        line_state      m_line_state     = line_state::mode2;
-        pixel*          m_line_buffer    = nullptr;
-        int             m_x_pos          = 0;
-        int             m_first_dot_clks = gb_clock_cycles_per_lcd_line;
-        uint8_t         m_line_scx       = 0;
+        gb_current_line m_line        = gb_no_line;
+        line_stage      m_line_stage  = line_stage::mode2;
+        pixel*          m_line_buffer = nullptr;
+        int             m_x_pos       = 0;
+        int             m_matched_scx = 0;
 
         fetcher_step   m_next_fetcher_step          = fetcher_step::fetch_first_bg_tile_id;
         int            m_next_fetcher_clks          = gb_no_clock_cycle;

@@ -210,11 +210,16 @@ dmg-acid2/
 /gambatte/oamdma/oamdmasrcC000_hdmasrc0000_cgb04c_out0A940C0D
 /gambatte/oamdma/oamdmasrcC0_speedchange_readC000_cgb04c_out11
 
+/gambatte/scx_during_m3/scx_0360c0/scx_during_m3_ds_3.gbc
+/gambatte/scx_during_m3/scx_0360c0/scx_during_m3_ds_4.gbc
+/gambatte/scx_during_m3/scx_0367c0/scx_during_m3_ds_3.gbc
+/gambatte/scx_during_m3/scx_0367c0/scx_during_m3_ds_4.gbc
+/gambatte/scx_during_m3/scx_0761c0/scx_during_m3_ds_2.gbc
+/gambatte/scx_during_m3/scx_0761c0/scx_during_m3_ds_3.gbc
+/gambatte/scx_during_m3/scx_0761c0/scx_during_m3_ds_5.gbc
+/gambatte/scx_during_m3/scx_0761c0/scx_during_m3_ds_6.gbc
 /gambatte/scx_during_m3/scx_attrib_during_m3_spx
 /gambatte/scx_during_m3/scx_during_m3_spx
-/gambatte/scx_during_m3/scx_0360c0/
-/gambatte/scx_during_m3/scx_0367c0/
-/gambatte/scx_during_m3/scx_0761c0/
 /gambatte/scx_during_m3/scx_m3_extend_
 
 /gambatte/scy/scx3/scy_during_m3_2.gbc
