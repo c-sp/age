@@ -174,9 +174,6 @@ namespace age
 
         enum class fetcher_step
         {
-            fetch_first_bg_tile_id,
-            fetch_first_bg_bitplane0,
-            fetch_first_bg_bitplane1,
             fetch_bg_tile_id,
             fetch_bg_bitplane0,
             fetch_bg_bitplane1,
@@ -204,7 +201,7 @@ namespace age
         int             m_x_pos       = 0;
         int             m_matched_scx = 0;
 
-        fetcher_step   m_next_fetcher_step          = fetcher_step::fetch_first_bg_tile_id;
+        fetcher_step   m_next_fetcher_step          = fetcher_step::fetch_bg_tile_id;
         int            m_next_fetcher_clks          = gb_no_clock_cycle;
         uint8_t        m_fetched_bg_tile_id         = 0;
         uint8_t        m_fetched_bg_tile_attributes = 0;

@@ -60,7 +60,7 @@ void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line)
     // no need to reset the following members
     // m_matched_scx = 0;
 
-    m_next_fetcher_step = fetcher_step::fetch_first_bg_tile_id;
+    m_next_fetcher_step = fetcher_step::fetch_bg_tile_id;
     m_next_fetcher_clks = gb_clks_mode3_begin;
     // no need to reset the following members
     // m_fetched_bg_tile_id         = 0;
@@ -91,22 +91,6 @@ bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
         }
         switch (m_next_fetcher_step)
         {
-            case fetcher_step::fetch_first_bg_tile_id:
-                fetch_bg_tile_id();
-                schedule_next_fetcher_step(2, fetcher_step::fetch_first_bg_bitplane0);
-                break;
-
-            case fetcher_step::fetch_first_bg_bitplane0:
-                fetch_bg_bitplane(0);
-                schedule_next_fetcher_step(2, fetcher_step::fetch_first_bg_bitplane1);
-                break;
-
-            case fetcher_step::fetch_first_bg_bitplane1:
-                fetch_bg_bitplane(1);
-                push_bg_bitplanes();
-                schedule_next_fetcher_step(4, fetcher_step::fetch_bg_tile_id);
-                break;
-
             case fetcher_step::fetch_bg_tile_id:
                 fetch_bg_tile_id();
                 schedule_next_fetcher_step(2, fetcher_step::fetch_bg_bitplane0);
