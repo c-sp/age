@@ -131,84 +131,19 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
         switch (m_line_stage)
         {
             case line_stage::mode2:
-                m_line.m_line_clks = until_line_clks;
-                if (m_line.m_line_clks >= gb_clks_mode3_begin)
-                {
-                    m_line_stage       = line_stage::mode3_align_scx;
-                    m_line.m_line_clks = gb_clks_mode3_begin;
-                    // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                    //                 << " entering line_stage::mode3_align_scx")
-                }
+                line_stage_mode2(until_line_clks);
                 break;
 
             case line_stage::mode3_align_scx:
-                AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin)
-                m_matched_scx = m_common.m_scx & 0b111;
-                for (; m_line.m_line_clks < until_line_clks; ++m_line.m_line_clks)
-                {
-                    int match = (m_line.m_line_clks - gb_clks_mode3_begin) & 0b111;
-                    if (match == m_matched_scx)
-                    {
-                        AGE_ASSERT(m_bg_fifo.size() <= 8)
-                        m_line_stage = line_stage::mode3_skip_first_8_dots;
-                        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                        //                 << " entering line_stage::mode3_skip_first_8_dots"
-                        //                 << ", scx=" << (int) m_common.m_scx
-                        //                 << ", bg-fifo-size=" << m_bg_fifo.size())
-                        break;
-                    }
-                    // still no match at scx 7 -> clear BG fifo and begin anew
-                    if (match == 0b111)
-                    {
-                        m_bg_fifo.clear();
-                    }
-                }
+                line_stage_mode3_align_scx(until_line_clks);
                 break;
 
             case line_stage::mode3_skip_first_8_dots:
-                AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin)
-                AGE_ASSERT(m_x_pos < 8)
-                m_x_pos += until_line_clks - m_line.m_line_clks;
-                m_line.m_line_clks = until_line_clks;
-                if (m_x_pos >= 8)
-                {
-                    AGE_ASSERT(m_bg_fifo.size() >= 8)
-                    for (int i = 0; i < m_matched_scx; ++i)
-                    {
-                        m_bg_fifo.pop_front();
-                    }
-                    m_line.m_line_clks -= m_x_pos - 8;
-                    m_x_pos      = 8;
-                    m_line_stage = line_stage::mode3_render;
-                    // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                    //                 << " entering line_stage::mode3_render"
-                    //                 << ", bg-fifo-size=" << m_bg_fifo.size())
-                }
+                line_stage_mode3_skip_first_8_dots(until_line_clks);
                 break;
 
             case line_stage::mode3_render:
-                AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin + 8)
-                AGE_ASSERT(m_x_pos >= 8)
-                for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
-                {
-                    AGE_ASSERT(!m_bg_fifo.empty())
-
-                    auto color_idx = m_bg_fifo[0];
-                    m_bg_fifo.pop_front();
-                    m_line_buffer[m_x_pos - 8] = m_palettes.get_color(color_idx);
-
-                    ++m_x_pos;
-                    if (m_x_pos == gb_screen_width + 8)
-                    {
-                        m_line_stage        = line_stage::mode0;
-                        m_next_fetcher_clks = gb_clock_cycles_per_lcd_line;
-                        m_next_fetcher_step = fetcher_step::finish_line;
-                        // AGE_LOG("line " << m_line.m_line << " (" << i << "):"
-                        //                 << " entering line_stage::mode0")
-                        break;
-                    }
-                }
-                m_line.m_line_clks = until_line_clks;
+                line_stage_mode3_render(until_line_clks);
                 break;
 
             case line_stage::mode0:
@@ -216,7 +151,94 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
                 break;
         }
     }
+
     AGE_ASSERT(m_line.m_line_clks == until_line_clks)
+}
+
+void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
+{
+    AGE_ASSERT(m_line.m_line_clks < gb_clks_mode3_begin)
+    m_line.m_line_clks = until_line_clks;
+    if (m_line.m_line_clks >= gb_clks_mode3_begin)
+    {
+        m_line_stage       = line_stage::mode3_align_scx;
+        m_line.m_line_clks = gb_clks_mode3_begin;
+        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+        //                 << " entering line_stage::mode3_align_scx")
+    }
+}
+
+void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
+{
+    AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin)
+    m_matched_scx = m_common.m_scx & 0b111;
+    for (; m_line.m_line_clks < until_line_clks; ++m_line.m_line_clks)
+    {
+        int match = (m_line.m_line_clks - gb_clks_mode3_begin) & 0b111;
+        if (match == m_matched_scx)
+        {
+            AGE_ASSERT(m_bg_fifo.size() <= 8)
+            m_line_stage = line_stage::mode3_skip_first_8_dots;
+            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+            //                 << " entering line_stage::mode3_skip_first_8_dots"
+            //                 << ", scx=" << (int) m_common.m_scx
+            //                 << ", bg-fifo-size=" << m_bg_fifo.size())
+            break;
+        }
+        // still no match at scx 7 -> clear BG fifo and begin anew
+        if (match == 0b111)
+        {
+            m_bg_fifo.clear();
+        }
+    }
+}
+
+void age::gb_lcd_dot_renderer::line_stage_mode3_skip_first_8_dots(int until_line_clks)
+{
+    AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin)
+    AGE_ASSERT(m_x_pos < 8)
+    m_x_pos += until_line_clks - m_line.m_line_clks;
+    m_line.m_line_clks = until_line_clks;
+    if (m_x_pos >= 8)
+    {
+        AGE_ASSERT(m_bg_fifo.size() >= 8)
+        for (int i = 0; i < m_matched_scx; ++i)
+        {
+            m_bg_fifo.pop_front();
+        }
+        m_line.m_line_clks -= m_x_pos - 8;
+        m_x_pos      = 8;
+        m_line_stage = line_stage::mode3_render;
+        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+        //                 << " entering line_stage::mode3_render"
+        //                 << ", bg-fifo-size=" << m_bg_fifo.size())
+    }
+}
+
+void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
+{
+    AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin + 8)
+    AGE_ASSERT(m_x_pos >= 8)
+    for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
+    {
+        AGE_ASSERT(!m_bg_fifo.empty())
+
+        auto color_idx = m_bg_fifo[0];
+        m_bg_fifo.pop_front();
+        m_line_buffer[m_x_pos - 8] = m_palettes.get_color(color_idx);
+
+        ++m_x_pos;
+        if (m_x_pos == gb_screen_width + 8)
+        {
+            m_line_stage        = line_stage::mode0;
+            m_next_fetcher_clks = gb_clock_cycles_per_lcd_line;
+            m_next_fetcher_step = fetcher_step::finish_line;
+            // AGE_LOG("line " << m_line.m_line << " (" << i << "):"
+            //                 << " entering line_stage::mode0")
+            break;
+        }
+    }
+    m_line.m_line_clks = until_line_clks;
 }
 
 

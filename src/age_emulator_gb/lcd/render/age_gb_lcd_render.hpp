@@ -181,6 +181,10 @@ namespace age
         };
 
         void update_line_stage(int until_line_clks);
+        void line_stage_mode2(int until_line_clks);
+        void line_stage_mode3_align_scx(int until_line_clks);
+        void line_stage_mode3_skip_first_8_dots(int until_line_clks);
+        void line_stage_mode3_render(int until_line_clks);
         void schedule_next_fetcher_step(int clks, fetcher_step step);
         void fetch_bg_tile_id();
         void fetch_bg_bitplane(int bitplane_offset);
