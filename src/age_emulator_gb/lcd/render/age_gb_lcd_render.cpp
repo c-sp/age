@@ -129,6 +129,11 @@ age::gb_lcd_render::gb_lcd_render(const gb_device&       device,
 
 
 
+void age::gb_lcd_render::set_clks_tile_data_change(gb_current_line at_line)
+{
+    m_dot_renderer.set_clks_tile_data_change(at_line);
+}
+
 void age::gb_lcd_render::new_frame()
 {
     m_dot_renderer.reset(); //! \todo maybe we can remove this after fixing LCD off/on
@@ -152,7 +157,7 @@ void age::gb_lcd_render::render(gb_current_line until)
     {
         if (!m_dot_renderer.continue_line(until))
         {
-            return;
+            return; // line not yet finished
         }
         ++m_rendered_lines;
     }
@@ -160,7 +165,7 @@ void age::gb_lcd_render::render(gb_current_line until)
     // render complete lines, if possible
     // (note that 289 T4 cycles is the longest mode 3 duration)
     int complete_lines = until.m_line + ((until.m_line_clks >= 80 + 289) ? 1 : 0);
-    int sanitized = std::min<int>(gb_screen_height, complete_lines);
+    int sanitized      = std::min<int>(gb_screen_height, complete_lines);
 
     for (; m_rendered_lines < sanitized; ++m_rendered_lines)
     {

@@ -35,16 +35,28 @@ age::uint8_t age::gb_lcd::read_lcdc() const
 
 void age::gb_lcd::write_lcdc(uint8_t value)
 {
-    update_state();
     auto msg = log_reg();
     msg << "write LCDC = " << log_hex8(value) << log_line_clks(m_line);
 
-    int diff = m_render.get_lcdc() ^ value;
-    m_render.set_lcdc(value);
+    uint8_t diff = m_render.get_lcdc() ^ value;
 
+    // LCD not switched
     if (!(diff & gb_lcdc_enable))
     {
         msg << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
+
+        // LCD ws already on -> check for CGB glitches
+        if (m_line.lcd_is_on())
+        {
+            update_state(-1); // let any LCDC change take effect immediately
+            if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
+            {
+                // tile data bit changed
+                m_render.set_clks_tile_data_change(m_line.current_line());
+            }
+        }
+
+        m_render.set_lcdc(value);
         return;
     }
 
@@ -52,7 +64,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
     if (value & gb_lcdc_enable)
     {
         msg << "\n    * LCD switched on";
-
+        m_render.set_lcdc(value);
         m_line.lcd_on();
         m_lcd_irqs.lcd_on(m_render.m_scx);
         m_render.new_frame();
@@ -66,7 +78,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         auto line = m_line.current_line();
 
         // switch frame buffers, if the current frame is finished
-        // (otherwise it would be lost because we did not reach
+        // (otherwise it would be lost just because we did not reach
         // the last v-blank line)
         if (line.m_line >= gb_screen_height)
         {
@@ -86,6 +98,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
         m_lcd_irqs.lcd_off();
         m_line.lcd_off();
+        m_render.set_lcdc(value);
     }
 }
 

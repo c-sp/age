@@ -113,16 +113,7 @@ void age::gb_lcd::set_back_clock(int clock_cycle_offset)
 
 void age::gb_lcd::update_state()
 {
-    if (!m_line.lcd_is_on())
-    {
-        return;
-    }
-    bool new_frame = update_frame();
-    if (new_frame)
-    {
-        new_frame = update_frame();
-        AGE_ASSERT(!new_frame)
-    }
+    update_state(0);
 }
 
 void age::gb_lcd::check_for_finished_frame()
@@ -138,12 +129,27 @@ void age::gb_lcd::check_for_finished_frame()
     }
 }
 
-bool age::gb_lcd::update_frame()
+void age::gb_lcd::update_state(int line_clock_offset)
+{
+    if (!m_line.lcd_is_on())
+    {
+        return;
+    }
+    bool new_frame = update_frame(line_clock_offset);
+    if (new_frame)
+    {
+        new_frame = update_frame(line_clock_offset);
+        AGE_ASSERT(!new_frame)
+    }
+}
+
+bool age::gb_lcd::update_frame(int line_clock_offset)
 {
     AGE_ASSERT(m_line.lcd_is_on())
 
     // continue rendering the current unfinished frame
-    auto line = m_line.current_line();
+    auto line        = m_line.current_line();
+    line.m_line_clks = std::min(std::max(line.m_line_clks + line_clock_offset, 0), gb_clock_cycles_per_lcd_line - 1);
     m_render.render(line);
 
     if (line.m_line < gb_lcd_line_count)

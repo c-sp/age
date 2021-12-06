@@ -42,13 +42,13 @@ namespace age
         {}
         ~gb_sound_logger() = default;
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_sound, m_clk_current_state);
         }
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log_reg() const
         {
             return m_clock.log(gb_log_category::lc_sound_registers, m_clk_current_state);
@@ -119,7 +119,7 @@ namespace age
             return m_logger->m_device;
         }
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             auto log = m_logger->log();
@@ -127,7 +127,7 @@ namespace age
             return log;
         }
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log_reg() const
         {
             auto log = m_logger->log_reg();

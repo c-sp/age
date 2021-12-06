@@ -67,7 +67,7 @@ namespace age
 
         gb_current_line current_line() const;
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_lcd);
@@ -201,15 +201,16 @@ namespace age
         void check_for_finished_frame();
 
     private:
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log_reg() const
         {
             return m_clock.log(gb_log_category::lc_lcd_registers);
         }
 
-        bool            is_oam_readable(gb_current_line& line);
-        bool            is_oam_writable(gb_current_line& line);
-        bool            update_frame();
+        bool is_oam_readable(gb_current_line& line);
+        bool is_oam_writable(gb_current_line& line);
+        void update_state(int line_clock_offset);
+        bool update_frame(int line_clock_offset = 0);
 
         //! This function should be used when update_state() has not been
         //! called before.

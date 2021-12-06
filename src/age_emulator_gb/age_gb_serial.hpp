@@ -65,7 +65,7 @@ namespace age
         void set_back_clock(int clock_cycle_offset);
 
     private:
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_serial);

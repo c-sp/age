@@ -53,7 +53,7 @@ namespace age
 
         void trigger_interrupt(gb_interrupt interrupt, int irq_clock_cycle);
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return m_clock.log(gb_log_category::lc_interrupts);

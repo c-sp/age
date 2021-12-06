@@ -18,6 +18,13 @@
 
 #include <age_debug.hpp>
 
+namespace
+{
+    constexpr int gb_clks_begin_fetcher   = 85;
+    constexpr int gb_clks_begin_scx_align = 84;
+
+} // namespace
+
 
 
 age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_lcd_render_common& common,
@@ -42,6 +49,11 @@ bool age::gb_lcd_dot_renderer::in_progress() const
     return m_line.m_line >= 0;
 }
 
+void age::gb_lcd_dot_renderer::set_clks_tile_data_change(gb_current_line at_line)
+{
+    m_clks_tile_data_change = at_line;
+}
+
 void age::gb_lcd_dot_renderer::reset()
 {
     m_line = gb_no_line;
@@ -57,15 +69,16 @@ void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line)
     m_line_stage  = line_stage::mode2;
     m_line_buffer = &m_screen_buffer.get_back_buffer()[line.m_line * gb_screen_width];
     m_x_pos       = 0;
-    // no need to reset the following members
+    // no need to reset all members
     // m_matched_scx = 0;
 
     m_next_fetcher_step = fetcher_step::fetch_bg_tile_id;
-    m_next_fetcher_clks = gb_clks_mode3_begin;
-    // no need to reset the following members
+    m_next_fetcher_clks = gb_clks_begin_fetcher;
+    // no need to reset all members
     // m_fetched_bg_tile_id         = 0;
     // m_fetched_bg_tile_attributes = 0;
     // m_fetched_bg_bitplane        = {};
+    m_clks_tile_data_change = gb_no_line;
 
     bool line_finished = continue_line(line);
     AGE_ASSERT(!line_finished)
@@ -157,24 +170,25 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
 
 void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks < gb_clks_mode3_begin)
+    AGE_ASSERT(m_line.m_line_clks < gb_clks_begin_scx_align)
     m_line.m_line_clks = until_line_clks;
-    if (m_line.m_line_clks >= gb_clks_mode3_begin)
+    if (m_line.m_line_clks >= gb_clks_begin_scx_align)
     {
         m_line_stage       = line_stage::mode3_align_scx;
-        m_line.m_line_clks = gb_clks_mode3_begin;
+        m_line.m_line_clks = gb_clks_begin_scx_align;
         // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-        //                 << " entering line_stage::mode3_align_scx")
+        //                 << " entering line_stage::mode3_align_scx"
+        //                 << ", scx=" << (int) m_common.m_scx)
     }
 }
 
 void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin)
+    AGE_ASSERT(m_line.m_line_clks >= gb_clks_begin_scx_align)
     m_matched_scx = m_common.m_scx & 0b111;
     for (; m_line.m_line_clks < until_line_clks; ++m_line.m_line_clks)
     {
-        int match = (m_line.m_line_clks - gb_clks_mode3_begin) & 0b111;
+        int match = (m_line.m_line_clks - gb_clks_begin_scx_align) & 0b111;
         if (match == m_matched_scx)
         {
             AGE_ASSERT(m_bg_fifo.size() <= 8)
@@ -183,6 +197,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
             //                 << " entering line_stage::mode3_skip_first_8_dots"
             //                 << ", scx=" << (int) m_common.m_scx
             //                 << ", bg-fifo-size=" << m_bg_fifo.size())
+            ++m_line.m_line_clks;
             break;
         }
         // still no match at scx 7 -> clear BG fifo and begin anew
@@ -195,7 +210,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
 
 void age::gb_lcd_dot_renderer::line_stage_mode3_skip_first_8_dots(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin)
+    AGE_ASSERT(m_line.m_line_clks >= gb_clks_begin_scx_align)
     AGE_ASSERT(m_x_pos < 8)
     m_x_pos += until_line_clks - m_line.m_line_clks;
     m_line.m_line_clks = until_line_clks;
@@ -217,7 +232,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_skip_first_8_dots(int until_line
 
 void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= gb_clks_mode3_begin + 8)
+    AGE_ASSERT(m_line.m_line_clks >= gb_clks_begin_scx_align + 8)
     AGE_ASSERT(m_x_pos >= 8)
     for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
     {
@@ -258,13 +273,24 @@ void age::gb_lcd_dot_renderer::fetch_bg_tile_id()
     int tile_line_ofs = ((m_common.m_scx + m_x_pos + px_ofs) >> 3) & 0b11111;
     int tile_vram_ofs = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2) + tile_line_ofs;
 
-    m_fetched_bg_tile_id         = m_video_ram[tile_vram_ofs] ^ m_common.m_tile_xor; // bank 0
-    m_fetched_bg_tile_attributes = m_video_ram[tile_vram_ofs + 0x2000];              // bank 1 (always zero for DMG)
+    m_fetched_bg_tile_id         = m_video_ram[tile_vram_ofs];          // bank 0
+    m_fetched_bg_tile_attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1 (always zero for DMG)
 }
 
 void age::gb_lcd_dot_renderer::fetch_bg_bitplane(int bitplane_offset)
 {
     AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
+
+    // CGB tile data glitch
+    if (m_clks_tile_data_change.m_line_clks == m_next_fetcher_clks)
+    {
+        AGE_ASSERT(m_device.is_cgb_device())
+        if (!(m_common.get_lcdc() & gb_lcdc_bg_win_data))
+        {
+            m_fetched_bg_bitplane[bitplane_offset] = m_common.m_xflip_cache[m_fetched_bg_tile_id];
+            return;
+        }
+    }
 
     int tile_line = (m_common.m_scy + m_line.m_line) & 0b111;
     // y-flip
@@ -274,12 +300,15 @@ void age::gb_lcd_dot_renderer::fetch_bg_bitplane(int bitplane_offset)
     }
 
     // read tile data
-    int tile_data_ofs = m_fetched_bg_tile_id << 4; // 16 bytes per tile
+    int tile_data_ofs = (m_fetched_bg_tile_id ^ m_common.m_tile_xor) << 4; // 16 bytes per tile
     tile_data_ofs += m_common.m_tile_data_offset;
     tile_data_ofs += (m_fetched_bg_tile_attributes & gb_tile_attrib_vram_bank) << 10;
     tile_data_ofs += tile_line * 2; // 2 bytes per line
 
     auto bitplane = m_video_ram[tile_data_ofs + bitplane_offset];
+
+    // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+    //                 << " read bitplane " << bitplane_offset << " = " << (int) bitplane)
 
     // x-flip
     // (we invert the x-flip for easier rendering:

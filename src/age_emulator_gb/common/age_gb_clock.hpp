@@ -106,7 +106,7 @@ namespace age
         [[nodiscard]] uint8_t read_div() const;
         void                  write_div();
 
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log(gb_log_category category) const
         {
             return log(category, m_clock_cycle);
@@ -118,7 +118,7 @@ namespace age
         }
 
     private:
-        // logging code is header-only to allow compile time optimization
+        // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
             return log(gb_log_category::lc_clock, m_clock_cycle);
