@@ -129,6 +129,11 @@ age::gb_lcd_render::gb_lcd_render(const gb_device&       device,
 
 
 
+bool age::gb_lcd_render::stat_mode0() const
+{
+    return m_dot_renderer.stat_mode0();
+}
+
 void age::gb_lcd_render::set_clks_tile_data_change(gb_current_line at_line)
 {
     m_dot_renderer.set_clks_tile_data_change(at_line);
@@ -150,7 +155,7 @@ void age::gb_lcd_render::new_frame()
 
 #ifdef AGE_COMPILE_DOT_RENDERER
 
-void age::gb_lcd_render::render(gb_current_line until)
+void age::gb_lcd_render::render(gb_current_line until, bool is_first_frame)
 {
     // finish dot-rendered line
     if (m_dot_renderer.in_progress())
@@ -180,15 +185,16 @@ void age::gb_lcd_render::render(gb_current_line until)
     AGE_ASSERT(m_rendered_lines >= until.m_line)
     if (m_rendered_lines == until.m_line)
     {
-        m_dot_renderer.begin_new_line(until);
+        m_dot_renderer.begin_new_line(until, is_first_frame);
     }
 }
 
 #else
 
-void age::gb_lcd_render::render(gb_current_line until)
+void age::gb_lcd_render::render(gb_current_line until, bool is_first_frame)
 {
     // AGE_COMPILE_DOT_RENDERER not set
+    AGE_UNUSED(is_first_frame);
     int until_line = until.m_line + ((until.m_line_clks >= 80) ? 1 : 0);
 
     AGE_ASSERT(until_line >= m_rendered_lines)

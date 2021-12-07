@@ -150,7 +150,7 @@ bool age::gb_lcd::update_frame(int line_clock_offset)
     // continue rendering the current unfinished frame
     auto line        = m_line.current_line();
     line.m_line_clks = std::min(std::max(line.m_line_clks + line_clock_offset, 0), gb_clock_cycles_per_lcd_line - 1);
-    m_render.render(line);
+    m_render.render(line, m_line.is_first_frame());
 
     if (line.m_line < gb_lcd_line_count)
     {

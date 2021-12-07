@@ -156,10 +156,11 @@ namespace age
         ~gb_lcd_dot_renderer() = default;
 
         [[nodiscard]] bool in_progress() const;
+        [[nodiscard]] bool stat_mode0() const;
 
         void set_clks_tile_data_change(gb_current_line at_line);
         void reset();
-        void begin_new_line(gb_current_line line);
+        void begin_new_line(gb_current_line line, bool is_first_frame);
         bool continue_line(gb_current_line until);
 
     private:
@@ -199,11 +200,12 @@ namespace age
 
         std::deque<uint8_t> m_bg_fifo{};
 
-        gb_current_line m_line        = gb_no_line;
-        line_stage      m_line_stage  = line_stage::mode2;
-        pixel*          m_line_buffer = nullptr;
-        int             m_x_pos       = 0;
-        int             m_matched_scx = 0;
+        gb_current_line m_line            = gb_no_line;
+        line_stage      m_line_stage      = line_stage::mode2;
+        pixel*          m_line_buffer     = nullptr;
+        int             m_begin_align_scx = 0;
+        int             m_x_pos           = 0;
+        int             m_matched_scx     = 0;
 
         fetcher_step    m_next_fetcher_step          = fetcher_step::fetch_bg_tile_id;
         int             m_next_fetcher_clks          = gb_no_clock_cycle;
@@ -229,9 +231,11 @@ namespace age
 
         ~gb_lcd_render() = default;
 
+        [[nodiscard]] bool stat_mode0() const;
+
         void set_clks_tile_data_change(gb_current_line at_line);
         void new_frame();
-        void render(gb_current_line until);
+        void render(gb_current_line until, bool is_first_frame);
 
         using gb_lcd_render_common::get_lcdc;
         using gb_lcd_render_common::set_lcdc;

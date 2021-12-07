@@ -130,7 +130,7 @@ age::uint8_t age::gb_lcd::read_stat()
     return result;
 }
 
-age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line) const
+age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line)
 {
     AGE_ASSERT(current_line.m_line < gb_lcd_line_count)
 
@@ -146,23 +146,24 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line) con
         return (current_line.m_line_clks >= gb_clock_cycles_per_lcd_line - 4) ? 0 : 1;
     }
 
+    // mode 2 (mode 0 for the first line after the LCD was switched on)
+    bool is_line_zero = m_line.is_first_frame() && (current_line.m_line == 0);
+    if (current_line.m_line_clks < (is_line_zero ? 82 : 80))
+    {
+        return is_line_zero ? 0 : 2;
+    }
+
+    // mode 3 or mode 0
+#ifdef AGE_COMPILE_DOT_RENDERER
+    update_state();
+    return m_render.stat_mode0() ? 0 : 3;
+
+#else
     // first line after restarting the LCD:
     // mode 0 instead of mode 2.
     int m3_end = 80 + 172 + (m_render.m_scx & 7);
-    if (m_line.is_first_frame() && !current_line.m_line)
-    {
-        return ((current_line.m_line_clks < 80 + 2) || (current_line.m_line_clks >= m3_end + 2)) ? 0 : 3;
-    }
-
-    // mode 2
-    if (current_line.m_line_clks < 80)
-    {
-        return 2;
-    }
-
-    // mode 3 and mode 0
-    //! \todo mode 3 timing also depends on sprites & window
-    return (current_line.m_line_clks >= m3_end) ? 0 : 3;
+    return (current_line.m_line_clks >= (is_line_zero ? m3_end + 2 : m3_end)) ? 0 : 3;
+#endif
 }
 
 age::uint8_t age::gb_lcd::get_stat_ly_match(const gb_current_line& current_line) const

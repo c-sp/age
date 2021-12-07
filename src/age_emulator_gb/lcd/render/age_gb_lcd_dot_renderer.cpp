@@ -18,13 +18,6 @@
 
 #include <age_debug.hpp>
 
-namespace
-{
-    constexpr int gb_clks_begin_fetcher   = 85;
-    constexpr int gb_clks_begin_scx_align = 84;
-
-} // namespace
-
 
 
 age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_lcd_render_common& common,
@@ -49,6 +42,11 @@ bool age::gb_lcd_dot_renderer::in_progress() const
     return m_line.m_line >= 0;
 }
 
+bool age::gb_lcd_dot_renderer::stat_mode0() const
+{
+    return !in_progress() || (m_x_pos >= gb_screen_width + 7);
+}
+
 void age::gb_lcd_dot_renderer::set_clks_tile_data_change(gb_current_line at_line)
 {
     m_clks_tile_data_change = at_line;
@@ -59,21 +57,23 @@ void age::gb_lcd_dot_renderer::reset()
     m_line = gb_no_line;
 }
 
-void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line)
+void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line, bool is_first_frame)
 {
     AGE_ASSERT(!in_progress())
+    bool is_line_zero = is_first_frame && (line.m_line == 0);
 
     m_bg_fifo.clear();
 
-    m_line        = {.m_line = line.m_line, .m_line_clks = 0};
-    m_line_stage  = line_stage::mode2;
-    m_line_buffer = &m_screen_buffer.get_back_buffer()[line.m_line * gb_screen_width];
-    m_x_pos       = 0;
+    m_line            = {.m_line = line.m_line, .m_line_clks = 0};
+    m_line_stage      = line_stage::mode2;
+    m_line_buffer     = &m_screen_buffer.get_back_buffer()[line.m_line * gb_screen_width];
+    m_begin_align_scx = is_line_zero ? 86 : 84;
+    m_x_pos           = 0;
     // no need to reset all members
-    // m_matched_scx = 0;
+    // m_matched_scx  = 0;
 
     m_next_fetcher_step = fetcher_step::fetch_bg_tile_id;
-    m_next_fetcher_clks = gb_clks_begin_fetcher;
+    m_next_fetcher_clks = is_line_zero ? 87 : 85;
     // no need to reset all members
     // m_fetched_bg_tile_id         = 0;
     // m_fetched_bg_tile_attributes = 0;
@@ -160,6 +160,7 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
                 break;
 
             case line_stage::mode0:
+                m_x_pos += until_line_clks - m_line.m_line_clks;
                 m_line.m_line_clks = until_line_clks;
                 break;
         }
@@ -170,12 +171,12 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
 
 void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks < gb_clks_begin_scx_align)
+    AGE_ASSERT(m_line.m_line_clks < m_begin_align_scx)
     m_line.m_line_clks = until_line_clks;
-    if (m_line.m_line_clks >= gb_clks_begin_scx_align)
+    if (m_line.m_line_clks >= m_begin_align_scx)
     {
         m_line_stage       = line_stage::mode3_align_scx;
-        m_line.m_line_clks = gb_clks_begin_scx_align;
+        m_line.m_line_clks = m_begin_align_scx;
         // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
         //                 << " entering line_stage::mode3_align_scx"
         //                 << ", scx=" << (int) m_common.m_scx)
@@ -184,11 +185,11 @@ void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
 
 void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= gb_clks_begin_scx_align)
+    AGE_ASSERT(m_line.m_line_clks >= m_begin_align_scx)
     m_matched_scx = m_common.m_scx & 0b111;
     for (; m_line.m_line_clks < until_line_clks; ++m_line.m_line_clks)
     {
-        int match = (m_line.m_line_clks - gb_clks_begin_scx_align) & 0b111;
+        int match = (m_line.m_line_clks - m_begin_align_scx) & 0b111;
         if (match == m_matched_scx)
         {
             AGE_ASSERT(m_bg_fifo.size() <= 8)
@@ -210,7 +211,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
 
 void age::gb_lcd_dot_renderer::line_stage_mode3_skip_first_8_dots(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= gb_clks_begin_scx_align)
+    AGE_ASSERT(m_line.m_line_clks >= m_begin_align_scx)
     AGE_ASSERT(m_x_pos < 8)
     m_x_pos += until_line_clks - m_line.m_line_clks;
     m_line.m_line_clks = until_line_clks;
@@ -232,9 +233,9 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_skip_first_8_dots(int until_line
 
 void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= gb_clks_begin_scx_align + 8)
+    AGE_ASSERT(m_line.m_line_clks >= m_begin_align_scx + 8)
     AGE_ASSERT(m_x_pos >= 8)
-    for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
+    for (; m_line.m_line_clks < until_line_clks; ++m_line.m_line_clks)
     {
         AGE_ASSERT(!m_bg_fifo.empty())
 
@@ -248,12 +249,11 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             m_line_stage        = line_stage::mode0;
             m_next_fetcher_clks = gb_clock_cycles_per_lcd_line;
             m_next_fetcher_step = fetcher_step::finish_line;
-            // AGE_LOG("line " << m_line.m_line << " (" << i << "):"
+            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
             //                 << " entering line_stage::mode0")
             break;
         }
     }
-    m_line.m_line_clks = until_line_clks;
 }
 
 
