@@ -28,7 +28,7 @@ namespace
 
     // tile_data array contents copied from gambatte code
     // (gambatte/test/testrunner.cpp)
-    constexpr age::uint8_array<16 * 8 * 8> tile_data
+    constexpr age::uint8_array<16ULL * 8 * 8> tile_data
         = {{_, _, _, _, _, _, _, _,
             _, O, O, O, O, O, O, O,
             _, O, _, _, _, _, _, O,
@@ -271,10 +271,12 @@ namespace
             for (int line = 0; line < 8; ++line)
             {
                 int pixel_offset = 0;
-                for (size_t exp_index = 0; exp_index < 20; ++exp_index)
+                for (auto tile_index : expected_result)
                 {
-                    // pad the expected result with zeroes to fail on e.g. result 0x1F when expecting 0x1
-                    auto tile_index = (exp_index >= expected_result.size()) ? 0 : expected_result[exp_index];
+                    // Padding the expected result with zeroes to fail on e.g. result 0x1F when expecting 0x1
+                    // does not work for all tests:
+                    // e.g. gambatte/scx_during_m3/scx_m3_extend_1_dmg08_cgb04c_out3.gbc
+                    // auto tile_index = (exp_index >= expected_result.size()) ? 0 : expected_result[exp_index];
 
                     const age::uint8_t* tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
                     for (int tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
@@ -284,6 +286,27 @@ namespace
 
                         if (found_background != expect_background)
                         {
+                            // std::string exp;
+                            // for (size_t i = 0; i < expected_result.size(); ++i)
+                            // {
+                            //     exp += '0' + expected_result[i];
+                            // }
+                            // AGE_LOG("expected " << exp)
+                            // AGE_LOG("expected bg " << expect_background
+                            //                        << ", found bg " << found_background
+                            //                        << ", line " << line
+                            //                        << ", tile_index " << tile_index
+                            //                        << ", tile_pixel " << tile_pixel)
+                            // for (int l = 0; l < 8; ++l)
+                            // {
+                            //     std::string log;
+                            //     for (int x = 0; x < screen_width; ++x)
+                            //     {
+                            //         bool bg = screen[l * screen_width + x] == background;
+                            //         log += bg ? '.' : '#';
+                            //     }
+                            //     AGE_LOG(log)
+                            // }
                             return false;
                         }
                     }

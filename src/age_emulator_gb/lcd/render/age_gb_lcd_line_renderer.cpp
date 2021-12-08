@@ -56,7 +56,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
     // first visible pixel
     int px0 = 8 + (m_common.m_scx & 0b111);
 
-    // BG & windows not visible
+    // BG & window not visible
     if (!m_device.cgb_mode() && !(m_common.get_lcdc() & gb_lcdc_bg_enable))
     {
         pixel fill_color = m_palettes.get_palette(gb_palette_bgp)[0];

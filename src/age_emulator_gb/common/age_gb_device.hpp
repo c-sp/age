@@ -47,6 +47,14 @@ namespace age
         gb_device(const uint8_vector& rom, gb_device_type device_type);
 
         //!
+        //! The emulated device is a Game Boy Classic.
+        //!
+        [[nodiscard]] bool is_dmg_device() const
+        {
+            return m_device_mode == gb_device_mode::dmg;
+        }
+
+        //!
         //! The emulated device is a Game Boy Color.
         //!
         [[nodiscard]] bool is_cgb_device() const

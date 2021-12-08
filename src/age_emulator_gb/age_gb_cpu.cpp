@@ -79,7 +79,7 @@ age::gb_cpu::gb_cpu(const gb_device&         device,
       m_sp(0xFFFE),
       m_prefetched_opcode(m_bus.read_byte(m_pc))
 {
-    if (!m_device.is_cgb_device())
+    if (m_device.is_dmg_device())
     {
         m_a = 0x01;
         set_flags(0xB0);

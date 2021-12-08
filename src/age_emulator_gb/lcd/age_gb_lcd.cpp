@@ -54,7 +54,7 @@ bool age::gb_lcd::is_video_ram_accessible()
         // DMG-C:                < 83 cycles
         // CGB-B/E single speed: < 84 cycles
         // CGB-B/E double speed: < 82 cycles
-        int m3_edge = !m_device.is_cgb_device()   ? 83
+        int m3_edge = m_device.is_dmg_device()    ? 83
                       : m_clock.is_double_speed() ? 82
                                                   : 84;
         accessible  = (line.m_line_clks < m3_edge)

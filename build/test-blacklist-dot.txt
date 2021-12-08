@@ -153,11 +153,7 @@ dmg-acid2/
 /gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_oamw_2_dmg08_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx3_2_dmg08_cgb04c_out84.gbc
 /gambatte/enable_display/ly0_m0irq_scx0_ds_1_cgb04c_outE0.gbc
 /gambatte/enable_display/ly0_m0irq_scx1_1_dmg08_cgb04c_outE0.gbc
 /gambatte/enable_display/ly0_m0irq_scx1_ds_1_cgb04c_outE0.gbc
@@ -185,9 +181,6 @@ dmg-acid2/
 /gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_4_dmg08_cgb04c_out0.gbc
 /gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_ds_2_cgb04c_out0.gbc
 
-/gambatte/m2int_m3stat/scx/late_scx4_2_dmg08_cgb04c_out0.gbc
-/gambatte/m2int_m3stat/scx/late_scx4_ds_2_cgb04c_out0.gbc
-
 /gambatte/miscmstatirq/
 
 /gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
@@ -211,14 +204,7 @@ dmg-acid2/
 
 /gambatte/scx_during_m3/scx_attrib_during_m3_spx
 /gambatte/scx_during_m3/scx_during_m3_spx
-/gambatte/scx_during_m3/scx_m3_extend_
 
-/gambatte/scy/scx3/scy_during_m3_2.gbc
-/gambatte/scy/scx3/scy_during_m3_4.gbc
-/gambatte/scy/scx3/scy_during_m3_6.gbc
-/gambatte/scy/scy_during_m3_2.gbc
-/gambatte/scy/scy_during_m3_4.gbc
-/gambatte/scy/scy_during_m3_6.gbc
 /gambatte/scy/scy_during_m3_spx
 
 /gambatte/sprites/

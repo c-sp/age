@@ -341,7 +341,9 @@ age::uint8_t age::gb_lcd::read_ocpd() const
 
 void age::gb_lcd::write_scy(uint8_t value)
 {
-    update_state();
+    // Game Boy Classic: SCY changes influence fetcher reads on the same cycle
+    int offset = (m_line.lcd_is_on() && m_device.is_dmg_device()) ? -1 : 0;
+    update_state(offset);
     log_reg() << "write SCY = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_scy = value;
 }

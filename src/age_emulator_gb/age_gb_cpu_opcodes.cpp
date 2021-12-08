@@ -1324,7 +1324,7 @@ void age::gb_cpu::execute_prefetched()
             if (halted)
             {
                 msg << "\n    * CPU HALTed";
-                if (!m_device.is_cgb_device())
+                if (m_device.is_dmg_device())
                 {
                     msg << "\n    * applying extra DMG HALT delay (2 m-cycles)";
                     m_clock.tick_machine_cycle();
