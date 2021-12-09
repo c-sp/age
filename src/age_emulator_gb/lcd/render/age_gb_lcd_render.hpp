@@ -69,26 +69,24 @@ namespace age
         }
 
         void set_lcdc(uint8_t lcdc);
-        void reset_window();
-
-        [[nodiscard]] bool window_visible(int line) const;
-        [[nodiscard]] int  get_next_window_line() const;
 
     private:
         const gb_device& m_device;
         gb_lcd_sprites&  m_sprites;
 
-        uint8_t     m_lcdc  = 0;
-        mutable int m_wline = -1;
+        uint8_t m_lcdc = 0;
 
     public:
         const uint8_array<256> m_xflip_cache;
+
+        mutable int m_last_wline = -1;
 
         int     m_bg_tile_map_offset  = 0;
         int     m_win_tile_map_offset = 0;
         int     m_tile_data_offset    = 0;
         uint8_t m_tile_xor            = 0;
         uint8_t m_priority_mask       = 0xFF;
+        bool    m_window_enabled      = false;
 
         uint8_t m_scy = 0;
         uint8_t m_scx = 0;
@@ -175,9 +173,9 @@ namespace age
 
         enum class fetcher_step
         {
-            fetch_bg_tile_id,
-            fetch_bg_bitplane0,
-            fetch_bg_bitplane1,
+            fetch_bg_win_tile_id,
+            fetch_bg_win_bitplane0,
+            fetch_bg_win_bitplane1,
             finish_line,
         };
 
@@ -186,10 +184,11 @@ namespace age
         void line_stage_mode3_align_scx(int until_line_clks);
         void line_stage_mode3_skip_first_8_dots(int until_line_clks);
         void line_stage_mode3_render(int until_line_clks);
-        void schedule_next_fetcher_step(int clks, fetcher_step step);
-        void fetch_bg_tile_id();
-        void fetch_bg_bitplane(int bitplane_offset);
-        void push_bg_bitplanes();
+
+        void schedule_next_fetcher_step(int clks_offset, fetcher_step step);
+        void fetch_bg_win_tile_id();
+        void fetch_bg_win_bitplane(int bitplane_offset);
+        void push_bg_win_bitplanes();
 
         const gb_lcd_render_common& m_common;
         const gb_device&            m_device;
@@ -198,20 +197,21 @@ namespace age
         const uint8_t*              m_video_ram;
         screen_buffer&              m_screen_buffer;
 
-        std::deque<uint8_t> m_bg_fifo{};
+        std::deque<uint8_t> m_bg_win_fifo{};
 
-        gb_current_line m_line            = gb_no_line;
-        line_stage      m_line_stage      = line_stage::mode2;
-        pixel*          m_line_buffer     = nullptr;
-        int             m_begin_align_scx = 0;
-        int             m_x_pos           = 0;
-        int             m_matched_scx     = 0;
+        gb_current_line m_line                 = gb_no_line;
+        line_stage      m_line_stage           = line_stage::mode2;
+        pixel*          m_line_buffer          = nullptr;
+        int             m_clks_begin_align_scx = 0;
+        int             m_x_pos                = 0;
+        int             m_x_pos_win_start      = 0;
+        int             m_matched_scx          = 0;
 
-        fetcher_step    m_next_fetcher_step          = fetcher_step::fetch_bg_tile_id;
-        int             m_next_fetcher_clks          = gb_no_clock_cycle;
-        uint8_t         m_fetched_bg_tile_id         = 0;
-        uint8_t         m_fetched_bg_tile_attributes = 0;
-        uint8_array<2>  m_fetched_bg_bitplane{};
+        fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;
+        int             m_next_fetcher_clks              = gb_no_clock_cycle;
+        uint8_t         m_fetched_bg_win_tile_id         = 0;
+        uint8_t         m_fetched_bg_win_tile_attributes = 0;
+        uint8_array<2>  m_fetched_bg_win_bitplane{};
         gb_current_line m_clks_tile_data_change;
     };
 

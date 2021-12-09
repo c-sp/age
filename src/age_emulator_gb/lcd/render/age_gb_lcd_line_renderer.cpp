@@ -67,7 +67,9 @@ void age::gb_lcd_line_renderer::render_line(int line)
     // render BG & window
     else
     {
-        bool render_window = m_common.window_visible(line);
+        bool winx_visible  = ((m_common.get_lcdc() & gb_lcdc_win_enable) != 0) && (m_common.m_wx < 167);
+        bool render_window = (m_common.m_last_wline < 0) ? winx_visible && (m_common.m_wy <= line)
+                                                         : winx_visible;
 
         // render BG
         int    bg_y          = m_common.m_scy + line;
@@ -87,9 +89,9 @@ void age::gb_lcd_line_renderer::render_line(int line)
         // render window
         if (render_window)
         {
-            int wline     = m_common.get_next_window_line();
-            tile_vram_ofs = m_common.m_win_tile_map_offset + ((wline & 0b11111000) << 2);
-            tile_line     = wline & 0b111;
+            m_common.m_last_wline++;
+            tile_vram_ofs = m_common.m_win_tile_map_offset + ((m_common.m_last_wline & 0b11111000) << 2);
+            tile_line     = m_common.m_last_wline & 0b111;
             px            = &m_line[px0 + m_common.m_wx - 7];
 
             for (int tx = 0, max = ((gb_screen_width + 7 - m_common.m_wx) >> 3) + 1; tx < max; ++tx)

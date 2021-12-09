@@ -76,41 +76,8 @@ void age::gb_lcd_render_common::set_lcdc(uint8_t lcdc)
         // BG & window regardless of any priority flags
         m_priority_mask = (lcdc & gb_lcdc_bg_enable) ? 0xFF : 0x00;
     }
-}
 
-void age::gb_lcd_render_common::reset_window()
-{
-    m_wline = -1;
-}
-
-bool age::gb_lcd_render_common::window_visible(int line) const
-{
-    bool win_x_visible = ((m_lcdc & gb_lcdc_win_enable) != 0) && (m_wx < 167);
-
-    // window is already being rendered => ignore (potentially modified) WY
-    if (m_wline >= 0)
-    {
-        return win_x_visible;
-    }
-
-    // start rendering window on this line?
-    if (win_x_visible && (m_wy <= line))
-    {
-        m_wline = 0;
-        return true;
-    }
-    return false;
-}
-
-int age::gb_lcd_render_common::get_next_window_line() const
-{
-    int wline = m_wline;
-    if (wline < 0)
-    {
-        return -1;
-    }
-    ++m_wline;
-    return wline;
+    m_window_enabled = (lcdc & gb_lcdc_win_enable) > 0;
 }
 
 
@@ -146,8 +113,8 @@ void age::gb_lcd_render::new_frame()
     AGE_ASSERT(!m_dot_renderer.in_progress())
     //! \todo AGE_ASSERT(m_rendered_lines == gb_screen_height) (does not work for LCD off/on)
 
-    reset_window();
     m_screen_buffer.switch_buffers();
+    m_last_wline = -1;
     m_rendered_lines = 0;
 }
 
