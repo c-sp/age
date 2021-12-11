@@ -22,17 +22,19 @@
 
 
 
-age::gb_lcd_line_renderer::gb_lcd_line_renderer(const gb_lcd_render_common& common,
-                                                const gb_device&            device,
+age::gb_lcd_line_renderer::gb_lcd_line_renderer(const gb_device&            device,
+                                                const gb_lcd_render_common& common,
                                                 const gb_lcd_palettes&      palettes,
                                                 const gb_lcd_sprites&       sprites,
                                                 const uint8_t*              video_ram,
+                                                gb_window_check&            window,
                                                 screen_buffer&              screen_buffer)
-    : m_common(common),
-      m_device(device),
+    : m_device(device),
+      m_common(common),
       m_palettes(palettes),
       m_sprites(sprites),
       m_video_ram(video_ram),
+      m_window(window),
       m_screen_buffer(screen_buffer)
 {
 }
@@ -67,9 +69,9 @@ void age::gb_lcd_line_renderer::render_line(int line)
     // render BG & window
     else
     {
+        m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, line);
         bool winx_visible  = ((m_common.get_lcdc() & gb_lcdc_win_enable) != 0) && (m_common.m_wx < 167);
-        bool render_window = (m_common.m_last_wline < 0) ? winx_visible && (m_common.m_wy <= line)
-                                                         : winx_visible;
+        bool render_window = m_window.enabled_and_wy_matched(m_common.get_lcdc()) && winx_visible;
 
         // render BG
         int    bg_y          = m_common.m_scy + line;
@@ -89,9 +91,9 @@ void age::gb_lcd_line_renderer::render_line(int line)
         // render window
         if (render_window)
         {
-            m_common.m_last_wline++;
-            tile_vram_ofs = m_common.m_win_tile_map_offset + ((m_common.m_last_wline & 0b11111000) << 2);
-            tile_line     = m_common.m_last_wline & 0b111;
+            int wline     = m_window.next_window_line();
+            tile_vram_ofs = m_common.m_win_tile_map_offset + ((wline & 0b11111000) << 2);
+            tile_line     = wline & 0b111;
             px            = &m_line[px0 + m_common.m_wx - 7];
 
             for (int tx = 0, max = ((gb_screen_width + 7 - m_common.m_wx) >> 3) + 1; tx < max; ++tx)

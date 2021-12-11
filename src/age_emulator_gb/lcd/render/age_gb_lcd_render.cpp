@@ -76,8 +76,6 @@ void age::gb_lcd_render_common::set_lcdc(uint8_t lcdc)
         // BG & window regardless of any priority flags
         m_priority_mask = (lcdc & gb_lcdc_bg_enable) ? 0xFF : 0x00;
     }
-
-    m_window_enabled = (lcdc & gb_lcdc_win_enable) > 0;
 }
 
 
@@ -88,8 +86,8 @@ age::gb_lcd_render::gb_lcd_render(const gb_device&       device,
                                   const uint8_t*         video_ram,
                                   screen_buffer&         screen_buffer)
     : gb_lcd_render_common(device, sprites),
-      m_dot_renderer(*this, device, palettes, sprites, video_ram, screen_buffer),
-      m_line_renderer(*this, device, palettes, sprites, video_ram, screen_buffer),
+      m_dot_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
+      m_line_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
       m_screen_buffer(screen_buffer)
 {
 }
@@ -113,8 +111,8 @@ void age::gb_lcd_render::new_frame()
     AGE_ASSERT(!m_dot_renderer.in_progress())
     //! \todo AGE_ASSERT(m_rendered_lines == gb_screen_height) (does not work for LCD off/on)
 
+    m_window.new_frame();
     m_screen_buffer.switch_buffers();
-    m_last_wline = -1;
     m_rendered_lines = 0;
 }
 
@@ -135,9 +133,7 @@ void age::gb_lcd_render::render(gb_current_line until, bool is_first_frame)
     }
 
     // render complete lines, if possible
-    // (note that 289 T4 cycles is the longest mode 3 duration)
-    int complete_lines = until.m_line + ((until.m_line_clks >= 80 + 289) ? 1 : 0);
-    int sanitized      = std::min<int>(gb_screen_height, complete_lines);
+    int sanitized = std::min<int>(gb_screen_height, until.m_line);
 
     for (; m_rendered_lines < sanitized; ++m_rendered_lines)
     {

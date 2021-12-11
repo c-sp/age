@@ -114,6 +114,8 @@ dmg-acid2/
 /gambatte/oamdma/oamdmasrcC000_gdmasrcC0F0_gdmalen13_vramdumper_1.gbc
 /gambatte/sram.gbc
 /gambatte/vram_dumper.gbc
+/gambatte/window/on_screen/late_wx_ds_1.gbc
+/gambatte/window/on_screen/late_wx_ds_2.gbc
 /gambatte/wram_dumper.gbc
 
 ### unknown or "x'd" test result

@@ -25,6 +25,7 @@
 #include "../../common/age_gb_device.hpp"
 #include "../palettes/age_gb_lcd_palettes.hpp"
 #include "age_gb_lcd_sprites.hpp"
+#include "age_gb_lcd_window_check.hpp"
 
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
@@ -42,15 +43,6 @@ namespace age
 
     constexpr int16_t gb_screen_width  = 160;
     constexpr int16_t gb_screen_height = 144;
-
-    constexpr uint8_t gb_lcdc_enable      = 0x80;
-    constexpr uint8_t gb_lcdc_win_map     = 0x40;
-    constexpr uint8_t gb_lcdc_win_enable  = 0x20;
-    constexpr uint8_t gb_lcdc_bg_win_data = 0x10;
-    constexpr uint8_t gb_lcdc_bg_map      = 0x08;
-    constexpr uint8_t gb_lcdc_obj_size    = 0x04;
-    constexpr uint8_t gb_lcdc_obj_enable  = 0x02;
-    constexpr uint8_t gb_lcdc_bg_enable   = 0x01;
 
 
 
@@ -79,14 +71,11 @@ namespace age
     public:
         const uint8_array<256> m_xflip_cache;
 
-        mutable int m_last_wline = -1;
-
         int     m_bg_tile_map_offset  = 0;
         int     m_win_tile_map_offset = 0;
         int     m_tile_data_offset    = 0;
         uint8_t m_tile_xor            = 0;
         uint8_t m_priority_mask       = 0xFF;
-        bool    m_window_enabled      = false;
 
         uint8_t m_scy = 0;
         uint8_t m_scx = 0;
@@ -102,11 +91,12 @@ namespace age
         AGE_DISABLE_MOVE(gb_lcd_line_renderer);
 
     public:
-        gb_lcd_line_renderer(const gb_lcd_render_common& common,
-                             const gb_device&            device,
+        gb_lcd_line_renderer(const gb_device&            device,
+                             const gb_lcd_render_common& common,
                              const gb_lcd_palettes&      palettes,
                              const gb_lcd_sprites&       sprites,
                              const uint8_t*              video_ram,
+                             gb_window_check&            window,
                              screen_buffer&              screen_buffer);
 
         ~gb_lcd_line_renderer() = default;
@@ -117,11 +107,12 @@ namespace age
         pixel* render_bg_tile(pixel* dst, int tile_line, int tile_vram_ofs);
         void   render_sprite_tile(pixel* dst, int tile_line, const gb_sprite& sprite);
 
-        const gb_lcd_render_common& m_common;
         const gb_device&            m_device;
+        const gb_lcd_render_common& m_common;
         const gb_lcd_palettes&      m_palettes;
         const gb_lcd_sprites&       m_sprites;
         const uint8_t*              m_video_ram;
+        gb_window_check&            m_window;
         screen_buffer&              m_screen_buffer;
 
         // 160px + 3 tiles (8px + scx + last window/sprite tile)
@@ -144,11 +135,12 @@ namespace age
         AGE_DISABLE_MOVE(gb_lcd_dot_renderer);
 
     public:
-        gb_lcd_dot_renderer(const gb_lcd_render_common& common,
-                            const gb_device&            device,
+        gb_lcd_dot_renderer(const gb_device&            device,
+                            const gb_lcd_render_common& common,
                             const gb_lcd_palettes&      palettes,
                             const gb_lcd_sprites&       sprites,
                             const uint8_t*              video_ram,
+                            gb_window_check&            window,
                             screen_buffer&              screen_buffer);
 
         ~gb_lcd_dot_renderer() = default;
@@ -184,17 +176,19 @@ namespace age
         void line_stage_mode3_align_scx(int until_line_clks);
         void line_stage_mode3_skip_first_8_dots(int until_line_clks);
         void line_stage_mode3_render(int until_line_clks);
+        void line_stage_mode0(int until_line_clks);
 
         void schedule_next_fetcher_step(int clks_offset, fetcher_step step);
         void fetch_bg_win_tile_id();
         void fetch_bg_win_bitplane(int bitplane_offset);
         void push_bg_win_bitplanes();
 
-        const gb_lcd_render_common& m_common;
         const gb_device&            m_device;
+        const gb_lcd_render_common& m_common;
         const gb_lcd_palettes&      m_palettes;
         const gb_lcd_sprites&       m_sprites;
         const uint8_t*              m_video_ram;
+        gb_window_check&            m_window;
         screen_buffer&              m_screen_buffer;
 
         std::deque<uint8_t> m_bg_win_fifo{};
@@ -246,6 +240,7 @@ namespace age
         using gb_lcd_render_common::m_wy;
 
     private:
+        gb_window_check      m_window;
         gb_lcd_dot_renderer  m_dot_renderer;
         gb_lcd_line_renderer m_line_renderer;
         screen_buffer&       m_screen_buffer;

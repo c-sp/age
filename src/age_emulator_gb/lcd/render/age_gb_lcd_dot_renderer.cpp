@@ -20,17 +20,19 @@
 
 
 
-age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_lcd_render_common& common,
-                                              const gb_device&            device,
+age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_device&            device,
+                                              const gb_lcd_render_common& common,
                                               const gb_lcd_palettes&      palettes,
                                               const gb_lcd_sprites&       sprites,
                                               const uint8_t*              video_ram,
+                                              gb_window_check&            window,
                                               screen_buffer&              screen_buffer)
-    : m_common(common),
-      m_device(device),
+    : m_device(device),
+      m_common(common),
       m_palettes(palettes),
       m_sprites(sprites),
       m_video_ram(video_ram),
+      m_window(window),
       m_screen_buffer(screen_buffer)
 {
 }
@@ -162,8 +164,7 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
                 break;
 
             case line_stage::mode0:
-                m_x_pos += until_line_clks - m_line.m_line_clks;
-                m_line.m_line_clks = until_line_clks;
+                line_stage_mode0(until_line_clks);
                 break;
         }
     }
@@ -244,14 +245,15 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
         // start window rendering?
         // (m_line.m_line_clks and m_x_pos are not synchronized here:
         // m_line.m_line_clks is one clock cycle ahead)
-        if (m_common.m_window_enabled && (m_x_pos_win_start < 0) && (m_x_pos == (m_common.m_wx + 1)))
+        if ((m_x_pos_win_start < 0) && (m_x_pos == (m_common.m_wx + 1)))
         {
-            if ((m_common.m_last_wline >= 0) || (m_common.m_wy <= m_line.m_line))
+            m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
+            if (m_window.enabled_and_wy_matched(m_common.get_lcdc()))
             {
                 // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
                 //                 << " initialize window rendering")
                 m_bg_win_fifo.clear(); // is replaced with first window tile
-                m_common.m_last_wline++;
+                m_window.next_window_line();
                 m_x_pos_win_start   = m_x_pos;
                 m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
                 m_next_fetcher_clks = m_line.m_line_clks;
@@ -279,6 +281,26 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
     }
 }
 
+void age::gb_lcd_dot_renderer::line_stage_mode0(int until_line_clks)
+{
+    int max_wy_clks = 450 + (m_device.is_dmg_device() ? 1 : 0);
+
+    // last chance to activate the window on this line
+    if ((m_line.m_line_clks <= max_wy_clks) && (until_line_clks > max_wy_clks))
+    {
+        if (m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line))
+        {
+            // AGE_LOG("line " << m_line.m_line << " (" << max_wy_clks << "):"
+            //                 << " late match for WY = " << (int)m_common.m_wy)
+            //\todo is this correct? late window activation -> skip the first window line
+            m_window.next_window_line();
+        }
+    }
+
+    m_x_pos += until_line_clks - m_line.m_line_clks;
+    m_line.m_line_clks = until_line_clks;
+}
+
 
 
 void age::gb_lcd_dot_renderer::schedule_next_fetcher_step(int clks_offset, fetcher_step step)
@@ -291,10 +313,20 @@ void age::gb_lcd_dot_renderer::schedule_next_fetcher_step(int clks_offset, fetch
 
 void age::gb_lcd_dot_renderer::fetch_bg_win_tile_id()
 {
-    int bg_y          = m_common.m_scy + m_line.m_line;
-    int px_ofs        = ((m_x_pos <= 8) || m_device.is_cgb_device()) ? 0 : 1;
-    int tile_line_ofs = ((m_common.m_scx + m_x_pos + px_ofs) >> 3) & 0b11111;
-    int tile_vram_ofs = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2) + tile_line_ofs;
+    int tile_vram_ofs = 0;
+
+    if ((m_x_pos_win_start >= 0) && is_window_enabled(m_common.get_lcdc()))
+    {
+        int tile_line_ofs = (m_x_pos - m_x_pos_win_start) >> 3;
+        tile_vram_ofs     = m_common.m_bg_tile_map_offset + ((m_window.current_window_line() & 0b11111000) << 2) + tile_line_ofs;
+    }
+    else
+    {
+        int bg_y          = m_common.m_scy + m_line.m_line;
+        int px_ofs        = ((m_x_pos <= 8) || m_device.is_cgb_device()) ? 0 : 1;
+        int tile_line_ofs = ((m_common.m_scx + m_x_pos + px_ofs) >> 3) & 0b11111;
+        tile_vram_ofs     = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2) + tile_line_ofs;
+    }
 
     m_fetched_bg_win_tile_id         = m_video_ram[tile_vram_ofs];          // bank 0
     m_fetched_bg_win_tile_attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1 (always zero for DMG)
@@ -315,7 +347,9 @@ void age::gb_lcd_dot_renderer::fetch_bg_win_bitplane(int bitplane_offset)
         }
     }
 
-    int tile_line = (m_common.m_scy + m_line.m_line) & 0b111;
+    int tile_line = ((m_x_pos_win_start >= 0) && is_window_enabled(m_common.get_lcdc()))
+                        ? m_window.current_window_line() & 0b111
+                        : (m_common.m_scy + m_line.m_line) & 0b111;
     // y-flip
     if (m_fetched_bg_win_tile_attributes & gb_tile_attrib_flip_y)
     {

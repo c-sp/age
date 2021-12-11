@@ -20,6 +20,7 @@ add_library(
         lcd/render/age_gb_lcd_dot_renderer.cpp
         lcd/render/age_gb_lcd_line_renderer.cpp
         lcd/render/age_gb_lcd_sprites.cpp
+        lcd/render/age_gb_lcd_window_check.hpp
         lcd/age_gb_lcd.cpp
         lcd/age_gb_lcd_irqs.cpp
         lcd/age_gb_lcd_line.cpp

@@ -51,6 +51,7 @@ HEADERS += \
     age_emulator_gb/lcd/age_gb_lcd.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_render.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_sprites.hpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_window_check.hpp \
     age_emulator_gb/age_gb_memory.hpp \
     age_emulator_gb/age_gb_oam_dma.hpp \
     age_emulator_gb/age_gb_serial.hpp \
