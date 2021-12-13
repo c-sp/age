@@ -121,14 +121,6 @@ namespace age
 
 
 
-    struct gb_current_line
-    {
-        int m_line;
-        int m_line_clks;
-    };
-
-    constexpr gb_current_line gb_no_line = {.m_line = -1, .m_line_clks = gb_no_clock_cycle};
-
     class gb_lcd_dot_renderer
     {
         AGE_DISABLE_COPY(gb_lcd_dot_renderer);
@@ -176,7 +168,7 @@ namespace age
         void line_stage_mode3_align_scx(int until_line_clks);
         void line_stage_mode3_skip_first_8_dots(int until_line_clks);
         void line_stage_mode3_render(int until_line_clks);
-        void line_stage_mode0(int until_line_clks);
+        bool check_start_window();
 
         void schedule_next_fetcher_step(int clks_offset, fetcher_step step);
         void fetch_bg_win_tile_id();
@@ -206,7 +198,7 @@ namespace age
         uint8_t         m_fetched_bg_win_tile_id         = 0;
         uint8_t         m_fetched_bg_win_tile_attributes = 0;
         uint8_array<2>  m_fetched_bg_win_bitplane{};
-        gb_current_line m_clks_tile_data_change;
+        gb_current_line m_clks_tile_data_change = gb_no_line;
     };
 
 
@@ -228,6 +220,7 @@ namespace age
         [[nodiscard]] bool stat_mode0() const;
 
         void set_clks_tile_data_change(gb_current_line at_line);
+        void check_wy_match(gb_current_line at_line);
         void new_frame();
         void render(gb_current_line until, bool is_first_frame);
 

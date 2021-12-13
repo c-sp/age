@@ -71,7 +71,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
     {
         m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, line);
         bool winx_visible  = ((m_common.get_lcdc() & gb_lcdc_win_enable) != 0) && (m_common.m_wx < 167);
-        bool render_window = m_window.enabled_and_wy_matched(m_common.get_lcdc()) && winx_visible;
+        bool render_window = m_window.is_enabled_and_wy_matched(m_common.get_lcdc()) && winx_visible;
 
         // render BG
         int    bg_y          = m_common.m_scy + line;

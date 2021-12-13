@@ -42,23 +42,62 @@ namespace age
 
 
 
+    struct gb_current_line
+    {
+        int m_line;
+        int m_line_clks;
+    };
+
+    constexpr gb_current_line gb_no_line = {.m_line = -1, .m_line_clks = gb_no_clock_cycle};
+
+
+
     class gb_window_check
     {
     public:
+        explicit gb_window_check(bool dmg)
+            : m_dmg(dmg)
+        {
+        }
+
         void new_frame()
         {
             m_frame_wy_match = false;
             m_current_wline  = -1;
         }
 
-        bool check_for_wy_match(uint8_t lcdc, int wy, int line)
+        void check_for_wy_match(uint8_t lcdc, int wy, int at_line)
         {
-            bool wy_match = is_window_enabled(lcdc) && (wy == line);
+            AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
+            m_frame_wy_match |= is_window_enabled(lcdc) && (wy == at_line);
+        }
+
+        bool check_for_wy_match(uint8_t lcdc, int wy, gb_current_line at_line)
+        {
+            AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
+            if (!is_window_enabled(lcdc))
+            {
+                return false;
+            }
+
+            // match the specified line
+            int  max_wy_clks = 450 + (m_dmg ? 1 : 0);
+            bool wy_match    = (at_line.m_line_clks <= max_wy_clks) && (wy == at_line.m_line);
+
+            // CGB: match the next line on this line's last cycle
+            if (!m_dmg && (at_line.m_line_clks >= 455))
+            {
+                wy_match |= (wy == (at_line.m_line + 1));
+                //!\todo match for next line -> skip first window line?
+            }
+
+            // AGE_LOG("WY " << wy << " match on line " << at_line.m_line << " @" << at_line.m_line_clks
+            //               << ": " << wy_match << " (" << m_frame_wy_match << ")");
             m_frame_wy_match |= wy_match;
             return wy_match;
         }
 
-        [[nodiscard]] bool enabled_and_wy_matched(uint8_t lcdc) const
+        [[nodiscard]] bool is_enabled_and_wy_matched(uint8_t lcdc) const
         {
             return m_frame_wy_match && is_window_enabled(lcdc);
         }
@@ -75,11 +114,10 @@ namespace age
             return m_current_wline;
         }
 
-
-
     private:
-        bool m_frame_wy_match = false;
-        int  m_current_wline  = -1;
+        const bool m_dmg;
+        bool       m_frame_wy_match = false;
+        int        m_current_wline  = -1;
     };
 
 } // namespace age

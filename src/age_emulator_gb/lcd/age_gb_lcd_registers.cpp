@@ -48,7 +48,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         // LCD ws already on -> check for CGB glitches
         if (m_line.lcd_is_on())
         {
-            update_state(-1); // let any LCDC change take effect immediately
+            update_state();
             if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
             {
                 // tile data bit changed
@@ -341,9 +341,10 @@ age::uint8_t age::gb_lcd::read_ocpd() const
 
 void age::gb_lcd::write_scy(uint8_t value)
 {
-    // Game Boy Classic: SCY changes influence fetcher reads on the same cycle
-    int offset = (m_line.lcd_is_on() && m_device.is_dmg_device()) ? -1 : 0;
-    update_state(offset);
+    if (m_line.lcd_is_on())
+    {
+        update_state(m_device.is_cgb_device() ? 1 : 0);
+    }
     log_reg() << "write SCY = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_scy = value;
 }
@@ -399,9 +400,22 @@ void age::gb_lcd::write_obp1(uint8_t value)
 
 void age::gb_lcd::write_wy(uint8_t value)
 {
-    update_state();
+    // make sure wwe don't miss any WY match for the current value
+    // (e.g. on line cycle 455 for CGB)
+    if (m_line.lcd_is_on())
+    {
+        update_state();
+        m_render.check_wy_match(m_line.current_line());
+    }
+
     log_reg() << "write WY = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_wy = value;
+
+    // allow for a late WY match on the current line
+    if (m_line.lcd_is_on())
+    {
+        m_render.check_wy_match(m_line.current_line());
+    }
 }
 
 void age::gb_lcd::write_wx(uint8_t value)

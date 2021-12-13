@@ -86,6 +86,7 @@ age::gb_lcd_render::gb_lcd_render(const gb_device&       device,
                                   const uint8_t*         video_ram,
                                   screen_buffer&         screen_buffer)
     : gb_lcd_render_common(device, sprites),
+      m_window(device.is_dmg_device()),
       m_dot_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
       m_line_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
       m_screen_buffer(screen_buffer)
@@ -102,6 +103,11 @@ bool age::gb_lcd_render::stat_mode0() const
 void age::gb_lcd_render::set_clks_tile_data_change(gb_current_line at_line)
 {
     m_dot_renderer.set_clks_tile_data_change(at_line);
+}
+
+void age::gb_lcd_render::check_wy_match(gb_current_line at_line)
+{
+    m_window.check_for_wy_match(get_lcdc(), m_wy, at_line);
 }
 
 void age::gb_lcd_render::new_frame()
@@ -133,7 +139,9 @@ void age::gb_lcd_render::render(gb_current_line until, bool is_first_frame)
     }
 
     // render complete lines, if possible
-    int sanitized = std::min<int>(gb_screen_height, until.m_line);
+    // (note that 289 T4 cycles is the longest mode 3 duration)
+    int complete_lines = until.m_line + ((until.m_line_clks >= 80 + 289) ? 1 : 0);
+    int sanitized      = std::min<int>(gb_screen_height, complete_lines);
 
     for (; m_rendered_lines < sanitized; ++m_rendered_lines)
     {
