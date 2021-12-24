@@ -152,7 +152,7 @@ namespace age
             mode3_align_scx,
             mode3_skip_first_8_dots,
             mode3_render,
-            mode0,
+            rendering_finished,
         };
 
         enum class fetcher_step
@@ -191,7 +191,8 @@ namespace age
         int             m_clks_begin_align_scx = 0;
         int             m_x_pos                = 0;
         int             m_x_pos_win_start      = 0;
-        int             m_matched_scx          = 0;
+        int             m_skip_initial_pixel   = 0;
+        bool            m_mode3_finished       = false;
 
         fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;
         int             m_next_fetcher_clks              = gb_no_clock_cycle;
@@ -220,7 +221,7 @@ namespace age
         [[nodiscard]] bool stat_mode0() const;
 
         void set_clks_tile_data_change(gb_current_line at_line);
-        void check_wy_match(gb_current_line at_line);
+        void check_wy_match(gb_current_line at_line, uint8_t wy);
         void new_frame();
         void render(gb_current_line until, bool is_first_frame);
 

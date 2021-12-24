@@ -400,22 +400,19 @@ void age::gb_lcd::write_obp1(uint8_t value)
 
 void age::gb_lcd::write_wy(uint8_t value)
 {
-    // make sure wwe don't miss any WY match for the current value
-    // (e.g. on line cycle 455 for CGB)
     if (m_line.lcd_is_on())
     {
-        update_state();
-        m_render.check_wy_match(m_line.current_line());
+        // handle window activation on the current line
+        update_state(m_device.is_cgb_device() ? 6 : 2);
+        // make sure we don't miss any late WY match for the current line
+        // or the next line (e.g. on line cycle 455 for CGB)
+        auto line = m_line.current_line();
+        m_render.check_wy_match(line, m_render.m_wy);
+        m_render.check_wy_match(line, value);
     }
 
     log_reg() << "write WY = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_wy = value;
-
-    // allow for a late WY match on the current line
-    if (m_line.lcd_is_on())
-    {
-        m_render.check_wy_match(m_line.current_line());
-    }
 }
 
 void age::gb_lcd::write_wx(uint8_t value)
