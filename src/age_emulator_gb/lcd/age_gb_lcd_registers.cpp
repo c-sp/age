@@ -403,7 +403,7 @@ void age::gb_lcd::write_wy(uint8_t value)
     if (m_line.lcd_is_on())
     {
         // handle window activation on the current line
-        update_state(m_device.is_cgb_device() ? 6 : 2);
+        update_state(m_device.is_cgb_device() ? 5 : 1);
         // make sure we don't miss any late WY match for the current line
         // or the next line (e.g. on line cycle 455 for CGB)
         auto line = m_line.current_line();

@@ -151,6 +151,7 @@ namespace age
             mode2,
             mode3_align_scx,
             mode3_skip_first_8_dots,
+            mode3_initial_fifo_skip,
             mode3_render,
             rendering_finished,
         };

@@ -138,7 +138,8 @@ bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
         }
     }
 
-    update_line_stage(current_line_clks);
+    AGE_ASSERT(m_next_fetcher_clks >= current_line_clks)
+    update_line_stage(current_line_clks); //! \todo this may reset the fetcher => make it part of the loop
     AGE_ASSERT(m_line.m_line_clks < gb_clock_cycles_per_lcd_line)
     AGE_ASSERT(m_line.m_line_clks >= current_line_clks)
     return false;
@@ -169,14 +170,32 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
                 line_stage_mode3_skip_first_8_dots(until_line_clks);
                 break;
 
+            case line_stage::mode3_initial_fifo_skip:
+                // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                //                 << " entering line_stage::mode3_render"
+                //                 << ", bg-fifo-size=" << m_bg_win_fifo.size()
+                //                 << ", discarding " << m_skip_initial_pixel << " FIFO pixel")
+                AGE_ASSERT(m_bg_win_fifo.size() >= 8)
+                for (int p = 0; p < m_skip_initial_pixel; ++p)
+                {
+                    m_bg_win_fifo.pop_front();
+                }
+                m_line_stage = line_stage::mode3_render;
+                break;
+
             case line_stage::mode3_render:
                 line_stage_mode3_render(until_line_clks);
                 break;
 
             case line_stage::rendering_finished:
-                m_x_pos += until_line_clks - m_line.m_line_clks;
                 m_line.m_line_clks = until_line_clks;
                 break;
+        }
+        // terminate loop early if the fetcher has been reset
+        // (to initialize window or sprite rendering)
+        if (m_next_fetcher_clks < m_line.m_line_clks)
+        {
+            break;
         }
     }
 
@@ -246,22 +265,26 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_skip_first_8_dots(int until_line
 
         if (check_start_window())
         {
-            m_x_pos      = x_pos_first_px;
-            m_line_stage = line_stage::mode3_render;
+            // glitch on (WX == 0) && ((SCX & 7) != 0)
+            if ((m_x_pos == 1) && (m_skip_initial_pixel >= 1))
+            {
+                ++m_line.m_line_clks;
+            }
+            m_skip_initial_pixel = 7 - m_common.m_wx;
+            // For x-pos==8 we have to delay pixel skipping
+            // to until the first window tile has been fetched.
+            // We also cannot increment x-pos any further,
+            // i.e. no more iterations of this loop.
+            if (m_x_pos == x_pos_first_px)
+            {
+                m_line_stage = line_stage::mode3_initial_fifo_skip;
+            }
             break;
         }
 
         if (m_x_pos == x_pos_first_px)
         {
-            AGE_ASSERT(m_bg_win_fifo.size() >= 8)
-            for (int p = 0; p < m_skip_initial_pixel; ++p)
-            {
-                m_bg_win_fifo.pop_front();
-            }
-            m_line_stage = line_stage::mode3_render;
-            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-            //                 << " entering line_stage::mode3_render"
-            //                 << ", bg-fifo-size=" << m_bg_win_fifo.size())
+            m_line_stage = line_stage::mode3_initial_fifo_skip;
             break;
         }
     }
@@ -282,7 +305,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
         ++m_x_pos;
         ++m_line.m_line_clks;
 
-        // last pixel plotted => enter next line stage
+        // last pixel plotted
         if (m_x_pos > x_pos_last_px)
         {
             m_line_stage        = line_stage::rendering_finished;
@@ -294,7 +317,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             break;
         }
 
-        // start rendering the window on the upcoming pixel?
+        // start window rendering on the upcoming pixel?
         if (check_start_window())
         {
             break;
@@ -329,12 +352,14 @@ bool age::gb_lcd_dot_renderer::check_start_window()
             // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
             //                 << " initialize window rendering"
             //                 << ", x-pos = " << m_x_pos
-            //                 << ", wx = " << (int) m_common.m_wx)
+            //                 << ", wx = " << (int) m_common.m_wx
+            //                 << ", scx = " << (int) m_common.m_scx)
             m_bg_win_fifo.clear(); // is replaced with first window tile
             m_window.next_window_line();
             m_x_pos_win_start   = m_x_pos;
             m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
             m_next_fetcher_clks = m_line.m_line_clks;
+            //! \todo this is a workaround for x-pos==167, any better way?
             m_line.m_line_clks += (m_x_pos == x_pos_last_px) ? 5 : 6;
             return true;
         }
