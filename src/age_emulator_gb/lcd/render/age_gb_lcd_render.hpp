@@ -222,7 +222,7 @@ namespace age
         [[nodiscard]] bool stat_mode0() const;
 
         void set_clks_tile_data_change(gb_current_line at_line);
-        void check_wy_match(gb_current_line at_line, uint8_t wy);
+        void check_for_wy_match(gb_current_line at_line, uint8_t wy);
         void new_frame();
         void render(gb_current_line until, bool is_first_frame);
 

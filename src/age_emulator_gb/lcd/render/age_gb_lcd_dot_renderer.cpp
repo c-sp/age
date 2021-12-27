@@ -312,6 +312,8 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             m_next_fetcher_clks = gb_clock_cycles_per_lcd_line - 1;
             m_next_fetcher_step = fetcher_step::finish_line;
             m_mode3_finished    = true;
+            // don't miss any WY match in case WX is out of the visible range
+            m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
             // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
             //                 << " entering line_stage::rendering_finished")
             break;

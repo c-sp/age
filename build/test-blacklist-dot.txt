@@ -216,7 +216,13 @@ dmg-acid2/
 /gambatte/vram_m3/prewrite_lcdoffset2_1_cgb04c_out1.gbc
 /gambatte/vram_m3/vramw_m3start_1_dmg08_cgb04c_out1.gbc
 
-/gambatte/window/
+/gambatte/window/arg/late_enable_afterVblank_
+/gambatte/window/late_disable_
+/gambatte/window/late_enable_
+/gambatte/window/late_reenable_
+/gambatte/window/late_scx_late_disable_
+/gambatte/window/m2int_
+/gambatte/window/on_screen/
 
 
 

@@ -72,12 +72,19 @@ namespace age
             m_frame_wy_match |= is_window_enabled(lcdc) && (wy == at_line);
         }
 
-        bool check_for_wy_match(uint8_t lcdc, int wy, gb_current_line at_line)
+        void check_for_wy_match(uint8_t lcdc, int wy, gb_current_line at_line)
         {
             AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
             if (!is_window_enabled(lcdc))
             {
-                return false;
+                return;
+            }
+
+            // special timing for line 0:
+            // not matched in the first 2 cycles
+            if ((at_line.m_line == 0) && (at_line.m_line_clks < 3))
+            {
+                return;
             }
 
             // match the specified line
@@ -88,13 +95,11 @@ namespace age
             if (!m_dmg && (at_line.m_line_clks >= 455))
             {
                 wy_match |= (wy == (at_line.m_line + 1));
-                //!\todo match for next line -> skip first window line?
             }
 
             // AGE_LOG("WY " << wy << " match on line " << at_line.m_line << " @" << at_line.m_line_clks
             //               << ": " << wy_match << " (" << m_frame_wy_match << ")");
             m_frame_wy_match |= wy_match;
-            return wy_match;
         }
 
         [[nodiscard]] bool is_enabled_and_wy_matched(uint8_t lcdc) const

@@ -403,12 +403,14 @@ void age::gb_lcd::write_wy(uint8_t value)
     if (m_line.lcd_is_on())
     {
         // handle window activation on the current line
-        update_state(m_device.is_cgb_device() ? 5 : 1);
+        update_state(m_device.is_dmg_device()    ? 1
+                     : m_clock.is_double_speed() ? 2
+                                                 : 5);
         // make sure we don't miss any late WY match for the current line
         // or the next line (e.g. on line cycle 455 for CGB)
         auto line = m_line.current_line();
-        m_render.check_wy_match(line, m_render.m_wy);
-        m_render.check_wy_match(line, value);
+        m_render.check_for_wy_match(line, m_render.m_wy);
+        m_render.check_for_wy_match(line, value);
     }
 
     log_reg() << "write WY = " << log_hex8(value) << log_line_clks(m_line);
@@ -417,7 +419,10 @@ void age::gb_lcd::write_wy(uint8_t value)
 
 void age::gb_lcd::write_wx(uint8_t value)
 {
-    update_state();
+    if (m_line.lcd_is_on())
+    {
+        update_state(m_device.is_dmg_device() ? 0 : 1);
+    }
     log_reg() << "write WX = " << log_hex8(value) << log_line_clks(m_line);
     m_render.m_wx = value;
 }
