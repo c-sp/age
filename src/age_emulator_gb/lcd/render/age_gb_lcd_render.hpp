@@ -150,11 +150,15 @@ namespace age
         {
             mode2,
             mode3_align_scx,
-            mode3_skip_first_8_dots,
-            mode3_initial_fifo_skip,
             mode3_render,
             rendering_finished,
         };
+        void update_line_stage(int until_line_clks);
+        void line_stage_mode2(int until_line_clks);
+        void line_stage_mode3_align_scx(int until_line_clks);
+        void line_stage_mode3_render(int until_line_clks);
+        void initial_fifo_alignment();
+        bool check_start_window();
 
         enum class fetcher_step
         {
@@ -163,14 +167,6 @@ namespace age
             fetch_bg_win_bitplane1,
             finish_line,
         };
-
-        void update_line_stage(int until_line_clks);
-        void line_stage_mode2(int until_line_clks);
-        void line_stage_mode3_align_scx(int until_line_clks);
-        void line_stage_mode3_skip_first_8_dots(int until_line_clks);
-        void line_stage_mode3_render(int until_line_clks);
-        bool check_start_window();
-
         void schedule_next_fetcher_step(int clks_offset, fetcher_step step);
         void fetch_bg_win_tile_id();
         void fetch_bg_win_bitplane(int bitplane_offset);
@@ -192,7 +188,7 @@ namespace age
         int             m_clks_begin_align_scx = 0;
         int             m_x_pos                = 0;
         int             m_x_pos_win_start      = 0;
-        int             m_skip_initial_pixel   = 0;
+        int             m_aligned_scx          = 0;
         bool            m_mode3_finished       = false;
 
         fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;

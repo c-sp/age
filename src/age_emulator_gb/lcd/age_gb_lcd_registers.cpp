@@ -40,19 +40,20 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
     uint8_t diff = m_render.get_lcdc() ^ value;
 
-    // LCD not switched
+    // LCD remains on/off
     if (!(diff & gb_lcdc_enable))
     {
         msg << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
 
-        // LCD ws already on -> check for CGB glitches
+        // LCD ws already on -> check for glitches
         if (m_line.lcd_is_on())
         {
             update_state();
+            // tile data bit changed
             if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
             {
-                // tile data bit changed
                 m_render.set_clks_tile_data_change(m_line.current_line());
+                msg << "\n    * potential CGB glitch: tile data bit switched (LCD on)";
             }
         }
 
