@@ -41,6 +41,17 @@
 
 ##################################################################
 ###
+###   mealybug tearoom
+###
+
+/mealybug-tearoom-tests/dma/
+/mealybug-tearoom-tests/mbc/
+/mealybug-tearoom-tests/ppu/
+
+
+
+##################################################################
+###
 ###   mooneye-gb
 ###
 

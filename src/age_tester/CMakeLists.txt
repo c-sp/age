@@ -11,6 +11,7 @@ add_executable(
         age_tester_tasks_age.cpp
         age_tester_tasks_blargg.cpp
         age_tester_tasks_gambatte.cpp
+        age_tester_tasks_mealybug.cpp
         age_tester_tasks_mooneye_gb.cpp
         age_tester_tasks_same_suite.cpp
         age_tester_thread_pool.hpp
