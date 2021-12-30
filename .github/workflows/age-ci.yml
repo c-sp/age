@@ -176,8 +176,8 @@ jobs:
         run: build/age_ci.sh run-tests gambatte
 
 
-  test-mooneye-gb:
-    name: run Mooneye GB test suite
+  test-mooneye:
+    name: run Mooneye Test Suite
     runs-on: ubuntu-20.04
     needs: [ build-tester ]
     steps:
@@ -191,4 +191,4 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}
 
       - name: run tests
-        run: build/age_ci.sh run-tests mooneye-gb
+        run: build/age_ci.sh run-tests mooneye

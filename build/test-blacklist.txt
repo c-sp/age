@@ -53,37 +53,37 @@
 
 ##################################################################
 ###
-###   mooneye-gb
+###   mooneye-test-suite
 ###
 
 ### non-test roms
 
-/mooneye-gb/utils/dump_boot_hwio.gb
-/mooneye-gb/utils/bootrom_dumper.gb
+/mooneye-test-suite/utils/dump_boot_hwio.gb
+/mooneye-test-suite/utils/bootrom_dumper.gb
 
 ### Gameboy hardware not supported by AGE
 
-/mooneye-gb/acceptance/boot_div2-S.gb            # SGB not supported
-/mooneye-gb/acceptance/boot_div-dmg0.gb          # DMG0 not supported
-/mooneye-gb/acceptance/boot_div-S.gb             # SGB not supported
-/mooneye-gb/acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
-/mooneye-gb/acceptance/boot_hwio-S.gb            # SGB not supported
-/mooneye-gb/acceptance/boot_regs-dmg0.gb         # DMG0 not supported
-/mooneye-gb/acceptance/boot_regs-mgb.gb          # MGB not supported
-/mooneye-gb/acceptance/boot_regs-sgb.gb          # SGB not supported
-/mooneye-gb/acceptance/boot_regs-sgb2.gb         # SGB not supported
-/mooneye-gb/madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
-/mooneye-gb/misc/boot_div-A.gb                   # GBA not supported
-/mooneye-gb/misc/boot_div-cgb0.gb                # CGB0 not supported
-/mooneye-gb/misc/boot_regs-A.gb                  # GBA not supported
+/mooneye-test-suite/acceptance/boot_div2-S.gb            # SGB not supported
+/mooneye-test-suite/acceptance/boot_div-dmg0.gb          # DMG0 not supported
+/mooneye-test-suite/acceptance/boot_div-S.gb             # SGB not supported
+/mooneye-test-suite/acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
+/mooneye-test-suite/acceptance/boot_hwio-S.gb            # SGB not supported
+/mooneye-test-suite/acceptance/boot_regs-dmg0.gb         # DMG0 not supported
+/mooneye-test-suite/acceptance/boot_regs-mgb.gb          # MGB not supported
+/mooneye-test-suite/acceptance/boot_regs-sgb.gb          # SGB not supported
+/mooneye-test-suite/acceptance/boot_regs-sgb2.gb         # SGB not supported
+/mooneye-test-suite/madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
+/mooneye-test-suite/misc/boot_div-A.gb                   # GBA not supported
+/mooneye-test-suite/misc/boot_div-cgb0.gb                # CGB0 not supported
+/mooneye-test-suite/misc/boot_regs-A.gb                  # GBA not supported
 
 ### failing tests
 
-/mooneye-gb/acceptance/ppu/intr_2_mode0_timing_sprites.gb
-/mooneye-gb/acceptance/ppu/lcdon_write_timing-GS.gb
-/mooneye-gb/acceptance/ppu/stat_irq_blocking.gb
-/mooneye-gb/acceptance/ppu/stat_lyc_onoff.gb
-/mooneye-gb/manual-only/sprite_priority.gb
+/mooneye-test-suite/acceptance/ppu/intr_2_mode0_timing_sprites.gb
+/mooneye-test-suite/acceptance/ppu/lcdon_write_timing-GS.gb
+/mooneye-test-suite/acceptance/ppu/stat_irq_blocking.gb
+/mooneye-test-suite/acceptance/ppu/stat_lyc_onoff.gb
+/mooneye-test-suite/manual-only/sprite_priority.gb
 
 
 

@@ -54,7 +54,7 @@ namespace
     constexpr const char* opt_long_gambatte     = "gambatte";
     constexpr const char* opt_long_help         = "help";
     constexpr const char* opt_long_write_logs   = "write-logs";
-    constexpr const char* opt_long_mooneye_gb   = "mooneye-gb";
+    constexpr const char* opt_long_mooneye_gb   = "mooneye";
     constexpr const char* opt_long_mealybug     = "mealybug";
     constexpr const char* opt_long_print_passed = "print-passed";
     constexpr const char* opt_long_same_suite   = "same-suite";
@@ -97,7 +97,7 @@ namespace
         "  -e, --age           run age test roms",
         "  -b, --blargg        run Blarggs test roms",
         "  -g, --gambatte      run Gambatte test roms",
-        "  -m, --mooneye-gb    run Mooneye GB test roms",
+        "  -m, --mooneye       run Mooneye GB test roms",
         "  -n, --mealybug      run Mealybug Tearoom test roms",
         "  -s, --same-suite    run SameSuite test roms",
     };

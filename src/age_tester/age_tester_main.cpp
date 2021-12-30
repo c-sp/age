@@ -101,7 +101,7 @@ int main(int argc, char** argv)
               << (opts.m_blargg ? " blargg" : "")
               << (opts.m_gambatte ? " gambatte" : "")
               << (opts.m_mealybug ? " mealybug-tearoom-tests" : "")
-              << (opts.m_mooneye_gb ? " mooneye-gb" : "")
+              << (opts.m_mooneye_gb ? " mooneye" : "")
               << std::endl
               << "looking for test roms in: " << opts.m_test_suite_path.string()
               << std::endl;
