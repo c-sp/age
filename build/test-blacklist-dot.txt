@@ -18,6 +18,7 @@ dmg-acid2/
 
 /age-test-roms/_in-progress
 /age-test-roms/m3-bg-bgp
+/age-test-roms/oam/oam-write-dmgC
 
 
 
@@ -38,6 +39,17 @@ dmg-acid2/
 ### failing tests
 
 /blargg/oam_bug/
+
+
+
+##################################################################
+###
+###   mealybug tearoom
+###
+
+/mealybug-tearoom-tests/dma/
+/mealybug-tearoom-tests/mbc/
+/mealybug-tearoom-tests/ppu/
 
 
 

@@ -15,6 +15,7 @@
 /age-test-roms/m3-bg-bgp
 /age-test-roms/m3-bg-lcdc
 /age-test-roms/m3-bg-scx
+/age-test-roms/oam/oam-write-dmgC
 /age-test-roms/stat-mode-window
 
 
