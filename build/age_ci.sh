@@ -31,6 +31,7 @@ print_usage_and_exit()
     echo "  tests:"
     echo "    $0 $CMD_RUN_GTEST"
     echo "    $0 $CMD_RUN_TESTS $TESTS_ACID2"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_AGE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_GB"
@@ -165,13 +166,14 @@ run_gtest()
     chmod +x "$TEST_EXEC"
 
     # run the tests
-    ${TEST_EXEC} $@
+    ${TEST_EXEC} "$@"
 }
 
 run_tests()
 {
     case $1 in
         "${TESTS_ACID2}") ;;
+        "${TESTS_AGE}") ;;
         "${TESTS_BLARGG}") ;;
         "${TESTS_GAMBATTE}") ;;
         "${TESTS_MOONEYE_GB}") ;;
@@ -220,6 +222,7 @@ CMAKE_BUILD_TYPE_DEBUG=Debug
 CMAKE_BUILD_TYPE_RELEASE=Release
 
 TESTS_ACID2=acid2
+TESTS_AGE=age
 TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
 TESTS_MOONEYE_GB=mooneye
