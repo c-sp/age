@@ -79,11 +79,12 @@ void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line, bool is_firs
     m_line_stage           = line_stage::mode2;
     m_line_buffer          = &m_screen_buffer.get_back_buffer()[line.m_line * gb_screen_width];
     m_clks_begin_align_scx = is_line_zero ? 86 : 84;
+    m_clks_end_window_init = gb_no_clock_cycle;
     m_x_pos                = 0;
     m_x_pos_win_start      = int_max;
     m_mode3_finished       = false;
     // no need to reset all members
-    // m_aligned_scx = 0;
+    // m_alignment_scx = 0;
 
     m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
     m_next_fetcher_clks = is_line_zero ? 87 : 85;
@@ -170,6 +171,10 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
                 line_stage_mode3_render(until_line_clks);
                 break;
 
+            case line_stage::mode3_init_window:
+                line_stage_mode3_init_window(until_line_clks);
+                break;
+
             case line_stage::rendering_finished:
                 m_line.m_line_clks = until_line_clks;
                 break;
@@ -182,7 +187,7 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
         }
     }
 
-    AGE_ASSERT(m_line.m_line_clks >= until_line_clks)
+    // note that in case of a fetcher reset m_line.m_line_clks may still be smaller than until_line_clks
 }
 
 void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
@@ -217,7 +222,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
             // => save the number of pixel to discard for later
             //    (SCX might have been changed already when we
             //    discard the first X pixel)
-            m_aligned_scx = scx;
+            m_alignment_scx = scx;
             AGE_ASSERT(m_bg_win_fifo.size() <= 8)
             m_line_stage = line_stage::mode3_render;
             // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
@@ -245,11 +250,16 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
         if (m_x_pos >= x_pos_first_px)
         {
             // align the pixel FIFO right before setting the first pixel
+            // (the first N pixel are discarded based on SCX or WX)
             if (m_x_pos == x_pos_first_px)
             {
                 initial_fifo_alignment();
             }
 
+            if (m_bg_win_fifo.empty())
+            {
+                AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): fifo empty")
+            }
             AGE_ASSERT(!m_bg_win_fifo.empty())
             auto color_idx = m_bg_win_fifo[0];
             m_bg_win_fifo.pop_front();
@@ -287,17 +297,47 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
     }
 }
 
+void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
+{
+    AGE_ASSERT(m_line.m_line_clks < m_clks_end_window_init)
+
+    if (false) // m_device.is_cgb_device() && !is_window_enabled(m_common.get_lcdc()))
+    {
+        m_line_stage        = line_stage::mode3_render;
+        m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
+        m_next_fetcher_clks = m_line.m_line_clks;
+        m_bg_win_fifo.clear();
+        push_bg_win_bitplanes(); //! \todo continue with previously fetched tile, is this correct?
+
+        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+        //                 << " terminate window init, x-pos = " << m_x_pos)
+        return;
+    }
+
+    m_line.m_line_clks = until_line_clks;
+    if (m_line.m_line_clks >= m_clks_end_window_init)
+    {
+        m_line_stage        = line_stage::mode3_render;
+        m_line.m_line_clks  = m_clks_end_window_init;
+        m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
+        m_next_fetcher_clks = m_line.m_line_clks;
+        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+        //                 << " finish window init, x-pos = " << m_x_pos
+        //                 << ", fifo size = " << m_bg_win_fifo.size())
+    }
+}
+
 void age::gb_lcd_dot_renderer::initial_fifo_alignment()
 {
     // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
     //                 << " entering line_stage::mode3_render"
     //                 << ", bg-fifo-size=" << m_bg_win_fifo.size()
-    //                 << ", discarding " << m_aligned_scx << " FIFO pixel")
+    //                 << ", discarding " << m_alignment_scx << " FIFO pixel")
     AGE_ASSERT(m_bg_win_fifo.size() >= 8)
-    int skip = (m_x_pos_win_start < int_max) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc())
-                   ? 7 - m_common.m_wx
-                   : m_aligned_scx;
-    for (int p = 0; p < skip; ++p)
+    int skip_count = (m_x_pos_win_start < int_max)
+                         ? 7 - m_common.m_wx
+                         : m_alignment_scx;
+    for (int p = 0; p < skip_count; ++p)
     {
         m_bg_win_fifo.pop_front();
     }
@@ -317,25 +357,28 @@ bool age::gb_lcd_dot_renderer::check_start_window()
         m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
         if ((m_x_pos_win_start == int_max) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc()))
         {
+            //! \todo this is a workaround for x-pos==167, any better way?
+            int clks_init_window = (m_x_pos == x_pos_last_px) ? 5 : 6;
+
+            // glitch on (WX == 0) && ((SCX & 7) != 0)
+            if ((m_x_pos == 1) && (m_alignment_scx >= 1))
+            {
+                ++clks_init_window;
+            }
+
+            m_bg_win_fifo.clear(); // any pending tile will be replaced by the window's first tile
+            m_window.next_window_line();
+            m_x_pos_win_start      = m_x_pos;
+            m_line_stage           = line_stage::mode3_init_window;
+            m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
+            m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
+            m_next_fetcher_clks    = m_line.m_line_clks;
+
             // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
             //                 << " initialize window rendering"
             //                 << ", x-pos = " << m_x_pos
             //                 << ", wx = " << (int) m_common.m_wx
             //                 << ", scx = " << (int) m_common.m_scx)
-            m_bg_win_fifo.clear(); // is replaced with first window tile
-            m_window.next_window_line();
-            m_x_pos_win_start   = m_x_pos;
-            m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
-            m_next_fetcher_clks = m_line.m_line_clks;
-            //! \todo this line is a workaround for x-pos==167, any better way?
-            m_line.m_line_clks += (m_x_pos == x_pos_last_px) ? 5 : 6;
-
-            // glitch on (WX == 0) && ((SCX & 7) != 0)
-            if ((m_x_pos == 1) && (m_aligned_scx >= 1))
-            {
-                ++m_line.m_line_clks;
-            }
-
             return true;
         }
     }

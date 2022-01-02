@@ -151,12 +151,14 @@ namespace age
             mode2,
             mode3_align_scx,
             mode3_render,
+            mode3_init_window,
             rendering_finished,
         };
         void update_line_stage(int until_line_clks);
         void line_stage_mode2(int until_line_clks);
         void line_stage_mode3_align_scx(int until_line_clks);
         void line_stage_mode3_render(int until_line_clks);
+        void line_stage_mode3_init_window(int until_line_clks);
         void initial_fifo_alignment();
         bool check_start_window();
 
@@ -186,9 +188,10 @@ namespace age
         line_stage      m_line_stage           = line_stage::mode2;
         pixel*          m_line_buffer          = nullptr;
         int             m_clks_begin_align_scx = 0;
+        int             m_clks_end_window_init = 0;
         int             m_x_pos                = 0;
         int             m_x_pos_win_start      = 0;
-        int             m_aligned_scx          = 0;
+        int             m_alignment_scx        = 0;
         bool            m_mode3_finished       = false;
 
         fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;
