@@ -138,6 +138,18 @@ void age::gb_lcd_render::render(gb_current_line until, bool is_first_frame)
         ++m_rendered_lines;
     }
 
+#ifdef AGE_FORCE_DOT_RENDERER
+
+    int sanitized = std::min<int>(gb_screen_height, until.m_line);
+
+    for (; m_rendered_lines < sanitized; ++m_rendered_lines)
+    {
+        gb_current_line line{.m_line = m_rendered_lines, .m_line_clks = gb_clock_cycles_per_lcd_line};
+        m_dot_renderer.begin_new_line(line, is_first_frame);
+    }
+
+#else
+
     // render complete lines, if possible
     // (note that 289 T4 cycles is the longest mode 3 duration)
     int complete_lines = until.m_line + ((until.m_line_clks >= 80 + 289) ? 1 : 0);
@@ -147,6 +159,8 @@ void age::gb_lcd_render::render(gb_current_line until, bool is_first_frame)
     {
         m_line_renderer.render_line(m_rendered_lines);
     }
+
+#endif
 
     // dot-render current line, if necessary
     if (m_rendered_lines >= gb_screen_height)

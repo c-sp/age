@@ -94,9 +94,7 @@ void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line, bool is_firs
     // m_fetched_bg_win_bitplane        = {};
     m_clks_tile_data_change = gb_no_line;
 
-    bool line_finished = continue_line(line);
-    AGE_ASSERT(!line_finished)
-    AGE_UNUSED(line_finished); // unused in release builds
+    continue_line(line);
 }
 
 bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)

@@ -23,6 +23,13 @@ OPTION(COMPILE_DOT_RENDERER "compile AGE with dot rendering enabled") # disabled
 if (COMPILE_DOT_RENDERER)
     message("compiling AGE with dot rendering enabled")
     ADD_DEFINITIONS(-DAGE_COMPILE_DOT_RENDERER)
+
+    OPTION(FORCE_DOT_RENDERER "compile AGE with forced dot rendering enabled") # disabled by default
+    if (FORCE_DOT_RENDERER)
+        message("compiling AGE with forced dot rendering enabled")
+        ADD_DEFINITIONS(-DAGE_FORCE_DOT_RENDERER)
+    endif (FORCE_DOT_RENDERER)
+
 else ()
     message("compiling AGE with dot rendering disabled")
 endif (COMPILE_DOT_RENDERER)
