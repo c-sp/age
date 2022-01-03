@@ -322,7 +322,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
         m_line_stage       = line_stage::mode3_render;
         m_line.m_line_clks = m_clks_end_window_init;
         m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
-        m_next_fetcher_clks = m_line.m_line_clks;
+        m_next_fetcher_clks = m_line.m_line_clks + 1;
         // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
         //                 << ", fifo size = " << m_bg_win_fifo.size())
     }
@@ -369,7 +369,7 @@ bool age::gb_lcd_dot_renderer::check_start_window()
 
             m_bg_win_fifo.clear(); // any pending tile will be replaced by the window's first tile
             m_window.next_window_line();
-            m_x_pos_win_start      = m_x_pos;
+            m_x_pos_win_start      = m_x_pos - 7;
             m_line_stage           = line_stage::mode3_init_window;
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
             m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
@@ -403,7 +403,7 @@ void age::gb_lcd_dot_renderer::fetch_bg_win_tile_id()
     if ((m_x_pos_win_start <= m_x_pos) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc()))
     {
         int tile_line_ofs = (m_x_pos - m_x_pos_win_start) >> 3;
-        tile_vram_ofs     = m_common.m_bg_tile_map_offset + ((m_window.current_window_line() & 0b11111000) << 2) + tile_line_ofs;
+        tile_vram_ofs     = m_common.m_win_tile_map_offset + ((m_window.current_window_line() & 0b11111000) << 2) + tile_line_ofs;
     }
     else
     {
