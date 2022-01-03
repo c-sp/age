@@ -138,7 +138,7 @@ namespace age
             if (value.m_line.lcd_is_on())
             {
                 auto line = value.m_line.current_line();
-                *m_stream << " (" << line.m_line_clks << " clock cycles into line " << line.m_line << ")";
+                *m_stream << " (" << line.m_line_clks << " clock cycles into line " << (line.m_line % 154) << ")";
             }
             else
             {

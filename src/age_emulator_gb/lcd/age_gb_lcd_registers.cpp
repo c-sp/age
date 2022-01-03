@@ -45,19 +45,29 @@ void age::gb_lcd::write_lcdc(uint8_t value)
     {
         msg << "\n    * LCD already " << ((value & gb_lcdc_enable) ? "on" : "off");
 
-        // LCD ws already on -> check for glitches
-        if (m_line.lcd_is_on())
+        // LCD remains off
+        if (!m_line.lcd_is_on())
         {
-            update_state();
-            // tile data bit changed
-            if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
-            {
-                m_render.set_clks_tile_data_change(m_line.current_line());
-                msg << "\n    * potential CGB glitch: tile data bit switched (LCD on)";
-            }
+            m_render.set_lcdc(value);
+            return;
         }
 
+        // LCD remains on -> update state before updating LCDC
+        update_state();
+
+        // tile data bit changed
+        if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
+        {
+            m_render.set_clks_tile_data_change(m_line.current_line());
+            msg << "\n    * potential CGB glitch: tile data bit switched (LCD on)";
+        }
+
+        // update LCDC
         m_render.set_lcdc(value);
+
+        // check for late WY match on this line
+        m_render.check_for_wy_match(m_line.current_line(), m_render.m_wy);
+
         return;
     }
 
