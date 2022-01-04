@@ -62,6 +62,14 @@ void age::gb_lcd::write_lcdc(uint8_t value)
             msg << "\n    * potential CGB glitch: tile data bit switched (LCD on)";
         }
 
+        // window flag switched
+        if ((diff & gb_lcdc_win_enable) && (value & gb_lcdc_win_enable))
+        {
+            // update LCDC but delay updating the window-enable-flag by one cycle
+            m_render.set_lcdc((m_render.get_lcdc() & gb_lcdc_win_enable) | (value & ~gb_lcdc_win_enable));
+            update_state(1);
+        }
+
         // update LCDC
         m_render.set_lcdc(value);
 
@@ -388,7 +396,11 @@ void age::gb_lcd::write_lyc(uint8_t value)
 
 void age::gb_lcd::write_bgp(uint8_t value)
 {
-    update_state();
+    update_state(m_device.is_dmg_device() || m_device.is_cgb_e_device() ? -1 : 0);
+    if (m_device.is_dmg_device() && m_line.lcd_is_on())
+    {
+        m_render.set_clks_bgp_change(m_line.current_line());
+    }
     log_reg() << "write BGP = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_bgp(value);
 }

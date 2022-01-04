@@ -57,6 +57,8 @@ namespace age
 
         [[nodiscard]] const pixel* get_palette(unsigned palette_index) const;
         [[nodiscard]] pixel        get_color(unsigned color_index) const;
+        [[nodiscard]] pixel        get_color_bgp_glitch(unsigned color_index) const;
+        [[nodiscard]] pixel        get_color_zero_dmg() const;
 
         [[nodiscard]] uint8_t read_bgp() const;
         [[nodiscard]] uint8_t read_obp0() const;
@@ -103,11 +105,12 @@ namespace age
 
         pixel_vector m_cgb_color_lut{};
 
-        uint8_t m_bgp  = 0xFC;
-        uint8_t m_obp0 = 0xFF;
-        uint8_t m_obp1 = 0xFF;
-        uint8_t m_bcps = 0xC0;
-        uint8_t m_ocps = 0xC1;
+        uint8_t m_bgp          = 0xFC;
+        uint8_t m_previous_bgp = 0xFC;
+        uint8_t m_obp0         = 0xFF;
+        uint8_t m_obp1         = 0xFF;
+        uint8_t m_bcps         = 0xC0;
+        uint8_t m_ocps         = 0xC1;
     };
 
 } // namespace age

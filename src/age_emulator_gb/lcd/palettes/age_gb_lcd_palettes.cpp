@@ -77,6 +77,19 @@ age::pixel age::gb_lcd_palettes::get_color(unsigned color_index) const
     return m_colors[color_index];
 }
 
+age::pixel age::gb_lcd_palettes::get_color_bgp_glitch(unsigned int color_index) const
+{
+    AGE_ASSERT(color_index < 4)
+    uint8_t glitched_bgp = m_bgp | m_previous_bgp;
+    glitched_bgp >>= color_index * 2;
+    return m_bgp_colors[glitched_bgp & 0x03];
+}
+
+age::pixel age::gb_lcd_palettes::get_color_zero_dmg() const
+{
+    return m_bgp_colors[0];
+}
+
 age::uint8_t age::gb_lcd_palettes::read_bgp() const
 {
     return m_bgp;
@@ -121,7 +134,8 @@ age::uint8_t age::gb_lcd_palettes::read_ocpd() const
 void age::gb_lcd_palettes::write_bgp(uint8_t value)
 {
     update_dmg_palette(gb_palette_bgp, value);
-    m_bgp = value;
+    m_previous_bgp = m_bgp;
+    m_bgp          = value;
 }
 
 void age::gb_lcd_palettes::write_obp0(uint8_t value)

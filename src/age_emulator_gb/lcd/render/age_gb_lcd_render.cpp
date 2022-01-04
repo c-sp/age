@@ -105,6 +105,11 @@ void age::gb_lcd_render::set_clks_tile_data_change(gb_current_line at_line)
     m_dot_renderer.set_clks_tile_data_change(at_line);
 }
 
+void age::gb_lcd_render::set_clks_bgp_change(gb_current_line at_line)
+{
+    m_dot_renderer.set_clks_bgp_change(at_line);
+}
+
 void age::gb_lcd_render::check_for_wy_match(gb_current_line at_line, uint8_t wy)
 {
     m_window.check_for_wy_match(get_lcdc(), wy, at_line);

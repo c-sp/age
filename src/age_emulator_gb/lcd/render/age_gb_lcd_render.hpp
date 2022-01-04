@@ -141,6 +141,7 @@ namespace age
         [[nodiscard]] bool stat_mode0() const;
 
         void set_clks_tile_data_change(gb_current_line at_line);
+        void set_clks_bgp_change(gb_current_line at_line);
         void reset();
         void begin_new_line(gb_current_line line, bool is_first_frame);
         bool continue_line(gb_current_line until);
@@ -159,7 +160,7 @@ namespace age
         void line_stage_mode3_align_scx(int until_line_clks);
         void line_stage_mode3_render(int until_line_clks);
         void line_stage_mode3_init_window(int until_line_clks);
-        void initial_fifo_alignment();
+        void plot_pixel();
         bool check_start_window();
 
         enum class fetcher_step
@@ -192,7 +193,9 @@ namespace age
         int             m_x_pos                = 0;
         int             m_x_pos_win_start      = 0;
         int             m_alignment_scx        = 0;
+        int             m_alignment_wx         = 0;
         bool            m_mode3_finished       = false;
+        gb_current_line m_clks_bgp_change      = gb_no_line;
 
         fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;
         int             m_next_fetcher_clks              = gb_no_clock_cycle;
@@ -221,6 +224,7 @@ namespace age
         [[nodiscard]] bool stat_mode0() const;
 
         void set_clks_tile_data_change(gb_current_line at_line);
+        void set_clks_bgp_change(gb_current_line at_line);
         void check_for_wy_match(gb_current_line at_line, uint8_t wy);
         void new_frame();
         void render(gb_current_line until, bool is_first_frame);

@@ -17,7 +17,6 @@ dmg-acid2/
 ###
 
 /age-test-roms/_in-progress
-/age-test-roms/m3-bg-bgp
 /age-test-roms/oam/oam-write-dmgC
 
 
@@ -39,53 +38,6 @@ dmg-acid2/
 ### failing tests
 
 /blargg/oam_bug/
-
-
-
-##################################################################
-###
-###   mealybug tearoom
-###
-
-/mealybug-tearoom-tests/dma/
-/mealybug-tearoom-tests/mbc/
-/mealybug-tearoom-tests/ppu/
-
-
-
-##################################################################
-###
-###   mooneye-test-suite
-###
-
-### non-test roms
-
-/mooneye-test-suite/utils/dump_boot_hwio.gb
-/mooneye-test-suite/utils/bootrom_dumper.gb
-
-### Gameboy hardware not supported by AGE
-
-/mooneye-test-suite/acceptance/boot_div2-S.gb            # SGB not supported
-/mooneye-test-suite/acceptance/boot_div-dmg0.gb          # DMG0 not supported
-/mooneye-test-suite/acceptance/boot_div-S.gb             # SGB not supported
-/mooneye-test-suite/acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
-/mooneye-test-suite/acceptance/boot_hwio-S.gb            # SGB not supported
-/mooneye-test-suite/acceptance/boot_regs-dmg0.gb         # DMG0 not supported
-/mooneye-test-suite/acceptance/boot_regs-mgb.gb          # MGB not supported
-/mooneye-test-suite/acceptance/boot_regs-sgb.gb          # SGB not supported
-/mooneye-test-suite/acceptance/boot_regs-sgb2.gb         # SGB not supported
-/mooneye-test-suite/madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
-/mooneye-test-suite/misc/boot_div-A.gb                   # GBA not supported
-/mooneye-test-suite/misc/boot_div-cgb0.gb                # CGB0 not supported
-/mooneye-test-suite/misc/boot_regs-A.gb                  # GBA not supported
-
-### failing tests
-
-/mooneye-test-suite/acceptance/ppu/intr_2_mode0_timing_sprites.gb
-/mooneye-test-suite/acceptance/ppu/lcdon_write_timing-GS.gb
-/mooneye-test-suite/acceptance/ppu/stat_irq_blocking.gb
-/mooneye-test-suite/acceptance/ppu/stat_lyc_onoff.gb
-/mooneye-test-suite/manual-only/sprite_priority.gb
 
 
 
@@ -126,8 +78,6 @@ dmg-acid2/
 /gambatte/oamdma/oamdmasrcC000_gdmasrcC0F0_gdmalen13_vramdumper_1.gbc
 /gambatte/sram.gbc
 /gambatte/vram_dumper.gbc
-/gambatte/window/on_screen/late_wx_ds_1.gbc
-/gambatte/window/on_screen/late_wx_ds_2.gbc
 /gambatte/wram_dumper.gbc
 
 ### unknown or "x'd" test result
@@ -145,6 +95,8 @@ dmg-acid2/
 /gambatte/scx_during_m3/scx_attrib_during_m3_spx0.gbc
 /gambatte/scx_during_m3/scx_attrib_during_m3_spx1.gbc
 /gambatte/sound/ch1_duty0_to_duty3_pos3_1_dmg08_cgb_xoutaudio1.gbc
+/gambatte/window/on_screen/late_wx_ds_1.gbc
+/gambatte/window/on_screen/late_wx_ds_2.gbc
 
 ### failing tests
 
@@ -229,10 +181,85 @@ dmg-acid2/
 /gambatte/vram_m3/vramw_m3start_1_dmg08_cgb04c_out1.gbc
 
 /gambatte/window/late_disable_spx10_
-/gambatte/window/late_enable_ly0_
-/gambatte/window/late_reenable_
-/gambatte/window/m2int_
+/gambatte/window/late_reenable_scx
+/gambatte/window/m2int_wxA5_m0irq
+/gambatte/window/m2int_wxA6_oambusyread
+/gambatte/window/m2int_wxA6_spxA7_m3stat
+/gambatte/window/m2int_wxA6_vrambusyread
 /gambatte/window/on_screen/
+
+
+
+##################################################################
+###
+###   mealybug tearoom
+###
+
+/mealybug-tearoom-tests/dma/
+/mealybug-tearoom-tests/mbc/
+
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple_wx
+
+# sprites required
+/mealybug-tearoom-tests/ppu/m3_bgp_change_sprites
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_map_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_map_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_en_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_en_change_variant
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_size_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_size_change_scx
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_win_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_win_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_map_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_map_change2
+/mealybug-tearoom-tests/ppu/m3_obp0_change
+/mealybug-tearoom-tests/ppu/m3_scx_high_5_bits
+/mealybug-tearoom-tests/ppu/m3_scx_high_5_bits_change2
+/mealybug-tearoom-tests/ppu/m3_scy_change
+/mealybug-tearoom-tests/ppu/m3_scy_change2
+/mealybug-tearoom-tests/ppu/m3_wx_4_change_sprites
+/mealybug-tearoom-tests/ppu/win_without_bg
+
+
+
+##################################################################
+###
+###   mooneye-test-suite
+###
+
+### non-test roms
+
+/mooneye-test-suite/utils/dump_boot_hwio.gb
+/mooneye-test-suite/utils/bootrom_dumper.gb
+
+### Gameboy hardware not supported by AGE
+
+/mooneye-test-suite/acceptance/boot_div2-S.gb            # SGB not supported
+/mooneye-test-suite/acceptance/boot_div-dmg0.gb          # DMG0 not supported
+/mooneye-test-suite/acceptance/boot_div-S.gb             # SGB not supported
+/mooneye-test-suite/acceptance/boot_hwio-dmg0.gb         # DMG0 not supported
+/mooneye-test-suite/acceptance/boot_hwio-S.gb            # SGB not supported
+/mooneye-test-suite/acceptance/boot_regs-dmg0.gb         # DMG0 not supported
+/mooneye-test-suite/acceptance/boot_regs-mgb.gb          # MGB not supported
+/mooneye-test-suite/acceptance/boot_regs-sgb.gb          # SGB not supported
+/mooneye-test-suite/acceptance/boot_regs-sgb2.gb         # SGB not supported
+/mooneye-test-suite/madness/mgb_oam_dma_halt_sprites.gb  # MGB not supported
+/mooneye-test-suite/misc/boot_div-A.gb                   # GBA not supported
+/mooneye-test-suite/misc/boot_div-cgb0.gb                # CGB0 not supported
+/mooneye-test-suite/misc/boot_regs-A.gb                  # GBA not supported
+
+### failing tests
+
+/mooneye-test-suite/acceptance/ppu/intr_2_mode0_timing_sprites.gb
+/mooneye-test-suite/acceptance/ppu/lcdon_write_timing-GS.gb
+/mooneye-test-suite/acceptance/ppu/stat_irq_blocking.gb
+/mooneye-test-suite/acceptance/ppu/stat_lyc_onoff.gb
+/mooneye-test-suite/manual-only/sprite_priority.gb
 
 
 

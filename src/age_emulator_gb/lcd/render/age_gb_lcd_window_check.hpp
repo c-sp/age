@@ -69,13 +69,17 @@ namespace age
         void check_for_wy_match(uint8_t lcdc, int wy, int at_line)
         {
             AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
+            // WY matching requires the window to be enabled
+            // (see Gambatte window/late_enable_afterVblank tests)
             m_frame_wy_match |= is_window_enabled(lcdc) && (wy == at_line);
         }
 
         void check_for_wy_match(uint8_t lcdc, int wy, gb_current_line at_line)
         {
             AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
-            if (!is_window_enabled(lcdc))
+            // WY matching requires the window to be enabled
+            // (see Gambatte window/late_enable_afterVblank tests)
+            if (!is_window_enabled(lcdc) || m_frame_wy_match)
             {
                 return;
             }

@@ -60,7 +60,14 @@ bool age::gb_lcd_dot_renderer::stat_mode0() const
 
 void age::gb_lcd_dot_renderer::set_clks_tile_data_change(gb_current_line at_line)
 {
+    AGE_ASSERT(m_device.is_cgb_device())
     m_clks_tile_data_change = at_line;
+}
+
+void age::gb_lcd_dot_renderer::set_clks_bgp_change(gb_current_line at_line)
+{
+    AGE_ASSERT(m_device.is_dmg_device())
+    m_clks_bgp_change = at_line;
 }
 
 void age::gb_lcd_dot_renderer::reset()
@@ -83,6 +90,7 @@ void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line, bool is_firs
     m_x_pos                = 0;
     m_x_pos_win_start      = int_max;
     m_mode3_finished       = false;
+    m_clks_bgp_change      = gb_no_line;
     // no need to reset all members
     // m_alignment_scx = 0;
 
@@ -247,21 +255,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
         // set next pixel
         if (m_x_pos >= x_pos_first_px)
         {
-            // align the pixel FIFO right before setting the first pixel
-            // (the first N pixel are discarded based on SCX or WX)
-            if (m_x_pos == x_pos_first_px)
-            {
-                initial_fifo_alignment();
-            }
-
-            if (m_bg_win_fifo.empty())
-            {
-                AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): fifo empty")
-            }
-            AGE_ASSERT(!m_bg_win_fifo.empty())
-            auto color_idx = m_bg_win_fifo[0];
-            m_bg_win_fifo.pop_front();
-            m_line_buffer[m_x_pos - x_pos_first_px] = m_palettes.get_color(color_idx);
+            plot_pixel();
         }
 
         // next dot (keep x-pos & line-clks in sync)
@@ -299,6 +293,8 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
 {
     AGE_ASSERT(m_line.m_line_clks < m_clks_end_window_init)
 
+    // window termination can occur only on the update's first cycle
+    // as LCD registers are constant during LCD updates
     if (!is_window_enabled(m_common.get_lcdc()))
     {
         if (m_device.is_cgb_device() || ((m_clks_end_window_init - m_line.m_line_clks) >= 6))
@@ -319,8 +315,8 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
     m_line.m_line_clks = until_line_clks;
     if (m_line.m_line_clks >= m_clks_end_window_init)
     {
-        m_line_stage       = line_stage::mode3_render;
-        m_line.m_line_clks = m_clks_end_window_init;
+        m_line_stage        = line_stage::mode3_render;
+        m_line.m_line_clks  = m_clks_end_window_init;
         m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
         m_next_fetcher_clks = m_line.m_line_clks + 1;
         // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
@@ -328,21 +324,50 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
     }
 }
 
-void age::gb_lcd_dot_renderer::initial_fifo_alignment()
+void age::gb_lcd_dot_renderer::plot_pixel()
 {
-    AGE_ASSERT(m_bg_win_fifo.size() >= 8)
-    int skip_count = (m_x_pos_win_start < int_max)
-                         ? 7 - m_common.m_wx
-                         : m_alignment_scx;
-    // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-    //                 << " entering line_stage::mode3_render"
-    //                 << ", bg-fifo-size=" << m_bg_win_fifo.size()
-    //                 << ", discarding " << skip_count << " FIFO pixel")
-    for (int p = 0; p < skip_count; ++p)
+    // align the pixel FIFO right before setting the first pixel
+    // (the first N pixel are discarded based on SCX or WX)
+    bool bgp_glitch = false;
+    if (m_x_pos == x_pos_first_px)
     {
-        m_bg_win_fifo.pop_front();
+        AGE_ASSERT(m_bg_win_fifo.size() >= 8)
+        int skip_count = (m_x_pos_win_start < int_max) ? m_alignment_wx : m_alignment_scx;
+        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+        //                 << " entering line_stage::mode3_render"
+        //                 << ", bg-fifo-size=" << m_bg_win_fifo.size()
+        //                 << ", discarding " << skip_count << " FIFO pixel")
+        for (int p = 0; p < skip_count; ++p)
+        {
+            m_bg_win_fifo.pop_front();
+        }
     }
-    m_line_stage = line_stage::mode3_render;
+    else
+    {
+        // not on the first pixel, see age-test-roms/m3-bg-bgp
+        bgp_glitch = m_clks_bgp_change.m_line_clks == m_line.m_line_clks + 1;
+    }
+
+    // check for WX zero pixel glitch
+    // (see mealybug tearoom tests: m3_wx_4_change, m3_wx_5_change, m3_wx_6_change)
+    bool wx_glitch = m_device.is_dmg_device()
+                     && (m_x_pos_win_start < m_x_pos - 8) // not on first window activation
+                     && (m_x_pos == m_common.m_wx + 1)
+                     && (m_next_fetcher_clks == m_line.m_line_clks + 1)
+                     && (m_next_fetcher_step == fetcher_step::fetch_bg_win_tile_id);
+    if (wx_glitch)
+    {
+        m_line_buffer[m_x_pos - x_pos_first_px] = m_palettes.get_color_zero_dmg();
+    }
+    else
+    {
+        AGE_ASSERT(!m_bg_win_fifo.empty())
+        auto color_idx = m_bg_win_fifo[0];
+        m_bg_win_fifo.pop_front();
+        m_line_buffer[m_x_pos - x_pos_first_px] = bgp_glitch
+                                                      ? m_palettes.get_color_bgp_glitch(color_idx)
+                                                      : m_palettes.get_color(color_idx);
+    }
 }
 
 bool age::gb_lcd_dot_renderer::check_start_window()
@@ -370,6 +395,7 @@ bool age::gb_lcd_dot_renderer::check_start_window()
             m_bg_win_fifo.clear(); // any pending tile will be replaced by the window's first tile
             m_window.next_window_line();
             m_x_pos_win_start      = m_x_pos - 7;
+            m_alignment_wx         = 7 - m_common.m_wx;
             m_line_stage           = line_stage::mode3_init_window;
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
             m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
