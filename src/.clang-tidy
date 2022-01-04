@@ -7,17 +7,20 @@ Checks: >
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -fuchsia-*,
+  -hicpp-signed-bitwise,
   -llvm-header-guard,
   -llvmlibc-*,
   -misc-non-private-member-variables-in-classes,
   -modernize-use-trailing-return-type,
   -readability-magic-numbers,
 
+# We should enable the following checks:
+#  - cppcoreguidelines-pro-bounds-pointer-arithmetic (requires C++20 spans)
+
 CheckOptions:
   - key: readability-implicit-bool-conversion.AllowIntegerConditions
-    value: true
+    value: 1
   - key: readability-implicit-bool-conversion.AllowPointerConditions
-    value: true
-  - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
-    value: true
+    value: 1
