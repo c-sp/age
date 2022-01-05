@@ -198,7 +198,6 @@ dmg-acid2/
 /mealybug-tearoom-tests/dma/
 /mealybug-tearoom-tests/mbc/
 
-/mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple
 /mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple_wx
 
 # sprites required

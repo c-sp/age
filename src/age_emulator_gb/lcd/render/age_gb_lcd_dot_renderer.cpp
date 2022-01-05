@@ -27,6 +27,13 @@ namespace
 
 //! \todo handle LCDC bit 0
 
+//! \todo maybe replace this with gb_logger
+#if 0
+#define LOG(x) AGE_LOG(x)
+#else
+#define LOG(x)
+#endif
+
 
 
 age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_device&            device,
@@ -110,43 +117,55 @@ bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
     AGE_ASSERT(in_progress())
     AGE_ASSERT(until.m_line >= m_line.m_line)
 
+    // deactivate window?
+    // (LCD registers are constant during this LCD update, so we can check this upfront)
+    if (!is_window_enabled(m_common.get_lcdc()))
+    {
+        m_x_pos_win_start = int_max;
+    }
+
+    // finish line?
     int current_line_clks = (until.m_line > m_line.m_line)
                                 ? gb_clock_cycles_per_lcd_line
                                 : until.m_line_clks;
 
-    while (m_next_fetcher_clks < current_line_clks)
+    LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                << " update until clks < " << current_line_clks
+                << ", window enabled = " << is_window_enabled(m_common.get_lcdc()))
+
+    while (m_line.m_line_clks < current_line_clks)
     {
-        update_line_stage(m_next_fetcher_clks); // may set m_next_fetcher_step = fetcher_step::finish_line
-        if (m_next_fetcher_clks > current_line_clks)
+        // update_line_stage() may modify the next fetcher step & cycle
+        update_line_stage(std::min(m_next_fetcher_clks, current_line_clks));
+
+        if (m_next_fetcher_clks < current_line_clks)
         {
-            break;
-        }
-        switch (m_next_fetcher_step)
-        {
-            case fetcher_step::fetch_bg_win_tile_id:
-                fetch_bg_win_tile_id();
-                schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane0);
-                break;
+            switch (m_next_fetcher_step)
+            {
+                case fetcher_step::fetch_bg_win_tile_id:
+                    fetch_bg_win_tile_id();
+                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane0);
+                    break;
 
-            case fetcher_step::fetch_bg_win_bitplane0:
-                fetch_bg_win_bitplane(0);
-                schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane1);
-                break;
+                case fetcher_step::fetch_bg_win_bitplane0:
+                    fetch_bg_win_bitplane(0);
+                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane1);
+                    break;
 
-            case fetcher_step::fetch_bg_win_bitplane1:
-                fetch_bg_win_bitplane(1);
-                push_bg_win_bitplanes();
-                schedule_next_fetcher_step(4, fetcher_step::fetch_bg_win_tile_id);
-                break;
+                case fetcher_step::fetch_bg_win_bitplane1:
+                    fetch_bg_win_bitplane(1);
+                    push_bg_win_bitplanes();
+                    schedule_next_fetcher_step(4, fetcher_step::fetch_bg_win_tile_id);
+                    break;
 
-            case fetcher_step::finish_line:
-                reset();
-                return true;
+                case fetcher_step::finish_line:
+                    reset();
+                    return true;
+            }
         }
     }
 
     AGE_ASSERT(m_next_fetcher_clks >= current_line_clks)
-    update_line_stage(current_line_clks); //! \todo this may reset the fetcher => make it part of the loop
     AGE_ASSERT(m_line.m_line_clks < gb_clock_cycles_per_lcd_line)
     AGE_ASSERT(m_line.m_line_clks >= current_line_clks)
     return false;
@@ -204,9 +223,9 @@ void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
     {
         m_line_stage       = line_stage::mode3_align_scx;
         m_line.m_line_clks = m_clks_begin_align_scx;
-        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-        //                 << " entering line_stage::mode3_align_scx"
-        //                 << ", scx=" << (int) m_common.m_scx)
+        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                    << " entering line_stage::mode3_align_scx"
+                    << ", scx=" << (int) m_common.m_scx)
     }
 }
 
@@ -228,7 +247,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
             // => save the number of pixel to discard for later
             //    (SCX might have been changed already when we
             //    discard the first X pixel)
-            m_alignment_scx = scx;
+            m_alignment_x = scx;
             AGE_ASSERT(m_bg_win_fifo.size() <= 8)
             m_line_stage = line_stage::mode3_render;
             // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
@@ -270,6 +289,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             m_next_fetcher_step = fetcher_step::finish_line;
             m_mode3_finished    = true;
             // don't miss any WY match in case WX is out of the visible range
+            // as check_start_window() verifies WY only if WX matches
             m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
             // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
             //                 << " entering line_stage::rendering_finished")
@@ -295,19 +315,21 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
 
     // window termination can occur only on the update's first cycle
     // as LCD registers are constant during LCD updates
-    if (!is_window_enabled(m_common.get_lcdc()))
+    if (m_x_pos_win_start == int_max)
     {
         if (m_device.is_cgb_device() || ((m_clks_end_window_init - m_line.m_line_clks) >= 6))
         {
-            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): terminate window init"
-            //                 << " (would have been finished on line cycle " << m_clks_end_window_init << ")")
+            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): terminate window init"
+                        << " (would have been finished on line cycle " << m_clks_end_window_init << ")")
 
             m_line_stage = line_stage::mode3_render;
             m_line.m_line_clks += m_device.is_cgb_device() ? 1 : 0;
             m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
             m_next_fetcher_clks = m_line.m_line_clks;
+            // note that we keep m_alignment_x as the FIFO might run empty otherwise
+            //! \todo restart previously fetched tile, is this correct?
             m_bg_win_fifo.clear();
-            push_bg_win_bitplanes(); //! \todo restart previously fetched tile, is this correct?
+            push_bg_win_bitplanes();
             return;
         }
     }
@@ -319,8 +341,8 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
         m_line.m_line_clks  = m_clks_end_window_init;
         m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
         m_next_fetcher_clks = m_line.m_line_clks + 1;
-        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
-        //                 << ", fifo size = " << m_bg_win_fifo.size())
+        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
+                    << ", fifo size = " << m_bg_win_fifo.size())
     }
 }
 
@@ -332,12 +354,11 @@ void age::gb_lcd_dot_renderer::plot_pixel()
     if (m_x_pos == x_pos_first_px)
     {
         AGE_ASSERT(m_bg_win_fifo.size() >= 8)
-        int skip_count = (m_x_pos_win_start < int_max) ? m_alignment_wx : m_alignment_scx;
-        // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-        //                 << " entering line_stage::mode3_render"
-        //                 << ", bg-fifo-size=" << m_bg_win_fifo.size()
-        //                 << ", discarding " << skip_count << " FIFO pixel")
-        for (int p = 0; p < skip_count; ++p)
+        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                    << " entering line_stage::mode3_render"
+                    << ", bg-fifo-size=" << m_bg_win_fifo.size()
+                    << ", discarding " << m_alignment_x << " FIFO pixel")
+        for (int p = 0; p < m_alignment_x; ++p)
         {
             m_bg_win_fifo.pop_front();
         }
@@ -383,11 +404,10 @@ bool age::gb_lcd_dot_renderer::check_start_window()
         m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
         if ((m_x_pos_win_start == int_max) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc()))
         {
-            //! \todo this is a workaround for x-pos==167, any better way?
             int clks_init_window = (m_x_pos == x_pos_last_px) ? 5 : 6;
 
             // glitch on (WX == 0) && ((SCX & 7) != 0)
-            if ((m_x_pos == 1) && (m_alignment_scx >= 1))
+            if ((m_x_pos == 1) && (m_alignment_x >= 1))
             {
                 ++clks_init_window;
             }
@@ -395,17 +415,17 @@ bool age::gb_lcd_dot_renderer::check_start_window()
             m_bg_win_fifo.clear(); // any pending tile will be replaced by the window's first tile
             m_window.next_window_line();
             m_x_pos_win_start      = m_x_pos - 7;
-            m_alignment_wx         = 7 - m_common.m_wx;
+            m_alignment_x          = 7 - m_common.m_wx;
             m_line_stage           = line_stage::mode3_init_window;
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
             m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
             m_next_fetcher_clks    = m_line.m_line_clks;
 
-            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-            //                 << " initialize window rendering"
-            //                 << ", x-pos = " << m_x_pos
-            //                 << ", wx = " << (int) m_common.m_wx
-            //                 << ", scx = " << (int) m_common.m_scx)
+            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                        << " initialize window rendering"
+                        << ", x-pos = " << m_x_pos
+                        << ", wx = " << (int) m_common.m_wx
+                        << ", scx = " << (int) m_common.m_scx)
             return true;
         }
     }
@@ -424,10 +444,12 @@ void age::gb_lcd_dot_renderer::schedule_next_fetcher_step(int clks_offset, fetch
 
 void age::gb_lcd_dot_renderer::fetch_bg_win_tile_id()
 {
-    int tile_vram_ofs = 0;
+    m_fetching_window = m_x_pos_win_start <= m_x_pos;
 
-    if ((m_x_pos_win_start <= m_x_pos) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc()))
+    int tile_vram_ofs = 0;
+    if (m_fetching_window)
     {
+        LOG("line " << m_line.m_line << " (" << m_next_fetcher_clks << "): read window tile id")
         int tile_line_ofs = (m_x_pos - m_x_pos_win_start) >> 3;
         tile_vram_ofs     = m_common.m_win_tile_map_offset + ((m_window.current_window_line() & 0b11111000) << 2) + tile_line_ofs;
     }
@@ -458,7 +480,11 @@ void age::gb_lcd_dot_renderer::fetch_bg_win_bitplane(int bitplane_offset)
         }
     }
 
-    int tile_line = ((m_x_pos_win_start <= m_x_pos) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc()))
+    if (m_fetching_window)
+    {
+        LOG("line " << m_line.m_line << " (" << m_next_fetcher_clks << "): read window tile data " << bitplane_offset)
+    }
+    int tile_line = m_fetching_window
                         ? m_window.current_window_line() & 0b111
                         : (m_common.m_scy + m_line.m_line) & 0b111;
     // y-flip
@@ -474,9 +500,6 @@ void age::gb_lcd_dot_renderer::fetch_bg_win_bitplane(int bitplane_offset)
     tile_data_ofs += tile_line * 2; // 2 bytes per line
 
     auto bitplane = m_video_ram[tile_data_ofs + bitplane_offset];
-
-    // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-    //                 << " read bitplane " << bitplane_offset << " = " << (int) bitplane)
 
     // x-flip
     // (we invert the x-flip for easier rendering:

@@ -192,13 +192,13 @@ namespace age
         int             m_clks_end_window_init = 0;
         int             m_x_pos                = 0;
         int             m_x_pos_win_start      = 0;
-        int             m_alignment_scx        = 0;
-        int             m_alignment_wx         = 0;
+        int             m_alignment_x          = 0;
         bool            m_mode3_finished       = false;
         gb_current_line m_clks_bgp_change      = gb_no_line;
 
         fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;
         int             m_next_fetcher_clks              = gb_no_clock_cycle;
+        bool            m_fetching_window                = false;
         uint8_t         m_fetched_bg_win_tile_id         = 0;
         uint8_t         m_fetched_bg_win_tile_attributes = 0;
         uint8_array<2>  m_fetched_bg_win_bitplane{};
