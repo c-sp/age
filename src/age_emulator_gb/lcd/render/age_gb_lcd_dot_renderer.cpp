@@ -206,7 +206,7 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
         }
         // terminate loop early if the fetcher has been reset
         // (to initialize window or sprite rendering)
-        if (m_next_fetcher_clks < m_line.m_line_clks)
+        if (m_next_fetcher_clks <= m_line.m_line_clks)
         {
             break;
         }
@@ -341,6 +341,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
         m_line.m_line_clks  = m_clks_end_window_init;
         m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
         m_next_fetcher_clks = m_line.m_line_clks + 1;
+        m_mode3_finished    = m_x_pos == x_pos_last_px;
         LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
                     << ", fifo size = " << m_bg_win_fifo.size())
     }
@@ -404,13 +405,8 @@ bool age::gb_lcd_dot_renderer::check_start_window()
         m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
         if ((m_x_pos_win_start == int_max) && m_window.is_enabled_and_wy_matched(m_common.get_lcdc()))
         {
-            int clks_init_window = (m_x_pos == x_pos_last_px) ? 5 : 6;
-
             // glitch on (WX == 0) && ((SCX & 7) != 0)
-            if ((m_x_pos == 1) && (m_alignment_x >= 1))
-            {
-                ++clks_init_window;
-            }
+            int clks_init_window = ((m_x_pos == 1) && (m_alignment_x >= 1)) ? 7 : 6;
 
             m_bg_win_fifo.clear(); // any pending tile will be replaced by the window's first tile
             m_window.next_window_line();
@@ -419,7 +415,7 @@ bool age::gb_lcd_dot_renderer::check_start_window()
             m_line_stage           = line_stage::mode3_init_window;
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
             m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
-            m_next_fetcher_clks    = m_line.m_line_clks;
+            m_next_fetcher_clks    = m_line.m_line_clks + 1;
 
             LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
                         << " initialize window rendering"
