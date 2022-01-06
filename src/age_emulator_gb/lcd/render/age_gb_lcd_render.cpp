@@ -115,6 +115,11 @@ void age::gb_lcd_render::check_for_wy_match(gb_current_line at_line, uint8_t wy)
     m_window.check_for_wy_match(get_lcdc(), wy, at_line);
 }
 
+void age::gb_lcd_render::window_switched_off(gb_current_line at_line)
+{
+    m_window.window_switched_off(at_line);
+}
+
 void age::gb_lcd_render::new_frame()
 {
     m_dot_renderer.reset(); //! \todo maybe we can remove this after fixing LCD off/on

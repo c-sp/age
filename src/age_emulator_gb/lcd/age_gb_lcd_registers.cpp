@@ -54,27 +54,35 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
         // LCD remains on -> update state before updating LCDC
         update_state();
+        auto line = m_line.current_line();
 
         // tile data bit changed
         if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
         {
-            m_render.set_clks_tile_data_change(m_line.current_line());
+            m_render.set_clks_tile_data_change(line);
             msg << "\n    * potential CGB glitch: tile data bit switched (LCD on)";
         }
 
         // window flag switched
-        if ((diff & gb_lcdc_win_enable) && (value & gb_lcdc_win_enable))
+        if (diff & gb_lcdc_win_enable)
         {
-            // update LCDC but delay updating the window-enable-flag by one cycle
-            m_render.set_lcdc((m_render.get_lcdc() & gb_lcdc_win_enable) | (value & ~gb_lcdc_win_enable));
-            update_state(1);
+            if (value & gb_lcdc_win_enable)
+            {
+                // update LCDC but delay updating the window-enable-flag
+                m_render.set_lcdc((m_render.get_lcdc() & gb_lcdc_win_enable) | (value & ~gb_lcdc_win_enable));
+                update_state(1);
+            }
+            else
+            {
+                m_render.window_switched_off(line);
+            }
         }
 
         // update LCDC
         m_render.set_lcdc(value);
 
         // check for late WY match on this line
-        m_render.check_for_wy_match(m_line.current_line(), m_render.m_wy);
+        m_render.check_for_wy_match(line, m_render.m_wy);
 
         return;
     }
@@ -174,7 +182,7 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line)
 
     // mode 3 or mode 0
 #ifdef AGE_COMPILE_DOT_RENDERER
-    update_state();
+    update_state(1);
     return m_render.stat_mode0() ? 0 : 3;
 
 #else
