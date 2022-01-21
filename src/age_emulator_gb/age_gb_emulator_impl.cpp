@@ -171,12 +171,15 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         {
             AGE_ASSERT(m_device.cgb_mode())
         }
-        else if (m_interrupts.halted())
+        else if (m_interrupts.halted() || m_cpu.is_frozen())
         {
             int fast_forward_cycle = get_fast_forward_halt_cycles(cycle_to_reach);
             AGE_ASSERT(fast_forward_cycle >= m_clock.get_clock_cycle())
             m_clock.tick_clock_cycles(fast_forward_cycle - m_clock.get_clock_cycle());
-            m_bus.handle_events(); // interrupt may terminate HALT
+            // handle events:
+            //  - HALT: may be terminated by interrupt
+            //  - frozen CPU: keep overall state consistent to prevent set_back_clock() errors
+            m_bus.handle_events();
         }
         else
         {

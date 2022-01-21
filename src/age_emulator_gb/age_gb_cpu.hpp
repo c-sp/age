@@ -52,12 +52,12 @@ namespace age
                gb_bus&                  bus);
         ~gb_cpu() = default;
 
+        [[nodiscard]] bool         is_frozen() const;
         [[nodiscard]] gb_test_info get_test_info() const;
         void                       emulate();
 
     private:
         void dispatch_interrupt();
-        void handle_state();
 
         void    set_flags(int from_value);
         void    tick_push_byte(int byte);

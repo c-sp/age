@@ -105,6 +105,11 @@ age::gb_cpu::gb_cpu(const gb_device&         device,
 
 
 
+bool age::gb_cpu::is_frozen() const
+{
+    return m_cpu_state & gb_cpu_state_frozen;
+}
+
 age::gb_test_info age::gb_cpu::get_test_info() const
 {
     gb_test_info result;
@@ -125,35 +130,7 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 
 void age::gb_cpu::emulate()
 {
-    // special treatments: EI & CPU freeze
-    if (m_cpu_state)
-    {
-        handle_state();
-        return;
-    }
-
-    // look for any interrupt to dispatch
-    m_bus.handle_events(); // make sure the IF register is up to date
-    if (m_interrupts.next_interrupt_bit())
-    {
-        dispatch_interrupt();
-        return;
-    }
-
-    // just execute the next instruction
-    execute_prefetched();
-}
-
-
-
-void age::gb_cpu::handle_state()
-{
-    // CPU frozen
-    if (m_cpu_state & gb_cpu_state_frozen)
-    {
-        m_clock.tick_machine_cycle();
-        return;
-    }
+    AGE_ASSERT(!(m_cpu_state & gb_cpu_state_frozen))
 
     // EI - delayed interrupts enabling
     if (m_cpu_state & gb_cpu_state_ei)
@@ -175,6 +152,17 @@ void age::gb_cpu::handle_state()
         // we're done here
         return;
     }
+
+    // look for any interrupt to dispatch
+    m_bus.handle_events(); // make sure the IF register is up to date
+    if (m_interrupts.next_interrupt_bit())
+    {
+        dispatch_interrupt();
+        return;
+    }
+
+    // just execute the next instruction
+    execute_prefetched();
 }
 
 

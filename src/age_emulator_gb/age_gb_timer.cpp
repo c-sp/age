@@ -112,7 +112,7 @@ age::uint8_t age::gb_timer::read_tima()
 void age::gb_timer::write_tma(uint8_t value)
 {
     auto msg = log();
-    msg << "write TIMA = " << log_hex8(value);
+    msg << "write TMA = " << log_hex8(value);
 
     if (m_clk_timer_zero != gb_no_clock_cycle)
     {
