@@ -201,7 +201,7 @@ namespace age
             {
                 return gb_log_message_stream(nullptr);
             }
-            m_messages.emplace_back(gb_log_entry{category, clock, div_clock, ""});
+            m_messages.emplace_back(gb_log_entry{category, m_clock_offset + clock, div_clock, ""});
             return gb_log_message_stream(&m_messages[m_messages.size() - 1]);
         }
 
@@ -210,9 +210,15 @@ namespace age
             return m_messages;
         }
 
+        void set_back_clock(int clock_cycle_offset)
+        {
+            m_clock_offset += clock_cycle_offset;
+        }
+
     private:
         gb_log_categories         m_log_categories;
         std::vector<gb_log_entry> m_messages;
+        int64_t                   m_clock_offset = 0;
 
 #else
     public:
@@ -230,6 +236,12 @@ namespace age
         [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const
         {
             return m_no_entries;
+        }
+
+        // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+        void set_back_clock(int clock_cycle_offset)
+        {
+            AGE_UNUSED(clock_cycle_offset);
         }
 
     private:

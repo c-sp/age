@@ -1292,9 +1292,12 @@ void age::gb_cpu::execute_prefetched()
         case 0x00: break; // NOP
 
         case 0x10: { // STOP
+            m_clock.log(gb_log_category::lc_cpu) << "STOP encountered (no STOP M-cycle executed yet)";
             READ_BYTE(m_prefetched_opcode, m_pc);
             TICK_MACHINE_CYCLE;
             m_bus.execute_stop();
+            m_clock.log(gb_log_category::lc_cpu) << "continuing after STOP, prefetched "
+                                                 << log_hex8(m_prefetched_opcode);
             return;
         }
 

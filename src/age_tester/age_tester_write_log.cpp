@@ -40,8 +40,8 @@ namespace
                << "     AGE git revision: " << GIT_REV << " (" << GIT_DATE << ")\n"
                << "--------------------------------------------------------------------------------\n"
                << '\n'
-               << "T4-cycle  T4-16-bit-divider    category    comments" << '\n'
-               << "--------  -------------------  ----------  -------------------------------------\n";
+               << " T4-cycle  T4-16-bit-divider    category    comments" << '\n'
+               << "---------  -------------------  ----------  -------------------------------------\n";
 
         return result.str();
     }
@@ -83,9 +83,9 @@ namespace
         std::bitset<4> div1{div};
 
         std::stringstream prefix_str;
-        prefix_str << std::setw(8) << entry.m_clock << std::setw(0)
+        prefix_str << std::setw(9) << entry.m_clock << std::setw(0)
                    << "  " << div4 << "'" << div3 << "'" << div2 << "'" << div1
-                   << "  " << std::left << std::setw(11) << category_str(entry.m_category) << std::setw(0) << std::right
+                   << "  " << std::left << std::setw(10) << category_str(entry.m_category) << std::setw(0) << std::right
                    << "  ";
 
         auto prefix = prefix_str.str();

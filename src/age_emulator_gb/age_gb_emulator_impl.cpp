@@ -219,6 +219,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         AGE_ASSERT(clock_cycle_offset < current_cycle)
 
         m_clock.set_back_clock(clock_cycle_offset);
+        m_logger.set_back_clock(clock_cycle_offset); // this goes second to not mess up the logs
         m_events.set_back_clock(clock_cycle_offset);
         m_sound.set_back_clock(clock_cycle_offset);
         m_lcd.set_back_clock(clock_cycle_offset);

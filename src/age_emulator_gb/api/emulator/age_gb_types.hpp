@@ -144,7 +144,7 @@ namespace age
 
     struct gb_log_entry
     {
-        gb_log_entry(gb_log_category category, int clock, int div_clock, std::string message)
+        gb_log_entry(gb_log_category category, int64_t clock, int div_clock, std::string message)
             : m_category(category),
               m_clock(clock),
               m_div_clock(div_clock),
@@ -152,7 +152,7 @@ namespace age
         {}
 
         gb_log_category m_category;
-        int             m_clock;
+        int64_t         m_clock;
         uint16_t        m_div_clock;
         std::string     m_message;
     };
