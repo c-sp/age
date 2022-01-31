@@ -39,7 +39,7 @@ jobs:
         run: build/age_ci.sh build-qt release
 
       - name: upload Qt artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
@@ -56,7 +56,7 @@ jobs:
         run: build/age_ci.sh build-gtest Debug
 
       - name: upload Google Test artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
@@ -73,7 +73,7 @@ jobs:
         run: build/age_ci.sh build-tester Release
 
       - name: upload tester artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
@@ -92,7 +92,7 @@ jobs:
         run: build/age_ci.sh build-wasm Release
 
       - name: upload WebAssembly artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_PATH }}
