@@ -21,7 +21,7 @@ jobs:
       # https://github.com/jurplel/install-qt-action
       - name: cache Qt
         id: cache-qt
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.7
         with:
           path: ../Qt
           key: ${{ runner.os }}-Qt-cache-5.12.8
