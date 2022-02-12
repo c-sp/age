@@ -111,7 +111,7 @@ bool age::gb_clock::change_speed()
     const bool double_speed = (m_key1 & 0x80) > 0;
     m_machine_cycle_clocks  = double_speed ? 2 : 4;
 
-    log() << ((double_speed ? "double speed activated" : "single speed activated"));
+    log() << ((double_speed ? "double speed activated" : "normal speed activated"));
     return true;
 }
 

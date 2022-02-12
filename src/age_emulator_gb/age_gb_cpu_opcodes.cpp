@@ -1296,7 +1296,7 @@ void age::gb_cpu::execute_prefetched()
             READ_BYTE(m_prefetched_opcode, m_pc);
             TICK_MACHINE_CYCLE;
             m_bus.execute_stop();
-            m_clock.log(gb_log_category::lc_cpu) << "continuing after STOP, prefetched "
+            m_clock.log(gb_log_category::lc_cpu) << "continuing after STOP with prefetched op code "
                                                  << log_hex8(m_prefetched_opcode);
             return;
         }
