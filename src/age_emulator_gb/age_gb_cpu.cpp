@@ -69,10 +69,12 @@ namespace
 
 age::gb_cpu::gb_cpu(const gb_device&         device,
                     gb_clock&                clock,
+                    gb_events&               events,
                     gb_interrupt_dispatcher& interrupts,
                     gb_bus&                  bus)
     : m_device(device),
       m_clock(clock),
+      m_events(events),
       m_interrupts(interrupts),
       m_bus(bus),
       m_pc(0x0100),

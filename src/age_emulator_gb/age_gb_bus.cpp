@@ -69,16 +69,16 @@ namespace
 //
 //---------------------------------------------------------
 
-age::gb_bus::gb_bus(const gb_device&        device,
-                    gb_clock&               clock,
-                    gb_interrupt_registers& interrupts,
-                    gb_events&              events,
-                    gb_memory&              memory,
-                    gb_sound&               sound,
-                    gb_lcd&                 lcd,
-                    gb_timer&               timer,
-                    gb_joypad&              joypad,
-                    gb_serial&              serial)
+age::gb_bus::gb_bus(const gb_device&         device,
+                    gb_clock&                clock,
+                    gb_interrupt_dispatcher& interrupts,
+                    gb_events&               events,
+                    gb_memory&               memory,
+                    gb_sound&                sound,
+                    gb_lcd&                  lcd,
+                    gb_timer&                timer,
+                    gb_joypad&               joypad,
+                    gb_serial&               serial)
     : m_device(device),
       m_clock(clock),
       m_interrupts(interrupts),
@@ -509,6 +509,10 @@ void age::gb_bus::handle_events()
                 m_timer.trigger_interrupt();
                 break;
 
+            case gb_event::unhalt:
+                m_interrupts.unhalt();
+                break;
+
             case gb_event::start_oam_dma:
                 m_oam_dma.handle_start_dma_event();
                 break;
@@ -625,8 +629,6 @@ void age::gb_bus::execute_stop()
     m_lcd.after_speed_change();
     m_sound.after_speed_change();
     m_timer.after_speed_change();
-
-    m_clock.tick_speed_change_delay();
 }
 
 void age::gb_bus::set_back_clock(int clock_cycle_offset)

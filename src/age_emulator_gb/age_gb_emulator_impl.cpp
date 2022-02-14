@@ -173,9 +173,14 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         }
         else if (m_interrupts.halted() || m_cpu.is_frozen())
         {
-            int fast_forward_cycle = get_fast_forward_halt_cycles(cycle_to_reach);
-            AGE_ASSERT(fast_forward_cycle >= m_clock.get_clock_cycle())
-            m_clock.tick_clock_cycles(fast_forward_cycle - m_clock.get_clock_cycle());
+            int fast_forward_cycles = get_fast_forward_halt_cycles(cycle_to_reach);
+            AGE_ASSERT(fast_forward_cycles >= 0)
+            m_interrupts.log() << "CPU halted ("
+                               << (m_clock.is_double_speed() ? "double" : "normal")
+                               << " speed), fast forwarding to clock cycle "
+                               << (m_clock.get_clock_cycle() + fast_forward_cycles)
+                               << " (skipping " << fast_forward_cycles << " clock cycles)";
+            m_clock.tick_clock_cycles(fast_forward_cycles);
             // handle events:
             //  - HALT: may be terminated by interrupt
             //  - frozen CPU: keep overall state consistent to prevent set_back_clock() errors
@@ -233,21 +238,27 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 
 int age::gb_emulator_impl::get_fast_forward_halt_cycles(int cycle_to_reach) const
 {
+    int current_clk = m_clock.get_clock_cycle();
+    AGE_ASSERT(current_clk < cycle_to_reach)
+
     // get the maximal cycle we can fast-forward to
-    int next_event_cycles  = m_events.get_next_event_cycle();
-    int fast_forward_cycle = (next_event_cycles == gb_no_clock_cycle)
+    int next_event_cycle   = m_events.get_next_event_cycle();
+    int fast_forward_cycle = (next_event_cycle == gb_no_clock_cycle)
                                  ? cycle_to_reach
-                                 : std::min(cycle_to_reach, next_event_cycles);
+                                 : std::min(cycle_to_reach, next_event_cycle);
 
     // make sure we fast-forward in complete m-cycles
-    int m_cycle_clocks = m_clock.get_machine_cycle_clocks();
-    int fraction = fast_forward_cycle & (m_cycle_clocks - 1);
+    // (don't align absolute clock cycles to not mess up the alignment,
+    // e.g. after multiple speed switches)
+    int fast_forward_clk_diff = fast_forward_cycle - current_clk;
+    int t4_cycles             = m_clock.get_machine_cycle_clocks();
+    int fraction              = fast_forward_clk_diff & (t4_cycles - 1);
     if (fraction)
     {
-        fast_forward_cycle += m_cycle_clocks - fraction;
+        fast_forward_clk_diff += t4_cycles - fraction;
     }
 
-    return fast_forward_cycle;
+    return fast_forward_clk_diff;
 }
 
 
@@ -276,7 +287,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
       m_joypad(m_device, m_interrupts),
       m_serial(m_device, m_clock, m_interrupts, m_events),
       m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
-      m_cpu(m_device, m_clock, m_interrupts, m_bus)
+      m_cpu(m_device, m_clock, m_events, m_interrupts, m_bus)
 {
     m_memory.init_vram(m_device.is_cgb_device());
 }

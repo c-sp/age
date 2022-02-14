@@ -25,6 +25,7 @@
 
 #include "age_gb_clock.hpp"
 #include "age_gb_device.hpp"
+#include "age_gb_events.hpp"
 
 
 
@@ -98,6 +99,7 @@ namespace age
         void                  finish_dispatch();
 
         [[nodiscard]] bool halted() const;
+        void               unhalt();
         bool               halt();
     };
 

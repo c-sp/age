@@ -48,6 +48,7 @@ namespace age
     public:
         gb_cpu(const gb_device&         device,
                gb_clock&                clock,
+               gb_events&               events,
                gb_interrupt_dispatcher& interrupts,
                gb_bus&                  bus);
         ~gb_cpu() = default;
@@ -66,6 +67,7 @@ namespace age
 
         const gb_device&         m_device;
         gb_clock&                m_clock;
+        gb_events&               m_events;
         gb_interrupt_dispatcher& m_interrupts;
         gb_bus&                  m_bus;
 

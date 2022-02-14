@@ -39,9 +39,13 @@ namespace age
         serial_transfer_finished = 4,
         timer_interrupt          = 5,
 
-        start_oam_dma = 6,
+        //! The unhalt event is scheduled by the STOP instruction to terminate the period of
+        //! oscillation stabilization (HALT mode) that follows each STOP.
+        unhalt = 6,
 
-        none = 7 // must be the last value
+        start_oam_dma = 7,
+
+        none = 8 // must be the last value
     };
 
 

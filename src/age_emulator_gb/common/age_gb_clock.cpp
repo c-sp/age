@@ -91,14 +91,6 @@ void age::gb_clock::set_back_clock(int clock_cycle_offset)
 
 
 
-void age::gb_clock::tick_speed_change_delay()
-{
-    // same number of machine cycles, different number of T4 cycles
-    int delay = is_double_speed() ? 0x10000 : 0x20000;
-    log() << "applying speed change delay of " << log_hex(delay) << " clock cycles";
-    m_clock_cycle += delay;
-}
-
 bool age::gb_clock::change_speed()
 {
     if ((m_key1 & 1) == 0)

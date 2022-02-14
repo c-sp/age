@@ -94,7 +94,6 @@ namespace age
         void tick_clock_cycles(int clock_cycles);
         void set_back_clock(int clock_cycle_offset);
 
-        void tick_speed_change_delay();
         bool change_speed();
 
         [[nodiscard]] uint8_t read_key1() const;

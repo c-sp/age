@@ -1292,12 +1292,23 @@ void age::gb_cpu::execute_prefetched()
         case 0x00: break; // NOP
 
         case 0x10: { // STOP
-            m_clock.log(gb_log_category::lc_cpu) << "STOP encountered (no STOP M-cycle executed yet)";
+            m_interrupts.log() << "STOP encountered (no STOP M-cycle executed yet)";
             READ_BYTE(m_prefetched_opcode, m_pc);
+            m_interrupts.log() << "STOP: prefetched op code " << log_hex8(m_prefetched_opcode);
             TICK_MACHINE_CYCLE;
             m_bus.execute_stop();
-            m_clock.log(gb_log_category::lc_cpu) << "continuing after STOP with prefetched op code "
-                                                 << log_hex8(m_prefetched_opcode);
+            if (m_interrupts.halt())
+            {
+                // same number of machine cycles, different number of T4 cycles
+                int clk_offset = m_clock.is_double_speed() ? 0x10000 : 0x20000;
+                m_events.schedule_event(gb_event::unhalt, clk_offset);
+                m_interrupts.log() << "STOP: HALT mode period after STOP lasts until clock cycle "
+                                   << m_events.get_event_cycle(gb_event::unhalt);
+            }
+            else
+            {
+                m_interrupts.log() << "STOP: HALT mode period after STOP terminated immediately";
+            }
             return;
         }
 
@@ -1322,7 +1333,7 @@ void age::gb_cpu::execute_prefetched()
             m_clock.tick_machine_cycle();
             m_prefetched_opcode = m_bus.read_byte(m_pc);
 
-            m_bus.handle_events(); // make sure the IF register is up to date
+            m_bus.handle_events(); // make sure the IF register is up-to-date
             bool halted = m_interrupts.halt();
             if (halted)
             {

@@ -112,7 +112,7 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
     if (clks_diff < half_mcycle)
     {
         m_clock.tick_machine_cycle();
-        msg << "\n    * additional HALT termination M-cycle"
+        msg << "\n    * additional DMG HALT termination M-cycle"
             << " (interrupt occurred " << clks_diff << " T4-cycles ago)";
     }
 
@@ -219,6 +219,12 @@ void age::gb_interrupt_dispatcher::finish_dispatch()
 bool age::gb_interrupt_dispatcher::halted() const
 {
     return m_halted;
+}
+
+void age::gb_interrupt_dispatcher::unhalt()
+{
+    log() << "HALT mode period terminated";
+    m_halted = false;
 }
 
 bool age::gb_interrupt_dispatcher::halt()

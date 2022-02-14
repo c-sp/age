@@ -134,16 +134,16 @@ namespace age
         AGE_DISABLE_MOVE(gb_bus);
 
     public:
-        gb_bus(const gb_device&        device,
-               gb_clock&               clock,
-               gb_interrupt_registers& interrupts,
-               gb_events&              events,
-               gb_memory&              memory,
-               gb_sound&               sound,
-               gb_lcd&                 lcd,
-               gb_timer&               timer,
-               gb_joypad&              joypad,
-               gb_serial&              serial);
+        gb_bus(const gb_device&         device,
+               gb_clock&                clock,
+               gb_interrupt_dispatcher& interrupts,
+               gb_events&               events,
+               gb_memory&               memory,
+               gb_sound&                sound,
+               gb_lcd&                  lcd,
+               gb_timer&                timer,
+               gb_joypad&               joypad,
+               gb_serial&               serial);
 
         ~gb_bus() = default;
 
@@ -165,17 +165,17 @@ namespace age
         void reset_div(bool during_stop);
         void write_hdma5(uint8_t value);
 
-        const gb_device&        m_device;
-        gb_clock&               m_clock;
-        gb_interrupt_registers& m_interrupts;
-        gb_events&              m_events;
-        gb_memory&              m_memory;
-        gb_sound&               m_sound;
-        gb_lcd&                 m_lcd;
-        gb_timer&               m_timer;
-        gb_joypad&              m_joypad;
-        gb_serial&              m_serial;
-        gb_oam_dma              m_oam_dma;
+        const gb_device&         m_device;
+        gb_clock&                m_clock;
+        gb_interrupt_dispatcher& m_interrupts;
+        gb_events&               m_events;
+        gb_memory&               m_memory;
+        gb_sound&                m_sound;
+        gb_lcd&                  m_lcd;
+        gb_timer&                m_timer;
+        gb_joypad&               m_joypad;
+        gb_serial&               m_serial;
+        gb_oam_dma               m_oam_dma;
 
         uint8_array<0x200> m_high_ram; // 0xFE00 - 0xFFFF (including OAM ram and registers for easier handling)
         uint8_t            m_rp   = 0x3E;
