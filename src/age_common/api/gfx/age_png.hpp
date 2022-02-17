@@ -94,6 +94,11 @@ namespace age
                                     int   screen_width,
                                     int   screen_height)
     {
+        if ((screen_width < 1) || (screen_height <= 1))
+        {
+            return {};
+        }
+
         // check png signature
         uint8_array<8> sig;
         fread(sig.data(), 1, 8, fp);
@@ -104,12 +109,13 @@ namespace age
 
         // allocate pixel buffer before any png data structures
         // to prevent memory leaks as we have to manually free png data structures
-        age::pixel_vector pixels(screen_width * screen_height, age::pixel());
+        size_t screen_width_u = screen_width;
+        age::pixel_vector pixels(screen_width_u * screen_height, age::pixel());
 
         png_bytep row_pointers[screen_height];
         for (int i = 0; i < screen_height; i++)
         {
-            row_pointers[i] = reinterpret_cast<unsigned char*>(&pixels[i * screen_width]);
+            row_pointers[i] = reinterpret_cast<unsigned char*>(&pixels[i * screen_width_u]);
         }
 
         // create png data structures
