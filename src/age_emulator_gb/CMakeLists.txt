@@ -16,11 +16,10 @@ add_library(
         lcd/palettes/age_gb_lcd_palettes.cpp
         lcd/palettes/age_gb_lcd_palettes_cgb.cpp
         lcd/palettes/age_gb_lcd_palettes_compat.cpp
-        lcd/render/age_gb_lcd_render.cpp
-        lcd/render/age_gb_lcd_dot_renderer.cpp
+        lcd/render/age_gb_lcd_fifo_renderer.cpp
         lcd/render/age_gb_lcd_line_renderer.cpp
+        lcd/render/age_gb_lcd_renderer.cpp
         lcd/render/age_gb_lcd_sprites.cpp
-        lcd/render/age_gb_lcd_window_check.hpp
         lcd/age_gb_lcd.cpp
         lcd/age_gb_lcd_irqs.cpp
         lcd/age_gb_lcd_line.cpp

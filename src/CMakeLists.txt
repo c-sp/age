@@ -18,21 +18,21 @@ else ()
     message("compiling AGE with logging disabled")
 endif (COMPILE_LOGGER)
 
-# Compile AGE with (experimental & unfinished) dot rendering enabled?
-OPTION(COMPILE_DOT_RENDERER "compile AGE with dot rendering enabled") # disabled by default
-if (COMPILE_DOT_RENDERER)
-    message("compiling AGE with dot rendering enabled")
-    ADD_DEFINITIONS(-DAGE_COMPILE_DOT_RENDERER)
+# Compile AGE with (experimental & unfinished) fifo rendering enabled?
+OPTION(COMPILE_FIFO_RENDERER "compile AGE with fifo rendering enabled") # disabled by default
+if (COMPILE_FIFO_RENDERER)
+    message("compiling AGE with fifo rendering enabled")
+    ADD_DEFINITIONS(-DAGE_COMPILE_FIFO_RENDERER)
 
-    OPTION(FORCE_DOT_RENDERER "compile AGE with forced dot rendering enabled") # disabled by default
-    if (FORCE_DOT_RENDERER)
-        message("compiling AGE with forced dot rendering enabled")
-        ADD_DEFINITIONS(-DAGE_FORCE_DOT_RENDERER)
-    endif (FORCE_DOT_RENDERER)
+    OPTION(FORCE_FIFO_RENDERER "compile AGE with forced fifo rendering enabled") # disabled by default
+    if (FORCE_FIFO_RENDERER)
+        message("compiling AGE with forced fifo rendering enabled")
+        ADD_DEFINITIONS(-DAGE_FORCE_FIFO_RENDERER)
+    endif (FORCE_FIFO_RENDERER)
 
 else ()
-    message("compiling AGE with dot rendering disabled")
-endif (COMPILE_DOT_RENDERER)
+    message("compiling AGE with fifo rendering disabled")
+endif (COMPILE_FIFO_RENDERER)
 
 
 

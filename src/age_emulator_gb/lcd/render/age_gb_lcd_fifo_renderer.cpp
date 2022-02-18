@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_gb_lcd_render.hpp"
+#include "age_gb_lcd_fifo_renderer.hpp"
 
 #include <age_debug.hpp>
 
@@ -35,14 +35,13 @@ namespace
 #endif
 
 
-
-age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_device&            device,
-                                              const gb_lcd_render_common& common,
-                                              const gb_lcd_palettes&      palettes,
-                                              const gb_lcd_sprites&       sprites,
-                                              const uint8_t*              video_ram,
-                                              gb_window_check&            window,
-                                              screen_buffer&              screen_buffer)
+age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              device,
+                                                const gb_lcd_renderer_common& common,
+                                                const gb_lcd_palettes&        palettes,
+                                                const gb_lcd_sprites&         sprites,
+                                                const uint8_t*                video_ram,
+                                                gb_window_check&              window,
+                                                screen_buffer&                screen_buffer)
     : m_device(device),
       m_common(common),
       m_palettes(palettes),
@@ -55,34 +54,34 @@ age::gb_lcd_dot_renderer::gb_lcd_dot_renderer(const gb_device&            device
 
 
 
-bool age::gb_lcd_dot_renderer::in_progress() const
+bool age::gb_lcd_fifo_renderer::in_progress() const
 {
     return m_line.m_line >= 0;
 }
 
-bool age::gb_lcd_dot_renderer::stat_mode0() const
+bool age::gb_lcd_fifo_renderer::stat_mode0() const
 {
     return !in_progress() || (m_next_fetcher_step == fetcher_step::finish_line);
 }
 
-void age::gb_lcd_dot_renderer::set_clks_tile_data_change(gb_current_line at_line)
+void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_line)
 {
     AGE_ASSERT(m_device.is_cgb_device())
     m_clks_tile_data_change = at_line;
 }
 
-void age::gb_lcd_dot_renderer::set_clks_bgp_change(gb_current_line at_line)
+void age::gb_lcd_fifo_renderer::set_clks_bgp_change(gb_current_line at_line)
 {
     AGE_ASSERT(m_device.is_dmg_device())
     m_clks_bgp_change = at_line;
 }
 
-void age::gb_lcd_dot_renderer::reset()
+void age::gb_lcd_fifo_renderer::reset()
 {
     m_line = gb_no_line;
 }
 
-void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line, bool is_first_frame)
+void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_first_frame)
 {
     AGE_ASSERT(!in_progress())
     bool is_line_zero = is_first_frame && (line.m_line == 0);
@@ -111,13 +110,13 @@ void age::gb_lcd_dot_renderer::begin_new_line(gb_current_line line, bool is_firs
     continue_line(line);
 }
 
-bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
+bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
 {
     AGE_ASSERT(in_progress())
     AGE_ASSERT(until.m_line >= m_line.m_line)
 
     // deactivate window?
-    // (LCD registers are constant during this LCD update, so we can check this upfront)
+    // (LCD registers are constant during continue_line(), so we can check this upfront)
     if (!is_window_enabled(m_common.get_lcdc()))
     {
         m_x_pos_win_start = int_max;
@@ -175,8 +174,9 @@ bool age::gb_lcd_dot_renderer::continue_line(gb_current_line until)
 
 
 
-void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
+void age::gb_lcd_fifo_renderer::update_line_stage(int until_line_clks)
 {
+    AGE_ASSERT(until_line_clks <= m_next_fetcher_clks)
     AGE_ASSERT(until_line_clks <= gb_clock_cycles_per_lcd_line)
     // m_line.m_line_clks may be > until_line_clks
     // (e.g. when starting window rendering)
@@ -208,16 +208,15 @@ void age::gb_lcd_dot_renderer::update_line_stage(int until_line_clks)
         }
         // terminate loop early if the fetcher has been reset
         // (to initialize window or sprite rendering)
-        if (m_next_fetcher_clks <= m_line.m_line_clks)
-        {
-            break;
-        }
+        until_line_clks = std::min(m_next_fetcher_clks, until_line_clks);
     }
 
-    // note that in case of a fetcher reset m_line.m_line_clks may still be smaller than until_line_clks
+    // the next fetcher step might have been changed during the upper loop
+    AGE_ASSERT(until_line_clks <= m_next_fetcher_clks)
+    AGE_ASSERT(m_line.m_line_clks <= m_next_fetcher_clks)
 }
 
-void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
+void age::gb_lcd_fifo_renderer::line_stage_mode2(int until_line_clks)
 {
     AGE_ASSERT(m_line.m_line_clks < m_clks_begin_align_scx)
     m_line.m_line_clks = until_line_clks;
@@ -231,7 +230,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode2(int until_line_clks)
     }
 }
 
-void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
+void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
 {
     AGE_ASSERT(m_line.m_line_clks >= m_clks_begin_align_scx)
     uint8_t scx = m_common.m_scx & 0b111;
@@ -267,8 +266,10 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_align_scx(int until_line_clks)
     }
 }
 
-void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
+void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
 {
+    AGE_ASSERT(m_next_fetcher_clks >= until_line_clks)
+    AGE_ASSERT(m_next_fetcher_clks >= m_line.m_line_clks)
     AGE_ASSERT(m_line.m_line_clks > m_clks_begin_align_scx)
     AGE_ASSERT(m_x_pos <= x_pos_last_px)
     for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
@@ -285,7 +286,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             m_window.next_window_line();
             m_x_pos_win_start      = m_x_pos - 6;
             m_alignment_x          = 7 - m_common.m_wx;
-            m_line_stage           = line_stage::mode3_init_window;
+            m_line_stage           = line_stage::mode3_init_window; // loop terminated after this pixel
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
             m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
             m_next_fetcher_clks    = m_line.m_line_clks + 2;
@@ -303,7 +304,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             plot_pixel();
         }
 
-        // next dot (keep x-pos & line-clks in sync)
+        // next pixel (keep x-pos & line-clks in sync)
         ++m_x_pos;
         ++m_line.m_line_clks;
 
@@ -328,14 +329,15 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_render(int until_line_clks)
             break;
         }
     }
+    AGE_ASSERT(m_next_fetcher_clks >= m_line.m_line_clks)
 }
 
-void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
+void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks)
 {
     AGE_ASSERT(m_line.m_line_clks < m_clks_end_window_init)
 
     // window termination can occur only on the update's first cycle
-    // as LCD registers are constant during LCD updates
+    // as LCD registers are constant during continue_line()
     if (m_x_pos_win_start == int_max)
     {
         if (m_device.is_cgb_device() || ((m_clks_end_window_init - m_line.m_line_clks) >= 6))
@@ -367,7 +369,7 @@ void age::gb_lcd_dot_renderer::line_stage_mode3_init_window(int until_line_clks)
     }
 }
 
-void age::gb_lcd_dot_renderer::plot_pixel()
+void age::gb_lcd_fifo_renderer::plot_pixel()
 {
     // align the pixel FIFO right before setting the first pixel
     // (the first N pixel are discarded based on SCX or WX)
@@ -411,7 +413,7 @@ void age::gb_lcd_dot_renderer::plot_pixel()
     }
 }
 
-bool age::gb_lcd_dot_renderer::init_window()
+bool age::gb_lcd_fifo_renderer::init_window()
 {
     AGE_ASSERT(m_x_pos <= x_pos_last_px)
     if (m_x_pos == m_common.m_wx)
@@ -445,7 +447,7 @@ bool age::gb_lcd_dot_renderer::init_window()
 
 
 
-void age::gb_lcd_dot_renderer::schedule_next_fetcher_step(int clks_offset, fetcher_step step)
+void age::gb_lcd_fifo_renderer::schedule_next_fetcher_step(int clks_offset, fetcher_step step)
 {
     AGE_ASSERT(clks_offset > 0)
     m_next_fetcher_clks += clks_offset;
@@ -453,7 +455,7 @@ void age::gb_lcd_dot_renderer::schedule_next_fetcher_step(int clks_offset, fetch
     AGE_ASSERT(m_next_fetcher_clks < gb_clock_cycles_per_lcd_line)
 }
 
-void age::gb_lcd_dot_renderer::fetch_bg_win_tile_id()
+void age::gb_lcd_fifo_renderer::fetch_bg_win_tile_id()
 {
     m_fetching_window = m_x_pos_win_start <= m_x_pos;
 
@@ -480,7 +482,7 @@ void age::gb_lcd_dot_renderer::fetch_bg_win_tile_id()
                 << " with attributes 0x" << (int) m_fetched_bg_win_tile_attributes << std::dec)
 }
 
-void age::gb_lcd_dot_renderer::fetch_bg_win_bitplane(int bitplane_offset)
+void age::gb_lcd_fifo_renderer::fetch_bg_win_bitplane(int bitplane_offset)
 {
     AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
 
@@ -520,7 +522,7 @@ void age::gb_lcd_dot_renderer::fetch_bg_win_bitplane(int bitplane_offset)
                                                      : m_common.m_xflip_cache[bitplane];
 }
 
-void age::gb_lcd_dot_renderer::push_bg_win_bitplanes()
+void age::gb_lcd_fifo_renderer::push_bg_win_bitplanes()
 {
     unsigned bitplane0 = m_fetched_bg_win_bitplane[0];
     unsigned bitplane1 = m_fetched_bg_win_bitplane[1];

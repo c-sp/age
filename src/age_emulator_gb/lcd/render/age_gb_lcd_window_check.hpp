@@ -21,44 +21,10 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
-#include <age_types.hpp>
+#include "../common/age_gb_lcd_common.hpp"
 
 namespace age
 {
-    constexpr uint8_t gb_lcdc_enable      = 0x80;
-    constexpr uint8_t gb_lcdc_win_map     = 0x40;
-    constexpr uint8_t gb_lcdc_win_enable  = 0x20;
-    constexpr uint8_t gb_lcdc_bg_win_data = 0x10;
-    constexpr uint8_t gb_lcdc_bg_map      = 0x08;
-    constexpr uint8_t gb_lcdc_obj_size    = 0x04;
-    constexpr uint8_t gb_lcdc_obj_enable  = 0x02;
-    constexpr uint8_t gb_lcdc_bg_enable   = 0x01;
-
-    constexpr bool is_window_enabled(uint8_t lcdc)
-    {
-        return (lcdc & gb_lcdc_win_enable) != 0;
-    }
-
-
-
-    struct gb_current_line
-    {
-        int m_line;
-        int m_line_clks;
-
-        [[nodiscard]] uint64_t as_64bits() const
-        {
-            uint64_t result = 0;
-            memcpy(&result, &m_line, sizeof(uint64_t));
-            return result;
-        }
-    };
-
-    constexpr gb_current_line gb_no_line = {.m_line = -1, .m_line_clks = gb_no_clock_cycle};
-
-
-
     class gb_window_check
     {
     public:
@@ -136,7 +102,7 @@ namespace age
             m_last_window_off = at_line;
         }
 
-        [[nodiscard]] bool window_switched_off_on(gb_current_line line)
+        [[nodiscard]] bool window_switched_off_on(gb_current_line line) const
         {
             return m_last_window_off.as_64bits() == line.as_64bits();
         }

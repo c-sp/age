@@ -48,10 +48,13 @@ HEADERS += \
     age_emulator_gb/age_gb_emulator_impl.hpp \
     age_emulator_gb/age_gb_joypad.hpp \
     age_emulator_gb/lcd/palettes/age_gb_lcd_palettes.hpp \
-    age_emulator_gb/lcd/age_gb_lcd.hpp \
-    age_emulator_gb/lcd/render/age_gb_lcd_render.hpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_fifo_renderer.hpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_line_renderer.hpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_renderer.hpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_renderer_common.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_sprites.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_window_check.hpp \
+    age_emulator_gb/lcd/age_gb_lcd.hpp \
     age_emulator_gb/age_gb_memory.hpp \
     age_emulator_gb/age_gb_oam_dma.hpp \
     age_emulator_gb/age_gb_serial.hpp \
@@ -92,18 +95,18 @@ SOURCES += \
     age_emulator_gb/age_gb_emulator.cpp \
     age_emulator_gb/age_gb_emulator_impl.cpp \
     age_emulator_gb/age_gb_joypad.cpp \
-    age_emulator_gb/lcd/age_gb_lcd.cpp \
-    age_emulator_gb/lcd/age_gb_lcd_irqs.cpp \
-    age_emulator_gb/lcd/age_gb_lcd_oam_access.cpp \
     age_emulator_gb/lcd/palettes/age_gb_lcd_palettes.cpp \
     age_emulator_gb/lcd/palettes/age_gb_lcd_palettes_cgb.cpp \
     age_emulator_gb/lcd/palettes/age_gb_lcd_palettes_compat.cpp \
-    age_emulator_gb/lcd/age_gb_lcd_registers.cpp \
-    age_emulator_gb/lcd/render/age_gb_lcd_dot_renderer.cpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_fifo_renderer.cpp \
     age_emulator_gb/lcd/render/age_gb_lcd_line_renderer.cpp \
-    age_emulator_gb/lcd/render/age_gb_lcd_render.cpp \
-    age_emulator_gb/lcd/age_gb_lcd_line.cpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_renderer.cpp \
     age_emulator_gb/lcd/render/age_gb_lcd_sprites.cpp \
+    age_emulator_gb/lcd/age_gb_lcd.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_irqs.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_line.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_oam_access.cpp \
+    age_emulator_gb/lcd/age_gb_lcd_registers.cpp \
     age_emulator_gb/age_gb_memory.cpp \
     age_emulator_gb/age_gb_memory_init.cpp \
     age_emulator_gb/age_gb_oam_dma.cpp \

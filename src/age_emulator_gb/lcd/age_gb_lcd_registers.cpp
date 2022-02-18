@@ -181,7 +181,7 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line)
     }
 
     // mode 3 or mode 0
-#ifdef AGE_COMPILE_DOT_RENDERER
+#ifdef AGE_COMPILE_FIFO_RENDERER
     update_state(1);
     return m_render.stat_mode0() ? 0 : 3;
 

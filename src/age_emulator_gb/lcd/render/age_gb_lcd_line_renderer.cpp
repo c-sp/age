@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_gb_lcd_render.hpp"
+#include "age_gb_lcd_line_renderer.hpp"
 
 #include <age_debug.hpp>
 
@@ -22,13 +22,13 @@
 
 
 
-age::gb_lcd_line_renderer::gb_lcd_line_renderer(const gb_device&            device,
-                                                const gb_lcd_render_common& common,
-                                                const gb_lcd_palettes&      palettes,
-                                                const gb_lcd_sprites&       sprites,
-                                                const uint8_t*              video_ram,
-                                                gb_window_check&            window,
-                                                screen_buffer&              screen_buffer)
+age::gb_lcd_line_renderer::gb_lcd_line_renderer(const gb_device&              device,
+                                                const gb_lcd_renderer_common& common,
+                                                const gb_lcd_palettes&        palettes,
+                                                const gb_lcd_sprites&         sprites,
+                                                const uint8_t*                video_ram,
+                                                gb_window_check&              window,
+                                                screen_buffer&                screen_buffer)
     : m_device(device),
       m_common(common),
       m_palettes(palettes),

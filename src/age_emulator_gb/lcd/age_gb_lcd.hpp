@@ -29,7 +29,7 @@
 #include "../common/age_gb_events.hpp"
 #include "../common/age_gb_interrupts.hpp"
 
-#include "render/age_gb_lcd_render.hpp"
+#include "render/age_gb_lcd_renderer.hpp"
 
 
 
@@ -226,7 +226,7 @@ namespace age
         gb_lcd_irqs      m_lcd_irqs;
         gb_lcd_palettes  m_palettes;
         gb_lcd_sprites   m_sprites;
-        gb_lcd_render    m_render;
+        gb_lcd_renderer  m_render;
 
         uint8_t m_retained_ly_match = 0;
     };
