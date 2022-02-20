@@ -20,8 +20,7 @@
 
 namespace
 {
-    constexpr int x_pos_first_px = 8;
-    constexpr int x_pos_last_px  = age::gb_screen_width + x_pos_first_px - 1;
+    constexpr int x_pos_last_px = age::gb_screen_width + age::gb_x_pos_first_px - 1;
 
 } // namespace
 
@@ -48,7 +47,8 @@ age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              de
       m_sprites(sprites),
       m_video_ram(video_ram),
       m_window(window),
-      m_screen_buffer(screen_buffer)
+      m_screen_buffer(screen_buffer),
+      m_fetcher(device, common, video_ram, window, m_bg_win_fifo)
 {
 }
 
@@ -56,18 +56,17 @@ age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              de
 
 bool age::gb_lcd_fifo_renderer::in_progress() const
 {
-    return m_line.m_line >= 0;
+    return (m_line.m_line >= 0) && (m_line.m_line_clks < gb_clock_cycles_per_lcd_line);
 }
 
 bool age::gb_lcd_fifo_renderer::stat_mode0() const
 {
-    return !in_progress() || (m_next_fetcher_step == fetcher_step::finish_line);
+    return !in_progress() || m_fetcher.during_mode0();
 }
 
 void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_line)
 {
-    AGE_ASSERT(m_device.is_cgb_device())
-    m_clks_tile_data_change = at_line;
+    m_fetcher.set_clks_tile_data_change(at_line);
 }
 
 void age::gb_lcd_fifo_renderer::set_clks_bgp_change(gb_current_line at_line)
@@ -99,13 +98,7 @@ void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_fir
     // no need to reset all members
     // m_alignment_scx = 0;
 
-    m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
-    m_next_fetcher_clks = is_line_zero ? 87 : 85;
-    // no need to reset all members
-    // m_fetched_bg_win_tile_id         = 0;
-    // m_fetched_bg_win_tile_attributes = 0;
-    // m_fetched_bg_win_bitplane        = {};
-    m_clks_tile_data_change = gb_no_line;
+    m_fetcher.init_for_line(line.m_line, is_line_zero);
 
     continue_line(line);
 }
@@ -131,52 +124,32 @@ bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
                 << " update until clks < " << current_line_clks
                 << ", window enabled = " << is_window_enabled(m_common.get_lcdc()))
 
-    while (std::min(m_next_fetcher_clks, m_line.m_line_clks) < current_line_clks)
+    AGE_ASSERT(current_line_clks <= gb_clock_cycles_per_lcd_line)
+    while (std::min(m_fetcher.next_step_clks(), m_line.m_line_clks) < current_line_clks)
     {
         // update_line_stage() may modify the next fetcher cycle.
         // We have to continue the loop until the fetcher has caught up.
         // As m_line_clks might already be equal to current_line_clks,
         // the std::min() in the loop condition is required.
-        update_line_stage(std::min(m_next_fetcher_clks, current_line_clks));
+        update_line_stage(std::min(m_fetcher.next_step_clks(), current_line_clks));
 
-        if (m_next_fetcher_clks < current_line_clks)
+        if (m_fetcher.next_step_clks() < current_line_clks)
         {
-            switch (m_next_fetcher_step)
-            {
-                case fetcher_step::fetch_bg_win_tile_id:
-                    fetch_bg_win_tile_id();
-                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane0);
-                    break;
-
-                case fetcher_step::fetch_bg_win_bitplane0:
-                    fetch_bg_win_bitplane(0);
-                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane1);
-                    break;
-
-                case fetcher_step::fetch_bg_win_bitplane1:
-                    fetch_bg_win_bitplane(1);
-                    push_bg_win_bitplanes();
-                    schedule_next_fetcher_step(4, fetcher_step::fetch_bg_win_tile_id);
-                    break;
-
-                case fetcher_step::finish_line:
-                    reset();
-                    return true;
-            }
+            m_fetcher.next_step(m_x_pos, m_x_pos_win_start);
         }
     }
 
-    AGE_ASSERT(m_next_fetcher_clks >= current_line_clks)
-    AGE_ASSERT(m_line.m_line_clks < gb_clock_cycles_per_lcd_line)
+    AGE_ASSERT(m_fetcher.next_step_clks() >= current_line_clks)
+    AGE_ASSERT(m_line.m_line_clks <= gb_clock_cycles_per_lcd_line)
     AGE_ASSERT(m_line.m_line_clks >= current_line_clks)
-    return false;
+    return !in_progress();
 }
 
 
 
 void age::gb_lcd_fifo_renderer::update_line_stage(int until_line_clks)
 {
-    AGE_ASSERT(until_line_clks <= m_next_fetcher_clks)
+    AGE_ASSERT(until_line_clks <= m_fetcher.next_step_clks())
     AGE_ASSERT(until_line_clks <= gb_clock_cycles_per_lcd_line)
     // m_line.m_line_clks may be > until_line_clks
     // (e.g. when starting window rendering)
@@ -208,12 +181,12 @@ void age::gb_lcd_fifo_renderer::update_line_stage(int until_line_clks)
         }
         // terminate loop early if the fetcher has been reset
         // (to initialize window or sprite rendering)
-        until_line_clks = std::min(m_next_fetcher_clks, until_line_clks);
+        until_line_clks = std::min(m_fetcher.next_step_clks(), until_line_clks);
     }
 
     // the next fetcher step might have been changed during the upper loop
-    AGE_ASSERT(until_line_clks <= m_next_fetcher_clks)
-    AGE_ASSERT(m_line.m_line_clks <= m_next_fetcher_clks)
+    AGE_ASSERT(until_line_clks <= m_fetcher.next_step_clks())
+    AGE_ASSERT(m_line.m_line_clks <= m_fetcher.next_step_clks())
 }
 
 void age::gb_lcd_fifo_renderer::line_stage_mode2(int until_line_clks)
@@ -268,8 +241,8 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
 
 void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
 {
-    AGE_ASSERT(m_next_fetcher_clks >= until_line_clks)
-    AGE_ASSERT(m_next_fetcher_clks >= m_line.m_line_clks)
+    AGE_ASSERT(m_fetcher.next_step_clks() >= until_line_clks)
+    AGE_ASSERT(m_fetcher.next_step_clks() >= m_line.m_line_clks)
     AGE_ASSERT(m_line.m_line_clks > m_clks_begin_align_scx)
     AGE_ASSERT(m_x_pos <= x_pos_last_px)
     for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
@@ -288,8 +261,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
             m_alignment_x          = 7 - m_common.m_wx;
             m_line_stage           = line_stage::mode3_init_window; // loop terminated after this pixel
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
-            m_next_fetcher_step    = fetcher_step::fetch_bg_win_tile_id;
-            m_next_fetcher_clks    = m_line.m_line_clks + 2;
+            m_fetcher.restart_bg_win_fetch(m_line.m_line_clks + 2);
 
             LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
                         << " initialize window for next pixel"
@@ -299,7 +271,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
         }
 
         // set next pixel
-        if (m_x_pos >= x_pos_first_px)
+        if (m_x_pos >= gb_x_pos_first_px)
         {
             plot_pixel();
         }
@@ -311,9 +283,8 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
         // last pixel plotted
         if (m_x_pos > x_pos_last_px)
         {
-            m_line_stage        = line_stage::rendering_finished;
-            m_next_fetcher_clks = gb_clock_cycles_per_lcd_line - 1;
-            m_next_fetcher_step = fetcher_step::finish_line;
+            m_line_stage = line_stage::rendering_finished;
+            m_fetcher.finish_line();
             // don't miss any WY match in case WX is out of the visible range
             // as init_window() verifies WY only if WX matches
             m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
@@ -329,7 +300,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
             break;
         }
     }
-    AGE_ASSERT(m_next_fetcher_clks >= m_line.m_line_clks)
+    AGE_ASSERT(m_fetcher.next_step_clks() >= m_line.m_line_clks)
 }
 
 void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks)
@@ -347,12 +318,10 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
 
             m_line_stage = line_stage::mode3_render;
             m_line.m_line_clks += m_device.is_cgb_device() ? 1 : 0;
-            m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
-            m_next_fetcher_clks = m_line.m_line_clks;
+            m_bg_win_fifo.clear();
             // note that we keep m_alignment_x as the FIFO might run empty otherwise
             //! \todo restart previously fetched tile, is this correct?
-            m_bg_win_fifo.clear();
-            push_bg_win_bitplanes();
+            m_fetcher.restart_bg_win_fetch(m_line.m_line_clks, true);
             return;
         }
     }
@@ -360,10 +329,9 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
     m_line.m_line_clks = until_line_clks;
     if (m_line.m_line_clks >= m_clks_end_window_init)
     {
-        m_line_stage        = line_stage::mode3_render;
-        m_line.m_line_clks  = m_clks_end_window_init;
-        m_next_fetcher_step = fetcher_step::fetch_bg_win_tile_id;
-        m_next_fetcher_clks = m_line.m_line_clks + 1;
+        m_line_stage       = line_stage::mode3_render;
+        m_line.m_line_clks = m_clks_end_window_init;
+        m_fetcher.restart_bg_win_fetch(m_line.m_line_clks + 1);
         LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
                     << ", fifo size = " << m_bg_win_fifo.size())
     }
@@ -374,7 +342,7 @@ void age::gb_lcd_fifo_renderer::plot_pixel()
     // align the pixel FIFO right before setting the first pixel
     // (the first N pixel are discarded based on SCX or WX)
     bool bgp_glitch = false;
-    if (m_x_pos == x_pos_first_px)
+    if (m_x_pos == gb_x_pos_first_px)
     {
         LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): first pixel"
                     << ", bg-fifo-size=" << m_bg_win_fifo.size()
@@ -396,20 +364,20 @@ void age::gb_lcd_fifo_renderer::plot_pixel()
     bool wx_glitch = m_device.is_dmg_device()
                      && (m_x_pos_win_start < m_x_pos - 8) // not for the actual window activation
                      && (m_x_pos == m_common.m_wx + 1)
-                     && (m_next_fetcher_clks == m_line.m_line_clks + 1)
-                     && (m_next_fetcher_step == fetcher_step::fetch_bg_win_tile_id);
+                     && (m_fetcher.next_step_clks() == m_line.m_line_clks + 1)
+                     && m_fetcher.next_step_fetches_tile_id();
     if (wx_glitch)
     {
-        m_line_buffer[m_x_pos - x_pos_first_px] = m_palettes.get_color_zero_dmg();
+        m_line_buffer[m_x_pos - gb_x_pos_first_px] = m_palettes.get_color_zero_dmg();
     }
     else
     {
         AGE_ASSERT(!m_bg_win_fifo.empty())
         auto color_idx = m_bg_win_fifo[0];
         m_bg_win_fifo.pop_front();
-        m_line_buffer[m_x_pos - x_pos_first_px] = bgp_glitch
-                                                      ? m_palettes.get_color_bgp_glitch(color_idx)
-                                                      : m_palettes.get_color(color_idx);
+        m_line_buffer[m_x_pos - gb_x_pos_first_px] = bgp_glitch
+                                                         ? m_palettes.get_color_bgp_glitch(color_idx)
+                                                         : m_palettes.get_color(color_idx);
     }
 }
 
@@ -443,98 +411,4 @@ bool age::gb_lcd_fifo_renderer::init_window()
         }
     }
     return false;
-}
-
-
-
-void age::gb_lcd_fifo_renderer::schedule_next_fetcher_step(int clks_offset, fetcher_step step)
-{
-    AGE_ASSERT(clks_offset > 0)
-    m_next_fetcher_clks += clks_offset;
-    m_next_fetcher_step = step;
-    AGE_ASSERT(m_next_fetcher_clks < gb_clock_cycles_per_lcd_line)
-}
-
-void age::gb_lcd_fifo_renderer::fetch_bg_win_tile_id()
-{
-    m_fetching_window = m_x_pos_win_start <= m_x_pos;
-
-    int tile_vram_ofs = 0;
-    if (m_fetching_window)
-    {
-        int tile_line_ofs = (m_x_pos - m_x_pos_win_start) >> 3;
-        tile_vram_ofs     = m_common.m_win_tile_map_offset + ((m_window.current_window_line() & 0b11111000) << 2) + tile_line_ofs;
-    }
-    else
-    {
-        int bg_y          = m_common.m_scy + m_line.m_line;
-        int px_ofs        = ((m_x_pos < x_pos_first_px) || m_device.is_cgb_device()) ? 0 : 1;
-        int tile_line_ofs = ((m_common.m_scx + m_x_pos + px_ofs) >> 3) & 0b11111;
-        tile_vram_ofs     = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2) + tile_line_ofs;
-    }
-
-    m_fetched_bg_win_tile_id         = m_video_ram[tile_vram_ofs];          // bank 0
-    m_fetched_bg_win_tile_attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1 (always zero for DMG)
-
-    LOG("line " << m_line.m_line << " (" << m_next_fetcher_clks << "): fetched "
-                << (m_fetching_window ? "window" : "bg")
-                << " tile id 0x" << std::hex << (int) m_fetched_bg_win_tile_id
-                << " with attributes 0x" << (int) m_fetched_bg_win_tile_attributes << std::dec)
-}
-
-void age::gb_lcd_fifo_renderer::fetch_bg_win_bitplane(int bitplane_offset)
-{
-    AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
-
-    // CGB tile data glitch
-    if (m_clks_tile_data_change.m_line_clks == m_next_fetcher_clks)
-    {
-        AGE_ASSERT(m_device.is_cgb_device())
-        if (!(m_common.get_lcdc() & gb_lcdc_bg_win_data))
-        {
-            m_fetched_bg_win_bitplane[bitplane_offset] = m_common.m_xflip_cache[m_fetched_bg_win_tile_id];
-            return;
-        }
-    }
-
-    int tile_line = m_fetching_window
-                        ? m_window.current_window_line() & 0b111
-                        : (m_common.m_scy + m_line.m_line) & 0b111;
-    // y-flip
-    if (m_fetched_bg_win_tile_attributes & gb_tile_attrib_flip_y)
-    {
-        tile_line = 7 - tile_line;
-    }
-
-    // read tile data
-    int tile_data_ofs = (m_fetched_bg_win_tile_id ^ m_common.m_tile_xor) << 4; // 16 bytes per tile
-    tile_data_ofs += m_common.m_tile_data_offset;
-    tile_data_ofs += (m_fetched_bg_win_tile_attributes & gb_tile_attrib_vram_bank) << 10;
-    tile_data_ofs += tile_line * 2; // 2 bytes per line
-
-    auto bitplane = m_video_ram[tile_data_ofs + bitplane_offset];
-
-    // x-flip
-    // (we invert the x-flip for easier rendering:
-    // this way bit 0 is used for the leftmost pixel)
-    m_fetched_bg_win_bitplane[bitplane_offset] = (m_fetched_bg_win_tile_attributes & gb_tile_attrib_flip_x)
-                                                     ? bitplane
-                                                     : m_common.m_xflip_cache[bitplane];
-}
-
-void age::gb_lcd_fifo_renderer::push_bg_win_bitplanes()
-{
-    unsigned bitplane0 = m_fetched_bg_win_bitplane[0];
-    unsigned bitplane1 = m_fetched_bg_win_bitplane[1];
-
-    uint8_t palette_ofs = m_fetched_bg_win_tile_attributes & gb_tile_attrib_palette;
-    palette_ofs <<= 2;
-
-    bitplane1 <<= 1;
-    for (int i = 0; i < 8; ++i)
-    {
-        m_bg_win_fifo.push_back((bitplane0 & 0b01U) + (bitplane1 & 0b10U) + palette_ofs);
-        bitplane0 >>= 1;
-        bitplane1 >>= 1;
-    }
 }

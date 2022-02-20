@@ -57,11 +57,13 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         auto line = m_line.current_line();
 
         // tile data bit changed
+#ifdef AGE_COMPILE_FIFO_RENDERER
         if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
         {
             m_render.set_clks_tile_data_change(line);
             msg << "\n    * potential CGB glitch: tile data bit switched (LCD on)";
         }
+#endif
 
         // window flag switched
         if (diff & gb_lcdc_win_enable)

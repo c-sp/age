@@ -47,7 +47,9 @@ HEADERS += \
     age_emulator_gb/age_gb_cpu.hpp \
     age_emulator_gb/age_gb_emulator_impl.hpp \
     age_emulator_gb/age_gb_joypad.hpp \
+    age_emulator_gb/lcd/common/age_gb_lcd_common.hpp \
     age_emulator_gb/lcd/palettes/age_gb_lcd_palettes.hpp \
+    age_emulator_gb/lcd/render/age_gb_lcd_fifo_fetcher.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_fifo_renderer.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_line_renderer.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_renderer.hpp \

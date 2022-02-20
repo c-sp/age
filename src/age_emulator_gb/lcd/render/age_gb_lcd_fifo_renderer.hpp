@@ -23,6 +23,7 @@
 
 #include "../../common/age_gb_device.hpp"
 #include "../palettes/age_gb_lcd_palettes.hpp"
+#include "age_gb_lcd_fifo_fetcher.hpp"
 #include "age_gb_lcd_renderer_common.hpp"
 #include "age_gb_lcd_sprites.hpp"
 #include "age_gb_lcd_window_check.hpp"
@@ -80,18 +81,6 @@ namespace age
         void plot_pixel();
         bool init_window();
 
-        enum class fetcher_step
-        {
-            fetch_bg_win_tile_id,
-            fetch_bg_win_bitplane0,
-            fetch_bg_win_bitplane1,
-            finish_line,
-        };
-        void schedule_next_fetcher_step(int clks_offset, fetcher_step step);
-        void fetch_bg_win_tile_id();
-        void fetch_bg_win_bitplane(int bitplane_offset);
-        void push_bg_win_bitplanes();
-
         const gb_device&              m_device;
         const gb_lcd_renderer_common& m_common;
         const gb_lcd_palettes&        m_palettes;
@@ -101,6 +90,7 @@ namespace age
         screen_buffer&                m_screen_buffer;
 
         std::deque<uint8_t> m_bg_win_fifo{};
+        gb_lcd_fifo_fetcher m_fetcher;
 
         gb_current_line m_line                 = gb_no_line;
         line_stage      m_line_stage           = line_stage::mode2;
@@ -111,14 +101,6 @@ namespace age
         int             m_x_pos_win_start      = 0;
         int             m_alignment_x          = 0;
         gb_current_line m_clks_bgp_change      = gb_no_line;
-
-        fetcher_step    m_next_fetcher_step              = fetcher_step::fetch_bg_win_tile_id;
-        int             m_next_fetcher_clks              = gb_no_clock_cycle;
-        bool            m_fetching_window                = false;
-        uint8_t         m_fetched_bg_win_tile_id         = 0;
-        uint8_t         m_fetched_bg_win_tile_attributes = 0;
-        uint8_array<2>  m_fetched_bg_win_bitplane{};
-        gb_current_line m_clks_tile_data_change = gb_no_line;
     };
 
 } // namespace age

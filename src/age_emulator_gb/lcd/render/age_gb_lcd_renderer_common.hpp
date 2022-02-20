@@ -31,6 +31,8 @@
 
 namespace age
 {
+    //! common logic used by line- and fifo-renderer
+    //!
     class gb_lcd_renderer_common
     {
         AGE_DISABLE_COPY(gb_lcd_renderer_common);

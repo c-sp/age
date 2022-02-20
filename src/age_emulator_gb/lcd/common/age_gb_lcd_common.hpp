@@ -43,6 +43,8 @@ namespace age
     constexpr uint8_t gb_lcdc_obj_enable  = 0x02;
     constexpr uint8_t gb_lcdc_bg_enable   = 0x01;
 
+    constexpr int gb_x_pos_first_px = 8;
+
     constexpr bool is_window_enabled(uint8_t lcdc)
     {
         return (lcdc & gb_lcdc_win_enable) != 0;
