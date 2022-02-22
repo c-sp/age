@@ -110,12 +110,12 @@ void age::gb_lcd_line_renderer::render_line(int line)
         std::for_each(rbegin(sprites),
                       rend(sprites),
                       [&](const gb_sprite& sprite) {
-                          if (sprite.m_data.m_x && (sprite.m_data.m_x < gb_screen_width + 8))
+                          if (sprite.m_x && (sprite.m_x < gb_screen_width + 8))
                           {
-                              AGE_ASSERT((px0 + sprite.m_data.m_x) < gb_screen_width + 24)
+                              AGE_ASSERT((px0 + sprite.m_x) < gb_screen_width + 24)
                               render_sprite_tile(
-                                  &m_line[px0 + sprite.m_data.m_x - 8],
-                                  line - (sprite.m_data.m_y - 16),
+                                  &m_line[px0 + sprite.m_x - 8],
+                                  line - (sprite.m_y - 16),
                                   sprite);
                           }
                       });
@@ -174,7 +174,7 @@ age::pixel* age::gb_lcd_line_renderer::render_bg_tile(pixel* dst,
     }
 
     // bg palette
-    const pixel* palette = m_palettes.get_palette(attributes & gb_tile_attrib_palette);
+    const pixel* palette = m_palettes.get_palette(attributes & gb_tile_attrib_cgb_palette);
 
     // bg priority
     uint8_t priority = attributes & gb_tile_attrib_priority;
@@ -206,14 +206,14 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
     AGE_ASSERT((tile_line >= 0) && (tile_line < 16))
 
     // y-flip
-    uint8_t oam_attr = sprite.m_data.m_attributes;
+    uint8_t oam_attr = sprite.m_attributes;
     if (oam_attr & gb_tile_attrib_flip_y)
     {
         tile_line = m_sprites.get_sprite_size() - 1 - tile_line;
     }
 
     // read tile data
-    int tile_data_ofs = sprite.m_data.m_tile_nr & m_sprites.get_tile_nr_mask();
+    int tile_data_ofs = sprite.m_tile_nr & m_sprites.get_tile_nr_mask();
     tile_data_ofs <<= 4; // 16 bytes per tile
     tile_data_ofs += (oam_attr & gb_tile_attrib_vram_bank) << 10;
     tile_data_ofs += tile_line << 1; // 2 bytes per line
@@ -231,7 +231,7 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
     }
 
     // palette
-    const pixel* palette = m_palettes.get_palette(sprite.m_data.m_palette_idx);
+    const pixel* palette = m_palettes.get_palette(sprite.m_palette_idx);
 
     // bg priority
     uint8_t priority = oam_attr & gb_tile_attrib_priority;

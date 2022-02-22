@@ -227,7 +227,7 @@ namespace age
             unsigned bitplane0 = m_fetched_bg_win_bitplane[0];
             unsigned bitplane1 = m_fetched_bg_win_bitplane[1];
 
-            uint8_t palette_ofs = m_fetched_bg_win_tile_attributes & gb_tile_attrib_palette;
+            uint8_t palette_ofs = m_fetched_bg_win_tile_attributes & gb_tile_attrib_cgb_palette;
             palette_ofs <<= 2;
 
             bitplane1 <<= 1;

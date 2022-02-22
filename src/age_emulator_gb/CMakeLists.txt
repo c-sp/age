@@ -19,7 +19,6 @@ add_library(
         lcd/render/age_gb_lcd_fifo_renderer.cpp
         lcd/render/age_gb_lcd_line_renderer.cpp
         lcd/render/age_gb_lcd_renderer.cpp
-        lcd/render/age_gb_lcd_sprites.cpp
         lcd/age_gb_lcd.cpp
         lcd/age_gb_lcd_irqs.cpp
         lcd/age_gb_lcd_line.cpp
@@ -37,5 +36,8 @@ target_link_libraries(age_emulator_gb age_common)
 
 target_include_directories(age_emulator_gb PUBLIC api)
 
-# uncomment this to generate assembler listings with g++
+# uncomment this to generate assembler listings with g++ (interleaved)
 #set_target_properties(age_emulator_gb PROPERTIES COMPILE_FLAGS "-save-temps -fverbose-asm -Wa,-adhlmn=main.lst")
+
+# uncomment this to generate assembler listings with clang
+set_target_properties(age_emulator_gb PROPERTIES COMPILE_FLAGS "--save-temps")
