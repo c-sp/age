@@ -106,7 +106,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
     // render sprites
     if (m_common.get_lcdc() & gb_lcdc_obj_enable)
     {
-        auto sprites = m_sprites.get_line_sprites(line);
+        auto sprites = m_sprites.get_line_sprites(line, !m_device.cgb_mode());
         std::for_each(rbegin(sprites),
                       rend(sprites),
                       [&](const gb_sprite& sprite) {

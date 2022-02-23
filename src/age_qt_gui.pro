@@ -103,7 +103,6 @@ SOURCES += \
     age_emulator_gb/lcd/render/age_gb_lcd_fifo_renderer.cpp \
     age_emulator_gb/lcd/render/age_gb_lcd_line_renderer.cpp \
     age_emulator_gb/lcd/render/age_gb_lcd_renderer.cpp \
-    age_emulator_gb/lcd/render/age_gb_lcd_sprites.cpp \
     age_emulator_gb/lcd/age_gb_lcd.cpp \
     age_emulator_gb/lcd/age_gb_lcd_irqs.cpp \
     age_emulator_gb/lcd/age_gb_lcd_line.cpp \

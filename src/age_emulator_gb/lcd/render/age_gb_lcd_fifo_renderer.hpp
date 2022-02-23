@@ -85,12 +85,12 @@ namespace age
         const gb_lcd_renderer_common& m_common;
         const gb_lcd_palettes&        m_palettes;
         const gb_lcd_sprites&         m_sprites;
-        const uint8_t*                m_video_ram;
         gb_window_check&              m_window;
         screen_buffer&                m_screen_buffer;
 
-        std::deque<uint8_t> m_bg_win_fifo{};
-        gb_lcd_fifo_fetcher m_fetcher;
+        std::vector<gb_sprite> m_sorted_sprites{};
+        std::deque<uint8_t>    m_bg_win_fifo{};
+        gb_lcd_fifo_fetcher    m_fetcher;
 
         gb_current_line m_line                 = gb_no_line;
         line_stage      m_line_stage           = line_stage::mode2;

@@ -26,6 +26,8 @@
 #include <age_debug.hpp>
 #include <age_types.hpp>
 
+#include <algorithm> // std::sort
+
 
 
 namespace age
@@ -104,7 +106,7 @@ namespace age
 
 
 
-        [[nodiscard]] std::vector<gb_sprite> get_line_sprites(int line) const
+        [[nodiscard]] std::vector<gb_sprite> get_line_sprites(int line, bool sort_by_x) const
         {
             // find the first 10 sprites on this line
             std::vector<gb_sprite> sprites;
@@ -140,7 +142,7 @@ namespace age
             }
 
             // non-CGB mode: sort sprites by X coordinate
-            if (!m_cgb_mode)
+            if (sort_by_x)
             {
                 std::sort(begin(sprites),
                           end(sprites),

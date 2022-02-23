@@ -45,7 +45,6 @@ age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              de
       m_common(common),
       m_palettes(palettes),
       m_sprites(sprites),
-      m_video_ram(video_ram),
       m_window(window),
       m_screen_buffer(screen_buffer),
       m_fetcher(device, common, video_ram, window, m_bg_win_fifo)
@@ -85,6 +84,8 @@ void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_fir
     AGE_ASSERT(!in_progress())
     bool is_line_zero = is_first_frame && (line.m_line == 0);
 
+    //! \todo sprites should be searched step by step in mode 2
+    m_sorted_sprites = m_sprites.get_line_sprites(line.m_line, true);
     m_bg_win_fifo.clear();
 
     m_line                 = {.m_line = line.m_line, .m_line_clks = 0};
@@ -270,7 +271,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
                         << ", scx = " << (int) m_common.m_scx)
         }
 
-        // set next pixel
+        // plot current pixel
         if (m_x_pos >= gb_x_pos_first_px)
         {
             plot_pixel();
