@@ -126,7 +126,7 @@ namespace age
                 sprite.m_y           = y;
                 sprite.m_x           = m_oam[oam_ofs + gb_oam_ofs_x];
                 sprite.m_tile_nr     = m_oam[oam_ofs + gb_oam_ofs_tile];
-                sprite.m_attributes  = m_oam[oam_ofs + gb_oam_ofs_attributes];
+                sprite.m_attributes  = m_oam[oam_ofs + gb_oam_ofs_attributes] & m_attribute_mask;
                 sprite.m_sprite_id   = sprite_id;
                 sprite.m_palette_idx = m_cgb_mode
                                            ? (8 + (sprite.m_attributes & gb_tile_attrib_cgb_palette))

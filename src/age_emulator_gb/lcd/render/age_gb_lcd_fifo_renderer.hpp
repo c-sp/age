@@ -71,6 +71,7 @@ namespace age
             mode3_align_scx,
             mode3_render,
             mode3_init_window,
+            mode3_wait_for_sprite,
             rendering_finished,
         };
         void update_line_stage(int until_line_clks);
@@ -78,6 +79,7 @@ namespace age
         void line_stage_mode3_align_scx(int until_line_clks);
         void line_stage_mode3_render(int until_line_clks);
         void line_stage_mode3_init_window(int until_line_clks);
+        void line_stage_mode3_wait_for_sprite(int until_line_clks);
         void plot_pixel();
         bool init_window();
 
@@ -101,6 +103,7 @@ namespace age
         int             m_x_pos_win_start      = 0;
         int             m_alignment_x          = 0;
         gb_current_line m_clks_bgp_change      = gb_no_line;
+        int             m_next_sprite_x        = -1;
     };
 
 } // namespace age

@@ -18,6 +18,8 @@
 
 #include <age_debug.hpp>
 
+#include <algorithm>
+
 namespace
 {
     constexpr int x_pos_last_px = age::gb_screen_width + age::gb_x_pos_first_px - 1;
@@ -47,7 +49,7 @@ age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              de
       m_sprites(sprites),
       m_window(window),
       m_screen_buffer(screen_buffer),
-      m_fetcher(device, common, video_ram, window, m_bg_win_fifo)
+      m_fetcher(device, common, video_ram, sprites, window, m_bg_win_fifo)
 {
 }
 
@@ -86,6 +88,10 @@ void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_fir
 
     //! \todo sprites should be searched step by step in mode 2
     m_sorted_sprites = m_sprites.get_line_sprites(line.m_line, true);
+    // first sprite last in vector (so that we can easily pop_back() to the next sprite)
+    std::reverse(m_sorted_sprites.begin(), m_sorted_sprites.end());
+    m_next_sprite_x = m_sorted_sprites.empty() ? -1 : m_sorted_sprites.back().m_x;
+
     m_bg_win_fifo.clear();
 
     m_line                 = {.m_line = line.m_line, .m_line_clks = 0};
@@ -132,11 +138,14 @@ bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
         // We have to continue the loop until the fetcher has caught up.
         // As m_line_clks might already be equal to current_line_clks,
         // the std::min() in the loop condition is required.
+
+        // Update until right before the next fetcher step.
+        // The fetcher always comes first (before plotting the pixel on that cycle).
         update_line_stage(std::min(m_fetcher.next_step_clks(), current_line_clks));
 
         if (m_fetcher.next_step_clks() < current_line_clks)
         {
-            m_fetcher.next_step(m_x_pos, m_x_pos_win_start);
+            m_fetcher.execute_next_step(m_x_pos, m_x_pos_win_start);
         }
     }
 
@@ -174,6 +183,10 @@ void age::gb_lcd_fifo_renderer::update_line_stage(int until_line_clks)
 
             case line_stage::mode3_init_window:
                 line_stage_mode3_init_window(until_line_clks);
+                break;
+
+            case line_stage::mode3_wait_for_sprite:
+                line_stage_mode3_wait_for_sprite(until_line_clks);
                 break;
 
             case line_stage::rendering_finished:
@@ -225,10 +238,10 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
             m_alignment_x = scx;
             AGE_ASSERT(m_bg_win_fifo.size() <= 8)
             m_line_stage = line_stage::mode3_render;
-            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-            //                 << " entering line_stage::mode3_wait_for_initial_fifo_contents"
-            //                 << ", scx=" << (int) m_common.m_scx
-            //                 << ", bg-fifo-size=" << m_bg_win_fifo.size())
+            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                        << " entering line_stage::mode3_wait_for_initial_fifo_contents"
+                        << ", scx=" << (int) m_common.m_scx
+                        << ", bg-fifo-size=" << m_bg_win_fifo.size())
             break;
         }
 
@@ -248,6 +261,27 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
     AGE_ASSERT(m_x_pos <= x_pos_last_px)
     for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
     {
+        // fetch next sprite?
+        if (m_next_sprite_x == m_x_pos)
+        {
+            AGE_ASSERT(!m_sorted_sprites.empty())
+            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                        << " prepare fetching sprite #" << (int) m_sorted_sprites[0].m_sprite_id
+                        << ", x-pos = " << m_x_pos
+                        << ", scx = " << (int) m_common.m_scx
+                        << ", next-fetcher-step " << m_fetcher.next_step()
+                        << ", next-fetcher-clks " << m_fetcher.next_step_clks())
+
+            // trigger sprite fetch
+            //m_line_stage = line_stage::mode3_wait_for_sprite;
+            //m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks);
+
+            // next sprite
+            m_sorted_sprites.pop_back();
+            m_next_sprite_x = m_sorted_sprites.empty() ? -1 : m_sorted_sprites.back().m_x;
+            //break;
+        }
+
         // start window rendering on this pixel?
         // (do this before increasing m_x_pos, otherwise we would initialize the window
         // in the last loop iteration too early as m_x_pos already points to the next pixel
@@ -338,6 +372,19 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
     }
 }
 
+void age::gb_lcd_fifo_renderer::line_stage_mode3_wait_for_sprite(int until_line_clks)
+{
+    m_line.m_line_clks = until_line_clks;
+    if (m_line.m_line_clks >= m_fetcher.sprite_finished_clks())
+    {
+        m_line_stage       = line_stage::mode3_render;
+        m_line.m_line_clks = m_fetcher.sprite_finished_clks();
+        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish sprite fetching")
+    }
+}
+
+
+
 void age::gb_lcd_fifo_renderer::plot_pixel()
 {
     // align the pixel FIFO right before setting the first pixel
@@ -401,7 +448,7 @@ bool age::gb_lcd_fifo_renderer::init_window()
 
         if (m_device.is_dmg_device() && (m_x_pos >= x_pos_last_px - 1))
         {
-            //! \todo (dmg) this enabled the window on the next line!
+            //! \todo (dmg) this enables the window on the next line!
             return false;
         }
 

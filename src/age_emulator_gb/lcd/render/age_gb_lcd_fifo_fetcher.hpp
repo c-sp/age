@@ -44,11 +44,13 @@ namespace age
         gb_lcd_fifo_fetcher(const gb_device&              device,
                             const gb_lcd_renderer_common& common,
                             const uint8_t*                video_ram,
+                            const gb_lcd_sprites&         sprites,
                             const gb_window_check&        window,
                             std::deque<uint8_t>&          bg_win_fifo)
             : m_device(device),
               m_common(common),
               m_video_ram(video_ram),
+              m_sprites(sprites),
               m_window(window),
               m_bg_win_fifo(bg_win_fifo)
         {
@@ -76,11 +78,6 @@ namespace age
             m_next_step_clks = gb_clock_cycles_per_lcd_line;
         }
 
-        [[nodiscard]] bool during_mode0() const
-        {
-            return m_next_step == fetcher_step::line_finished;
-        }
-
         void restart_bg_win_fetch(int start_fetch_cycle_clks, bool push_last_tile = false)
         {
             m_next_step      = fetcher_step::fetch_bg_win_tile_id;
@@ -88,6 +85,35 @@ namespace age
             if (push_last_tile)
             {
                 push_bg_win_bitplanes();
+            }
+        }
+
+        void trigger_sprite_fetch(uint8_t sprite_id, int line_clks)
+        {
+            AGE_ASSERT(m_next_step_clks > line_clks)
+            AGE_ASSERT(m_sprite_to_fetch == no_sprite)
+            m_sprite_to_fetch      = sprite_id;
+            m_clks_sprite_finished = int_max;
+            switch (m_next_step)
+            {
+                case fetcher_step::fetch_bg_win_tile_id:
+                    // start sprite fetch on the next cycle
+                    m_clks_next_bg_win_fetch = m_next_step_clks - line_clks;
+                    m_next_step              = fetcher_step::fetch_sprite_tile_id;
+                    m_next_step_clks         = line_clks + 1;
+                    break;
+
+                case fetcher_step::fetch_bg_win_bitplane0:
+                case fetcher_step::fetch_bg_win_bitplane1:
+                    // delay sprite fetch until after the current bg/win tile has been fetched
+                    break;
+
+                case fetcher_step::fetch_sprite_tile_id:
+                case fetcher_step::fetch_sprite_bitplane0:
+                case fetcher_step::fetch_sprite_bitplane1:
+                case fetcher_step::line_finished:
+                    AGE_ASSERT(false)
+                    break;
             }
         }
 
@@ -105,12 +131,27 @@ namespace age
             return m_next_step_clks;
         }
 
+        [[nodiscard]] int next_step() const
+        {
+            return to_underlying(m_next_step);
+        }
+
+        [[nodiscard]] int sprite_finished_clks() const
+        {
+            return m_clks_sprite_finished;
+        }
+
+        [[nodiscard]] bool during_mode0() const
+        {
+            return m_next_step == fetcher_step::line_finished;
+        }
+
         [[nodiscard]] bool next_step_fetches_tile_id() const
         {
             return m_next_step == fetcher_step::fetch_bg_win_tile_id;
         }
 
-        void next_step(int x_pos, int x_pos_win_start)
+        void execute_next_step(int x_pos, int x_pos_win_start)
         {
             AGE_ASSERT(m_next_step_clks < gb_clock_cycles_per_lcd_line)
             switch (m_next_step)
@@ -128,7 +169,34 @@ namespace age
                 case fetcher_step::fetch_bg_win_bitplane1:
                     fetch_bg_win_bitplane(1);
                     push_bg_win_bitplanes();
-                    schedule_next_fetcher_step(4, fetcher_step::fetch_bg_win_tile_id);
+                    if (m_sprite_to_fetch != no_sprite)
+                    {
+                        schedule_next_fetcher_step(1, fetcher_step::fetch_sprite_tile_id);
+                        m_clks_next_bg_win_fetch = 3;
+                    }
+                    else
+                    {
+                        schedule_next_fetcher_step(4, fetcher_step::fetch_bg_win_tile_id);
+                    }
+                    break;
+
+                case fetcher_step::fetch_sprite_tile_id:
+                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane0);
+                    break;
+
+                case fetcher_step::fetch_sprite_bitplane0:
+                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane1);
+                    break;
+
+                case fetcher_step::fetch_sprite_bitplane1:
+                    AGE_ASSERT(m_clks_sprite_finished == int_max)
+                    AGE_ASSERT(m_clks_next_bg_win_fetch > 0)
+                    AGE_ASSERT(m_clks_next_bg_win_fetch <= 3)
+                    AGE_ASSERT(m_sprite_to_fetch != no_sprite)
+                    m_clks_sprite_finished   = m_next_step_clks;
+                    m_clks_next_bg_win_fetch = 0;
+                    m_sprite_to_fetch        = no_sprite;
+                    schedule_next_fetcher_step(m_clks_next_bg_win_fetch, fetcher_step::fetch_bg_win_tile_id);
                     break;
 
                 case fetcher_step::line_finished:
@@ -144,6 +212,9 @@ namespace age
             fetch_bg_win_tile_id,
             fetch_bg_win_bitplane0,
             fetch_bg_win_bitplane1,
+            fetch_sprite_tile_id,
+            fetch_sprite_bitplane0,
+            fetch_sprite_bitplane1,
             line_finished,
         };
 
@@ -154,6 +225,8 @@ namespace age
             m_next_step = step;
             AGE_ASSERT(m_next_step_clks < gb_clock_cycles_per_lcd_line)
         }
+
+
 
         void fetch_bg_win_tile_id(int x_pos, int x_pos_win_start)
         {
@@ -239,9 +312,12 @@ namespace age
             }
         }
 
+
+
         const gb_device&              m_device;
         const gb_lcd_renderer_common& m_common;
         const uint8_t*                m_video_ram;
+        const gb_lcd_sprites&         m_sprites;
         const gb_window_check&        m_window;
         std::deque<uint8_t>&          m_bg_win_fifo;
 
@@ -253,6 +329,12 @@ namespace age
         uint8_t         m_fetched_bg_win_tile_attributes = 0;
         uint8_array<2>  m_fetched_bg_win_bitplane{};
         gb_current_line m_clks_tile_data_change = gb_no_line;
+
+        int     m_clks_next_bg_win_fetch = 0;
+        int     m_clks_sprite_finished   = int_max;
+        uint8_t m_sprite_to_fetch        = no_sprite;
+
+        constexpr static uint8_t no_sprite = std::numeric_limits<uint8_t>::max();
     };
 
 } // namespace age
