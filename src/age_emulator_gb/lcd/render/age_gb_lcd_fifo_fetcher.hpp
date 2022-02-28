@@ -95,9 +95,16 @@ namespace age
             m_fetched_bg_win_tile_attributes = 0;
             m_fetched_bg_win_bitplane        = {};
             m_clks_tile_data_change          = gb_no_line;
+            m_clks_next_bg_win_fetch         = 0;
+            m_clks_sprite_finished           = int_max;
+            m_spx0_delay                     = 0;
+            m_sprite_to_fetch                = no_sprite;
+            m_fetched_sprite_tile_id         = 0;
+            m_fetched_sprite_attributes      = 0;
+            m_fetched_sprite_bitplane        = {};
         }
 
-        void finish_line()
+        void finish_rendering()
         {
             m_next_step      = fetcher_step::line_finished;
             m_next_step_clks = gb_clock_cycles_per_lcd_line;

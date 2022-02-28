@@ -78,7 +78,10 @@ bool age::gb_lcd_fifo_renderer::stat_mode0() const
 
 void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_line)
 {
-    m_fetcher.set_clks_tile_data_change(at_line);
+    if (in_progress())
+    {
+        m_fetcher.set_clks_tile_data_change(at_line);
+    }
 }
 
 void age::gb_lcd_fifo_renderer::set_clks_bgp_change(gb_current_line at_line)
@@ -284,7 +287,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
                         << ", next-fetcher-clks " << m_fetcher.next_step_clks())
 
             // trigger sprite fetch
-            m_line_stage = line_stage::mode3_wait_for_sprite;
+            m_line_stage   = line_stage::mode3_wait_for_sprite;
             int spx0_delay = (m_x_pos == 0) ? std::min(m_common.m_scx & 0b111, 5) : 0;
             m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks, spx0_delay);
 
@@ -331,7 +334,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
         if (m_x_pos > x_pos_last_px)
         {
             m_line_stage = line_stage::rendering_finished;
-            m_fetcher.finish_line();
+            m_fetcher.finish_rendering();
             // don't miss any WY match in case WX is out of the visible range
             // as init_window() verifies WY only if WX matches
             m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
