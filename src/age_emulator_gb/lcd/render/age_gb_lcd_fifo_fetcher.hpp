@@ -113,13 +113,16 @@ namespace age
             }
         }
 
-        void trigger_sprite_fetch(uint8_t sprite_id, int current_line_clks)
+        void trigger_sprite_fetch(uint8_t sprite_id, int current_line_clks, int spx0_delay)
         {
             AGE_ASSERT(m_next_step_clks > current_line_clks)
             AGE_ASSERT(m_next_step_clks <= current_line_clks + 4)
             AGE_ASSERT(m_sprite_to_fetch == no_sprite)
+            AGE_ASSERT(spx0_delay >= 0)
+            AGE_ASSERT(spx0_delay <= 5)
             m_sprite_to_fetch      = sprite_id;
             m_clks_sprite_finished = int_max;
+            m_spx0_delay           = spx0_delay;
             switch (m_next_step)
             {
                 case fetcher_step::fetch_bg_win_tile_id:
@@ -184,13 +187,13 @@ namespace age
                 case fetcher_step::fetch_bg_win_tile_id:
                     LOG("(" << m_next_step_clks << "): fetch_bg_win_tile_id")
                     fetch_bg_win_tile_id(x_pos, x_pos_win_start);
-                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane0);
+                    schedule_next_step(2, fetcher_step::fetch_bg_win_bitplane0);
                     break;
 
                 case fetcher_step::fetch_bg_win_bitplane0:
                     LOG("(" << m_next_step_clks << "): fetch_bg_win_bitplane0")
                     fetch_bg_win_bitplane(0);
-                    schedule_next_fetcher_step(2, fetcher_step::fetch_bg_win_bitplane1);
+                    schedule_next_step(2, fetcher_step::fetch_bg_win_bitplane1);
                     break;
 
                 case fetcher_step::fetch_bg_win_bitplane1:
@@ -199,25 +202,25 @@ namespace age
                     push_bg_win_bitplane();
                     if (m_sprite_to_fetch != no_sprite)
                     {
-                        schedule_next_fetcher_step(2, fetcher_step::fetch_sprite_tile_id);
+                        schedule_next_step(2, fetcher_step::fetch_sprite_tile_id);
                         m_clks_next_bg_win_fetch = 4;
                     }
                     else
                     {
-                        schedule_next_fetcher_step(4, fetcher_step::fetch_bg_win_tile_id);
+                        schedule_next_step(4, fetcher_step::fetch_bg_win_tile_id);
                     }
                     break;
 
                 case fetcher_step::fetch_sprite_tile_id:
                     LOG("(" << m_next_step_clks << "): fetch_sprite_tile_id")
                     fetch_sprite_tile_id();
-                    schedule_next_fetcher_step(2, fetcher_step::fetch_sprite_bitplane0);
+                    schedule_next_step(2, fetcher_step::fetch_sprite_bitplane0);
                     break;
 
                 case fetcher_step::fetch_sprite_bitplane0:
                     LOG("(" << m_next_step_clks << "): fetch_sprite_bitplane0")
                     fetch_sprite_bitplane(0);
-                    schedule_next_fetcher_step(2, fetcher_step::fetch_sprite_bitplane1);
+                    schedule_next_step(2, fetcher_step::fetch_sprite_bitplane1);
                     break;
 
                 case fetcher_step::fetch_sprite_bitplane1:
@@ -229,9 +232,10 @@ namespace age
                     fetch_sprite_bitplane(1);
                     apply_sp_bitplane();
                     m_sprite_to_fetch      = no_sprite;
-                    m_clks_sprite_finished = m_next_step_clks;
-                    schedule_next_fetcher_step(m_clks_next_bg_win_fetch, fetcher_step::fetch_bg_win_tile_id);
+                    m_clks_sprite_finished = m_next_step_clks + m_spx0_delay;
+                    schedule_next_step(m_clks_next_bg_win_fetch + m_spx0_delay, fetcher_step::fetch_bg_win_tile_id);
                     m_clks_next_bg_win_fetch = 0;
+                    m_spx0_delay             = 0;
                     break;
 
                 case fetcher_step::line_finished:
@@ -253,7 +257,7 @@ namespace age
             line_finished,
         };
 
-        void schedule_next_fetcher_step(int clks_offset, fetcher_step step)
+        void schedule_next_step(int clks_offset, fetcher_step step)
         {
             AGE_ASSERT(clks_offset > 0)
             m_next_step_clks += clks_offset;
@@ -435,6 +439,7 @@ namespace age
 
         int            m_clks_next_bg_win_fetch    = 0;
         int            m_clks_sprite_finished      = int_max;
+        int            m_spx0_delay                = 0;
         uint8_t        m_sprite_to_fetch           = no_sprite;
         uint8_t        m_fetched_sprite_tile_id    = 0;
         uint8_t        m_fetched_sprite_attributes = 0;

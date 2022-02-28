@@ -285,7 +285,8 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
 
             // trigger sprite fetch
             m_line_stage = line_stage::mode3_wait_for_sprite;
-            m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks);
+            int spx0_delay = (m_x_pos == 0) ? std::min(m_common.m_scx & 0b111, 5) : 0;
+            m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks, spx0_delay);
 
             // next sprite
             m_sorted_sprites.pop_back();
