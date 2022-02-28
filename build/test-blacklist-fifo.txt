@@ -109,6 +109,7 @@ dmg-acid2/
 
 /gambatte/dmgpalette_during_m3/
 
+/gambatte/enable_display/enable_display_ly0_sprites_m0stat_2_dmg08_cgb04c_out0
 /gambatte/enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc
 /gambatte/enable_display/frame0_m0irq_count_scx2_1_dmg08_cgb04c_out90.gbc
 /gambatte/enable_display/frame0_m0irq_count_scx2_ds_1_cgb04c_out90.gbc
@@ -153,7 +154,9 @@ dmg-acid2/
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
 
 /gambatte/oamdma/late_sp
+/gambatte/oamdma/oamdma_late_halt_stat_1_dmg08_cgb04c_out0
 /gambatte/oamdma/oamdma_late_halt_stat_2_dmg08_cgb04c_out3
+/gambatte/oamdma/oamdma_late_speedchange_stat_1_cgb04c_out0
 /gambatte/oamdma/oamdma_late_speedchange_stat_2_cgb04c_out3
 /gambatte/oamdma/oamdma_src8000_srcchange0000_busyinc_dmg08_cgb04c_out0
 /gambatte/oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4

@@ -32,9 +32,10 @@
 
 namespace age
 {
+    // tile attributes (OBJ & CGB-BG)
     constexpr uint8_t gb_tile_attrib_cgb_palette = 0x07;
     constexpr uint8_t gb_tile_attrib_vram_bank   = 0x08;
-    constexpr uint8_t gb_tile_attrib_dmg_palette = 0x10;
+    constexpr uint8_t gb_tile_attrib_dmg_palette = 0x10; // OBJ only
     constexpr uint8_t gb_tile_attrib_flip_x      = 0x20;
     constexpr uint8_t gb_tile_attrib_flip_y      = 0x40;
     constexpr uint8_t gb_tile_attrib_priority    = 0x80;
@@ -55,6 +56,15 @@ namespace age
         uint8_t m_sprite_id;
         uint8_t m_palette_idx;
     };
+
+    constexpr uint8_t gb_get_sprite_palette_idx(uint8_t sprite_attributes, bool cgb_mode)
+    {
+        return cgb_mode
+                   ? (8 + (sprite_attributes & gb_tile_attrib_cgb_palette))
+               : (sprite_attributes & gb_tile_attrib_dmg_palette)
+                   ? gb_palette_obp1
+                   : gb_palette_obp0;
+    }
 
 
 
@@ -128,11 +138,7 @@ namespace age
                 sprite.m_tile_nr     = m_oam[oam_ofs + gb_oam_ofs_tile];
                 sprite.m_attributes  = m_oam[oam_ofs + gb_oam_ofs_attributes] & m_attribute_mask;
                 sprite.m_sprite_id   = sprite_id;
-                sprite.m_palette_idx = m_cgb_mode
-                                           ? (8 + (sprite.m_attributes & gb_tile_attrib_cgb_palette))
-                                       : (sprite.m_attributes & gb_tile_attrib_dmg_palette)
-                                           ? gb_palette_obp1
-                                           : gb_palette_obp0;
+                sprite.m_palette_idx = gb_get_sprite_palette_idx(sprite.m_attributes, m_cgb_mode);
 
                 sprites.push_back(sprite);
                 if (sprites.size() >= 10)
