@@ -33,7 +33,7 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: build AGE
         run: build/age_ci.sh build-qt release
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: build Google Test binary
         run: build/age_ci.sh build-gtest Debug
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: build tester binary
         run: build/age_ci.sh build-tester Release
@@ -86,7 +86,7 @@ jobs:
       image: emscripten/emsdk:2.0.25
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: build binaries
         run: build/age_ci.sh build-wasm Release
@@ -110,7 +110,7 @@ jobs:
     needs: [ build-gtest ]
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: download artifacts
         uses: actions/download-artifact@v2.1.0
@@ -128,7 +128,7 @@ jobs:
     needs: [ build-tester ]
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: download artifacts
         uses: actions/download-artifact@v2.1.0
@@ -146,7 +146,7 @@ jobs:
     needs: [ build-tester ]
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: download artifacts
         uses: actions/download-artifact@v2.1.0
@@ -164,7 +164,7 @@ jobs:
     needs: [ build-tester ]
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: download artifacts
         uses: actions/download-artifact@v2.1.0
@@ -182,7 +182,7 @@ jobs:
     needs: [ build-tester ]
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: download artifacts
         uses: actions/download-artifact@v2.1.0
@@ -200,7 +200,7 @@ jobs:
     needs: [ build-tester ]
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: download artifacts
         uses: actions/download-artifact@v2.1.0
