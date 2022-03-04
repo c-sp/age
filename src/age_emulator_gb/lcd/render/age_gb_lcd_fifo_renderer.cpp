@@ -311,7 +311,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
             m_alignment_x          = 7 - m_common.m_wx;
             m_line_stage           = line_stage::mode3_init_window; // loop terminated after this pixel
             m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
-            m_fetcher.restart_bg_win_fetch(m_line.m_line_clks + 2);
+            m_fetcher.restart_bg_fetch(m_line.m_line_clks + 2);
 
             LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
                         << " initialize window for next pixel"
@@ -371,7 +371,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
             m_bg_fifo.clear();
             // note that we keep m_alignment_x as the FIFO might run empty otherwise
             //! \todo restart previously fetched tile, is this correct?
-            m_fetcher.restart_bg_win_fetch(m_line.m_line_clks, true);
+            m_fetcher.restart_bg_fetch(m_line.m_line_clks, true);
             return;
         }
     }
@@ -381,7 +381,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
     {
         m_line_stage       = line_stage::mode3_render;
         m_line.m_line_clks = m_clks_end_window_init;
-        m_fetcher.restart_bg_win_fetch(m_line.m_line_clks + 1);
+        m_fetcher.restart_bg_fetch(m_line.m_line_clks + 1);
         LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
                     << ", fifo size = " << m_bg_fifo.size())
     }

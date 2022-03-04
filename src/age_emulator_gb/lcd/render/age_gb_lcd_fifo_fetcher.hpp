@@ -87,22 +87,22 @@ namespace age
 
         void init_for_line(int line, bool is_line_zero)
         {
-            m_line                           = line;
-            m_next_step                      = fetcher_step::fetch_bg_win_tile_id;
-            m_clks_next_step                 = is_line_zero ? 87 : 85;
-            m_fetching_window                = false;
-            m_clks_last_bg_tile_id           = 0;
-            m_fetched_bg_win_tile_id         = 0;
-            m_fetched_bg_win_tile_attributes = 0;
-            m_fetched_bg_win_bitplane        = {};
-            m_clks_tile_data_change          = gb_no_line;
-            m_clks_next_bg_win_fetch         = 0;
-            m_clks_last_sprite_finished      = int_max;
-            m_spx0_delay                     = 0;
-            m_sprite_to_fetch                = no_sprite;
-            m_fetched_sprite_tile_id         = 0;
-            m_fetched_sprite_attributes      = 0;
-            m_fetched_sprite_bitplane        = {};
+            m_line                       = line;
+            m_next_step                  = fetcher_step::fetch_bg_tile_id;
+            m_clks_next_step             = is_line_zero ? 87 : 85;
+            m_fetching_window            = false;
+            m_clks_last_bg_tile_id       = 0;
+            m_fetched_bg_tile_id         = 0;
+            m_fetched_bg_tile_attributes = 0;
+            m_fetched_bg_bitplane        = {};
+            m_clks_tile_data_change      = gb_no_line;
+            m_clks_next_bg_fetch         = 0;
+            m_clks_last_sprite_finished  = int_max;
+            m_spx0_delay                 = 0;
+            m_sprite_to_fetch            = no_sprite;
+            m_fetched_sprite_tile_id     = 0;
+            m_fetched_sprite_attributes  = 0;
+            m_fetched_sprite_bitplane    = {};
         }
 
         void finish_rendering()
@@ -111,13 +111,13 @@ namespace age
             m_clks_next_step = gb_clock_cycles_per_lcd_line;
         }
 
-        void restart_bg_win_fetch(int start_fetch_cycle_clks, bool push_last_tile = false)
+        void restart_bg_fetch(int start_fetch_cycle_clks, bool push_last_tile = false)
         {
-            m_next_step      = fetcher_step::fetch_bg_win_tile_id;
+            m_next_step      = fetcher_step::fetch_bg_tile_id;
             m_clks_next_step = start_fetch_cycle_clks;
             if (push_last_tile)
             {
-                push_bg_win_bitplane();
+                push_bg_bitplane();
             }
         }
 
@@ -131,20 +131,20 @@ namespace age
             AGE_ASSERT(spx0_delay <= 5)
             m_sprite_to_fetch           = sprite_id;
             m_clks_last_sprite_finished = int_max;
-            m_clks_next_bg_win_fetch    = 10 - (current_line_clks - m_clks_last_bg_tile_id) + spx0_delay;
+            m_clks_next_bg_fetch        = 10 - (current_line_clks - m_clks_last_bg_tile_id) + spx0_delay;
             m_spx0_delay                = spx0_delay;
             switch (m_next_step)
             {
-                case fetcher_step::fetch_bg_win_tile_id:
+                case fetcher_step::fetch_bg_tile_id:
                     m_next_step      = fetcher_step::fetch_sprite_tile_id;
                     m_clks_next_step = (m_clks_next_step - current_line_clks == 4)
                                            ? current_line_clks + 1
                                            : current_line_clks;
                     break;
 
-                case fetcher_step::fetch_bg_win_bitplane0:
-                case fetcher_step::fetch_bg_win_bitplane1:
-                    // delay sprite fetch until after the current bg/win tile has been fetched
+                case fetcher_step::fetch_bg_bitplane0:
+                case fetcher_step::fetch_bg_bitplane1:
+                    // delay sprite fetch until after the current bg tile has been fetched
                     break;
 
                 case fetcher_step::fetch_sprite_tile_id:
@@ -187,7 +187,7 @@ namespace age
 
         [[nodiscard]] bool next_step_fetches_tile_id() const
         {
-            return m_next_step == fetcher_step::fetch_bg_win_tile_id;
+            return m_next_step == fetcher_step::fetch_bg_tile_id;
         }
 
         void execute_next_step(int x_pos, int x_pos_win_start)
@@ -195,30 +195,30 @@ namespace age
             AGE_ASSERT(m_clks_next_step < gb_clock_cycles_per_lcd_line)
             switch (m_next_step)
             {
-                case fetcher_step::fetch_bg_win_tile_id:
-                    LOG("(" << m_clks_next_step << "): fetch_bg_win_tile_id")
+                case fetcher_step::fetch_bg_tile_id:
+                    LOG("(" << m_clks_next_step << "): fetch_bg_tile_id")
                     m_clks_last_bg_tile_id = m_clks_next_step;
-                    fetch_bg_win_tile_id(x_pos, x_pos_win_start);
-                    schedule_next_step(2, fetcher_step::fetch_bg_win_bitplane0);
+                    fetch_bg_tile_id(x_pos, x_pos_win_start);
+                    schedule_next_step(2, fetcher_step::fetch_bg_bitplane0);
                     break;
 
-                case fetcher_step::fetch_bg_win_bitplane0:
-                    LOG("(" << m_clks_next_step << "): fetch_bg_win_bitplane0")
-                    fetch_bg_win_bitplane(0);
-                    schedule_next_step(2, fetcher_step::fetch_bg_win_bitplane1);
+                case fetcher_step::fetch_bg_bitplane0:
+                    LOG("(" << m_clks_next_step << "): fetch_bg_bitplane0")
+                    fetch_bg_bitplane(0);
+                    schedule_next_step(2, fetcher_step::fetch_bg_bitplane1);
                     break;
 
-                case fetcher_step::fetch_bg_win_bitplane1:
-                    LOG("(" << m_clks_next_step << "): fetch_bg_win_bitplane1")
-                    fetch_bg_win_bitplane(1);
-                    push_bg_win_bitplane();
+                case fetcher_step::fetch_bg_bitplane1:
+                    LOG("(" << m_clks_next_step << "): fetch_bg_bitplane1")
+                    fetch_bg_bitplane(1);
+                    push_bg_bitplane();
                     if (m_sprite_to_fetch != no_sprite)
                     {
                         schedule_next_step(1, fetcher_step::fetch_sprite_tile_id);
                     }
                     else
                     {
-                        schedule_next_step(4, fetcher_step::fetch_bg_win_tile_id);
+                        schedule_next_step(4, fetcher_step::fetch_bg_tile_id);
                     }
                     break;
 
@@ -236,16 +236,16 @@ namespace age
 
                 case fetcher_step::fetch_sprite_bitplane1:
                     AGE_ASSERT(m_clks_last_sprite_finished == int_max)
-                    AGE_ASSERT(m_clks_next_bg_win_fetch > 0)
-                    AGE_ASSERT(m_clks_next_bg_win_fetch <= 10)
+                    AGE_ASSERT(m_clks_next_bg_fetch > 0)
+                    AGE_ASSERT(m_clks_next_bg_fetch <= 10)
                     AGE_ASSERT(m_sprite_to_fetch != no_sprite)
                     LOG("(" << m_clks_next_step << "): fetch_sprite_bitplane1")
                     fetch_sprite_bitplane(1);
                     apply_sp_bitplane();
                     m_sprite_to_fetch           = no_sprite;
                     m_clks_last_sprite_finished = m_clks_next_step + 1 + m_spx0_delay;
-                    schedule_next_step(m_clks_next_bg_win_fetch, fetcher_step::fetch_bg_win_tile_id);
-                    m_clks_next_bg_win_fetch = 0;
+                    schedule_next_step(m_clks_next_bg_fetch, fetcher_step::fetch_bg_tile_id);
+                    m_clks_next_bg_fetch = 0;
                     break;
 
                 case fetcher_step::line_finished:
@@ -258,9 +258,9 @@ namespace age
     private:
         enum class fetcher_step
         {
-            fetch_bg_win_tile_id,
-            fetch_bg_win_bitplane0,
-            fetch_bg_win_bitplane1,
+            fetch_bg_tile_id,
+            fetch_bg_bitplane0,
+            fetch_bg_bitplane1,
             fetch_sprite_tile_id,
             fetch_sprite_bitplane0,
             fetch_sprite_bitplane1,
@@ -277,7 +277,7 @@ namespace age
 
 
 
-        void fetch_bg_win_tile_id(int x_pos, int x_pos_win_start)
+        void fetch_bg_tile_id(int x_pos, int x_pos_win_start)
         {
             m_fetching_window = x_pos_win_start <= x_pos;
 
@@ -295,16 +295,16 @@ namespace age
                 tile_vram_ofs     = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2) + tile_line_ofs;
             }
 
-            m_fetched_bg_win_tile_id         = m_video_ram[tile_vram_ofs];          // bank 0
-            m_fetched_bg_win_tile_attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1 (always zero for DMG)
+            m_fetched_bg_tile_id         = m_video_ram[tile_vram_ofs];          // bank 0
+            m_fetched_bg_tile_attributes = m_video_ram[tile_vram_ofs + 0x2000]; // bank 1 (always zero for DMG)
 
             // LOG("line " << m_line.m_line << " (" << m_clks_next_step << "): fetched "
             //             << (m_fetching_window ? "window" : "bg")
-            //             << " tile id 0x" << std::hex << (int) m_fetched_bg_win_tile_id
-            //             << " with attributes 0x" << (int) m_fetched_bg_win_tile_attributes << std::dec)
+            //             << " tile id 0x" << std::hex << (int) m_fetched_bg_tile_id
+            //             << " with attributes 0x" << (int) m_fetched_bg_tile_attributes << std::dec)
         }
 
-        void fetch_bg_win_bitplane(int bitplane_offset)
+        void fetch_bg_bitplane(int bitplane_offset)
         {
             AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
 
@@ -314,7 +314,7 @@ namespace age
                 AGE_ASSERT(m_device.is_cgb_device())
                 if (!(m_common.get_lcdc() & gb_lcdc_bg_win_data))
                 {
-                    m_fetched_bg_win_bitplane[bitplane_offset] = m_common.m_xflip_cache[m_fetched_bg_win_tile_id];
+                    m_fetched_bg_bitplane[bitplane_offset] = m_common.m_xflip_cache[m_fetched_bg_tile_id];
                     return;
                 }
             }
@@ -323,15 +323,15 @@ namespace age
                                 ? m_window.current_window_line() & 0b111
                                 : (m_common.m_scy + m_line) & 0b111;
             // y-flip
-            if (m_fetched_bg_win_tile_attributes & gb_tile_attrib_flip_y)
+            if (m_fetched_bg_tile_attributes & gb_tile_attrib_flip_y)
             {
                 tile_line = 7 - tile_line;
             }
 
             // read tile data
-            int tile_data_ofs = (m_fetched_bg_win_tile_id ^ m_common.m_tile_xor) << 4; // 16 bytes per tile
+            int tile_data_ofs = (m_fetched_bg_tile_id ^ m_common.m_tile_xor) << 4; // 16 bytes per tile
             tile_data_ofs += m_common.m_tile_data_offset;
-            tile_data_ofs += (m_fetched_bg_win_tile_attributes & gb_tile_attrib_vram_bank) << 10;
+            tile_data_ofs += (m_fetched_bg_tile_attributes & gb_tile_attrib_vram_bank) << 10;
             tile_data_ofs += tile_line * 2; // 2 bytes per line
 
             auto bitplane = m_video_ram[tile_data_ofs + bitplane_offset];
@@ -339,17 +339,17 @@ namespace age
             // x-flip
             // (we invert the x-flip for easier rendering:
             // this way bit 0 is used for the leftmost pixel)
-            m_fetched_bg_win_bitplane[bitplane_offset] = (m_fetched_bg_win_tile_attributes & gb_tile_attrib_flip_x)
-                                                             ? bitplane
-                                                             : m_common.m_xflip_cache[bitplane];
+            m_fetched_bg_bitplane[bitplane_offset] = (m_fetched_bg_tile_attributes & gb_tile_attrib_flip_x)
+                                                         ? bitplane
+                                                         : m_common.m_xflip_cache[bitplane];
         }
 
-        void push_bg_win_bitplane()
+        void push_bg_bitplane()
         {
-            unsigned bitplane0 = m_fetched_bg_win_bitplane[0];
-            unsigned bitplane1 = m_fetched_bg_win_bitplane[1];
+            unsigned bitplane0 = m_fetched_bg_bitplane[0];
+            unsigned bitplane1 = m_fetched_bg_bitplane[1];
 
-            uint8_t palette_ofs = m_fetched_bg_win_tile_attributes & gb_tile_attrib_cgb_palette;
+            uint8_t palette_ofs = m_fetched_bg_tile_attributes & gb_tile_attrib_cgb_palette;
             palette_ofs <<= 2;
 
             bitplane1 <<= 1;
@@ -439,17 +439,17 @@ namespace age
         gb_sp_fifo&                   m_sp_fifo;
 
         int          m_line           = gb_no_line.m_line;
-        fetcher_step m_next_step      = fetcher_step::fetch_bg_win_tile_id;
+        fetcher_step m_next_step      = fetcher_step::fetch_bg_tile_id;
         int          m_clks_next_step = gb_no_clock_cycle;
 
-        bool            m_fetching_window                = false;
-        int             m_clks_last_bg_tile_id           = 0;
-        uint8_t         m_fetched_bg_win_tile_id         = 0;
-        uint8_t         m_fetched_bg_win_tile_attributes = 0;
-        uint8_array<2>  m_fetched_bg_win_bitplane{};
+        bool            m_fetching_window            = false;
+        int             m_clks_last_bg_tile_id       = 0;
+        uint8_t         m_fetched_bg_tile_id         = 0;
+        uint8_t         m_fetched_bg_tile_attributes = 0;
+        uint8_array<2>  m_fetched_bg_bitplane{};
         gb_current_line m_clks_tile_data_change = gb_no_line;
 
-        int            m_clks_next_bg_win_fetch    = 0;
+        int            m_clks_next_bg_fetch        = 0;
         int            m_clks_last_sprite_finished = int_max;
         int            m_spx0_delay                = 0;
         uint8_t        m_sprite_to_fetch           = no_sprite;
