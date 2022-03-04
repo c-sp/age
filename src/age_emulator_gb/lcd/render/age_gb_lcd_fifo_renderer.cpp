@@ -253,7 +253,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
             AGE_ASSERT(m_bg_fifo.size() <= 8)
             m_line_stage = line_stage::mode3_render;
             LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                        << " entering line_stage::mode3_wait_for_initial_fifo_contents"
+                        << " entering line_stage::mode3_render"
                         << ", scx=" << (int) m_common.m_scx
                         << ", bg-fifo-size=" << m_bg_fifo.size())
             break;
@@ -288,7 +288,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
 
             // trigger sprite fetch
             m_line_stage   = line_stage::mode3_wait_for_sprite;
-            int spx0_delay = (m_x_pos == 0) ? std::min(m_common.m_scx & 0b111, 5) : 0;
+            int spx0_delay = (m_x_pos == 0) ? std::min(m_alignment_x & 0b111, 5) : 0;
             m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks, spx0_delay);
 
             // next sprite
@@ -338,8 +338,8 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
             // don't miss any WY match in case WX is out of the visible range
             // as init_window() verifies WY only if WX matches
             m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
-            // AGE_LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-            //                 << " entering line_stage::rendering_finished")
+            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
+                        << " entering line_stage::rendering_finished")
             break;
         }
 
@@ -390,10 +390,10 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
 void age::gb_lcd_fifo_renderer::line_stage_mode3_wait_for_sprite(int until_line_clks)
 {
     m_line.m_line_clks = until_line_clks;
-    if (m_line.m_line_clks >= m_fetcher.sprite_finished_clks())
+    if (m_line.m_line_clks >= m_fetcher.last_sprite_finished_clks())
     {
         m_line_stage       = line_stage::mode3_render;
-        m_line.m_line_clks = m_fetcher.sprite_finished_clks() + 1;
+        m_line.m_line_clks = m_fetcher.last_sprite_finished_clks() + 1;
         LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finished sprite fetching, continue rendering")
     }
 }
