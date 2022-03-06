@@ -180,11 +180,6 @@ namespace age
             return m_clks_last_sprite_finished;
         }
 
-        [[nodiscard]] bool during_mode0() const
-        {
-            return m_next_step == fetcher_step::line_finished;
-        }
-
         [[nodiscard]] bool next_step_fetches_tile_id() const
         {
             return m_next_step == fetcher_step::fetch_bg_tile_id;

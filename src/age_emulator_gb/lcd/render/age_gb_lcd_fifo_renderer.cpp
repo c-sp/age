@@ -73,7 +73,7 @@ bool age::gb_lcd_fifo_renderer::in_progress() const
 
 bool age::gb_lcd_fifo_renderer::stat_mode0() const
 {
-    return !in_progress() || m_fetcher.during_mode0();
+    return !in_progress() || (m_line_stage == line_stage::rendering_finished);
 }
 
 void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_line)
