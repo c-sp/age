@@ -81,7 +81,9 @@ namespace age
         void line_stage_mode3_init_window(int until_line_clks);
         void line_stage_mode3_wait_for_sprite(int until_line_clks);
         void plot_pixel();
+        bool dmg_wx_glitch();
         bool init_window();
+        bool fetch_next_sprite();
 
         const gb_device&              m_device;
         const gb_lcd_renderer_common& m_common;
@@ -91,7 +93,6 @@ namespace age
         screen_buffer&                m_screen_buffer;
 
         std::vector<gb_sprite> m_sorted_sprites{};
-        gb_bg_fifo             m_bg_fifo{};
         gb_sp_fifo             m_sp_fifo{};
         gb_lcd_fifo_fetcher    m_fetcher;
 

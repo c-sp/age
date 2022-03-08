@@ -198,13 +198,15 @@ dmg-acid2/
 ###   mealybug tearoom
 ###
 
+### no test result available
+
+/mealybug-tearoom-tests/ppu/win_without_bg
+
+### failing tests
+
 /mealybug-tearoom-tests/dma/
 /mealybug-tearoom-tests/mbc/
 
-/mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple_wx
-
-# sprites required
-/mealybug-tearoom-tests/ppu/m3_bgp_change_sprites
 /mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change
 /mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change2
 /mealybug-tearoom-tests/ppu/m3_lcdc_bg_map_change
@@ -217,6 +219,7 @@ dmg-acid2/
 /mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_change2
 /mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_win_change
 /mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_win_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple_wx
 /mealybug-tearoom-tests/ppu/m3_lcdc_win_map_change
 /mealybug-tearoom-tests/ppu/m3_lcdc_win_map_change2
 /mealybug-tearoom-tests/ppu/m3_obp0_change
@@ -225,7 +228,6 @@ dmg-acid2/
 /mealybug-tearoom-tests/ppu/m3_scy_change
 /mealybug-tearoom-tests/ppu/m3_scy_change2
 /mealybug-tearoom-tests/ppu/m3_wx_4_change_sprites
-/mealybug-tearoom-tests/ppu/win_without_bg
 
 
 
