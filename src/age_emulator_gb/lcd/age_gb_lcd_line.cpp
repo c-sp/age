@@ -49,14 +49,13 @@ age::gb_lcd_line::gb_lcd_line(const gb_device& device,
 
 
 
-void age::gb_lcd_line::after_speed_change()
+void age::gb_lcd_line::align_after_speed_change(int clock_cycle_offset)
 {
-    if (lcd_is_on() && m_clock.is_double_speed())
-    {
-        ++m_clk_frame_start;
-        ++m_clk_line_start;
-        log_frame_alignment();
-    }
+    AGE_ASSERT(lcd_is_on())
+    AGE_ASSERT(m_clock.is_double_speed())
+    m_clk_frame_start += clock_cycle_offset;
+    m_clk_line_start += clock_cycle_offset;
+    log_frame_alignment();
 }
 
 void age::gb_lcd_line::set_back_clock(int clock_cycle_offset)
@@ -182,17 +181,27 @@ age::gb_current_line age::gb_lcd_line::current_line() const
         return {.m_line = m_line, .m_line_clks = clks_diff};
     }
 
-    // recalculate line
-    int clks_frame = clk_current - m_clk_frame_start;
+    auto current_line = calculate_line(m_clock.get_clock_cycle());
+
+    m_line           = current_line.m_line;
+    m_clk_line_start = m_clk_frame_start + m_line * gb_clock_cycles_per_lcd_line;
+
+    return current_line;
+}
+
+age::gb_current_line age::gb_lcd_line::calculate_line(int clock_cycle) const
+{
+    AGE_ASSERT(lcd_is_on())
+    AGE_ASSERT(clock_cycle >= m_clk_frame_start)
+
+    int clks_frame = clock_cycle - m_clk_frame_start;
 
     // We hope for the compiler to optimize the "/" and "%" operations,
     // e.g. to make use of the remainder being a by-product of the
     // division.
     // On x86 this should be a single DIV instruction.
-    m_line        = clks_frame / gb_clock_cycles_per_lcd_line;
+    int line      = clks_frame / gb_clock_cycles_per_lcd_line;
     int line_clks = clks_frame % gb_clock_cycles_per_lcd_line;
 
-    m_clk_line_start = m_clk_frame_start + m_line * gb_clock_cycles_per_lcd_line;
-
-    return {.m_line = m_line, .m_line_clks = line_clks};
+    return {.m_line = line, .m_line_clks = line_clks};
 }

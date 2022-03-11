@@ -107,6 +107,46 @@ void age::gb_lcd_irqs::lcd_off()
     m_events.remove_event(gb_event::lcd_interrupt_mode0);
 }
 
+void age::gb_lcd_irqs::align_after_speed_change(int clock_cycle_offset)
+{
+    AGE_ASSERT(m_line.lcd_is_on())
+    AGE_ASSERT(m_clock.is_double_speed())
+    int clk_current = m_clock.get_clock_cycle();
+
+    if (m_clk_next_irq_vblank != gb_no_clock_cycle)
+    {
+        m_clk_next_irq_vblank += clock_cycle_offset;
+        m_events.schedule_event(gb_event::lcd_interrupt_vblank, m_clk_next_irq_vblank - clk_current);
+
+        m_line.log() << "aligning v-blank IRQ (+" << clock_cycle_offset << "), next v-blank IRQ in "
+                     << log_in_clks(m_clk_next_irq_vblank - clk_current, clk_current);
+    }
+    if (m_clk_next_irq_lyc != gb_no_clock_cycle)
+    {
+        m_clk_next_irq_lyc += clock_cycle_offset;
+        m_events.schedule_event(gb_event::lcd_interrupt_lyc, m_clk_next_irq_lyc - clk_current);
+
+        m_line.log() << "aligning LYC IRQ (+" << clock_cycle_offset << "), next LYC IRQ in "
+                     << log_in_clks(m_clk_next_irq_lyc - clk_current, clk_current);
+    }
+    if (m_clk_next_irq_mode2 != gb_no_clock_cycle)
+    {
+        m_clk_next_irq_mode2 += clock_cycle_offset;
+        m_events.schedule_event(gb_event::lcd_interrupt_mode2, m_clk_next_irq_mode2 - clk_current);
+
+        m_line.log() << "aligning mode 2 IRQ (+" << clock_cycle_offset << "), next mode 2 IRQ in "
+                     << log_in_clks(m_clk_next_irq_mode2 - clk_current, clk_current);
+    }
+    if (m_clk_next_irq_mode0 != gb_no_clock_cycle)
+    {
+        m_clk_next_irq_mode0 += clock_cycle_offset;
+        m_events.schedule_event(gb_event::lcd_interrupt_mode0, m_clk_next_irq_mode0 - clk_current);
+
+        m_line.log() << "aligning mode 0 IRQ (+" << clock_cycle_offset << "), next mode 0 IRQ in "
+                     << log_in_clks(m_clk_next_irq_mode0 - clk_current, clk_current);
+    }
+}
+
 void age::gb_lcd_irqs::set_back_clock(int clock_cycle_offset)
 {
     gb_set_back_clock_cycle(m_clk_next_irq_vblank, clock_cycle_offset);
@@ -129,6 +169,7 @@ void age::gb_lcd_irqs::trigger_irq_vblank()
     AGE_ASSERT(m_clk_next_irq_vblank <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::vblank, m_clk_next_irq_vblank);
+    m_interrupts.log() << "v-blank interrupt occurred" << log_line_clks(m_line, m_clk_next_irq_vblank);
     if (m_stat & gb_stat_irq_mode1)
     {
         m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_vblank);
@@ -139,9 +180,8 @@ void age::gb_lcd_irqs::trigger_irq_vblank()
     int clk_diff = m_clk_next_irq_vblank - clk_current;
     AGE_ASSERT(clk_diff > 0)
 
-    m_interrupts.log() << "next v-blank IRQ in " << clk_diff << " clock cycles (" << m_clk_next_irq_vblank << ")";
-
     m_events.schedule_event(gb_event::lcd_interrupt_vblank, clk_diff);
+    m_interrupts.log() << "next v-blank IRQ in " << log_in_clks(clk_diff, clk_current);
 }
 
 
@@ -155,9 +195,11 @@ void age::gb_lcd_irqs::schedule_irq_vblank()
 
     m_clk_next_irq_vblank = clk_frame_start
                             + gb_screen_height * gb_clock_cycles_per_lcd_line;
+    int clk_diff = m_clk_next_irq_vblank - clk_current;
     AGE_ASSERT(m_clk_next_irq_vblank > clk_current)
 
-    m_events.schedule_event(gb_event::lcd_interrupt_vblank, m_clk_next_irq_vblank - clk_current);
+    m_events.schedule_event(gb_event::lcd_interrupt_vblank, clk_diff);
+    m_interrupts.log() << "next v-blank IRQ in " << log_in_clks(clk_diff, clk_current);
 }
 
 
@@ -168,7 +210,7 @@ void age::gb_lcd_irqs::schedule_irq_vblank()
 //
 //---------------------------------------------------------
 
-void age::gb_lcd_irqs::lyc_update()
+void age::gb_lcd_irqs::on_lyc_change()
 {
     if (m_line.lcd_is_on())
     {
@@ -184,17 +226,18 @@ void age::gb_lcd_irqs::trigger_irq_lyc()
     AGE_ASSERT(m_clk_next_irq_lyc <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_lyc);
+    m_interrupts.log() << "LYC interrupt for LYC " << log_hex8(m_line.m_lyc)
+                       << " occurred" << log_line_clks(m_line, m_clk_next_irq_lyc);
 
     int clk_current = m_clock.get_clock_cycle();
     m_clk_next_irq_lyc += add_total_frames(m_clk_next_irq_lyc, clk_current);
     int clk_diff = m_clk_next_irq_lyc - clk_current;
     AGE_ASSERT(clk_diff > 0)
 
-    m_interrupts.log() << "next LYC IRQ in " << clk_diff
-                       << " clock cycles (" << m_clk_next_irq_lyc << ")"
-                       << " for LYC " << log_hex8(m_line.m_lyc);
-
     m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
+
+    m_interrupts.log() << "next LYC IRQ for LYC " << log_hex8(m_line.m_lyc)
+                       << " in " << log_in_clks(clk_diff, clk_current);
 }
 
 
@@ -212,16 +255,24 @@ void age::gb_lcd_irqs::schedule_irq_lyc()
     int clk_frame_start = m_line.clk_frame_start();
     AGE_ASSERT(m_line.lcd_is_on())
 
-    m_clk_next_irq_lyc = clk_frame_start + m_line.m_lyc * gb_clock_cycles_per_lcd_line;
+    int frame_clks = (m_line.m_lyc == 0)
+                             ? 153 * gb_clock_cycles_per_lcd_line + 8
+                             : m_line.m_lyc * gb_clock_cycles_per_lcd_line;
+    m_clk_next_irq_lyc = clk_frame_start + frame_clks;
 
+    // schedule LYC interrupt for this frame or for the next frame?
     int clk_current = m_clock.get_clock_cycle();
     if (m_clk_next_irq_lyc <= clk_current)
     {
         m_clk_next_irq_lyc += gb_clock_cycles_per_lcd_frame;
     }
+    int clk_diff = m_clk_next_irq_lyc - clk_current;
+    AGE_ASSERT(clk_diff > 0)
 
-    AGE_ASSERT(m_clk_next_irq_lyc > clk_current)
-    m_events.schedule_event(gb_event::lcd_interrupt_lyc, m_clk_next_irq_lyc - clk_current);
+    m_events.schedule_event(gb_event::lcd_interrupt_lyc, clk_diff);
+
+    m_interrupts.log() << "next LYC IRQ for LYC " << log_hex8(m_line.m_lyc)
+                       << " in " << log_in_clks(clk_diff, clk_current);
 
     // immediate interrupt, if we're still on this line
     //! \todo what's the exact timing?
@@ -248,16 +299,11 @@ void age::gb_lcd_irqs::trigger_irq_mode2()
     AGE_ASSERT(m_clk_next_irq_mode2 <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode2);
-    m_interrupts.log() << "mode 2 IRQ happened on line "
-                       << ((m_clk_next_irq_mode2 - m_line.clk_frame_start()) / gb_clock_cycles_per_lcd_line);
+    m_interrupts.log() << "mode 2 interrupt occurred" << log_line_clks(m_line, m_clk_next_irq_mode2);
 
     // handle all the details in schedule_irq_mode2()
     // (irq for specific lines at specific clock cycles)
     schedule_irq_mode2();
-
-    m_interrupts.log() << "next mode 2 IRQ in "
-                       << (m_clk_next_irq_mode2 - m_clock.get_clock_cycle())
-                       << " clock cycles (" << m_clk_next_irq_mode2 << ")";
 }
 
 
@@ -314,10 +360,12 @@ void age::gb_lcd_irqs::schedule_irq_mode2()
                            + ((line + 1) * gb_clock_cycles_per_lcd_line)
                            // the mode 2 irq for line 0 is not triggered early
                            + ((line == 153) ? 0 : m2_lead);
+    int clk_diff = m_clk_next_irq_mode2 - clk_current;
 
     AGE_ASSERT(m_clk_next_irq_mode2 > clk_current)
 
-    m_events.schedule_event(gb_event::lcd_interrupt_mode2, m_clk_next_irq_mode2 - clk_current);
+    m_events.schedule_event(gb_event::lcd_interrupt_mode2, clk_diff);
+    m_interrupts.log() << "next mode 2 IRQ in " << log_in_clks(clk_diff, clk_current);
 }
 
 
@@ -334,18 +382,11 @@ void age::gb_lcd_irqs::trigger_irq_mode0(int scx)
     AGE_ASSERT(m_clk_next_irq_mode0 <= m_clock.get_clock_cycle())
 
     m_interrupts.trigger_interrupt(gb_interrupt::lcd, m_clk_next_irq_mode0);
-    auto msg = m_interrupts.log();
-    msg << "mode 0 interrupt requested on line "
-        << ((m_clk_next_irq_mode0 - m_line.clk_frame_start()) / gb_clock_cycles_per_lcd_line)
-        << "\n    * " << ((m_clk_next_irq_mode0 - m_line.clk_frame_start()) % gb_clock_cycles_per_lcd_line)
-        << " cycles into line";
+    m_interrupts.log() << "mode 0 interrupt occurred" << log_line_clks(m_line, m_clk_next_irq_mode0);
 
     // handle all the details in schedule_irq_mode0()
     // (irq for specific lines at specific clock cycles)
     schedule_irq_mode0(scx);
-
-    msg << "\n    * next mode 0 IRQ in "
-        << log_in_clks(m_clk_next_irq_mode0 - m_clock.get_clock_cycle(), m_clock.get_clock_cycle());
 }
 
 
@@ -393,8 +434,10 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
     m_clk_next_irq_mode0 = clk_frame_start
                            + (line * gb_clock_cycles_per_lcd_line)
                            + m3_end;
+    int clk_diff = m_clk_next_irq_mode0 - clk_current;
 
     AGE_ASSERT(m_clk_next_irq_mode0 > clk_current)
 
-    m_events.schedule_event(gb_event::lcd_interrupt_mode0, m_clk_next_irq_mode0 - clk_current);
+    m_events.schedule_event(gb_event::lcd_interrupt_mode0, clk_diff);
+    m_interrupts.log() << "next mode 0 IRQ in " << log_in_clks(clk_diff, clk_current);
 }

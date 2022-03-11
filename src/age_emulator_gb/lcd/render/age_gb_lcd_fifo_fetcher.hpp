@@ -154,11 +154,9 @@ namespace age
             }
         }
 
-        void set_clks_tile_data_change(gb_current_line at_line)
+        void set_clks_tile_data_change(int line_clks)
         {
-            AGE_ASSERT(m_device.is_cgb_device())
-            AGE_ASSERT(at_line.m_line == m_line)
-            m_bg_clks_last_lcdc_tile_data = at_line.m_line_clks;
+            m_bg_clks_last_lcdc_tile_data = line_clks;
         }
 
         uint8_t pop_bg_dot()

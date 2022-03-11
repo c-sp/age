@@ -76,10 +76,11 @@ bool age::gb_lcd::is_video_ram_accessible()
 
 void age::gb_lcd::after_speed_change()
 {
-    if (m_line.lcd_is_on())
+    if (m_line.lcd_is_on() && m_clock.is_double_speed())
     {
         update_state();
-        m_line.after_speed_change();
+        m_line.align_after_speed_change(1);
+        m_lcd_irqs.align_after_speed_change(1);
     }
 }
 

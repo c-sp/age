@@ -80,7 +80,10 @@ void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_lin
 {
     if (in_progress())
     {
-        m_fetcher.set_clks_tile_data_change(at_line);
+        AGE_ASSERT(m_device.is_cgb_device())
+        AGE_ASSERT(m_line.m_line == at_line.m_line)
+        AGE_ASSERT(m_line.m_line_clks >= at_line.m_line_clks)
+        m_fetcher.set_clks_tile_data_change(m_line.m_line_clks);
     }
 }
 
@@ -251,8 +254,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
             m_line_stage  = line_stage::mode3_render;
             LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
                         << " entering line_stage::mode3_render"
-                        << ", scx=" << (int) m_common.m_scx
-                        << ", bg-fifo-size=" << m_bg_fifo.size())
+                        << ", scx=" << (int) m_common.m_scx)
             break;
         }
     }
@@ -342,8 +344,7 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
         m_line_stage       = line_stage::mode3_render;
         m_line.m_line_clks = m_clks_end_window_init;
         m_fetcher.restart_bg_fetch(m_line.m_line_clks);
-        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init"
-                    << ", fifo size = " << m_bg_fifo.size())
+        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init")
     }
 }
 

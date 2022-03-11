@@ -58,10 +58,12 @@ namespace age
     template<typename Line>
     struct log_line_clks
     {
-        explicit log_line_clks(Line& line)
-            : m_line(line)
+        explicit log_line_clks(Line& line, int with_clock_cycle = -1)
+            : m_line(line),
+              m_with_clock_cycle(with_clock_cycle)
         {}
         Line& m_line;
+        int   m_with_clock_cycle;
     };
 
     template<int Bits, typename Value>
@@ -137,7 +139,10 @@ namespace age
         {
             if (value.m_line.lcd_is_on())
             {
-                auto line = value.m_line.current_line();
+                auto line = (value.m_with_clock_cycle >= 0)
+                                ? value.m_line.calculate_line(value.m_with_clock_cycle)
+                                : value.m_line.current_line();
+
                 *m_stream << " (" << line.m_line_clks << " clock cycles into line " << (line.m_line % 154) << ")";
             }
             else

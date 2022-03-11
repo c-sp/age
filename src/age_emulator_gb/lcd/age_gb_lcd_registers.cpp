@@ -198,23 +198,21 @@ age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line)
 age::uint8_t age::gb_lcd::get_stat_ly_match(const gb_current_line& current_line) const
 {
     int match_line = current_line.m_line;
+    int line_clks  = current_line.m_line_clks;
 
     // special timing for line 153
-    if (current_line.m_line == 153)
+    if (match_line == 153)
     {
-        //! \todo need more timing details
-        if (current_line.m_line_clks > 4)
-        {
-            match_line = 0;
-        }
+        match_line = (line_clks == 7)  ? -1
+                     : (line_clks > 7) ? 0
+                                       : 153;
     }
 
     // "regular" timing
     else
     {
-        // when not running at double speed LY-match is cleared early
-        int clks_next_line = gb_clock_cycles_per_lcd_line - current_line.m_line_clks;
-        if (clks_next_line <= (m_clock.is_double_speed() ? 0 : 2))
+        int clks_next_line = gb_clock_cycles_per_lcd_line - line_clks;
+        if (clks_next_line <= 1)
         {
             match_line = -1;
         }
@@ -265,7 +263,7 @@ age::uint8_t age::gb_lcd::read_ly()
     // LY = 153 only for 2-3 T4-cycles
     if ((line.m_line >= 153) && (line.m_line_clks > 2 + (m_clock.is_double_speed() || m_device.is_cgb_e_device() ? 1 : 0)))
     {
-        log_reg() << "read LY == 0" << log_line_clks(m_line);
+        log_reg() << "read LY == " << log_hex8(0) << log_line_clks(m_line);
         return 0;
     }
 
@@ -390,7 +388,7 @@ void age::gb_lcd::write_scx(uint8_t value)
 void age::gb_lcd::write_lyc(uint8_t value)
 {
     auto msg = log_reg();
-    msg << "write LYC = " << log_hex8(value);
+    msg << "write LYC = " << log_hex8(value) << log_line_clks(m_line);
 
     if (m_line.m_lyc == value)
     {
@@ -399,7 +397,7 @@ void age::gb_lcd::write_lyc(uint8_t value)
     }
     update_state();
     m_line.m_lyc = value;
-    m_lcd_irqs.lyc_update();
+    m_lcd_irqs.on_lyc_change();
 }
 
 

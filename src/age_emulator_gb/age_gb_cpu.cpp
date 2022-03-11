@@ -200,6 +200,7 @@ void age::gb_cpu::dispatch_interrupt()
     // IF bit (checked by pushing to IF).
     tick_push_byte(m_pc);
 
+    //! \todo delay write by one cycle (similar to IF write)? (see failing "late_retrigger" tests)
     m_interrupts.clear_interrupt_flag(intr_bit);
 
     m_pc                = interrupt_pc_lookup[intr_bit];

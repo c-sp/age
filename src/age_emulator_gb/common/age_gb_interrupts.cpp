@@ -204,7 +204,8 @@ void age::gb_interrupt_dispatcher::clear_interrupt_flag(uint8_t interrupt_bit)
 {
     m_if &= ~interrupt_bit;
     m_during_dispatch = interrupt_bit;
-    log() << "clear IF bit " << log_hex8(interrupt_bit);
+    log() << "clear IF bit " << log_hex8(interrupt_bit)
+          << ", IF == " << log_hex8(m_if);
 }
 
 void age::gb_interrupt_dispatcher::finish_dispatch()

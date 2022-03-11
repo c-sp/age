@@ -53,7 +53,7 @@ namespace age
         gb_lcd_line(const gb_device& device, const gb_clock& clock);
         ~gb_lcd_line() = default;
 
-        void after_speed_change();
+        void align_after_speed_change(int clock_cycle_offset);
         void set_back_clock(int clock_cycle_offset);
 
         bool lcd_is_on() const;
@@ -66,6 +66,7 @@ namespace age
         void fast_forward_frames();
 
         gb_current_line current_line() const;
+        gb_current_line calculate_line(int clock_cycle) const;
 
         // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
@@ -104,7 +105,7 @@ namespace age
 
         [[nodiscard]] uint8_t read_stat() const;
         void                  write_stat(uint8_t value, int scx);
-        void                  lyc_update();
+        void                  on_lyc_change();
 
         void trigger_irq_vblank();
         void trigger_irq_lyc();
@@ -113,6 +114,7 @@ namespace age
 
         void lcd_on(int scx);
         void lcd_off();
+        void align_after_speed_change(int clock_cycle_offset);
         void set_back_clock(int clock_cycle_offset);
 
     private:
