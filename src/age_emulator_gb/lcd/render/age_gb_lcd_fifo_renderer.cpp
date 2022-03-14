@@ -445,6 +445,16 @@ bool age::gb_lcd_fifo_renderer::fetch_next_sprite()
         return false;
     }
 
+    if (m_device.is_dmg_device() && !are_sprites_enabled(m_common.get_lcdc()))
+    {
+        while (m_next_sprite_x == m_x_pos)
+        {
+            m_sorted_sprites.pop_back();
+            m_next_sprite_x = m_sorted_sprites.empty() ? -1 : m_sorted_sprites.back().m_x;
+        }
+        return false;
+    }
+
     int spx0_delay = (m_x_pos == 0) ? std::min(m_alignment_x & 0b111, 5) : 0;
 
     AGE_ASSERT(!m_sorted_sprites.empty())

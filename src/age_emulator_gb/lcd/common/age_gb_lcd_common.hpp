@@ -50,6 +50,11 @@ namespace age
         return (lcdc & gb_lcdc_win_enable) != 0;
     }
 
+    constexpr bool are_sprites_enabled(uint8_t lcdc)
+    {
+        return (lcdc & gb_lcdc_obj_enable) != 0;
+    }
+
     struct gb_current_line
     {
         int m_line;

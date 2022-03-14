@@ -408,7 +408,9 @@ namespace age
             bitplane1 <<= 1;
             for (int i = 0; i < 8; ++i)
             {
-                uint8_t color = (bitplane0 & 0b01U) + (bitplane1 & 0b10U) + palette_ofs;
+                uint8_t color = are_sprites_enabled(m_common.get_lcdc())
+                                    ? (bitplane0 & 0b01U) + (bitplane1 & 0b10U) + palette_ofs
+                                    : 0;
                 bitplane0 >>= 1;
                 bitplane1 >>= 1;
 
