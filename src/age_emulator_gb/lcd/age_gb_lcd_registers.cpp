@@ -258,19 +258,31 @@ age::uint8_t age::gb_lcd::read_ly()
         return 0;
     }
 
-    auto line = calculate_line();
+    auto line               = calculate_line();
+    int  ly                 = line.m_line;
+    bool glitch             = false;
+    bool cgb_e_normal_speed = m_device.is_cgb_e_device() && !m_clock.is_double_speed();
 
     // LY = 153 only for 2-3 T4-cycles
-    if ((line.m_line >= 153) && (line.m_line_clks > 2 + (m_clock.is_double_speed() || m_device.is_cgb_e_device() ? 1 : 0)))
+    if ((line.m_line == 153) && (line.m_line_clks > 2 + (cgb_e_normal_speed ? 1 : 0)))
     {
-        log_reg() << "read LY == " << log_hex8(0) << log_line_clks(m_line);
-        return 0;
+        ly = 0;
+    }
+    // LY is incremented early
+    else if (line.m_line_clks >= gb_clock_cycles_per_lcd_line - (m_clock.is_double_speed() ? 2 : 1))
+    {
+        ++ly;
+    }
+    // LY glitch right before incrementing LY
+    else if (line.m_line_clks >= gb_clock_cycles_per_lcd_line - (!cgb_e_normal_speed ? 3 : 2))
+    {
+        ly &= (ly + 1);
+        glitch = true;
     }
 
-    // LY is incremented 2 clock cycles early
-    int ly = line.m_line + ((line.m_line_clks >= gb_clock_cycles_per_lcd_line - 2) ? 1 : 0);
-
-    log_reg() << "read LY == " << log_hex8(ly) << log_line_clks(m_line);
+    log_reg() << "read LY == " << log_hex8(ly)
+              << (glitch ? " (glitch)" : "")
+              << log_line_clks(m_line);
     return ly;
 }
 

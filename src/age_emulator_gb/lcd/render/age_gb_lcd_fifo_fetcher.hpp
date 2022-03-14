@@ -97,6 +97,7 @@ namespace age
             m_bg_next_bitplane            = {};
             m_bg_cur_attributes           = 0;
             m_bg_cur_bitplane             = {};
+            m_bg_cur_buffered_dots        = 8;
 
             m_spr_clks_next_bg_fetch        = 0;
             m_spr_clks_last_sprite_finished = int_max;
@@ -122,14 +123,12 @@ namespace age
         void trigger_sprite_fetch(uint8_t sprite_id, int current_line_clks, int spx0_delay)
         {
             AGE_ASSERT(m_next_step_clks > current_line_clks)
-            AGE_ASSERT(m_next_step_clks <= current_line_clks + 4)
-            AGE_ASSERT(m_bg_clks_last_tile_name <= current_line_clks)
             AGE_ASSERT(m_spr_id_to_fetch == no_sprite)
             AGE_ASSERT(spx0_delay >= 0)
             AGE_ASSERT(spx0_delay <= 5)
             m_spr_id_to_fetch               = sprite_id;
             m_spr_clks_last_sprite_finished = int_max;
-            m_spr_clks_next_bg_fetch        = 9 - (current_line_clks - m_bg_clks_last_tile_name) + spx0_delay;
+            m_spr_clks_next_bg_fetch        = m_bg_cur_buffered_dots + 1 + spx0_delay;
             m_spr_spx0_delay                = spx0_delay;
             switch (m_next_step)
             {
@@ -161,6 +160,8 @@ namespace age
 
         uint8_t pop_bg_dot()
         {
+            AGE_ASSERT(m_bg_cur_buffered_dots > 0)
+
             uint8_t color_idx = m_bg_cur_attributes & gb_tile_attrib_cgb_palette;
             color_idx <<= 2;
 
@@ -169,6 +170,7 @@ namespace age
 
             m_bg_cur_bitplane[0] >>= 1;
             m_bg_cur_bitplane[1] >>= 1;
+            --m_bg_cur_buffered_dots;
 
             return color_idx;
         }
@@ -239,11 +241,11 @@ namespace age
                     break;
 
                 case fetcher_step::fetch_sprite_bitplane1:
+                    LOG("(" << m_next_step_clks << "): fetch_sprite_bitplane1")
                     AGE_ASSERT(m_spr_clks_last_sprite_finished == int_max)
                     AGE_ASSERT(m_spr_clks_next_bg_fetch > 0)
                     AGE_ASSERT(m_spr_clks_next_bg_fetch <= 10)
                     AGE_ASSERT(m_spr_id_to_fetch != no_sprite)
-                    LOG("(" << m_next_step_clks << "): fetch_sprite_bitplane1")
                     fetch_sprite_bitplane(1);
                     apply_sp_bitplane();
                     m_spr_id_to_fetch               = no_sprite;
@@ -283,8 +285,9 @@ namespace age
 
         void fetch_bg_name(int x_pos, int x_pos_win_start)
         {
-            m_bg_cur_attributes = m_bg_next_attributes;
-            m_bg_cur_bitplane   = m_bg_next_bitplane;
+            m_bg_cur_attributes    = m_bg_next_attributes;
+            m_bg_cur_bitplane      = m_bg_next_bitplane;
+            m_bg_cur_buffered_dots = 8;
 
             m_bg_fetch_window = x_pos_win_start <= x_pos;
             int tile_vram_ofs = 0;
@@ -438,6 +441,7 @@ namespace age
         uint8_array<2> m_bg_next_bitplane{};
         uint8_t        m_bg_cur_attributes = 0;
         uint8_array<2> m_bg_cur_bitplane{};
+        int8_t         m_bg_cur_buffered_dots = 0;
 
         int            m_spr_clks_next_bg_fetch        = 0;
         int            m_spr_clks_last_sprite_finished = int_max;

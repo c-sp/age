@@ -257,6 +257,8 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
                         << ", scx=" << (int) m_common.m_scx)
             break;
         }
+
+        m_fetcher.pop_bg_dot();
     }
 }
 
@@ -443,17 +445,19 @@ bool age::gb_lcd_fifo_renderer::fetch_next_sprite()
         return false;
     }
 
+    int spx0_delay = (m_x_pos == 0) ? std::min(m_alignment_x & 0b111, 5) : 0;
+
     AGE_ASSERT(!m_sorted_sprites.empty())
     LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
                 << " prepare fetching sprite #" << (int) m_sorted_sprites[0].m_sprite_id
                 << ", x-pos = " << m_x_pos
                 << ", scx = " << (int) m_common.m_scx
+                << ", spx0-delay " << spx0_delay
                 << ", next-fetcher-step " << m_fetcher.next_step()
                 << ", next-fetcher-clks " << m_fetcher.next_step_clks())
 
     // trigger sprite fetch
-    m_line_stage   = line_stage::mode3_wait_for_sprite;
-    int spx0_delay = (m_x_pos == 0) ? std::min(m_alignment_x & 0b111, 5) : 0;
+    m_line_stage = line_stage::mode3_wait_for_sprite;
     m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks, spx0_delay);
 
     // watch out for the next sprite

@@ -127,7 +127,19 @@
 /gambatte/enable_display/ly1_late_cgbpw_2_cgb04c_out55.gbc
 
 /gambatte/irq_precedence/
-/gambatte/lcd_offset/
+
+/gambatte/lcd_offset/offset1_lyc99int_m2stat_count_1
+/gambatte/lcd_offset/offset1_lyc99int_m2stat_count_ds_2
+/gambatte/lcd_offset/offset1_lyc99int_m3stat_count_ds_2
+/gambatte/lcd_offset/offset3_lyc8fint_m1stat_1
+/gambatte/lcd_offset/offset3_lyc98int_ly_count_1
+/gambatte/lcd_offset/offset3_lyc98int_ly_count_2
+/gambatte/lcd_offset/offset3_lyc99int_m0stat_count_scx0_2
+/gambatte/lcd_offset/offset3_lyc99int_m0stat_count_scx1_2
+/gambatte/lcd_offset/offset3_lyc99int_m2irq_count_2
+/gambatte/lcd_offset/offset3_lyc99int_m2stat_count_2
+/gambatte/lcd_offset/offset3_lyc99int_m3stat_count_2
+
 /gambatte/lcdirq_precedence/
 
 /gambatte/ly0/lycint152_lyc0irq_late_retrigger

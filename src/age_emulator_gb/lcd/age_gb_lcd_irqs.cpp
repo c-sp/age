@@ -409,7 +409,7 @@ void age::gb_lcd_irqs::schedule_irq_mode0(int scx)
 
     //! \todo Gambatte test rom analysis: enable_display/frame0_m0irq_count_scx{2|3}
     //! \todo write a test rom for this
-    int m3_end = 80 + 172 + (scx & 7) + (m_line.is_odd_alignment() ? 1 : 0);
+    int m3_end = 80 + 172 + (scx & 7) + (m_line.is_odd_alignment() && !m_clock.is_double_speed() ? 1 : 0);
 
     // if we're past the mode 0 irq for this line,
     // continue with the next line
