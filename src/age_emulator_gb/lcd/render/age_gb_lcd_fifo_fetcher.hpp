@@ -41,20 +41,21 @@
 
 namespace age
 {
-    struct sp_pixel
+    struct gb_sp_dot
     {
-        sp_pixel() : sp_pixel(0, 0) {}
+        gb_sp_dot() : gb_sp_dot(0, 0, 0) {}
 
-        sp_pixel(uint8_t id, uint8_t color)
-            : m_id(id),
-              m_color(color) {}
+        gb_sp_dot(uint16_t priority, uint8_t color, uint8_t attributes)
+            : m_priority(priority),
+              m_color(color),
+              m_attributes(attributes) {}
 
-        uint8_t m_id;
-        uint8_t m_color;
+        uint16_t m_priority;
+        uint8_t  m_color;
+        uint8_t  m_attributes;
     };
 
-    using gb_bg_fifo = std::deque<uint8_t>;
-    using gb_sp_fifo = std::deque<sp_pixel>;
+    using gb_sp_fifo = std::deque<gb_sp_dot>;
 
 
 
@@ -68,14 +69,12 @@ namespace age
                             const gb_lcd_renderer_common& common,
                             const uint8_t*                video_ram,
                             const gb_lcd_sprites&         sprites,
-                            const gb_window_check&        window,
-                            gb_sp_fifo&                   sp_fifo)
+                            const gb_window_check&        window)
             : m_device(device),
               m_common(common),
               m_video_ram(video_ram),
               m_sprites(sprites),
-              m_window(window),
-              m_sp_fifo(sp_fifo)
+              m_window(window)
         {
         }
 
@@ -102,7 +101,7 @@ namespace age
             m_spr_clks_next_bg_fetch        = 0;
             m_spr_clks_last_sprite_finished = int_max;
             m_spr_spx0_delay                = 0;
-            m_spr_id_to_fetch               = no_sprite;
+            m_spr_to_fetch_id               = no_sprite;
             m_spr_next_name                 = 0;
             m_spr_next_attributes           = 0;
             m_spr_next_bitplane             = {};
@@ -120,13 +119,14 @@ namespace age
             m_next_step_clks = start_fetch_cycle_clks;
         }
 
-        void trigger_sprite_fetch(uint8_t sprite_id, int current_line_clks, int spx0_delay)
+        void trigger_sprite_fetch(uint8_t sprite_id, uint8_t spr_x, int current_line_clks, int spx0_delay)
         {
             AGE_ASSERT(m_next_step_clks > current_line_clks)
-            AGE_ASSERT(m_spr_id_to_fetch == no_sprite)
+            AGE_ASSERT(m_spr_to_fetch_id == no_sprite)
             AGE_ASSERT(spx0_delay >= 0)
             AGE_ASSERT(spx0_delay <= 5)
-            m_spr_id_to_fetch               = sprite_id;
+            m_spr_to_fetch_id               = sprite_id;
+            m_spr_to_fetch_x                = spr_x;
             m_spr_clks_last_sprite_finished = int_max;
             m_spr_clks_next_bg_fetch        = m_bg_cur_buffered_dots + 1 + spx0_delay;
             m_spr_spx0_delay                = spx0_delay;
@@ -158,6 +158,13 @@ namespace age
             m_bg_clks_last_lcdc_tile_data = line_clks;
         }
 
+
+
+        [[nodiscard]] uint8_t get_bg_attributes() const
+        {
+            return m_bg_cur_attributes;
+        }
+
         uint8_t pop_bg_dot()
         {
             AGE_ASSERT(m_bg_cur_buffered_dots > 0)
@@ -173,6 +180,17 @@ namespace age
             --m_bg_cur_buffered_dots;
 
             return color_idx;
+        }
+
+        age::gb_sp_dot pop_sp_dot()
+        {
+            if (m_sp_fifo.empty())
+            {
+                return {};
+            }
+            auto sp_px = m_sp_fifo[0];
+            m_sp_fifo.pop_front();
+            return sp_px;
         }
 
 
@@ -218,7 +236,7 @@ namespace age
                 case fetcher_step::fetch_bg_bitplane1:
                     LOG("(" << m_next_step_clks << "): fetch_bg_bitplane1")
                     fetch_bg_bitplane(1);
-                    if (m_spr_id_to_fetch != no_sprite)
+                    if (m_spr_to_fetch_id != no_sprite)
                     {
                         schedule_next_step(2, fetcher_step::fetch_sprite_name);
                     }
@@ -245,10 +263,10 @@ namespace age
                     AGE_ASSERT(m_spr_clks_last_sprite_finished == int_max)
                     AGE_ASSERT(m_spr_clks_next_bg_fetch > 0)
                     AGE_ASSERT(m_spr_clks_next_bg_fetch <= 10)
-                    AGE_ASSERT(m_spr_id_to_fetch != no_sprite)
+                    AGE_ASSERT(m_spr_to_fetch_id != no_sprite)
                     fetch_sprite_bitplane(1);
                     apply_sp_bitplane();
-                    m_spr_id_to_fetch               = no_sprite;
+                    m_spr_to_fetch_id               = no_sprite;
                     m_spr_clks_last_sprite_finished = m_next_step_clks + m_spr_spx0_delay;
                     schedule_next_step(m_spr_clks_next_bg_fetch, fetcher_step::fetch_bg_name);
                     m_spr_clks_next_bg_fetch = 0;
@@ -285,8 +303,9 @@ namespace age
 
         void fetch_bg_name(int x_pos, int x_pos_win_start)
         {
-            m_bg_cur_attributes    = m_bg_next_attributes;
-            m_bg_cur_bitplane      = m_bg_next_bitplane;
+            bool bg_enabled        = m_device.cgb_mode() || ((m_common.get_lcdc() & gb_lcdc_bg_enable) != 0);
+            m_bg_cur_attributes    = bg_enabled ? m_bg_next_attributes : 0;
+            m_bg_cur_bitplane      = bg_enabled ? m_bg_next_bitplane : uint8_array<2>{};
             m_bg_cur_buffered_dots = 8;
 
             m_bg_fetch_window = x_pos_win_start <= x_pos;
@@ -357,8 +376,8 @@ namespace age
 
         void fetch_sprite_name()
         {
-            m_spr_next_name       = m_sprites.read_oam(m_spr_id_to_fetch * 4 + gb_oam_ofs_tile);
-            m_spr_next_attributes = m_sprites.read_oam(m_spr_id_to_fetch * 4 + gb_oam_ofs_attributes);
+            m_spr_next_name       = m_sprites.read_oam(m_spr_to_fetch_id * 4 + gb_oam_ofs_tile);
+            m_spr_next_attributes = m_sprites.read_oam(m_spr_to_fetch_id * 4 + gb_oam_ofs_attributes);
 
             if (m_sprites.get_sprite_size() == 16)
             {
@@ -371,7 +390,7 @@ namespace age
             AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
 
             int tile_line_mask = (m_sprites.get_sprite_size() == 16) ? 0b1111 : 0b111;
-            int tile_line      = (m_line + 16 - m_sprites.read_oam(m_spr_id_to_fetch * 4 + gb_oam_ofs_y)) & tile_line_mask;
+            int tile_line      = (m_line + 16 - m_sprites.read_oam(m_spr_to_fetch_id * 4 + gb_oam_ofs_y)) & tile_line_mask;
 
             // y-flip
             if (m_spr_next_attributes & gb_tile_attrib_flip_y)
@@ -399,6 +418,10 @@ namespace age
             AGE_ASSERT(m_sp_fifo.size() <= 8)
             m_sp_fifo.resize(8);
 
+            uint16_t priority = m_device.cgb_mode()
+                                    ? m_spr_to_fetch_id
+                                    : (m_spr_to_fetch_x << 8) + m_spr_to_fetch_id;
+
             unsigned bitplane0 = m_spr_next_bitplane[0];
             unsigned bitplane1 = m_spr_next_bitplane[1];
 
@@ -414,10 +437,9 @@ namespace age
                 bitplane0 >>= 1;
                 bitplane1 >>= 1;
 
-                //! \todo sprite priority
-                if ((m_sp_fifo[i].m_color & 0b11) == 0)
+                if (((m_sp_fifo[i].m_color & 0b11) == 0) || (m_sp_fifo[i].m_priority > priority))
                 {
-                    m_sp_fifo[i] = {m_spr_id_to_fetch, color};
+                    m_sp_fifo[i] = {priority, color, m_spr_next_attributes};
                 }
             }
         }
@@ -429,7 +451,7 @@ namespace age
         const uint8_t*                m_video_ram;
         const gb_lcd_sprites&         m_sprites;
         const gb_window_check&        m_window;
-        gb_sp_fifo&                   m_sp_fifo;
+        gb_sp_fifo                    m_sp_fifo{};
 
         int          m_line           = gb_no_line.m_line;
         fetcher_step m_next_step      = fetcher_step::fetch_bg_name;
@@ -448,7 +470,8 @@ namespace age
         int            m_spr_clks_next_bg_fetch        = 0;
         int            m_spr_clks_last_sprite_finished = int_max;
         int            m_spr_spx0_delay                = 0;
-        uint8_t        m_spr_id_to_fetch               = no_sprite;
+        uint8_t        m_spr_to_fetch_id               = no_sprite;
+        uint8_t        m_spr_to_fetch_x                = no_sprite;
         uint8_t        m_spr_next_name                 = 0;
         uint8_t        m_spr_next_attributes           = 0;
         uint8_array<2> m_spr_next_bitplane{};

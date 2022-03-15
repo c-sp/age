@@ -93,7 +93,6 @@ namespace age
         screen_buffer&                m_screen_buffer;
 
         std::vector<gb_sprite> m_sorted_sprites{};
-        gb_sp_fifo             m_sp_fifo{};
         gb_lcd_fifo_fetcher    m_fetcher;
 
         gb_current_line m_line                 = gb_no_line;

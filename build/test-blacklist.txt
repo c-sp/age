@@ -12,11 +12,7 @@
 ###
 
 /age-test-roms/_in-progress
-/age-test-roms/m3-bg-bgp
-/age-test-roms/m3-bg-lcdc
-/age-test-roms/m3-bg-scx
 /age-test-roms/oam/oam-write-dmgC
-/age-test-roms/stat-mode-window
 
 
 
@@ -94,6 +90,13 @@
 /gambatte/scx_during_m3/scx_attrib_during_m3_spx0.gbc
 /gambatte/scx_during_m3/scx_attrib_during_m3_spx1.gbc
 /gambatte/sound/ch1_duty0_to_duty3_pos3_1_dmg08_cgb_xoutaudio1.gbc
+/gambatte/sprites/11spritesPrLine_10xposA8.gbc
+/gambatte/sprites/late_disable_group_image_
+/gambatte/sprites/late_disable_scx5_
+/gambatte/sprites/late_disable_sp00x18_
+/gambatte/sprites/sprite_late_enable_spx19_2_dmg08_xout0.gb
+/gambatte/window/on_screen/late_wx_ds_1.gbc
+/gambatte/window/on_screen/late_wx_ds_2.gbc
 
 ### failing tests
 
@@ -106,6 +109,7 @@
 
 /gambatte/dmgpalette_during_m3/
 
+/gambatte/enable_display/enable_display_ly0_sprites_m0stat_2_dmg08_cgb04c_out0
 /gambatte/enable_display/enable_display_ly0_wemaster_1_dmg08_cgb04c_out3.gbc
 /gambatte/enable_display/frame0_m0irq_count_scx2_1_dmg08_cgb04c_out90.gbc
 /gambatte/enable_display/frame0_m0irq_count_scx2_ds_1_cgb04c_out90.gbc
@@ -116,11 +120,7 @@
 /gambatte/enable_display/ly0_late_cgbpw_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_cgbpw_ds_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_oamw_2_dmg08_cgb04c_out55.gbc
-/gambatte/enable_display/ly0_late_oamw_ds_2_cgb04c_out55.gbc
 /gambatte/enable_display/ly0_late_scx7_m3stat_scx0_2_dmg08_out87_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx0_3_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx1_2_dmg08_cgb04c_out84.gbc
-/gambatte/enable_display/ly0_late_scx7_m3stat_scx3_2_dmg08_cgb04c_out84.gbc
 /gambatte/enable_display/ly0_m0irq_scx0_ds_1_cgb04c_outE0.gbc
 /gambatte/enable_display/ly0_m0irq_scx1_1_dmg08_cgb04c_outE0.gbc
 /gambatte/enable_display/ly0_m0irq_scx1_ds_1_cgb04c_outE0.gbc
@@ -158,16 +158,15 @@
 /gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_4_dmg08_cgb04c_out0.gbc
 /gambatte/m2int_m0irq/m2int_m0irq_scx3_ifw_ds_2_cgb04c_out0.gbc
 
-/gambatte/m2int_m3stat/scx/late_scx4_2_dmg08_cgb04c_out0.gbc
-/gambatte/m2int_m3stat/scx/late_scx4_ds_2_cgb04c_out0.gbc
-
 /gambatte/miscmstatirq/
 
 /gambatte/oam_access/10spritesprline_postread_1_dmg08_cgb04c_out3
 /gambatte/oam_access/midwrite_2_dmg08_out1_cgb04c_out0.gbc
 
 /gambatte/oamdma/late_sp
+/gambatte/oamdma/oamdma_late_halt_stat_1_dmg08_cgb04c_out0
 /gambatte/oamdma/oamdma_late_halt_stat_2_dmg08_cgb04c_out3
+/gambatte/oamdma/oamdma_late_speedchange_stat_1_cgb04c_out0
 /gambatte/oamdma/oamdma_late_speedchange_stat_2_cgb04c_out3
 /gambatte/oamdma/oamdma_src8000_srcchange0000_busyinc_dmg08_cgb04c_out0
 /gambatte/oamdma/oamdma_src8000_vrambankchange_2_cgb04c_out4
@@ -182,16 +181,64 @@
 /gambatte/oamdma/oamdmasrcC000_hdmasrc0000_cgb04c_out0A940C0D
 /gambatte/oamdma/oamdmasrcC0_speedchange_readC000_cgb04c_out11
 
-/gambatte/scx_during_m3/
-/gambatte/scy/
-/gambatte/sprites/
+/gambatte/scx_during_m3/scx_attrib_during_m3_spx
+/gambatte/scx_during_m3/scx_during_m3_spx
+
+/gambatte/scy/scy_during_m3_spx
+
+/gambatte/sprites/10spritesPrLine_10xposA6_m0irq_1_dmg08_cgb04c_out0.gbc
+/gambatte/sprites/late_disable_1_dmg08_out0.gb
+/gambatte/sprites/late_sizechange2_sp00_ds_1_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange2_sp01_1_dmg08_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange2_sp01_ds_1_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange2_sp02_1_dmg08_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange2_sp39_1_dmg08_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange2_sp39_ds_1_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange_1_dmg08_cgb04c_out0.gbc
+/gambatte/sprites/late_sizechange_2_dmg08_out0_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange_ds_1_cgb04c_out0.gbc
+/gambatte/sprites/late_sizechange_sp00_ds_1_cgb04c_out0.gbc
+/gambatte/sprites/late_sizechange_sp01_2_dmg08_out0_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange_sp01_ds_1_cgb04c_out0.gbc
+/gambatte/sprites/late_sizechange_sp02_1_dmg08_cgb04c_out0.gbc
+/gambatte/sprites/late_sizechange_sp39_1_dmg08_cgb04c_out0.gbc
+/gambatte/sprites/late_sizechange_sp39_2_dmg08_out0_cgb04c_out3.gbc
+/gambatte/sprites/late_sizechange_sp39_ds_1_cgb04c_out0.gbc
+/gambatte/sprites/space/2overlap8_offset4_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap4_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap4_scx4_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap5_scx1_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap5_scx6_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap6_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap6_rev_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap6_scx2_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap7_scx2_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap7_scx3_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/space/3overlap8_scx4_m3stat_ds_2_cgb04c_out0.gbc
+/gambatte/sprites/sprite_late_disable_spx18_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_disable_spx19_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_disable_spx1A_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_disable_spx1B_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_enable_spx18_2_dmg08_out0.gb
+/gambatte/sprites/sprite_late_enable_spx1A_2_dmg08_out0.gb
+/gambatte/sprites/sprite_late_enable_spx1B_2_dmg08_out0.gb
+/gambatte/sprites/sprite_late_late_disable_spx18_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_late_disable_spx19_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_late_disable_spx1A_1_dmg08_out0.gb
+/gambatte/sprites/sprite_late_late_disable_spx1B_1_dmg08_out0.gb
 
 /gambatte/vram_m3/10spritesprline_postread_1_dmg08_cgb04c_out3.gbc
 /gambatte/vram_m3/preread_lcdoffset2_1_cgb04c_out0.gbc
 /gambatte/vram_m3/prewrite_lcdoffset2_1_cgb04c_out1.gbc
 /gambatte/vram_m3/vramw_m3start_1_dmg08_cgb04c_out1.gbc
 
-/gambatte/window/
+/gambatte/window/late_disable_spx10_
+/gambatte/window/late_reenable_scx
+/gambatte/window/m2int_wxA5_m0irq
+/gambatte/window/m2int_wxA6_oambusyread
+/gambatte/window/m2int_wxA6_spxA7_m3stat
+/gambatte/window/m2int_wxA6_vrambusyread
+/gambatte/window/on_screen/
 
 
 
@@ -200,9 +247,36 @@
 ###   mealybug tearoom
 ###
 
+### no test result available
+
+/mealybug-tearoom-tests/ppu/win_without_bg
+
+### failing tests
+
 /mealybug-tearoom-tests/dma/
 /mealybug-tearoom-tests/mbc/
-/mealybug-tearoom-tests/ppu/
+
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_map_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_bg_map_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_en_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_en_change_variant
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_size_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_obj_size_change_scx
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_win_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_tile_sel_win_change2
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_en_change_multiple_wx
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_map_change
+/mealybug-tearoom-tests/ppu/m3_lcdc_win_map_change2
+/mealybug-tearoom-tests/ppu/m3_obp0_change
+/mealybug-tearoom-tests/ppu/m3_scx_high_5_bits
+/mealybug-tearoom-tests/ppu/m3_scx_high_5_bits_change2
+/mealybug-tearoom-tests/ppu/m3_scy_change
+/mealybug-tearoom-tests/ppu/m3_scy_change2
+/mealybug-tearoom-tests/ppu/m3_wx_4_change_sprites
 
 
 

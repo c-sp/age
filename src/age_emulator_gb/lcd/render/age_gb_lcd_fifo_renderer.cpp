@@ -24,20 +24,7 @@ namespace
 {
     constexpr int x_pos_last_px = age::gb_screen_width + age::gb_x_pos_first_px - 1;
 
-    age::uint8_t pop_sp_pixel(age::gb_sp_fifo& sp_fifo)
-    {
-        if (sp_fifo.empty())
-        {
-            return 0;
-        }
-        auto color = sp_fifo[0].m_color;
-        sp_fifo.pop_front();
-        return color;
-    }
-
 } // namespace
-
-//! \todo handle LCDC bit 0
 
 //! \todo maybe replace this with gb_logger
 #if 0
@@ -60,7 +47,7 @@ age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              de
       m_sprites(sprites),
       m_window(window),
       m_screen_buffer(screen_buffer),
-      m_fetcher(device, common, video_ram, sprites, window, m_sp_fifo)
+      m_fetcher(device, common, video_ram, sprites, window)
 {
 }
 
@@ -365,20 +352,28 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_wait_for_sprite(int until_line_
 
 void age::gb_lcd_fifo_renderer::plot_pixel()
 {
-    auto sp_color = pop_sp_pixel(m_sp_fifo);
     auto bg_color = m_fetcher.pop_bg_dot();
+    auto sp_dot   = m_fetcher.pop_sp_dot();
 
     if (m_x_pos >= gb_x_pos_first_px)
     {
-        // BGP glitch not on the first pixel, see age-test-roms/m3-bg-bgp
-        bool bgp_glitch = (m_clks_bgp_change.m_line_clks == m_line.m_line_clks + 1)
-                          && (m_x_pos > gb_x_pos_first_px);
+        uint8_t bg_prio_flag = (m_fetcher.get_bg_attributes() | sp_dot.m_attributes) & gb_tile_attrib_priority;
+        uint8_t prio         = ((bg_color & 0b11) | bg_prio_flag) & m_common.m_priority_mask;
 
-        auto color = (sp_color & 0b11)
-                         ? m_palettes.get_color(sp_color)
-                     : bgp_glitch
-                         ? m_palettes.get_color_bgp_glitch(bg_color)
-                         : m_palettes.get_color(bg_color);
+        pixel color;
+        if ((prio <= 0x80) && (sp_dot.m_color & 0b11))
+        {
+            color = m_palettes.get_color(sp_dot.m_color);
+        }
+        else
+        {
+            // BGP glitch not on the first pixel, see age-test-roms/m3-bg-bgp
+            bool bgp_glitch = (m_clks_bgp_change.m_line_clks == m_line.m_line_clks + 1)
+                              && (m_x_pos > gb_x_pos_first_px);
+
+            color = bgp_glitch ? m_palettes.get_color_bgp_glitch(bg_color)
+                               : m_palettes.get_color(bg_color);
+        }
 
         m_line_buffer[m_x_pos - gb_x_pos_first_px] = color;
     }
@@ -468,7 +463,8 @@ bool age::gb_lcd_fifo_renderer::fetch_next_sprite()
 
     // trigger sprite fetch
     m_line_stage = line_stage::mode3_wait_for_sprite;
-    m_fetcher.trigger_sprite_fetch(m_sorted_sprites.back().m_sprite_id, m_line.m_line_clks, spx0_delay);
+    auto sprite  = m_sorted_sprites.back();
+    m_fetcher.trigger_sprite_fetch(sprite.m_sprite_id, sprite.m_x, m_line.m_line_clks, spx0_delay);
 
     // watch out for the next sprite
     m_sorted_sprites.pop_back();

@@ -74,8 +74,6 @@ void age::gb_lcd_renderer::new_frame()
 
 
 
-#ifdef AGE_COMPILE_FIFO_RENDERER
-
 void age::gb_lcd_renderer::render(gb_current_line until, bool is_first_frame)
 {
     // finish fifo-rendered line
@@ -123,35 +121,3 @@ void age::gb_lcd_renderer::render(gb_current_line until, bool is_first_frame)
         m_fifo_renderer.begin_new_line(until, is_first_frame);
     }
 }
-
-#else
-
-void age::gb_lcd_renderer::render(gb_current_line until, bool is_first_frame)
-{
-    // AGE_COMPILE_FIFO_RENDERER not set
-    AGE_UNUSED(is_first_frame);
-    int until_line = until.m_line + ((until.m_line_clks >= 80) ? 1 : 0);
-
-    AGE_ASSERT(until_line >= m_rendered_lines)
-    AGE_ASSERT(m_rendered_lines <= gb_screen_height)
-
-    int sanitized = std::min<int>(gb_screen_height, until_line);
-    int to_render = sanitized - m_rendered_lines;
-
-    // new lines to render?
-    if (to_render <= 0)
-    {
-        return;
-    }
-
-    // render lines
-    int line = m_rendered_lines;
-    m_rendered_lines += to_render;
-
-    for (; line < m_rendered_lines; ++line)
-    {
-        m_line_renderer.render_line(line);
-    }
-}
-
-#endif
