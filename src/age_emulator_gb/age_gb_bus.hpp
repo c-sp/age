@@ -31,10 +31,10 @@
 #include "sound/age_gb_sound.hpp"
 
 #include "age_gb_joypad.hpp"
-#include "age_gb_memory.hpp"
 #include "age_gb_oam_dma.hpp"
 #include "age_gb_serial.hpp"
 #include "age_gb_timer.hpp"
+#include "memory/age_gb_memory.hpp"
 
 
 

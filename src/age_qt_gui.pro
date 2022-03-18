@@ -57,7 +57,7 @@ HEADERS += \
     age_emulator_gb/lcd/render/age_gb_lcd_sprites.hpp \
     age_emulator_gb/lcd/render/age_gb_lcd_window_check.hpp \
     age_emulator_gb/lcd/age_gb_lcd.hpp \
-    age_emulator_gb/age_gb_memory.hpp \
+    age_emulator_gb/memory/age_gb_memory.hpp \
     age_emulator_gb/age_gb_oam_dma.hpp \
     age_emulator_gb/age_gb_serial.hpp \
     age_emulator_gb/age_gb_timer.hpp \
@@ -108,8 +108,12 @@ SOURCES += \
     age_emulator_gb/lcd/age_gb_lcd_line.cpp \
     age_emulator_gb/lcd/age_gb_lcd_oam_access.cpp \
     age_emulator_gb/lcd/age_gb_lcd_registers.cpp \
-    age_emulator_gb/age_gb_memory.cpp \
-    age_emulator_gb/age_gb_memory_init.cpp \
+    age_emulator_gb/memory/age_gb_mbc1.cpp \
+    age_emulator_gb/memory/age_gb_mbc2.cpp \
+    age_emulator_gb/memory/age_gb_mbc3.cpp \
+    age_emulator_gb/memory/age_gb_mbc5.cpp \
+    age_emulator_gb/memory/age_gb_memory.cpp \
+    age_emulator_gb/memory/age_gb_memory_init.cpp \
     age_emulator_gb/age_gb_oam_dma.cpp \
     age_emulator_gb/age_gb_timer.cpp \
     age_emulator_gb/age_gb_timer_state.cpp \

@@ -27,7 +27,7 @@
 
 #include <age_types.hpp>
 
-#include "common/age_gb_clock.hpp"
+#include "../common/age_gb_clock.hpp"
 
 
 
@@ -60,7 +60,7 @@ namespace age
         [[nodiscard]] uint8_vector get_persistent_ram() const;
         void                       set_persistent_ram(const uint8_vector& source);
 
-        [[nodiscard]] uint8_t read_byte(uint16_t address) const;
+        [[nodiscard]] uint8_t read_byte(uint16_t address);
         [[nodiscard]] uint8_t read_svbk() const;
         [[nodiscard]] uint8_t read_vbk() const;
 
@@ -71,7 +71,9 @@ namespace age
 
 
     private:
-        using mbc_writer = std::function<void(gb_memory&, uint16_t, uint8_t)>;
+        static void    no_mbc_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static void    cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static uint8_t cart_ram_read(gb_memory& memory, uint16_t address);
 
         struct gb_mbc1_data
         {
@@ -79,22 +81,21 @@ namespace age
             uint8_t m_bank2;
             bool    m_mode1;
         };
+        static void mbc1_write(gb_memory& memory, uint16_t address, uint8_t value);
+
+        static void    mbc2_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static void    mbc2_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static uint8_t mbc2_cart_ram_read(gb_memory& memory, uint16_t address);
+
+        static void mbc3_write(gb_memory& memory, uint16_t address, uint8_t value);
 
         struct gb_mbc5_data
         {
             uint8_t m_2000;
             uint8_t m_3000;
         };
-
-        using gb_mbc_data = std::variant<gb_mbc1_data, gb_mbc5_data>;
-
-        static mbc_writer get_mbc_writer(gb_mbc_data& mbc, uint8_t mbc_type);
-        static void       write_to_mbc_no_op(gb_memory& memory, uint16_t offset, uint8_t value);
-        static void       write_to_mbc1(gb_memory& memory, uint16_t offset, uint8_t value);
-        static void       write_to_mbc2(gb_memory& memory, uint16_t offset, uint8_t value);
-        static void       write_to_mbc3(gb_memory& memory, uint16_t offset, uint8_t value);
-        static void       write_to_mbc5(gb_memory& memory, uint16_t offset, uint8_t value);
-        static void       write_to_mbc5_rumble(gb_memory& memory, uint16_t offset, uint8_t value);
+        static void mbc5_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static void mbc5_rumble_write(gb_memory& memory, uint16_t address, uint8_t value);
 
 
 
@@ -109,18 +110,19 @@ namespace age
             return m_clock.log(gb_log_category::lc_memory);
         }
 
-        const gb_clock& m_clock; //!< used only for logging
+        using gb_mbc_data = std::variant<gb_mbc1_data, gb_mbc5_data>;
+        using gb_fn_write = std::function<void(gb_memory&, uint16_t, uint8_t)>;
+        using gb_fn_read  = std::function<uint8_t(gb_memory&, uint16_t)>;
 
-        // m_mbc_data must be initialized before m_mbc_writer!
-        // Otherwise it's MBC-dependent value will be overwritten by
-        // the initial value (see gb_memory constructor)
-        gb_mbc_data m_mbc_data;
-        mbc_writer  m_mbc_writer;
+        const gb_clock& m_clock; //!< used only for logging
+        gb_mbc_data     m_mbc_data;
+        gb_fn_write     m_mbc_write;
+        gb_fn_write     m_cart_ram_write;
+        gb_fn_read      m_cart_ram_read;
 
         const int16_t m_num_cart_rom_banks;
         const int16_t m_num_cart_ram_banks;
         const bool    m_has_battery;
-        const bool    m_is_mbc2; //!< special RAM addressing
         bool          m_mbc1_multi_cart  = false;
         bool          m_cart_ram_enabled = false;
         uint8_t       m_svbk             = 0xF8;
@@ -130,7 +132,7 @@ namespace age
         const int           m_work_ram_offset;
         const int           m_video_ram_offset;
         uint8_vector        m_memory;
-        std::array<int, 16> m_offsets{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        std::array<int, 16> m_offsets{};
     };
 
 } // namespace age

@@ -24,8 +24,12 @@ add_library(
         lcd/age_gb_lcd_line.cpp
         lcd/age_gb_lcd_oam_access.cpp
         lcd/age_gb_lcd_registers.cpp
-        age_gb_memory.cpp
-        age_gb_memory_init.cpp
+        memory/age_gb_mbc1.cpp
+        memory/age_gb_mbc2.cpp
+        memory/age_gb_mbc3.cpp
+        memory/age_gb_mbc5.cpp
+        memory/age_gb_memory.cpp
+        memory/age_gb_memory_init.cpp
         age_gb_oam_dma.cpp
         age_gb_serial.cpp
         age_gb_timer.cpp

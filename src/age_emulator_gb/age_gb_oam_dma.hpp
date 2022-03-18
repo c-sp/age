@@ -29,7 +29,7 @@
 
 #include "lcd/age_gb_lcd.hpp"
 
-#include "age_gb_memory.hpp"
+#include "memory/age_gb_memory.hpp"
 
 
 

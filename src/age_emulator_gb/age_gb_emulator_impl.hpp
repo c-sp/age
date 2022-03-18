@@ -35,9 +35,9 @@
 #include "age_gb_bus.hpp"
 #include "age_gb_cpu.hpp"
 #include "age_gb_joypad.hpp"
-#include "age_gb_memory.hpp"
 #include "age_gb_serial.hpp"
 #include "age_gb_timer.hpp"
+#include "memory/age_gb_memory.hpp"
 
 
 

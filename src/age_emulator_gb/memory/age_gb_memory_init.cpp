@@ -171,11 +171,9 @@ namespace
 
 age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
     : m_clock(clock),
-      m_mbc_writer(get_mbc_writer(m_mbc_data, safe_get(cart_rom, gb_cia_ofs_type))),
       m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
       m_has_battery(has_battery(cart_rom)),
-      m_is_mbc2(is_mbc2(cart_rom)),
       m_cart_ram_offset(m_num_cart_rom_banks * gb_cart_rom_bank_size),
       m_work_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
       m_video_ram_offset(m_work_ram_offset + gb_work_ram_size)
@@ -185,6 +183,62 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
     AGE_ASSERT(m_cart_ram_offset > 0)
     AGE_ASSERT(m_work_ram_offset >= m_cart_ram_offset)
     AGE_ASSERT(m_video_ram_offset > m_work_ram_offset)
+
+    switch (safe_get(cart_rom, gb_cia_ofs_type))
+    {
+        //case 0x00:
+        //case 0x08:
+        //case 0x09:
+        default:
+            m_mbc_write      = no_mbc_write;
+            m_cart_ram_write = cart_ram_write;
+            m_cart_ram_read  = cart_ram_read;
+            break;
+
+        case 0x01:
+        case 0x02:
+        case 0x03:
+            m_mbc_data       = gb_mbc1_data{.m_bank1 = 1, .m_bank2 = 0, .m_mode1 = false};
+            m_mbc_write      = mbc1_write;
+            m_cart_ram_write = cart_ram_write;
+            m_cart_ram_read  = cart_ram_read;
+            break;
+
+        case 0x05:
+        case 0x06:
+            m_mbc_write      = mbc2_write;
+            m_cart_ram_write = mbc2_cart_ram_write;
+            m_cart_ram_read  = mbc2_cart_ram_read;
+            break;
+
+        case 0x0F:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+            m_mbc_write      = mbc3_write;
+            m_cart_ram_write = cart_ram_write;
+            m_cart_ram_read  = cart_ram_read;
+            break;
+
+        case 0x19:
+        case 0x1A:
+        case 0x1B:
+            m_mbc_data       = gb_mbc5_data{.m_2000 = 1, .m_3000 = 0};
+            m_mbc_write      = mbc5_write;
+            m_cart_ram_write = cart_ram_write;
+            m_cart_ram_read  = cart_ram_read;
+            break;
+
+        case 0x1C:
+        case 0x1D:
+        case 0x1E:
+            m_mbc_data       = gb_mbc5_data{.m_2000 = 1, .m_3000 = 0};
+            m_mbc_write      = mbc5_rumble_write;
+            m_cart_ram_write = cart_ram_write;
+            m_cart_ram_read  = cart_ram_read;
+            break;
+    }
 
     // 0x0000 - 0x3FFF : rom bank 0
     // 0x4000 - 0x7FFF : switchable rom bank
