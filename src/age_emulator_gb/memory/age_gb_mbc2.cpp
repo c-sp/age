@@ -31,7 +31,6 @@ namespace
 void age::gb_memory::mbc2_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
     AGE_ASSERT(address < 0x8000)
-    memory.log() << "(MBC2) writing " << log_hex16(address) << " = " << log_hex8(value);
 
     // writes to $4000-$7FFF have no effect
     if (address >= 0x4000)

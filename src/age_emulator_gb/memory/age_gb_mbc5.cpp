@@ -21,7 +21,6 @@
 void age::gb_memory::mbc5_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
     AGE_ASSERT(address < 0x8000)
-    memory.log() << "(MBC5) writing " << log_hex16(address) << " = " << log_hex8(value);
 
     // workaround for older STL implementations
     // (we actually want to use std::get<gb_mbc1_data> here ...)

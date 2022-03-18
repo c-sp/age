@@ -146,6 +146,7 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
     // access MBC
     if (address < 0x8000)
     {
+        log() << "writing " << log_hex16(address) << " = " << log_hex8(value);
         m_mbc_write(*this, address, value);
         return;
     }

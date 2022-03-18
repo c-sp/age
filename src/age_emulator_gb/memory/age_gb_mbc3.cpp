@@ -21,7 +21,6 @@
 void age::gb_memory::mbc3_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
     AGE_ASSERT(address < 0x8000)
-    memory.log() << "(MBC3) writing " << log_hex16(address) << " = " << log_hex8(value);
 
     switch (address & 0x6000)
     {

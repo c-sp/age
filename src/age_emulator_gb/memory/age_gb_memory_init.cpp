@@ -186,13 +186,21 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
 
     switch (safe_get(cart_rom, gb_cia_ofs_type))
     {
-        //case 0x00:
-        //case 0x08:
-        //case 0x09:
         default:
+            m_mbc_data       = gb_mbc1_data{.m_bank1 = 1, .m_bank2 = 0, .m_mode1 = false};
+            m_mbc_write      = mbc1_write;
+            m_cart_ram_write = cart_ram_write;
+            m_cart_ram_read  = cart_ram_read;
+            m_log_mbc        = "unknown MBC";
+            break;
+
+        case 0x00:
+        case 0x08:
+        case 0x09:
             m_mbc_write      = no_mbc_write;
             m_cart_ram_write = cart_ram_write;
             m_cart_ram_read  = cart_ram_read;
+            m_log_mbc        = "no MBC";
             break;
 
         case 0x01:
@@ -202,6 +210,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
             m_mbc_write      = mbc1_write;
             m_cart_ram_write = cart_ram_write;
             m_cart_ram_read  = cart_ram_read;
+            m_log_mbc        = "MBC1";
             break;
 
         case 0x05:
@@ -209,6 +218,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
             m_mbc_write      = mbc2_write;
             m_cart_ram_write = mbc2_cart_ram_write;
             m_cart_ram_read  = mbc2_cart_ram_read;
+            m_log_mbc        = "MBC2";
             break;
 
         case 0x0F:
@@ -219,6 +229,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
             m_mbc_write      = mbc3_write;
             m_cart_ram_write = cart_ram_write;
             m_cart_ram_read  = cart_ram_read;
+            m_log_mbc        = "MBC3";
             break;
 
         case 0x19:
@@ -228,6 +239,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
             m_mbc_write      = mbc5_write;
             m_cart_ram_write = cart_ram_write;
             m_cart_ram_read  = cart_ram_read;
+            m_log_mbc        = "MBC5";
             break;
 
         case 0x1C:
@@ -237,6 +249,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
             m_mbc_write      = mbc5_rumble_write;
             m_cart_ram_write = cart_ram_write;
             m_cart_ram_read  = cart_ram_read;
+            m_log_mbc        = "MBC5-rumble";
             break;
     }
 

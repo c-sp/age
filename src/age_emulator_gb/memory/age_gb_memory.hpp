@@ -107,14 +107,20 @@ namespace age
         // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
-            return m_clock.log(gb_log_category::lc_memory);
+            auto msg = m_clock.log(gb_log_category::lc_memory);
+            if (m_log_mbc)
+            {
+                msg << "(" << m_log_mbc << ") ";
+            }
+            return msg;
         }
 
         using gb_mbc_data = std::variant<gb_mbc1_data, gb_mbc5_data>;
         using gb_fn_write = std::function<void(gb_memory&, uint16_t, uint8_t)>;
         using gb_fn_read  = std::function<uint8_t(gb_memory&, uint16_t)>;
 
-        const gb_clock& m_clock; //!< used only for logging
+        const gb_clock& m_clock;             //!< used only for logging
+        const char*     m_log_mbc = nullptr; //!< used only for logging
         gb_mbc_data     m_mbc_data;
         gb_fn_write     m_mbc_write;
         gb_fn_write     m_cart_ram_write;
