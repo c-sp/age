@@ -31,7 +31,8 @@ void age::gb_memory::mbc3_write(gb_memory& memory, uint16_t address, uint8_t val
 
         case 0x2000: {
             // select rom bank
-            int rom_bank_id = value & 0x7F;
+            // (MBC30 mode, if more than 128 rom banks are available)
+            int rom_bank_id = (memory.m_num_cart_rom_banks > 128) ? value : value & 0x7F;
             if (rom_bank_id == 0)
             {
                 rom_bank_id = 1;
@@ -42,7 +43,8 @@ void age::gb_memory::mbc3_write(gb_memory& memory, uint16_t address, uint8_t val
 
         case 0x4000:
             // select ram bank
-            memory.set_ram_bank(value & 0x03);
+            // (MBC30 mode, if more than 4 ram banks are available)
+            memory.set_ram_bank((memory.m_num_cart_ram_banks > 4) ? value & 0x07 : value & 0x03);
             break;
 
         case 0x6000:
