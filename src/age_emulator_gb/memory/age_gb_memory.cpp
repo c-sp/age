@@ -121,7 +121,7 @@ age::uint8_t age::gb_memory::read_byte(uint16_t address)
     // cartridge ram not readable
     if (!m_cart_ram_enabled)
     {
-        log() << "read [" << log_hex16(address) << "] = 0xFF: cartridge RAM disabled";
+        log_mbc() << "read [" << log_hex16(address) << "] = 0xFF: cartridge RAM disabled";
         return 0xFF;
     }
     // read cartridge ram
@@ -146,7 +146,7 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
     // access MBC
     if (address < 0x8000)
     {
-        log() << "writing " << log_hex16(address) << " = " << log_hex8(value);
+        log_mbc() << "writing " << log_hex16(address) << " = " << log_hex8(value);
         m_mbc_write(*this, address, value);
         return;
     }
@@ -159,7 +159,7 @@ void age::gb_memory::write_byte(uint16_t address, uint8_t value)
     // cartridge ram not writable
     if (!m_cart_ram_enabled)
     {
-        log() << "ignoring write [" << log_hex16(address) << "] = " << log_hex8(value) << " (cartridge RAM disabled)";
+        log_mbc() << "ignoring write [" << log_hex16(address) << "] = " << log_hex8(value) << " (cartridge RAM disabled)";
         return;
     }
     // write cartridge ram
@@ -218,8 +218,8 @@ unsigned age::gb_memory::get_offset(uint16_t address) const
 void age::gb_memory::set_ram_accessible(uint8_t value)
 {
     m_cart_ram_enabled = ((value & 0x0F) == 0x0A) && (m_num_cart_ram_banks > 0);
-    log() << "enable cartridge ram = " << log_hex8(value)
-          << " (cartridge ram " << (m_cart_ram_enabled ? "enabled" : "disabled") << ")";
+    log_mbc() << "enable cartridge ram = " << log_hex8(value)
+              << " (cartridge ram " << (m_cart_ram_enabled ? "enabled" : "disabled") << ")";
 }
 
 void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
@@ -241,8 +241,8 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
     m_offsets[6] = m_offsets[4];
     m_offsets[7] = m_offsets[4];
 
-    log() << "switch to rom banks " << log_hex(low_bank_id) << " @ 0x0000-0x3FFF, "
-          << log_hex(high_bank_id) << " @ 0x4000-0x7FFF";
+    log_mbc() << "switch to rom banks " << log_hex(low_bank_id) << " @ 0x0000-0x3FFF, "
+              << log_hex(high_bank_id) << " @ 0x4000-0x7FFF";
 }
 
 void age::gb_memory::set_ram_bank(int bank_id)
@@ -254,15 +254,15 @@ void age::gb_memory::set_ram_bank(int bank_id)
     m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;
     m_offsets[0xB] = m_offsets[0xA];
 
-    log() << "switch to ram bank " << log_hex(bank_id);
+    log_mbc() << "switch to ram bank " << log_hex(bank_id);
 }
 
 
 
 void age::gb_memory::no_mbc_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    memory.log() << "ignoring write [" << log_hex16(address) << "] = " << log_hex8(value)
-                 << " (cartridge has no MBC)";
+    memory.log_mbc() << "ignoring write [" << log_hex16(address) << "] = " << log_hex8(value)
+                     << " (cartridge has no MBC)";
 }
 
 void age::gb_memory::cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value)

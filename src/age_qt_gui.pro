@@ -67,6 +67,7 @@ HEADERS += \
     age_emulator_gb/common/age_gb_device.hpp \
     age_emulator_gb/common/age_gb_events.hpp \
     age_emulator_gb/common/age_gb_interrupts.hpp \
+    age_emulator_gb/common/age_gb_logger.hpp \
     age_emulator_gb/sound/age_gb_sound.hpp \
     age_emulator_gb/sound/age_gb_sound_channel.hpp \
     age_emulator_gb/sound/age_gb_sound_generate.hpp \

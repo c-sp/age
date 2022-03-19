@@ -65,7 +65,7 @@ void age::gb_memory::mbc5_rumble_write(gb_memory& memory, uint16_t address, uint
     {
         if (value & 0x08)
         {
-            memory.log() << "(MBC5-rumble) clearing bit 0x08 of " << log_hex8(value);
+            memory.log_mbc() << "clearing bit 0x08 of " << log_hex8(value);
             value &= ~0x08;
         }
     }

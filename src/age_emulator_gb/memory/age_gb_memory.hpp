@@ -107,7 +107,11 @@ namespace age
         // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
         {
-            auto msg = m_clock.log(gb_log_category::lc_memory);
+            return m_clock.log(gb_log_category::lc_memory);
+        }
+        [[nodiscard]] gb_log_message_stream log_mbc() const
+        {
+            auto msg = log();
             if (m_log_mbc)
             {
                 msg << "(" << m_log_mbc << ") ";
