@@ -78,7 +78,7 @@ namespace age
 
         [[nodiscard]] gb_test_info get_test_info() const;
 
-        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const;
+        std::vector<gb_log_entry> get_and_clear_log_entries();
 
     private:
         int emulate_cycles(int cycles_to_emulate);

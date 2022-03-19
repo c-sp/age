@@ -134,10 +134,10 @@ std::string age::tester::get_device_type_string(age::gb_device_type device_type)
 
 
 
-void age::tester::write_log(const std::filesystem::path&     log_path,
-                            const std::vector<gb_log_entry>& log_entries,
-                            const std::filesystem::path&     rom_path,
-                            gb_device_type                   device_type)
+void age::tester::write_log(const std::filesystem::path& log_path,
+                            std::vector<gb_log_entry>    log_entries,
+                            const std::filesystem::path& rom_path,
+                            gb_device_type               device_type)
 {
     if (log_entries.empty())
     {

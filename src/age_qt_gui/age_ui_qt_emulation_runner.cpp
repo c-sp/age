@@ -18,6 +18,8 @@
 
 #include "age_ui_qt_emulation_runner.hpp"
 
+#include <sstream>
+
 #if 0
 #define LOG(x) AGE_LOG(x)
 #else
@@ -33,6 +35,57 @@ namespace
     static_assert(emulation_interval_millis > 0, "the emulation interval must be greater than zero");
 
     constexpr qint64 emulation_speed_interval_nanos = 1000000000 / age::stats_per_second;
+
+
+
+    std::string category_str(age::gb_log_category category)
+    {
+        switch (category)
+        {
+            case age::gb_log_category::lc_clock: return "clock";
+            case age::gb_log_category::lc_cpu: return "cpu";
+            case age::gb_log_category::lc_events: return "events";
+            case age::gb_log_category::lc_hdma: return "hdma";
+            case age::gb_log_category::lc_interrupts: return "interrupts";
+            case age::gb_log_category::lc_lcd: return "lcd";
+            case age::gb_log_category::lc_lcd_oam: return "lcd-oam";
+            case age::gb_log_category::lc_lcd_oam_dma: return "lcd-oam-dma";
+            case age::gb_log_category::lc_lcd_registers: return "lcd-reg";
+            case age::gb_log_category::lc_lcd_vram: return "lcd-vram";
+            case age::gb_log_category::lc_memory: return "memory";
+            case age::gb_log_category::lc_serial: return "serial";
+            case age::gb_log_category::lc_sound: return "sound";
+            case age::gb_log_category::lc_sound_registers: return "sound-reg";
+            case age::gb_log_category::lc_timer: return "timer";
+        }
+        return "";
+    }
+
+    void log_entry(const age::gb_log_entry& entry)
+    {
+        std::stringstream prefix_str;
+        prefix_str << std::setw(9) << entry.m_clock << std::setw(0)
+                   << "  " << std::left << std::setw(10) << category_str(entry.m_category) << std::setw(0) << std::right
+                   << "  ";
+
+        auto prefix = prefix_str.str();
+
+        std::stringstream result;
+
+        auto start = 0U;
+        auto end   = entry.m_message.find('\n');
+
+        while (end != std::string::npos)
+        {
+            auto line = entry.m_message.substr(start, end - start);
+            AGE_LOG(prefix << line)
+
+            start = end + 1;
+            end   = entry.m_message.find('\n', start);
+        }
+
+        AGE_LOG(prefix << entry.m_message.substr(start, end))
+    }
 
 } // namespace
 
@@ -280,6 +333,13 @@ void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
     AGE_ASSERT(cycles_left <= int_max)
     bool new_frame = emu->emulate(static_cast<int>(cycles_left));
     AGE_ASSERT(emu->get_emulated_cycles() >= m_emulated_cycles)
+
+    auto log_entries = emu->get_and_clear_log_entries();
+    std::for_each(begin(log_entries),
+                  end(log_entries),
+                  [&](const auto& entry) {
+                      log_entry(entry);
+                  });
 
     // update video & audio
     if (new_frame)

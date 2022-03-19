@@ -28,6 +28,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 
@@ -207,12 +208,15 @@ namespace age
                 return gb_log_message_stream(nullptr);
             }
             m_messages.emplace_back(gb_log_entry{category, m_clock_offset + clock, div_clock, ""});
+            //! \todo there must not be any pending gb_log_message_stream instances when get_and_clear_log_entries() is called
             return gb_log_message_stream(&m_messages[m_messages.size() - 1]);
         }
 
-        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const
+        std::vector<gb_log_entry> get_and_clear_log_entries()
         {
-            return m_messages;
+            std::vector<gb_log_entry> tmp = std::move(m_messages);
+            m_messages = {};
+            return tmp;
         }
 
         void set_back_clock(int clock_cycle_offset)
@@ -238,9 +242,9 @@ namespace age
             return {};
         }
 
-        [[nodiscard]] const std::vector<gb_log_entry>& get_log_entries() const
+        std::vector<gb_log_entry> get_and_clear_log_entries()
         {
-            return m_no_entries;
+            return {};
         }
 
         // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -248,9 +252,6 @@ namespace age
         {
             AGE_UNUSED(clock_cycle_offset);
         }
-
-    private:
-        std::vector<gb_log_entry> m_no_entries;
 #endif
     };
 

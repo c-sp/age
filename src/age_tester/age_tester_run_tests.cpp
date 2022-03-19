@@ -89,8 +89,8 @@ namespace
         auto regex_strings = read_list_file(file);
 
         std::vector<path_matcher> matcher_list;
-        std::transform(begin(regex_strings), end(regex_strings), std::back_inserter(matcher_list), [](const std::string &s) {
-            return [=](const std::string& absolute_path){
+        std::transform(begin(regex_strings), end(regex_strings), std::back_inserter(matcher_list), [](const std::string& s) {
+            return [=](const std::string& absolute_path) {
                 return absolute_path.find(s) != std::string::npos;
             };
         });
@@ -185,7 +185,8 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
             {
                 last_update = now;
                 std::cout << "\rfinished " << tasks_finished << " of " << total << " tasks" << std::flush;
-                if (total == tasks_finished) {
+                if (total == tasks_finished)
+                {
                     std::cout << std::endl;
                 }
             }
@@ -248,7 +249,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                                     }
                                 }();
                                 log_path.replace_extension(log_ext);
-                                write_log(log_path, emulator->get_log_entries(), rom_path, device_type);
+                                write_log(log_path, emulator->get_and_clear_log_entries(), rom_path, device_type);
                             }
                         });
                         ++scheduled_count;
@@ -261,7 +262,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
             });
         };
 
-        pool.queue_task([&](){
+        pool.queue_task([&]() {
             if (opts.m_acid2)
             {
                 find_roms(opts.m_test_suite_path / "cgb-acid2", matcher, [&](const std::filesystem::path& rom_path) {
