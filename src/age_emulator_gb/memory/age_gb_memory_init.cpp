@@ -103,6 +103,7 @@ namespace
             case 0x13:
             case 0x1B:
             case 0x1E:
+            case 0x22: //! \todo really?
                 return true;
 
             default:
@@ -159,6 +160,32 @@ namespace
         }
     }
 
+    //
+    // Check if this might be a multi-cart rom.
+    //
+    // We use the same heuristic as mooneye-gb:
+    // If we find the Nintendo logo at least 3 times (menu + 2 games) at specific locations,
+    // we flag this rom as multi-cart.
+    //
+    // Since only 8 MBit multi-cart roms are known,
+    // we limit the search to roms of this size.
+    //
+    bool is_multicart_rom(const age::uint8_vector& rom)
+    {
+        int findings = 0;
+
+        for (unsigned offset = 0; offset + 0x134 <= rom.size(); offset += 0x40000)
+        {
+            uint32_t crc = age::crc32(begin(rom) + offset + 0x104, begin(rom) + offset + 0x134);
+            if (crc == 0x46195417)
+            {
+                ++findings;
+            }
+        }
+
+        return findings >= 3;
+    }
+
 } // namespace
 
 
@@ -205,13 +232,15 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
 
         case 0x01:
         case 0x02:
-        case 0x03:
-            m_mbc_data       = gb_mbc1_data{.m_bank1 = 1, .m_bank2 = 0, .m_mode1 = false};
+        case 0x03: {
+            bool multicart   = is_multicart_rom(cart_rom);
+            m_mbc_data       = gb_mbc1_data{.m_bank1 = 1, .m_bank2 = 0, .m_mode1 = false, .m_multicart = multicart};
             m_mbc_write      = mbc1_write;
             m_cart_ram_write = cart_ram_write;
             m_cart_ram_read  = cart_ram_read;
-            m_log_mbc        = "MBC1";
+            m_log_mbc        = multicart ? "MBC1M" : "MBC1";
             break;
+        }
 
         case 0x05:
         case 0x06:
@@ -251,6 +280,13 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
             m_cart_ram_read  = cart_ram_read;
             m_log_mbc        = "MBC5-rumble";
             break;
+
+        case 0x22:
+            m_mbc_write      = mbc7_write;
+            m_cart_ram_write = mbc7_cart_ram_write;
+            m_cart_ram_read  = mbc7_cart_ram_read;
+            m_log_mbc        = "MBC7";
+            break;
     }
 
     // 0x0000 - 0x3FFF : rom bank 0
@@ -280,39 +316,12 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
     log() << "copying " << copy_rom_bytes << " bytes of cartridge rom (rom size is " << cart_rom.size() << " bytes)";
     std::copy(begin(cart_rom), begin(cart_rom) + copy_rom_bytes, begin(m_memory));
 
-    //
-    // Check if this might be a multi-cart rom.
-    //
-    // We use the same heuristic as mooneye-gb:
-    // If we find the Nintendo logo at least 3 times (menu + 2 games) at specific locations,
-    // we flag this rom as multi-cart.
-    //
-    // Since only 8 MBit multi-cart roms are known,
-    // we limit the search to roms of this size.
-    //
-    if (m_num_cart_rom_banks == 64)
-    {
-        int findings = 0;
-
-        for (int offset = 0; offset < cart_rom_size; offset += 0x40000)
-        {
-            uint32_t crc = crc32(begin(m_memory) + offset + 0x104, begin(m_memory) + offset + 0x134);
-            if (crc == 0x46195417)
-            {
-                ++findings;
-            }
-        }
-
-        m_mbc1_multi_cart = (findings >= 3);
-    }
-
     log() << "cartridge:"
-          << "\n    * type: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
+          << "\n    * type: " << m_log_mbc << ", " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
           << "\n    * cgb compatibility: " << log_hex8(safe_get(cart_rom, 0x143))
           << "\n    * has " << m_num_cart_rom_banks << " rom bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_rom_size))
           << "\n    * has " << m_num_cart_ram_banks << " ram bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_ram_size))
-          << "\n    * has " << (m_has_battery ? "a" : "no") << " battery: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
-          << "\n    * is a multicart: " << m_mbc1_multi_cart;
+          << "\n    * has " << (m_has_battery ? "a" : "no") << " battery: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type));
 }
 
 

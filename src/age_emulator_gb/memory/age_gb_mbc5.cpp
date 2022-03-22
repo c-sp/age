@@ -22,10 +22,7 @@ void age::gb_memory::mbc5_write(gb_memory& memory, uint16_t address, uint8_t val
 {
     AGE_ASSERT(address < 0x8000)
 
-    // workaround for older STL implementations
-    // (we actually want to use std::get<gb_mbc1_data> here ...)
-    auto* p_mbc_data = std::get_if<gb_mbc5_data>(&memory.m_mbc_data);
-    auto& mbc_data   = *p_mbc_data;
+    auto& mbc_data = memory.get_mbc_data<gb_mbc5_data>();
 
     switch (address & 0x6000)
     {

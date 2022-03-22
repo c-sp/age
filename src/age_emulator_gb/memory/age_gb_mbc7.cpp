@@ -18,32 +18,44 @@
 
 
 
-void age::gb_memory::mbc3_write(gb_memory& memory, uint16_t address, uint8_t value)
+void age::gb_memory::mbc7_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
     AGE_ASSERT(address < 0x8000)
 
     switch (address & 0x6000)
     {
         case 0x0000:
-            // (de)activate ram
+            // RAM enable 1
             memory.set_ram_accessible(value);
             break;
 
-        case 0x2000: {
-            // select rom bank
-            // (automatic MBC30 mode: we don't restrict the number of accessible rom banks here)
-            memory.set_rom_banks(0, (value == 0) ? 1 : value);
+        case 0x2000:
+            memory.set_rom_banks(0, value);
             break;
-        }
 
         case 0x4000:
-            // select ram bank
-            // (automatic MBC30 mode: we don't restrict the number of accessible ram banks here)
-            memory.set_ram_bank(value);
-            break;
-
-        case 0x6000:
-            // latch real time clock
+            //! \todo MBC7: RAM enable 2
+            memory.set_ram_bank(value & 0x0F);
             break;
     }
+}
+
+
+
+void age::gb_memory::mbc7_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value)
+{
+    //! \todo implement mbc7_cart_ram_write
+    AGE_UNUSED(memory);
+    AGE_UNUSED(address);
+    AGE_UNUSED(value);
+}
+
+
+
+age::uint8_t age::gb_memory::mbc7_cart_ram_read(gb_memory& memory, uint16_t address)
+{
+    //! \todo implement mbc7_cart_ram_read
+    AGE_UNUSED(memory);
+    AGE_UNUSED(address);
+    return 0xFF;
 }

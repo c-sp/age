@@ -80,6 +80,7 @@ namespace age
             uint8_t m_bank1;
             uint8_t m_bank2;
             bool    m_mode1;
+            bool    m_multicart;
         };
         static void mbc1_write(gb_memory& memory, uint16_t address, uint8_t value);
 
@@ -97,12 +98,11 @@ namespace age
         static void mbc5_write(gb_memory& memory, uint16_t address, uint8_t value);
         static void mbc5_rumble_write(gb_memory& memory, uint16_t address, uint8_t value);
 
+        static void    mbc7_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static void    mbc7_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static uint8_t mbc7_cart_ram_read(gb_memory& memory, uint16_t address);
 
 
-        [[nodiscard]] unsigned get_offset(uint16_t address) const;
-        void                   set_ram_accessible(uint8_t value);
-        void                   set_rom_banks(int low_bank_id, int high_bank_id);
-        void                   set_ram_bank(int bank_id);
 
         // logging code is header-only to allow for compile time optimization
         [[nodiscard]] gb_log_message_stream log() const
@@ -119,6 +119,20 @@ namespace age
             return msg;
         }
 
+        template<typename T>
+        T& get_mbc_data()
+        {
+            // workaround for older STL implementations
+            // (we actually want to use std::get<gb_mbc1_data> here ...)
+            auto* p_mbc_data = std::get_if<T>(&m_mbc_data);
+            return *p_mbc_data;
+        }
+
+        [[nodiscard]] unsigned get_offset(uint16_t address) const;
+        void                   set_ram_accessible(uint8_t value);
+        void                   set_rom_banks(int low_bank_id, int high_bank_id);
+        void                   set_ram_bank(int bank_id);
+
         using gb_mbc_data = std::variant<gb_mbc1_data, gb_mbc5_data>;
         using gb_fn_write = std::function<void(gb_memory&, uint16_t, uint8_t)>;
         using gb_fn_read  = std::function<uint8_t(gb_memory&, uint16_t)>;
@@ -133,7 +147,6 @@ namespace age
         const int16_t m_num_cart_rom_banks;
         const int16_t m_num_cart_ram_banks;
         const bool    m_has_battery;
-        bool          m_mbc1_multi_cart  = false;
         bool          m_cart_ram_enabled = false;
         uint8_t       m_svbk             = 0xF8;
         uint8_t       m_vbk              = 0xF8;
