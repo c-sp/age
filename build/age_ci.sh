@@ -34,6 +34,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_RUN_TESTS $TESTS_AGE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_MEALYBUG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_GB"
     echo "  miscellaneous:"
     echo "    $0 $CMD_DOXYGEN"
@@ -176,6 +177,7 @@ run_tests()
         "${TESTS_AGE}") ;;
         "${TESTS_BLARGG}") ;;
         "${TESTS_GAMBATTE}") ;;
+        "${TESTS_MEALYBUG}") ;;
         "${TESTS_MOONEYE_GB}") ;;
         *) print_usage_and_exit ;;
     esac
@@ -204,7 +206,7 @@ run_tests()
     fi
 
     # run the tests
-    ${TEST_EXEC} --print-failed --blacklist "$BUILD_DIR/test-blacklist.txt" "--$1" "$SUITE_DIR"
+    ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "--$1" "$SUITE_DIR"
 }
 
 
@@ -225,6 +227,7 @@ TESTS_ACID2=acid2
 TESTS_AGE=age
 TESTS_BLARGG=blargg
 TESTS_GAMBATTE=gambatte
+TESTS_MEALYBUG=mealybug
 TESTS_MOONEYE_GB=mooneye
 
 CMD_BUILD_GTEST=build-gtest

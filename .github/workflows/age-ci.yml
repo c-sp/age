@@ -194,6 +194,24 @@ jobs:
         run: build/age_ci.sh run-tests gambatte
 
 
+  test-mealybug:
+    name: run Mealybug Tearoom tests
+    runs-on: ubuntu-20.04
+    needs: [ build-tester ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests mealybug
+
+
   test-mooneye:
     name: run Mooneye Test Suite
     runs-on: ubuntu-20.04
