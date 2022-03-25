@@ -28,7 +28,7 @@ void age::gb_memory::mbc5_write(gb_memory& memory, uint16_t address, uint8_t val
     {
         case 0x0000:
             // (de)activate ram
-            memory.set_ram_accessible(value);
+            memory.set_cart_ram_enabled(value);
             break;
 
         case 0x2000:

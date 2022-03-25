@@ -48,10 +48,8 @@ namespace age
         AGE_DISABLE_MOVE(gb_memory);
 
     public:
-        explicit gb_memory(const uint8_vector& cart_rom, const gb_clock& clock);
+        explicit gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, bool is_cgb_device);
         ~gb_memory() = default;
-
-        void init_vram(bool for_cgb_device);
 
         [[nodiscard]] const uint8_t* get_video_ram() const;
         [[nodiscard]] const uint8_t* get_rom_header() const;
@@ -67,6 +65,9 @@ namespace age
         void write_byte(uint16_t address, uint8_t value);
         void write_svbk(uint8_t value);
         void write_vbk(uint8_t value);
+
+        void update_state();
+        void set_back_clock(int clock_cycle_offset);
 
 
 
@@ -88,7 +89,20 @@ namespace age
         static void    mbc2_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value);
         static uint8_t mbc2_cart_ram_read(gb_memory& memory, uint16_t address);
 
-        static void mbc3_write(gb_memory& memory, uint16_t address, uint8_t value);
+        struct gb_mbc3rtc_data
+        {
+            uint8_array<5> m_rtc_reg{};
+            uint8_array<5> m_rtc_reg_latched{};
+            int            m_clks_last_update   = 0;
+            int            m_clks_sec_remainder = 0;
+            uint8_t        m_mapped_rtc_reg     = 0; //!< the current RTC register mapped to 0xA000
+            uint8_t        m_last_latch_write   = 0;
+        };
+        static void    mbc3_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static void    mbc3rtc_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static void    mbc3rtc_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value);
+        static uint8_t mbc3rtc_cart_ram_read(gb_memory& memory, uint16_t address);
+        static void    mbc3rtc_update(gb_memory& memory);
 
         struct gb_mbc5_data
         {
@@ -129,25 +143,27 @@ namespace age
         }
 
         [[nodiscard]] unsigned get_offset(uint16_t address) const;
-        void                   set_ram_accessible(uint8_t value);
+        void                   set_cart_ram_enabled(uint8_t value);
         void                   set_rom_banks(int low_bank_id, int high_bank_id);
         void                   set_ram_bank(int bank_id);
 
-        using gb_mbc_data = std::variant<gb_mbc1_data, gb_mbc5_data>;
-        using gb_fn_write = std::function<void(gb_memory&, uint16_t, uint8_t)>;
-        using gb_fn_read  = std::function<uint8_t(gb_memory&, uint16_t)>;
 
-        const gb_clock& m_clock;             //!< used only for logging
-        const char*     m_log_mbc = nullptr; //!< used only for logging
-        gb_mbc_data     m_mbc_data;
-        gb_fn_write     m_mbc_write;
-        gb_fn_write     m_cart_ram_write;
-        gb_fn_read      m_cart_ram_read;
+
+        using gb_mbc_data      = std::variant<gb_mbc1_data, gb_mbc3rtc_data, gb_mbc5_data>;
+        using gb_fn_write_byte = std::function<void(gb_memory&, uint16_t, uint8_t)>;
+        using gb_fn_read_byte  = std::function<uint8_t(gb_memory&, uint16_t)>;
+
+        const gb_clock&  m_clock;
+        const char*      m_log_mbc = nullptr; //!< used only for logging
+        gb_mbc_data      m_mbc_data;
+        gb_fn_write_byte m_mbc_write;
+        gb_fn_write_byte m_cart_ram_write;
+        gb_fn_read_byte  m_cart_ram_read;
 
         const int16_t m_num_cart_rom_banks;
         const int16_t m_num_cart_ram_banks;
         const bool    m_has_battery;
-        bool          m_cart_ram_enabled = false;
+        bool          m_cart_ram_enabled = false; //!< also used as "feature enabled" e.g. for MBC3-RTC
         uint8_t       m_svbk             = 0xF8;
         uint8_t       m_vbk              = 0xF8;
 

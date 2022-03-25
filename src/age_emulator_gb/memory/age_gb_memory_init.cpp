@@ -196,7 +196,7 @@ namespace
 //
 //---------------------------------------------------------
 
-age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
+age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, bool is_cgb_device)
     : m_clock(clock),
       m_num_cart_rom_banks(get_num_cart_rom_banks(cart_rom)),
       m_num_cart_ram_banks(get_num_cart_ram_banks(cart_rom)),
@@ -252,6 +252,13 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
 
         case 0x0F:
         case 0x10:
+            m_mbc_data       = gb_mbc3rtc_data{};
+            m_mbc_write      = mbc3rtc_write;
+            m_cart_ram_write = mbc3rtc_cart_ram_write;
+            m_cart_ram_read  = mbc3rtc_cart_ram_read;
+            m_log_mbc        = "MBC3-RTC";
+            break;
+
         case 0x11:
         case 0x12:
         case 0x13:
@@ -316,30 +323,13 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock)
     log() << "copying " << copy_rom_bytes << " bytes of cartridge rom (rom size is " << cart_rom.size() << " bytes)";
     std::copy(begin(cart_rom), begin(cart_rom) + copy_rom_bytes, begin(m_memory));
 
-    log() << "cartridge:"
-          << "\n    * type: " << m_log_mbc << ", " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
-          << "\n    * cgb compatibility: " << log_hex8(safe_get(cart_rom, 0x143))
-          << "\n    * has " << m_num_cart_rom_banks << " rom bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_rom_size))
-          << "\n    * has " << m_num_cart_ram_banks << " ram bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_ram_size))
-          << "\n    * has " << (m_has_battery ? "a" : "no") << " battery: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type));
-}
-
-
-
-//---------------------------------------------------------
-//
-//   public methods
-//
-//---------------------------------------------------------
-
-void age::gb_memory::init_vram(bool for_cgb_device)
-{
+    // init vram
     for (uint16_t i = 0, end = gb_sparse_vram_0010_dump.size(); i < end; ++i)
     {
         set_memory(m_memory, m_video_ram_offset + 0x10 + i * 2, gb_sparse_vram_0010_dump[i]);
     }
 
-    if (!for_cgb_device)
+    if (!is_cgb_device)
     {
         set_memory(m_memory, m_video_ram_offset + 0x1910, 0x19);
         for (uint8_t i = 1; i <= 0x0C; ++i)
@@ -348,4 +338,12 @@ void age::gb_memory::init_vram(bool for_cgb_device)
             set_memory(m_memory, m_video_ram_offset + 0x1923 + i, i + 0x0C);
         }
     }
+
+    // log memory info
+    log() << "cartridge:"
+          << "\n    * type: " << m_log_mbc << ", " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type))
+          << "\n    * cgb compatibility: " << log_hex8(safe_get(cart_rom, 0x143))
+          << "\n    * has " << m_num_cart_rom_banks << " rom bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_rom_size))
+          << "\n    * has " << m_num_cart_ram_banks << " ram bank(s): " << log_hex8(safe_get(cart_rom, gb_cia_ofs_ram_size))
+          << "\n    * has " << (m_has_battery ? "a" : "no") << " battery: " << log_hex8(safe_get(cart_rom, gb_cia_ofs_type));
 }

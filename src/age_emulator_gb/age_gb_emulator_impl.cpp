@@ -209,8 +209,8 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     // cycle counter from overflowing
     if (current_cycle >= cycle_setback_limit)
     {
-        // update timer clock values
         m_timer.update_state();
+        m_memory.update_state();
 
         AGE_ASSERT(cycle_setback_limit >= 2 * gb_clock_cycles_per_second)
 
@@ -225,6 +225,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 
         m_clock.set_back_clock(clock_cycle_offset);
         m_logger.set_back_clock(clock_cycle_offset); // this goes second to not mess up the logs
+        m_memory.set_back_clock(clock_cycle_offset);
         m_events.set_back_clock(clock_cycle_offset);
         m_sound.set_back_clock(clock_cycle_offset);
         m_lcd.set_back_clock(clock_cycle_offset);
@@ -278,7 +279,7 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
       m_logger(std::move(log_categories)),
       m_device(rom, device_type),
       m_clock(m_logger, m_device),
-      m_memory(rom, m_clock),
+      m_memory(rom, m_clock, m_device.is_cgb_device()),
       m_interrupts(m_device, m_clock),
       m_events(m_clock),
       m_sound(m_device, m_clock, m_audio_buffer),
@@ -289,5 +290,4 @@ age::gb_emulator_impl::gb_emulator_impl(const uint8_vector& rom,
       m_bus(m_device, m_clock, m_interrupts, m_events, m_memory, m_sound, m_lcd, m_timer, m_joypad, m_serial),
       m_cpu(m_device, m_clock, m_events, m_interrupts, m_bus)
 {
-    m_memory.init_vram(m_device.is_cgb_device());
 }

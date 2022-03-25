@@ -196,6 +196,28 @@ void age::gb_memory::write_vbk(uint8_t value)
 
 
 
+void age::gb_memory::update_state()
+{
+    auto* mbc3rtc_data = std::get_if<gb_mbc3rtc_data>(&m_mbc_data);
+    if (mbc3rtc_data == nullptr)
+    {
+        return;
+    }
+    mbc3rtc_update(*this);
+}
+
+void age::gb_memory::set_back_clock(int clock_cycle_offset)
+{
+    auto* mbc3rtc_data = std::get_if<gb_mbc3rtc_data>(&m_mbc_data);
+    if (mbc3rtc_data == nullptr)
+    {
+        return;
+    }
+    gb_set_back_clock_cycle(mbc3rtc_data->m_clks_last_update, clock_cycle_offset);
+}
+
+
+
 
 
 //---------------------------------------------------------
@@ -215,9 +237,9 @@ unsigned age::gb_memory::get_offset(uint16_t address) const
     return static_cast<unsigned>(offset);
 }
 
-void age::gb_memory::set_ram_accessible(uint8_t value)
+void age::gb_memory::set_cart_ram_enabled(uint8_t value)
 {
-    m_cart_ram_enabled = ((value & 0x0F) == 0x0A) && (m_num_cart_ram_banks > 0);
+    m_cart_ram_enabled = (value & 0x0F) == 0x0A;
     log_mbc() << "enable cartridge ram = " << log_hex8(value)
               << " (cartridge ram " << (m_cart_ram_enabled ? "enabled" : "disabled") << ")";
 }
@@ -268,10 +290,15 @@ void age::gb_memory::no_mbc_write(gb_memory& memory, uint16_t address, uint8_t v
 
 void age::gb_memory::cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    memory.m_memory[memory.get_offset(address)] = value;
+    if (memory.m_num_cart_ram_banks > 0)
+    {
+        memory.m_memory[memory.get_offset(address)] = value;
+    }
 }
 
 age::uint8_t age::gb_memory::cart_ram_read(gb_memory& memory, uint16_t address)
 {
-    return memory.m_memory[memory.get_offset(address)];
+    return (memory.m_num_cart_ram_banks > 0)
+               ? memory.m_memory[memory.get_offset(address)]
+               : 0xFF;
 }

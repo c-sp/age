@@ -21,12 +21,11 @@
 void age::gb_memory::mbc3_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
     AGE_ASSERT(address < 0x8000)
-
     switch (address & 0x6000)
     {
         case 0x0000:
             // (de)activate ram
-            memory.set_ram_accessible(value);
+            memory.set_cart_ram_enabled(value);
             break;
 
         case 0x2000: {

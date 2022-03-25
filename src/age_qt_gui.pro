@@ -112,6 +112,7 @@ SOURCES += \
     age_emulator_gb/memory/age_gb_mbc1.cpp \
     age_emulator_gb/memory/age_gb_mbc2.cpp \
     age_emulator_gb/memory/age_gb_mbc3.cpp \
+    age_emulator_gb/memory/age_gb_mbc3_rtc.cpp \
     age_emulator_gb/memory/age_gb_mbc5.cpp \
     age_emulator_gb/memory/age_gb_mbc7.cpp \
     age_emulator_gb/memory/age_gb_memory.cpp \

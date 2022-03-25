@@ -28,7 +28,7 @@ void age::gb_memory::mbc1_write(gb_memory& memory, uint16_t address, uint8_t val
     {
         case 0x0000:
             // (de)activate ram
-            memory.set_ram_accessible(value);
+            memory.set_cart_ram_enabled(value);
             return;
 
         case 0x2000:
@@ -65,7 +65,7 @@ void age::gb_memory::mbc1_write(gb_memory& memory, uint16_t address, uint8_t val
 
     int high_rom_bits    = mbc_high_bits << (mbc_data.m_multicart ? 4 : 5);
     int low_rom_bank_id  = mbc_data.m_mode1 ? high_rom_bits : 0;
-    int high_rom_bank_id = high_rom_bits + (mbc_data.m_bank1 & (mbc_data.m_multicart ? 0x0FU : 0x1FU));
+    int high_rom_bank_id = high_rom_bits + (mbc_data.m_bank1 & (mbc_data.m_multicart ? 0x0F : 0x1F));
 
     int ram_bank_id = mbc_data.m_mode1 ? mbc_high_bits : 0;
 

@@ -80,7 +80,7 @@ namespace age
             return m_clock_cycle;
         }
 
-        [[nodiscard]] int8_t get_machine_cycle_clocks() const
+        [[nodiscard]] uint8_t get_machine_cycle_clocks() const
         {
             return m_machine_cycle_clocks;
         }
@@ -126,7 +126,7 @@ namespace age
         gb_logger& m_logger;
 
         int     m_clock_cycle          = 0;
-        int8_t  m_machine_cycle_clocks = 4;
+        uint8_t m_machine_cycle_clocks = 4;
         uint8_t m_key1                 = 0x7E;
 
         int m_old_div_offset = 0; //!< clock offset before the last reset

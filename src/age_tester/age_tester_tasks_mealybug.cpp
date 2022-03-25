@@ -36,6 +36,11 @@ namespace
         return {};
     }
 
+    bool is_mealybug_mbc_test(const std::filesystem::path& rom_path)
+    {
+        return rom_path.filename().string() == "mbc3_rtc.gb";
+    }
+
     bool is_test_finished(const age::gb_emulator& emulator)
     {
         return emulator.get_test_info().m_ld_b_b;
@@ -48,6 +53,15 @@ namespace
 void age::tester::schedule_rom_mealybug(const std::filesystem::path& rom_path,
                                         const schedule_test_t&       schedule)
 {
+    auto rom_contents = load_rom_file(rom_path);
+
+    if (is_mealybug_mbc_test(rom_path))
+    {
+        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::dmg_greyscale, run_common_test);
+        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_acid2, run_common_test);
+        return;
+    }
+
     auto cgb_screenshot = find_screenshot(rom_path, "_cgb_c.png");
     auto dmg_screenshot = find_screenshot(rom_path, "_dmg_blob.png");
 
@@ -55,8 +69,6 @@ void age::tester::schedule_rom_mealybug(const std::filesystem::path& rom_path,
     {
         return;
     }
-
-    auto rom_contents = load_rom_file(rom_path);
 
     if (!cgb_screenshot.empty())
     {

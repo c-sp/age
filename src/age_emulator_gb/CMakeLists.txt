@@ -27,6 +27,7 @@ add_library(
         memory/age_gb_mbc1.cpp
         memory/age_gb_mbc2.cpp
         memory/age_gb_mbc3.cpp
+        memory/age_gb_mbc3_rtc.cpp
         memory/age_gb_mbc5.cpp
         memory/age_gb_mbc7.cpp
         memory/age_gb_memory.cpp

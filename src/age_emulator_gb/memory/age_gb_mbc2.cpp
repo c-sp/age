@@ -41,7 +41,7 @@ void age::gb_memory::mbc2_write(gb_memory& memory, uint16_t address, uint8_t val
     // (de)activate ram
     if ((address & 0x100) == 0)
     {
-        memory.set_ram_accessible(value);
+        memory.set_cart_ram_enabled(value);
     }
 
     // switch rom bank
@@ -56,10 +56,15 @@ void age::gb_memory::mbc2_write(gb_memory& memory, uint16_t address, uint8_t val
 
 void age::gb_memory::mbc2_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    memory.m_memory[memory.get_offset(mbc2_ram_address(address))] = value | 0xF0;
+    if (memory.m_num_cart_ram_banks > 0)
+    {
+        memory.m_memory[memory.get_offset(mbc2_ram_address(address))] = value | 0xF0;
+    }
 }
 
 age::uint8_t age::gb_memory::mbc2_cart_ram_read(gb_memory& memory, uint16_t address)
 {
-    return memory.m_memory[memory.get_offset(mbc2_ram_address(address))] | 0xF0;
+    return (memory.m_num_cart_ram_banks > 0)
+               ? memory.m_memory[memory.get_offset(mbc2_ram_address(address))] | 0xF0
+               : 0xFF;
 }

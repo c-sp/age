@@ -254,7 +254,6 @@
 ### failing tests
 
 /mealybug-tearoom-tests/dma/
-/mealybug-tearoom-tests/mbc/
 
 /mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change
 /mealybug-tearoom-tests/ppu/m3_lcdc_bg_en_change2
