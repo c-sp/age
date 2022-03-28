@@ -43,9 +43,9 @@ void age::tester::schedule_rom_same_suite(const std::filesystem::path& rom_path,
     auto normalized_rom_path = age::tester::normalize_path_separator(rom_path.string());
     auto rom_contents        = load_rom_file(rom_path);
 
-    schedule(rom_contents, gb_device_type::cgb_e, gb_colors_hint::default_colors, run_common_test);
+    schedule({rom_contents, gb_device_type::cgb_e, run_common_test});
     if (allow_dmg_test(normalized_rom_path))
     {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::default_colors, run_common_test);
+        schedule({rom_contents, gb_device_type::dmg, run_common_test});
     }
 }

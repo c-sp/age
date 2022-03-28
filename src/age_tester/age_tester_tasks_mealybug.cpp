@@ -41,11 +41,6 @@ namespace
         return rom_path.filename().string() == "mbc3_rtc.gb";
     }
 
-    bool is_test_finished(const age::gb_emulator& emulator)
-    {
-        return emulator.get_test_info().m_ld_b_b;
-    }
-
 } // namespace
 
 
@@ -57,8 +52,8 @@ void age::tester::schedule_rom_mealybug(const std::filesystem::path& rom_path,
 
     if (is_mealybug_mbc_test(rom_path))
     {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::dmg_greyscale, run_common_test);
-        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_acid2, run_common_test);
+        schedule({rom_contents, gb_device_type::dmg, run_common_test});
+        schedule({rom_contents, gb_device_type::cgb_abcd, run_common_test});
         return;
     }
 
@@ -72,10 +67,14 @@ void age::tester::schedule_rom_mealybug(const std::filesystem::path& rom_path,
 
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_acid2, new_screenshot_test(cgb_screenshot, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::cgb_abcd,
+                  new_screenshot_test(cgb_screenshot, run_until(has_executed_ld_b_b))});
     }
     if (!dmg_screenshot.empty())
     {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::dmg_greyscale, new_screenshot_test(dmg_screenshot, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::dmg,
+                  new_screenshot_test(dmg_screenshot, run_until(has_executed_ld_b_b))});
     }
 }

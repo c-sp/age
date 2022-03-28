@@ -104,13 +104,6 @@ namespace
         return screenshots;
     }
 
-    age::tester::run_test_t run_screenshot_test(const std::filesystem::path& screenshot_path)
-    {
-        return age::tester::new_screenshot_test(screenshot_path, [](const age::gb_emulator& emulator) {
-            return emulator.get_test_info().m_ld_b_b;
-        });
-    }
-
 } // namespace
 
 
@@ -124,13 +117,13 @@ void age::tester::schedule_rom_age(const std::filesystem::path& rom_path,
     // schedule "regular" tests
 
     for_each_device_type(rom_path, prefix_dmg, parse_dmg_type, [&](gb_device_type type) {
-        schedule(rom_contents, type, gb_colors_hint::default_colors, run_common_test);
+        schedule({rom_contents, type, run_common_test});
     });
     for_each_device_type(rom_path, prefix_cgb, parse_cgb_type, [&](gb_device_type type) {
-        schedule(rom_contents, type, gb_colors_hint::default_colors, run_common_test);
+        schedule({rom_contents, type, run_common_test});
     });
     for_each_device_type(rom_path, prefix_ncm, parse_cgb_type, [&](gb_device_type type) {
-        schedule(rom_contents, type, gb_colors_hint::default_colors, run_common_test);
+        schedule({rom_contents, type, run_common_test});
     });
 
     // schedule screenshot tests
@@ -138,13 +131,21 @@ void age::tester::schedule_rom_age(const std::filesystem::path& rom_path,
     auto screenshots = find_screenshots(rom_path);
     std::for_each(begin(screenshots), end(screenshots), [&](const auto& screenshot_path) {
         for_each_device_type(screenshot_path, prefix_dmg, parse_dmg_type, [&](gb_device_type type) {
-            schedule(rom_contents, type, gb_colors_hint::dmg_greyscale, run_screenshot_test(screenshot_path));
+            schedule({rom_contents,
+                      type,
+                      new_screenshot_test(screenshot_path, run_until(has_executed_ld_b_b))});
         });
+
         for_each_device_type(screenshot_path, prefix_cgb, parse_cgb_type, [&](gb_device_type type) {
-            schedule(rom_contents, type, gb_colors_hint::cgb_acid2, run_screenshot_test(screenshot_path));
+            schedule({rom_contents,
+                      type,
+                      new_screenshot_test(screenshot_path, run_until(has_executed_ld_b_b))});
         });
+
         for_each_device_type(screenshot_path, prefix_ncm, parse_cgb_type, [&](gb_device_type type) {
-            schedule(rom_contents, type, gb_colors_hint::cgb_acid2, run_screenshot_test(screenshot_path));
+            schedule({rom_contents,
+                      type,
+                      new_screenshot_test(screenshot_path, run_until(has_executed_ld_b_b))});
         });
     });
 }

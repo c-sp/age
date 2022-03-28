@@ -154,10 +154,10 @@ namespace
 
 
 
-    std::string with_device_type(const std::filesystem::path& rom_path,
-                                 age::gb_device_type          device_type)
+    std::string with_device_type(const std::string&  rom_info,
+                                 age::gb_device_type device_type)
     {
-        return rom_path.string() + " " + age::tester::get_device_type_string(device_type);
+        return rom_info + " " + age::tester::get_device_type_string(device_type);
     }
 
 } // namespace
@@ -202,11 +202,8 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
 
                 schedule_rom(
                     rom_path,
-                    [&pool, &results, &opts, rom_path, &scheduled_count](const std::shared_ptr<age::uint8_vector>& rom_contents,
-                                                                         age::gb_device_type                       device_type,
-                                                                         age::gb_colors_hint                       colors_hint,
-                                                                         const run_test_t&                         run) {
-                        switch (device_type)
+                    [&pool, &results, &opts, rom_path, &scheduled_count](schedule_test_opts test_opts) {
+                        switch (test_opts.m_device_type)
                         {
                             case gb_device_type::auto_detect:
                                 return;
@@ -227,16 +224,23 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                                 break;
                         }
 
-                        pool.queue_task([&results, &opts, rom_path, rom_contents, device_type, colors_hint, run]() {
-                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*rom_contents, device_type, colors_hint, opts.m_log_categories));
-                            auto                              passed = run(*emulator);
-                            results.push({with_device_type(rom_path, device_type), passed});
+                        pool.queue_task([&results, &opts, rom_path, test_opts]() {
+                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*test_opts.m_rom, test_opts.m_device_type, test_opts.m_colors_hint, opts.m_log_categories));
+                            auto                              passed = test_opts.m_run_test(*emulator);
+
+                            std::string rom_info = rom_path.string();
+                            if (!test_opts.m_info.empty())
+                            {
+                                rom_info += ", " + test_opts.m_info;
+                            }
+
+                            results.push({with_device_type(rom_info, test_opts.m_device_type), passed});
 
                             if (opts.m_write_logs)
                             {
                                 std::filesystem::path log_path = rom_path;
                                 const auto*           log_ext  = [&]() {
-                                    switch (device_type)
+                                    switch (test_opts.m_device_type)
                                     {
                                         case gb_device_type::dmg:
                                             return ".dmg.log";
@@ -249,7 +253,7 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                                     }
                                 }();
                                 log_path.replace_extension(log_ext);
-                                write_log(log_path, emulator->get_and_clear_log_entries(), rom_path, device_type);
+                                write_log(log_path, emulator->get_and_clear_log_entries(), rom_path, test_opts.m_device_type);
                             }
                         });
                         ++scheduled_count;
@@ -300,6 +304,12 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
             {
                 find_roms(opts.m_test_suite_path / "mooneye-test-suite", matcher, [&](const std::filesystem::path& rom_path) {
                     schedule_rom(rom_path, schedule_rom_mooneye_gb);
+                });
+            }
+            if (opts.m_rtc3test)
+            {
+                find_roms(opts.m_test_suite_path / "rtc3test", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_rtc3test);
                 });
             }
             if (opts.m_same_suite)

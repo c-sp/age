@@ -103,13 +103,13 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
 
         if (seconds > 0)
         {
-            schedule(rom_contents,
-                     device_type,
-                     colors_hint,
-                     new_screenshot_test(screenshot_path,
-                                         [=](const age::gb_emulator& emulator) {
-                                             return emulator.get_emulated_cycles() >= seconds * emulator.get_cycles_per_second();
-                                         }));
+            schedule({rom_contents,
+                      device_type,
+                      colors_hint,
+                      new_screenshot_test(screenshot_path,
+                                          run_until([=](const age::gb_emulator& emulator) {
+                                              return emulator.get_emulated_cycles() >= seconds * emulator.get_cycles_per_second();
+                                          }))});
         }
     };
 

@@ -31,11 +31,6 @@ namespace
         return {};
     }
 
-    bool is_test_finished(const age::gb_emulator& emulator)
-    {
-        return emulator.get_test_info().m_ld_b_b;
-    }
-
 } // namespace
 
 
@@ -53,8 +48,13 @@ void age::tester::schedule_rom_acid2_cgb(const std::filesystem::path& rom_path,
     auto cgb_screenshot = find_screenshot(rom_path.parent_path(), "cgb-acid2.png");
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_acid2, new_screenshot_test(cgb_screenshot, is_test_finished));
-        schedule(rom_contents, gb_device_type::cgb_e, gb_colors_hint::cgb_acid2, new_screenshot_test(cgb_screenshot, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::cgb_abcd,
+                  new_screenshot_test(cgb_screenshot, run_until(has_executed_ld_b_b))});
+
+        schedule({rom_contents,
+                  gb_device_type::cgb_e,
+                  new_screenshot_test(cgb_screenshot, run_until(has_executed_ld_b_b))});
     }
 }
 
@@ -73,23 +73,20 @@ void age::tester::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
     auto cgb_screenshot = find_screenshot(rom_path.parent_path(), "dmg-acid2-cgb.png");
     if (!cgb_screenshot.empty())
     {
-        schedule(rom_contents,
-                 gb_device_type::cgb_abcd,
-                 gb_colors_hint::default_colors, // the color palette is predefined for DMG-on-CGB roms
-                 new_screenshot_test(cgb_screenshot, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::cgb_abcd,
+                  new_screenshot_test(cgb_screenshot, run_until(has_executed_ld_b_b))});
 
-        schedule(rom_contents,
-                 gb_device_type::cgb_e,
-                 gb_colors_hint::default_colors, // the color palette is predefined for DMG-on-CGB roms
-                 new_screenshot_test(cgb_screenshot, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::cgb_e,
+                  new_screenshot_test(cgb_screenshot, run_until(has_executed_ld_b_b))});
     }
 
     auto dmg_screenshot = find_screenshot(rom_path.parent_path(), "dmg-acid2-dmg.png");
     if (!dmg_screenshot.empty())
     {
-        schedule(rom_contents,
-                 gb_device_type::dmg,
-                 gb_colors_hint::dmg_greyscale,
-                 new_screenshot_test(dmg_screenshot, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::dmg,
+                  new_screenshot_test(dmg_screenshot, run_until(has_executed_ld_b_b))});
     }
 }

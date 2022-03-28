@@ -73,6 +73,25 @@ bool age::tester::run_common_test(age::gb_emulator& emulator)
 
 
 
+bool age::tester::has_executed_ld_b_b(const age::gb_emulator& emulator)
+{
+    return emulator.get_test_info().m_ld_b_b;
+}
+
+age::tester::run_test_t age::tester::run_until(const std::function<bool(const age::gb_emulator&)>& test_finished)
+{
+    return [=](age::gb_emulator& emulator) {
+        int step_cycles = emulator.get_cycles_per_second() / 256;
+        while (!test_finished(emulator))
+        {
+            emulator.emulate(step_cycles);
+        }
+        return true;
+    };
+}
+
+
+
 std::string age::tester::normalize_path_separator(const std::string& path)
 {
     if constexpr (std::filesystem::path::preferred_separator == '/')
@@ -95,15 +114,10 @@ std::shared_ptr<age::uint8_vector> age::tester::load_rom_file(const std::filesys
 
 
 age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::path& screenshot_png_path,
-                                                         const test_finished_t&       test_finished)
+                                                         const run_test_t&            run_test)
 {
     return [=](age::gb_emulator& emulator) {
-        int cycles_per_step = emulator.get_cycles_per_second() >> 8;
-
-        while (!test_finished(emulator))
-        {
-            emulator.emulate(cycles_per_step);
-        }
+        run_test(emulator);
 
         // load png
         auto png_data = load_png(screenshot_png_path, emulator);

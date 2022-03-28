@@ -32,7 +32,57 @@ namespace age::tester
 {
     using run_test_t = std::function<bool(age::gb_emulator&)>;
 
-    using schedule_test_t = std::function<void(const std::shared_ptr<age::uint8_vector>&, age::gb_device_type, age::gb_colors_hint colors_hint, run_test_t)>;
+    bool run_common_test(age::gb_emulator& emulator);
+
+
+
+    bool has_executed_ld_b_b(const age::gb_emulator& emulator);
+
+    run_test_t run_until(const std::function<bool(const age::gb_emulator&)>& test_finished);
+
+    run_test_t new_screenshot_test(const std::filesystem::path& screenshot_png_path,
+                                   const run_test_t&            run_test);
+
+
+
+    struct schedule_test_opts
+    {
+        schedule_test_opts(std::shared_ptr<const uint8_vector> rom,
+                           gb_device_type                      device_type,
+                           run_test_t                          run_test)
+            : schedule_test_opts(std::move(rom), device_type, std::move(run_test), "") {}
+
+        schedule_test_opts(std::shared_ptr<const uint8_vector> rom,
+                           gb_device_type                      device_type,
+                           run_test_t                          run_test,
+                           std::string                         info)
+            : schedule_test_opts(std::move(rom),
+                                 device_type,
+                                 device_type == gb_device_type::dmg
+                                     ? gb_colors_hint::dmg_greyscale
+                                     : gb_colors_hint::cgb_acid2,
+                                 std::move(run_test),
+                                 std::move(info)) {}
+
+        schedule_test_opts(std::shared_ptr<const uint8_vector> rom,
+                           gb_device_type                      device_type,
+                           gb_colors_hint                      colors_hint,
+                           run_test_t                          run_test,
+                           std::string                         info = "")
+            : m_rom(std::move(rom)),
+              m_device_type(device_type),
+              m_colors_hint(colors_hint),
+              m_run_test(std::move(run_test)),
+              m_info(std::move(info)) {}
+
+        std::shared_ptr<const uint8_vector> m_rom;
+        gb_device_type                      m_device_type;
+        gb_colors_hint                      m_colors_hint;
+        run_test_t                          m_run_test;
+        std::string                         m_info;
+    };
+
+    using schedule_test_t = std::function<void(schedule_test_opts)>;
 
     void schedule_rom_acid2_cgb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_acid2_dmg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
@@ -41,19 +91,13 @@ namespace age::tester
     void schedule_rom_gambatte(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mealybug(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mooneye_gb(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_rtc3test(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_same_suite(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
 
-    bool run_common_test(age::gb_emulator& emulator);
 
 
-
-    std::string normalize_path_separator(const std::string &path);
+    std::string                        normalize_path_separator(const std::string& path);
     std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
-
-    using test_finished_t = std::function<bool(const age::gb_emulator&)>;
-
-    run_test_t new_screenshot_test(const std::filesystem::path& screenshot_png_path,
-                                   const test_finished_t&       test_finished);
 
 } // namespace age::tester
 

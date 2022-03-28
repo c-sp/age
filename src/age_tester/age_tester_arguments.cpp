@@ -39,6 +39,7 @@ namespace
     constexpr char opt_mooneye_gb   = 'm';
     constexpr char opt_mealybug     = 'n';
     constexpr char opt_print_passed = 'p';
+    constexpr char opt_rtc3test     = 'r';
     constexpr char opt_same_suite   = 's';
     constexpr char opt_whitelist    = 'w';
     constexpr char opt_blacklist    = 'x';
@@ -57,6 +58,7 @@ namespace
     constexpr const char* opt_long_mooneye_gb   = "mooneye";
     constexpr const char* opt_long_mealybug     = "mealybug";
     constexpr const char* opt_long_print_passed = "print-passed";
+    constexpr const char* opt_long_rtc3test     = "rtc3test";
     constexpr const char* opt_long_same_suite   = "same-suite";
     constexpr const char* opt_long_whitelist    = "whitelist";
     constexpr const char* opt_long_blacklist    = "blacklist";
@@ -99,6 +101,7 @@ namespace
         "  -g, --gambatte      run Gambatte test roms",
         "  -m, --mooneye       run Mooneye GB test roms",
         "  -n, --mealybug      run Mealybug Tearoom test roms",
+        "  -r, --rtc3test      run rtc3test test rom",
         "  -s, --same-suite    run SameSuite test roms",
     };
 } // namespace
@@ -228,6 +231,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_print_passed,
         },
         {
+            .name    = opt_long_rtc3test,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_rtc3test,
+        },
+        {
             .name    = opt_long_same_suite,
             .has_arg = no_argument,
             .flag    = nullptr,
@@ -310,6 +319,10 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_print_passed:
                 options.m_print_passed = true;
+                break;
+
+            case opt_rtc3test:
+                options.m_rtc3test = true;
                 break;
 
             case opt_same_suite:

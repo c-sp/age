@@ -123,6 +123,6 @@ void age::tester::schedule_rom_mooneye_gb(const std::filesystem::path& rom_path,
     std::for_each(begin(device_types),
                   end(device_types),
                   [&](const auto& dev_type) {
-                      schedule(rom_contents, dev_type, gb_colors_hint::default_colors, run_common_test);
+                      schedule({rom_contents, dev_type, run_common_test});
                   });
 }

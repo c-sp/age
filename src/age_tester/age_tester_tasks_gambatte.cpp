@@ -186,9 +186,9 @@ namespace
     //!
     constexpr int samples_per_frame = 35112;
 
-    bool is_test_finished(const age::gb_emulator& emulator)
+    bool test_is_finished(const age::gb_emulator& emulator)
     {
-        return emulator.get_emulated_cycles() >= test_frames * samples_per_frame * 2;
+        return emulator.get_emulated_cycles() >= 2LL * test_frames * samples_per_frame;
     }
 
     void run_test(age::gb_emulator& emulator)
@@ -394,35 +394,48 @@ void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
     auto outaudio_cgb = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_cgb04c_outaudio"});
     if (outaudio_cgb.has_value())
     {
-        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_gambatte, new_audio_test(outaudio_cgb.value()));
+        schedule({rom_contents,
+                  gb_device_type::cgb_abcd,
+                  new_audio_test(outaudio_cgb.value())});
     }
     auto outaudio_dmg = parse_boolean_out(filename, {"_dmg08_cgb04c_outaudio", "_dmg08_outaudio"});
     if (outaudio_dmg.has_value())
     {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::dmg_greyscale, new_audio_test(outaudio_dmg.value()));
+        schedule({rom_contents,
+                  gb_device_type::dmg,
+                  new_audio_test(outaudio_dmg.value())});
     }
 
     // check for expected characters on screen
     auto out_cgb = parse_hex_out(filename, {"_dmg08_cgb04c_out", "_cgb04c_out"});
     if (!out_cgb.empty())
     {
-        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_gambatte, new_hex_out_test(out_cgb));
+        schedule({rom_contents,
+                  gb_device_type::cgb_abcd,
+                  new_hex_out_test(out_cgb)});
     }
     auto out_dmg = parse_hex_out(filename, {"_dmg08_cgb04c_out", "_dmg08_out"});
     if (!out_dmg.empty())
     {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::dmg_greyscale, new_hex_out_test(out_dmg));
+        schedule({rom_contents,
+                  gb_device_type::dmg,
+                  new_hex_out_test(out_dmg)});
     }
 
     // check for screenshot file
     auto screen_cgb = find_screenshot(rom_path, "_cgb04c.png");
     if (!screen_cgb.empty())
     {
-        schedule(rom_contents, gb_device_type::cgb_abcd, gb_colors_hint::cgb_gambatte, new_screenshot_test(screen_cgb, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::cgb_abcd,
+                  gb_colors_hint::cgb_gambatte,
+                  new_screenshot_test(screen_cgb, run_until(test_is_finished))});
     }
     auto screen_dmg = find_screenshot(rom_path, "_dmg08.png");
     if (!screen_dmg.empty())
     {
-        schedule(rom_contents, gb_device_type::dmg, gb_colors_hint::dmg_greyscale, new_screenshot_test(screen_dmg, is_test_finished));
+        schedule({rom_contents,
+                  gb_device_type::dmg,
+                  new_screenshot_test(screen_dmg, run_until(test_is_finished))});
     }
 }

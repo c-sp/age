@@ -34,6 +34,7 @@ namespace age::tester
         bool m_gambatte   = false; //!< run Gambatte tests
         bool m_mealybug   = false; //!< run Mealybug Tearoom tests
         bool m_mooneye_gb = false; //!< run Mooneye GB tests
+        bool m_rtc3test   = false; //!< run rtc3test
         bool m_same_suite = false; //!< run SameSuite tests
 
         bool m_cgb_only = false;
