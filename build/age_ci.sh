@@ -154,11 +154,14 @@ build_wasm()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir age_wasm
+    cd_new_tmp
     echo "running age_wasm $1 build in \"$(pwd -P)\""
 
     emcmake cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_wasm
+
+    ARTIFACT_DIR=$(mkdir_artifact age_wasm)
+    cp age_wasm/age_wasm.* "$ARTIFACT_DIR"
 }
 
 run_doxygen()
