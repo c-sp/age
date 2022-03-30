@@ -47,10 +47,30 @@ print_usage_and_exit()
 artifact_dir()
 {
     if [ -z "$1" ]; then
-        echo "out-dir not specified"
+        echo "artifact-dir not specified"
         exit 1
     fi
     echo "$BUILD_DIR/artifacts/$1"
+}
+
+cd_new_tmp()
+{
+    NEW_TMP=$(mktemp -d)
+    cd "$NEW_TMP"
+}
+
+mkdir_artifact()
+{
+    ART_DIR=$(artifact_dir "$1")
+
+    # remove previous build artifacts
+    if [ -e "$ART_DIR" ]; then
+        rm -rf "$ART_DIR"
+    fi
+
+    # create the directory
+    mkdir -p "$ART_DIR"
+    echo "$ART_DIR"
 }
 
 switch_to_out_dir()
@@ -83,11 +103,14 @@ build_gtest()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir age_gtest
+    cd_new_tmp
     echo "running age_gtest $1 build in \"$(pwd -P)\""
 
     cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_gtest
+
+    ARTIFACT_DIR=$(mkdir_artifact age_gtest)
+    cp age_gtest "$ARTIFACT_DIR"
 }
 
 build_qt()
