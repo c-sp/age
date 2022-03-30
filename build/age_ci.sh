@@ -33,9 +33,12 @@ print_usage_and_exit()
     echo "    $0 $CMD_RUN_TESTS $TESTS_ACID2"
     echo "    $0 $CMD_RUN_TESTS $TESTS_AGE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_FIRSTWHITE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MEALYBUG"
-    echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_GB"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_RTC3TEST"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_SAME_SUITE"
     echo "  miscellaneous:"
     echo "    $0 $CMD_DOXYGEN"
     exit 1
@@ -176,9 +179,12 @@ run_tests()
         "${TESTS_ACID2}") ;;
         "${TESTS_AGE}") ;;
         "${TESTS_BLARGG}") ;;
+        "${TESTS_FIRSTWHITE}") ;;
         "${TESTS_GAMBATTE}") ;;
         "${TESTS_MEALYBUG}") ;;
-        "${TESTS_MOONEYE_GB}") ;;
+        "${TESTS_MOONEYE}") ;;
+        "${TESTS_RTC3TEST}") ;;
+        "${TESTS_SAME_SUITE}") ;;
         *) print_usage_and_exit ;;
     esac
 
@@ -226,9 +232,12 @@ CMAKE_BUILD_TYPE_RELEASE=Release
 TESTS_ACID2=acid2
 TESTS_AGE=age
 TESTS_BLARGG=blargg
+TESTS_FIRSTWHITE=firstwhite
 TESTS_GAMBATTE=gambatte
 TESTS_MEALYBUG=mealybug
-TESTS_MOONEYE_GB=mooneye
+TESTS_MOONEYE=mooneye
+TESTS_RTC3TEST=rtc3test
+TESTS_SAME_SUITE=same-suite
 
 CMD_BUILD_GTEST=build-gtest
 CMD_BUILD_QT=build-qt

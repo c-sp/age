@@ -122,24 +122,6 @@ jobs:
         run: build/age_ci.sh run-gtest
 
 
-  test-acid2:
-    name: run dmg-acid2 and cgb-acid2 tests
-    runs-on: ubuntu-20.04
-    needs: [ build-tester ]
-    steps:
-      - name: checkout code
-        uses: actions/checkout@v3
-
-      - name: download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
-
-      - name: run tests
-        run: build/age_ci.sh run-tests acid2
-
-
   test-age:
     name: run age-test-roms
     runs-on: ubuntu-20.04
@@ -158,6 +140,24 @@ jobs:
         run: build/age_ci.sh run-tests age
 
 
+  test-acid2:
+    name: run dmg-acid2 and cgb-acid2 tests
+    runs-on: ubuntu-20.04
+    needs: [ build-tester ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests acid2
+
+
   test-blargg:
     name: run Blargg's test suite
     runs-on: ubuntu-20.04
@@ -174,6 +174,24 @@ jobs:
 
       - name: run tests
         run: build/age_ci.sh run-tests blargg
+
+
+  test-firstwhite:
+    name: run firstwhite test
+    runs-on: ubuntu-20.04
+    needs: [ build-tester ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests firstwhite
 
 
   test-gambatte:
@@ -228,3 +246,39 @@ jobs:
 
       - name: run tests
         run: build/age_ci.sh run-tests mooneye
+
+
+  test-rtc3test:
+    name: run rtc3test
+    runs-on: ubuntu-20.04
+    needs: [ build-tester ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests rtc3test
+
+
+  test-same-suite:
+    name: run SameSuite
+    runs-on: ubuntu-20.04
+    needs: [ build-tester ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests same-suite
