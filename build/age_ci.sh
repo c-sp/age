@@ -121,11 +121,14 @@ build_qt()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir age_qt
+    cd_new_tmp
     echo "running age_qt $1 build in \"$(pwd -P)\""
 
     qmake "CONFIG+=$1" "$REPO_DIR/src/age_qt_gui.pro"
     make -j -l 5
+
+    ARTIFACT_DIR=$(mkdir_artifact age_qt)
+    cp age "$ARTIFACT_DIR"
 }
 
 build_tester()
