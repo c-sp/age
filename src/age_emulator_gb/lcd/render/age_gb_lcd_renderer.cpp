@@ -18,6 +18,8 @@
 
 #include <age_debug.hpp>
 
+#include <algorithm> // std::fill
+
 
 
 age::gb_lcd_renderer::gb_lcd_renderer(const gb_device&       device,
@@ -29,7 +31,8 @@ age::gb_lcd_renderer::gb_lcd_renderer(const gb_device&       device,
       m_window(device.is_dmg_device()),
       m_fifo_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
       m_line_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
-      m_screen_buffer(screen_buffer)
+      m_screen_buffer(screen_buffer),
+      m_palettes(palettes)
 {
 }
 
@@ -60,16 +63,20 @@ void age::gb_lcd_renderer::window_switched_off(gb_current_line at_line)
     m_window.window_switched_off(at_line);
 }
 
-void age::gb_lcd_renderer::new_frame()
+void age::gb_lcd_renderer::new_frame(bool frame_is_blank)
 {
-    m_fifo_renderer.reset(); //! \todo maybe we can remove this after fixing LCD off/on
-
-    AGE_ASSERT(!m_fifo_renderer.in_progress())
-    //! \todo AGE_ASSERT(m_rendered_lines == gb_screen_height) (does not work for LCD off/on)
+    if (frame_is_blank)
+    {
+        auto  blank       = m_device.is_dmg_device() ? m_palettes.get_color_zero_dmg() : pixel(0xFFFFFF);
+        auto& back_buffer = m_screen_buffer.get_back_buffer();
+        std::fill(begin(back_buffer), end(back_buffer), blank);
+    }
+    m_screen_buffer.switch_buffers();
 
     m_window.new_frame();
-    m_screen_buffer.switch_buffers();
     m_rendered_lines = 0;
+    m_fifo_renderer.reset();
+    AGE_ASSERT(!m_fifo_renderer.in_progress())
 }
 
 

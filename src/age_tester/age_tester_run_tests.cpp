@@ -288,6 +288,12 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                     schedule_rom(rom_path, schedule_rom_blargg);
                 });
             }
+            if (opts.m_firstwhite)
+            {
+                find_roms(opts.m_test_suite_path / "firstwhite", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_firstwhite);
+                });
+            }
             if (opts.m_gambatte)
             {
                 find_roms(opts.m_test_suite_path / "gambatte", matcher, [&](const std::filesystem::path& rom_path) {
@@ -300,10 +306,10 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                     schedule_rom(rom_path, schedule_rom_mealybug);
                 });
             }
-            if (opts.m_mooneye_gb)
+            if (opts.m_mooneye)
             {
                 find_roms(opts.m_test_suite_path / "mooneye-test-suite", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_mooneye_gb);
+                    schedule_rom(rom_path, schedule_rom_mooneye);
                 });
             }
             if (opts.m_rtc3test)

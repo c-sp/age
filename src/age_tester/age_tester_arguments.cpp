@@ -35,8 +35,9 @@ namespace
     constexpr char opt_print_failed = 'f';
     constexpr char opt_gambatte     = 'g';
     constexpr char opt_help         = 'h';
+    constexpr char opt_firstwhite   = 'i';
     constexpr char opt_write_logs   = 'l';
-    constexpr char opt_mooneye_gb   = 'm';
+    constexpr char opt_mooneye      = 'm';
     constexpr char opt_mealybug     = 'n';
     constexpr char opt_print_passed = 'p';
     constexpr char opt_rtc3test     = 'r';
@@ -44,7 +45,7 @@ namespace
     constexpr char opt_whitelist    = 'w';
     constexpr char opt_blacklist    = 'x';
 
-    constexpr const char* optstring = ":abcdefghlmnpw:x:";
+    constexpr const char* optstring = ":abcdefghilmnprsw:x:";
 
     constexpr const char* opt_long_acid2        = "acid2";
     constexpr const char* opt_long_blargg       = "blargg";
@@ -54,8 +55,9 @@ namespace
     constexpr const char* opt_long_print_failed = "print-failed";
     constexpr const char* opt_long_gambatte     = "gambatte";
     constexpr const char* opt_long_help         = "help";
+    constexpr const char* opt_long_firstwhite   = "firstwhite";
     constexpr const char* opt_long_write_logs   = "write-logs";
-    constexpr const char* opt_long_mooneye_gb   = "mooneye";
+    constexpr const char* opt_long_mooneye      = "mooneye";
     constexpr const char* opt_long_mealybug     = "mealybug";
     constexpr const char* opt_long_print_passed = "print-passed";
     constexpr const char* opt_long_rtc3test     = "rtc3test";
@@ -99,6 +101,7 @@ namespace
         "  -e, --age           run age test roms",
         "  -b, --blargg        run Blarggs test roms",
         "  -g, --gambatte      run Gambatte test roms",
+        "  -i, --firstwhite    run firstwhite test rom",
         "  -m, --mooneye       run Mooneye GB test roms",
         "  -n, --mealybug      run Mealybug Tearoom test roms",
         "  -r, --rtc3test      run rtc3test test rom",
@@ -207,16 +210,22 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_help,
         },
         {
+            .name    = opt_long_firstwhite,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_firstwhite,
+        },
+        {
             .name    = opt_long_write_logs,
             .has_arg = no_argument,
             .flag    = nullptr,
             .val     = opt_write_logs,
         },
         {
-            .name    = opt_long_mooneye_gb,
+            .name    = opt_long_mooneye,
             .has_arg = no_argument,
             .flag    = nullptr,
-            .val     = opt_mooneye_gb,
+            .val     = opt_mooneye,
         },
         {
             .name    = opt_long_mealybug,
@@ -305,12 +314,16 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
                 options.m_help = true;
                 break;
 
+            case opt_firstwhite:
+                options.m_firstwhite = true;
+                break;
+
             case opt_write_logs:
                 options.m_write_logs = true;
                 break;
 
-            case opt_mooneye_gb:
-                options.m_mooneye_gb = true;
+            case opt_mooneye:
+                options.m_mooneye = true;
                 break;
 
             case opt_mealybug:

@@ -13,6 +13,7 @@
 
 /age-test-roms/_in-progress
 /age-test-roms/oam/oam-write-dmgC
+/age-test-roms/speed-switch/caution
 
 
 
@@ -281,7 +282,7 @@
 
 ##################################################################
 ###
-###   mooneye-test-suite
+###   mooneye test suite
 ###
 
 ### non-test roms

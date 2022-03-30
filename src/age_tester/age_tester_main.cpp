@@ -30,18 +30,20 @@ namespace
         bool run_all = !options.m_acid2
                        && !options.m_age
                        && !options.m_blargg
+                       && !options.m_firstwhite
                        && !options.m_gambatte
                        && !options.m_mealybug
-                       && !options.m_mooneye_gb
+                       && !options.m_mooneye
                        && !options.m_rtc3test
                        && !options.m_same_suite;
 
         options.m_acid2 |= run_all;
         options.m_age |= run_all;
         options.m_blargg |= run_all;
+        options.m_firstwhite |= run_all;
         options.m_gambatte |= run_all;
         options.m_mealybug |= run_all;
-        options.m_mooneye_gb |= run_all;
+        options.m_mooneye |= run_all;
         options.m_rtc3test |= run_all;
         options.m_same_suite |= run_all;
     }
@@ -109,7 +111,7 @@ int main(int argc, char** argv)
               << (opts.m_blargg ? " blargg" : "")
               << (opts.m_gambatte ? " gambatte" : "")
               << (opts.m_mealybug ? " mealybug-tearoom-tests" : "")
-              << (opts.m_mooneye_gb ? " mooneye" : "")
+              << (opts.m_mooneye ? " mooneye" : "")
               << std::endl
               << "looking for test roms in: " << opts.m_test_suite_path.string()
               << std::endl;

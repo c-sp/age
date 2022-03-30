@@ -56,7 +56,7 @@ namespace age
         void set_clks_bgp_change(gb_current_line at_line);
         void check_for_wy_match(gb_current_line at_line, uint8_t wy);
         void window_switched_off(gb_current_line at_line);
-        void new_frame();
+        void new_frame(bool frame_is_blank);
         void render(gb_current_line until, bool is_first_frame);
 
         using gb_lcd_renderer_common::get_lcdc;
@@ -68,10 +68,11 @@ namespace age
         using gb_lcd_renderer_common::m_wy;
 
     private:
-        gb_window_check      m_window;
-        gb_lcd_fifo_renderer m_fifo_renderer;
-        gb_lcd_line_renderer m_line_renderer;
-        screen_buffer&       m_screen_buffer;
+        gb_window_check        m_window;
+        gb_lcd_fifo_renderer   m_fifo_renderer;
+        gb_lcd_line_renderer   m_line_renderer;
+        screen_buffer&         m_screen_buffer;
+        const gb_lcd_palettes& m_palettes;
 
         int m_rendered_lines = 0;
     };

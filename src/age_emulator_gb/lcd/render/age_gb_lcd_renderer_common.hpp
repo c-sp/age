@@ -52,6 +52,7 @@ namespace age
 
 
         const uint8_array<256> m_xflip_cache;
+        const gb_device&       m_device;
 
         int     m_bg_tile_map_offset  = 0;
         int     m_win_tile_map_offset = 0;
@@ -94,8 +95,7 @@ namespace age
     private:
         uint8_t m_lcdc = 0;
 
-        const gb_device& m_device;
-        gb_lcd_sprites&  m_sprites;
+        gb_lcd_sprites& m_sprites;
 
         static age::uint8_array<256> calculate_xflip_lut()
         {
