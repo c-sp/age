@@ -136,11 +136,14 @@ build_tester()
         *) print_usage_and_exit ;;
     esac
 
-    switch_to_out_dir age_tester
+    cd_new_tmp
     echo "running age_tester $1 build in \"$(pwd -P)\""
 
     cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_tester
+
+    ARTIFACT_DIR=$(mkdir_artifact age_tester)
+    cp age_tester/age_tester "$ARTIFACT_DIR"
 }
 
 build_wasm()
@@ -212,7 +215,7 @@ run_tests()
     esac
 
     # the executable file must exist
-    TEST_EXEC="$(artifact_dir age_tester)/age_tester/age_tester"
+    TEST_EXEC="$(artifact_dir age_tester)/age_tester"
     if ! [ -e "$TEST_EXEC" ]; then
         echo "The AGE test executable could not be found at:"
         echo "$TEST_EXEC"
