@@ -73,18 +73,10 @@ mkdir_artifact()
     echo "$ART_DIR"
 }
 
-switch_to_out_dir()
+cd_artifact()
 {
-    OUT_DIR=$(artifact_dir "$1")
-
-    # remove previous build artifacts
-    if [ -e "$OUT_DIR" ]; then
-        rm -rf "$OUT_DIR"
-    fi
-
-    # create the directory and change to it
-    mkdir -p "$OUT_DIR"
-    cd "$OUT_DIR"
+    ART_DIR=$(mkdir_artifact "$1")
+    cd "$ART_DIR"
 }
 
 
@@ -169,21 +161,21 @@ build_wasm()
 
 run_doxygen()
 {
-    # make sure that the doxygen out-dir exists and is empty
-    switch_to_out_dir doxygen
+    # make sure that the doxygen artifact-dir exists and is empty
+    cd_artifact doxygen
 
     # The doxygen configuration contains several paths that doxygen interprets
     # based on the current directory.
     # Thus we have to change into the doxygen configuration directory for
     # doxygen to work properly.
-    OUT_DIR=$(pwd -P)
+    ARTIFACT_DIR=$(pwd -P)
     cd "$BUILD_DIR/doxygen"
     echo "running doxygen in \"$(pwd -P)\""
 
     doxygen doxygen_config
 
     # move the doxygen output
-    mv html "$OUT_DIR"
+    mv html "$ARTIFACT_DIR"
 }
 
 run_gtest()
@@ -238,7 +230,7 @@ run_tests()
     if ! [ -e "$SUITE_DIR" ]; then
         echo "test suite not found at: $SUITE_DIR"
         echo "downloading test suites zip file"
-        switch_to_out_dir test-suites
+        cd_artifact test-suites
         wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v4.0/gameboy-test-roms-v4.0.zip
         unzip -q gameboy-test-roms-v4.0.zip
     fi
