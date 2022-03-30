@@ -44,7 +44,7 @@ print_usage_and_exit()
     exit 1
 }
 
-out_dir()
+artifact_dir()
 {
     if [ -z "$1" ]; then
         echo "out-dir not specified"
@@ -55,7 +55,7 @@ out_dir()
 
 switch_to_out_dir()
 {
-    OUT_DIR=$(out_dir "$1")
+    OUT_DIR=$(artifact_dir "$1")
 
     # remove previous build artifacts
     if [ -e "$OUT_DIR" ]; then
@@ -157,7 +157,7 @@ run_doxygen()
 run_gtest()
 {
     # the executable file must exist
-    TEST_EXEC="$(out_dir age_gtest)/age_gtest"
+    TEST_EXEC="$(artifact_dir age_gtest)/age_gtest"
     if ! [ -e "$TEST_EXEC" ]; then
         echo "The AGE Google Test executable could not be found at:"
         echo "$TEST_EXEC"
@@ -189,7 +189,7 @@ run_tests()
     esac
 
     # the executable file must exist
-    TEST_EXEC="$(out_dir age_tester)/age_tester/age_tester"
+    TEST_EXEC="$(artifact_dir age_tester)/age_tester/age_tester"
     if ! [ -e "$TEST_EXEC" ]; then
         echo "The AGE test executable could not be found at:"
         echo "$TEST_EXEC"
@@ -202,13 +202,13 @@ run_tests()
     chmod +x "$TEST_EXEC"
 
     # check test suite path
-    SUITE_DIR="$(out_dir test-suites)"
+    SUITE_DIR="$(artifact_dir test-suites)"
     if ! [ -e "$SUITE_DIR" ]; then
         echo "test suite not found at: $SUITE_DIR"
         echo "downloading test suites zip file"
         switch_to_out_dir test-suites
-        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v3.2/gameboy-test-roms-v3.2.zip
-        unzip -q gameboy-test-roms-v3.2.zip
+        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v4.0/gameboy-test-roms-v4.0.zip
+        unzip -q gameboy-test-roms-v4.0.zip
     fi
 
     # run the tests
