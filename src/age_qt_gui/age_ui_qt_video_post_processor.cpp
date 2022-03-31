@@ -112,12 +112,15 @@ void age::qt_video_post_processor::set_native_frame_size(const QSize& size)
     m_new_frame_idx = 0;
     m_native_frames.clear();
 
+    pixel_vector empty_frame(size.width() * size.height(), pixel());
+
     for (int i = 0; i < qt_video_frame_history_size; ++i)
     {
         QSharedPointer<QOpenGLTexture> frame = QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target2D);
         frame->setFormat(tx_format);
         frame->setSize(m_native_frame_size.width(), m_native_frame_size.height());
         frame->allocateStorage(tx_pixel_format, tx_pixel_type);
+        frame->setData(tx_pixel_format, tx_pixel_type, empty_frame.data());
 
         set_min_mag_filter(frame->textureId(), true, m_bilinear_filter);
         set_wrap_mode(frame->textureId());
