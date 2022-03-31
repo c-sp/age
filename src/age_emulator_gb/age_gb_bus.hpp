@@ -177,7 +177,7 @@ namespace age
         gb_serial&               m_serial;
         gb_oam_dma               m_oam_dma;
 
-        uint8_array<0x200> m_high_ram; // 0xFE00 - 0xFFFF (including OAM ram and registers for easier handling)
+        uint8_array<0x200> m_high_ram{}; // 0xFE00 - 0xFFFF (including OAM ram and registers for easier handling)
         uint8_t            m_rp   = 0x3E;
         uint8_t            m_un6c = 0xFE;
         uint8_t            m_un72 = 0;

@@ -201,6 +201,7 @@ namespace age
 
         void update_state();
         void check_for_finished_frame();
+        void next_empty_frame();
 
     private:
         // logging code is header-only to allow for compile time optimization
@@ -224,6 +225,7 @@ namespace age
 
         const gb_device& m_device;
         const gb_clock&  m_clock;
+        gb_events&       m_events;
         gb_lcd_line      m_line;
         gb_lcd_irqs      m_lcd_irqs;
         gb_lcd_palettes  m_palettes;

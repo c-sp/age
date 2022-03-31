@@ -28,6 +28,7 @@ age::gb_lcd::gb_lcd(const gb_device&      device,
                     gb_colors_hint        colors_hint)
     : m_device(device),
       m_clock(clock),
+      m_events(events),
       m_line(device, clock),
       m_lcd_irqs(device, clock, m_line, events, interrupts),
       m_palettes(device, rom_header, colors_hint),
@@ -129,6 +130,14 @@ void age::gb_lcd::check_for_finished_frame()
         update_frame();
     }
 }
+
+void age::gb_lcd::next_empty_frame()
+{
+    m_render.new_frame(true);
+    m_events.schedule_event(gb_event::next_empty_frame, gb_clock_cycles_per_lcd_frame);
+}
+
+
 
 void age::gb_lcd::update_state(int line_clock_offset)
 {

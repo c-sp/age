@@ -43,9 +43,13 @@ namespace age
         //! oscillation stabilization (HALT mode) that follows each STOP.
         unhalt = 6,
 
-        start_oam_dma = 7,
+        //! To keep up the framerate while the LCD is switched off,
+        //! we create a stream of empty frames.
+        next_empty_frame = 7,
 
-        none = 8 // must be the last value
+        start_oam_dma = 8,
+
+        none = 9 // must be the last value
     };
 
 

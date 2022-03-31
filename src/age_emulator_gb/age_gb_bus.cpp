@@ -513,6 +513,10 @@ void age::gb_bus::handle_events()
                 m_interrupts.unhalt();
                 break;
 
+            case gb_event::next_empty_frame:
+                m_lcd.next_empty_frame();
+                break;
+
             case gb_event::start_oam_dma:
                 m_oam_dma.handle_start_dma_event();
                 break;

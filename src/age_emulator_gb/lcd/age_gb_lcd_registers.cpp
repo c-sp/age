@@ -94,7 +94,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         m_render.set_lcdc(value);
         m_line.lcd_on();
         m_lcd_irqs.lcd_on(m_render.m_scx);
-        // m_render.new_frame() not required here (has already been called on lcd-off)
+        m_events.remove_event(gb_event::next_empty_frame);
     }
 
     // LCD switched off
@@ -110,7 +110,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         if (line.m_line >= gb_screen_height)
         {
             update_state();
-            m_render.new_frame(true);
+            next_empty_frame();
         }
 
         // The STAT LY match flag is retained when switching off the LCD.
