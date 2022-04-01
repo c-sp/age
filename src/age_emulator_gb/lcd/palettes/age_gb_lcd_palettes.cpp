@@ -41,7 +41,9 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device& device,
                                       const uint8_t*   rom_header,
                                       gb_colors_hint   colors_hint)
     : m_device(device),
-      m_colors_hint(colors_hint)
+      m_colors_hint(colors_hint),
+      m_obp0(m_device.is_cgb_device() ? 0x00 : 0xFF),
+      m_obp1(m_device.is_cgb_device() ? 0x00 : 0xFF)
 {
     if (!m_device.cgb_mode())
     {

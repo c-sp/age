@@ -318,6 +318,45 @@
 
 ##################################################################
 ###
+###   mooneye test suite (wilbertpol)
+###
+
+### non-test roms
+
+/mooneye-test-suite-wilbertpol/utils/dump_boot_hwio.gb
+
+### Gameboy hardware not supported by AGE
+
+/mooneye-test-suite-wilbertpol/misc/boot_hwio-S.gb
+/mooneye-test-suite-wilbertpol/misc/boot_regs-A.gb
+/mooneye-test-suite-wilbertpol/misc/boot_regs-mgb.gb
+/mooneye-test-suite-wilbertpol/misc/boot_regs-sgb.gb
+/mooneye-test-suite-wilbertpol/misc/boot_regs-sgb2.gb
+
+### failing tests
+
+/mooneye-test-suite-wilbertpol/acceptance/gpu/intr_2_mode0_timing_sprites
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly00_mode1_2-C
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc-C
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc_0-C
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc_0_write
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc_144-C
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc_153-C
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc_153_write
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_lyc_write
+/mooneye-test-suite-wilbertpol/acceptance/gpu/ly_new_frame-C
+/mooneye-test-suite-wilbertpol/acceptance/gpu/stat_irq_blocking
+/mooneye-test-suite-wilbertpol/acceptance/gpu/stat_write_if
+/mooneye-test-suite-wilbertpol/logic-analysis/external-bus/read_timing/read_timing
+/mooneye-test-suite-wilbertpol/logic-analysis/external-bus/write_timing/write_timing
+/mooneye-test-suite-wilbertpol/logic-analysis/ppu/simple_scx/simple_scx
+/mooneye-test-suite-wilbertpol/madness/mgb_oam_dma_halt_sprites
+/mooneye-test-suite-wilbertpol/manual-only/sprite_priority.gb
+
+
+
+##################################################################
+###
 ###   same suite
 ###
 

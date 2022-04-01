@@ -27,43 +27,45 @@
 
 namespace
 {
-    constexpr char opt_acid2        = 'a';
-    constexpr char opt_blargg       = 'b';
-    constexpr char opt_cgb_only     = 'c';
-    constexpr char opt_dmg_only     = 'd';
-    constexpr char opt_age          = 'e';
-    constexpr char opt_print_failed = 'f';
-    constexpr char opt_gambatte     = 'g';
-    constexpr char opt_help         = 'h';
-    constexpr char opt_firstwhite   = 'i';
-    constexpr char opt_write_logs   = 'l';
-    constexpr char opt_mooneye      = 'm';
-    constexpr char opt_mealybug     = 'n';
-    constexpr char opt_print_passed = 'p';
-    constexpr char opt_rtc3test     = 'r';
-    constexpr char opt_same_suite   = 's';
-    constexpr char opt_whitelist    = 'w';
-    constexpr char opt_blacklist    = 'x';
+    constexpr char opt_acid2              = 'a';
+    constexpr char opt_blargg             = 'b';
+    constexpr char opt_cgb_only           = 'c';
+    constexpr char opt_dmg_only           = 'd';
+    constexpr char opt_age                = 'e';
+    constexpr char opt_print_failed       = 'f';
+    constexpr char opt_gambatte           = 'g';
+    constexpr char opt_help               = 'h';
+    constexpr char opt_firstwhite         = 'i';
+    constexpr char opt_write_logs         = 'l';
+    constexpr char opt_mooneye            = 'm';
+    constexpr char opt_mealybug           = 'n';
+    constexpr char opt_mooneye_wilbertpol = 'o';
+    constexpr char opt_print_passed       = 'p';
+    constexpr char opt_rtc3test           = 'r';
+    constexpr char opt_same_suite         = 's';
+    constexpr char opt_whitelist          = 'w';
+    constexpr char opt_blacklist          = 'x';
 
-    constexpr const char* optstring = ":abcdefghilmnprsw:x:";
+    constexpr const char* optstring = ":abcdefghilmnoprsw:x:";
 
-    constexpr const char* opt_long_acid2        = "acid2";
-    constexpr const char* opt_long_blargg       = "blargg";
-    constexpr const char* opt_long_cgb_only     = "cgb-only";
-    constexpr const char* opt_long_dmg_only     = "dmg-only";
-    constexpr const char* opt_long_age          = "age";
-    constexpr const char* opt_long_print_failed = "print-failed";
-    constexpr const char* opt_long_gambatte     = "gambatte";
-    constexpr const char* opt_long_help         = "help";
-    constexpr const char* opt_long_firstwhite   = "firstwhite";
-    constexpr const char* opt_long_write_logs   = "write-logs";
-    constexpr const char* opt_long_mooneye      = "mooneye";
-    constexpr const char* opt_long_mealybug     = "mealybug";
-    constexpr const char* opt_long_print_passed = "print-passed";
-    constexpr const char* opt_long_rtc3test     = "rtc3test";
-    constexpr const char* opt_long_same_suite   = "same-suite";
-    constexpr const char* opt_long_whitelist    = "whitelist";
-    constexpr const char* opt_long_blacklist    = "blacklist";
+    constexpr const char* opt_long_acid2              = "acid2";
+    constexpr const char* opt_long_blargg             = "blargg";
+    constexpr const char* opt_long_cgb_only           = "cgb-only";
+    constexpr const char* opt_long_dmg_only           = "dmg-only";
+    constexpr const char* opt_long_age                = "age";
+    constexpr const char* opt_long_print_failed       = "print-failed";
+    constexpr const char* opt_long_gambatte           = "gambatte";
+    constexpr const char* opt_long_help               = "help";
+    constexpr const char* opt_long_firstwhite         = "firstwhite";
+    constexpr const char* opt_long_write_logs         = "write-logs";
+    constexpr const char* opt_long_mooneye            = "mooneye";
+    constexpr const char* opt_long_mealybug           = "mealybug";
+    constexpr const char* opt_long_mooneye_wilbertpol = "mooneye-wilbertpol";
+    constexpr const char* opt_long_print_passed       = "print-passed";
+    constexpr const char* opt_long_rtc3test           = "rtc3test";
+    constexpr const char* opt_long_same_suite         = "same-suite";
+    constexpr const char* opt_long_whitelist          = "whitelist";
+    constexpr const char* opt_long_blacklist          = "blacklist";
 
     constexpr const char* help_cmd_var = "%cmd%";
     constexpr const char* help_git_var = "%git%";
@@ -97,15 +99,16 @@ namespace
         "Use the following category options to run only a subset of test roms.",
         "Multiple categories can be picked simultaneously.",
         "If no category is specified all tests will run.",
-        "  -a, --acid2         run cgb-acid-2 and dmg-acid-2 test roms",
-        "  -e, --age           run age test roms",
-        "  -b, --blargg        run Blarggs test roms",
-        "  -g, --gambatte      run Gambatte test roms",
-        "  -i, --firstwhite    run firstwhite test rom",
-        "  -m, --mooneye       run Mooneye GB test roms",
-        "  -n, --mealybug      run Mealybug Tearoom test roms",
-        "  -r, --rtc3test      run rtc3test test rom",
-        "  -s, --same-suite    run SameSuite test roms",
+        "  -a, --acid2              run cgb-acid-2 and dmg-acid-2 test roms",
+        "  -e, --age                run age test roms",
+        "  -b, --blargg             run Blarggs test roms",
+        "  -g, --gambatte           run Gambatte test roms",
+        "  -i, --firstwhite         run firstwhite test rom",
+        "  -m, --mooneye            run Mooneye Test Suite",
+        "  -o, --mooneye-wilbertpol run Mooneye Test Suite adjusted by wilbertpol",
+        "  -n, --mealybug           run Mealybug Tearoom test roms",
+        "  -r, --rtc3test           run rtc3test test rom",
+        "  -s, --same-suite         run SameSuite test roms",
     };
 } // namespace
 
@@ -234,6 +237,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_mealybug,
         },
         {
+            .name    = opt_long_mooneye_wilbertpol,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_mooneye_wilbertpol,
+        },
+        {
             .name    = opt_long_print_passed,
             .has_arg = no_argument,
             .flag    = nullptr,
@@ -328,6 +337,10 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_mealybug:
                 options.m_mealybug = true;
+                break;
+
+            case opt_mooneye_wilbertpol:
+                options.m_mooneye_wilbertpol = true;
                 break;
 
             case opt_print_passed:

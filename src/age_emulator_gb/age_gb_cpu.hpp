@@ -94,7 +94,8 @@ namespace age
         uint8_t m_prefetched_opcode = 0;
         uint8_t m_cpu_state         = 0;
 
-        bool m_ld_b_b = false; //!< used to indicate a finished test rom
+        bool    m_ld_b_b         = false; //!< used to indicate a finished test rom
+        uint8_t m_invalid_opcode = 0;
     };
 
 } // namespace age

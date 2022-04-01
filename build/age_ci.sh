@@ -37,6 +37,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MEALYBUG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_WILBERTPOL"
     echo "    $0 $CMD_RUN_TESTS $TESTS_RTC3TEST"
     echo "    $0 $CMD_RUN_TESTS $TESTS_SAME_SUITE"
     echo "  miscellaneous:"
@@ -207,6 +208,7 @@ run_tests()
         "${TESTS_GAMBATTE}") ;;
         "${TESTS_MEALYBUG}") ;;
         "${TESTS_MOONEYE}") ;;
+        "${TESTS_MOONEYE_WILBERTPOL}") ;;
         "${TESTS_RTC3TEST}") ;;
         "${TESTS_SAME_SUITE}") ;;
         *) print_usage_and_exit ;;
@@ -260,6 +262,7 @@ TESTS_FIRSTWHITE=firstwhite
 TESTS_GAMBATTE=gambatte
 TESTS_MEALYBUG=mealybug
 TESTS_MOONEYE=mooneye
+TESTS_MOONEYE_WILBERTPOL=mooneye-wilbertpol
 TESTS_RTC3TEST=rtc3test
 TESTS_SAME_SUITE=same-suite
 

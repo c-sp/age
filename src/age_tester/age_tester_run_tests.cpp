@@ -312,6 +312,12 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                     schedule_rom(rom_path, schedule_rom_mooneye);
                 });
             }
+            if (opts.m_mooneye_wilbertpol)
+            {
+                find_roms(opts.m_test_suite_path / "mooneye-test-suite-wilbertpol", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_mooneye_wilbertpol);
+                });
+            }
             if (opts.m_rtc3test)
             {
                 find_roms(opts.m_test_suite_path / "rtc3test", matcher, [&](const std::filesystem::path& rom_path) {

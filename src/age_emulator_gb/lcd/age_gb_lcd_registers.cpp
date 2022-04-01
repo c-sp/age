@@ -54,7 +54,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
 
         // LCD remains on -> update state before updating LCDC
         update_state();
-        auto line = m_line.current_line();
+        auto line = m_line.current_line(); // update_state() called, no need for calculate_line()
 
         // tile data bit changed
         if (m_device.is_cgb_device() && (diff & gb_lcdc_bg_win_data))
@@ -102,16 +102,7 @@ void age::gb_lcd::write_lcdc(uint8_t value)
     {
         msg << "\n    * LCD switched off";
 
-        auto line = m_line.current_line();
-
-        // switch frame buffers, if the current frame is finished
-        // (otherwise it would be lost just because we did not reach
-        // the last v-blank line)
-        if (line.m_line >= gb_screen_height)
-        {
-            update_state();
-            next_empty_frame();
-        }
+        auto line = calculate_line(); // we need the actual line for LYC below
 
         // The STAT LY match flag is retained when switching off the LCD.
         // Mooneye GB tests:
@@ -125,6 +116,8 @@ void age::gb_lcd::write_lcdc(uint8_t value)
         m_lcd_irqs.lcd_off();
         m_line.lcd_off();
         m_render.set_lcdc(value);
+
+        next_empty_frame(); // start stream of white frames
     }
 }
 
@@ -408,7 +401,7 @@ void age::gb_lcd::write_bgp(uint8_t value)
     update_state(m_device.is_dmg_device() || m_device.is_cgb_e_device() ? -1 : 0);
     if (m_device.is_dmg_device() && m_line.lcd_is_on())
     {
-        m_render.set_clks_bgp_change(m_line.current_line());
+        m_render.set_clks_bgp_change(m_line.current_line()); // update_state() called, no need for calculate_line()
     }
     log_reg() << "write BGP = " << log_hex8(value) << log_line_clks(m_line);
     m_palettes.write_bgp(value);
@@ -440,7 +433,7 @@ void age::gb_lcd::write_wy(uint8_t value)
                                                  : 5);
         // make sure we don't miss any late WY match for the current line
         // or the next line (e.g. on line cycle 455 for CGB)
-        auto line = m_line.current_line();
+        auto line = m_line.current_line(); // update_state() called, no need for calculate_line()
         m_render.check_for_wy_match(line, m_render.m_wy);
         m_render.check_for_wy_match(line, value);
     }

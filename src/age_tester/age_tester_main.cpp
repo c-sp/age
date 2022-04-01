@@ -34,6 +34,7 @@ namespace
                        && !options.m_gambatte
                        && !options.m_mealybug
                        && !options.m_mooneye
+                       && !options.m_mooneye_wilbertpol
                        && !options.m_rtc3test
                        && !options.m_same_suite;
 
@@ -44,6 +45,7 @@ namespace
         options.m_gambatte |= run_all;
         options.m_mealybug |= run_all;
         options.m_mooneye |= run_all;
+        options.m_mooneye_wilbertpol |= run_all;
         options.m_rtc3test |= run_all;
         options.m_same_suite |= run_all;
     }

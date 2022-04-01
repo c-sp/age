@@ -116,14 +116,15 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 {
     gb_test_info result;
 
-    result.m_ld_b_b = m_ld_b_b;
-    result.m_a      = m_a;
-    result.m_b      = m_b;
-    result.m_c      = m_c;
-    result.m_d      = m_d;
-    result.m_e      = m_e;
-    result.m_h      = m_h;
-    result.m_l      = m_l;
+    result.m_ld_b_b         = m_ld_b_b;
+    result.m_invalid_opcode = m_invalid_opcode;
+    result.m_a              = m_a;
+    result.m_b              = m_b;
+    result.m_c              = m_c;
+    result.m_d              = m_d;
+    result.m_e              = m_e;
+    result.m_h              = m_h;
+    result.m_l              = m_l;
 
     return result;
 }

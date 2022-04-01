@@ -108,7 +108,8 @@ namespace age
     //!
     struct gb_test_info
     {
-        bool m_ld_b_b = false;
+        bool    m_ld_b_b         = false;
+        uint8_t m_invalid_opcode = 0;
 
         uint8_t m_a = 0;
         uint8_t m_b = 0;

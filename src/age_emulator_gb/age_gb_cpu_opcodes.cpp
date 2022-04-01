@@ -850,6 +850,8 @@ age::uint8_t age::gb_cpu::tick_read_byte(int address)
 
 void age::gb_cpu::execute_prefetched()
 {
+    AGE_ASSERT(!(m_cpu_state & gb_cpu_state_frozen))
+
     // Let PC point to the byte after the prefetched opcode.
     // HALT bug: let PC point to the opcode after HALT
     //           (that opcode is also already prefetched)
@@ -862,6 +864,7 @@ void age::gb_cpu::execute_prefetched()
             // invalid opcode, stay here and freeze CPU
             --m_pc;
             m_cpu_state |= gb_cpu_state_frozen;
+            m_invalid_opcode = opcode;
             m_clock.log(gb_log_category::lc_cpu) << "invalid opcode " << log_hex8(opcode)
                                                  << " at PC == " << log_hex16(m_pc)
                                                  << ", cpu frozen";
