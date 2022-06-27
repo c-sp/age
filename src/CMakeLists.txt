@@ -64,11 +64,11 @@ endif ()
 
 # include Google Test, see also:
 # https://google.github.io/googletest/quickstart-cmake.html
-# (commit 8d51ffdfab10b3fba636ae69bc03da4b54f8c235 created on 2021-07-09)
+# (commit b9d2e1f62f3d93c1c3197900ba7170fa5177ad23 created on 2022-06-25)
 include(FetchContent)
 FetchContent_Declare(
         googletest
-        URL https://github.com/google/googletest/archive/8d51ffdfab10b3fba636ae69bc03da4b54f8c235.zip
+        URL https://github.com/google/googletest/archive/b9d2e1f62f3d93c1c3197900ba7170fa5177ad23.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
