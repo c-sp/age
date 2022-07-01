@@ -15,6 +15,7 @@
 //
 
 #include <algorithm>
+#include <random>
 
 #include <age_debug.hpp>
 #include <age_utilities.hpp>
@@ -328,7 +329,6 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, b
     {
         set_memory(m_memory, m_video_ram_offset + 0x10 + i * 2, gb_sparse_vram_0010_dump[i]);
     }
-
     if (!is_cgb_device)
     {
         set_memory(m_memory, m_video_ram_offset + 0x1910, 0x19);
@@ -338,6 +338,19 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, b
             set_memory(m_memory, m_video_ram_offset + 0x1923 + i, i + 0x0C);
         }
     }
+
+    // randomize wram
+    std::random_device                      device;
+    std::mt19937                            generator(device());
+    std::uniform_int_distribution<unsigned> distribution(0, 255);
+
+    auto rng = [&distribution, &generator]() {
+        return distribution(generator);
+    };
+
+    std::generate(begin(m_memory) + m_work_ram_offset,
+                  begin(m_memory) + m_work_ram_offset + gb_work_ram_size,
+                  rng);
 
     // log memory info
     log() << "cartridge:"
