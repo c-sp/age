@@ -583,7 +583,7 @@ namespace
     }                              \
     (void) 0 // no-op to force semicolon when using this macro
 
-// reset bit in 8 bit value
+// reset specific bit in 8 bit value
 // carry, zero, subtract, half = unmodified
 #define RES_MEM_HL(opcode)        \
     {                             \
@@ -1498,7 +1498,7 @@ void age::gb_cpu::execute_prefetched()
                     SRL(m_a);
                     break;
 
-                    // bit test
+                    // bit
 
                 case 0x40: BIT(m_b, 0x40); break;
                 case 0x41: BIT(m_c, 0x41); break;

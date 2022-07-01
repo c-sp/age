@@ -126,7 +126,7 @@ void age::gb_sound::after_div_reset(bool during_stop)
         log() << "sound off at DIV reset";
         return;
     }
-    // everything must be up to date
+    // everything must be up-to-date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
@@ -179,7 +179,7 @@ void age::gb_sound::after_speed_change()
         return;
     }
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
-    // everything must be up to date
+    // everything must be up-to-date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
@@ -253,7 +253,7 @@ bool age::gb_sound::should_inc_period() const
 {
     AGE_ASSERT(m_master_on)
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
-    // everything must be up to date
+    // everything must be up-to-date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
@@ -273,7 +273,7 @@ bool age::gb_sound::should_dec_length_counter() const
 {
     AGE_ASSERT(m_master_on)
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
-    // everything must be up to date
+    // everything must be up-to-date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 
@@ -284,7 +284,7 @@ bool age::gb_sound::should_align_frequency_timer() const
 {
     AGE_ASSERT(m_master_on)
     AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
-    // everything must be up to date
+    // everything must be up-to-date
     AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
                && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
 

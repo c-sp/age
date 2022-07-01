@@ -1,5 +1,5 @@
 ###
-###   gameboy-test-roms blacklist
+###   test rom blacklist
 ###
 ###   see also: https://github.com/c-sp/gameboy-test-roms
 ###

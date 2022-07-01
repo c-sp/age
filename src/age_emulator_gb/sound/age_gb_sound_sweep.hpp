@@ -124,10 +124,10 @@ namespace age
 
             AGE_ASSERT(!invalid_frequency(m_frequency_bits))
             int shifted = m_frequency_bits >> m_shift;
-            int sweeped = m_frequency_bits + (m_sweep_up ? shifted : -shifted);
+            int result = m_frequency_bits + (m_sweep_up ? shifted : -shifted);
 
-            AGE_ASSERT((sweeped >= int16_t_min) && (sweeped <= int16_t_max))
-            return static_cast<int16_t>(sweeped);
+            AGE_ASSERT((result >= int16_t_min) && (result <= int16_t_max))
+            return static_cast<int16_t>(result);
         }
 
         void set_period_counter()

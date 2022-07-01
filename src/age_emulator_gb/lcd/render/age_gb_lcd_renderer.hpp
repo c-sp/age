@@ -55,7 +55,6 @@ namespace age
         void set_clks_tile_data_change(gb_current_line at_line);
         void set_clks_bgp_change(gb_current_line at_line);
         void check_for_wy_match(gb_current_line at_line, uint8_t wy);
-        void window_switched_off(gb_current_line at_line);
         void new_frame(bool frame_is_blank);
         void render(gb_current_line until, bool is_first_frame);
 

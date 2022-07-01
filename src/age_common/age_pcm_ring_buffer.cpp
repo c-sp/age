@@ -118,7 +118,7 @@ void age::pcm_ring_buffer::add_samples(const pcm_vector& samples_to_add, int num
         std::copy(first + sample_offset, last, std::begin(m_buffer));
     }
 
-    // if we add less samples than the buffer can hold in total, we may
+    // if we add fewer samples than the buffer can hold in total, we may
     // still overwrite currently buffered samples
     else
     {

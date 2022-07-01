@@ -35,9 +35,8 @@ namespace age
 
         void new_frame()
         {
-            m_last_window_off = gb_no_line;
-            m_frame_wy_match  = false;
-            m_current_wline   = -1;
+            m_frame_wy_match = false;
+            m_current_wline  = -1;
         }
 
         void check_for_wy_match(uint8_t lcdc, int wy, int at_line)
@@ -97,21 +96,10 @@ namespace age
             return m_current_wline;
         }
 
-        void window_switched_off(gb_current_line at_line)
-        {
-            m_last_window_off = at_line;
-        }
-
-        [[nodiscard]] bool window_switched_off_on(gb_current_line line) const
-        {
-            return m_last_window_off.as_64bits() == line.as_64bits();
-        }
-
     private:
-        gb_current_line m_last_window_off = gb_no_line;
-        const bool      m_dmg;
-        bool            m_frame_wy_match = false;
-        int             m_current_wline  = -1;
+        const bool m_dmg;
+        bool       m_frame_wy_match = false;
+        int        m_current_wline  = -1;
     };
 
 } // namespace age

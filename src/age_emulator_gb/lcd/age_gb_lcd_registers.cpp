@@ -72,16 +72,12 @@ void age::gb_lcd::write_lcdc(uint8_t value)
                 m_render.set_lcdc((m_render.get_lcdc() & gb_lcdc_win_enable) | (value & ~gb_lcdc_win_enable));
                 update_state(1);
             }
-            else
-            {
-                m_render.window_switched_off(line);
-            }
         }
 
         // update LCDC
         m_render.set_lcdc(value);
 
-        // check for late WY match on this line
+        // check for late WY-match on this line
         m_render.check_for_wy_match(line, m_render.m_wy);
 
         return;

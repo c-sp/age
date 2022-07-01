@@ -237,7 +237,7 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
     uint8_t priority = oam_attr & gb_tile_attrib_priority;
 
     // render tile sprite
-    // (least significant bit in byte1)
+    // (the least significant bit in byte1)
     tile_byte2 <<= 1;
 
     for (int i = 0; i < 8; ++i)

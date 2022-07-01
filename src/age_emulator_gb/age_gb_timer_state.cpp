@@ -100,7 +100,7 @@ bool age::gb_timer::update_timer_state()
     }
     else if ((clk_current == m_clk_last_overflow) && (tima > 0x100))
     {
-        m_interrupts.trigger_interrupt(gb_interrupt::timer, 0); // we don't care for the actual clock cycle any more
+        m_interrupts.trigger_interrupt(gb_interrupt::timer, 0); // we don't care for the actual clock cycle anymore
         interrupt_triggered = true;
         m_events.schedule_event(gb_event::timer_interrupt, m_clock.get_machine_cycle_clocks());
     }
@@ -130,7 +130,7 @@ void age::gb_timer::after_speed_change()
     }
     // DIV has been reset
     AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0)
-    // state is up to date
+    // state is up-to-date
     AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima)
 
     // calculate the old timer overflow clock cycle
@@ -172,7 +172,7 @@ void age::gb_timer::after_div_reset(bool during_stop)
     }
     // DIV has been reset
     AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0)
-    // state is up to date
+    // state is up-to-date
     AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima)
 
     // identify the least significant timer clock bit
@@ -299,7 +299,7 @@ void age::gb_timer::set_clk_timer_zero(int new_clk_timer_zero)
     }
 
     // If this was called during gb_timer.trigger_interrupt(),
-    // the interrupt event is not scheduled any more which is the
+    // the interrupt event is not scheduled anymore which is the
     // reasons for this deactivated assertion.
     // AGE_ASSERT(m_events.get_event_cycle(gb_event::timer_interrupt) != gb_no_clock_cycle)
 

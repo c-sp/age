@@ -58,11 +58,6 @@ void age::gb_lcd_renderer::check_for_wy_match(gb_current_line at_line, uint8_t w
     m_window.check_for_wy_match(get_lcdc(), wy, at_line);
 }
 
-void age::gb_lcd_renderer::window_switched_off(gb_current_line at_line)
-{
-    m_window.window_switched_off(at_line);
-}
-
 void age::gb_lcd_renderer::new_frame(bool frame_is_blank)
 {
     if (frame_is_blank)

@@ -51,7 +51,7 @@ namespace age
 
         pixel_vector m_front_buffer;
         pixel_vector m_back_buffer;
-        unsigned     m_frame_id = 0; // unsigned for well defined wrap around behaviour
+        unsigned     m_frame_id = 0; // unsigned for well-defined wrap around behaviour
     };
 
 } // namespace age

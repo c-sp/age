@@ -220,7 +220,7 @@ void age::gb_timer::write_tima(uint8_t value)
     update_timer_state();
 
     // TIMA write is ignored if the last timer overflow occurred
-    // occurred one machine cycle ago.
+    // one machine cycle ago.
     //
     // Mooneye GB tests:
     //      acceptance/timer/tima_write_reloading

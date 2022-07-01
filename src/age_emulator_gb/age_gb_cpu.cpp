@@ -109,7 +109,7 @@ age::gb_cpu::gb_cpu(const gb_device&         device,
 
 bool age::gb_cpu::is_frozen() const
 {
-    return m_cpu_state & gb_cpu_state_frozen;
+    return (m_cpu_state & gb_cpu_state_frozen) != 0;
 }
 
 age::gb_test_info age::gb_cpu::get_test_info() const
@@ -157,7 +157,7 @@ void age::gb_cpu::emulate()
     }
 
     // look for any interrupt to dispatch
-    m_bus.handle_events(); // make sure the IF register is up to date
+    m_bus.handle_events(); // make sure the IF register is up-to-date
     if (m_interrupts.next_interrupt_bit())
     {
         dispatch_interrupt();
@@ -188,28 +188,28 @@ void age::gb_cpu::dispatch_interrupt()
     // Writing IF here will influence interrupt dispatching.
     tick_push_byte(m_pc >> 8);
 
-    m_bus.handle_events(); // make sure the IF register is up to date
-    uint8_t intr_bit = m_interrupts.next_interrupt_bit();
-    AGE_ASSERT((intr_bit == 0x00)
-               || (intr_bit == 0x01)
-               || (intr_bit == 0x02)
-               || (intr_bit == 0x04)
-               || (intr_bit == 0x08)
-               || (intr_bit == 0x10))
+    m_bus.handle_events(); // make sure the IF register is up-to-date
+    uint8_t interrupt_bit = m_interrupts.next_interrupt_bit();
+    AGE_ASSERT((interrupt_bit == 0x00)
+               || (interrupt_bit == 0x01)
+               || (interrupt_bit == 0x02)
+               || (interrupt_bit == 0x04)
+               || (interrupt_bit == 0x08)
+               || (interrupt_bit == 0x10))
 
     // Pushing the lower PC byte happens before clearing the interrupt's
     // IF bit (checked by pushing to IF).
     tick_push_byte(m_pc);
 
     //! \todo delay write by one cycle (similar to IF write)? (see failing "late_retrigger" tests)
-    m_interrupts.clear_interrupt_flag(intr_bit);
+    m_interrupts.clear_interrupt_flag(interrupt_bit);
 
-    m_pc                = interrupt_pc_lookup[intr_bit];
+    m_pc                = interrupt_pc_lookup[interrupt_bit];
     m_prefetched_opcode = tick_read_byte(m_pc);
 
     m_interrupts.finish_dispatch();
 
-    m_interrupts.log() << "interrupt " << log_hex8(intr_bit)
-                       << " (" << interrupt_name[intr_bit] << ")"
+    m_interrupts.log() << "interrupt " << log_hex8(interrupt_bit)
+                       << " (" << interrupt_name[interrupt_bit] << ")"
                        << " dispatched to " << log_hex16(m_pc);
 }

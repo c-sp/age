@@ -63,7 +63,7 @@ namespace age
         bool                 remove_event(gb_event event);
         [[nodiscard]] int    get_event_cycle(gb_event event) const;
         [[nodiscard]] int    get_next_event_cycle() const;
-        [[nodiscard]] size_t get_events_schuled() const;
+        [[nodiscard]] size_t get_events_scheduled() const;
         gb_event             poll_next_event(int for_clock_cycle);
         void                 set_back_clock(int clock_cycle_offset);
 
