@@ -16,7 +16,7 @@ jobs:
 
   build-qt:
     name: build Qt applications
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       # https://github.com/jurplel/install-qt-action
       - name: cache Qt
@@ -47,7 +47,7 @@ jobs:
 
   build-gtest:
     name: build Google Test binary
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -64,7 +64,7 @@ jobs:
 
   build-tester:
     name: build tester binary
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -81,7 +81,7 @@ jobs:
 
   build-wasm:
     name: build WebAssembly binary
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container:
       image: emscripten/emsdk:2.0.25
     steps:
@@ -106,7 +106,7 @@ jobs:
 
   gtest:
     name: run AGE test suite
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-gtest ]
     steps:
       - name: checkout code
@@ -124,7 +124,7 @@ jobs:
 
   test-age:
     name: run age-test-roms
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -142,7 +142,7 @@ jobs:
 
   test-acid2:
     name: run dmg-acid2 and cgb-acid2 tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -160,7 +160,7 @@ jobs:
 
   test-blargg:
     name: run Blargg's test suite
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -178,7 +178,7 @@ jobs:
 
   test-firstwhite:
     name: run firstwhite test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -196,7 +196,7 @@ jobs:
 
   test-gambatte:
     name: run Gambatte test suite
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -214,7 +214,7 @@ jobs:
 
   test-mealybug:
     name: run Mealybug Tearoom tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -232,7 +232,7 @@ jobs:
 
   test-mooneye:
     name: run Mooneye Test Suite
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -250,7 +250,7 @@ jobs:
 
   test-mooneye-wilbertpol:
     name: run Mooneye Test Suite (wilbertpol)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -268,7 +268,7 @@ jobs:
 
   test-rtc3test:
     name: run rtc3test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
@@ -286,7 +286,7 @@ jobs:
 
   test-same-suite:
     name: run SameSuite
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
       - name: checkout code
