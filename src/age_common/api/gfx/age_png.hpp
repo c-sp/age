@@ -27,6 +27,7 @@
 #include <gfx/age_pixel.hpp>
 
 #include <cstdio>
+#include <string>
 
 
 
