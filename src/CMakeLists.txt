@@ -4,7 +4,16 @@ project(AGE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Avoid warning about missing DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24,
+# see also: https://cmake.org/cmake/help/latest/policy/CMP0135.html
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0)
+    cmake_policy(SET CMP0135 NEW)
+endif()
 
+
+
+###############################################################################
+# AGE features
 
 # Compile AGE with rom logging features?
 # This is mostly used to analyse test roms and not suited
@@ -27,6 +36,25 @@ endif (FORCE_FIFO_RENDERER)
 
 
 
+###############################################################################
+# libraries used to conditionally add subdirectories
+
+# age_qt_gui requires Qt
+# (condition: Qt5Widgets_FOUND)
+find_package(Qt5 QUIET COMPONENTS Widgets)
+
+# age_tester requires libpng
+# (condition: PNG_FOUND)
+find_package(PNG QUIET)
+if (PNG_FOUND)
+    add_compile_definitions(LIBPNG_FOUND) # used by age_common (optional)
+endif ()
+
+
+
+###############################################################################
+# code
+
 # include common code:
 #   - utility code
 #   - emulator core
@@ -34,7 +62,6 @@ add_subdirectory(age_common)
 add_subdirectory(age_emulator_gb)
 
 # age_qt_gui requires Qt
-find_package(Qt5 QUIET COMPONENTS Widgets)
 if (Qt5Widgets_FOUND)
     message("Qt5 found => configuring age_qt_gui")
     add_subdirectory(age_qt_gui)
@@ -43,10 +70,8 @@ else ()
 endif ()
 
 # age_tester requires libpng
-find_package(PNG QUIET)
 if (PNG_FOUND)
     message("PNG found => configuring age_tester")
-    add_compile_definitions(LIBPNG_FOUND)
     add_subdirectory(age_tester)
 else ()
     message("PNG not found => age_tester not available")
@@ -61,6 +86,9 @@ else ()
 endif ()
 
 
+
+###############################################################################
+# Google Test
 
 # include Google Test, see also:
 # https://google.github.io/googletest/quickstart-cmake.html

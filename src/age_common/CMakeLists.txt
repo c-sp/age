@@ -63,8 +63,15 @@ add_library(
         age_debug.cpp
         age_downsampler.cpp
         age_pcm_ring_buffer.cpp
+        age_png.cpp
         age_screen_buffer.cpp
         age_utilities.cpp
 )
+
+# libpng is optional
+find_package(PNG QUIET)
+if (PNG_FOUND)
+    target_link_libraries(age_common PRIVATE PNG::PNG)
+endif ()
 
 target_include_directories(age_common PUBLIC api)
