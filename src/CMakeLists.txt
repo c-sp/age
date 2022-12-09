@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # see also: https://cmake.org/cmake/help/latest/policy/CMP0135.html
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0)
     cmake_policy(SET CMP0135 NEW)
-endif()
+endif ()
 
 
 
@@ -38,6 +38,15 @@ endif (FORCE_FIFO_RENDERER)
 
 ###############################################################################
 # libraries used to conditionally add subdirectories
+
+# macos:
+# don't mix libpng headers and libraries of different versions,
+# e.g. brew-installs and frameworks like Mono
+#
+# see also:
+#   https://cmake.org/cmake/help/latest/variable/CMAKE_FIND_FRAMEWORK.html
+#   https://stackoverflow.com/a/64054469
+set(CMAKE_FIND_FRAMEWORK LAST)
 
 # age_qt_gui requires Qt
 # (condition: Qt5Widgets_FOUND)

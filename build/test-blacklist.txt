@@ -22,6 +22,8 @@
 ###   blargg
 ###
 
+/blargg
+
 ### single test roms
 ### (we run the test suites instead)
 

@@ -90,6 +90,7 @@ namespace age::tester
     void schedule_rom_blargg(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_firstwhite(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_gambatte(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
+    void schedule_rom_little_things(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mealybug(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mooneye(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mooneye_wilbertpol(const std::filesystem::path& rom_path, const schedule_test_t& schedule);

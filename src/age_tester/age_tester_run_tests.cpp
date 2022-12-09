@@ -300,6 +300,12 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
                     schedule_rom(rom_path, schedule_rom_gambatte);
                 });
             }
+            if (opts.m_little_things)
+            {
+                find_roms(opts.m_test_suite_path / "little-things-gb", matcher, [&](const std::filesystem::path& rom_path) {
+                    schedule_rom(rom_path, schedule_rom_little_things);
+                });
+            }
             if (opts.m_mealybug)
             {
                 find_roms(opts.m_test_suite_path / "mealybug-tearoom-tests", matcher, [&](const std::filesystem::path& rom_path) {

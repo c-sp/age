@@ -35,6 +35,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_FIRSTWHITE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_LITTLE_THINGS"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MEALYBUG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE_WILBERTPOL"
@@ -206,6 +207,7 @@ run_tests()
         "${TESTS_BLARGG}") ;;
         "${TESTS_FIRSTWHITE}") ;;
         "${TESTS_GAMBATTE}") ;;
+        "${TESTS_LITTLE_THINGS}") ;;
         "${TESTS_MEALYBUG}") ;;
         "${TESTS_MOONEYE}") ;;
         "${TESTS_MOONEYE_WILBERTPOL}") ;;
@@ -233,8 +235,8 @@ run_tests()
         echo "test suite not found at: $SUITE_DIR"
         echo "downloading test suites zip file"
         cd_artifact test-suites
-        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v4.0/gameboy-test-roms-v4.0.zip
-        unzip -q gameboy-test-roms-v4.0.zip
+        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v5.0/game-boy-test-roms-v5.0.zip
+        unzip -q game-boy-test-roms-v5.0.zip
     fi
 
     # run the tests
@@ -260,6 +262,7 @@ TESTS_AGE=age
 TESTS_BLARGG=blargg
 TESTS_FIRSTWHITE=firstwhite
 TESTS_GAMBATTE=gambatte
+TESTS_LITTLE_THINGS=little-things
 TESTS_MEALYBUG=mealybug
 TESTS_MOONEYE=mooneye
 TESTS_MOONEYE_WILBERTPOL=mooneye-wilbertpol

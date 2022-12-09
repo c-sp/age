@@ -43,10 +43,11 @@ namespace
     constexpr char opt_print_passed       = 'p';
     constexpr char opt_rtc3test           = 'r';
     constexpr char opt_same_suite         = 's';
+    constexpr char opt_little_things      = 't';
     constexpr char opt_whitelist          = 'w';
     constexpr char opt_blacklist          = 'x';
 
-    constexpr const char* optstring = ":abcdefghilmnoprsw:x:";
+    constexpr const char* optstring = ":abcdefghilmnoprstw:x:";
 
     constexpr const char* opt_long_acid2              = "acid2";
     constexpr const char* opt_long_blargg             = "blargg";
@@ -64,6 +65,7 @@ namespace
     constexpr const char* opt_long_print_passed       = "print-passed";
     constexpr const char* opt_long_rtc3test           = "rtc3test";
     constexpr const char* opt_long_same_suite         = "same-suite";
+    constexpr const char* opt_long_little_things      = "little-things";
     constexpr const char* opt_long_whitelist          = "whitelist";
     constexpr const char* opt_long_blacklist          = "blacklist";
 
@@ -109,6 +111,7 @@ namespace
         "  -n, --mealybug           run Mealybug Tearoom test roms",
         "  -r, --rtc3test           run rtc3test test rom",
         "  -s, --same-suite         run SameSuite test roms",
+        "  -t, --little-things      run little-things-gb test roms",
     };
 } // namespace
 
@@ -261,6 +264,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_same_suite,
         },
         {
+            .name    = opt_long_little_things,
+            .has_arg = no_argument,
+            .flag    = nullptr,
+            .val     = opt_little_things,
+        },
+        {
             .name    = opt_long_whitelist,
             .has_arg = required_argument,
             .flag    = nullptr,
@@ -353,6 +362,10 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_same_suite:
                 options.m_same_suite = true;
+                break;
+
+            case opt_little_things:
+                options.m_little_things = true;
                 break;
 
             case opt_whitelist:

@@ -12,6 +12,7 @@ add_executable(
         age_tester_tasks_blargg.cpp
         age_tester_tasks_firstwhite.cpp
         age_tester_tasks_gambatte.cpp
+        age_tester_tasks_little_things.cpp
         age_tester_tasks_mealybug.cpp
         age_tester_tasks_mooneye.cpp
         age_tester_tasks_mooneye_wilbertpol.cpp

@@ -32,6 +32,7 @@ namespace
                        && !options.m_blargg
                        && !options.m_firstwhite
                        && !options.m_gambatte
+                       && !options.m_little_things
                        && !options.m_mealybug
                        && !options.m_mooneye
                        && !options.m_mooneye_wilbertpol
@@ -43,6 +44,7 @@ namespace
         options.m_blargg |= run_all;
         options.m_firstwhite |= run_all;
         options.m_gambatte |= run_all;
+        options.m_little_things |= run_all;
         options.m_mealybug |= run_all;
         options.m_mooneye |= run_all;
         options.m_mooneye_wilbertpol |= run_all;
