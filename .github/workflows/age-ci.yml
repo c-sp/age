@@ -176,8 +176,8 @@ jobs:
         run: build/age_ci.sh run-tests blargg
 
 
-  test-firstwhite:
-    name: run firstwhite test
+  test-little-things:
+    name: run little-things test
     runs-on: ubuntu-22.04
     needs: [ build-tester ]
     steps:
@@ -191,7 +191,7 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}
 
       - name: run tests
-        run: build/age_ci.sh run-tests firstwhite
+        run: build/age_ci.sh run-tests little-things
 
 
   test-gambatte:

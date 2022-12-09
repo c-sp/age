@@ -41,27 +41,27 @@ namespace
     {
         // see https://github.com/c-sp/gameboy-test-roms
 
-        if (screenshot_filename == "cgb_cpu_instrs.png")
+        if (screenshot_filename == "cpu_instrs-dmg-cgb.png")
         {
             return 31;
         }
-        if (screenshot_filename == "cgb_halt_bug.png")
+        if (screenshot_filename == "halt_bug-dmg-cgb.png")
         {
             return 2;
         }
-        if (screenshot_filename == "cgb_interrupt_time.png")
+        if (screenshot_filename == "interrupt_time-cgb.png")
         {
             return 2;
         }
-        if (screenshot_filename == "cgb_instr_timing.png")
+        if (screenshot_filename == "instr_timing-dmg-cgb.png")
         {
             return 1;
         }
-        if (screenshot_filename == "cgb_mem_timing.png")
+        if (screenshot_filename == "mem_timing-dmg-cgb.png")
         {
             return 4; // == max(3, 4)  =>  mem-timing and mem-timing-2
         }
-        if (screenshot_filename == "cgb_sound.png")
+        if (screenshot_filename == "cgb_sound-cgb.png")
         {
             return 37;
         }
