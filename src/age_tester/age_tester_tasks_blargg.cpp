@@ -21,35 +21,49 @@
 namespace
 {
     std::filesystem::path find_screenshot(const std::filesystem::path& rom_path,
-                                          const std::string&           prefix)
+                                          const std::string&           suffix)
     {
-        auto filename            = rom_path.filename();
-        bool is_prefixed         = filename.string().substr(0, prefix.length()) == prefix;
-        auto screenshot_filename = (is_prefixed ? filename : std::filesystem::path(prefix + filename.string())).replace_extension(".png");
+        auto rom_path_filename = std::filesystem::path{rom_path}.replace_extension().string();
 
-        auto screenshot_path = rom_path.parent_path() / screenshot_filename;
-        if (std::filesystem::is_regular_file(screenshot_path))
+        for (const auto& entry : std::filesystem::directory_iterator{rom_path.parent_path()})
         {
-            return screenshot_path;
+            auto path = entry.path().string();
+
+            if (!entry.is_regular_file()
+                || (entry.path().extension().string() != ".png")
+                || (path.find(rom_path_filename) != 0)
+                || (path.find("_actual.png") != std::string::npos))
+            {
+                continue;
+            }
+
+            if (path.find(suffix, rom_path_filename.size()) != std::string::npos)
+            {
+                return path;
+            }
         }
         return {};
     }
 
 
 
-    int get_test_seconds(const std::string& screenshot_filename)
+    int get_test_seconds(const std::string& screenshot_filename, age::gb_device_type device_type)
     {
-        // see https://github.com/c-sp/gameboy-test-roms
+        // see https://github.com/c-sp/gameboy-test-roms/blob/master/src/howto/blargg.md
 
+        if (screenshot_filename == "cgb_sound-cgb.png")
+        {
+            return 37;
+        }
         if (screenshot_filename == "cpu_instrs-dmg-cgb.png")
         {
-            return 31;
+            return device_type == age::gb_device_type::dmg ? 55 : 31;
+        }
+        if (screenshot_filename == "dmg_sound-dmg.png")
+        {
+            return 36;
         }
         if (screenshot_filename == "halt_bug-dmg-cgb.png")
-        {
-            return 2;
-        }
-        if (screenshot_filename == "interrupt_time-cgb.png")
         {
             return 2;
         }
@@ -57,34 +71,17 @@ namespace
         {
             return 1;
         }
-        if (screenshot_filename == "mem_timing-dmg-cgb.png")
-        {
-            return 4; // == max(3, 4)  =>  mem-timing and mem-timing-2
-        }
-        if (screenshot_filename == "cgb_sound-cgb.png")
-        {
-            return 37;
-        }
-
-        if (screenshot_filename == "dmg_cpu_instrs.png")
-        {
-            return 55;
-        }
-        if (screenshot_filename == "dmg_halt_bug.png")
+        if (screenshot_filename == "interrupt_time-cgb.png")
         {
             return 2;
         }
-        if (screenshot_filename == "dmg_instr_timing.png")
+        if (screenshot_filename == "interrupt_time-dmg.png")
         {
-            return 1;
+            return 2;
         }
-        if (screenshot_filename == "dmg_mem_timing.png")
+        if (screenshot_filename == "mem_timing-dmg-cgb.png")
         {
             return 4; // == max(3, 4)  =>  mem-timing and mem-timing-2
-        }
-        if (screenshot_filename == "dmg_sound.png")
-        {
-            return 36;
         }
         return 0;
     }
@@ -98,14 +95,13 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
 {
     auto rom_contents = load_rom_file(rom_path);
 
-    auto schedule_test = [&](gb_device_type device_type, gb_colors_hint colors_hint, const std::filesystem::path& screenshot_path) {
-        age::int64_t seconds = get_test_seconds(screenshot_path.filename().string());
+    auto schedule_test = [&](gb_device_type device_type, const std::filesystem::path& screenshot_path) {
+        const int64_t seconds = get_test_seconds(screenshot_path.filename().string(), device_type);
 
         if (seconds > 0)
         {
             schedule({rom_contents,
                       device_type,
-                      colors_hint,
                       new_screenshot_test(screenshot_path,
                                           run_until([=](const age::gb_emulator& emulator) {
                                               return emulator.get_emulated_cycles() >= seconds * emulator.get_cycles_per_second();
@@ -113,16 +109,16 @@ void age::tester::schedule_rom_blargg(const std::filesystem::path& rom_path,
         }
     };
 
-    auto cgb_screenshot = find_screenshot(rom_path, "cgb_");
+    auto cgb_screenshot = find_screenshot(rom_path, "-cgb");
     if (!cgb_screenshot.empty())
     {
-        schedule_test(gb_device_type::cgb_abcd, gb_colors_hint::cgb_gambatte, cgb_screenshot);
-        schedule_test(gb_device_type::cgb_e, gb_colors_hint::cgb_gambatte, cgb_screenshot);
+        schedule_test(gb_device_type::cgb_abcd, cgb_screenshot);
+        schedule_test(gb_device_type::cgb_e, cgb_screenshot);
     }
 
-    auto dmg_screenshot = find_screenshot(rom_path, "dmg_");
+    auto dmg_screenshot = find_screenshot(rom_path, "-dmg");
     if (!dmg_screenshot.empty())
     {
-        schedule_test(gb_device_type::dmg, gb_colors_hint::dmg_greyscale, dmg_screenshot);
+        schedule_test(gb_device_type::dmg, dmg_screenshot);
     }
 }
