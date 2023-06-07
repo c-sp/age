@@ -31,7 +31,6 @@ namespace age::tester
         bool m_age                = false; //!< run age-test-roms
         bool m_acid2              = false; //!< run cgb-acid2 and dmg-acid2 tests
         bool m_blargg             = false; //!< run Blargg tests
-        bool m_firstwhite         = false; //!< run firstwhite test
         bool m_gambatte           = false; //!< run Gambatte tests
         bool m_little_things      = false; //!< run little-things-gb tests
         bool m_mealybug           = false; //!< run Mealybug Tearoom tests

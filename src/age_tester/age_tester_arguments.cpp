@@ -35,7 +35,6 @@ namespace
     constexpr char opt_print_failed       = 'f';
     constexpr char opt_gambatte           = 'g';
     constexpr char opt_help               = 'h';
-    constexpr char opt_firstwhite         = 'i';
     constexpr char opt_write_logs         = 'l';
     constexpr char opt_mooneye            = 'm';
     constexpr char opt_mealybug           = 'n';
@@ -57,7 +56,6 @@ namespace
     constexpr const char* opt_long_print_failed       = "print-failed";
     constexpr const char* opt_long_gambatte           = "gambatte";
     constexpr const char* opt_long_help               = "help";
-    constexpr const char* opt_long_firstwhite         = "firstwhite";
     constexpr const char* opt_long_write_logs         = "write-logs";
     constexpr const char* opt_long_mooneye            = "mooneye";
     constexpr const char* opt_long_mealybug           = "mealybug";
@@ -105,7 +103,6 @@ namespace
         "  -e, --age                run age test roms",
         "  -b, --blargg             run Blarggs test roms",
         "  -g, --gambatte           run Gambatte test roms",
-        "  -i, --firstwhite         run firstwhite test rom",
         "  -m, --mooneye            run Mooneye Test Suite",
         "  -o, --mooneye-wilbertpol run Mooneye Test Suite adjusted by wilbertpol",
         "  -n, --mealybug           run Mealybug Tearoom test roms",
@@ -216,12 +213,6 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .val     = opt_help,
         },
         {
-            .name    = opt_long_firstwhite,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_firstwhite,
-        },
-        {
             .name    = opt_long_write_logs,
             .has_arg = no_argument,
             .flag    = nullptr,
@@ -330,10 +321,6 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
 
             case opt_help:
                 options.m_help = true;
-                break;
-
-            case opt_firstwhite:
-                options.m_firstwhite = true;
                 break;
 
             case opt_write_logs:
