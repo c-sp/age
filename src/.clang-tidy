@@ -1,24 +1,75 @@
+# We ignore:
+#   - Checks related to Abseil library (abseil-*)
+#   - Checks related to Android (android-*)
+#   - Checks related to OpenCL programming for FPGAs (altera-*)
+#   - Checks related to Fuchsia coding conventions (fuchsia-*)
+#   - Checks related to the LLVM-libc coding standards (llvmlibc-*)
+#       https://libc.llvm.org/dev/clang_tidy_checks.html
+#   - Checks related to magic numbers
+#   - Checks related to gsl::owner (cppcoreguidelines-owning-memory)
+#       https://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines/owning-memory.html
+#   - Checks for LLVM Header Guard Style (llvm-header-guard)
+#       https://clang.llvm.org/extra/clang-tidy/checks/llvm/header-guard.html
+#
+# TODO bugprone-easily-swappable-parameters
+# TODO cert-err33-c
+# TODO concurrency-mt-unsafe
+# TODO cppcoreguidelines-avoid-c-arrays
+# TODO cppcoreguidelines-avoid-const-or-ref-data-members
+# TODO cppcoreguidelines-avoid-non-const-global-variables
+# TODO cppcoreguidelines-non-private-member-variables-in-classes
+# TODO cppcoreguidelines-pro-bounds-constant-array-index
+# TODO cppcoreguidelines-pro-type-reinterpret-cast
+# TODO cppcoreguidelines-pro-type-vararg
+# TODO hicpp-avoid-c-arrays
+# TODO hicpp-signed-bitwise
+# TODO hicpp-vararg
+# TODO misc-const-correctness
+# TODO misc-non-private-member-variables-in-classes
+# TODO modernize-avoid-c-arrays,
+# TODO modernize-use-trailing-return-type
+# TODO readability-function-cognitive-complexity
+# TODO readability-identifier-length
+#
 Checks: >
   *,
   -abseil-*,
   -android-*,
   -altera-*,
-  -cppcoreguidelines-avoid-magic-numbers,
-  -cppcoreguidelines-non-private-member-variables-in-classes,
-  -cppcoreguidelines-owning-memory,
-  -cppcoreguidelines-pro-bounds-constant-array-index,
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -fuchsia-*,
-  -hicpp-signed-bitwise,
-  -llvm-header-guard,
   -llvmlibc-*,
-  -misc-non-private-member-variables-in-classes,
-  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-avoid-magic-numbers,
   -readability-magic-numbers,
+  -cppcoreguidelines-owning-memory,
+  -llvm-header-guard,
 
-# We should enable the following checks:
-#  - cppcoreguidelines-pro-bounds-pointer-arithmetic (requires C++20 spans)
+  -bugprone-easily-swappable-parameters,
+  -cert-err33-c,
+  -concurrency-mt-unsafe,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-vararg,
+  -hicpp-avoid-c-arrays,
+  -hicpp-signed-bitwise,
+  -hicpp-vararg,
+  -misc-const-correctness,
+  -misc-non-private-member-variables-in-classes,
+  -modernize-avoid-c-arrays,
+  -modernize-use-trailing-return-type,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
 
+#  -cppcoreguidelines-non-private-member-variables-in-classes,
+#  -cppcoreguidelines-pro-bounds-constant-array-index,
+#  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+#  -hicpp-signed-bitwise,
+#  -misc-non-private-member-variables-in-classes,
+
+# TODO remove the following exceptions
 CheckOptions:
   - key: readability-implicit-bool-conversion.AllowIntegerConditions
     value: 1

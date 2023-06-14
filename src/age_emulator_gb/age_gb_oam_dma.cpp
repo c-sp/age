@@ -214,7 +214,7 @@ bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
     {
         if ((m_oam_dma_src_address >= 0xC000) && (m_oam_dma_src_address < 0xFE00))
         {
-            m_override_next_oam_byte = m_next_oam_byte & value;
+            m_override_next_oam_byte = static_cast<int16_t>(m_next_oam_byte & value);
             msg << "\n    * DMG: replacing " << log_hex8(value)
                 << " with " << log_hex8(m_override_next_oam_byte)
                 << " (mixing OAM data when writing to work ram)";

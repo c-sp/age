@@ -59,7 +59,7 @@ std::string age::age_log_time::get_timestamp()
     strftime(tmp.data(), 80, "%H:%M:%S", time_info);
 
     std::array<char, 84> tmp_millis{};
-    sprintf(tmp_millis.data(), "%s.%03d", tmp.data(), static_cast<int>(milliseconds % 1000));
+    snprintf(tmp_millis.data(), 84, "%s.%03d", tmp.data(), static_cast<int>(milliseconds % 1000));
 
     return {tmp_millis.data()};
 }

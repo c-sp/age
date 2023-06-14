@@ -31,13 +31,13 @@ age::uint32_t age::crc32(uint8_vector::const_iterator begin, uint8_vector::const
 
     std::for_each(begin,
                   end,
-                  [&](const uint8_t& v) {
-                      crc ^= v;
+                  [&](const uint8_t& vector_element) {
+                      crc ^= vector_element;
                       for (int i = 0; i < 8; ++i)
                       {
-                          crc = (crc & 1U)
-                                    ? (crc >> 1) ^ 0xEDB88320
-                                    : crc >> 1;
+                          crc = (crc & 1U) != 0
+                                    ? (crc >> 1U) ^ 0xEDB88320
+                                    : crc >> 1U;
                       }
                   });
 

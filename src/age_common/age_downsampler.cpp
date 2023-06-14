@@ -136,7 +136,8 @@ void age::downsampler_linear::add_output_sample(const pcm_frame& left_frame, con
 {
     AGE_ASSERT(m_right_sample_fraction < 0x10000)
 
-    int diff[2], interpolated[2];
+    int diff[2];
+    int interpolated[2];
 
     diff[0] = right_frame.m_left_sample;
     diff[1] = right_frame.m_right_sample;

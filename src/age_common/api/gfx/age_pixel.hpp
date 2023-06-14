@@ -39,8 +39,8 @@ namespace age
         {}
 
         explicit pixel(unsigned rgb)
-            : pixel(static_cast<uint8_t>(rgb >> 16),
-                    static_cast<uint8_t>(rgb >> 8),
+            : pixel(static_cast<uint8_t>(rgb >> 16U),
+                    static_cast<uint8_t>(rgb >> 8U),
                     static_cast<uint8_t>(rgb))
         {}
 

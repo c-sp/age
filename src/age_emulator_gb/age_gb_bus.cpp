@@ -522,7 +522,6 @@ void age::gb_bus::handle_events()
                 break;
 
             case gb_event::none:
-                AGE_ASSERT(false)
                 break;
         }
     }

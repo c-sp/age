@@ -92,10 +92,13 @@ namespace age
 } // namespace age
 
 
-
+//! \todo remove AGE_ASSERT, use assert() instead
 // AGE_ASSERT is concluded with a semicolon to prevent "empty statement" warnings for release builds
 // triggered by lone semicolons
-#define AGE_ASSERT(x) /* NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay) */ assert(x); /* NOLINTEND */
+#define AGE_ASSERT(x)                                                      \
+    /* NOLINTBEGIN(cppcoreguidelines-pro-bounds-array-to-pointer-decay) */ \
+    assert(x);                                                             \
+    /* NOLINTEND(cppcoreguidelines-pro-bounds-array-to-pointer-decay) */
 
 // AGE_LOG is concluded with a semicolon to prevent "empty statement" warnings for release builds
 // triggered by lone semicolons

@@ -27,7 +27,7 @@
 #define SAMPLES_WRAPPING     ((m_buffered_samples == m_buffer_size - (m_first_buffered_sample - m_first_new_sample)) && (m_first_buffered_sample > m_first_new_sample))
 
 #define AGE_ASSERT_BUFFERED_SAMPLES AGE_ASSERT(BUFFER_SIZE_MATCHES && (BUFFER_FILLED || BUFFER_EMPTY || SAMPLES_NOT_WRAPPING || SAMPLES_WRAPPING))
-// NOLINTEND
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 
 

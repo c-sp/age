@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(AGE)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Avoid warning about missing DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24,

@@ -45,7 +45,10 @@ namespace
         {
             if (m_file_ptr != nullptr)
             {
-                fclose(m_file_ptr);
+                auto state = fclose(m_file_ptr);
+                if (state != 0) {
+                    //! \todo log something
+                }
                 m_file_ptr = nullptr;
             }
         }

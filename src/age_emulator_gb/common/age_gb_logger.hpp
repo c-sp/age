@@ -100,6 +100,8 @@ namespace age
         Value m_value;
     };
 
+
+
     class gb_log_message_stream
     {
 #ifdef AGE_COMPILE_LOGGER
@@ -125,7 +127,7 @@ namespace age
         gb_log_message_stream(gb_log_message_stream&&)      = default;
 
         gb_log_message_stream& operator=(const gb_log_message_stream&) = delete;
-        gb_log_message_stream& operator=(gb_log_message_stream&&) = default;
+        gb_log_message_stream& operator=(gb_log_message_stream&&)      = default;
 
         template<typename Cycles, typename Clock>
         gb_log_message_stream& operator<<(const log_in_clks<Cycles, Clock>& value)
@@ -207,7 +209,7 @@ namespace age
             {
                 return gb_log_message_stream(nullptr);
             }
-            m_messages.emplace_back(gb_log_entry{category, m_clock_offset + clock, div_clock, ""});
+            m_messages.emplace_back(category, m_clock_offset + clock, div_clock, "");
             //! \todo there must not be any pending gb_log_message_stream instances when get_and_clear_log_entries() is called
             return gb_log_message_stream(&m_messages[m_messages.size() - 1]);
         }
@@ -215,7 +217,7 @@ namespace age
         std::vector<gb_log_entry> get_and_clear_log_entries()
         {
             std::vector<gb_log_entry> tmp = std::move(m_messages);
-            m_messages = {};
+            m_messages                    = {};
             return tmp;
         }
 
@@ -242,6 +244,7 @@ namespace age
             return {};
         }
 
+        // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
         std::vector<gb_log_entry> get_and_clear_log_entries()
         {
             return {};

@@ -110,7 +110,7 @@ namespace age
         void create_windowed_sinc(double transition_frequency, int filter_order, const std::function<double(double, int)>& window_weight);
 
     private:
-        double calculate_sinc(double n, int filter_order, double transition_frequency);
+        static double calculate_sinc(double n, int filter_order, double transition_frequency);
 
         std::vector<int32_t> m_fir_values;
         pcm_vector           m_prev_samples;
