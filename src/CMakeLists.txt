@@ -10,10 +10,18 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0)
     cmake_policy(SET CMP0135 NEW)
 endif ()
 
-set(CMAKE_CXX_CLANG_TIDY
-        clang-tidy;
-        -header-filter=.;)
-        #-warnings-as-errors=*;)
+find_program(CLANG_TIDY NAMES "clang-tidy-${CLANG_TIDY_VERSION}" "clang-tidy")
+if (CLANG_TIDY)
+    message("found ${CLANG_TIDY}, adding linting targets")
+
+    set(CMAKE_CXX_CLANG_TIDY
+            clang-tidy;
+            -header-filter=.;)
+    #-warnings-as-errors=*;)
+else ()
+    message("clang-tidy not found!")
+endif ()
+
 
 
 ###############################################################################
