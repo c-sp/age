@@ -88,13 +88,13 @@ namespace age
         gb_events&       m_events;
         gb_lcd&          m_lcd;
 
-        int     m_oam_dma_src_address    = 0;
-        int     m_oam_dma_offset         = 0;
-        int     m_oam_dma_last_cycle     = gb_no_clock_cycle;
-        int16_t m_override_next_oam_byte = -1;
-        uint8_t m_next_oam_byte          = 0;
-        bool    m_oam_dma_active         = false;
-        uint8_t m_oam_dma_reg;
+        int      m_oam_dma_src_address    = 0;
+        int      m_oam_dma_offset         = 0;
+        int      m_oam_dma_last_cycle     = gb_no_clock_cycle;
+        uint16_t m_override_next_oam_byte = uint16_t_max;
+        uint8_t  m_next_oam_byte          = 0;
+        bool     m_oam_dma_active         = false;
+        uint8_t  m_oam_dma_reg;
     };
 
 } // namespace age

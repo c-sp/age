@@ -51,9 +51,9 @@ void age::gb_sorted_events::schedule_event(gb_event event, int for_clock_cycle)
     {
         for (auto it = begin(m_events); it != end(m_events); ++it)
         {
-            if (it->m_struct.m_event == event)
+            if (it->m_event == event)
             {
-                it->m_struct.m_clock_cycle = for_clock_cycle;
+                it->m_clock_cycle = for_clock_cycle;
                 break;
             }
         }
@@ -62,7 +62,7 @@ void age::gb_sorted_events::schedule_event(gb_event event, int for_clock_cycle)
     // schedule new event
     else
     {
-        scheduled_event ev{{.m_event = event, .m_clock_cycle = for_clock_cycle}};
+        scheduled_event ev{.m_event = event, .m_clock_cycle = for_clock_cycle};
         m_events.push_back(ev);
     }
 
@@ -70,7 +70,9 @@ void age::gb_sorted_events::schedule_event(gb_event event, int for_clock_cycle)
     std::sort(begin(m_events),
               end(m_events),
               [](const scheduled_event& a, const scheduled_event& b) {
-                  return a.m_int > b.m_int;
+                  return a.m_clock_cycle == b.m_clock_cycle
+                             ? a.m_event > b.m_event
+                             : a.m_clock_cycle > b.m_clock_cycle;
               });
     m_active_events[ev_idx] = for_clock_cycle;
 }
@@ -89,7 +91,7 @@ bool age::gb_sorted_events::remove_event(gb_event event)
     // remove scheduled event
     for (auto it = begin(m_events); it != end(m_events); ++it)
     {
-        if (it->m_struct.m_event == event)
+        if (it->m_event == event)
         {
             m_events.erase(it);
             break;
@@ -109,8 +111,8 @@ int age::gb_sorted_events::get_event_cycle(gb_event event) const
 int age::gb_sorted_events::get_next_event_cycle() const
 {
     return m_events.empty()
-        ? gb_no_clock_cycle
-        : m_events.back().m_struct.m_clock_cycle;
+               ? gb_no_clock_cycle
+               : m_events.back().m_clock_cycle;
 }
 
 age::size_t age::gb_sorted_events::get_events_scheduled() const
@@ -129,13 +131,13 @@ age::gb_event age::gb_sorted_events::poll_next_event(int for_clock_cycle)
     }
 
     // check event clock cycle
-    if (for_clock_cycle < m_events.back().m_struct.m_clock_cycle)
+    if (for_clock_cycle < m_events.back().m_clock_cycle)
     {
         return gb_event::none;
     }
 
     // poll event
-    gb_event event = m_events.back().m_struct.m_event;
+    gb_event event = m_events.back().m_event;
     m_events.pop_back();
     m_active_events[to_underlying(event)] = gb_no_clock_cycle;
     return event;
@@ -148,7 +150,7 @@ void age::gb_sorted_events::set_back_clock(int clock_cycle_offset)
     std::for_each(begin(m_events),
                   end(m_events),
                   [&](auto& ev) {
-                      gb_set_back_clock_cycle(ev.m_struct.m_clock_cycle, clock_cycle_offset);
+                      gb_set_back_clock_cycle(ev.m_clock_cycle, clock_cycle_offset);
                   });
 
     std::for_each(begin(m_active_events),
@@ -176,22 +178,22 @@ age::gb_events::gb_events(const gb_clock& clock)
 void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
 {
     int ev_cycle = m_clock.get_clock_cycle() + clock_cycle_offset;
-    gb_sorted_events::schedule_event(event, ev_cycle);
+    m_events.schedule_event(event, ev_cycle);
 
     log() << "event " << log_dec(to_underlying(event))
           << " scheduled for clock cycle " << ev_cycle
-          << ", " << get_events_scheduled() << " event(s) scheduled total";
+          << ", " << m_events.get_events_scheduled() << " event(s) scheduled total";
 }
 
 
 
 void age::gb_events::remove_event(gb_event event)
 {
-    auto removed = gb_sorted_events::remove_event(event);
+    auto removed = m_events.remove_event(event);
     if (removed)
     {
         log() << "event " << log_dec(to_underlying(event)) << " removed"
-              << ", " << get_events_scheduled() << " event(s) still scheduled";
+              << ", " << m_events.get_events_scheduled() << " event(s) still scheduled";
     }
 }
 
@@ -199,23 +201,23 @@ void age::gb_events::remove_event(gb_event event)
 
 int age::gb_events::get_event_cycle(gb_event event) const
 {
-    return gb_sorted_events::get_event_cycle(event);
+    return m_events.get_event_cycle(event);
 }
 
 int age::gb_events::get_next_event_cycle() const
 {
-    return gb_sorted_events::get_next_event_cycle();
+    return m_events.get_next_event_cycle();
 }
 
 
 
-age::gb_event age::gb_events::poll_event()
+age::gb_event age::gb_events::poll_next_event()
 {
-    auto event = gb_sorted_events::poll_next_event(m_clock.get_clock_cycle());
+    auto event = m_events.poll_next_event(m_clock.get_clock_cycle());
     if (event != gb_event::none)
     {
         log() << "event " << to_underlying(event) << " polled"
-              << ", " << get_events_scheduled() << " event(s) still scheduled";
+              << ", " << m_events.get_events_scheduled() << " event(s) still scheduled";
     }
     return event;
 }
@@ -224,5 +226,5 @@ age::gb_event age::gb_events::poll_event()
 
 void age::gb_events::set_back_clock(int clock_cycle_offset)
 {
-    gb_sorted_events::set_back_clock(clock_cycle_offset);
+    m_events.set_back_clock(clock_cycle_offset);
 }

@@ -148,8 +148,7 @@ namespace age
                 case fetcher_step::fetch_sprite_bitplane0:
                 case fetcher_step::fetch_sprite_bitplane1:
                 case fetcher_step::line_finished:
-                    AGE_ASSERT(false)
-                    break;
+                    assert(false);
             }
         }
 

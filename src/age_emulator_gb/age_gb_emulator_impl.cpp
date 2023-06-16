@@ -42,9 +42,9 @@ std::string age::gb_emulator_impl::get_emulator_title() const
 
         // stop on the first invalid character
         if ((c != ascii_underscore)
-            && !((c >= ascii_0) && (c <= ascii_9))
-            && !((c >= ascii_a) && (c <= ascii_z))
-            && !((c >= ascii_A) && (c <= ascii_Z)))
+            && ((c < ascii_0) || (c > ascii_9))
+            && ((c < ascii_a) || (c > ascii_z))
+            && ((c < ascii_A) || (c > ascii_Z)))
         {
             break;
         }

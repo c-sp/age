@@ -67,10 +67,11 @@ void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_lin
 {
     if (in_progress())
     {
-        AGE_ASSERT(m_device.is_cgb_device())
-        AGE_ASSERT(m_line.m_line == at_line.m_line)
-        AGE_ASSERT(m_line.m_line_clks >= at_line.m_line_clks)
+        assert(m_device.is_cgb_device());
+        assert(m_line.m_line == at_line.m_line);
+        assert(m_line.m_line_clks >= at_line.m_line_clks);
         m_fetcher.set_clks_tile_data_change(m_line.m_line_clks);
+        AGE_UNUSED(at_line); // release build: unused
     }
 }
 
@@ -98,7 +99,7 @@ void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_fir
 
     m_line                 = {.m_line = line.m_line, .m_line_clks = 0};
     m_line_stage           = line_stage::mode2;
-    m_line_buffer          = &m_screen_buffer.get_back_buffer()[line.m_line * gb_screen_width];
+    m_line_buffer          = &m_screen_buffer.get_back_buffer()[static_cast<size_t>(line.m_line) * gb_screen_width];
     m_clks_begin_align_scx = is_line_zero ? 86 : 84;
     m_clks_end_window_init = gb_no_clock_cycle;
     m_x_pos                = 0;
@@ -419,7 +420,7 @@ bool age::gb_lcd_fifo_renderer::init_window()
     int clks_init_window = ((m_common.m_wx == 0) && (m_alignment_x >= 1)) ? 8 : 7;
 
     m_window.next_window_line();
-    m_x_pos_win_start      = m_x_pos; // for first tile fetch
+    m_x_pos_win_start      = m_x_pos;                       // for first tile fetch
     m_alignment_x          = 7 - m_common.m_wx;
     m_line_stage           = line_stage::mode3_init_window; // break loop after this pixel
     m_clks_end_window_init = m_line.m_line_clks + clks_init_window;

@@ -35,6 +35,7 @@ namespace
 } // namespace
 
 
+//! \todo rewrite this after we have performance tests ready
 
 //---------------------------------------------------------
 //
@@ -833,7 +834,7 @@ void age::gb_cpu::tick_push_byte(int byte)
 
 age::uint8_t age::gb_cpu::tick_read_byte(int address)
 {
-    uint8_t result;
+    uint8_t result = 0;
     READ_BYTE(result, address);
     return result;
 }
@@ -896,7 +897,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x33:
             ++m_sp;
             TICK_MACHINE_CYCLE;
-            break; // INC SP
+            break;                             // INC SP
 
         case 0x0B: DEC_BYTES(m_b, m_c); break; // DEC BC
         case 0x1B: DEC_BYTES(m_d, m_e); break; // DEC DE
@@ -908,14 +909,14 @@ void age::gb_cpu::execute_prefetched()
 
             // loads
 
-        case 0x06: POP_BYTE_AT_PC(m_b); break; // LD B, x
-        case 0x0E: POP_BYTE_AT_PC(m_c); break; // LD C, x
-        case 0x16: POP_BYTE_AT_PC(m_d); break; // LD D, x
-        case 0x1E: POP_BYTE_AT_PC(m_e); break; // LD E, x
-        case 0x26: POP_BYTE_AT_PC(m_h); break; // LD H, x
-        case 0x2E: POP_BYTE_AT_PC(m_l); break; // LD L, x
-        case 0x36: LD_IMM8_MEM_HL; break;      // LD [HL], x
-        case 0x3E: POP_BYTE_AT_PC(m_a); break; // LD A, x
+        case 0x06: POP_BYTE_AT_PC(m_b); break;     // LD B, x
+        case 0x0E: POP_BYTE_AT_PC(m_c); break;     // LD C, x
+        case 0x16: POP_BYTE_AT_PC(m_d); break;     // LD D, x
+        case 0x1E: POP_BYTE_AT_PC(m_e); break;     // LD E, x
+        case 0x26: POP_BYTE_AT_PC(m_h); break;     // LD H, x
+        case 0x2E: POP_BYTE_AT_PC(m_l); break;     // LD L, x
+        case 0x36: LD_IMM8_MEM_HL; break;          // LD [HL], x
+        case 0x3E: POP_BYTE_AT_PC(m_a); break;     // LD A, x
 
         case 0x40: m_ld_b_b = true; break;         // LD B, B
         case 0x41: m_b = m_c; break;               // LD B, C
@@ -993,26 +994,26 @@ void age::gb_cpu::execute_prefetched()
         case 0x12: WRITE_BYTE(LOAD_DE, m_a); break; // LD [DE], A
         case 0x1A: READ_BYTE(m_a, LOAD_DE); break;  // LD A, [DE]
 
-        case 0xF8: LD_HL_SP_ADD; break; // LD HL, SP + x
+        case 0xF8: LD_HL_SP_ADD; break;             // LD HL, SP + x
         case 0xF9:
             m_sp = LOAD_HL & 0xFFFF;
             TICK_MACHINE_CYCLE;
             break; // LD SP, HL
         case 0x08: {
-            int address;
+            int address = 0;
             POP_WORD_AT_PC(address);
             WRITE_WORD(address, m_sp);
         }
         break; // LD [xx], SP
 
         case 0xE0: {
-            uint8_t offset;
+            uint8_t offset = 0;
             POP_BYTE_AT_PC(offset);
             WRITE_BYTE(0xFF00 + offset, m_a);
         }
         break; // LDH [x], A
         case 0xF0: {
-            uint8_t offset;
+            uint8_t offset = 0;
             POP_BYTE_AT_PC(offset);
             READ_BYTE(m_a, 0xFF00 + offset);
         }
@@ -1020,13 +1021,13 @@ void age::gb_cpu::execute_prefetched()
         case 0xE2: WRITE_BYTE(0xFF00 + m_c, m_a); break; // LDH [C], A
         case 0xF2: READ_BYTE(m_a, 0xFF00 + m_c); break;  // LDH A, [C]
         case 0xEA: {
-            int address;
+            int address = 0;
             POP_WORD_AT_PC(address);
             WRITE_BYTE(address, m_a);
         }
         break; // LD [xx], A
         case 0xFA: {
-            int address;
+            int address = 0;
             POP_WORD_AT_PC(address);
             READ_BYTE(m_a, address);
         }
@@ -1073,7 +1074,8 @@ void age::gb_cpu::execute_prefetched()
             POP_BYTE_AT_PC(m_h);
             break; // LD HL, xx
         case 0x31: {
-            int h, l;
+            int h = 0;
+            int l = 0;
             POP_BYTE_AT_PC(l);
             POP_BYTE_AT_PC(h);
             m_sp = (l + (h << 8)) & 0xFFFF;
@@ -1259,7 +1261,7 @@ void age::gb_cpu::execute_prefetched()
             TICK_MACHINE_CYCLE;
             PUSH_BYTE(m_a);
             {
-                uint8_t f;
+                uint8_t f=0;
                 STORE_FLAGS_TO(f);
                 PUSH_BYTE(f);
             }
@@ -1278,7 +1280,7 @@ void age::gb_cpu::execute_prefetched()
             POP_BYTE(m_h);
             break; // POP HL
         case 0xF1: {
-            uint8_t f;
+            uint8_t f=0;
             POP_BYTE(f);
             LOAD_FLAGS_FROM(f);
         }
@@ -1294,7 +1296,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x00: break; // NOP
 
-        case 0x10: { // STOP
+        case 0x10: {      // STOP
             m_interrupts.log() << "STOP encountered (no STOP M-cycle executed yet)";
             READ_BYTE(m_prefetched_opcode, m_pc);
             m_interrupts.log() << "STOP: prefetched op code " << log_hex8(m_prefetched_opcode);
@@ -1327,7 +1329,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x3F:
             m_carry_indicator ^= 0x100;
             m_hcs_flags = m_hcs_operand = 0;
-            break; // CCF
+            break;   // CCF
 
         case 0x76: { // HALT
             auto msg = m_interrupts.log();
@@ -1375,7 +1377,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x27: // DAA
         {
-            uint8_t f;
+            uint8_t f=0;
             STORE_FLAGS_TO(f);
             // calculate correction based on carry flags
             uint8_t correction = ((f & gb_carry_flag) > 0) ? 0x60 : 0;
@@ -1723,6 +1725,9 @@ void age::gb_cpu::execute_prefetched()
                 case 0xFD: m_l |= CB_BIT(0xFD); break;
                 case 0xFE: SET_MEM_HL(0xFE); break;
                 case 0xFF: m_a |= CB_BIT(0xFF); break;
+
+                default: // just for clang-tidy
+                    break;
             }
             break;
         }

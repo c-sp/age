@@ -372,12 +372,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
                 }
                 else
                 {
-                    options.m_unknown_options.emplace_back(std::string(1, static_cast<char>(optopt)));
+                    options.m_unknown_options.emplace_back(1, static_cast<char>(optopt));
                 }
                 break;
 
             case ':':
-                options.m_invalid_arg_options.emplace_back(std::string(1, static_cast<char>(optopt)));
+                options.m_invalid_arg_options.emplace_back(1, static_cast<char>(optopt));
                 break;
 
             default:

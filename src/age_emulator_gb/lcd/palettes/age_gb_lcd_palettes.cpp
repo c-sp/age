@@ -197,7 +197,7 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
     AGE_ASSERT((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1))
     unsigned color_index = palette_index << 2;
 
-    const auto& color_src = [&]() {
+    const auto& color_src = [&palette_index, this]() {
         switch (palette_index)
         {
             case gb_palette_obp0:
@@ -226,16 +226,16 @@ void age::gb_lcd_palettes::update_cgb_color(unsigned color_index)
     AGE_ASSERT(color_index < gb_total_color_count)
 
     unsigned cpd_index = color_index << 1;
-    unsigned low_byte  = m_cpd[cpd_index];
-    unsigned high_byte = m_cpd[cpd_index + 1];
-    unsigned cgb_rgb15 = (high_byte << 8) | low_byte;
+    auto low_byte  = m_cpd[cpd_index];
+    auto high_byte = m_cpd[cpd_index + 1];
+    uint16_t cgb_rgb15 = (high_byte << 8) | low_byte;
 
     // gb-color:   red:    bits 0-4
     //             green:  bits 5-9
     //             blue:   bits 10-14
-    unsigned gb_r = cgb_rgb15 & 0x1FU;
-    unsigned gb_g = (cgb_rgb15 >> 5) & 0x1FU;
-    unsigned gb_b = (cgb_rgb15 >> 10) & 0x1FU;
+    uint16_t gb_r = cgb_rgb15 & 0x1FU;
+    uint16_t gb_g = (cgb_rgb15 >> 5) & 0x1FU;
+    uint16_t gb_b = (cgb_rgb15 >> 10) & 0x1FU;
 
     // Matt Currie's formula
     if (m_colors_hint == gb_colors_hint::cgb_acid2)

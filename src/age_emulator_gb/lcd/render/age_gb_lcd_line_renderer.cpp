@@ -109,7 +109,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
         auto sprites = m_sprites.get_line_sprites(line, !m_device.cgb_mode());
         std::for_each(rbegin(sprites),
                       rend(sprites),
-                      [&](const gb_sprite& sprite) {
+                      [this, &px0, &line](const gb_sprite& sprite) {
                           if (sprite.m_x && (sprite.m_x < gb_screen_width + 8))
                           {
                               AGE_ASSERT((px0 + sprite.m_x) < gb_screen_width + 24)
@@ -122,7 +122,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
     }
 
     // copy line
-    auto* dst = &m_screen_buffer.get_back_buffer()[line * gb_screen_width];
+    auto* dst = &m_screen_buffer.get_back_buffer()[static_cast<size_t>(line) * gb_screen_width];
     auto* src = &m_line[px0];
 
     auto alpha_bits = pixel{0, 0, 0, 255}.get_32bits();

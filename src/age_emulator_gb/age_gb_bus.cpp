@@ -480,8 +480,8 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
 void age::gb_bus::handle_events()
 {
     // handle outstanding events
-    gb_event event;
-    while ((event = m_events.poll_event()) != gb_event::none)
+    gb_event event{};
+    while ((event = m_events.poll_next_event()) != gb_event::none)
     {
         switch (event)
         {

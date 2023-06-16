@@ -37,4 +37,6 @@ add_executable(
         shaders/age_qt_gui_shaders.qrc
 )
 
+set_target_properties(age_qt_gui PROPERTIES CXX_CLANG_TIDY "")
+
 target_link_libraries(age_qt_gui PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Multimedia age_emulator_gb age_common)

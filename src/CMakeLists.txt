@@ -10,6 +10,10 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0)
     cmake_policy(SET CMP0135 NEW)
 endif ()
 
+set(CMAKE_CXX_CLANG_TIDY
+        clang-tidy;
+        -header-filter=.;)
+        #-warnings-as-errors=*;)
 
 
 ###############################################################################
@@ -111,6 +115,13 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
+
+# silence clang-tidy for googletest
+# https://discourse.cmake.org/t/how-to-prevent-clang-tidy-to-check-sources-added-with-fetchcontents/2871/12
+set_target_properties(gtest PROPERTIES CXX_CLANG_TIDY "")
+set_target_properties(gtest_main PROPERTIES CXX_CLANG_TIDY "")
+set_target_properties(gmock PROPERTIES CXX_CLANG_TIDY "")
+set_target_properties(gmock_main PROPERTIES CXX_CLANG_TIDY "")
 
 # age google test executable
 add_executable(

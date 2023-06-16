@@ -68,25 +68,19 @@ namespace age
         void                 set_back_clock(int clock_cycle_offset);
 
     private:
-        union scheduled_event
+        struct scheduled_event
         {
-            struct
-            {
-                gb_event m_event;
-                int      m_clock_cycle;
-            } m_struct;
-            int64_t m_int;
+            gb_event m_event;
+            int      m_clock_cycle;
         };
 
         std::array<int, to_underlying(gb_event::none)> m_active_events{};
-
-        static_assert(sizeof(int) == 4, "gb_sorted_events requires int to be exactly 32 bits wide");
         std::vector<scheduled_event> m_events;
     };
 
 
 
-    class gb_events : private gb_sorted_events
+    class gb_events
     {
         AGE_DISABLE_COPY(gb_events);
         AGE_DISABLE_MOVE(gb_events);
@@ -99,7 +93,7 @@ namespace age
         void              remove_event(gb_event event);
         [[nodiscard]] int get_event_cycle(gb_event event) const;
         [[nodiscard]] int get_next_event_cycle() const;
-        gb_event          poll_event();
+        gb_event          poll_next_event();
         void              set_back_clock(int clock_cycle_offset);
 
     private:
@@ -110,6 +104,7 @@ namespace age
         }
 
         const gb_clock& m_clock;
+        gb_sorted_events m_events;
     };
 
 } // namespace age

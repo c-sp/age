@@ -71,7 +71,7 @@ namespace age::tester
         {
             for (unsigned i = 0; i < num_threads; ++i)
             {
-                m_threads.emplace_back(std::thread([this]() {
+                m_threads.emplace_back([this]() {
                     while (true)
                     {
                         task_t task = nullptr;
@@ -118,7 +118,7 @@ namespace age::tester
                             m_cv.notify_all();
                         }
                     }
-                }));
+                });
             }
         }
 

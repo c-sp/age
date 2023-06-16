@@ -214,7 +214,7 @@ bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
     {
         if ((m_oam_dma_src_address >= 0xC000) && (m_oam_dma_src_address < 0xFE00))
         {
-            m_override_next_oam_byte = static_cast<int16_t>(m_next_oam_byte & value);
+            m_override_next_oam_byte = m_next_oam_byte & value;
             msg << "\n    * DMG: replacing " << log_hex8(value)
                 << " with " << log_hex8(m_override_next_oam_byte)
                 << " (mixing OAM data when writing to work ram)";
@@ -314,7 +314,7 @@ void age::gb_oam_dma::continue_dma()
         //! \todo apparently oam dma is not blocked by mode 2 and 3, is there any test rom for this?
         //        (see e.g. Zelda on DMG: sprites bugs when blocking oam writes here)
         m_lcd.write_oam_dma(i, byte);
-        m_override_next_oam_byte = -1;
+        m_override_next_oam_byte = uint16_t_max;
 
         auto msg = log();
         msg << "write OAM [" << log_hex16(0xFE00 + i) << "] = " << log_hex8(byte);
@@ -348,7 +348,7 @@ void age::gb_oam_dma::continue_dma()
 
 age::uint8_t age::gb_oam_dma::read_dma_byte(int offset) const
 {
-    if (m_override_next_oam_byte >= 0)
+    if (m_override_next_oam_byte < uint16_t_max)
     {
         return m_override_next_oam_byte;
     }

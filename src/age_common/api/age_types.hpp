@@ -22,24 +22,26 @@
 //!
 
 #include <array>
-#include <cstdint> // std::uint8_t etc.
+#include <cstdint>     // std::uint8_t etc.
 #include <limits>
 #include <type_traits> // std::underlying_type
 #include <vector>
 
 
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define AGE_DISABLE_COPY(Class)   \
-private:                          \
-    Class(const Class&) = delete; \
+// NOLINTBEGIN(bugprone-macro-parentheses)
+#define AGE_DISABLE_COPY(Class)              \
+private:                                     \
+    Class(const Class&)            = delete; \
     Class& operator=(const Class&) = delete
+// NOLINTEND(bugprone-macro-parentheses)
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define AGE_DISABLE_MOVE(Class)    \
-private:                           \
-    Class(const Class&&) = delete; \
+// NOLINTBEGIN(bugprone-macro-parentheses)
+#define AGE_DISABLE_MOVE(Class)               \
+private:                                      \
+    Class(const Class&&)            = delete; \
     Class& operator=(const Class&&) = delete
+// NOLINTEND(bugprone-macro-parentheses)
 
 
 
@@ -48,7 +50,6 @@ private:                           \
 //
 // See also:
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables#comment51105057_1486931
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define AGE_UNUSED(arg) ((void) &(arg))
 
 
@@ -90,10 +91,11 @@ namespace age
 
     // constant expressions
 
-    constexpr int     int_max     = std::numeric_limits<int>::max();
-    constexpr int16_t int16_t_max = std::numeric_limits<int16_t>::max();
-    constexpr int16_t int16_t_min = std::numeric_limits<int16_t>::min();
-    constexpr int32_t int32_t_max = std::numeric_limits<int32_t>::max();
+    constexpr int      int_max      = std::numeric_limits<int>::max();
+    constexpr int16_t  int16_t_max  = std::numeric_limits<int16_t>::max();
+    constexpr uint16_t uint16_t_max = std::numeric_limits<uint16_t>::max();
+    constexpr int16_t  int16_t_min  = std::numeric_limits<int16_t>::min();
+    constexpr int32_t  int32_t_max  = std::numeric_limits<int32_t>::max();
 
 
 
@@ -103,7 +105,7 @@ namespace age
     //! Convert the specified enum value to the associated value of the underlying type.
     //! See also: https://stackoverflow.com/a/14589519
     //!
-    //! Can be replaced by std::to_underlying with C++23.
+    //! \todo Can be replaced by std::to_underlying with C++23.
     //!
     template<typename Enum>
     constexpr auto to_underlying(Enum e) -> typename std::underlying_type<Enum>::type

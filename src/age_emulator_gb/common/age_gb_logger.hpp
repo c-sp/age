@@ -94,12 +94,17 @@ namespace age
     }
 
     template<typename Value>
-    struct log_dec
+    struct log_dec_t
     {
-        explicit log_dec(Value value) : m_value(value) {}
+        explicit log_dec_t(Value value) : m_value(value) {}
         Value m_value;
     };
 
+    template<typename Value>
+    log_dec_t<Value> log_dec(Value value)
+    {
+        return log_dec_t<Value>(value);
+    }
 
 
     class gb_log_message_stream
@@ -133,7 +138,7 @@ namespace age
         gb_log_message_stream& operator<<(const log_in_clks<Cycles, Clock>& value)
         {
             *m_stream << static_cast<int64_t>(value.m_clock_cycles) << " clock cycles"
-                      << " (on clock cycle " << static_cast<int64_t>(value.m_current_clock_cycle + value.m_clock_cycles) << ")";
+                      << " (on clock cycle " << (static_cast<int64_t>(value.m_current_clock_cycle) + value.m_clock_cycles) << ")";
             return *this;
         }
 
@@ -156,7 +161,7 @@ namespace age
         }
 
         template<typename Value>
-        gb_log_message_stream& operator<<(const log_dec<Value>& value)
+        gb_log_message_stream& operator<<(const log_dec_t<Value>& value)
         {
             *m_stream << static_cast<int64_t>(value.m_value);
             return *this;
@@ -180,6 +185,13 @@ namespace age
 
         template<typename Value>
         gb_log_message_stream& operator<<(const Value& value)
+        {
+            *m_stream << value;
+            return *this;
+        }
+
+        template<typename Value>
+        gb_log_message_stream& operator<<(const Value* value)
         {
             *m_stream << value;
             return *this;
@@ -236,11 +248,11 @@ namespace age
         explicit gb_logger(gb_log_categories log_categories = {}) { AGE_UNUSED(log_categories); }
 
         // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_offset)
+        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_clock)
         {
             AGE_UNUSED(category);
             AGE_UNUSED(clock);
-            AGE_UNUSED(div_offset);
+            AGE_UNUSED(div_clock);
             return {};
         }
 
