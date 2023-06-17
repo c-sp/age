@@ -24,6 +24,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <regex>
 
 
@@ -105,7 +106,9 @@ namespace
     path_matcher new_matcher(const std::string& file_or_regex)
     {
         auto possible_file = std::filesystem::current_path() / file_or_regex;
-        return std::filesystem::is_regular_file(possible_file) ? new_list_matcher(possible_file) : new_regex_matcher(file_or_regex);
+        return std::filesystem::is_regular_file(possible_file)
+                   ? new_list_matcher(possible_file)
+                   : new_regex_matcher(file_or_regex);
     }
 
 
@@ -113,19 +116,27 @@ namespace
     void traverse_directory(const std::filesystem::path&                             path,
                             const std::function<void(const std::filesystem::path&)>& file_callback)
     {
-        if (!std::filesystem::is_directory(path))
+        std::queue<const std::filesystem::path> directories;
+        if (std::filesystem::is_directory(path))
         {
-            return;
+            directories.push(path);
         }
-        for (const auto& entry : std::filesystem::directory_iterator(path))
+
+        while (!directories.empty())
         {
-            if (entry.is_directory())
+            auto dir = directories.front();
+            directories.pop();
+
+            for (const auto& entry : std::filesystem::directory_iterator(dir))
             {
-                traverse_directory(entry.path(), file_callback);
-            }
-            else if (entry.is_regular_file())
-            {
-                file_callback(entry.path());
+                if (entry.is_directory())
+                {
+                    directories.push(entry.path());
+                }
+                else if (entry.is_regular_file())
+                {
+                    file_callback(entry.path());
+                }
             }
         }
     }
