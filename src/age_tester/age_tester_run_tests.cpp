@@ -116,7 +116,7 @@ namespace
     void traverse_directory(const std::filesystem::path&                             path,
                             const std::function<void(const std::filesystem::path&)>& file_callback)
     {
-        std::queue<const std::filesystem::path> directories;
+        std::queue<std::filesystem::path> directories;
         if (std::filesystem::is_directory(path))
         {
             directories.push(path);
