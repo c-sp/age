@@ -23,10 +23,10 @@
 
 #include "../palettes/age_gb_lcd_palettes.hpp"
 
-#include <age_debug.hpp>
 #include <age_types.hpp>
 
 #include <algorithm> // std::sort
+#include <cassert>
 
 
 
@@ -85,13 +85,13 @@ namespace age
 
         [[nodiscard]] uint8_t read_oam(int offset) const
         {
-            AGE_ASSERT((offset >= 0) && (offset < 160))
+            assert((offset >= 0) && (offset < 160));
             return m_oam[offset];
         }
 
         void write_oam(int offset, uint8_t value)
         {
-            AGE_ASSERT((offset >= 0) && (offset < 160))
+            assert((offset >= 0) && (offset < 160));
             m_oam[offset] = value;
         }
 
@@ -109,7 +109,7 @@ namespace age
 
         void set_sprite_size(uint8_t sprite_size)
         {
-            AGE_ASSERT((sprite_size == 8) || (sprite_size == 16))
+            assert((sprite_size == 8) || (sprite_size == 16));
             m_sprite_size  = sprite_size;
             m_tile_nr_mask = (sprite_size == 16) ? 0xFE : 0xFF;
         }

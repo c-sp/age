@@ -21,9 +21,6 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-#include <emulator/age_gb_types.hpp>
-
 #include "common/age_gb_clock.hpp"
 #include "common/age_gb_device.hpp"
 #include "common/age_gb_events.hpp"
@@ -38,6 +35,9 @@
 #include "age_gb_serial.hpp"
 #include "age_gb_timer.hpp"
 #include "memory/age_gb_memory.hpp"
+
+#include <age_types.hpp>
+#include <emulator/age_gb_types.hpp>
 
 
 

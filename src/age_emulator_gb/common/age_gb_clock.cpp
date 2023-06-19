@@ -25,10 +25,10 @@ void age::gb_set_back_clock_cycle(int& clock_cycle, int cycle_offset)
         return;
     }
 
-    AGE_ASSERT(cycle_offset >= gb_clock_cycles_per_second)
-    AGE_ASSERT((cycle_offset % gb_clock_cycles_per_second) == 0)
+    assert(cycle_offset >= gb_clock_cycles_per_second);
+    assert((cycle_offset % gb_clock_cycles_per_second) == 0);
 
-    AGE_ASSERT(clock_cycle >= cycle_offset)
+    assert(clock_cycle >= cycle_offset);
     clock_cycle -= cycle_offset;
 }
 
@@ -64,7 +64,7 @@ age::gb_clock::gb_clock(gb_logger& logger, const gb_device& device)
         m_clock_cycle -= 52;
     }
     log() << "clock initialized to " << log_hex(m_clock_cycle);
-    AGE_ASSERT((m_clock_cycle % 4) == 0)
+    assert((m_clock_cycle % 4) == 0);
 }
 
 
@@ -76,8 +76,8 @@ void age::gb_clock::tick_machine_cycle()
 
 void age::gb_clock::tick_clock_cycles(int clock_cycles)
 {
-    AGE_ASSERT(clock_cycles >= 0)
-    AGE_ASSERT(!(clock_cycles & 1))
+    assert(clock_cycles >= 0);
+    assert(!(clock_cycles & 1));
     m_clock_cycle += clock_cycles;
 }
 
@@ -127,7 +127,7 @@ age::gb_div_reset_details age::gb_clock::get_div_reset_details(int lowest_counte
 {
     int lower_bits  = lowest_counter_bit - 1;
     int trigger_bit = lowest_counter_bit / 2;
-    AGE_ASSERT((lowest_counter_bit & lower_bits) == 0) // only one bit set
+    assert((lowest_counter_bit & lower_bits) == 0); // only one bit set
 
     // calculate old and new (current) div-aligned clock
     int old_clock = m_clock_cycle + m_old_div_offset;

@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_sound.hpp"
 
 #include <algorithm>
+#include <cassert>
 
 
 
@@ -52,7 +51,7 @@ namespace
 
 age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
 {
-    AGE_ASSERT(offset < m_c3_wave_ram.size())
+    assert(offset < m_c3_wave_ram.size());
 
     // if channel 3 is currently active, we can only read the last accessed
     // wave sample (DMG: only if within clock range)
@@ -73,7 +72,7 @@ age::uint8_t age::gb_sound::read_wave_ram(unsigned offset)
 
 void age::gb_sound::write_wave_ram(unsigned offset, uint8_t value)
 {
-    AGE_ASSERT(offset < m_c3_wave_ram.size())
+    assert(offset < m_c3_wave_ram.size());
 
     // if channel 3 is currently active, we can only write the last accessed
     // wave sample (DMG: only if within clock range)
@@ -105,7 +104,7 @@ void age::gb_sound::update_state()
     }
 
     // apu on
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
     while (current_clk >= m_clk_next_apu_event)
     {
         generate_samples(m_clk_next_apu_event);
@@ -114,7 +113,7 @@ void age::gb_sound::update_state()
     }
 
     generate_samples(current_clk);
-    AGE_ASSERT(m_clk_current_state < m_clk_next_apu_event)
+    assert(m_clk_current_state < m_clk_next_apu_event);
 }
 
 
@@ -127,15 +126,15 @@ void age::gb_sound::after_div_reset(bool during_stop)
         return;
     }
     // everything must be up-to-date
-    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
+    assert((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
-    AGE_ASSERT(m_clk_current_state < m_clk_next_apu_event)
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
+    assert(m_clk_current_state < m_clk_next_apu_event);
 
     auto reset_details = m_clock.get_div_reset_details(gb_apu_event_clock_cycles);
-    AGE_ASSERT((m_clk_next_apu_event == m_clk_current_state + reset_details.m_old_next_increment)
-               || (m_clk_next_apu_event - 2 == m_clk_current_state + reset_details.m_old_next_increment))
+    assert((m_clk_next_apu_event == m_clk_current_state + reset_details.m_old_next_increment)
+               || (m_clk_next_apu_event - 2 == m_clk_current_state + reset_details.m_old_next_increment));
 
     if (!during_stop)
     {
@@ -152,7 +151,7 @@ void age::gb_sound::after_div_reset(bool during_stop)
     if (during_stop && (reset_details.m_clk_adjust == -gb_apu_event_clock_cycles / 2))
     {
         msg << "\n    * sound STOP glitch: immediate frame sequencer step by DIV reset not on this machine cycle";
-        AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2)
+        assert(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
         reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
     }
 
@@ -166,7 +165,7 @@ void age::gb_sound::after_div_reset(bool during_stop)
         apu_event();
     }
     m_clk_next_apu_event = m_clk_current_state + reset_details.m_new_next_increment;
-    AGE_ASSERT(m_clk_current_state < m_clk_next_apu_event)
+    assert(m_clk_current_state < m_clk_next_apu_event);
 }
 
 
@@ -178,10 +177,10 @@ void age::gb_sound::after_speed_change()
         log() << "sound off at speed change";
         return;
     }
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
     // everything must be up-to-date
-    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
+    assert((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
     auto msg = log();
     msg << "sound at speed change:";
@@ -236,7 +235,7 @@ void age::gb_sound::set_back_clock(int clock_cycle_offset)
     gb_set_back_clock_cycle(m_clk_current_state, clock_cycle_offset);
     gb_set_back_clock_cycle(m_clk_next_apu_event, clock_cycle_offset);
 
-    AGE_ASSERT((m_clk_next_apu_event == gb_no_clock_cycle) || (m_clk_next_apu_event > m_clk_current_state))
+    assert((m_clk_next_apu_event == gb_no_clock_cycle) || (m_clk_next_apu_event > m_clk_current_state));
 }
 
 
@@ -251,11 +250,11 @@ void age::gb_sound::set_back_clock(int clock_cycle_offset)
 
 bool age::gb_sound::should_inc_period() const
 {
-    AGE_ASSERT(m_master_on)
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
+    assert(m_master_on);
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
     // everything must be up-to-date
-    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
+    assert((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
     // the initial volume envelope period is increased by one,
     // if the next frame sequencer step 7 is near
@@ -271,22 +270,22 @@ bool age::gb_sound::should_inc_period() const
 
 bool age::gb_sound::should_dec_length_counter() const
 {
-    AGE_ASSERT(m_master_on)
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
+    assert(m_master_on);
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
     // everything must be up-to-date
-    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
+    assert((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
     return (m_next_frame_sequencer_step & 1) != 0;
 }
 
 bool age::gb_sound::should_align_frequency_timer() const
 {
-    AGE_ASSERT(m_master_on)
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
+    assert(m_master_on);
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
     // everything must be up-to-date
-    AGE_ASSERT((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
-               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0))
+    assert((m_clock.get_clock_cycle() - m_clk_current_state <= 1)
+               && (m_clock.get_clock_cycle() - m_clk_current_state >= 0));
 
     //! \todo this needs more test roms (find them or write them)
     //
@@ -357,17 +356,17 @@ bool age::gb_sound::should_align_frequency_timer() const
 
 int age::gb_sound::apu_event()
 {
-    AGE_ASSERT(m_master_on)
-    AGE_ASSERT(m_clk_next_apu_event != gb_no_clock_cycle)
-    AGE_ASSERT((m_next_frame_sequencer_step >= 0) && (m_next_frame_sequencer_step <= 7))
+    assert(m_master_on);
+    assert(m_clk_next_apu_event != gb_no_clock_cycle);
+    assert((m_next_frame_sequencer_step >= 0) && (m_next_frame_sequencer_step <= 7));
 
     // skip this frame sequencer step
     // (triggered by switching on the APU at specific cycles)
     if (m_skip_frame_sequencer_step)
     {
         log() << "skipping frame sequencer step " << log_dec(m_next_frame_sequencer_step);
-        AGE_ASSERT(!m_delayed_disable_c1)
-        AGE_ASSERT(m_next_frame_sequencer_step == 7)
+        assert(!m_delayed_disable_c1);
+        assert(m_next_frame_sequencer_step == 7);
         m_next_frame_sequencer_step = 0;
         m_skip_frame_sequencer_step = false;
         return gb_apu_event_clock_cycles;
@@ -377,7 +376,7 @@ int age::gb_sound::apu_event()
     if (m_delayed_disable_c1)
     {
         log() << "delayed deactivation of channel 1 triggered by frequency sweep";
-        AGE_ASSERT((m_next_frame_sequencer_step == 7) || (m_next_frame_sequencer_step == 3))
+        assert((m_next_frame_sequencer_step == 7) || (m_next_frame_sequencer_step == 3));
         m_c1.deactivate();
         m_delayed_disable_c1 = false;
         return gb_apu_event_clock_cycles - gb_frequency_sweep_check_delay;
@@ -425,7 +424,7 @@ int age::gb_sound::apu_event()
 
 void age::gb_sound::generate_samples(int for_clk)
 {
-    AGE_ASSERT(for_clk >= m_clk_current_state)
+    assert(for_clk >= m_clk_current_state);
 
     int samples_to_generate = (for_clk - m_clk_current_state) / 2;
     if (samples_to_generate <= 0)
@@ -435,10 +434,10 @@ void age::gb_sound::generate_samples(int for_clk)
     m_clk_current_state += samples_to_generate * 2;
 
     // allocate silence
-    AGE_ASSERT(m_samples.size() <= int_max)
+    assert(m_samples.size() <= int_max);
     int sample_index = static_cast<int>(m_samples.size());
 
-    AGE_ASSERT(int_max >= sample_index + samples_to_generate)
+    assert(int_max >= sample_index + samples_to_generate);
     m_samples.resize(static_cast<unsigned>(sample_index + samples_to_generate));
 
     // fill the silence, if audio is enabled
@@ -510,7 +509,7 @@ age::gb_sound::gb_sound(const gb_device& device,
     // and that each waveform step takes 126 samples
     // (see test rom analysis)
     int duty_pos5_clk = m_device.cgb_mode() ? 9500 : 44508;
-    AGE_ASSERT(m_clk_current_state < duty_pos5_clk)
+    assert(m_clk_current_state < duty_pos5_clk);
 
     int duty_clks_diff   = duty_pos5_clk - m_clk_current_state;
     int duty_clks_offset = duty_clks_diff % 252;

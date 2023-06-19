@@ -16,7 +16,7 @@
 
 #include "age_gb_lcd_palettes.hpp"
 
-#include <age_debug.hpp>
+#include <cassert>
 
 
 
@@ -69,19 +69,19 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device& device,
 
 const age::pixel* age::gb_lcd_palettes::get_palette(unsigned palette_index) const
 {
-    AGE_ASSERT(palette_index < gb_palette_count)
+    assert(palette_index < gb_palette_count);
     return &m_colors[palette_index << 2];
 }
 
 age::pixel age::gb_lcd_palettes::get_color(unsigned color_index) const
 {
-    AGE_ASSERT(color_index < gb_total_color_count)
+    assert(color_index < gb_total_color_count);
     return m_colors[color_index];
 }
 
 age::pixel age::gb_lcd_palettes::get_color_bgp_glitch(unsigned int color_index) const
 {
-    AGE_ASSERT(color_index < 4)
+    assert(color_index < 4);
     uint8_t glitched_bgp = m_bgp | m_previous_bgp;
     glitched_bgp >>= color_index * 2;
     return m_bgp_colors[glitched_bgp & 0x03];
@@ -109,25 +109,25 @@ age::uint8_t age::gb_lcd_palettes::read_obp1() const
 
 age::uint8_t age::gb_lcd_palettes::read_bcps() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     return m_bcps;
 }
 
 age::uint8_t age::gb_lcd_palettes::read_bcpd() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     return m_cpd[m_bcps & 0x3F];
 }
 
 age::uint8_t age::gb_lcd_palettes::read_ocps() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     return m_ocps;
 }
 
 age::uint8_t age::gb_lcd_palettes::read_ocpd() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     return m_cpd[0x40 + (m_ocps & 0x3F)];
 }
 
@@ -154,13 +154,13 @@ void age::gb_lcd_palettes::write_obp1(uint8_t value)
 
 void age::gb_lcd_palettes::write_bcps(uint8_t value)
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     m_bcps = value | 0x40;
 }
 
 void age::gb_lcd_palettes::write_bcpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
 
     unsigned cpd_index = m_bcps & 0x3F;
     m_cpd[cpd_index]   = value;
@@ -171,13 +171,13 @@ void age::gb_lcd_palettes::write_bcpd(uint8_t value)
 
 void age::gb_lcd_palettes::write_ocps(uint8_t value)
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     m_ocps = value | 0x40;
 }
 
 void age::gb_lcd_palettes::write_ocpd(uint8_t value)
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
 
     unsigned cpd_index = 0x40 + (m_ocps & 0x3F);
     m_cpd[cpd_index]   = value;
@@ -194,7 +194,7 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
     {
         return;
     }
-    AGE_ASSERT((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1))
+    assert((palette_index == gb_palette_bgp) || (palette_index == gb_palette_obp0) || (palette_index == gb_palette_obp1));
     unsigned color_index = palette_index << 2;
 
     const auto& color_src = [&palette_index, this]() {
@@ -222,8 +222,8 @@ void age::gb_lcd_palettes::update_dmg_palette(unsigned palette_index, uint8_t va
 
 void age::gb_lcd_palettes::update_cgb_color(unsigned color_index)
 {
-    AGE_ASSERT(m_device.cgb_mode())
-    AGE_ASSERT(color_index < gb_total_color_count)
+    assert(m_device.cgb_mode());
+    assert(color_index < gb_total_color_count);
 
     unsigned cpd_index = color_index << 1;
     auto low_byte  = m_cpd[cpd_index];

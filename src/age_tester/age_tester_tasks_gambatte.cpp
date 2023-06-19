@@ -17,6 +17,7 @@
 #include "age_tester_tasks.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <optional>
 
 
@@ -193,7 +194,7 @@ namespace
 
     void run_test(age::gb_emulator& emulator)
     {
-        AGE_ASSERT(emulator.get_pcm_sampling_rate() == emulator.get_cycles_per_second() / 2)
+        assert(emulator.get_pcm_sampling_rate() == emulator.get_cycles_per_second() / 2);
         for (int i = test_frames; i >= 0; --i)
         {
             emulator.emulate(samples_per_frame * 2);
@@ -286,27 +287,6 @@ namespace
 
                         if (found_background != expect_background)
                         {
-                            // std::string exp;
-                            // for (size_t i = 0; i < expected_result.size(); ++i)
-                            // {
-                            //     exp += '0' + expected_result[i];
-                            // }
-                            // AGE_LOG("expected " << exp)
-                            // AGE_LOG("expected bg " << expect_background
-                            //                        << ", found bg " << found_background
-                            //                        << ", line " << line
-                            //                        << ", tile_index " << tile_index
-                            //                        << ", tile_pixel " << tile_pixel)
-                            // for (int l = 0; l < 8; ++l)
-                            // {
-                            //     std::string log;
-                            //     for (int x = 0; x < screen_width; ++x)
-                            //     {
-                            //         bool bg = screen[l * screen_width + x] == background;
-                            //         log += bg ? '.' : '#';
-                            //     }
-                            //     AGE_LOG(log)
-                            // }
                             return false;
                         }
                     }
@@ -350,7 +330,7 @@ namespace
             // evaluate test result by checking the first X samples of the last emulation iteration
             // (similar to gambatte/test/testrunner.cpp)
             const age::pcm_vector& audio_buffer = emulator.get_audio_buffer();
-            AGE_ASSERT(audio_buffer.size() >= samples_per_frame)
+            assert(audio_buffer.size() >= samples_per_frame);
 
             const age::pcm_frame first_sample = emulator.get_audio_buffer()[0];
 

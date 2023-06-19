@@ -16,9 +16,8 @@
 
 #include "age_gb_lcd_line_renderer.hpp"
 
-#include <age_debug.hpp>
-
 #include <algorithm> // std::fill
+#include <cassert>
 
 
 
@@ -112,7 +111,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
                       [this, &px0, &line](const gb_sprite& sprite) {
                           if (sprite.m_x && (sprite.m_x < gb_screen_width + 8))
                           {
-                              AGE_ASSERT((px0 + sprite.m_x) < gb_screen_width + 24)
+                              assert((px0 + sprite.m_x) < gb_screen_width + 24);
                               render_sprite_tile(
                                   &m_line[px0 + sprite.m_x - 8],
                                   line - (sprite.m_y - 16),
@@ -141,8 +140,8 @@ age::pixel* age::gb_lcd_line_renderer::render_bg_tile(pixel* dst,
                                                       int    tile_line,
                                                       int    tile_vram_ofs)
 {
-    AGE_ASSERT((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < 0x2000))
-    AGE_ASSERT((tile_line >= 0) && (tile_line < 8))
+    assert((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < 0x2000));
+    assert((tile_line >= 0) && (tile_line < 8));
 
     int tile_nr = m_video_ram[tile_vram_ofs] ^ m_common.m_tile_xor; // bank 0
 
@@ -203,7 +202,7 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
                                                    int              tile_line,
                                                    const gb_sprite& sprite)
 {
-    AGE_ASSERT((tile_line >= 0) && (tile_line < 16))
+    assert((tile_line >= 0) && (tile_line < 16));
 
     // y-flip
     uint8_t oam_attr = sprite.m_attributes;

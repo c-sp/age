@@ -20,17 +20,10 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 
-#include <age_debug.hpp>
-
 #include "age_ui_qt_video.hpp"
 
+#include <cassert>
 #include <utility> // std::move
-
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
 
 
 
@@ -107,7 +100,6 @@ namespace
 
 void age::qt_init_shader_program(QOpenGLShaderProgram& program, const QString& vertex_shader_file, const QString& fragment_shader_file)
 {
-    LOG("creating shader program from " << vertex_shader_file << " (vert) and " << fragment_shader_file << " (frag)")
 
     // failures are logged by Qt
     program.addShaderFromSourceCode(QOpenGLShader::Vertex, load_shader(vertex_shader_file));
@@ -137,11 +129,6 @@ age::qt_video_output::qt_video_output(QWidget* parent)
 {
     // Which OpenGL Version is being used?
     // https://stackoverflow.com/questions/41021681/qt-how-to-detect-which-version-of-opengl-is-being-used
-    LOG("OpenGL Module Type: " << QOpenGLContext::openGLModuleType()
-                               << " (LibGL " << QOpenGLContext::LibGL << ", LibGLES " << QOpenGLContext::LibGLES << ")")
-
-    LOG("format version: " << format().majorVersion() << "." << format().minorVersion())
-    LOG("format options: " << format().options())
 
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &qt_video_output::update_fps);
@@ -158,7 +145,6 @@ age::qt_video_output::~qt_video_output()
     m_post_processor = nullptr;
 
     doneCurrent();
-    LOG("")
 }
 
 
@@ -171,7 +157,6 @@ age::qt_video_output::~qt_video_output()
 
 void age::qt_video_output::set_emulator_screen_size(int16_t w, int16_t h)
 {
-    LOG(w << ", " << h)
     m_emulator_screen = QSize(w, h);
 
     run_if_initialized([this] {
@@ -189,7 +174,6 @@ void age::qt_video_output::new_frame(QSharedPointer<const age::pixel_vector> new
 
 void age::qt_video_output::set_blend_frames(int num_frames_to_blend)
 {
-    LOG(num_frames_to_blend)
     m_num_frames_to_blend = num_frames_to_blend;
 
     update(); // trigger paintGL()
@@ -197,7 +181,6 @@ void age::qt_video_output::set_blend_frames(int num_frames_to_blend)
 
 void age::qt_video_output::set_post_processing_filter(qt_filter_list filter_list)
 {
-    LOG("#filters: " << filter_list.size())
     m_filter_list = std::move(filter_list);
 
     run_if_initialized([this] {
@@ -207,7 +190,6 @@ void age::qt_video_output::set_post_processing_filter(qt_filter_list filter_list
 
 void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
 {
-    LOG(bilinear_filter)
     m_bilinear_filter = bilinear_filter;
 
     run_if_initialized([this] {
@@ -226,10 +208,6 @@ void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
 void age::qt_video_output::initializeGL()
 {
     initializeOpenGLFunctions();
-
-    LOG("format version: " << format().majorVersion() << "." << format().minorVersion())
-    LOG("GL_VERSION: " << glGetString(GL_VERSION))
-    LOG("GL_SHADING_LANGUAGE_VERSION: " << glGetString(GL_SHADING_LANGUAGE_VERSION))
 
     // OpenGL configuration
     glClearColor(0, 0, 0, 1);
@@ -251,7 +229,6 @@ void age::qt_video_output::initializeGL()
 
 void age::qt_video_output::resizeGL(int width, int height)
 {
-    LOG(width << " x " << height)
     m_renderer->update_matrix(m_emulator_screen, QSize(width, height));
 }
 
@@ -307,7 +284,6 @@ void age::qt_video_output::new_frame_slot(QSharedPointer<const pixel_vector> new
     else
     {
         ++m_frames_discarded;
-        LOG(m_frames_discarded << " frame(s) discarded (total)")
     }
     m_new_frame = new_frame;
 }
@@ -315,7 +291,7 @@ void age::qt_video_output::new_frame_slot(QSharedPointer<const pixel_vector> new
 void age::qt_video_output::process_new_frame()
 {
     run_if_initialized([this] {
-        AGE_ASSERT(nullptr != m_new_frame)
+        assert(nullptr != m_new_frame);
         m_post_processor->add_new_frame(*m_new_frame);
         ++m_frame_counter;
     });

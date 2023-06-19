@@ -16,11 +16,13 @@
 
 #include "age_gb_memory.hpp"
 
+#include <cassert>
+
 
 
 void age::gb_memory::mbc5_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0x8000)
+    assert(address < 0x8000);
 
     auto& mbc_data = memory.get_mbc_data<gb_mbc5_data>();
 
@@ -55,7 +57,7 @@ void age::gb_memory::mbc5_write(gb_memory& memory, uint16_t address, uint8_t val
 
 void age::gb_memory::mbc5_rumble_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0x8000)
+    assert(address < 0x8000);
 
     // clear rumble motor bit
     if ((address & 0x6000) == 0x4000)

@@ -16,6 +16,8 @@
 
 #include "age_gb_lcd.hpp"
 
+#include <cassert>
+
 
 
 age::gb_lcd::gb_lcd(const gb_device&      device,
@@ -149,14 +151,14 @@ void age::gb_lcd::update_state(int line_clock_offset)
     if (new_frame)
     {
         new_frame = update_frame(line_clock_offset);
-        AGE_ASSERT(!new_frame)
+        assert(!new_frame);
         AGE_UNUSED(new_frame); // release build: unused
     }
 }
 
 bool age::gb_lcd::update_frame(int line_clock_offset)
 {
-    AGE_ASSERT(m_line.lcd_is_on())
+    assert(m_line.lcd_is_on());
 
     // continue rendering the current unfinished frame
     auto line           = m_line.current_line();

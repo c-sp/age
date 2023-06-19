@@ -16,11 +16,13 @@
 
 #include "age_gb_memory.hpp"
 
+#include <cassert>
+
 
 
 void age::gb_memory::mbc3_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0x8000)
+    assert(address < 0x8000);
     switch (address & 0x6000)
     {
         case 0x0000:

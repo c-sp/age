@@ -17,17 +17,9 @@
 #include <QGroupBox>
 #include <QVBoxLayout>
 
-#include <age_debug.hpp>
-
 #include "age_ui_qt_settings.hpp"
 
 #include <utility> // std::move
-
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
 
 constexpr const char* qt_settings_misc_pause_emulator        = "miscellaneous/pause_emulator";
 constexpr const char* qt_settings_misc_synchronize_emulator  = "miscellaneous/synchronize_emulator";
@@ -152,8 +144,6 @@ void age::qt_settings_miscellaneous::set_pause_emulator(bool pause_emulator)
 
 void age::qt_settings_miscellaneous::emit_settings_signals()
 {
-    LOG("emitting settings signals")
-
     emit pause_emulator_changed(m_pause_emulator->isChecked());
     emit synchronize_emulator_changed(m_synchronize_emulator->isChecked());
     emit show_menu_bar_changed(m_show_menu_bar->isChecked());
@@ -177,7 +167,6 @@ void age::qt_settings_miscellaneous::on_pause_emulator_change(int state)
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_misc_pause_emulator, checked);
 
-    LOG(checked)
     emit pause_emulator_changed(checked);
 }
 
@@ -186,7 +175,6 @@ void age::qt_settings_miscellaneous::on_synchronize_emulator_change(int state)
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_misc_synchronize_emulator, checked);
 
-    LOG(checked)
     emit synchronize_emulator_changed(checked);
 }
 
@@ -195,7 +183,6 @@ void age::qt_settings_miscellaneous::on_show_menu_bar_change(int state)
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_misc_menu_bar, checked);
 
-    LOG(checked)
     emit show_menu_bar_changed(checked);
 }
 
@@ -204,7 +191,6 @@ void age::qt_settings_miscellaneous::on_show_status_bar_change(int state)
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_misc_status_bar, checked);
 
-    LOG(checked)
     emit show_status_bar_changed(checked);
 }
 
@@ -213,7 +199,6 @@ void age::qt_settings_miscellaneous::on_show_menu_bar_fullscreen_change(int stat
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_misc_menu_bar_fullscreen, checked);
 
-    LOG(checked)
     emit show_menu_bar_fullscreen_changed(checked);
 }
 
@@ -222,6 +207,5 @@ void age::qt_settings_miscellaneous::on_show_status_bar_fullscreen_change(int st
     bool checked = is_checked(state);
     m_user_value_store->set_value(qt_settings_misc_status_bar_fullscreen, checked);
 
-    LOG(checked)
     emit show_status_bar_fullscreen_changed(checked);
 }

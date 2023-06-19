@@ -14,21 +14,15 @@
 // limitations under the License.
 //
 
-#include <QVariant>
+#include "age_ui_qt_emulator.hpp"
 
-#include <age_debug.hpp>
 #include <age_utilities.hpp>
 #include <emulator/age_gb_emulator.hpp>
 
-#include "age_ui_qt_emulator.hpp"
-
+#include <cassert>
 #include <utility> // std::move
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
+#include <QVariant>
 
 
 
@@ -45,7 +39,6 @@ age::qt_emulator::qt_emulator(const QByteArray& rom_contents, gb_device_type dev
     uint8_vector                rom(rom_contents.begin(), rom_contents.end());
     gb_log_categories           log_categories{gb_log_category::lc_memory};
     QSharedPointer<gb_emulator> gb_emu = QSharedPointer<gb_emulator>(new gb_emulator(rom, device_type, gb_colors_hint::default_colors, log_categories));
-    LOG("emulator created")
 
     // load persistent ram, if supported by this cartridge
     if (!gb_emu->get_persistent_ram().empty())
@@ -55,12 +48,10 @@ age::qt_emulator::qt_emulator(const QByteArray& rom_contents, gb_device_type dev
                         .append("_")
                         .append(QString::number(crc32(rom), 16))
                         .append(".ram");
-        LOG("persistent ram key is " << m_ram_key)
 
         // load persistent ram from user values
         QVariant   ram_value = m_user_value_store->get_value(m_ram_key);
         QByteArray ram       = ram_value.toByteArray();
-        LOG("loaded " << ram.size() << " bytes of persistent ram")
 
         if (ram.size() > 0)
         {
@@ -80,11 +71,9 @@ age::qt_emulator::~qt_emulator()
     // save persistent ram
     if (m_ram_key.length() > 0)
     {
-        LOG("storing persistent ram with key " << m_ram_key)
-
         uint8_vector ram = m_emulator->get_persistent_ram();
 
-        AGE_ASSERT(ram.size() <= int_max)
+        assert(ram.size() <= int_max);
         int         ram_size = static_cast<int>(ram.size());
         const char* ram_data = reinterpret_cast<const char*>(ram.data());
 

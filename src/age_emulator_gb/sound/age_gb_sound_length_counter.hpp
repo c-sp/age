@@ -23,6 +23,8 @@
 
 #include <age_types.hpp>
 
+#include <cassert>
+
 
 
 namespace age
@@ -40,7 +42,7 @@ namespace age
             : BaseClass(logger),
               m_counter_mask(counter_mask)
         {
-            AGE_ASSERT(m_counter_mask >= 0x3F)
+            assert(m_counter_mask >= 0x3F);
         }
 
         void write_nrX1(uint8_t nrX1)

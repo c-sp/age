@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_joypad.hpp"
+
+#include <cassert>
 
 namespace
 {
@@ -34,8 +34,8 @@ age::uint8_t age::gb_joypad::read_p1() const
 
 void age::gb_joypad::write_p1(uint8_t byte)
 {
-    AGE_ASSERT(m_p14 <= 0x0F)
-    AGE_ASSERT(m_p15 <= 0x0F)
+    assert(m_p14 <= 0x0F);
+    assert(m_p15 <= 0x0F);
     byte |= 0x0F; // set button-bits
 
     // p14 low?

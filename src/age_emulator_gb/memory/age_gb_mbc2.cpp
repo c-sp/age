@@ -16,6 +16,8 @@
 
 #include "age_gb_memory.hpp"
 
+#include <cassert>
+
 namespace
 {
     uint16_t mbc2_ram_address(uint16_t address)
@@ -30,7 +32,7 @@ namespace
 
 void age::gb_memory::mbc2_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0x8000)
+    assert(address < 0x8000);
 
     // writes to $4000-$7FFF have no effect
     if (address >= 0x4000)

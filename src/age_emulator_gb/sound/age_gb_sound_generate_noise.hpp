@@ -21,10 +21,12 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-
 #include "age_gb_sound_channel.hpp"
 #include "age_gb_sound_generate.hpp"
+
+#include <age_types.hpp>
+
+#include <cassert>
 
 
 
@@ -81,7 +83,7 @@ namespace age
 
         void set_volume(uint8_t volume)
         {
-            AGE_ASSERT(volume <= 15)
+            assert(volume <= 15);
             m_volume = volume;
             gb_sample_generator<gb_noise_generator<ChannelId>>::set_current_pcm_amplitude(get_current_noise_value());
         }

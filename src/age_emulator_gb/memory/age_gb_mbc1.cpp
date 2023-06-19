@@ -16,11 +16,13 @@
 
 #include "age_gb_memory.hpp"
 
+#include <cassert>
+
 
 
 void age::gb_memory::mbc1_write(gb_memory& memory, uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0x8000)
+    assert(address < 0x8000);
 
     auto& mbc_data = memory.get_mbc_data<gb_mbc1_data>();
 
@@ -70,7 +72,7 @@ void age::gb_memory::mbc1_write(gb_memory& memory, uint16_t address, uint8_t val
     int ram_bank_id = mbc_data.m_mode1 ? mbc_high_bits : 0;
 
     // set rom & ram banks
-    AGE_ASSERT(mbc_data.m_multicart || ((high_rom_bank_id & 0x1F) > 0))
+    assert(mbc_data.m_multicart || ((high_rom_bank_id & 0x1F) > 0));
     memory.set_rom_banks(low_rom_bank_id, high_rom_bank_id);
     memory.set_ram_bank(ram_bank_id);
 }

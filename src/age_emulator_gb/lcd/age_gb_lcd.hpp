@@ -21,15 +21,15 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-#include <gfx/age_screen_buffer.hpp>
-
 #include "../common/age_gb_clock.hpp"
 #include "../common/age_gb_device.hpp"
 #include "../common/age_gb_events.hpp"
 #include "../common/age_gb_interrupts.hpp"
 
 #include "render/age_gb_lcd_renderer.hpp"
+
+#include <age_types.hpp>
+#include <gfx/age_screen_buffer.hpp>
 
 
 

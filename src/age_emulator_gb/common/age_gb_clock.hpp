@@ -21,11 +21,12 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
-#include <age_types.hpp>
-
 #include "age_gb_device.hpp"
 #include "age_gb_logger.hpp"
+
+#include <age_types.hpp>
+
+#include <cassert>
 
 
 
@@ -76,7 +77,7 @@ namespace age
         //! Game Boy Color speed setting.
         [[nodiscard]] int get_clock_cycle() const
         {
-            AGE_ASSERT(m_clock_cycle >= 0)
+            assert(m_clock_cycle >= 0);
             return m_clock_cycle;
         }
 

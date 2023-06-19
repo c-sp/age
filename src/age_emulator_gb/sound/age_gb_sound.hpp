@@ -21,19 +21,18 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
-#include <age_types.hpp>
-#include <pcm/age_pcm_frame.hpp>
-
-#include "../common/age_gb_clock.hpp"
-#include "../common/age_gb_device.hpp"
-
 #include "age_gb_sound_generate_duty.hpp"
 #include "age_gb_sound_generate_noise.hpp"
 #include "age_gb_sound_generate_wave.hpp"
 #include "age_gb_sound_length_counter.hpp"
 #include "age_gb_sound_sweep.hpp"
 #include "age_gb_sound_volume.hpp"
+
+#include "../common/age_gb_clock.hpp"
+#include "../common/age_gb_device.hpp"
+
+#include <age_types.hpp>
+#include <pcm/age_pcm_frame.hpp>
 
 
 

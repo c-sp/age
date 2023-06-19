@@ -21,11 +21,11 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-
 #include "../../common/age_gb_device.hpp"
 #include "../common/age_gb_lcd_common.hpp"
 #include "age_gb_lcd_sprites.hpp"
+
+#include <age_types.hpp>
 
 
 

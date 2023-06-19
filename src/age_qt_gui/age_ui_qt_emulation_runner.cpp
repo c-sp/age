@@ -14,17 +14,12 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_ui_qt_emulation_runner.hpp"
 
+#include <cassert>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
-
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
 
 namespace
 {
@@ -78,13 +73,13 @@ namespace
         while (end != std::string::npos)
         {
             auto line = entry.m_message.substr(start, end - start);
-            AGE_LOG(prefix << line)
+            std::cout << prefix << line;
 
             start = end + 1;
             end   = entry.m_message.find('\n', start);
         }
 
-        AGE_LOG(prefix << entry.m_message.substr(start, end))
+        std::cout << prefix << entry.m_message.substr(start, end);
     }
 
 } // namespace
@@ -101,9 +96,6 @@ namespace
 
 age::qt_emulation_runner::qt_emulation_runner()
 {
-    LOG("emulation interval: " << emulation_interval_millis
-                               << " milliseconds (" << emulation_interval_nanos << " nanos)")
-
     m_timer.start();
 }
 
@@ -135,19 +127,15 @@ void age::qt_emulation_runner::initialize()
     // start continuous emulation
     m_emulation_event_trigger->setTimerType(Qt::PreciseTimer); // if possible, use millisecond accuracy
     m_emulation_event_trigger->start(emulation_interval_millis);
-
-    LOG("started emulation timer with interval of " << emulation_interval_millis << " millisecond(s)")
 }
 
 
 
 void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emulator)
 {
-    LOG("")
-
-    AGE_ASSERT(new_emulator != nullptr)
+    assert(new_emulator != nullptr);
     auto emu = new_emulator->get_emulator();
-    AGE_ASSERT(emu != nullptr)
+    assert(emu != nullptr);
 
     m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
 
@@ -161,13 +149,11 @@ void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emul
 
 void age::qt_emulation_runner::set_emulator_buttons_down(int buttons)
 {
-    LOG(buttons)
     m_buttons_down |= buttons;
 }
 
 void age::qt_emulation_runner::set_emulator_buttons_up(int buttons)
 {
-    LOG(buttons)
     m_buttons_up |= buttons;
 }
 
@@ -175,8 +161,6 @@ void age::qt_emulation_runner::set_emulator_buttons_up(int buttons)
 
 void age::qt_emulation_runner::set_emulator_synchronize(bool synchronize)
 {
-    LOG(synchronize)
-
     if (m_synchronize != synchronize)
     {
         m_synchronize = synchronize;
@@ -186,8 +170,6 @@ void age::qt_emulation_runner::set_emulator_synchronize(bool synchronize)
 
 void age::qt_emulation_runner::set_emulator_paused(bool paused)
 {
-    LOG(paused)
-
     if (m_paused != paused)
     {
         m_paused = paused;
@@ -209,21 +191,17 @@ void age::qt_emulation_runner::set_emulator_paused(bool paused)
 
 void age::qt_emulation_runner::set_audio_output(QAudioDeviceInfo device, QAudioFormat format)
 {
-    LOG(device.deviceName() << " @ " << format.sampleRate() << " hz")
     m_audio_output.set_output(device, format);
     emit_audio_output_activated();
 }
 
 void age::qt_emulation_runner::set_audio_volume(int volume_percent)
 {
-    LOG(volume_percent)
     m_audio_output.set_volume(volume_percent);
 }
 
 void age::qt_emulation_runner::set_audio_latency(int latency_milliseconds)
 {
-    LOG(latency_milliseconds)
-
     // We don't change this value immediately since it triggers an expensive
     // audio device reset every time. Instead we just store the changed value,
     // essentially compacting multiple events into one.
@@ -233,7 +211,6 @@ void age::qt_emulation_runner::set_audio_latency(int latency_milliseconds)
 
 void age::qt_emulation_runner::set_audio_downsampler_quality(age::qt_downsampler_quality quality)
 {
-    LOG("")
     m_audio_output.set_downsampler_quality(quality);
     emit_audio_output_activated();
 }
@@ -307,32 +284,30 @@ void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
     // (allow evening out load spikes though, requiring a limit greater than emulation_interval_nanos).
     qint64 nanos_to_emulate = m_synchronize ? timer_nanos_elapsed : qint64_max;
     nanos_to_emulate        = qMin(nanos_to_emulate, emulation_interval_nanos * 2);
-    LOG("nanos_to_emulate " << nanos_to_emulate)
 
     // convert nanoseconds to emulation cycles
-    AGE_ASSERT(qint64_max / nanos_to_emulate > emu->get_cycles_per_second())
+    assert(qint64_max / nanos_to_emulate > emu->get_cycles_per_second());
     qint64 cycles_to_emulate = nanos_to_emulate * emu->get_cycles_per_second() / 1000000000;
 
     // save the nanoseconds that make up just a fraction of an emulation cycle
     // for the next emulate() iteration
     m_last_emulate_nanos = current_timer_nanos - (nanos_to_emulate - cycles_to_emulate * 1000000000 / emu->get_cycles_per_second());
-    AGE_ASSERT(m_last_emulate_nanos <= current_timer_nanos)
-    AGE_ASSERT(m_last_emulate_nanos >= current_timer_nanos - 1000000000 / emu->get_cycles_per_second() - 1)
+    assert(m_last_emulate_nanos <= current_timer_nanos);
+    assert(m_last_emulate_nanos >= current_timer_nanos - 1000000000 / emu->get_cycles_per_second() - 1);
 
     // Calculate the number of emulation cycles we should have reached by now.
     // Since the last call to emulator::emulate() may have emulated more cycles
     // than requested, we have to do this to keep the emulation synchronous.
     m_emulated_cycles += cycles_to_emulate;
     qint64 cycles_left = m_emulated_cycles - emu->get_emulated_cycles();
-    LOG("cycles_left " << cycles_left)
     if (cycles_left <= 0)
     {
         return;
     }
 
-    AGE_ASSERT(cycles_left <= int_max)
+    assert(cycles_left <= int_max);
     bool new_frame = emu->emulate(static_cast<int>(cycles_left));
-    AGE_ASSERT(emu->get_emulated_cycles() >= m_emulated_cycles)
+    assert(emu->get_emulated_cycles() >= m_emulated_cycles);
 
     auto log_entries = emu->get_and_clear_log_entries();
     std::for_each(begin(log_entries),
@@ -351,7 +326,7 @@ void age::qt_emulation_runner::emulate(QSharedPointer<gb_emulator> emu)
     m_audio_output.buffer_samples(emu->get_audio_buffer());
 
     // calculate emulation speed
-    AGE_ASSERT(current_timer_nanos >= m_speed_last_nanos)
+    assert(current_timer_nanos >= m_speed_last_nanos);
     qint64 speed_diff_nanos = current_timer_nanos - m_speed_last_nanos;
 
     if (speed_diff_nanos >= emulation_speed_interval_nanos)
@@ -388,6 +363,5 @@ void age::qt_emulation_runner::emit_audio_output_activated()
     int              buffer_size          = m_audio_output.get_buffer_size();
     int              downsampler_fir_size = static_cast<int>(m_audio_output.get_downsampler_fir_size());
 
-    LOG(device_info.deviceName() << ", " << format.sampleRate() << ", " << buffer_size << " bytes")
     emit audio_output_activated(device_info, format, buffer_size, downsampler_fir_size);
 }

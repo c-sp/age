@@ -21,10 +21,10 @@
 //! \file
 //!
 
-#include <array>
-
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
+
+#include <array>
 
 
 

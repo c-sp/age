@@ -14,21 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_ui_qt_audio.hpp"
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
-#if 0
-#define LOG_STREAM(x) LOG(x)
-#else
-#define LOG_STREAM(x)
-#endif
+#include <cassert>
 
 constexpr int sizeof_pcm_frame = sizeof(age::pcm_frame);
 
@@ -44,7 +32,6 @@ age::qt_audio_output::~qt_audio_output()
 {
     if (m_output != nullptr)
     {
-        LOG("closing audio output")
         m_output->stop();
     }
 }
@@ -82,7 +69,6 @@ age::size_t age::qt_audio_output::get_downsampler_fir_size() const
 void age::qt_audio_output::set_volume(int volume_percent)
 {
     m_volume = volume_percent / 100.F;
-    LOG(volume_percent << " (" << m_volume << ")")
 
     if (m_downsampler != nullptr)
     {
@@ -92,8 +78,7 @@ void age::qt_audio_output::set_volume(int volume_percent)
 
 void age::qt_audio_output::set_input_sampling_rate(int sampling_rate)
 {
-    LOG(sampling_rate)
-    AGE_ASSERT(sampling_rate > 1)
+    assert(sampling_rate > 1);
     m_input_sampling_rate = sampling_rate;
 
     create_downsampler();
@@ -101,7 +86,6 @@ void age::qt_audio_output::set_input_sampling_rate(int sampling_rate)
 
 void age::qt_audio_output::set_downsampler_quality(qt_downsampler_quality quality)
 {
-    LOG("")
     m_downsampler_quality = quality;
 
     create_downsampler();
@@ -109,7 +93,6 @@ void age::qt_audio_output::set_downsampler_quality(qt_downsampler_quality qualit
 
 void age::qt_audio_output::set_latency(int latency_milliseconds)
 {
-    LOG(latency_milliseconds)
     latency_milliseconds   = qMax(qt_audio_latency_milliseconds_min, latency_milliseconds);
     m_latency_milliseconds = qMin(qt_audio_latency_milliseconds_max, latency_milliseconds);
 
@@ -118,8 +101,7 @@ void age::qt_audio_output::set_latency(int latency_milliseconds)
 
 void age::qt_audio_output::set_output(QAudioDeviceInfo device_info, QAudioFormat format)
 {
-    LOG(device_info.deviceName() << " @ " << format.sampleRate() << "hz")
-    AGE_ASSERT(format.sampleRate() > 1)
+    assert(format.sampleRate() > 1);
 
     m_device_info = device_info;
     m_format      = format;
@@ -133,7 +115,7 @@ void age::qt_audio_output::buffer_samples(const pcm_vector& samples)
 {
     if (m_output != nullptr)
     {
-        AGE_ASSERT(m_downsampler != nullptr)
+        assert(m_downsampler != nullptr);
 
         m_downsampler->add_input_samples(samples);
         m_buffer.add_samples(m_downsampler->get_output_samples());
@@ -164,21 +146,16 @@ void age::qt_audio_output::stream_audio_data()
 {
     if (m_output != nullptr)
     {
-        LOG_STREAM("free bytes: " << m_output->bytesFree() << ", buffered bytes "
-                                  << m_buffer.get_buffered_samples() * sizeof_pcm_frame)
-
         // wait for ring buffer to fill up on buffer underflow
         if (m_output->bytesFree() == m_output->bufferSize())
         {
             if (m_buffer.get_buffered_samples() == m_buffer.get_max_buffered_samples())
             {
                 m_pause_streaming = false;
-                LOG("ring buffer is filled completely after buffer underflow, will resume streaming")
             }
             else if (!m_pause_streaming)
             {
                 m_pause_streaming = true;
-                LOG("buffer underflow detected, streaming paused until ring buffer is filled completely")
             }
         }
 
@@ -208,7 +185,6 @@ void age::qt_audio_output::reset()
     // stop the current audio output device and clean up
     if (m_output != nullptr)
     {
-        LOG("cleaning up")
         m_output->stop();
 
         m_downsampler = nullptr;
@@ -217,7 +193,6 @@ void age::qt_audio_output::reset()
     }
 
     // create a new audio output device
-    LOG("device info null: " << m_device_info.isNull() << ", format valid: " << m_format.isValid())
     if (!m_device_info.isNull() && m_format.isValid())
     {
         m_output = QSharedPointer<QAudioOutput>(new QAudioOutput(m_device_info, m_format));
@@ -225,7 +200,6 @@ void age::qt_audio_output::reset()
         // set the audio output buffer size
         int sample_rate = m_output->format().sampleRate();
 
-        LOG("current latency is " << m_latency_milliseconds)
         int buffered_samples = m_latency_milliseconds * sample_rate / 1000;
         int buffered_bytes   = buffered_samples * sizeof_pcm_frame;
 
@@ -234,7 +208,6 @@ void age::qt_audio_output::reset()
         // adjust the ring buffer
         if (buffered_samples != m_buffer.get_max_buffered_samples())
         {
-            LOG("changing ring buffer size from " << m_buffer.get_max_buffered_samples() << " to " << buffered_samples)
             m_buffer = pcm_ring_buffer(buffered_samples);
         }
         m_buffer.set_to(pcm_frame());
@@ -244,14 +217,9 @@ void age::qt_audio_output::reset()
 
         // Start the new audio output device.
         m_device = m_output->start();
-        LOG("started audio output, error code is " << m_output->error())
-        LOG("output.bufferSize     " << m_output->bufferSize() << " (expected " << buffered_bytes << ")")
-        LOG("output.category       " << m_output->category())
-        LOG("output.notifyInterval " << m_output->notifyInterval())
-        LOG("output.periodSize     " << m_output->periodSize())
 
         // create the silence buffer
-        AGE_ASSERT(buffered_samples >= 0)
+        assert(buffered_samples >= 0);
         m_silence = pcm_vector(static_cast<unsigned>(buffered_samples), pcm_frame());
     }
 }
@@ -268,13 +236,11 @@ void age::qt_audio_output::create_downsampler()
         switch (m_downsampler_quality)
         {
             case qt_downsampler_quality::low:
-                LOG("creating downsampler_linear")
                 d                      = new downsampler_linear(m_input_sampling_rate, output_sample_rate);
                 m_downsampler_fir_size = 0;
                 break;
 
             case qt_downsampler_quality::high: {
-                LOG("creating downsampler_kaiser with ripple 0.1")
                 auto* ds               = new downsampler_kaiser_low_pass(m_input_sampling_rate, output_sample_rate, 0.1);
                 m_downsampler_fir_size = ds->get_fir_size();
                 d                      = ds;
@@ -282,7 +248,6 @@ void age::qt_audio_output::create_downsampler()
             }
 
             case qt_downsampler_quality::highest: {
-                LOG("creating downsampler_kaiser with ripple 0.01")
                 auto* ds               = new downsampler_kaiser_low_pass(m_input_sampling_rate, output_sample_rate, 0.01);
                 m_downsampler_fir_size = ds->get_fir_size();
                 d                      = ds;
@@ -297,7 +262,7 @@ void age::qt_audio_output::create_downsampler()
 
 int age::qt_audio_output::write_samples()
 {
-    AGE_ASSERT(m_output != nullptr)
+    assert(m_output != nullptr);
 
     int samples_written = 0;
 
@@ -323,7 +288,7 @@ int age::qt_audio_output::write_samples()
 
             // calculate the number of samples that were written
             qint64 tmp = bytes_written / sizeof_pcm_frame;
-            AGE_ASSERT((tmp >= 0) && (tmp <= samples_to_write))
+            assert((tmp >= 0) && (tmp <= samples_to_write));
             samples_written = static_cast<int>(tmp);
 
             m_buffer.discard_buffered_samples(samples_written);

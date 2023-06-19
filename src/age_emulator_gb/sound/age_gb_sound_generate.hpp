@@ -21,12 +21,13 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
-#include <age_types.hpp>
-
 #include "age_gb_sound_channel.hpp"
 
+#include <age_types.hpp>
+#include <pcm/age_pcm_frame.hpp>
+
 #include <algorithm> // std::min
+#include <cassert>
 
 
 
@@ -39,14 +40,14 @@ namespace age
     public:
         void generate_samples(pcm_vector& buffer, int buffer_index, int samples_to_generate)
         {
-            AGE_ASSERT((buffer_index >= 0) && (samples_to_generate > 0))
-            AGE_ASSERT(int_max - samples_to_generate >= buffer_index)
-            AGE_ASSERT(m_frequency_timer_period > 0)
-            AGE_ASSERT(m_frequency_timer >= 0)
+            assert((buffer_index >= 0) && (samples_to_generate > 0));
+            assert(int_max - samples_to_generate >= buffer_index);
+            assert(m_frequency_timer_period > 0);
+            assert(m_frequency_timer >= 0);
 
             uint32_t channel_multiplier = static_cast<DerivedClass*>(this)->get_multiplier();
-            AGE_ASSERT((channel_multiplier & 0xFFFFU) <= 8)
-            AGE_ASSERT((channel_multiplier >> 16) <= 8)
+            assert((channel_multiplier & 0xFFFFU) <= 8);
+            assert((channel_multiplier >> 16) <= 8);
 
             for (int samples_remaining = samples_to_generate; samples_remaining > 0;)
             {
@@ -72,25 +73,25 @@ namespace age
                 }
             }
 
-            AGE_ASSERT(m_frequency_timer > 0)
+            assert(m_frequency_timer > 0);
         }
 
         void delay_one_sample()
         {
-            AGE_ASSERT(m_frequency_timer > 0)
+            assert(m_frequency_timer > 0);
             m_frequency_timer++;
         }
 
         uint8_t get_current_pcm_amplitude()
         {
-            AGE_ASSERT(m_current_pcm_amplitude <= 15)
+            assert(m_current_pcm_amplitude <= 15);
             return m_current_pcm_amplitude;
         }
 
     protected:
         void set_frequency_timer_period(int number_of_samples)
         {
-            AGE_ASSERT(number_of_samples > 0)
+            assert(number_of_samples > 0);
             m_frequency_timer_period = number_of_samples;
             static_cast<DerivedClass*>(this)->log() << "set frequency timer period = " << m_frequency_timer_period << " samples";
         }
@@ -114,7 +115,7 @@ namespace age
 
         void set_current_pcm_amplitude(uint8_t current_pcm_amplitude)
         {
-            AGE_ASSERT(current_pcm_amplitude <= 15)
+            assert(current_pcm_amplitude <= 15);
             m_current_pcm_amplitude = current_pcm_amplitude;
 
             // divider:
@@ -122,8 +123,8 @@ namespace age
             //   / 32  ->  4 channels, SOx volume up to 8
             int value = m_current_pcm_amplitude * int16_t_max;
             int output = value / (15 * 32);
-            AGE_ASSERT(output >= 0)
-            AGE_ASSERT(output <= int16_t_max / 32)
+            assert(output >= 0);
+            assert(output <= int16_t_max / 32);
 
             m_output_value = static_cast<int16_t>(output);
         }

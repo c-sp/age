@@ -29,13 +29,6 @@
 #include "age_ui_qt_main_window.hpp"
 #include "age_ui_qt_video.hpp"
 
-#if 0
-#include <age_debug.hpp>
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 
 
 
@@ -147,11 +140,8 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
 
 age::qt_main_window::~qt_main_window()
 {
-    LOG("terminating emulation runner")
     m_emulation_runner_thread.quit();
     m_emulation_runner_thread.wait();
-
-    LOG("destructor done")
 }
 
 
@@ -300,7 +290,6 @@ void age::qt_main_window::open_file(gb_device_type device_type)
         }
     }
 
-    LOG("open-file-dialog selected " << AGE_LOG_QUOTED(file_name.toStdString()))
     if (file_name.length() > 0)
     {
         // load file
@@ -345,7 +334,6 @@ void age::qt_main_window::open_file(gb_device_type device_type)
 
 void age::qt_main_window::misc_show_menu_bar_changed(bool show_menu_bar)
 {
-    LOG("show_menu_bar changed to " << show_menu_bar)
     if (!is_fullscreen())
     {
         menuBar()->setVisible(show_menu_bar);
@@ -354,7 +342,6 @@ void age::qt_main_window::misc_show_menu_bar_changed(bool show_menu_bar)
 
 void age::qt_main_window::misc_show_status_bar_changed(bool show_status_bar)
 {
-    LOG("show_status_bar changed to " << show_status_bar)
     if (!is_fullscreen())
     {
         statusBar()->setVisible(show_status_bar);
@@ -363,7 +350,6 @@ void age::qt_main_window::misc_show_status_bar_changed(bool show_status_bar)
 
 void age::qt_main_window::misc_show_menu_bar_fullscreen_changed(bool show_menu_bar_fullscreen)
 {
-    LOG("show_menu_bar_fullscreen changed to " << show_menu_bar_fullscreen)
     if (is_fullscreen())
     {
         menuBar()->setVisible(show_menu_bar_fullscreen);
@@ -372,7 +358,6 @@ void age::qt_main_window::misc_show_menu_bar_fullscreen_changed(bool show_menu_b
 
 void age::qt_main_window::misc_show_status_bar_fullscreen_changed(bool show_status_bar_fullscreen)
 {
-    LOG("show_status_bar_fullscreen changed to " << show_status_bar_fullscreen)
     if (is_fullscreen())
     {
         statusBar()->setVisible(show_status_bar_fullscreen);

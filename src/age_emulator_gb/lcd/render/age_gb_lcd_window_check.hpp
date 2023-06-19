@@ -23,6 +23,8 @@
 
 #include "../common/age_gb_lcd_common.hpp"
 
+#include <cassert>
+
 namespace age
 {
     class gb_window_check
@@ -41,7 +43,7 @@ namespace age
 
         void check_for_wy_match(uint8_t lcdc, int wy, int at_line)
         {
-            AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
+            assert((lcdc & gb_lcdc_enable) != 0);
             // WY matching requires the window to be enabled
             // (see Gambatte window/late_enable_afterVblank tests)
             m_frame_wy_match |= is_window_enabled(lcdc) && (wy == at_line);
@@ -49,7 +51,7 @@ namespace age
 
         void check_for_wy_match(uint8_t lcdc, int wy, gb_current_line at_line)
         {
-            AGE_ASSERT((lcdc & gb_lcdc_enable) != 0)
+            assert((lcdc & gb_lcdc_enable) != 0);
             // WY matching requires the window to be enabled
             // (see Gambatte window/late_enable_afterVblank tests)
             if (!is_window_enabled(lcdc) || m_frame_wy_match)
@@ -74,8 +76,6 @@ namespace age
                 wy_match |= (wy == (at_line.m_line + 1));
             }
 
-            // AGE_LOG("WY " << wy << " match on line " << at_line.m_line << " @" << at_line.m_line_clks
-            //               << ": " << wy_match << " (" << m_frame_wy_match << ")");
             m_frame_wy_match |= wy_match;
         }
 
@@ -92,7 +92,7 @@ namespace age
 
         [[nodiscard]] int current_window_line() const
         {
-            AGE_ASSERT(m_current_wline >= 0)
+            assert(m_current_wline >= 0);
             return m_current_wline;
         }
 

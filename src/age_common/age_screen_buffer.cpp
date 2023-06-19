@@ -14,17 +14,18 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include <gfx/age_screen_buffer.hpp>
+
+#include <cassert>
+
 
 
 age::screen_buffer::screen_buffer(int16_t screen_width, int16_t screen_height)
     : m_screen_width(screen_width),
       m_screen_height(screen_height)
 {
-    AGE_ASSERT(m_screen_width > 0)
-    AGE_ASSERT(m_screen_height > 0)
+    assert(m_screen_width > 0);
+    assert(m_screen_height > 0);
 
     auto buffer_size = static_cast<unsigned>(m_screen_width * m_screen_height);
 

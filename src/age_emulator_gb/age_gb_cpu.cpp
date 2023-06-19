@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_cpu.hpp"
+
+#include <cassert>
 
 
 
@@ -133,12 +133,12 @@ age::gb_test_info age::gb_cpu::get_test_info() const
 
 void age::gb_cpu::emulate()
 {
-    AGE_ASSERT(!(m_cpu_state & gb_cpu_state_frozen))
+    assert(!(m_cpu_state & gb_cpu_state_frozen));
 
     // EI - delayed interrupts enabling
     if (m_cpu_state & gb_cpu_state_ei)
     {
-        AGE_ASSERT(!m_interrupts.get_ime())
+        assert(!m_interrupts.get_ime());
         execute_prefetched();
 
         // enable interrupts only if this instruction was no DI
@@ -190,12 +190,12 @@ void age::gb_cpu::dispatch_interrupt()
 
     m_bus.handle_events(); // make sure the IF register is up-to-date
     uint8_t interrupt_bit = m_interrupts.next_interrupt_bit();
-    AGE_ASSERT((interrupt_bit == 0x00)
-               || (interrupt_bit == 0x01)
-               || (interrupt_bit == 0x02)
-               || (interrupt_bit == 0x04)
-               || (interrupt_bit == 0x08)
-               || (interrupt_bit == 0x10))
+    assert((interrupt_bit == 0x00)
+           || (interrupt_bit == 0x01)
+           || (interrupt_bit == 0x02)
+           || (interrupt_bit == 0x04)
+           || (interrupt_bit == 0x08)
+           || (interrupt_bit == 0x10));
 
     // Pushing the lower PC byte happens before clearing the interrupt's
     // IF bit (checked by pushing to IF).

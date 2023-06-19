@@ -35,7 +35,6 @@ INCLUDEPATH += $$PWD/age_emulator_gb/api
 
 
 HEADERS += \
-    age_common/api/age_debug.hpp \
     age_common/api/age_types.hpp \
     age_common/api/age_utilities.hpp \
     age_common/api/gfx/age_pixel.hpp \
@@ -87,7 +86,6 @@ HEADERS += \
     age_qt_gui/age_ui_qt_video.hpp
 
 SOURCES += \
-    age_common/age_debug.cpp \
     age_common/age_downsampler.cpp \
     age_common/age_pcm_ring_buffer.cpp \
     age_common/age_screen_buffer.cpp \

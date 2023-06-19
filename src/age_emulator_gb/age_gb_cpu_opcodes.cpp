@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_cpu.hpp"
+
+#include <cassert>
 
 namespace
 {
@@ -851,7 +851,7 @@ age::uint8_t age::gb_cpu::tick_read_byte(int address)
 
 void age::gb_cpu::execute_prefetched()
 {
-    AGE_ASSERT(!(m_cpu_state & gb_cpu_state_frozen))
+    assert(!(m_cpu_state & gb_cpu_state_frozen));
 
     // Let PC point to the byte after the prefetched opcode.
     // HALT bug: let PC point to the opcode after HALT

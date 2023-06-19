@@ -21,13 +21,13 @@
 //! \file
 //!
 
-#include <string>
-
 #include <age_types.hpp>
 #include <emulator/age_gb_types.hpp>
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 #include <pcm/age_pcm_frame.hpp>
+
+#include <string>
 
 
 

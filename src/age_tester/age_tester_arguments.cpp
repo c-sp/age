@@ -287,7 +287,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     // no getopt() error message on standard error
     opterr = 0;
 
-    while ((c = getopt_long(argc, argv, optstring, long_options, &longindex)) != -1)
+    while ((c = getopt_long(argc, argv, optstring, &long_options[0], &longindex)) != -1)
     {
         switch (c)
         {

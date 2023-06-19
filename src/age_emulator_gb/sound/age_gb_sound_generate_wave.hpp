@@ -21,13 +21,13 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
-#include <age_types.hpp>
-
 #include "age_gb_sound_channel.hpp"
 #include "age_gb_sound_generate.hpp"
 
+#include <age_types.hpp>
+
 #include <algorithm>
+#include <cassert>
 
 
 
@@ -88,7 +88,7 @@ namespace age
             uint8_t first_byte  = value >> 4;
             uint8_t second_byte = value & 0x0F;
 
-            AGE_ASSERT(offset < 16)
+            assert(offset < 16);
             offset <<= 1;
             m_wave_pattern[offset]     = first_byte;
             m_wave_pattern[offset + 1] = second_byte;
@@ -98,7 +98,7 @@ namespace age
 
         void set_volume_shift(uint8_t volume_shift)
         {
-            AGE_ASSERT(volume_shift <= 4)
+            assert(volume_shift <= 4);
             m_volume_shift = volume_shift;
             gb_sample_generator<gb_wave_generator<ChannelId>>::set_current_pcm_amplitude(get_current_wave_value());
         }
@@ -124,7 +124,7 @@ namespace age
         void calculate_frequency_timer_period()
         {
             int frequency = m_frequency_low + (m_frequency_high << 8);
-            AGE_ASSERT((frequency >= 0) && (frequency < 2048))
+            assert((frequency >= 0) && (frequency < 2048));
             int samples = 2048 - frequency;
 
             gb_sound_channel<ChannelId>::log() << "set frequency = " << log_hex16(frequency);

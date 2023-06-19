@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_timer.hpp"
+
+#include <cassert>
 
 
 
@@ -28,12 +28,12 @@
 
 void age::gb_timer::trigger_interrupt()
 {
-    AGE_ASSERT(m_clk_timer_zero != gb_no_clock_cycle)
+    assert(m_clk_timer_zero != gb_no_clock_cycle);
 
     // update the timer state in case the overflow has
     // not been handled yet
     bool interrupt_triggered = update_timer_state();
-    AGE_ASSERT(m_clk_last_overflow != gb_no_clock_cycle)
+    assert(m_clk_last_overflow != gb_no_clock_cycle);
 
     // While it does not really matter if we trigger the interrupt
     // twice on the same clock cycle,
@@ -59,8 +59,8 @@ void age::gb_timer::update_state()
 
 bool age::gb_timer::update_timer_state()
 {
-    AGE_ASSERT(m_clock_shift > 0)
-    AGE_ASSERT(m_clk_timer_zero != gb_no_clock_cycle)
+    assert(m_clock_shift > 0);
+    assert(m_clk_timer_zero != gb_no_clock_cycle);
 
     const int clk_current = m_clock.get_clock_cycle();
     const int clks_tima   = clk_current - m_clk_timer_zero;
@@ -81,7 +81,7 @@ bool age::gb_timer::update_timer_state()
     int clk_last_inc        = clk_current - (clks_tima & ((1 << m_clock_shift) - 1));
     int incs_since_overflow = m_tima - m_tma;
     m_clk_last_overflow     = clk_last_inc - (incs_since_overflow << m_clock_shift);
-    AGE_ASSERT(m_clk_last_overflow <= clk_current)
+    assert(m_clk_last_overflow <= clk_current);
 
     log() << "timer overflow on clock cycle " << m_clk_last_overflow
           << "\n    * TIMA == " << log_hex8(tima)
@@ -129,16 +129,16 @@ void age::gb_timer::after_speed_change()
         return;
     }
     // DIV has been reset
-    AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0)
+    assert(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0);
     // state is up-to-date
-    AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima)
+    assert(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima);
 
     // calculate the old timer overflow clock cycle
     int clk_overflow_old = m_clk_timer_zero + 0x100 * (1 << m_clock_shift);
 
     int clk_current         = m_clock.get_clock_cycle();
     int clks_until_overflow = clk_overflow_old - clk_current;
-    AGE_ASSERT(clks_until_overflow > 0)
+    assert(clks_until_overflow > 0);
 
     // calculate the new timer overflow clock cycle
     clks_until_overflow = m_clock.is_double_speed()
@@ -171,9 +171,9 @@ void age::gb_timer::after_div_reset(bool during_stop)
         return;
     }
     // DIV has been reset
-    AGE_ASSERT(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0)
+    assert(((m_clock.get_clock_cycle() + m_clock.get_div_offset()) % 65536) == 0);
     // state is up-to-date
-    AGE_ASSERT(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima)
+    assert(((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift) == m_tima);
 
     // identify the least significant timer clock bit
     int clks_per_inc = 1 << m_clock_shift;
@@ -194,14 +194,14 @@ void age::gb_timer::after_div_reset(bool during_stop)
         if (glitch)
         {
             msg << "\n    * speed change glitch: immediate increment by DIV reset not on this machine cycle";
-            AGE_ASSERT(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2)
+            assert(reset_details.m_new_next_increment == -reset_details.m_clk_adjust * 2);
             reset_details.m_clk_adjust = -reset_details.m_clk_adjust;
         }
     }
 
-    AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) > m_clock.get_clock_cycle())
+    assert((m_clk_timer_zero + 0x100 * clks_per_inc) > m_clock.get_clock_cycle());
     set_clk_timer_zero(m_clk_timer_zero + reset_details.m_clk_adjust);
-    AGE_ASSERT((m_clk_timer_zero + 0x100 * clks_per_inc) >= m_clock.get_clock_cycle())
+    assert((m_clk_timer_zero + 0x100 * clks_per_inc) >= m_clock.get_clock_cycle());
 
     msg << "\n    * TIMA (old) == " << log_hex8(m_tima)
         << "\n    * TIMA (new) == " << log_hex8((m_clock.get_clock_cycle() - m_clk_timer_zero) >> m_clock_shift)
@@ -279,7 +279,7 @@ void age::gb_timer::stop_timer()
 
 void age::gb_timer::set_clk_timer_zero(int new_clk_timer_zero)
 {
-    AGE_ASSERT(new_clk_timer_zero != gb_no_clock_cycle)
+    assert(new_clk_timer_zero != gb_no_clock_cycle);
     m_clk_timer_zero = new_clk_timer_zero;
 
     // The interrupt is raised with a delay of one machine cycle.
@@ -294,19 +294,19 @@ void age::gb_timer::set_clk_timer_zero(int new_clk_timer_zero)
 
     if (m_clk_last_overflow == clk_current)
     {
-        AGE_ASSERT(m_events.get_event_cycle(gb_event::timer_interrupt) != gb_no_clock_cycle)
+        assert(m_events.get_event_cycle(gb_event::timer_interrupt) != gb_no_clock_cycle);
         return;
     }
 
     // If this was called during gb_timer.trigger_interrupt(),
     // the interrupt event is not scheduled anymore which is the
     // reasons for this deactivated assertion.
-    // AGE_ASSERT(m_events.get_event_cycle(gb_event::timer_interrupt) != gb_no_clock_cycle)
+    // assert(m_events.get_event_cycle(gb_event::timer_interrupt) != gb_no_clock_cycle)
 
     // Schedule the interrupt event if the last overflow
     // was more than 1 machine cycle ago.
     int clk_irq = m_clk_timer_zero + (0x100 << m_clock_shift) + m_clock.get_machine_cycle_clocks();
-    AGE_ASSERT(clk_irq >= clk_current)
+    assert(clk_irq >= clk_current);
 
     int clks_irq = clk_irq - clk_current;
     m_events.schedule_event(gb_event::timer_interrupt, clks_irq);

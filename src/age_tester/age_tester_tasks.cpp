@@ -117,13 +117,6 @@ age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::
         {
             if (*screen != *screenshot)
             {
-                 // int x = i % emulator.get_screen_width();
-                 // int y = i / emulator.get_screen_width();
-                 // AGE_LOG(screenshot_png_path << ": screen and screenshot differ at position x="
-                 //                             << x << ", y=" << y
-                 //                             << ": expected 0x" << std::hex << screenshot->get_32bits()
-                 //                             << ", found 0x" << screen->get_32bits());
-
                 auto png_path = screenshot_png_path;
                 png_path.replace_extension();
                 png_path += "_actual.png";

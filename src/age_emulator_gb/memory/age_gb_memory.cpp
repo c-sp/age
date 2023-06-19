@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
-#include <age_debug.hpp>
-
 #include "age_gb_memory.hpp"
+
+#include <algorithm>
+#include <cassert>
 
 namespace
 {
@@ -68,7 +67,7 @@ age::uint8_vector age::gb_memory::get_persistent_ram() const
     {
         int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
 
-        AGE_ASSERT(cart_ram_size > 0)
+        assert(cart_ram_size > 0);
         result.resize(static_cast<unsigned>(cart_ram_size));
 
         std::copy(begin(m_memory) + m_cart_ram_offset,
@@ -87,7 +86,7 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
 {
     if (m_has_battery && (m_num_cart_ram_banks > 0))
     {
-        AGE_ASSERT(source.size() <= int_max)
+        assert(source.size() <= int_max);
         int source_size   = static_cast<int>(source.size());
         int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
 
@@ -112,7 +111,7 @@ void age::gb_memory::set_persistent_ram(const uint8_vector& source)
 
 age::uint8_t age::gb_memory::read_byte(uint16_t address)
 {
-    AGE_ASSERT(address < 0xFE00)
+    assert(address < 0xFE00);
     // rom, video ram & work ram
     if (!is_cartridge_ram(address))
     {
@@ -142,7 +141,7 @@ age::uint8_t age::gb_memory::read_vbk() const
 
 void age::gb_memory::write_byte(uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0xFE00)
+    assert(address < 0xFE00);
     // access MBC
     if (address < 0x8000)
     {
@@ -231,8 +230,8 @@ unsigned age::gb_memory::get_offset(uint16_t address) const
     auto offset = m_offsets[address >> 12];
     offset += address;
 
-    AGE_ASSERT(offset >= 0)
-    AGE_ASSERT(static_cast<unsigned>(offset) < m_memory.size())
+    assert(offset >= 0);
+    assert(static_cast<unsigned>(offset) < m_memory.size());
 
     return static_cast<unsigned>(offset);
 }
@@ -246,10 +245,10 @@ void age::gb_memory::set_cart_ram_enabled(uint8_t value)
 
 void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
 {
-    AGE_ASSERT(low_bank_id >= 0)
-    AGE_ASSERT(high_bank_id >= 0)
-    AGE_ASSERT(m_num_cart_rom_banks >= 0)
-    AGE_ASSERT((m_num_cart_rom_banks & (m_num_cart_rom_banks - 1)) == 0) // just 1 bit set
+    assert(low_bank_id >= 0);
+    assert(high_bank_id >= 0);
+    assert(m_num_cart_rom_banks >= 0);
+    assert((m_num_cart_rom_banks & (m_num_cart_rom_banks - 1)) == 0); // just 1 bit set
     low_bank_id &= m_num_cart_rom_banks - 1;
     high_bank_id &= m_num_cart_rom_banks - 1;
 
@@ -269,9 +268,9 @@ void age::gb_memory::set_rom_banks(int low_bank_id, int high_bank_id)
 
 void age::gb_memory::set_ram_bank(int bank_id)
 {
-    AGE_ASSERT(bank_id >= 0)
-    AGE_ASSERT(m_num_cart_ram_banks >= 0)
-    AGE_ASSERT((m_num_cart_ram_banks & (m_num_cart_ram_banks - 1)) == 0) // just 1 bit set
+    assert(bank_id >= 0);
+    assert(m_num_cart_ram_banks >= 0);
+    assert((m_num_cart_ram_banks & (m_num_cart_ram_banks - 1)) == 0); // just 1 bit set
     bank_id &= m_num_cart_ram_banks - 1;
 
     m_offsets[0xA] = m_cart_ram_offset + bank_id * gb_cart_ram_bank_size - 0xA000;

@@ -21,9 +21,9 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
 #include <age_types.hpp>
 
+#include <cassert>
 #include <cstring> // memcpy
 #include <vector>
 
@@ -45,8 +45,8 @@ namespace age
 
         pcm_frame& operator*=(float factor)
         {
-            AGE_ASSERT(factor <= 1)
-            AGE_ASSERT(factor >= 0)
+            assert(factor <= 1);
+            assert(factor >= 0);
             float s0       = m_left_sample;
             float s1       = m_right_sample;
             m_left_sample  = static_cast<int16_t>(s0 * factor);

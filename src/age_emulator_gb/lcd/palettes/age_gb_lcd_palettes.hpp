@@ -21,11 +21,12 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-#include <emulator/age_gb_types.hpp>
-#include <gfx/age_pixel.hpp>
-
 #include "../../common/age_gb_device.hpp"
+
+#include <emulator/age_gb_types.hpp>
+
+#include <age_types.hpp>
+#include <gfx/age_pixel.hpp>
 
 
 

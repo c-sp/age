@@ -21,8 +21,9 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
 #include <age_types.hpp>
+
+#include <cassert>
 
 
 
@@ -83,7 +84,7 @@ namespace age
 
             if (m_sweep_enabled && !m_skip_first_step)
             {
-                AGE_ASSERT(m_period_counter > 0)
+                assert(m_period_counter > 0);
                 --m_period_counter;
                 if (m_period_counter == 0)
                 {
@@ -122,11 +123,11 @@ namespace age
         {
             m_swept_down = !m_sweep_up;
 
-            AGE_ASSERT(!invalid_frequency(m_frequency_bits))
+            assert(!invalid_frequency(m_frequency_bits));
             int shifted = m_frequency_bits >> m_shift;
             int result = m_frequency_bits + (m_sweep_up ? shifted : -shifted);
 
-            AGE_ASSERT((result >= int16_t_min) && (result <= int16_t_max))
+            assert((result >= int16_t_min) && (result <= int16_t_max));
             return static_cast<int16_t>(result);
         }
 

@@ -50,6 +50,7 @@ private:                                      \
 //
 // See also:
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables#comment51105057_1486931
+//! \todo rename to "unused"?
 #define AGE_UNUSED(arg) ((void) &(arg))
 
 

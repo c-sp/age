@@ -23,13 +23,6 @@
 
 #include <utility> // std::move
 
-#if 0
-#include <age_debug.hpp>
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
 namespace
 {
     constexpr const char* qt_settings_keys_game_boy_up                      = "keys/game_boy_up";
@@ -307,7 +300,6 @@ void age::qt_settings_keys::button_clicked(bool)
             dialog.exec();
 
             Qt::Key new_key = dialog.get_key_pressed();
-            LOG("new key binding for " << event_string << ": " << get_key_string(new_key))
 
             set_key_binding(event, new_key, true);
         }
@@ -385,17 +377,12 @@ void age::qt_settings_keys::add_key_widgets(QGridLayout* layout, int row, qt_key
 
 void age::qt_settings_keys::set_key_binding(qt_key_event event, Qt::Key key, bool update_settings)
 {
-    LOG("binding key " << get_key_string(key) << " to event " << get_event_string(event))
-
     // set binding only, if both parameters are valid
     if (m_event_strings.contains(event) && m_allowed_keys.contains(key))
     {
         // remove all current mappings for the specified event and key
         qt_key_event old_event = get_event_for_key(key);
         Qt::Key      old_key   = m_key_for_event.value(event, Qt::Key_unknown);
-
-        LOG("old event for key " << get_key_string(key) << ": " << get_event_string(old_event))
-        LOG("old key for event " << get_event_string(event) << ": " << get_key_string(old_key))
 
         m_key_for_event.remove(old_event);
         m_event_for_key.remove(old_key);
@@ -443,7 +430,6 @@ void age::qt_settings_keys::save_key_binding(qt_key_event event)
 
         const char* settings_key = m_event_setting_strings.value(event);
 
-        LOG("saving to settings: " << settings_key << "=" << settings_value)
         m_user_value_store->set_value(settings_key, settings_value);
     }
 }
@@ -484,6 +470,5 @@ Qt::Key age::qt_key_dialog::get_key_pressed() const
 void age::qt_key_dialog::keyPressEvent(QKeyEvent* key_event)
 {
     m_key_pressed = static_cast<Qt::Key>(key_event->key());
-    LOG("closing qt_key_dialog with m_key_pressed == " << m_key_pressed)
     close();
 }

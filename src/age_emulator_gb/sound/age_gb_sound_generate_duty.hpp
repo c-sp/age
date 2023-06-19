@@ -21,13 +21,13 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
-#include <age_types.hpp>
-
 #include "age_gb_sound_channel.hpp"
 #include "age_gb_sound_generate.hpp"
 
+#include <age_types.hpp>
+
 #include <array>
+#include <cassert>
 
 
 
@@ -102,7 +102,7 @@ namespace age
 
         void set_volume(uint8_t volume)
         {
-            AGE_ASSERT(volume <= 15)
+            assert(volume <= 15);
             m_volume = volume;
             gb_sample_generator<gb_duty_generator<ChannelId>>::set_current_pcm_amplitude(m_current_duty_value ? m_volume : 0);
         }
@@ -123,7 +123,7 @@ namespace age
 
         void set_frequency_bits(int frequency_bits)
         {
-            AGE_ASSERT((frequency_bits >= 0) && (frequency_bits < 2048))
+            assert((frequency_bits >= 0) && (frequency_bits < 2048));
             m_frequency_bits = static_cast<int16_t>(frequency_bits);
             auto samples     = freq_to_samples();
 

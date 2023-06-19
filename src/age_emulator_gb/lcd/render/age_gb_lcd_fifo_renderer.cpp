@@ -16,9 +16,8 @@
 
 #include "age_gb_lcd_fifo_renderer.hpp"
 
-#include <age_debug.hpp>
-
 #include <algorithm>
+#include <cassert>
 
 namespace
 {
@@ -26,12 +25,6 @@ namespace
 
 } // namespace
 
-//! \todo maybe replace this with gb_logger
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
 
 
 age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              device,
@@ -77,7 +70,7 @@ void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_lin
 
 void age::gb_lcd_fifo_renderer::set_clks_bgp_change(gb_current_line at_line)
 {
-    AGE_ASSERT(m_device.is_dmg_device())
+    assert(m_device.is_dmg_device());
     m_clks_bgp_change = at_line;
 }
 
@@ -88,7 +81,7 @@ void age::gb_lcd_fifo_renderer::reset()
 
 void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_first_frame)
 {
-    AGE_ASSERT(!in_progress())
+    assert(!in_progress());
     bool is_line_zero = is_first_frame && (line.m_line == 0);
 
     //! \todo sprites should be searched step by step in mode 2
@@ -115,8 +108,8 @@ void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_fir
 
 bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
 {
-    AGE_ASSERT(in_progress())
-    AGE_ASSERT(until.m_line >= m_line.m_line)
+    assert(in_progress());
+    assert(until.m_line >= m_line.m_line);
 
     // deactivate window?
     // (LCD registers are constant during continue_line(), so we can check this upfront)
@@ -130,11 +123,7 @@ bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
                                 ? gb_clock_cycles_per_lcd_line
                                 : until.m_line_clks;
 
-    LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                << " update until clks < " << current_line_clks
-                << ", window enabled = " << is_window_enabled(m_common.get_lcdc()))
-
-    AGE_ASSERT(current_line_clks <= gb_clock_cycles_per_lcd_line)
+    assert(current_line_clks <= gb_clock_cycles_per_lcd_line);
     while (std::min(m_fetcher.next_step_clks(), m_line.m_line_clks) < current_line_clks)
     {
         // update_line_stage() may modify the next fetcher cycle.
@@ -152,9 +141,9 @@ bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
         }
     }
 
-    AGE_ASSERT(m_fetcher.next_step_clks() >= current_line_clks)
-    AGE_ASSERT(m_line.m_line_clks <= gb_clock_cycles_per_lcd_line)
-    AGE_ASSERT(m_line.m_line_clks >= current_line_clks)
+    assert(m_fetcher.next_step_clks() >= current_line_clks);
+    assert(m_line.m_line_clks <= gb_clock_cycles_per_lcd_line);
+    assert(m_line.m_line_clks >= current_line_clks);
     return !in_progress();
 }
 
@@ -162,11 +151,11 @@ bool age::gb_lcd_fifo_renderer::continue_line(gb_current_line until)
 
 void age::gb_lcd_fifo_renderer::update_line_stage(int until_line_clks)
 {
-    AGE_ASSERT(until_line_clks <= m_fetcher.next_step_clks())
-    AGE_ASSERT(until_line_clks <= gb_clock_cycles_per_lcd_line)
+    assert(until_line_clks <= m_fetcher.next_step_clks());
+    assert(until_line_clks <= gb_clock_cycles_per_lcd_line);
     // m_line.m_line_clks may be > until_line_clks
     // (e.g. when starting window rendering)
-    AGE_ASSERT(m_line.m_line_clks <= gb_clock_cycles_per_lcd_line)
+    assert(m_line.m_line_clks <= gb_clock_cycles_per_lcd_line);
 
     while (m_line.m_line_clks < until_line_clks)
     {
@@ -202,27 +191,24 @@ void age::gb_lcd_fifo_renderer::update_line_stage(int until_line_clks)
     }
 
     // the next fetcher step might have been changed during the upper loop
-    AGE_ASSERT(until_line_clks <= m_fetcher.next_step_clks())
-    AGE_ASSERT(m_line.m_line_clks <= m_fetcher.next_step_clks())
+    assert(until_line_clks <= m_fetcher.next_step_clks());
+    assert(m_line.m_line_clks <= m_fetcher.next_step_clks());
 }
 
 void age::gb_lcd_fifo_renderer::line_stage_mode2(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks < m_clks_begin_align_scx)
+    assert(m_line.m_line_clks < m_clks_begin_align_scx);
     m_line.m_line_clks = until_line_clks;
     if (m_line.m_line_clks >= m_clks_begin_align_scx)
     {
         m_line_stage       = line_stage::mode3_align_scx;
         m_line.m_line_clks = m_clks_begin_align_scx;
-        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                    << " entering line_stage::mode3_align_scx"
-                    << ", scx=" << (int) m_common.m_scx)
     }
 }
 
 void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks >= m_clks_begin_align_scx)
+    assert(m_line.m_line_clks >= m_clks_begin_align_scx);
     uint8_t scx = m_common.m_scx & 0b111;
 
     for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
@@ -240,9 +226,6 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
             //    discard the first X pixel)
             m_alignment_x = scx;
             m_line_stage  = line_stage::mode3_render;
-            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                        << " entering line_stage::mode3_render"
-                        << ", scx=" << (int) m_common.m_scx)
             break;
         }
 
@@ -252,10 +235,10 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_align_scx(int until_line_clks)
 
 void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
 {
-    AGE_ASSERT(m_fetcher.next_step_clks() >= until_line_clks)
-    AGE_ASSERT(m_fetcher.next_step_clks() >= m_line.m_line_clks)
-    AGE_ASSERT(m_line.m_line_clks > m_clks_begin_align_scx)
-    AGE_ASSERT(m_x_pos <= x_pos_last_px)
+    assert(m_fetcher.next_step_clks() >= until_line_clks);
+    assert(m_fetcher.next_step_clks() >= m_line.m_line_clks);
+    assert(m_line.m_line_clks > m_clks_begin_align_scx);
+    assert(m_x_pos <= x_pos_last_px);
     for (int i = m_line.m_line_clks; i < until_line_clks; ++i)
     {
         // fetch next sprite?
@@ -298,17 +281,15 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_render(int until_line_clks)
             // don't miss any WY match in case WX is out of the visible range
             // as init_window() verifies WY only if WX matches
             m_window.check_for_wy_match(m_common.get_lcdc(), m_common.m_wy, m_line.m_line);
-            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                        << " entering line_stage::rendering_finished")
             break;
         }
     }
-    AGE_ASSERT(m_fetcher.next_step_clks() >= m_line.m_line_clks)
+    assert(m_fetcher.next_step_clks() >= m_line.m_line_clks);
 }
 
 void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks)
 {
-    AGE_ASSERT(m_line.m_line_clks < m_clks_end_window_init)
+    assert(m_line.m_line_clks < m_clks_end_window_init);
 
     // window termination can occur only on the update's first cycle
     // as LCD registers are constant during continue_line()
@@ -316,9 +297,6 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
     {
         if (m_device.is_cgb_device() || ((m_clks_end_window_init - m_line.m_line_clks) >= 6))
         {
-            LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): terminate window init"
-                        << " (would have been finished on line cycle " << m_clks_end_window_init << ")")
-
             m_line_stage = line_stage::mode3_render;
             m_line.m_line_clks += m_device.is_cgb_device() ? 1 : 0;
             // note that we keep m_alignment_x as the FIFO might run empty otherwise
@@ -334,7 +312,6 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_init_window(int until_line_clks
         m_line_stage       = line_stage::mode3_render;
         m_line.m_line_clks = m_clks_end_window_init;
         m_fetcher.restart_bg_fetch(m_line.m_line_clks);
-        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finish window init")
     }
 }
 
@@ -345,7 +322,6 @@ void age::gb_lcd_fifo_renderer::line_stage_mode3_wait_for_sprite(int until_line_
     {
         m_line_stage       = line_stage::mode3_render;
         m_line.m_line_clks = m_fetcher.clks_last_sprite_finished() + 1;
-        LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "): finished sprite fetching, continue rendering")
     }
 }
 
@@ -399,7 +375,7 @@ bool age::gb_lcd_fifo_renderer::dmg_wx_glitch()
 
 bool age::gb_lcd_fifo_renderer::init_window()
 {
-    AGE_ASSERT(m_x_pos <= x_pos_last_px)
+    assert(m_x_pos <= x_pos_last_px);
     if (m_x_pos != m_common.m_wx)
     {
         return false;
@@ -426,11 +402,6 @@ bool age::gb_lcd_fifo_renderer::init_window()
     m_clks_end_window_init = m_line.m_line_clks + clks_init_window;
     m_fetcher.restart_bg_fetch(m_line.m_line_clks + 2);
 
-    LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                << " initialize window for next pixel"
-                << ", x-pos = " << m_x_pos
-                << ", wx = " << (int) m_common.m_wx
-                << ", scx = " << (int) m_common.m_scx)
     return true;
 }
 
@@ -453,14 +424,7 @@ bool age::gb_lcd_fifo_renderer::fetch_next_sprite()
 
     int spx0_delay = (m_x_pos == 0) ? std::min(m_alignment_x & 0b111, 5) : 0;
 
-    AGE_ASSERT(!m_sorted_sprites.empty())
-    LOG("line " << m_line.m_line << " (" << m_line.m_line_clks << "):"
-                << " prepare fetching sprite #" << (int) m_sorted_sprites[0].m_sprite_id
-                << ", x-pos = " << m_x_pos
-                << ", scx = " << (int) m_common.m_scx
-                << ", spx0-delay " << spx0_delay
-                << ", next-fetcher-step " << m_fetcher.next_step()
-                << ", next-fetcher-clks " << m_fetcher.next_step_clks())
+    assert(!m_sorted_sprites.empty());
 
     // trigger sprite fetch
     m_line_stage = line_stage::mode3_wait_for_sprite;

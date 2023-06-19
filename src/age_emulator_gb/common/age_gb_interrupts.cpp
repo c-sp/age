@@ -16,6 +16,8 @@
 
 #include "age_gb_interrupts.hpp"
 
+#include <cassert>
+
 namespace
 {
 
@@ -105,7 +107,7 @@ void age::gb_interrupt_trigger::trigger_interrupt(gb_interrupt interrupt,
 
     //! \todo Gambatte: delay depends on sub-m-cycle timing (analyse test roms)
     int clk_current = m_clock.get_clock_cycle();
-    AGE_ASSERT(clk_current >= irq_clock_cycle)
+    assert(clk_current >= irq_clock_cycle);
     int clks_diff   = clk_current - irq_clock_cycle;
     int half_mcycle = m_clock.get_machine_cycle_clocks() >> 1;
 
@@ -146,14 +148,14 @@ age::uint8_t age::gb_interrupt_registers::read_ie() const
 
 void age::gb_interrupt_registers::write_if(uint8_t value)
 {
-    AGE_ASSERT(!m_halted)
+    assert(!m_halted);
     log() << "write IF = " << log_hex8(value);
     m_if = value | 0xE0;
 }
 
 void age::gb_interrupt_registers::write_ie(uint8_t value)
 {
-    AGE_ASSERT(!m_halted)
+    assert(!m_halted);
     log() << "write IE = " << log_hex8(value);
     m_ie = value;
 }
@@ -230,7 +232,7 @@ void age::gb_interrupt_dispatcher::unhalt()
 
 bool age::gb_interrupt_dispatcher::halt()
 {
-    AGE_ASSERT(!m_halted)
+    assert(!m_halted);
 
     if (m_if & m_ie & 0x1F)
     {

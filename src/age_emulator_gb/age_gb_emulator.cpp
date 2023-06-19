@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <emulator/age_gb_emulator.hpp>
-
 #include "age_gb_emulator_impl.hpp"
+
+#include <emulator/age_gb_emulator.hpp>
 
 
 

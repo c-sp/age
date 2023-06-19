@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_timer.hpp"
+
+#include <cassert>
 
 namespace
 {
@@ -48,8 +48,8 @@ age::uint8_t age::gb_timer::get_clock_shift() const
     // CGB double speed => faster increments
     clock_shift -= m_clock.is_double_speed() ? 1 : 0;
 
-    AGE_ASSERT(clock_shift <= 10)
-    AGE_ASSERT(clock_shift >= 3) // CGB double speed: up to 524288 Hz
+    assert(clock_shift <= 10);
+    assert(clock_shift >= 3); // CGB double speed: up to 524288 Hz
 
     return clock_shift;
 }
@@ -125,7 +125,7 @@ void age::gb_timer::write_tma(uint8_t value)
         //      acceptance/timer/tma_write_reloading
         if (m_clk_last_overflow != gb_no_clock_cycle)
         {
-            AGE_ASSERT(m_clk_last_overflow <= m_clock.get_clock_cycle())
+            assert(m_clk_last_overflow <= m_clock.get_clock_cycle());
             int clks = m_clock.get_clock_cycle() - m_clk_last_overflow;
 
             if (clks <= m_clock.get_machine_cycle_clocks())

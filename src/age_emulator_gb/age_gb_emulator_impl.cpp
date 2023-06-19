@@ -16,6 +16,8 @@
 
 #include "age_gb_emulator_impl.hpp"
 
+#include <cassert>
+
 
 
 std::string age::gb_emulator_impl::get_emulator_title() const
@@ -128,7 +130,7 @@ bool age::gb_emulator_impl::emulate(int cycles_to_emulate)
     m_audio_buffer.clear();
 
     int emulated_cycles = emulate_cycles(cycles_to_emulate);
-    AGE_ASSERT(emulated_cycles > 0)
+    assert(emulated_cycles > 0);
     m_emulated_cycles += emulated_cycles;
 
     return m_screen_buffer.get_current_frame_id() != frame_id;
@@ -148,7 +150,7 @@ std::vector<age::gb_log_entry> age::gb_emulator_impl::get_and_clear_log_entries(
 
 int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 {
-    AGE_ASSERT(cycles_to_emulate > 0)
+    assert(cycles_to_emulate > 0);
 
     // make sure we have some headroom since we usually emulate
     // a few more cycles than requested
@@ -158,7 +160,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     // calculate the number of cycles to emulate based on the current
     // cycle and the cycle limit
     int starting_cycle = m_clock.get_clock_cycle();
-    AGE_ASSERT(starting_cycle < cycle_setback_limit)
+    assert(starting_cycle < cycle_setback_limit);
 
     int cycle_to_reach = starting_cycle + std::min(cycles_to_emulate, cycle_limit - starting_cycle);
 
@@ -169,12 +171,12 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     {
         if (m_bus.handle_gp_dma())
         {
-            AGE_ASSERT(m_device.cgb_mode())
+            assert(m_device.cgb_mode());
         }
         else if (m_interrupts.halted() || m_cpu.is_frozen())
         {
             int fast_forward_cycles = get_fast_forward_halt_cycles(cycle_to_reach);
-            AGE_ASSERT(fast_forward_cycles >= 0)
+            assert(fast_forward_cycles >= 0);
             m_interrupts.log() << "CPU halted ("
                                << (m_clock.is_double_speed() ? "double" : "normal")
                                << " speed), fast forwarding to clock cycle "
@@ -202,7 +204,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
     // calculate the cycles actually emulated
     int current_cycle   = m_clock.get_clock_cycle();
     int cycles_emulated = current_cycle - starting_cycle;
-    AGE_ASSERT(cycles_emulated >= 0)
+    assert(cycles_emulated >= 0);
 
     // if the cycle counter reaches a certain threshold,
     // set back all stored cycle values to keep the
@@ -212,16 +214,14 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
         m_timer.update_state();
         m_memory.update_state();
 
-        AGE_ASSERT(cycle_setback_limit >= 2 * gb_clock_cycles_per_second)
-
         // keep a minimum of cycles to prevent negative cycle values
         // (which should still work but is kind of unintuitive)
         int cycles_to_keep = gb_clock_cycles_per_second
                              + (current_cycle % gb_clock_cycles_per_second);
 
         int clock_cycle_offset = current_cycle - cycles_to_keep;
-        AGE_ASSERT(clock_cycle_offset > 0)
-        AGE_ASSERT(clock_cycle_offset < current_cycle)
+        assert(clock_cycle_offset > 0);
+        assert(clock_cycle_offset < current_cycle);
 
         m_clock.set_back_clock(clock_cycle_offset);
         m_logger.set_back_clock(clock_cycle_offset); // this goes second to not mess up the logs
@@ -240,7 +240,7 @@ int age::gb_emulator_impl::emulate_cycles(int cycles_to_emulate)
 int age::gb_emulator_impl::get_fast_forward_halt_cycles(int cycle_to_reach) const
 {
     int current_clk = m_clock.get_clock_cycle();
-    AGE_ASSERT(current_clk < cycle_to_reach)
+    assert(current_clk < cycle_to_reach);
 
     // get the maximal cycle we can fast-forward to
     int next_event_cycle   = m_events.get_next_event_cycle();

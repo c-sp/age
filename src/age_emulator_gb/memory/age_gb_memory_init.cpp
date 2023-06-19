@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-#include <random>
+#include "age_gb_memory.hpp"
 
-#include <age_debug.hpp>
 #include <age_utilities.hpp>
 
-#include "age_gb_memory.hpp"
+#include <algorithm>
+#include <cassert>
+#include <random>
 
 
 
@@ -87,8 +87,8 @@ namespace
 
     void set_memory(age::uint8_vector& memory, int offset, age::uint8_t value)
     {
-        AGE_ASSERT(offset >= 0)
-        AGE_ASSERT(static_cast<unsigned>(offset) < memory.size())
+        assert(offset >= 0);
+        assert(static_cast<unsigned>(offset) < memory.size());
         memory[static_cast<unsigned>(offset)] = value;
     }
 
@@ -206,11 +206,11 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, b
       m_work_ram_offset(m_cart_ram_offset + m_num_cart_ram_banks * gb_cart_ram_bank_size),
       m_video_ram_offset(m_work_ram_offset + gb_work_ram_size)
 {
-    AGE_ASSERT(m_num_cart_rom_banks > 0)
-    AGE_ASSERT(m_num_cart_ram_banks >= 0)
-    AGE_ASSERT(m_cart_ram_offset > 0)
-    AGE_ASSERT(m_work_ram_offset >= m_cart_ram_offset)
-    AGE_ASSERT(m_video_ram_offset > m_work_ram_offset)
+    assert(m_num_cart_rom_banks > 0);
+    assert(m_num_cart_ram_banks >= 0);
+    assert(m_cart_ram_offset > 0);
+    assert(m_work_ram_offset >= m_cart_ram_offset);
+    assert(m_video_ram_offset > m_work_ram_offset);
 
     switch (safe_get(cart_rom, gb_cia_ofs_type))
     {
@@ -314,7 +314,7 @@ age::gb_memory::gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, b
     int cart_rom_size = m_num_cart_rom_banks * gb_cart_rom_bank_size;
     int cart_ram_size = m_num_cart_ram_banks * gb_cart_ram_bank_size;
     int memory_size   = cart_rom_size + cart_ram_size + gb_work_ram_size + gb_video_ram_size;
-    AGE_ASSERT(memory_size > 0)
+    assert(memory_size > 0);
 
     log() << "allocating " << memory_size << " bytes total";
     m_memory = uint8_vector(static_cast<unsigned>(memory_size), 0);

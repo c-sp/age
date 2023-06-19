@@ -21,9 +21,10 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-
 #include "../common/age_gb_clock.hpp"
+
+#include <age_types.hpp>
+#include <pcm/age_pcm_frame.hpp>
 
 
 

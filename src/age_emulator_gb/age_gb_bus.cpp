@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-#include <algorithm>
-
-#include <age_debug.hpp>
-
 #include "age_gb_bus.hpp"
+
+#include <algorithm>
+#include <cassert>
 
 
 
@@ -548,9 +547,9 @@ bool age::gb_bus::handle_gp_dma()
 
     // calculate number of bytes to copy and update remaining DMA length
     int bytes = dma_length * 0x10;
-    AGE_ASSERT(bytes > 0)
-    AGE_ASSERT(bytes <= 0x800)
-    AGE_ASSERT((bytes % 0x10) == 0)
+    assert(bytes > 0);
+    assert(bytes <= 0x800);
+    assert((bytes % 0x10) == 0);
     auto msg = log_hdma();
     msg << "starting general purpose DMA"
         << "\n    * from " << log_hex16(m_hdma_source) << " to " << log_hex16(m_hdma_destination)
@@ -596,7 +595,7 @@ bool age::gb_bus::handle_gp_dma()
 
         ++m_hdma_source;
         ++m_hdma_destination;
-        AGE_ASSERT(m_hdma_destination <= 0x10000)
+        assert(m_hdma_destination <= 0x10000);
     }
 
     m_clock.tick_machine_cycle();

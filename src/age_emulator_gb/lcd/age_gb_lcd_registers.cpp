@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_lcd.hpp"
+
+#include <cassert>
 
 
 
@@ -132,7 +132,7 @@ age::uint8_t age::gb_lcd::read_stat()
     // LCD off: return retained LY match flag
     if (!m_line.lcd_is_on())
     {
-        AGE_ASSERT((result & gb_stat_modes) == 0)
+        assert((result & gb_stat_modes) == 0);
         return result | m_retained_ly_match;
     }
 
@@ -147,7 +147,7 @@ age::uint8_t age::gb_lcd::read_stat()
 
 age::uint8_t age::gb_lcd::get_stat_mode(const gb_current_line& current_line)
 {
-    AGE_ASSERT(current_line.m_line < gb_lcd_line_count)
+    assert(current_line.m_line < gb_lcd_line_count);
 
     // vblank
     if (current_line.m_line >= gb_screen_height)
@@ -218,14 +218,14 @@ void age::gb_lcd::write_stat(uint8_t value)
 
 age::gb_current_line age::gb_lcd::calculate_line()
 {
-    AGE_ASSERT(m_line.lcd_is_on())
+    assert(m_line.lcd_is_on());
     auto line = m_line.current_line();
     if (line.m_line >= gb_lcd_line_count)
     {
         update_frame();
         line = m_line.current_line();
     }
-    AGE_ASSERT(line.m_line < gb_lcd_line_count)
+    assert(line.m_line < gb_lcd_line_count);
     return line;
 }
 
@@ -332,7 +332,7 @@ age::uint8_t age::gb_lcd::read_bcps() const
 
 age::uint8_t age::gb_lcd::read_bcpd() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     auto result = m_palettes.read_bcpd();
     log_reg() << "read BCPD == " << log_hex8(result);
     return result;
@@ -340,7 +340,7 @@ age::uint8_t age::gb_lcd::read_bcpd() const
 
 age::uint8_t age::gb_lcd::read_ocps() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     auto result = m_palettes.read_ocps();
     log_reg() << "read OCPS == " << log_hex8(result);
     return result;
@@ -348,7 +348,7 @@ age::uint8_t age::gb_lcd::read_ocps() const
 
 age::uint8_t age::gb_lcd::read_ocpd() const
 {
-    AGE_ASSERT(m_device.cgb_mode())
+    assert(m_device.cgb_mode());
     auto result = m_palettes.read_ocpd();
     log_reg() << "read OCPD == " << log_hex8(result);
     return result;

@@ -21,18 +21,12 @@
 
 #include "age_ui_qt_video.hpp"
 
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
-
+#include <cassert>
 
 
 age::qt_video_renderer::qt_video_renderer()
     : m_indices(QOpenGLBuffer::IndexBuffer)
 {
-    LOG("")
     initializeOpenGLFunctions();
 
     // shader program
@@ -62,15 +56,12 @@ age::qt_video_renderer::~qt_video_renderer()
 {
     m_indices.destroy();
     m_vertices.destroy();
-    LOG("")
 }
 
 
 
 void age::qt_video_renderer::update_matrix(const QSize& emulator_screen, const QSize& viewport)
 {
-    LOG(emulator_screen.width() << " x " << emulator_screen.height() << " on " << viewport.width() << " x " << viewport.height())
-
     double viewport_ratio = 1. * viewport.width() / viewport.height();
     double screen_ratio   = 1. * emulator_screen.width() / emulator_screen.height();
 
@@ -78,13 +69,13 @@ void age::qt_video_renderer::update_matrix(const QSize& emulator_screen, const Q
     if (viewport_ratio > screen_ratio)
     {
         double diff = viewport_ratio - screen_ratio;
-        AGE_ASSERT(diff > 0)
+        assert(diff > 0);
         proj = QRectF(-.5 * diff, 0, 1 + diff, 1); // x, y, width, height
     }
     else
     {
         double diff = (1 / viewport_ratio) - (1 / screen_ratio);
-        AGE_ASSERT(diff >= 0)
+        assert(diff >= 0);
         proj = QRectF(0, -.5 * diff, 1, 1 + diff); // x, y, width, height
     }
 

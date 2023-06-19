@@ -16,6 +16,8 @@
 
 #include "age_gb_serial.hpp"
 
+#include <cassert>
+
 namespace
 {
     // DMG: 512 clock cycles for transferring one bit (8192 Bits/s)
@@ -152,8 +154,8 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
 
     // adjust to CGB double speed
     clock_shift -= m_clock.is_double_speed() ? 1 : 0;
-    AGE_ASSERT(clock_shift >= 3)
-    AGE_ASSERT(clock_shift <= 9)
+    assert(clock_shift >= 3);
+    assert(clock_shift <= 9);
 
     // number of clock cycles per serial transfer step
     int clks_per_step = 1 << (clock_shift - 1);
@@ -167,10 +169,10 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     int clks_first_step     = clks_per_step - clks_into_step;
     int clks_until_finished = clks_first_step + (15 << (clock_shift - 1));
 
-    AGE_ASSERT(clks_first_step > 0)
-    AGE_ASSERT(clks_first_step <= clks_per_step)
-    AGE_ASSERT(clks_until_finished > 0)
-    AGE_ASSERT(clks_until_finished <= 8 << clock_shift)
+    assert(clks_first_step > 0);
+    assert(clks_first_step <= clks_per_step);
+    assert(clks_until_finished > 0);
+    assert(clks_until_finished <= 8 << clock_shift);
 
     log() << "starting serial transfer"
           << "\n    * " << clks_per_step << " clock cycles per transferred bit"
@@ -182,8 +184,8 @@ void age::gb_serial::start_transfer(uint8_t value_sc)
     m_sio_clk_started = current_clk + clks_until_finished - (8 << clock_shift);
     m_sio_initial_sb  = m_sb;
 
-    AGE_ASSERT(m_sio_clk_started <= current_clk)
-    AGE_ASSERT(m_sio_clk_started != gb_no_clock_cycle)
+    assert(m_sio_clk_started <= current_clk);
+    assert(m_sio_clk_started != gb_no_clock_cycle);
 
     m_events.schedule_event(gb_event::serial_transfer_finished, clks_until_finished);
 }
@@ -197,8 +199,8 @@ void age::gb_serial::update_state()
     {
         return;
     }
-    AGE_ASSERT(m_sio_clk_started != gb_no_clock_cycle)
-    AGE_ASSERT(m_sio_clk_started < m_clock.get_clock_cycle())
+    assert(m_sio_clk_started != gb_no_clock_cycle);
+    assert(m_sio_clk_started < m_clock.get_clock_cycle());
 
     // calculate the number of shifts since the transfer was started
     int clks_elapsed = m_clock.get_clock_cycle() - m_sio_clk_started;
@@ -215,7 +217,7 @@ void age::gb_serial::update_state()
     {
         log() << "serial transfer finished";
         stop_transfer(gb_sio_state::no_transfer);
-        AGE_ASSERT(m_sb == 0xFF)
+        assert(m_sb == 0xFF);
 
         int clk_irq = m_sio_clk_started + (8 << m_sio_clock_shift);
         m_interrupts.trigger_interrupt(gb_interrupt::serial, clk_irq);
@@ -262,16 +264,16 @@ void age::gb_serial::after_div_reset()
 
     // number of clock cycles per serial transfer step
     int clks_per_step = 1 << (m_sio_clock_shift - 1);
-    AGE_ASSERT(clks_per_step > 0)
+    assert(clks_per_step > 0);
 
     // calculate potential immediate serial transfer step by div reset
     auto reset_details = m_clock.get_div_reset_details(clks_per_step);
 
     int clk_current  = m_clock.get_clock_cycle();
     int clk_finished = m_sio_clk_started + (8 << m_sio_clock_shift);
-    AGE_ASSERT(clk_finished > clk_current)
+    assert(clk_finished > clk_current);
     clk_finished += reset_details.m_clk_adjust;
-    AGE_ASSERT(clk_finished >= clk_current)
+    assert(clk_finished >= clk_current);
 
     log() << "serial transfer at DIV reset:"
           << "\n    * next step (old) in " << log_in_clks(reset_details.m_old_next_increment, clk_current)

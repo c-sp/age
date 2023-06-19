@@ -16,6 +16,8 @@
 
 #include "age_gb_oam_dma.hpp"
 
+#include <cassert>
+
 
 
 namespace
@@ -67,7 +69,7 @@ age::gb_oam_dma::gb_oam_dma(const gb_device& device,
 
 age::int16_t age::gb_oam_dma::conflicting_read(uint16_t address)
 {
-    AGE_ASSERT(address < 0xFE00)
+    assert(address < 0xFE00);
     if (!dma_active())
     {
         return -1;
@@ -129,7 +131,7 @@ age::int16_t age::gb_oam_dma::conflicting_read(uint16_t address)
 
 bool age::gb_oam_dma::conflicting_write(uint16_t address, uint8_t value)
 {
-    AGE_ASSERT(address < 0xFE00)
+    assert(address < 0xFE00);
     if (!dma_active())
     {
         return false;
@@ -305,7 +307,7 @@ void age::gb_oam_dma::continue_dma()
     m_oam_dma_last_cycle += cycles_elapsed;
     cycles_elapsed <<= m_clock.is_double_speed() ? 1 : 0;
 
-    AGE_ASSERT((cycles_elapsed & 3) == 0)
+    assert((cycles_elapsed & 3) == 0);
     int bytes = std::min(cycles_elapsed / 4, 160 - m_oam_dma_offset);
 
     for (int i = m_oam_dma_offset, max = m_oam_dma_offset + bytes; i < max; ++i)
@@ -330,7 +332,7 @@ void age::gb_oam_dma::continue_dma()
     }
 
     m_oam_dma_offset += bytes;
-    AGE_ASSERT(m_oam_dma_offset <= 160)
+    assert(m_oam_dma_offset <= 160);
     if (m_oam_dma_offset >= 160)
     {
         m_oam_dma_active     = false;
@@ -354,7 +356,7 @@ age::uint8_t age::gb_oam_dma::read_dma_byte(int offset) const
     }
     if (m_oam_dma_src_address >= 0xE000)
     {
-        AGE_ASSERT(m_device.is_cgb_device())
+        assert(m_device.is_cgb_device());
         return 0xFF;
     }
     return m_memory.read_byte(m_oam_dma_src_address + offset);

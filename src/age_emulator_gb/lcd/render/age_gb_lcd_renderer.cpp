@@ -16,9 +16,8 @@
 
 #include "age_gb_lcd_renderer.hpp"
 
-#include <age_debug.hpp>
-
 #include <algorithm> // std::fill
+#include <cassert>
 
 
 
@@ -71,7 +70,7 @@ void age::gb_lcd_renderer::new_frame(bool frame_is_blank)
     m_window.new_frame();
     m_rendered_lines = 0;
     m_fifo_renderer.reset();
-    AGE_ASSERT(!m_fifo_renderer.in_progress())
+    assert(!m_fifo_renderer.in_progress());
 }
 
 
@@ -117,7 +116,7 @@ void age::gb_lcd_renderer::render(gb_current_line until, bool is_first_frame)
     {
         return;
     }
-    AGE_ASSERT(m_rendered_lines >= until.m_line)
+    assert(m_rendered_lines >= until.m_line);
     if (m_rendered_lines == until.m_line)
     {
         m_fifo_renderer.begin_new_line(until, is_first_frame);

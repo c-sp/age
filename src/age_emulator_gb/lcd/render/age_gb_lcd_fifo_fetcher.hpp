@@ -25,17 +25,10 @@
 #include "age_gb_lcd_renderer_common.hpp"
 #include "age_gb_lcd_window_check.hpp"
 
-#include <age_debug.hpp>
 #include <age_types.hpp>
 
+#include <cassert>
 #include <deque>
-
-//! \todo maybe replace this with gb_logger
-#if 0
-#define LOG(x) AGE_LOG(x)
-#else
-#define LOG(x)
-#endif
 
 
 
@@ -121,10 +114,10 @@ namespace age
 
         void trigger_sprite_fetch(uint8_t sprite_id, uint8_t spr_x, int current_line_clks, int spx0_delay)
         {
-            AGE_ASSERT(m_next_step_clks > current_line_clks)
-            AGE_ASSERT(m_spr_to_fetch_id == no_sprite)
-            AGE_ASSERT(spx0_delay >= 0)
-            AGE_ASSERT(spx0_delay <= 5)
+            assert(m_next_step_clks > current_line_clks);
+            assert(m_spr_to_fetch_id == no_sprite);
+            assert(spx0_delay >= 0);
+            assert(spx0_delay <= 5);
             m_spr_to_fetch_id               = sprite_id;
             m_spr_to_fetch_x                = spr_x;
             m_spr_clks_last_sprite_finished = int_max;
@@ -166,7 +159,7 @@ namespace age
 
         uint8_t pop_bg_dot()
         {
-            AGE_ASSERT(m_bg_cur_buffered_dots > 0)
+            assert(m_bg_cur_buffered_dots > 0);
 
             uint8_t color_idx = m_bg_cur_attributes & gb_tile_attrib_cgb_palette;
             color_idx <<= 2;
@@ -216,24 +209,21 @@ namespace age
 
         void execute_next_step(int x_pos, int x_pos_win_start)
         {
-            AGE_ASSERT(m_next_step_clks < gb_clock_cycles_per_lcd_line)
+            assert(m_next_step_clks < gb_clock_cycles_per_lcd_line);
             switch (m_next_step)
             {
                 case fetcher_step::fetch_bg_name:
-                    LOG("(" << m_next_step_clks << "): fetch_bg_name")
                     m_bg_clks_last_tile_name = m_next_step_clks;
                     fetch_bg_name(x_pos, x_pos_win_start);
                     schedule_next_step(2, fetcher_step::fetch_bg_bitplane0);
                     break;
 
                 case fetcher_step::fetch_bg_bitplane0:
-                    LOG("(" << m_next_step_clks << "): fetch_bg_bitplane0")
                     fetch_bg_bitplane(0);
                     schedule_next_step(2, fetcher_step::fetch_bg_bitplane1);
                     break;
 
                 case fetcher_step::fetch_bg_bitplane1:
-                    LOG("(" << m_next_step_clks << "): fetch_bg_bitplane1")
                     fetch_bg_bitplane(1);
                     if (m_spr_to_fetch_id != no_sprite)
                     {
@@ -246,23 +236,20 @@ namespace age
                     break;
 
                 case fetcher_step::fetch_sprite_name:
-                    LOG("(" << m_next_step_clks << "): fetch_sprite_name")
                     fetch_sprite_name();
                     schedule_next_step(2, fetcher_step::fetch_sprite_bitplane0);
                     break;
 
                 case fetcher_step::fetch_sprite_bitplane0:
-                    LOG("(" << m_next_step_clks << "): fetch_sprite_bitplane0")
                     fetch_sprite_bitplane(0);
                     schedule_next_step(2, fetcher_step::fetch_sprite_bitplane1);
                     break;
 
                 case fetcher_step::fetch_sprite_bitplane1:
-                    LOG("(" << m_next_step_clks << "): fetch_sprite_bitplane1")
-                    AGE_ASSERT(m_spr_clks_last_sprite_finished == int_max)
-                    AGE_ASSERT(m_spr_clks_next_bg_fetch > 0)
-                    AGE_ASSERT(m_spr_clks_next_bg_fetch <= 10)
-                    AGE_ASSERT(m_spr_to_fetch_id != no_sprite)
+                    assert(m_spr_clks_last_sprite_finished == int_max);
+                    assert(m_spr_clks_next_bg_fetch > 0);
+                    assert(m_spr_clks_next_bg_fetch <= 10);
+                    assert(m_spr_to_fetch_id != no_sprite);
                     fetch_sprite_bitplane(1);
                     apply_sp_bitplane();
                     m_spr_to_fetch_id               = no_sprite;
@@ -292,10 +279,10 @@ namespace age
 
         void schedule_next_step(int clks_offset, fetcher_step step)
         {
-            AGE_ASSERT(clks_offset > 0)
+            assert(clks_offset > 0);
             m_next_step_clks += clks_offset;
             m_next_step = step;
-            AGE_ASSERT(m_next_step_clks < gb_clock_cycles_per_lcd_line)
+            assert(m_next_step_clks < gb_clock_cycles_per_lcd_line);
         }
 
 
@@ -333,12 +320,12 @@ namespace age
 
         void fetch_bg_bitplane(int bitplane_offset)
         {
-            AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
+            assert((bitplane_offset == 0) || (bitplane_offset == 1));
 
             // CGB tile data glitch
             if (m_bg_clks_last_lcdc_tile_data == m_next_step_clks)
             {
-                AGE_ASSERT(m_device.is_cgb_device())
+                assert(m_device.is_cgb_device());
                 if (!(m_common.get_lcdc() & gb_lcdc_bg_win_data))
                 {
                     m_bg_next_bitplane[bitplane_offset] = m_common.m_xflip_cache[m_bg_next_name];
@@ -386,7 +373,7 @@ namespace age
 
         void fetch_sprite_bitplane(int bitplane_offset)
         {
-            AGE_ASSERT((bitplane_offset == 0) || (bitplane_offset == 1))
+            assert((bitplane_offset == 0) || (bitplane_offset == 1));
 
             int tile_line_mask = (m_sprites.get_sprite_size() == 16) ? 0b1111 : 0b111;
             int tile_line      = (m_line + 16 - m_sprites.read_oam(m_spr_to_fetch_id * 4 + gb_oam_ofs_y)) & tile_line_mask;
@@ -414,7 +401,7 @@ namespace age
 
         void apply_sp_bitplane()
         {
-            AGE_ASSERT(m_sp_fifo.size() <= 8)
+            assert(m_sp_fifo.size() <= 8);
             m_sp_fifo.resize(8);
 
             uint16_t priority = m_device.cgb_mode()

@@ -60,7 +60,6 @@ add_library(
         STATIC
         api/gfx/age_png.hpp
         api/git_revision.hpp
-        age_debug.cpp
         age_downsampler.cpp
         age_pcm_ring_buffer.cpp
         age_png.cpp

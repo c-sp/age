@@ -16,6 +16,8 @@
 
 #include "age_gb_memory.hpp"
 
+#include <cassert>
+
 namespace
 {
     constexpr int idx_rtc_seconds = 0;
@@ -91,7 +93,7 @@ namespace
             sum -= bits + 1;
         }
 
-        AGE_ASSERT(sum >= 0)
+        assert(sum >= 0);
         int carry     = sum / factor;
         regs[reg_idx] = sum % factor;
 
@@ -106,7 +108,7 @@ void age::gb_memory::mbc3rtc_write(gb_memory& memory, uint16_t address, uint8_t 
 {
     auto& mbc_data = memory.get_mbc_data<gb_mbc3rtc_data>();
 
-    AGE_ASSERT(address < 0x8000)
+    assert(address < 0x8000);
     switch (address & 0x6000)
     {
         case 0x0000:

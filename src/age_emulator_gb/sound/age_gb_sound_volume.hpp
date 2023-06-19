@@ -21,8 +21,9 @@
 //! \file
 //!
 
-#include <age_debug.hpp>
 #include <age_types.hpp>
+
+#include <cassert>
 
 
 
@@ -123,7 +124,7 @@ namespace age
 
         void update_volume(int new_volume)
         {
-            AGE_ASSERT((new_volume >= 0) && (new_volume < 0x10))
+            assert((new_volume >= 0) && (new_volume < 0x10));
             m_volume = static_cast<int8_t>(new_volume);
             BaseClass::set_volume(m_volume);
         }

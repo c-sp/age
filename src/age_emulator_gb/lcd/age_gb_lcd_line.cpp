@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include <age_debug.hpp>
-
 #include "age_gb_lcd.hpp"
+
+#include <cassert>
 
 
 
@@ -51,8 +51,8 @@ age::gb_lcd_line::gb_lcd_line(const gb_device& device,
 
 void age::gb_lcd_line::align_after_speed_change(int clock_cycle_offset)
 {
-    AGE_ASSERT(lcd_is_on())
-    AGE_ASSERT(m_clock.is_double_speed())
+    assert(lcd_is_on());
+    assert(m_clock.is_double_speed());
     m_clk_frame_start += clock_cycle_offset;
     m_clk_line_start += clock_cycle_offset;
     log_frame_alignment();
@@ -134,7 +134,7 @@ bool age::gb_lcd_line::is_odd_alignment() const
 
 void age::gb_lcd_line::fast_forward_frames()
 {
-    AGE_ASSERT(lcd_is_on())
+    assert(lcd_is_on());
 
     // check for new frame
     int clk_current = m_clock.get_clock_cycle();
@@ -169,7 +169,7 @@ void age::gb_lcd_line::log_frame_alignment() const
 
 age::gb_current_line age::gb_lcd_line::current_line() const
 {
-    AGE_ASSERT(lcd_is_on())
+    assert(lcd_is_on());
 
     int clk_current = m_clock.get_clock_cycle();
     int clks_diff   = clk_current - m_clk_line_start;
@@ -191,8 +191,8 @@ age::gb_current_line age::gb_lcd_line::current_line() const
 
 age::gb_current_line age::gb_lcd_line::calculate_line(int clock_cycle) const
 {
-    AGE_ASSERT(lcd_is_on())
-    AGE_ASSERT(clock_cycle >= m_clk_frame_start)
+    assert(lcd_is_on());
+    assert(clock_cycle >= m_clk_frame_start);
 
     int clks_frame = clock_cycle - m_clk_frame_start;
 

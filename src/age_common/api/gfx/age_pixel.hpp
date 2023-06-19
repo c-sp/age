@@ -21,11 +21,11 @@
 //! \file
 //!
 
+#include <age_types.hpp>
+
+#include <cassert>
 #include <cstring> // memcpy
 #include <vector>
-
-#include <age_debug.hpp>
-#include <age_types.hpp>
 
 
 
@@ -54,15 +54,15 @@ namespace age
               m_b(static_cast<uint8_t>(b)),
               m_a(static_cast<uint8_t>(a))
         {
-            AGE_ASSERT(r >= 0)
-            AGE_ASSERT(g >= 0)
-            AGE_ASSERT(b >= 0)
-            AGE_ASSERT(a >= 0)
+            assert(r >= 0);
+            assert(g >= 0);
+            assert(b >= 0);
+            assert(a >= 0);
 
-            AGE_ASSERT(r <= 255)
-            AGE_ASSERT(g <= 255)
-            AGE_ASSERT(b <= 255)
-            AGE_ASSERT(a <= 255)
+            assert(r <= 255);
+            assert(g <= 255);
+            assert(b <= 255);
+            assert(a <= 255);
         }
 
 

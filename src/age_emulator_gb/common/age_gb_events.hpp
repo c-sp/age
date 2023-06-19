@@ -21,9 +21,9 @@
 //! \file
 //!
 
-#include <age_types.hpp>
-
 #include "age_gb_clock.hpp"
+
+#include <age_types.hpp>
 
 
 
