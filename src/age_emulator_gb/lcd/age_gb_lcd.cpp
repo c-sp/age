@@ -147,12 +147,11 @@ void age::gb_lcd::update_state(int line_clock_offset)
     {
         return;
     }
-    bool new_frame = update_frame(line_clock_offset);
+    [[maybe_unused]] bool new_frame = update_frame(line_clock_offset);
     if (new_frame)
     {
         new_frame = update_frame(line_clock_offset);
         assert(!new_frame);
-        AGE_UNUSED(new_frame); // release build: unused
     }
 }
 

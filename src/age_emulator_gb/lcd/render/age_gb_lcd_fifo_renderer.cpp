@@ -56,7 +56,7 @@ bool age::gb_lcd_fifo_renderer::stat_mode0() const
     return !in_progress() || (m_line_stage == line_stage::rendering_finished);
 }
 
-void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_line)
+void age::gb_lcd_fifo_renderer::set_clks_tile_data_change([[maybe_unused]] gb_current_line at_line)
 {
     if (in_progress())
     {
@@ -64,7 +64,6 @@ void age::gb_lcd_fifo_renderer::set_clks_tile_data_change(gb_current_line at_lin
         assert(m_line.m_line == at_line.m_line);
         assert(m_line.m_line_clks >= at_line.m_line_clks);
         m_fetcher.set_clks_tile_data_change(m_line.m_line_clks);
-        AGE_UNUSED(at_line); // release build: unused
     }
 }
 

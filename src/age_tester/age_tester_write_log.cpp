@@ -134,7 +134,7 @@ std::string age::tester::get_device_type_string(age::gb_device_type device_type)
 
 
 
-void age::tester::write_log(const std::filesystem::path& log_path,
+void age::tester::write_log([[maybe_unused]] const std::filesystem::path& log_path,
                             std::vector<gb_log_entry>    log_entries,
                             const std::filesystem::path& rom_path,
                             gb_device_type               device_type)
@@ -156,7 +156,5 @@ void age::tester::write_log(const std::filesystem::path& log_path,
 #ifdef AGE_COMPILE_LOGGER
     std::ofstream file(log_path);
     file << log.str();
-#else
-    AGE_UNUSED(log_path);
 #endif
 }

@@ -192,11 +192,6 @@ namespace age
             return m_next_step_clks;
         }
 
-        [[nodiscard]] int next_step() const
-        {
-            return to_underlying(m_next_step);
-        }
-
         [[nodiscard]] int clks_last_sprite_finished() const
         {
             return m_spr_clks_last_sprite_finished;

@@ -64,15 +64,13 @@ namespace
 
     using path_matcher = std::function<bool(const std::string&)>;
 
-    bool match_everything(const std::string& value)
+    bool match_everything([[maybe_unused]] const std::string& value)
     {
-        AGE_UNUSED(value);
         return true;
     }
 
-    bool match_nothing(const std::string& value)
+    bool match_nothing([[maybe_unused]] const std::string& value)
     {
-        AGE_UNUSED(value);
         return false;
     }
 

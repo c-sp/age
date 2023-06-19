@@ -45,16 +45,6 @@ private:                                      \
 
 
 
-// Use this to mark unused (but required) parameters,
-// e.g. for callbacks.
-//
-// See also:
-// https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables#comment51105057_1486931
-//! \todo rename to "unused"?
-#define AGE_UNUSED(arg) ((void) &(arg))
-
-
-
 namespace age
 {
 
@@ -101,18 +91,6 @@ namespace age
 
 
     // utility functions
-
-    //!
-    //! Convert the specified enum value to the associated value of the underlying type.
-    //! See also: https://stackoverflow.com/a/14589519
-    //!
-    //! \todo Can be replaced by std::to_underlying with C++23.
-    //!
-    template<typename Enum>
-    constexpr auto to_underlying(Enum e) -> typename std::underlying_type<Enum>::type
-    {
-        return static_cast<typename std::underlying_type<Enum>::type>(e);
-    }
 
     //!
     //! Return the size in bytes of the specified array's data.

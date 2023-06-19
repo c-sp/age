@@ -199,9 +199,8 @@ namespace age
 #else
     public:
         template<typename Value>
-        gb_log_message_stream& operator<<(const Value& value)
+        gb_log_message_stream& operator<<([[maybe_unused]] const Value& value)
         {
-            AGE_UNUSED(value);
             return *this;
         }
 #endif
@@ -245,14 +244,16 @@ namespace age
 
 #else
     public:
-        explicit gb_logger(gb_log_categories log_categories = {}) { AGE_UNUSED(log_categories); }
+        explicit gb_logger([[maybe_unused]] gb_log_categories log_categories = {})
+        {
+            // nothing to do here
+        }
 
         // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-        [[nodiscard]] gb_log_message_stream log(gb_log_category category, int clock, int div_clock)
+        [[nodiscard]] gb_log_message_stream log([[maybe_unused]] gb_log_category category,
+                                                [[maybe_unused]] int clock,
+                                                [[maybe_unused]] int div_clock)
         {
-            AGE_UNUSED(category);
-            AGE_UNUSED(clock);
-            AGE_UNUSED(div_clock);
             return {};
         }
 
@@ -263,9 +264,8 @@ namespace age
         }
 
         // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-        void set_back_clock(int clock_cycle_offset)
+        void set_back_clock([[maybe_unused]] int clock_cycle_offset)
         {
-            AGE_UNUSED(clock_cycle_offset);
         }
 #endif
     };

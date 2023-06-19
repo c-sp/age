@@ -44,20 +44,18 @@ void age::gb_memory::mbc7_write(gb_memory& memory, uint16_t address, uint8_t val
 
 
 
-void age::gb_memory::mbc7_cart_ram_write(gb_memory& memory, uint16_t address, uint8_t value)
+void age::gb_memory::mbc7_cart_ram_write([[maybe_unused]] gb_memory& memory,
+                                         [[maybe_unused]] uint16_t address,
+                                         [[maybe_unused]] uint8_t value)
 {
     //! \todo implement mbc7_cart_ram_write
-    AGE_UNUSED(memory);
-    AGE_UNUSED(address);
-    AGE_UNUSED(value);
 }
 
 
 
-age::uint8_t age::gb_memory::mbc7_cart_ram_read(gb_memory& memory, uint16_t address)
+age::uint8_t age::gb_memory::mbc7_cart_ram_read([[maybe_unused]] gb_memory& memory,
+                                                [[maybe_unused]] uint16_t address)
 {
     //! \todo implement mbc7_cart_ram_read
-    AGE_UNUSED(memory);
-    AGE_UNUSED(address);
     return 0xFF;
 }

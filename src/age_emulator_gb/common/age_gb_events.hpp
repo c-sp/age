@@ -25,6 +25,8 @@
 
 #include <age_types.hpp>
 
+#include <utility>
+
 
 
 namespace age
@@ -74,7 +76,7 @@ namespace age
             int      m_clock_cycle;
         };
 
-        std::array<int, to_underlying(gb_event::none)> m_active_events{};
+        std::array<int, std::to_underlying(gb_event::none)> m_active_events{};
         std::vector<scheduled_event> m_events;
     };
 
