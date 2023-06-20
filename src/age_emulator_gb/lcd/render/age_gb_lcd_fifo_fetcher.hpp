@@ -29,6 +29,7 @@
 
 #include <cassert>
 #include <deque>
+#include <span>
 
 
 
@@ -60,7 +61,7 @@ namespace age
     public:
         gb_lcd_fifo_fetcher(const gb_device&              device,
                             const gb_lcd_renderer_common& common,
-                            const uint8_t*                video_ram,
+                            std::span<uint8_t const>      video_ram,
                             const gb_lcd_sprites&         sprites,
                             const gb_window_check&        window)
             : m_device(device),
@@ -382,7 +383,7 @@ namespace age
             // read tile data
             int tile_data_ofs = m_spr_next_name << 4; // 16 bytes per tile
             tile_data_ofs += (m_spr_next_attributes & gb_tile_attrib_vram_bank) << 10;
-            tile_data_ofs += tile_line * 2; // 2 bytes per line
+            tile_data_ofs += tile_line * 2;           // 2 bytes per line
 
             auto bitplane = m_video_ram[tile_data_ofs + bitplane_offset];
 
@@ -429,7 +430,7 @@ namespace age
 
         const gb_device&              m_device;
         const gb_lcd_renderer_common& m_common;
-        const uint8_t*                m_video_ram;
+        std::span<uint8_t const>      m_video_ram;
         const gb_lcd_sprites&         m_sprites;
         const gb_window_check&        m_window;
         gb_sp_fifo                    m_sp_fifo{};

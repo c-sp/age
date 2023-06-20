@@ -37,9 +37,9 @@ namespace
 
 
 
-age::gb_lcd_palettes::gb_lcd_palettes(const gb_device& device,
-                                      const uint8_t*   rom_header,
-                                      gb_colors_hint   colors_hint)
+age::gb_lcd_palettes::gb_lcd_palettes(const gb_device&         device,
+                                      std::span<uint8_t const> rom_header,
+                                      gb_colors_hint           colors_hint)
     : m_device(device),
       m_colors_hint(colors_hint),
       m_obp0(m_device.is_cgb_device() ? 0x00 : 0xFF),
@@ -226,8 +226,8 @@ void age::gb_lcd_palettes::update_cgb_color(unsigned color_index)
     assert(color_index < gb_total_color_count);
 
     unsigned cpd_index = color_index << 1;
-    auto low_byte  = m_cpd[cpd_index];
-    auto high_byte = m_cpd[cpd_index + 1];
+    auto     low_byte  = m_cpd[cpd_index];
+    auto     high_byte = m_cpd[cpd_index + 1];
     uint16_t cgb_rgb15 = (high_byte << 8) | low_byte;
 
     // gb-color:   red:    bits 0-4

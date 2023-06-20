@@ -20,14 +20,14 @@
 
 
 
-age::gb_lcd::gb_lcd(const gb_device&      device,
-                    const gb_clock&       clock,
-                    const uint8_t*        video_ram,
-                    const uint8_t*        rom_header,
-                    gb_events&            events,
-                    gb_interrupt_trigger& interrupts,
-                    screen_buffer&        screen_buffer,
-                    gb_colors_hint        colors_hint)
+age::gb_lcd::gb_lcd(const gb_device&         device,
+                    const gb_clock&          clock,
+                    std::span<uint8_t const> video_ram,
+                    std::span<uint8_t const> rom_header,
+                    gb_events&               events,
+                    gb_interrupt_trigger&    interrupts,
+                    screen_buffer&           screen_buffer,
+                    gb_colors_hint           colors_hint)
     : m_device(device),
       m_clock(clock),
       m_events(events),

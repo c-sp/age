@@ -31,6 +31,8 @@
 #include <gfx/age_pixel.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
+#include <span>
+
 
 
 namespace age
@@ -46,7 +48,7 @@ namespace age
                              const gb_lcd_renderer_common& common,
                              const gb_lcd_palettes&        palettes,
                              const gb_lcd_sprites&         sprites,
-                             const uint8_t*                video_ram,
+                             std::span<uint8_t const>      video_ram,
                              gb_window_check&              window,
                              screen_buffer&                screen_buffer);
 
@@ -62,7 +64,7 @@ namespace age
         const gb_lcd_renderer_common& m_common;
         const gb_lcd_palettes&        m_palettes;
         const gb_lcd_sprites&         m_sprites;
-        const uint8_t*                m_video_ram;
+        std::span<uint8_t const>      m_video_ram;
         gb_window_check&              m_window;
         screen_buffer&                m_screen_buffer;
 

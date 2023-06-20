@@ -25,7 +25,7 @@ age::gb_lcd_line_renderer::gb_lcd_line_renderer(const gb_device&              de
                                                 const gb_lcd_renderer_common& common,
                                                 const gb_lcd_palettes&        palettes,
                                                 const gb_lcd_sprites&         sprites,
-                                                const uint8_t*                video_ram,
+                                                std::span<uint8_t const>      video_ram,
                                                 gb_window_check&              window,
                                                 screen_buffer&                screen_buffer)
     : m_device(device),
@@ -213,7 +213,7 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
 
     // read tile data
     int tile_data_ofs = sprite.m_tile_nr & m_sprites.get_tile_nr_mask();
-    tile_data_ofs <<= 4; // 16 bytes per tile
+    tile_data_ofs <<= 4;             // 16 bytes per tile
     tile_data_ofs += (oam_attr & gb_tile_attrib_vram_bank) << 10;
     tile_data_ofs += tile_line << 1; // 2 bytes per line
 

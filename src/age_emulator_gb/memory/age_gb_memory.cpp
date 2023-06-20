@@ -40,14 +40,14 @@ namespace
 //
 //---------------------------------------------------------
 
-const age::uint8_t* age::gb_memory::get_video_ram() const
+std::span<age::uint8_t const> age::gb_memory::get_video_ram() const
 {
-    return &m_memory[m_video_ram_offset];
+    return {m_memory.begin() + m_video_ram_offset, gb_video_ram_size};
 }
 
-const age::uint8_t* age::gb_memory::get_rom_header() const
+std::span<age::uint8_t const> age::gb_memory::get_rom_header() const
 {
-    return m_memory.data();
+    return {m_memory.begin(), 150};
 }
 
 std::string age::gb_memory::get_cartridge_title() const

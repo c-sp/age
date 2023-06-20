@@ -25,7 +25,7 @@ namespace
         colors = {age::pixel(color00), age::pixel(color01), age::pixel(color10), age::pixel(color11)};
     }
 
-    bool is_nintendo_rom(const uint8_t* rom_header)
+    bool is_nintendo_rom(std::span<age::uint8_t const> rom_header)
     {
         int licensee = rom_header[0x14B];
         if (licensee == 0x33)
@@ -41,10 +41,10 @@ namespace
     //! https://tcrf.net/Notes:Game_Boy_Color_Bootstrap_ROM#Assigned_Palette_Configurations
     //! https://web.archive.org/web/20170830061747/http://www.vcfed.org/forum/showthread.php?19247-Disassembling-the-GBC-Boot-ROM&p=128734
     //!
-    void init_dmg_colors(std::array<age::pixel, 4>& bgp,
-                         std::array<age::pixel, 4>& obp0,
-                         std::array<age::pixel, 4>& obp1,
-                         const age::uint8_t*        rom_header)
+    void init_dmg_colors(std::array<age::pixel, 4>&    bgp,
+                         std::array<age::pixel, 4>&    obp0,
+                         std::array<age::pixel, 4>&    obp1,
+                         std::span<age::uint8_t const> rom_header)
     {
         uint8_t rom_name_hash = 0;
         if (is_nintendo_rom(rom_header))
@@ -705,7 +705,7 @@ namespace
 
 
 
-void age::gb_lcd_palettes::init_dmg_colors(const age::uint8_t* rom_header)
+void age::gb_lcd_palettes::init_dmg_colors(std::span<uint8_t const> rom_header)
 {
     ::init_dmg_colors(m_bgp_colors, m_obp0_colors, m_obp1_colors, rom_header);
 }

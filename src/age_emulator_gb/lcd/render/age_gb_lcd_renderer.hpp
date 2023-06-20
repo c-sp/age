@@ -42,11 +42,11 @@ namespace age
         AGE_DISABLE_MOVE(gb_lcd_renderer);
 
     public:
-        gb_lcd_renderer(const gb_device&       device,
-                        const gb_lcd_palettes& palettes,
-                        gb_lcd_sprites&        sprites,
-                        const uint8_t*         video_ram,
-                        screen_buffer&         screen_buffer);
+        gb_lcd_renderer(const gb_device&         device,
+                        const gb_lcd_palettes&   palettes,
+                        gb_lcd_sprites&          sprites,
+                        std::span<uint8_t const> video_ram,
+                        screen_buffer&           screen_buffer);
 
         ~gb_lcd_renderer() = default;
 

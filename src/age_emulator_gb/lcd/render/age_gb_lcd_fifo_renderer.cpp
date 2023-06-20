@@ -31,7 +31,7 @@ age::gb_lcd_fifo_renderer::gb_lcd_fifo_renderer(const gb_device&              de
                                                 const gb_lcd_renderer_common& common,
                                                 const gb_lcd_palettes&        palettes,
                                                 const gb_lcd_sprites&         sprites,
-                                                const uint8_t*                video_ram,
+                                                std::span<uint8_t const>      video_ram,
                                                 gb_window_check&              window,
                                                 screen_buffer&                screen_buffer)
     : m_device(device),

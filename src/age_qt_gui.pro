@@ -6,7 +6,7 @@ QT += core gui widgets opengl multimedia
 
 # enable c14 features
 CONFIG -= c++11
-CONFIG *= c++17
+CONFIG *= c++20
 
 # define DEBUG (or maybe don't)
 CONFIG(debug, debug|release) {

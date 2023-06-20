@@ -28,6 +28,8 @@
 #include <age_types.hpp>
 #include <gfx/age_pixel.hpp>
 
+#include <span>
+
 
 
 namespace age
@@ -53,7 +55,10 @@ namespace age
         AGE_DISABLE_MOVE(gb_lcd_palettes);
 
     public:
-        gb_lcd_palettes(const gb_device& device, const uint8_t* rom_header, gb_colors_hint colors_hint);
+        gb_lcd_palettes(const gb_device&         device,
+                        std::span<uint8_t const> rom_header,
+                        gb_colors_hint           colors_hint);
+
         ~gb_lcd_palettes() = default;
 
         [[nodiscard]] const pixel* get_palette(unsigned palette_index) const;
@@ -78,7 +83,7 @@ namespace age
         void write_ocpd(uint8_t value);
 
     private:
-        void init_dmg_colors(const age::uint8_t* rom_header);
+        void init_dmg_colors(std::span<uint8_t const> rom_header);
 
         void  update_dmg_palette(unsigned palette_index, uint8_t value);
         void  update_cgb_color(unsigned color_index);

@@ -26,6 +26,7 @@
 #include <age_types.hpp>
 
 #include <functional>
+#include <span>
 #include <string>
 #include <variant>
 
@@ -36,9 +37,12 @@ namespace age
 
     constexpr int gb_cart_rom_bank_size  = 0x4000;
     constexpr int gb_cart_ram_bank_size  = 0x2000;
+
     constexpr int gb_work_ram_bank_size  = 0x1000;
     constexpr int gb_work_ram_size       = 8 * age::gb_work_ram_bank_size;
+
     constexpr int gb_video_ram_bank_size = 0x2000;
+    constexpr int gb_video_ram_size      = 2 * age::gb_video_ram_bank_size;
 
 
 
@@ -51,9 +55,9 @@ namespace age
         explicit gb_memory(const uint8_vector& cart_rom, const gb_clock& clock, bool is_cgb_device);
         ~gb_memory() = default;
 
-        [[nodiscard]] const uint8_t* get_video_ram() const;
-        [[nodiscard]] const uint8_t* get_rom_header() const;
-        [[nodiscard]] std::string    get_cartridge_title() const;
+        [[nodiscard]] std::span<uint8_t const> get_video_ram() const;
+        [[nodiscard]] std::span<uint8_t const> get_rom_header() const;
+        [[nodiscard]] std::string              get_cartridge_title() const;
 
         [[nodiscard]] uint8_vector get_persistent_ram() const;
         void                       set_persistent_ram(const uint8_vector& source);

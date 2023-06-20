@@ -21,11 +21,11 @@
 
 
 
-age::gb_lcd_renderer::gb_lcd_renderer(const gb_device&       device,
-                                      const gb_lcd_palettes& palettes,
-                                      gb_lcd_sprites&        sprites,
-                                      const uint8_t*         video_ram,
-                                      screen_buffer&         screen_buffer)
+age::gb_lcd_renderer::gb_lcd_renderer(const gb_device&         device,
+                                      const gb_lcd_palettes&   palettes,
+                                      gb_lcd_sprites&          sprites,
+                                      std::span<uint8_t const> video_ram,
+                                      screen_buffer&           screen_buffer)
     : gb_lcd_renderer_common(device, sprites),
       m_window(device.is_dmg_device()),
       m_fifo_renderer(device, *this, palettes, sprites, video_ram, m_window, screen_buffer),
