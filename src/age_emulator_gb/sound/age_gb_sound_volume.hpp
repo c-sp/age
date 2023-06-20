@@ -46,7 +46,7 @@ namespace age
             auto msg = BaseClass::log();
 
             // "zombie" update
-            int volume = static_cast<uint8_t>(m_volume);
+            int volume = m_volume;
             if ((m_period == 0) && (m_period_counter > 0))
             {
                 ++volume;
@@ -125,7 +125,7 @@ namespace age
         void update_volume(int new_volume)
         {
             assert((new_volume >= 0) && (new_volume < 0x10));
-            m_volume = static_cast<int8_t>(new_volume);
+            m_volume = new_volume;
             BaseClass::set_volume(m_volume);
         }
 
@@ -144,10 +144,10 @@ namespace age
 
         uint8_t m_nrX2 = 0;
 
-        bool   m_increase_volume = false;
-        int8_t m_period          = 0;
-        int8_t m_period_counter  = 0;
-        int8_t m_volume          = 0;
+        bool    m_increase_volume = false;
+        uint8_t m_period          = 0;
+        uint8_t m_period_counter  = 0;
+        uint8_t m_volume          = 0;
     };
 
 } // namespace age

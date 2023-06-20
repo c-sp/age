@@ -52,6 +52,7 @@ const age::uint8_t* age::gb_memory::get_rom_header() const
 
 std::string age::gb_memory::get_cartridge_title() const
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     const char* buffer = reinterpret_cast<const char*>(&m_memory[gb_cia_ofs_title]);
     std::string result = {buffer, 16};
     return result;

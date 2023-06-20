@@ -44,25 +44,25 @@ namespace age
                     static_cast<uint8_t>(rgb))
         {}
 
-        pixel(int r, int g, int b)
-            : pixel(r, g, b, 0xFF)
+        pixel(int red, int green, int blue)
+            : pixel(red, green, blue, 0xFF)
         {}
 
-        pixel(int r, int g, int b, int a)
-            : m_r(static_cast<uint8_t>(r)),
-              m_g(static_cast<uint8_t>(g)),
-              m_b(static_cast<uint8_t>(b)),
-              m_a(static_cast<uint8_t>(a))
+        pixel(int red, int green, int blue, int alpha)
+            : m_r(static_cast<uint8_t>(red)),
+              m_g(static_cast<uint8_t>(green)),
+              m_b(static_cast<uint8_t>(blue)),
+              m_a(static_cast<uint8_t>(alpha))
         {
-            assert(r >= 0);
-            assert(g >= 0);
-            assert(b >= 0);
-            assert(a >= 0);
+            assert(red >= 0);
+            assert(green >= 0);
+            assert(blue >= 0);
+            assert(alpha >= 0);
 
-            assert(r <= 255);
-            assert(g <= 255);
-            assert(b <= 255);
-            assert(a <= 255);
+            assert(red <= 255);
+            assert(green <= 255);
+            assert(blue <= 255);
+            assert(alpha <= 255);
         }
 
 

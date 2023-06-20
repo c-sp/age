@@ -47,10 +47,10 @@ namespace age
         {
             assert(factor <= 1);
             assert(factor >= 0);
-            float s0       = m_left_sample;
-            float s1       = m_right_sample;
-            m_left_sample  = static_cast<int16_t>(s0 * factor);
-            m_right_sample = static_cast<int16_t>(s1 * factor);
+            float sample_left  = m_left_sample;
+            float sample_right = m_right_sample;
+            m_left_sample      = static_cast<int16_t>(sample_left * factor);
+            m_right_sample     = static_cast<int16_t>(sample_right * factor);
             return *this;
         }
 

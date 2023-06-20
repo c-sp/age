@@ -54,8 +54,8 @@ namespace age
 
         void init_length_counter(uint8_t nrX4, bool immediate_decrement)
         {
-            int8_t decrement           = 0;
-            bool   new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
+            int  decrement           = 0;
+            bool new_counter_enabled = (nrX4 & gb_nrX4_length_counter) > 0;
             if (new_counter_enabled)
             {
                 decrement = immediate_decrement ? 1 : 0;

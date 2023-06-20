@@ -18,7 +18,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <utility>
 
 
 
@@ -44,7 +43,7 @@ void age::gb_sorted_events::schedule_event(gb_event event, int for_clock_cycle)
     assert(for_clock_cycle >= 0);
     assert(event != gb_event::none);
 
-    int ev_idx = std::to_underlying(event);
+    int ev_idx = to_underlying(event);
 
     //! \todo optimize this, the vector is sorted
 
@@ -84,7 +83,7 @@ void age::gb_sorted_events::schedule_event(gb_event event, int for_clock_cycle)
 bool age::gb_sorted_events::remove_event(gb_event event)
 {
     // is the event scheduled?
-    uint8_t idx = std::to_underlying(event);
+    uint8_t idx = to_underlying(event);
     if (m_active_events[idx] == gb_no_clock_cycle)
     {
         return false;
@@ -107,7 +106,7 @@ bool age::gb_sorted_events::remove_event(gb_event event)
 
 int age::gb_sorted_events::get_event_cycle(gb_event event) const
 {
-    return m_active_events[std::to_underlying(event)];
+    return m_active_events[to_underlying(event)];
 }
 
 int age::gb_sorted_events::get_next_event_cycle() const
@@ -141,7 +140,7 @@ age::gb_event age::gb_sorted_events::poll_next_event(int for_clock_cycle)
     // poll event
     gb_event event = m_events.back().m_event;
     m_events.pop_back();
-    m_active_events[std::to_underlying(event)] = gb_no_clock_cycle;
+    m_active_events[to_underlying(event)] = gb_no_clock_cycle;
     return event;
 }
 
@@ -182,7 +181,7 @@ void age::gb_events::schedule_event(gb_event event, int clock_cycle_offset)
     int ev_cycle = m_clock.get_clock_cycle() + clock_cycle_offset;
     m_events.schedule_event(event, ev_cycle);
 
-    log() << "event " << log_dec(std::to_underlying(event))
+    log() << "event " << log_dec(to_underlying(event))
           << " scheduled for clock cycle " << ev_cycle
           << ", " << m_events.get_events_scheduled() << " event(s) scheduled total";
 }
@@ -194,7 +193,7 @@ void age::gb_events::remove_event(gb_event event)
     auto removed = m_events.remove_event(event);
     if (removed)
     {
-        log() << "event " << log_dec(std::to_underlying(event)) << " removed"
+        log() << "event " << log_dec(to_underlying(event)) << " removed"
               << ", " << m_events.get_events_scheduled() << " event(s) still scheduled";
     }
 }
@@ -218,7 +217,7 @@ age::gb_event age::gb_events::poll_next_event()
     auto event = m_events.poll_next_event(m_clock.get_clock_cycle());
     if (event != gb_event::none)
     {
-        log() << "event " << std::to_underlying(event) << " polled"
+        log() << "event " << to_underlying(event) << " polled"
               << ", " << m_events.get_events_scheduled() << " event(s) still scheduled";
     }
     return event;

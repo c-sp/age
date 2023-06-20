@@ -46,7 +46,8 @@ namespace
             if (m_file_ptr != nullptr)
             {
                 auto state = fclose(m_file_ptr);
-                if (state != 0) {
+                if (state != 0)
+                {
                     //! \todo log something
                 }
                 m_file_ptr = nullptr;
@@ -144,10 +145,12 @@ age::pixel_vector age::read_png_file(const std::string& file_path,
     size_t            screen_width_u = image_width;
     age::pixel_vector pixels(screen_width_u * image_height, age::pixel());
 
-    png_bytep row_pointers[image_height];
+    std::vector<png_bytep> row_pointers;
+    row_pointers.reserve(image_height);
     for (int i = 0; i < image_height; i++)
     {
-        row_pointers[i] = reinterpret_cast<unsigned char*>(&pixels[i * screen_width_u]);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        row_pointers.push_back(reinterpret_cast<unsigned char*>(&pixels[i * screen_width_u]));
     }
 
     // create png data structures
@@ -185,11 +188,12 @@ age::pixel_vector age::read_png_file(const std::string& file_path,
 
     // read image data
     configure_rgba(png_ptr, info_ptr);
-    png_read_image(png_ptr, &row_pointers[0]);
+    png_read_image(png_ptr, row_pointers.data());
 
     png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     return pixels;
 }
+
 
 
 
@@ -208,12 +212,14 @@ void age::write_png_file(const age::pixel_vector& data,
     // We cannot be sure that png_write_image(png_structrp, png_bytepp) does not
     // modify image data, as the second parameter is not declared const.
     // We thus use an image data copy.
-    age::pixel_vector data_copy(data);
-    size_t            screen_width_u = image_width;
-    png_bytep         row_pointers[image_height];
+    age::pixel_vector      data_copy(data);
+    size_t                 screen_width_u = image_width;
+    std::vector<png_bytep> row_pointers;
+    row_pointers.reserve(image_height);
     for (int i = 0; i < image_height; i++)
     {
-        row_pointers[i] = reinterpret_cast<unsigned char*>(&data_copy[i * screen_width_u]);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        row_pointers.push_back(reinterpret_cast<unsigned char*>(&data_copy[i * screen_width_u]));
     }
 
     // create png data structures
@@ -251,7 +257,7 @@ void age::write_png_file(const age::pixel_vector& data,
         PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
-    png_write_image(png_ptr, &row_pointers[0]);
+    png_write_image(png_ptr, row_pointers.data());
     png_write_end(png_ptr, nullptr);
 
     png_destroy_write_struct(&png_ptr, &info_ptr);

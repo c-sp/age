@@ -18,7 +18,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <utility>
 
 
 
@@ -181,37 +180,37 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
             return result;
         }
         // high ram & ie
-        return (std::to_underlying(gb_register::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
+        return (to_underlying(gb_register::ie) == address) ? m_interrupts.read_ie() : m_high_ram[address - 0xFE00];
     }
 
     // 0xFF00 - 0xFF7F : registers & wave ram
     switch (address)
     {
-        case std::to_underlying(gb_register::p1): return m_joypad.read_p1();
-        case std::to_underlying(gb_register::sb): return m_serial.read_sb();
-        case std::to_underlying(gb_register::sc): return m_serial.read_sc();
-        case std::to_underlying(gb_register::div): return m_clock.read_div();
-        case std::to_underlying(gb_register::tima): return m_timer.read_tima();
-        case std::to_underlying(gb_register::tma): return m_timer.read_tma();
-        case std::to_underlying(gb_register::tac): return m_timer.read_tac();
-        case std::to_underlying(gb_register::if_): return m_interrupts.read_if();
+        case to_underlying(gb_register::p1): return m_joypad.read_p1();
+        case to_underlying(gb_register::sb): return m_serial.read_sb();
+        case to_underlying(gb_register::sc): return m_serial.read_sc();
+        case to_underlying(gb_register::div): return m_clock.read_div();
+        case to_underlying(gb_register::tima): return m_timer.read_tima();
+        case to_underlying(gb_register::tma): return m_timer.read_tma();
+        case to_underlying(gb_register::tac): return m_timer.read_tac();
+        case to_underlying(gb_register::if_): return m_interrupts.read_if();
 
-        case std::to_underlying(gb_register::nr10): return m_sound.read_nr10();
-        case std::to_underlying(gb_register::nr11): return m_sound.read_nr11();
-        case std::to_underlying(gb_register::nr12): return m_sound.read_nr12();
-        case std::to_underlying(gb_register::nr14): return m_sound.read_nr14();
-        case std::to_underlying(gb_register::nr21): return m_sound.read_nr21();
-        case std::to_underlying(gb_register::nr22): return m_sound.read_nr22();
-        case std::to_underlying(gb_register::nr24): return m_sound.read_nr24();
-        case std::to_underlying(gb_register::nr30): return m_sound.read_nr30();
-        case std::to_underlying(gb_register::nr32): return m_sound.read_nr32();
-        case std::to_underlying(gb_register::nr34): return m_sound.read_nr34();
-        case std::to_underlying(gb_register::nr42): return m_sound.read_nr42();
-        case std::to_underlying(gb_register::nr43): return m_sound.read_nr43();
-        case std::to_underlying(gb_register::nr44): return m_sound.read_nr44();
-        case std::to_underlying(gb_register::nr50): return m_sound.read_nr50();
-        case std::to_underlying(gb_register::nr51): return m_sound.read_nr51();
-        case std::to_underlying(gb_register::nr52): return m_sound.read_nr52();
+        case to_underlying(gb_register::nr10): return m_sound.read_nr10();
+        case to_underlying(gb_register::nr11): return m_sound.read_nr11();
+        case to_underlying(gb_register::nr12): return m_sound.read_nr12();
+        case to_underlying(gb_register::nr14): return m_sound.read_nr14();
+        case to_underlying(gb_register::nr21): return m_sound.read_nr21();
+        case to_underlying(gb_register::nr22): return m_sound.read_nr22();
+        case to_underlying(gb_register::nr24): return m_sound.read_nr24();
+        case to_underlying(gb_register::nr30): return m_sound.read_nr30();
+        case to_underlying(gb_register::nr32): return m_sound.read_nr32();
+        case to_underlying(gb_register::nr34): return m_sound.read_nr34();
+        case to_underlying(gb_register::nr42): return m_sound.read_nr42();
+        case to_underlying(gb_register::nr43): return m_sound.read_nr43();
+        case to_underlying(gb_register::nr44): return m_sound.read_nr44();
+        case to_underlying(gb_register::nr50): return m_sound.read_nr50();
+        case to_underlying(gb_register::nr51): return m_sound.read_nr51();
+        case to_underlying(gb_register::nr52): return m_sound.read_nr52();
         case 0xFF30:
         case 0xFF31:
         case 0xFF32:
@@ -230,19 +229,19 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
         case 0xFF3F:
             return m_sound.read_wave_ram(address - 0xFF30);
 
-        case std::to_underlying(gb_register::lcdc): return m_lcd.read_lcdc();
-        case std::to_underlying(gb_register::stat): return m_lcd.read_stat();
-        case std::to_underlying(gb_register::scy): return m_lcd.read_scy();
-        case std::to_underlying(gb_register::scx): return m_lcd.read_scx();
-        case std::to_underlying(gb_register::ly): return m_lcd.read_ly();
-        case std::to_underlying(gb_register::lyc): return m_lcd.read_lyc();
-        case std::to_underlying(gb_register::dma): return m_oam_dma.read_dma_reg();
-        case std::to_underlying(gb_register::bgp): return m_lcd.read_bgp();
-        case std::to_underlying(gb_register::obp0): return m_lcd.read_obp0();
-        case std::to_underlying(gb_register::obp1): return m_lcd.read_obp1();
-        case std::to_underlying(gb_register::wy): return m_lcd.read_wy();
-        case std::to_underlying(gb_register::wx): return m_lcd.read_wx();
-        case std::to_underlying(gb_register::ie): return m_interrupts.read_ie();
+        case to_underlying(gb_register::lcdc): return m_lcd.read_lcdc();
+        case to_underlying(gb_register::stat): return m_lcd.read_stat();
+        case to_underlying(gb_register::scy): return m_lcd.read_scy();
+        case to_underlying(gb_register::scx): return m_lcd.read_scx();
+        case to_underlying(gb_register::ly): return m_lcd.read_ly();
+        case to_underlying(gb_register::lyc): return m_lcd.read_lyc();
+        case to_underlying(gb_register::dma): return m_oam_dma.read_dma_reg();
+        case to_underlying(gb_register::bgp): return m_lcd.read_bgp();
+        case to_underlying(gb_register::obp0): return m_lcd.read_obp0();
+        case to_underlying(gb_register::obp1): return m_lcd.read_obp1();
+        case to_underlying(gb_register::wy): return m_lcd.read_wy();
+        case to_underlying(gb_register::wx): return m_lcd.read_wx();
+        case to_underlying(gb_register::ie): return m_interrupts.read_ie();
         default: break;
     }
 
@@ -251,21 +250,21 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     {
         switch (address)
         {
-            case std::to_underlying(gb_register::key1): return m_clock.read_key1();
-            case std::to_underlying(gb_register::vbk): return m_memory.read_vbk();
-            case std::to_underlying(gb_register::hdma5): return m_hdma5;
-            case std::to_underlying(gb_register::rp): return m_rp;
-            case std::to_underlying(gb_register::bcps): return m_lcd.read_bcps();
-            case std::to_underlying(gb_register::bcpd): return m_lcd.read_bcpd();
-            case std::to_underlying(gb_register::ocps): return m_lcd.read_ocps();
-            case std::to_underlying(gb_register::ocpd): return m_lcd.read_ocpd();
-            case std::to_underlying(gb_register::un6c): return m_un6c;
-            case std::to_underlying(gb_register::svbk): return m_memory.read_svbk();
-            case std::to_underlying(gb_register::un72): return m_un72;
-            case std::to_underlying(gb_register::un73): return m_un73;
-            case std::to_underlying(gb_register::un75): return m_un75;
-            case std::to_underlying(gb_register::pcm12): return m_sound.read_pcm12();
-            case std::to_underlying(gb_register::pcm34): return m_sound.read_pcm34();
+            case to_underlying(gb_register::key1): return m_clock.read_key1();
+            case to_underlying(gb_register::vbk): return m_memory.read_vbk();
+            case to_underlying(gb_register::hdma5): return m_hdma5;
+            case to_underlying(gb_register::rp): return m_rp;
+            case to_underlying(gb_register::bcps): return m_lcd.read_bcps();
+            case to_underlying(gb_register::bcpd): return m_lcd.read_bcpd();
+            case to_underlying(gb_register::ocps): return m_lcd.read_ocps();
+            case to_underlying(gb_register::ocpd): return m_lcd.read_ocpd();
+            case to_underlying(gb_register::un6c): return m_un6c;
+            case to_underlying(gb_register::svbk): return m_memory.read_svbk();
+            case to_underlying(gb_register::un72): return m_un72;
+            case to_underlying(gb_register::un73): return m_un73;
+            case to_underlying(gb_register::un75): return m_un75;
+            case to_underlying(gb_register::pcm12): return m_sound.read_pcm12();
+            case to_underlying(gb_register::pcm34): return m_sound.read_pcm34();
             default: break;
         }
     }
@@ -275,14 +274,14 @@ age::uint8_t age::gb_bus::read_byte(uint16_t address)
     {
         switch (address)
         {
-            case std::to_underlying(gb_register::vbk): return 0xFE;
-            case std::to_underlying(gb_register::bcps): return 0xC8;
-            case std::to_underlying(gb_register::ocps): return 0xD0;
-            case std::to_underlying(gb_register::un72): return m_un72;
-            case std::to_underlying(gb_register::un73): return m_un73;
-            case std::to_underlying(gb_register::un75): return m_un75;
-            case std::to_underlying(gb_register::pcm12): return m_sound.read_pcm12();
-            case std::to_underlying(gb_register::pcm34): return m_sound.read_pcm34();
+            case to_underlying(gb_register::vbk): return 0xFE;
+            case to_underlying(gb_register::bcps): return 0xC8;
+            case to_underlying(gb_register::ocps): return 0xD0;
+            case to_underlying(gb_register::un72): return m_un72;
+            case to_underlying(gb_register::un73): return m_un73;
+            case to_underlying(gb_register::un75): return m_un75;
+            case to_underlying(gb_register::pcm12): return m_sound.read_pcm12();
+            case to_underlying(gb_register::pcm34): return m_sound.read_pcm34();
             default: break;
         }
     }
@@ -352,7 +351,7 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
                 return;
             }
         }
-        if (std::to_underlying(gb_register::ie) == address)
+        if (to_underlying(gb_register::ie) == address)
         {
             m_interrupts.write_ie(byte);
         }
@@ -366,36 +365,36 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     // 0xFF00 - 0xFF7F : registers & wave ram
     switch (address)
     {
-        case std::to_underlying(gb_register::p1): m_joypad.write_p1(byte); return;
-        case std::to_underlying(gb_register::sb): m_serial.write_sb(byte); return;
-        case std::to_underlying(gb_register::sc): m_serial.write_sc(byte); return;
-        case std::to_underlying(gb_register::div): reset_div(false); return;
-        case std::to_underlying(gb_register::tima): m_timer.write_tima(byte); return;
-        case std::to_underlying(gb_register::tma): m_timer.write_tma(byte); return;
-        case std::to_underlying(gb_register::tac): m_timer.write_tac(byte); return;
-        case std::to_underlying(gb_register::if_): m_interrupts.write_if(byte); return;
+        case to_underlying(gb_register::p1): m_joypad.write_p1(byte); return;
+        case to_underlying(gb_register::sb): m_serial.write_sb(byte); return;
+        case to_underlying(gb_register::sc): m_serial.write_sc(byte); return;
+        case to_underlying(gb_register::div): reset_div(false); return;
+        case to_underlying(gb_register::tima): m_timer.write_tima(byte); return;
+        case to_underlying(gb_register::tma): m_timer.write_tma(byte); return;
+        case to_underlying(gb_register::tac): m_timer.write_tac(byte); return;
+        case to_underlying(gb_register::if_): m_interrupts.write_if(byte); return;
 
-        case std::to_underlying(gb_register::nr10): m_sound.write_nr10(byte); return;
-        case std::to_underlying(gb_register::nr11): m_sound.write_nr11(byte); return;
-        case std::to_underlying(gb_register::nr12): m_sound.write_nr12(byte); return;
-        case std::to_underlying(gb_register::nr13): m_sound.write_nr13(byte); return;
-        case std::to_underlying(gb_register::nr14): m_sound.write_nr14(byte); return;
-        case std::to_underlying(gb_register::nr21): m_sound.write_nr21(byte); return;
-        case std::to_underlying(gb_register::nr22): m_sound.write_nr22(byte); return;
-        case std::to_underlying(gb_register::nr23): m_sound.write_nr23(byte); return;
-        case std::to_underlying(gb_register::nr24): m_sound.write_nr24(byte); return;
-        case std::to_underlying(gb_register::nr30): m_sound.write_nr30(byte); return;
-        case std::to_underlying(gb_register::nr31): m_sound.write_nr31(byte); return;
-        case std::to_underlying(gb_register::nr32): m_sound.write_nr32(byte); return;
-        case std::to_underlying(gb_register::nr33): m_sound.write_nr33(byte); return;
-        case std::to_underlying(gb_register::nr34): m_sound.write_nr34(byte); return;
-        case std::to_underlying(gb_register::nr41): m_sound.write_nr41(byte); return;
-        case std::to_underlying(gb_register::nr42): m_sound.write_nr42(byte); return;
-        case std::to_underlying(gb_register::nr43): m_sound.write_nr43(byte); return;
-        case std::to_underlying(gb_register::nr44): m_sound.write_nr44(byte); return;
-        case std::to_underlying(gb_register::nr50): m_sound.write_nr50(byte); return;
-        case std::to_underlying(gb_register::nr51): m_sound.write_nr51(byte); return;
-        case std::to_underlying(gb_register::nr52): m_sound.write_nr52(byte); return;
+        case to_underlying(gb_register::nr10): m_sound.write_nr10(byte); return;
+        case to_underlying(gb_register::nr11): m_sound.write_nr11(byte); return;
+        case to_underlying(gb_register::nr12): m_sound.write_nr12(byte); return;
+        case to_underlying(gb_register::nr13): m_sound.write_nr13(byte); return;
+        case to_underlying(gb_register::nr14): m_sound.write_nr14(byte); return;
+        case to_underlying(gb_register::nr21): m_sound.write_nr21(byte); return;
+        case to_underlying(gb_register::nr22): m_sound.write_nr22(byte); return;
+        case to_underlying(gb_register::nr23): m_sound.write_nr23(byte); return;
+        case to_underlying(gb_register::nr24): m_sound.write_nr24(byte); return;
+        case to_underlying(gb_register::nr30): m_sound.write_nr30(byte); return;
+        case to_underlying(gb_register::nr31): m_sound.write_nr31(byte); return;
+        case to_underlying(gb_register::nr32): m_sound.write_nr32(byte); return;
+        case to_underlying(gb_register::nr33): m_sound.write_nr33(byte); return;
+        case to_underlying(gb_register::nr34): m_sound.write_nr34(byte); return;
+        case to_underlying(gb_register::nr41): m_sound.write_nr41(byte); return;
+        case to_underlying(gb_register::nr42): m_sound.write_nr42(byte); return;
+        case to_underlying(gb_register::nr43): m_sound.write_nr43(byte); return;
+        case to_underlying(gb_register::nr44): m_sound.write_nr44(byte); return;
+        case to_underlying(gb_register::nr50): m_sound.write_nr50(byte); return;
+        case to_underlying(gb_register::nr51): m_sound.write_nr51(byte); return;
+        case to_underlying(gb_register::nr52): m_sound.write_nr52(byte); return;
         case 0xFF30:
         case 0xFF31:
         case 0xFF32:
@@ -415,18 +414,18 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
             m_sound.write_wave_ram(address - 0xFF30, byte);
             return;
 
-        case std::to_underlying(gb_register::lcdc): m_lcd.write_lcdc(byte); return;
-        case std::to_underlying(gb_register::stat): m_lcd.write_stat(byte); return;
-        case std::to_underlying(gb_register::scy): m_lcd.write_scy(byte); return;
-        case std::to_underlying(gb_register::scx): m_lcd.write_scx(byte); return;
-        case std::to_underlying(gb_register::ly): return; // cannot be written
-        case std::to_underlying(gb_register::lyc): m_lcd.write_lyc(byte); return;
-        case std::to_underlying(gb_register::dma): m_oam_dma.write_dma_reg(byte); return;
-        case std::to_underlying(gb_register::bgp): m_lcd.write_bgp(byte); return;
-        case std::to_underlying(gb_register::obp0): m_lcd.write_obp0(byte); return;
-        case std::to_underlying(gb_register::obp1): m_lcd.write_obp1(byte); return;
-        case std::to_underlying(gb_register::wy): m_lcd.write_wy(byte); return;
-        case std::to_underlying(gb_register::wx): m_lcd.write_wx(byte); return;
+        case to_underlying(gb_register::lcdc): m_lcd.write_lcdc(byte); return;
+        case to_underlying(gb_register::stat): m_lcd.write_stat(byte); return;
+        case to_underlying(gb_register::scy): m_lcd.write_scy(byte); return;
+        case to_underlying(gb_register::scx): m_lcd.write_scx(byte); return;
+        case to_underlying(gb_register::ly): return; // cannot be written
+        case to_underlying(gb_register::lyc): m_lcd.write_lyc(byte); return;
+        case to_underlying(gb_register::dma): m_oam_dma.write_dma_reg(byte); return;
+        case to_underlying(gb_register::bgp): m_lcd.write_bgp(byte); return;
+        case to_underlying(gb_register::obp0): m_lcd.write_obp0(byte); return;
+        case to_underlying(gb_register::obp1): m_lcd.write_obp1(byte); return;
+        case to_underlying(gb_register::wy): m_lcd.write_wy(byte); return;
+        case to_underlying(gb_register::wx): m_lcd.write_wx(byte); return;
         default: break;
     }
 
@@ -435,23 +434,23 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     {
         switch (address)
         {
-            case std::to_underlying(gb_register::key1): m_clock.write_key1(byte); return;
-            case std::to_underlying(gb_register::vbk): m_memory.write_vbk(byte); return;
-            case std::to_underlying(gb_register::hdma1): m_hdma_source = (m_hdma_source & 0xFF) + (byte << 8); return;
-            case std::to_underlying(gb_register::hdma2): m_hdma_source = (m_hdma_source & 0xFF00) + (byte & 0xF0); return;
-            case std::to_underlying(gb_register::hdma3): m_hdma_destination = (m_hdma_destination & 0xFF) + (byte << 8); return;
-            case std::to_underlying(gb_register::hdma4): m_hdma_destination = (m_hdma_destination & 0xFF00) + (byte & 0xF0); return;
-            case std::to_underlying(gb_register::hdma5): write_hdma5(byte); return;
-            case std::to_underlying(gb_register::rp): m_rp = byte | 0x3E; return;
-            case std::to_underlying(gb_register::bcps): m_lcd.write_bcps(byte); return;
-            case std::to_underlying(gb_register::bcpd): m_lcd.write_bcpd(byte); return;
-            case std::to_underlying(gb_register::ocps): m_lcd.write_ocps(byte); return;
-            case std::to_underlying(gb_register::ocpd): m_lcd.write_ocpd(byte); return;
-            case std::to_underlying(gb_register::un6c): m_un6c = byte | 0xFE; return;
-            case std::to_underlying(gb_register::svbk): m_memory.write_svbk(byte); return;
-            case std::to_underlying(gb_register::un72): m_un72 = byte; return;
-            case std::to_underlying(gb_register::un73): m_un73 = byte; return;
-            case std::to_underlying(gb_register::un75): m_un75 = byte | 0x8F; return;
+            case to_underlying(gb_register::key1): m_clock.write_key1(byte); return;
+            case to_underlying(gb_register::vbk): m_memory.write_vbk(byte); return;
+            case to_underlying(gb_register::hdma1): m_hdma_source = (m_hdma_source & 0xFF) + (byte << 8); return;
+            case to_underlying(gb_register::hdma2): m_hdma_source = (m_hdma_source & 0xFF00) + (byte & 0xF0); return;
+            case to_underlying(gb_register::hdma3): m_hdma_destination = (m_hdma_destination & 0xFF) + (byte << 8); return;
+            case to_underlying(gb_register::hdma4): m_hdma_destination = (m_hdma_destination & 0xFF00) + (byte & 0xF0); return;
+            case to_underlying(gb_register::hdma5): write_hdma5(byte); return;
+            case to_underlying(gb_register::rp): m_rp = byte | 0x3E; return;
+            case to_underlying(gb_register::bcps): m_lcd.write_bcps(byte); return;
+            case to_underlying(gb_register::bcpd): m_lcd.write_bcpd(byte); return;
+            case to_underlying(gb_register::ocps): m_lcd.write_ocps(byte); return;
+            case to_underlying(gb_register::ocpd): m_lcd.write_ocpd(byte); return;
+            case to_underlying(gb_register::un6c): m_un6c = byte | 0xFE; return;
+            case to_underlying(gb_register::svbk): m_memory.write_svbk(byte); return;
+            case to_underlying(gb_register::un72): m_un72 = byte; return;
+            case to_underlying(gb_register::un73): m_un73 = byte; return;
+            case to_underlying(gb_register::un75): m_un75 = byte | 0x8F; return;
             default: break;
         }
     }
@@ -461,9 +460,9 @@ void age::gb_bus::write_byte(uint16_t address, uint8_t byte)
     {
         switch (address)
         {
-            case std::to_underlying(gb_register::un72): m_un72 = byte; return;
-            case std::to_underlying(gb_register::un73): m_un73 = byte; return;
-            case std::to_underlying(gb_register::un75): m_un75 = byte | 0x8F; return;
+            case to_underlying(gb_register::un72): m_un72 = byte; return;
+            case to_underlying(gb_register::un73): m_un73 = byte; return;
+            case to_underlying(gb_register::un75): m_un75 = byte | 0x8F; return;
             default: break;
         }
     }

@@ -30,8 +30,9 @@ namespace
 {
     std::string log_header(const std::filesystem::path& rom_path, age::gb_device_type device_type)
     {
-        std::time_t t  = std::time(nullptr);
-        auto*       tm = std::gmtime(&t);
+        std::time_t t = std::time(nullptr);
+        // NOLINTNEXTLINE(concurrency-mt-unsafe)
+        auto* tm = std::gmtime(&t);
 
         std::stringstream result;
         result << "--------------------------------------------------------------------------------\n"
@@ -135,9 +136,9 @@ std::string age::tester::get_device_type_string(age::gb_device_type device_type)
 
 
 void age::tester::write_log([[maybe_unused]] const std::filesystem::path& log_path,
-                            std::vector<gb_log_entry>    log_entries,
-                            const std::filesystem::path& rom_path,
-                            gb_device_type               device_type)
+                            std::vector<gb_log_entry>                     log_entries,
+                            const std::filesystem::path&                  rom_path,
+                            gb_device_type                                device_type)
 {
     if (log_entries.empty())
     {

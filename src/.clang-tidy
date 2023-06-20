@@ -17,76 +17,54 @@
 #       https://clang.llvm.org/extra/clang-tidy/checks/llvm/header-guard.html
 #
 # TODO bugprone-easily-swappable-parameters
-# TODO cert-err33-c
-# TODO concurrency-mt-unsafe
-# TODO cppcoreguidelines-avoid-c-arrays
+# TODO bugprone-exception-escape (requires https://github.com/llvm/llvm-project/issues/54668 to be solved)
 # TODO cppcoreguidelines-avoid-const-or-ref-data-members
-# TODO cppcoreguidelines-avoid-non-const-global-variables
-# TODO cppcoreguidelines-macro-usage
+# TODO cppcoreguidelines-macro-usage (requires CPU code rewrite)
 # TODO cppcoreguidelines-non-private-member-variables-in-classes
-# TODO cppcoreguidelines-pro-bounds-constant-array-index
-# TODO cppcoreguidelines-pro-bounds-pointer-arithmetic
-# TODO cppcoreguidelines-pro-bounds-pointer-arithmetic
-# TODO cppcoreguidelines-pro-type-reinterpret-cast
-# TODO cppcoreguidelines-pro-type-vararg
+# TODO cppcoreguidelines-pro-bounds-pointer-arithmetic (requires C++ spans)
 # TODO google-readability-function-size
-# TODO hicpp-avoid-c-arrays
 # TODO hicpp-function-size
 # TODO hicpp-signed-bitwise
 # TODO hicpp-vararg
 # TODO misc-const-correctness
 # TODO misc-non-private-member-variables-in-classes
-# TODO modernize-avoid-c-arrays,
 # TODO modernize-use-trailing-return-type
 # TODO readability-convert-member-functions-to-static
 # TODO readability-function-cognitive-complexity
 # TODO readability-function-size
-# TODO readability-identifier-length
-# TODO readability-isolate-declaration
-#
-# TODO enable bugprone-exception-escape when https://github.com/llvm/llvm-project/issues/54668 is resolved
+# TODO readability-isolate-declaration (requires CPU code rewrite)
 #
 Checks: >
   *,
   -abseil-*,
   -android-*,
   -altera-*,
-  -fuchsia-*,
-  -llvmlibc-*,
   -cppcoreguidelines-avoid-magic-numbers,
-  -readability-magic-numbers,
   -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -fuchsia-*,
   -llvm-header-guard,
-  -bugprone-exception-escape,
+  -llvmlibc-*,
+  -readability-identifier-length,
+  -readability-magic-numbers,
 
   -bugprone-easily-swappable-parameters,
-  -cert-err33-c,
-  -concurrency-mt-unsafe,
-  -cppcoreguidelines-avoid-c-arrays,
+  -bugprone-exception-escape,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
-  -cppcoreguidelines-avoid-non-const-global-variables,
   -cppcoreguidelines-macro-usage,
   -cppcoreguidelines-non-private-member-variables-in-classes,
-  -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-  -cppcoreguidelines-pro-type-reinterpret-cast,
-  -cppcoreguidelines-pro-type-vararg,
   -google-readability-function-size,
-  -hicpp-avoid-c-arrays,
   -hicpp-function-size,
   -hicpp-signed-bitwise,
   -hicpp-vararg,
-  -misc-const-correctness,
   -misc-non-private-member-variables-in-classes,
-  -modernize-avoid-c-arrays,
   -modernize-use-trailing-return-type,
   -readability-convert-member-functions-to-static,
   -readability-function-cognitive-complexity,
   -readability-function-size,
-  -readability-identifier-length,
   -readability-isolate-declaration,
 
-# TODO remove the following exceptions
 CheckOptions:
   - key: readability-implicit-bool-conversion.AllowIntegerConditions
     value: 1

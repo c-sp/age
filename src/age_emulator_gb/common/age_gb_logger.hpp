@@ -244,6 +244,7 @@ namespace age
 
 #else
     public:
+        // NOLINTNEXTLINE(performance-unnecessary-value-param)
         explicit gb_logger([[maybe_unused]] gb_log_categories log_categories = {})
         {
             // nothing to do here

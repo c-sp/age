@@ -29,19 +29,17 @@
 
 
 
-// NOLINTBEGIN(bugprone-macro-parentheses)
+// NOLINTBEGIN(bugprone-macro-parentheses, cppcoreguidelines-macro-usage)
 #define AGE_DISABLE_COPY(Class)              \
 private:                                     \
     Class(const Class&)            = delete; \
     Class& operator=(const Class&) = delete
-// NOLINTEND(bugprone-macro-parentheses)
 
-// NOLINTBEGIN(bugprone-macro-parentheses)
 #define AGE_DISABLE_MOVE(Class)               \
 private:                                      \
     Class(const Class&&)            = delete; \
     Class& operator=(const Class&&) = delete
-// NOLINTEND(bugprone-macro-parentheses)
+// NOLINTEND(bugprone-macro-parentheses, cppcoreguidelines-macro-usage)
 
 
 
@@ -91,6 +89,18 @@ namespace age
 
 
     // utility functions
+
+    //!
+    //! Convert the specified enum value to the associated value of the underlying type.
+    //! See also: https://stackoverflow.com/a/14589519
+    //!
+    //! \todo can be replaced by std::to_underlying with C++23
+    //!
+    template<typename Enum>
+    constexpr auto to_underlying(Enum enumValue) -> typename std::underlying_type<Enum>::type
+    {
+        return static_cast<typename std::underlying_type<Enum>::type>(enumValue);
+    }
 
     //!
     //! Return the size in bytes of the specified array's data.

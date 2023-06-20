@@ -7,7 +7,7 @@ AGE is a Game Boy Emulator for Linux/Windows/macOS
 (see also [age-online](https://github.com/c-sp/age-online)).
 
 AGE requires a
-[C++23](https://en.cppreference.com/w/cpp/23)
+[C++20](https://en.cppreference.com/w/cpp/20)
 compatible compiler and these libraries/frameworks:
 * [Qt 5](https://www.qt.io/)
   for the desktop application

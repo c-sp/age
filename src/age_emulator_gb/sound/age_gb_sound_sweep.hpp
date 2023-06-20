@@ -38,8 +38,8 @@ namespace age
 
         void write_nrX0(uint8_t nrX0)
         {
-            m_period   = static_cast<int8_t>((nrX0 >> 4) & 7);
-            m_shift    = static_cast<int8_t>(nrX0 & 7);
+            m_period   = (nrX0 >> 4) & 7;
+            m_shift    = nrX0 & 7;
             m_sweep_up = (nrX0 & 8) == 0;
 
             auto msg = BaseClass::log();
@@ -125,7 +125,7 @@ namespace age
 
             assert(!invalid_frequency(m_frequency_bits));
             int shifted = m_frequency_bits >> m_shift;
-            int result = m_frequency_bits + (m_sweep_up ? shifted : -shifted);
+            int result  = m_frequency_bits + (m_sweep_up ? shifted : -shifted);
 
             assert((result >= int16_t_min) && (result <= int16_t_max));
             return static_cast<int16_t>(result);
@@ -137,14 +137,14 @@ namespace age
         }
 
         int16_t m_frequency_bits = 0;
-        int8_t  m_period         = 0;
-        int8_t  m_shift          = 0;
+        uint8_t m_period         = 0;
+        uint8_t m_shift          = 0;
         bool    m_sweep_up       = true;
 
-        bool   m_skip_first_step = false;
-        bool   m_sweep_enabled   = false;
-        bool   m_swept_down      = false;
-        int8_t m_period_counter  = 0;
+        bool    m_skip_first_step = false;
+        bool    m_sweep_enabled   = false;
+        bool    m_swept_down      = false;
+        uint8_t m_period_counter  = 0;
     };
 
 } // namespace age

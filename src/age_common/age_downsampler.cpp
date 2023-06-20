@@ -19,8 +19,7 @@
 #include <algorithm> // std::min, ...
 #include <cassert>
 #include <cmath>     // std::pow, std::log10, ...
-
-constexpr double pi = 3.14159265358979323846;
+#include <numbers>
 
 
 
@@ -136,18 +135,15 @@ void age::downsampler_linear::add_output_sample(const pcm_frame& left_frame, con
 {
     assert(m_right_sample_fraction < 0x10000);
 
-    int diff[2];
-    int interpolated[2];
+    int diff0 = right_frame.m_left_sample;
+    int diff1 = right_frame.m_right_sample;
+    diff0 -= left_frame.m_left_sample;
+    diff1 -= left_frame.m_right_sample;
 
-    diff[0] = right_frame.m_left_sample;
-    diff[1] = right_frame.m_right_sample;
-    diff[0] -= left_frame.m_left_sample;
-    diff[1] -= left_frame.m_right_sample;
+    int interpolated0 = left_frame.m_left_sample + ((diff0 * m_right_sample_fraction) >> 16);
+    int interpolated1 = left_frame.m_right_sample + ((diff1 * m_right_sample_fraction) >> 16);
 
-    interpolated[0] = left_frame.m_left_sample + ((diff[0] * m_right_sample_fraction) >> 16);
-    interpolated[1] = left_frame.m_right_sample + ((diff[1] * m_right_sample_fraction) >> 16);
-
-    downsampler::add_output_samples(static_cast<int16_t>(interpolated[0]), static_cast<int16_t>(interpolated[1]));
+    downsampler::add_output_samples(static_cast<int16_t>(interpolated0), static_cast<int16_t>(interpolated1));
 
     m_right_sample_fraction += m_input_output_ratio;
     assert(m_right_sample_fraction > 0);
@@ -275,7 +271,7 @@ double age::downsampler_low_pass::calculate_sinc(double n, int filter_order, dou
     double v = n - (filter_order / 2.0);
     if ((v > 0) || (v < 0))
     {
-        v *= pi;
+        v *= std::numbers::pi;
         result = std::sin(result * v) / v;
     }
 
@@ -361,7 +357,7 @@ age::downsampler_kaiser_low_pass::downsampler_kaiser_low_pass(int input_sampling
 
     // calculate Kaiser Window parameters
     double A  = -20 * std::log10(ripple);
-    double tw = 2 * pi * transition_width;
+    double tw = 2 * std::numbers::pi * transition_width;
 
     int M = calculate_filter_order(A, tw);
     M += M & 1; // make even

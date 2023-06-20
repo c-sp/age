@@ -69,7 +69,7 @@ namespace
 
     constexpr const char* help_cmd_var = "%cmd%";
     constexpr const char* help_git_var = "%git%";
-    constexpr const char* help_lines[] = {
+    constexpr std::array help_lines{
         "Run (parts of) the gameboy-test-roms test suite with AGE.",
         "See also:",
         "  https://github.com/c-sp/gameboy-test-roms",
@@ -163,7 +163,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     // based on
     // https://en.wikipedia.org/wiki/Getopt#Using_GNU_extension_getopt_long
 
-    struct option long_options[] = {
+    std::array<option, 19> long_options{{
         {
             .name    = opt_long_acid2,
             .has_arg = no_argument,
@@ -278,7 +278,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
             .flag    = nullptr,
             .val     = 0,
         },
-    };
+    }};
 
     age::tester::options options{};
     int                  c         = 0;
@@ -287,7 +287,8 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     // no getopt() error message on standard error
     opterr = 0;
 
-    while ((c = getopt_long(argc, argv, optstring, &long_options[0], &longindex)) != -1)
+    // NOLINTNEXTLINE(concurrency-mt-unsafe)
+    while ((c = getopt_long(argc, argv, optstring, long_options.data(), &longindex)) != -1)
     {
         switch (c)
         {
