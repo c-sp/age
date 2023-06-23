@@ -18,6 +18,7 @@
 
 #include <gfx/age_png.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -100,38 +101,40 @@ age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::
         run_test(emulator);
 
         // load png
-        auto png_data = read_png_file(screenshot_png_path,
-                                      emulator.get_screen_width(),
-                                      emulator.get_screen_height());
-
-        // compare screen to screenshot
-        const auto* screen     = emulator.get_screen_front_buffer().data();
-        const auto* screenshot = png_data.data();
-        if (!screenshot)
+        auto screenshot = read_png_file(screenshot_png_path,
+                                        emulator.get_screen_width(),
+                                        emulator.get_screen_height());
+        if (screenshot.empty())
         {
             std::cout << "could not load screenshot: " << screenshot_png_path.string() << std::endl;
             return false;
         }
 
-        for (int i = 0, max = emulator.get_screen_width() * emulator.get_screen_height(); i < max; ++i)
+        // compare screen to screenshot
+        auto screen = emulator.get_screen_front_buffer();
+        if (screenshot.size() != screen.size())
         {
-            if (*screen != *screenshot)
-            {
-                auto png_path = screenshot_png_path;
-                png_path.replace_extension();
-                png_path += "_actual.png";
-
-                write_png_file(emulator.get_screen_front_buffer(),
-                               emulator.get_screen_width(),
-                               emulator.get_screen_height(),
-                               png_path.string());
-
-                return false;
-            }
-            ++screen;
-            ++screenshot;
+            std::cout << "screenshot size mismatch (expected "
+                      << screen.size()
+                      << " pixel, got "
+                      << screenshot.size()
+                      << "pixel): " << screenshot_png_path.string() << std::endl;
+            return false;
         }
 
-        return true;
+        bool screenshot_matches = screen == screenshot;
+        if (!screenshot_matches)
+        {
+            auto png_path = screenshot_png_path;
+            png_path.replace_extension();
+            png_path += "_actual.png";
+
+            write_png_file(emulator.get_screen_front_buffer(),
+                           emulator.get_screen_width(),
+                           emulator.get_screen_height(),
+                           png_path.string());
+        }
+
+        return screenshot_matches;
     };
 }

@@ -67,10 +67,10 @@ age::gb_lcd_palettes::gb_lcd_palettes(const gb_device&         device,
 
 
 
-const age::pixel* age::gb_lcd_palettes::get_palette(unsigned palette_index) const
+std::span<const age::pixel, 4> age::gb_lcd_palettes::get_palette(unsigned palette_index) const
 {
     assert(palette_index < gb_palette_count);
-    return &m_colors[palette_index << 2];
+    return std::span<const age::pixel, 4>{m_colors.begin() + (palette_index << 2), 4};
 }
 
 age::pixel age::gb_lcd_palettes::get_color(unsigned color_index) const

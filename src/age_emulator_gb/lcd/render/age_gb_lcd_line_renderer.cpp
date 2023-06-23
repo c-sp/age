@@ -73,10 +73,10 @@ void age::gb_lcd_line_renderer::render_line(int line)
         bool render_window = m_window.is_enabled_and_wy_matched(m_common.get_lcdc()) && winx_visible;
 
         // render BG
-        int    bg_y          = m_common.m_scy + line;
-        int    tile_vram_ofs = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
-        int    tile_line     = bg_y & 0b111;
-        pixel* px            = &m_line[8];
+        int bg_y          = m_common.m_scy + line;
+        int tile_vram_ofs = m_common.m_bg_tile_map_offset + ((bg_y & 0b11111000) << 2);
+        int tile_line     = bg_y & 0b111;
+        int line_px_ofs   = 8;
 
         int tiles = render_window
                         ? 1 + std::min<int>(20, std::max<int>(0, m_common.m_wx - 7) >> 3)
@@ -84,7 +84,10 @@ void age::gb_lcd_line_renderer::render_line(int line)
 
         for (int tx = m_common.m_scx >> 3, max = tx + tiles; tx < max; ++tx)
         {
-            px = render_bg_tile(px, tile_line, tile_vram_ofs + (tx & 0b11111));
+            render_bg_tile(std::span<pixel, 8>{m_line.begin() + line_px_ofs, 8},
+                           tile_line,
+                           tile_vram_ofs + (tx & 0b11111));
+            line_px_ofs += 8;
         }
 
         // render window
@@ -93,11 +96,14 @@ void age::gb_lcd_line_renderer::render_line(int line)
             int wline     = m_window.next_window_line();
             tile_vram_ofs = m_common.m_win_tile_map_offset + ((wline & 0b11111000) << 2);
             tile_line     = wline & 0b111;
-            px            = &m_line[px0 + m_common.m_wx - 7];
+            line_px_ofs   = px0 + m_common.m_wx - 7;
 
             for (int tx = 0, max = ((gb_screen_width + 7 - m_common.m_wx) >> 3) + 1; tx < max; ++tx)
             {
-                px = render_bg_tile(px, tile_line, tile_vram_ofs + tx);
+                render_bg_tile(std::span<pixel, 8>{m_line.begin() + line_px_ofs, 8},
+                               tile_line,
+                               tile_vram_ofs + tx);
+                line_px_ofs += 8;
             }
         }
     }
@@ -113,7 +119,7 @@ void age::gb_lcd_line_renderer::render_line(int line)
                           {
                               assert((px0 + sprite.m_x) < gb_screen_width + 24);
                               render_sprite_tile(
-                                  &m_line[px0 + sprite.m_x - 8],
+                                  std::span<pixel, 8>{m_line.begin() + px0 + sprite.m_x - 8, 8},
                                   line - (sprite.m_y - 16),
                                   sprite);
                           }
@@ -121,24 +127,22 @@ void age::gb_lcd_line_renderer::render_line(int line)
     }
 
     // copy line
-    auto* dst = &m_screen_buffer.get_back_buffer()[static_cast<size_t>(line) * gb_screen_width];
-    auto* src = &m_line[px0];
+    auto             dst = m_screen_buffer.get_back_buffer_line(line);
+    std::span<pixel> src{m_line.begin() + px0, gb_screen_width};
 
     auto alpha_bits = pixel{0, 0, 0, 255}.get_32bits();
     for (int i = 0; i < gb_screen_width; ++i)
     {
         // replace priority information with alpha value
-        dst->set_32bits(src->get_32bits() | alpha_bits);
-        ++src;
-        ++dst;
+        dst[i].set_32bits(src[i].get_32bits() | alpha_bits);
     }
 }
 
 
 
-age::pixel* age::gb_lcd_line_renderer::render_bg_tile(pixel* dst,
-                                                      int    tile_line,
-                                                      int    tile_vram_ofs)
+void age::gb_lcd_line_renderer::render_bg_tile(std::span<pixel, 8> dst,
+                                               int                 tile_line,
+                                               int                 tile_vram_ofs)
 {
     assert((tile_vram_ofs >= 0x1800) && (tile_vram_ofs < 0x2000));
     assert((tile_line >= 0) && (tile_line < 8));
@@ -173,7 +177,7 @@ age::pixel* age::gb_lcd_line_renderer::render_bg_tile(pixel* dst,
     }
 
     // bg palette
-    const pixel* palette = m_palettes.get_palette(attributes & gb_tile_attrib_cgb_palette);
+    auto palette = m_palettes.get_palette(attributes & gb_tile_attrib_cgb_palette);
 
     // bg priority
     uint8_t priority = attributes & gb_tile_attrib_priority;
@@ -187,20 +191,18 @@ age::pixel* age::gb_lcd_line_renderer::render_bg_tile(pixel* dst,
         int   color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
         pixel color     = palette[color_idx];
         color.m_a       = color_idx + priority;
-        *dst            = color;
+        dst[i]          = color;
 
-        ++dst;
         tile_byte1 >>= 1;
         tile_byte2 >>= 1;
     }
-    return dst;
 }
 
 
 
-void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
-                                                   int              tile_line,
-                                                   const gb_sprite& sprite)
+void age::gb_lcd_line_renderer::render_sprite_tile(std::span<pixel, 8> dst,
+                                                   int                 tile_line,
+                                                   const gb_sprite&    sprite)
 {
     assert((tile_line >= 0) && (tile_line < 16));
 
@@ -230,7 +232,7 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
     }
 
     // palette
-    const pixel* palette = m_palettes.get_palette(sprite.m_palette_idx);
+    auto palette = m_palettes.get_palette(sprite.m_palette_idx);
 
     // bg priority
     uint8_t priority = oam_attr & gb_tile_attrib_priority;
@@ -241,7 +243,7 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
 
     for (int i = 0; i < 8; ++i)
     {
-        pixel px = *dst;
+        pixel px = dst[i];
 
         // sprite pixel visible?
         int color_idx = (tile_byte1 & 0b01) + (tile_byte2 & 0b10);
@@ -251,11 +253,10 @@ void age::gb_lcd_line_renderer::render_sprite_tile(pixel*           dst,
         {
             pixel color = palette[color_idx];
             color.m_a   = px.m_a;
-            *dst        = color;
+            dst[i]      = color;
         }
 
         // next pixel
-        ++dst;
         tile_byte1 >>= 1;
         tile_byte2 >>= 1;
     }

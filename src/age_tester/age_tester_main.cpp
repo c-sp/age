@@ -76,12 +76,15 @@ namespace
 
 int main(int argc, char** argv)
 {
-    age::tester::options opts = age::tester::parse_arguments(argc, argv);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    std::vector<char*> args(argv, argv + argc);
+
+    age::tester::options opts = age::tester::parse_arguments(args);
 
     // just print the help text
     if (opts.m_help)
     {
-        age::tester::print_help(argc, argv);
+        age::tester::print_help(args);
         return 0;
     }
 
@@ -101,7 +104,7 @@ int main(int argc, char** argv)
                       });
 
         std::cout << std::endl;
-        age::tester::print_help(argc, argv);
+        age::tester::print_help(args);
         return 1;
     }
 

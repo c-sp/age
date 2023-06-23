@@ -31,6 +31,8 @@
 #include <age_types.hpp>
 #include <gfx/age_screen_buffer.hpp>
 
+#include <span>
+
 
 
 namespace age

@@ -61,10 +61,10 @@ namespace age
 
         ~gb_lcd_palettes() = default;
 
-        [[nodiscard]] const pixel* get_palette(unsigned palette_index) const;
-        [[nodiscard]] pixel        get_color(unsigned color_index) const;
-        [[nodiscard]] pixel        get_color_bgp_glitch(unsigned color_index) const;
-        [[nodiscard]] pixel        get_color_zero_dmg() const;
+        [[nodiscard]] std::span<const pixel, 4> get_palette(unsigned palette_index) const;
+        [[nodiscard]] pixel                     get_color(unsigned color_index) const;
+        [[nodiscard]] pixel                     get_color_bgp_glitch(unsigned color_index) const;
+        [[nodiscard]] pixel                     get_color_zero_dmg() const;
 
         [[nodiscard]] uint8_t read_bgp() const;
         [[nodiscard]] uint8_t read_obp0() const;

@@ -1,6 +1,21 @@
+#
+# Notes to myself:
+#
+#   - the exact build commands are logged with -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+#
+#   - Apple Clang seems to be a stripped down version of LLVM-Clang,
+#     some things will not work (e.g. -fuse-ld=lld):
+#     https://stackoverflow.com/questions/60944732/using-fuse-ld-lld-with-clang-on-macos
+#
 cmake_minimum_required(VERSION 3.14)
 project(AGE)
 
+# options
+OPTION(USE_CLANG_TIDY "run clang-tidy") # disabled by default
+OPTION(COMPILE_LOGGER "compile AGE with logging enabled") # disabled by default
+OPTION(FORCE_FIFO_RENDERER "compile AGE with forced fifo rendering enabled") # disabled by default
+
+# set C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -10,7 +25,12 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0)
     cmake_policy(SET CMP0135 NEW)
 endif ()
 
-OPTION(USE_CLANG_TIDY "run clang-tidy") # disabled by default
+
+
+###############################################################################
+# options
+
+# run clang-tidy?
 if (USE_CLANG_TIDY)
     find_program(CLANG_TIDY NAMES "clang-tidy-${CLANG_TIDY_VERSION}" "clang-tidy")
     if (CLANG_TIDY)
@@ -24,29 +44,22 @@ if (USE_CLANG_TIDY)
     endif ()
 endif ()
 
-
-
-###############################################################################
-# AGE features
-
 # Compile AGE with rom logging features?
 # This is mostly used to analyse test roms and not suited
 # for casual use (e.g. gaming) as the generated log files
 # can grow really big really fast.
-OPTION(COMPILE_LOGGER "compile AGE with logging enabled") # disabled by default
 if (COMPILE_LOGGER)
     message("compiling AGE with logging enabled")
-    ADD_DEFINITIONS(-DAGE_COMPILE_LOGGER)
+    add_definitions(-DAGE_COMPILE_LOGGER)
 else ()
     message("compiling AGE with logging disabled")
-endif (COMPILE_LOGGER)
+endif ()
 
 # Compile AGE with forced fifo rendering enabled?
-OPTION(FORCE_FIFO_RENDERER "compile AGE with forced fifo rendering enabled") # disabled by default
 if (FORCE_FIFO_RENDERER)
     message("compiling AGE with forced fifo rendering enabled")
-    ADD_DEFINITIONS(-DAGE_FORCE_FIFO_RENDERER)
-endif (FORCE_FIFO_RENDERER)
+    add_definitions(-DAGE_FORCE_FIFO_RENDERER)
+endif ()
 
 
 
@@ -76,7 +89,7 @@ endif ()
 
 
 ###############################################################################
-# code
+# targets
 
 # include common code:
 #   - utility code

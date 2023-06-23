@@ -96,16 +96,16 @@ namespace age
         std::vector<gb_sprite> m_sorted_sprites{};
         gb_lcd_fifo_fetcher    m_fetcher;
 
-        gb_current_line m_line                 = gb_no_line;
-        line_stage      m_line_stage           = line_stage::mode2;
-        pixel*          m_line_buffer          = nullptr;
-        int             m_clks_begin_align_scx = 0;
-        int             m_clks_end_window_init = 0;
-        int             m_x_pos                = 0;
-        int             m_x_pos_win_start      = 0;
-        int             m_alignment_x          = 0;
-        gb_current_line m_clks_bgp_change      = gb_no_line;
-        int             m_next_sprite_x        = -1;
+        gb_current_line  m_line       = gb_no_line;
+        line_stage       m_line_stage = line_stage::mode2;
+        std::span<pixel> m_line_buffer;
+        int              m_clks_begin_align_scx = 0;
+        int              m_clks_end_window_init = 0;
+        int              m_x_pos                = 0;
+        int              m_x_pos_win_start      = 0;
+        int              m_alignment_x          = 0;
+        gb_current_line  m_clks_bgp_change      = gb_no_line;
+        int              m_next_sprite_x        = -1;
     };
 
 } // namespace age

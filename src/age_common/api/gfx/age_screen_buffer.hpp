@@ -25,6 +25,7 @@
 #include <gfx/age_pixel.hpp>
 
 #include <array>
+#include <span>
 
 
 
@@ -42,8 +43,9 @@ namespace age
 
         [[nodiscard]] const pixel_vector& get_front_buffer() const;
 
-        pixel_vector& get_back_buffer();
-        void          switch_buffers();
+        pixel_vector&    get_back_buffer();
+        std::span<pixel> get_back_buffer_line(int line);
+        void             switch_buffers();
 
     private:
         const int16_t m_screen_width;

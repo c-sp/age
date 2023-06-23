@@ -60,6 +60,13 @@ age::pixel_vector& age::screen_buffer::get_back_buffer()
     return m_back_buffer;
 }
 
+std::span<age::pixel> age::screen_buffer::get_back_buffer_line(int line)
+{
+    auto back_buffer_offset = line * m_screen_width;
+    return {get_back_buffer().begin() + back_buffer_offset, static_cast<unsigned>(m_screen_width)};
+}
+
+
 void age::screen_buffer::switch_buffers()
 {
     // https://stackoverflow.com/a/28130696

@@ -21,7 +21,7 @@
 #include <algorithm> // std::for_each
 #include <iostream>  // std::cout
 
-#include <getopt.h> // getopt_long
+#include <getopt.h>  // getopt_long
 
 
 
@@ -69,7 +69,7 @@ namespace
 
     constexpr const char* help_cmd_var = "%cmd%";
     constexpr const char* help_git_var = "%git%";
-    constexpr std::array help_lines{
+    constexpr std::array  help_lines{
         "Run (parts of) the gameboy-test-roms test suite with AGE.",
         "See also:",
         "  https://github.com/c-sp/gameboy-test-roms",
@@ -114,7 +114,7 @@ namespace
 
 
 
-void age::tester::print_help(int argc, char** argv)
+void age::tester::print_help(const std::vector<char*>& args)
 {
     std::string cmd_var(help_cmd_var);
     std::string git_var(help_git_var);
@@ -128,7 +128,7 @@ void age::tester::print_help(int argc, char** argv)
                       auto cmd_var_idx = l.find(cmd_var);
                       if (cmd_var_idx != std::string::npos)
                       {
-                          auto cmd = argc >= 1 ? std::filesystem::path(argv[0]).filename().string() : "";
+                          auto cmd = args.empty() ? "" : std::filesystem::path(args[0]).filename().string();
                           l.replace(cmd_var_idx, cmd_var.size(), cmd);
                       }
 
@@ -158,7 +158,7 @@ void age::tester::print_help(int argc, char** argv)
 
 
 
-age::tester::options age::tester::parse_arguments(int argc, char** argv)
+age::tester::options age::tester::parse_arguments(const std::vector<char*>& args)
 {
     // based on
     // https://en.wikipedia.org/wiki/Getopt#Using_GNU_extension_getopt_long
@@ -288,7 +288,12 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     opterr = 0;
 
     // NOLINTNEXTLINE(concurrency-mt-unsafe)
-    while ((c = getopt_long(argc, argv, optstring, long_options.data(), &longindex)) != -1)
+    while ((c = getopt_long(static_cast<int>(args.size()),
+                            args.data(),
+                            optstring,
+                            long_options.data(),
+                            &longindex))
+           != -1)
     {
         switch (c)
         {
@@ -369,7 +374,7 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
                 // see also: https://stackoverflow.com/a/53828745
                 if (optopt == 0)
                 {
-                    options.m_unknown_options.emplace_back(argv[optind - 1]);
+                    options.m_unknown_options.emplace_back(args[optind - 1]);
                 }
                 else
                 {
@@ -387,9 +392,9 @@ age::tester::options age::tester::parse_arguments(int argc, char** argv)
     }
 
     options.m_test_suite_path = std::filesystem::current_path();
-    if (optind < argc)
+    if (optind < args.size())
     {
-        options.m_test_suite_path /= argv[optind];
+        options.m_test_suite_path /= args[optind];
     }
 
     //! \todo adjust & evaluate -l parameter

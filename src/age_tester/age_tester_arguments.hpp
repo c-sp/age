@@ -62,9 +62,9 @@ namespace age::tester
     };
 
 
-    void print_help(int argc, char** argv);
+    void print_help(const std::vector<char*>& args);
 
-    options parse_arguments(int argc, char** argv);
+    options parse_arguments(const std::vector<char*>& args);
 
 } // namespace age::tester
 

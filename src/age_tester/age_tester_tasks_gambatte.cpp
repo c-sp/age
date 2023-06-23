@@ -279,11 +279,13 @@ namespace
                     // e.g. gambatte/scx_during_m3/scx_m3_extend_1_dmg08_cgb04c_out3.gbc
                     // auto tile_index = (exp_index >= expected_result.size()) ? 0 : expected_result[exp_index];
 
-                    const age::uint8_t* tile_ptr = &tile_data[tile_index * 8 * 8 + tile_offset];
+                    ptrdiff_t tile_line_ofs = tile_index * 8 * 8 + tile_offset;
+                    auto tile = std::span<const uint8_t, 8>{tile_data.begin() + tile_line_ofs, 8};
+
                     for (int tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
                     {
                         bool found_background  = screen[line_offset + pixel_offset] == background;
-                        bool expect_background = tile_ptr[tile_pixel] == 0;
+                        bool expect_background = tile[tile_pixel] == 0;
 
                         if (found_background != expect_background)
                         {

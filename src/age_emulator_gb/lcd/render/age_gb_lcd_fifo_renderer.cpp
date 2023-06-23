@@ -91,7 +91,7 @@ void age::gb_lcd_fifo_renderer::begin_new_line(gb_current_line line, bool is_fir
 
     m_line                 = {.m_line = line.m_line, .m_line_clks = 0};
     m_line_stage           = line_stage::mode2;
-    m_line_buffer          = &m_screen_buffer.get_back_buffer()[static_cast<size_t>(line.m_line) * gb_screen_width];
+    m_line_buffer          = m_screen_buffer.get_back_buffer_line(line.m_line);
     m_clks_begin_align_scx = is_line_zero ? 86 : 84;
     m_clks_end_window_init = gb_no_clock_cycle;
     m_x_pos                = 0;

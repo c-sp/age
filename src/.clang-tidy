@@ -1,33 +1,13 @@
 #
-# To prevent CI pipeline errors make sure to have a clang-tidy version installed
-# that is at least as new as the one installed on the GitHub Action Runner:
-# https://github.com/actions/runner-images
-#
-# We ignore:
-#   - Checks related to Abseil library (abseil-*)
-#   - Checks related to Android (android-*)
-#   - Checks related to OpenCL programming for FPGAs (altera-*)
-#   - Checks related to Fuchsia coding conventions (fuchsia-*)
-#   - Checks related to the LLVM-libc coding standards (llvmlibc-*)
-#       https://libc.llvm.org/dev/clang_tidy_checks.html
-#   - Checks related to magic numbers
-#   - Checks related to gsl::owner (cppcoreguidelines-owning-memory)
-#       https://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines/owning-memory.html
-#   - Checks for LLVM Header Guard Style (llvm-header-guard)
-#       https://clang.llvm.org/extra/clang-tidy/checks/llvm/header-guard.html
-#
-# TODO bugprone-easily-swappable-parameters
 # TODO bugprone-exception-escape (requires https://github.com/llvm/llvm-project/issues/54668 to be solved)
 # TODO cppcoreguidelines-macro-usage (requires CPU code rewrite)
-# TODO cppcoreguidelines-pro-bounds-pointer-arithmetic (to be finished)
-# TODO google-readability-function-size
-# TODO hicpp-function-size
+# TODO google-readability-function-size (requires CPU code rewrite)
+# TODO hicpp-function-size (requires CPU code rewrite)
 # TODO hicpp-signed-bitwise
 # TODO misc-const-correctness (lots of work)
-# TODO modernize-use-trailing-return-type
 # TODO readability-convert-member-functions-to-static
-# TODO readability-function-cognitive-complexity
-# TODO readability-function-size
+# TODO readability-function-cognitive-complexity (requires CPU code rewrite)
+# TODO readability-function-size (requires CPU code rewrite)
 # TODO readability-isolate-declaration (requires CPU code rewrite)
 #
 Checks: >
@@ -35,6 +15,7 @@ Checks: >
   -abseil-*,
   -android-*,
   -altera-*,
+  -bugprone-easily-swappable-parameters,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-non-private-member-variables-in-classes,
@@ -44,18 +25,16 @@ Checks: >
   -llvm-header-guard,
   -llvmlibc-*,
   -misc-non-private-member-variables-in-classes,
+  -modernize-use-trailing-return-type,
   -readability-identifier-length,
   -readability-magic-numbers,
 
-  -bugprone-easily-swappable-parameters,
   -bugprone-exception-escape,
   -cppcoreguidelines-macro-usage,
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -google-readability-function-size,
   -hicpp-function-size,
   -hicpp-signed-bitwise,
   -misc-const-correctness,
-  -modernize-use-trailing-return-type,
   -readability-convert-member-functions-to-static,
   -readability-function-cognitive-complexity,
   -readability-function-size,

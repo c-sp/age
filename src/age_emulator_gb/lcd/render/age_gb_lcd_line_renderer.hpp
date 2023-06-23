@@ -57,8 +57,8 @@ namespace age
         void render_line(int line);
 
     private:
-        pixel* render_bg_tile(pixel* dst, int tile_line, int tile_vram_ofs);
-        void   render_sprite_tile(pixel* dst, int tile_line, const gb_sprite& sprite);
+        void render_bg_tile(std::span<pixel, 8> dst, int tile_line, int tile_vram_ofs);
+        void render_sprite_tile(std::span<pixel, 8> dst, int tile_line, const gb_sprite& sprite);
 
         const gb_device&              m_device;
         const gb_lcd_renderer_common& m_common;
