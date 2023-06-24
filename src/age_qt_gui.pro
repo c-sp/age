@@ -4,7 +4,7 @@ QT += core gui widgets opengl multimedia
 
 
 
-# enable c14 features
+# enable c++20 features
 CONFIG -= c++11
 CONFIG *= c++20
 

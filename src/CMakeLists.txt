@@ -11,9 +11,9 @@ cmake_minimum_required(VERSION 3.14)
 project(AGE)
 
 # options
-OPTION(USE_CLANG_TIDY "run clang-tidy") # disabled by default
-OPTION(COMPILE_LOGGER "compile AGE with logging enabled") # disabled by default
-OPTION(FORCE_FIFO_RENDERER "compile AGE with forced fifo rendering enabled") # disabled by default
+OPTION(USE_CLANG_TIDY "Run clang-tidy") # disabled by default
+OPTION(COMPILE_LOGGER "Compile AGE with logging enabled") # disabled by default
+OPTION(FORCE_FIFO_RENDERER "Compile AGE with forced fifo rendering enabled") # disabled by default
 
 # set C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -25,6 +25,14 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.24.0)
     cmake_policy(SET CMP0135 NEW)
 endif ()
 
+# log compiler details
+if (CMAKE_CXX_COMPILER_LOADED)
+    message(STATUS "Compiler path:           ${CMAKE_CXX_COMPILER}")
+    message(STATUS "Compiler ID:             ${CMAKE_CXX_COMPILER_ID}")
+    message(STATUS "Compiler version:        ${CMAKE_CXX_COMPILER_VERSION}")
+    message(STATUS "Compiler is part of GCC: ${CMAKE_COMPILER_IS_GNUCXX}")
+endif ()
+
 
 
 ###############################################################################
@@ -34,13 +42,13 @@ endif ()
 if (USE_CLANG_TIDY)
     find_program(CLANG_TIDY NAMES "clang-tidy-${CLANG_TIDY_VERSION}" "clang-tidy")
     if (CLANG_TIDY)
-        message("found ${CLANG_TIDY}, adding linting targets")
+        message(STATUS "Found ${CLANG_TIDY}, adding linting targets")
 
         set(CMAKE_CXX_CLANG_TIDY
                 clang-tidy;
                 -header-filter=.;)
     else ()
-        message("clang-tidy not found!")
+        message(STATUS "Clang-tidy not found!")
     endif ()
 endif ()
 
@@ -49,15 +57,15 @@ endif ()
 # for casual use (e.g. gaming) as the generated log files
 # can grow really big really fast.
 if (COMPILE_LOGGER)
-    message("compiling AGE with logging enabled")
+    message(STATUS "Compiling AGE with logging enabled")
     add_definitions(-DAGE_COMPILE_LOGGER)
 else ()
-    message("compiling AGE with logging disabled")
+    message(STATUS "Compiling AGE with logging disabled")
 endif ()
 
 # Compile AGE with forced fifo rendering enabled?
 if (FORCE_FIFO_RENDERER)
-    message("compiling AGE with forced fifo rendering enabled")
+    message(STATUS "Compiling AGE with forced fifo rendering enabled")
     add_definitions(-DAGE_FORCE_FIFO_RENDERER)
 endif ()
 
@@ -99,26 +107,26 @@ add_subdirectory(age_emulator_gb)
 
 # age_qt_gui requires Qt
 if (Qt5Widgets_FOUND)
-    message("Qt5 found => configuring age_qt_gui")
+    message(STATUS "Qt5 found => configuring age_qt_gui")
     add_subdirectory(age_qt_gui)
 else ()
-    message("Qt5 not found => age_qt_gui not available")
+    message(STATUS "Qt5 not found => age_qt_gui not available")
 endif ()
 
 # age_tester requires libpng
 if (PNG_FOUND)
-    message("PNG found => configuring age_tester")
+    message(STATUS "PNG found => configuring age_tester")
     add_subdirectory(age_tester)
 else ()
-    message("PNG not found => age_tester not available")
+    message(STATUS "PNG not found => age_tester not available")
 endif ()
 
 # age_wasm requires emscripten
 if (EMSCRIPTEN)
-    message("EMSCRIPTEN=${EMSCRIPTEN} => configuring age_wasm")
+    message(STATUS "EMSCRIPTEN=${EMSCRIPTEN} => configuring age_wasm")
     add_subdirectory(age_wasm)
 else ()
-    message("EMSCRIPTEN not set => age_wasm not available")
+    message(STATUS "EMSCRIPTEN not set => age_wasm not available")
 endif ()
 
 

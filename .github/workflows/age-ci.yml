@@ -35,6 +35,9 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v3
 
+      - name: log g++ version
+        run: g++ -v
+
       - name: build AGE
         run: build/age_ci.sh build-qt release
 
