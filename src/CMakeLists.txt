@@ -33,6 +33,13 @@ if (CMAKE_CXX_COMPILER_LOADED)
     message(STATUS "Compiler is part of GCC: ${CMAKE_COMPILER_IS_GNUCXX}")
 endif ()
 
+# Enable link time optimizations for all targets (only for Release builds).
+# Note that this will not work for e.g. -DCMAKE_BUILD_TYPE=ReLeAsE
+# https://gitlab.kitware.com/cmake/cmake/-/issues/22591
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif ()
+
 
 
 ###############################################################################
@@ -133,6 +140,9 @@ endif ()
 
 ###############################################################################
 # Google Test
+
+# deactivate link time optimizations for Google Test
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
 # include Google Test, see also:
 # https://google.github.io/googletest/quickstart-cmake.html
