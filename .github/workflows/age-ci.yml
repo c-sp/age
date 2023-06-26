@@ -15,8 +15,9 @@ jobs:
   ###############################################################################
 
   build-qt:
-    name: build Qt applications
+    name: build Qt application
     runs-on: ubuntu-22.04
+    if: ${{ false }}  # disable for now
     steps:
       # https://github.com/jurplel/install-qt-action
       - name: cache Qt
