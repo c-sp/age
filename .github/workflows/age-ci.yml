@@ -19,18 +19,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # https://github.com/jurplel/install-qt-action
-      - name: cache Qt
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-Qt-cache-5.12.8
-
       - name: install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '5.12.8'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: '6.5.*'
+          cache: true
 
       - name: checkout code
         uses: actions/checkout@v3
