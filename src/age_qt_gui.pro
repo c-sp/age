@@ -1,12 +1,11 @@
 TARGET = age
 TEMPLATE = app
-QT += core gui widgets opengl multimedia
+QT += core gui widgets openglwidgets multimedia
 
 
 
 # enable c++20 features
-CONFIG -= c++11
-CONFIG *= c++20
+CONFIG += c++20
 
 # define DEBUG (or maybe don't)
 CONFIG(debug, debug|release) {

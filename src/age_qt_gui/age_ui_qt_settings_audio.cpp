@@ -138,11 +138,11 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
 
     // connect signals to slots
 
-    connect(m_combo_devices, qOverload<const QString&>(&QComboBox::currentIndexChanged), this, &qt_settings_audio::devices_index_changed);
+    connect(m_combo_devices, &QComboBox::currentTextChanged, this, &qt_settings_audio::devices_index_changed);
     connect(m_check_mute, &QCheckBox::stateChanged, this, &qt_settings_audio::mute_state_changed);
     connect(m_slider_volume, &QSlider::valueChanged, this, &qt_settings_audio::volume_value_changed);
     connect(m_slider_latency, &QSlider::valueChanged, this, &qt_settings_audio::latency_value_changed);
-    connect(m_combo_downsampler, qOverload<const QString&>(&QComboBox::currentIndexChanged), this, &qt_settings_audio::downsampler_quality_index_changed);
+    connect(m_combo_downsampler, &QComboBox::currentTextChanged, this, &qt_settings_audio::downsampler_quality_index_changed);
 
     // set values from config
 
@@ -170,23 +170,23 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
 //
 //---------------------------------------------------------
 
-void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
-{
-    QString device_name = device.deviceName();
-    m_label_device->setText(device_name);
-    m_label_device->setToolTip(device_name);
+//void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
+//{
+//    QString device_name = device.deviceName();
+//    m_label_device->setText(device_name);
+//    m_label_device->setToolTip(device_name);
 
-    m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
+//    m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
 
-    assert(sizeof(pcm_frame) <= int_max);
-    int samples = buffer_size / static_cast<int>(sizeof(pcm_frame));
-    int millis  = samples * 1000 / format.sampleRate();
-    m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
-                            + QString::number(samples) + " samples, "
-                            + QString::number(millis) + " milliseconds)");
+//    assert(sizeof(pcm_frame) <= int_max);
+//    int samples = buffer_size / static_cast<int>(sizeof(pcm_frame));
+//    int millis  = samples * 1000 / format.sampleRate();
+//    m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
+//                            + QString::number(samples) + " samples, "
+//                            + QString::number(millis) + " milliseconds)");
 
-    m_label_fir_entries->setText(QString::number(downsampler_fir_size) + " FIR entries");
-}
+//    m_label_fir_entries->setText(QString::number(downsampler_fir_size) + " FIR entries");
+//}
 
 
 
@@ -213,7 +213,7 @@ void age::qt_settings_audio::decrease_volume()
 
 void age::qt_settings_audio::emit_settings_signals()
 {
-    emit output_changed(m_selected_device, m_selected_device_format);
+    //emit output_changed(m_selected_device, m_selected_device_format);
     emit volume_changed(m_selected_volume);
     emit latency_changed(m_selected_latency);
     emit downsampler_quality_changed(m_selected_downsampler_quality);
@@ -234,25 +234,25 @@ void age::qt_settings_audio::devices_index_changed(const QString& device_name)
     // ignore this signal, if nothing is selected
     if (!device_name.isEmpty())
     {
-        // check,if the audio device info is available
-        QAudioDeviceInfo device_info = get_device_info(device_name);
-        if (!device_info.isNull())
-        {
-            // store the selected device name before we change it
-            m_user_value_store->set_value(qt_settings_audio_device, device_name);
+//        // check,if the audio device info is available
+//        QAudioDeviceInfo device_info = get_device_info(device_name);
+//        if (!device_info.isNull())
+//        {
+//            // store the selected device name before we change it
+//            m_user_value_store->set_value(qt_settings_audio_device, device_name);
 
-            // find a suitable audio format
-            QAudioFormat format = find_suitable_format(device_info);
+//            // find a suitable audio format
+//            QAudioFormat format = find_suitable_format(device_info);
 
-            // allocate and use the specified audio output, if the format is valid
-            if (format.isValid())
-            {
-                m_selected_device        = device_info;
-                m_selected_device_format = format;
+//            // allocate and use the specified audio output, if the format is valid
+//            if (format.isValid())
+//            {
+//                m_selected_device        = device_info;
+//                m_selected_device_format = format;
 
-                emit output_changed(m_selected_device, m_selected_device_format);
-            }
-        }
+//                emit output_changed(m_selected_device, m_selected_device_format);
+//            }
+//        }
     }
 }
 
@@ -313,17 +313,17 @@ void age::qt_settings_audio::populate_devices_box(const QString& device_to_selec
 
     // add currently available audio output device names
     int                     current_device_index = 0; // index of the "default" item
-    QList<QAudioDeviceInfo> output_devices       = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-    for (int i = 0; i < output_devices.size(); ++i)
-    {
-        auto& device_info = output_devices.at(i);
-        m_combo_devices->addItem(device_info.deviceName());
+//    QList<QAudioDeviceInfo> output_devices       = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+//    for (int i = 0; i < output_devices.size(); ++i)
+//    {
+//        auto& device_info = output_devices.at(i);
+//        m_combo_devices->addItem(device_info.deviceName());
 
-        if (device_to_select == device_info.deviceName())
-        {
-            current_device_index = i + 1;
-        }
-    }
+//        if (device_to_select == device_info.deviceName())
+//        {
+//            current_device_index = i + 1;
+//        }
+//    }
 
     // select the requested audio output device, if available
     // (select "default" otherwise)
@@ -345,72 +345,72 @@ void age::qt_settings_audio::update_volume(int volume)
 
 
 
-QAudioDeviceInfo age::qt_settings_audio::get_device_info(const QString& device_name) const
-{
-    QAudioDeviceInfo result;
+//QAudioDeviceInfo age::qt_settings_audio::get_device_info(const QString& device_name) const
+//{
+//    QAudioDeviceInfo result;
 
-    // get the default audio output device info
-    if (device_name == qt_settings_default_audio_device_name)
-    {
-        result = QAudioDeviceInfo::defaultOutputDevice();
-    }
+//    // get the default audio output device info
+//    if (device_name == qt_settings_default_audio_device_name)
+//    {
+//        result = QAudioDeviceInfo::defaultOutputDevice();
+//    }
 
-    // get the specified audio output device info
-    else
-    {
-        QList<QAudioDeviceInfo> output_devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-        for (int i = 0; i < output_devices.size(); ++i)
-        {
-            auto& device_info = output_devices.at(i);
-            if (device_name == device_info.deviceName())
-            {
-                result = device_info;
-                break;
-            }
-        }
-    }
+//    // get the specified audio output device info
+//    else
+//    {
+//        QList<QAudioDeviceInfo> output_devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+//        for (int i = 0; i < output_devices.size(); ++i)
+//        {
+//            auto& device_info = output_devices.at(i);
+//            if (device_name == device_info.deviceName())
+//            {
+//                result = device_info;
+//                break;
+//            }
+//        }
+//    }
 
-    return result;
-}
+//    return result;
+//}
 
 
 
-QAudioFormat age::qt_settings_audio::find_suitable_format(const QAudioDeviceInfo& device_info)
-{
-    // create the audio format we want to use
-    QAudioFormat format;
-    format.setSampleRate(48000);
-    format.setChannelCount(2);
-    format.setSampleSize(16);
-    format.setCodec("audio/pcm");
-    format.setSampleType(QAudioFormat::SignedInt);
-    //format.setByteOrder(); // initialized to system's byte order
+//QAudioFormat age::qt_settings_audio::find_suitable_format(const QAudioDeviceInfo& device_info)
+//{
+//    // create the audio format we want to use
+//    QAudioFormat format;
+//    format.setSampleRate(48000);
+//    format.setChannelCount(2);
+//    format.setSampleSize(16);
+//    format.setCodec("audio/pcm");
+//    format.setSampleType(QAudioFormat::SignedInt);
+//    //format.setByteOrder(); // initialized to system's byte order
 
-    // find the best matching audio format available on the specified device
-    QAudioFormat nearest_format = device_info.nearestFormat(format);
+//    // find the best matching audio format available on the specified device
+//    QAudioFormat nearest_format = device_info.nearestFormat(format);
 
-    // check the fixed parameters and invalidate the format, if we cannot use it
-    if (nearest_format.sampleRate() < 11025)
-    {
-        nearest_format.setSampleRate(-1);
-    }
-    if (nearest_format.channelCount() != format.channelCount())
-    {
-        nearest_format.setChannelCount(-1);
-    }
-    if (nearest_format.sampleSize() != format.sampleSize())
-    {
-        nearest_format.setSampleSize(-1);
-    }
-    if (nearest_format.codec() != format.codec())
-    {
-        nearest_format.setCodec("");
-    }
-    if (nearest_format.sampleType() != format.sampleType())
-    {
-        nearest_format.setSampleType(QAudioFormat::Unknown);
-    }
+//    // check the fixed parameters and invalidate the format, if we cannot use it
+//    if (nearest_format.sampleRate() < 11025)
+//    {
+//        nearest_format.setSampleRate(-1);
+//    }
+//    if (nearest_format.channelCount() != format.channelCount())
+//    {
+//        nearest_format.setChannelCount(-1);
+//    }
+//    if (nearest_format.sampleSize() != format.sampleSize())
+//    {
+//        nearest_format.setSampleSize(-1);
+//    }
+//    if (nearest_format.codec() != format.codec())
+//    {
+//        nearest_format.setCodec("");
+//    }
+//    if (nearest_format.sampleType() != format.sampleType())
+//    {
+//        nearest_format.setSampleType(QAudioFormat::Unknown);
+//    }
 
-    // return the (potentially invalid) format
-    return nearest_format;
-}
+//    // return the (potentially invalid) format
+//    return nearest_format;
+//}

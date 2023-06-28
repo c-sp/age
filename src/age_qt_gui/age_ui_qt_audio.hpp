@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QIODevice>
@@ -83,7 +82,7 @@ namespace age
         //! \brief Get information about the currently used audio output device.
         //! \return A QAudioDeviceInfo for the currently used audio output device.
         //!
-        [[nodiscard]] QAudioDeviceInfo get_device_info() const;
+        //[[nodiscard]] QAudioDeviceInfo get_device_info() const;
 
         //!
         //! \brief Get the audio format used by the current audio output device.
@@ -165,7 +164,7 @@ namespace age
         //! \param device_info A QAudioDeviceInfo for audio output device to use.
         //! \param format A QAudioFormat for the audio output format to use.
         //!
-        void set_output(QAudioDeviceInfo device_info, QAudioFormat format);
+        //void set_output(QAudioDeviceInfo device_info, QAudioFormat format);
 
 
 
@@ -219,7 +218,7 @@ namespace age
         float                  m_volume               = 1;
         int                    m_latency_milliseconds = qt_audio_latency_milliseconds_min;
         qt_downsampler_quality m_downsampler_quality  = qt_downsampler_quality::low;
-        QAudioDeviceInfo       m_device_info;
+        //QAudioDeviceInfo       m_device_info;
         QAudioFormat           m_format;
 
         QSharedPointer<downsampler>  m_downsampler;

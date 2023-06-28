@@ -21,7 +21,6 @@
 //! \file
 //!
 
-#include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QElapsedTimer>
 #include <QObject>
@@ -53,8 +52,8 @@ namespace age
 
     signals:
 
-        void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
-        void emulator_screen_updated(QSharedPointer<const age::pixel_vector> screen);
+        //void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
+        void emulator_screen_updated(QSharedPointer<const pixel_vector> screen);
         void emulator_speed(int speed_percent);
         void emulator_milliseconds(qint64 emulated_milliseconds);
 
@@ -69,7 +68,7 @@ namespace age
         void set_emulator_synchronize(bool synchronize);
         void set_emulator_paused(bool paused);
 
-        void set_audio_output(QAudioDeviceInfo device, QAudioFormat format);
+        //void set_audio_output(QAudioDeviceInfo device, QAudioFormat format);
         void set_audio_volume(int volume_percent);
         void set_audio_latency(int latency_milliseconds);
         void set_audio_downsampler_quality(age::qt_downsampler_quality quality);

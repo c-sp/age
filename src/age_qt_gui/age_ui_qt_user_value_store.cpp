@@ -19,6 +19,7 @@
 #include <QFile>
 #include <QMetaType>
 
+#include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
 constexpr const char* user_value_directory = ".age_emulator";
