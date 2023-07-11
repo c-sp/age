@@ -218,7 +218,7 @@ namespace age
     public:
         explicit qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
-        //void set_active_audio_output(const QAudioDeviceInfo& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size);
+        void set_active_audio_device(QAudioDevice device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size);
 
         void toggle_mute();
         void increase_volume();
@@ -424,7 +424,7 @@ namespace age
         void video_frames_to_blend_changed(int frames_to_blend);
         void video_post_processing_filter_changed(age::qt_filter_list filter_list);
 
-        //void audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
+        void audio_device_changed(QAudioDevice device, QAudioFormat format);
         void audio_volume_changed(int volume_percent);
         void audio_latency_changed(int latency_milliseconds);
         void audio_downsampler_quality_changed(age::qt_downsampler_quality quality);
@@ -438,7 +438,7 @@ namespace age
 
     public slots:
 
-        //void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
+        void audio_device_activated(QAudioDevice device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
         void set_emulator_screen_size(age::int16_t width, age::int16_t height);
 
 
@@ -453,7 +453,7 @@ namespace age
         void emit_video_frames_to_blend_changed(int frames_to_blend);
         void emit_video_post_processing_filter_changed(age::qt_filter_list filter_list);
 
-        //void emit_audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
+        void emit_audio_device_changed(QAudioDevice device, QAudioFormat format);
         void emit_audio_volume_changed(int volume_percent);
         void emit_audio_latency_changed(int latency_milliseconds);
         void emit_audio_downsampler_quality_changed(age::qt_downsampler_quality quality);

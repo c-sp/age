@@ -171,23 +171,23 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
 //
 //---------------------------------------------------------
 
-//void age::qt_settings_audio::set_active_audio_output(const QAudioDeviceInfo& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
-//{
-//    QString device_name = device.deviceName();
-//    m_label_device->setText(device_name);
-//    m_label_device->setToolTip(device_name);
+void age::qt_settings_audio::set_active_audio_device(QAudioDevice device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
+{
+    QString device_name = device.description();
+    m_label_device->setText(device_name);
+    m_label_device->setToolTip(device_name);
 
-//    m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
+    m_label_format->setText(QString("stereo, 16 bit, ") + QString::number(format.sampleRate()) + " hz");
 
-//    assert(sizeof(pcm_frame) <= int_max);
-//    int samples = buffer_size / static_cast<int>(sizeof(pcm_frame));
-//    int millis  = samples * 1000 / format.sampleRate();
-//    m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
-//                            + QString::number(samples) + " samples, "
-//                            + QString::number(millis) + " milliseconds)");
+    assert(sizeof(pcm_frame) <= int_max);
+    int samples = buffer_size / static_cast<int>(sizeof(pcm_frame));
+    int millis  = samples * 1000 / format.sampleRate();
+    m_label_buffer->setText(QString::number(buffer_size) + " bytes buffer ("
+                            + QString::number(samples) + " samples, "
+                            + QString::number(millis) + " milliseconds)");
 
-//    m_label_fir_entries->setText(QString::number(downsampler_fir_size) + " FIR entries");
-//}
+    m_label_fir_entries->setText(QString::number(downsampler_fir_size) + " FIR entries");
+}
 
 
 
