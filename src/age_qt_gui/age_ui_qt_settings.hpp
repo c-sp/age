@@ -21,6 +21,7 @@
 //! \file
 //!
 
+#include <QAudioDevice>
 #include <QAudioFormat>
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -43,8 +44,8 @@
 #include <QSharedPointer>
 #include <QSlider>
 #include <QString>
-#include <QWidget>
 #include <QtGui/qopengl.h> // GLint
+#include <QWidget>
 
 #include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
@@ -227,25 +228,24 @@ namespace age
 
     signals:
 
-        //void output_changed(QAudioDeviceInfo device, QAudioFormat format);
+        void device_changed(QAudioDevice device, QAudioFormat format);
         void volume_changed(int volume_percent);
         void latency_changed(int latency_milliseconds);
         void downsampler_quality_changed(age::qt_downsampler_quality quality);
 
     private slots:
 
-        void devices_index_changed(const QString& text);
+        void devices_index_changed(int device_index);
         void mute_state_changed(int state);
         void volume_value_changed(int value);
         void latency_value_changed(int value);
         void downsampler_quality_index_changed(const QString& text);
 
     private:
-        void populate_devices_box(const QString& device_to_select);
+        void populate_devices_box(const QString& device_id_to_select);
         void update_volume(int volume);
 
-        //[[nodiscard]] QAudioDeviceInfo get_device_info(const QString& device_name) const;
-        //static QAudioFormat            find_suitable_format(const QAudioDeviceInfo& device_info);
+        static QAudioFormat find_suitable_format(const QAudioDevice& device);
 
         QSharedPointer<qt_user_value_store> m_user_value_store;
 
@@ -264,8 +264,6 @@ namespace age
         QSlider* m_slider_latency = nullptr;
         QLabel*  m_label_latency  = nullptr;
 
-        //QAudioDeviceInfo       m_selected_device;
-        QAudioFormat           m_selected_device_format;
         int                    m_selected_volume              = 0;
         int                    m_selected_latency             = 0;
         qt_downsampler_quality m_selected_downsampler_quality = qt_downsampler_quality::high; // default value

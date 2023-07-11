@@ -7,11 +7,9 @@ QT += core gui widgets openglwidgets multimedia
 # enable c++20 features
 CONFIG += c++20
 
-# define DEBUG (or maybe don't)
-CONFIG(debug, debug|release) {
-    DEFINES *= DEBUG
-} else {
-    DEFINES -= DEBUG
+# deactivate debug logging for release builds
+CONFIG(release, debug|release) {
+    DEFINES *= QT_NO_DEBUG_OUTPUT
 }
 
 # configure GCC optimizations
