@@ -22,9 +22,14 @@ jobs:
       - name: install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          modules: 'qtmultimedia qtopenglwidgets'
+          # for a list of available modules see:
+          # https://ddalcino.github.io/aqt-list-server/
+          modules: 'qtmultimedia'
           version: '6.5.*'
           cache: true
+
+      - name: aqt list-qt
+        run: aqt list-qt linux desktop --modules 6.5.1 gcc_64
 
       - name: checkout code
         uses: actions/checkout@v3
