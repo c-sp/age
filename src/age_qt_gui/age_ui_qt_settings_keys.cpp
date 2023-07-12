@@ -361,8 +361,8 @@ void age::qt_settings_keys::add_key_widgets(QGridLayout* layout, int row, qt_key
     const char*  settings_key = m_event_setting_strings.value(event);
     QString      key_string   = m_user_value_store->get_value(settings_key).toString();
     QKeySequence key_sequence(key_string, QKeySequence::PortableText);
-    int          key_int = key_sequence[0];
-    auto         key     = static_cast<Qt::Key>(key_int);
+    auto         key_combination = key_sequence[0];
+    auto         key             = key_combination.key();
 
     if (!m_allowed_keys.contains(key))
     {

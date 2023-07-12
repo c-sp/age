@@ -30,9 +30,9 @@ constexpr int sizeof_pcm_frame = sizeof(age::pcm_frame);
 
 age::qt_audio_output::~qt_audio_output()
 {
-    if (m_output != nullptr)
+    if (m_sink != nullptr)
     {
-        //m_output->stop();
+        m_sink->stop();
     }
 }
 
@@ -44,19 +44,19 @@ age::qt_audio_output::~qt_audio_output()
 //
 //---------------------------------------------------------
 
-//QAudioDeviceInfo age::qt_audio_output::get_device_info() const
-//{
-//    return m_device_info;
-//}
+QAudioDevice age::qt_audio_output::get_device() const
+{
+    return m_device;
+}
 
 QAudioFormat age::qt_audio_output::get_format() const
 {
-    return m_format; // (m_output == nullptr) ? m_format : m_output->format();
+    return (m_sink == nullptr) ? m_format : m_sink->format();
 }
 
 int age::qt_audio_output::get_buffer_size() const
 {
-    return 0; // (m_output == nullptr) ? 0 : m_output->bufferSize();
+    return (m_sink == nullptr) ? 0 : m_sink->bufferSize();
 }
 
 age::size_t age::qt_audio_output::get_downsampler_fir_size() const
@@ -99,21 +99,21 @@ void age::qt_audio_output::set_latency(int latency_milliseconds)
     reset(); // during reset() the thread's event loop may be called
 }
 
-//void age::qt_audio_output::set_output(QAudioDeviceInfo device_info, QAudioFormat format)
-//{
-//    assert(format.sampleRate() > 1);
+void age::qt_audio_output::set_device(QAudioDevice device, QAudioFormat format)
+{
+    assert(format.sampleRate() > 1);
 
-//    m_device_info = device_info;
-//    m_format      = format;
+    m_device = device;
+    m_format = format;
 
-//    reset(); // during reset() the thread's event loop may be called
-//}
+    reset(); // during reset() the thread's event loop may be called
+}
 
 
 
 void age::qt_audio_output::buffer_samples(const pcm_vector& samples)
 {
-    if (m_output != nullptr)
+    if (m_sink != nullptr)
     {
         assert(m_downsampler != nullptr);
 
@@ -125,9 +125,9 @@ void age::qt_audio_output::buffer_samples(const pcm_vector& samples)
 
 void age::qt_audio_output::buffer_silence()
 {
-    if (m_output != nullptr)
+    if (m_sink != nullptr)
     {
-        int bytes_free = 0; //m_output->bytesFree();
+        int bytes_free = m_sink->bytesFree();
 
         if (bytes_free > 0)
         {
@@ -144,20 +144,20 @@ void age::qt_audio_output::buffer_silence()
 
 void age::qt_audio_output::stream_audio_data()
 {
-    if (m_output != nullptr)
+    if (m_sink != nullptr)
     {
         // wait for ring buffer to fill up on buffer underflow
-//        if (m_output->bytesFree() == m_output->bufferSize())
-//        {
-//            if (m_buffer.get_buffered_samples() == m_buffer.get_max_buffered_samples())
-//            {
-//                m_pause_streaming = false;
-//            }
-//            else if (!m_pause_streaming)
-//            {
-//                m_pause_streaming = true;
-//            }
-//        }
+        if (m_sink->bytesFree() == m_sink->bufferSize())
+        {
+            if (m_buffer.get_buffered_samples() == m_buffer.get_max_buffered_samples())
+            {
+                m_pause_streaming = false;
+            }
+            else if (!m_pause_streaming)
+            {
+                m_pause_streaming = true;
+            }
+        }
 
         // stream to audio output device
         // (call write_samples twice in case of a ring buffer wrap around)
@@ -183,54 +183,54 @@ void age::qt_audio_output::stream_audio_data()
 void age::qt_audio_output::reset()
 {
     // stop the current audio output device and clean up
-    if (m_output != nullptr)
+    if (m_sink != nullptr)
     {
-        //m_output->stop();
+        m_sink->stop();
 
         m_downsampler = nullptr;
-        m_output      = nullptr;
-        m_device      = nullptr;
+        m_sink        = nullptr;
+        m_io_device   = nullptr;
     }
 
     // create a new audio output device
-//    if (!m_device_info.isNull() && m_format.isValid())
-//    {
-//        m_output = QSharedPointer<QAudioOutput>(new QAudioOutput(m_device_info, m_format));
+    if (!m_device.isNull() && m_format.isValid())
+    {
+        m_sink = QSharedPointer<QAudioSink>(new QAudioSink(m_device, m_format));
 
-//        // set the audio output buffer size
-//        int sample_rate = m_output->format().sampleRate();
+        // set the audio output buffer size
+        int sample_rate = m_sink->format().sampleRate();
 
-//        int buffered_samples = m_latency_milliseconds * sample_rate / 1000;
-//        int buffered_bytes   = buffered_samples * sizeof_pcm_frame;
+        int buffered_samples = m_latency_milliseconds * sample_rate / 1000;
+        int buffered_bytes   = buffered_samples * sizeof_pcm_frame;
 
-//        m_output->setBufferSize(buffered_bytes);
+        m_sink->setBufferSize(buffered_bytes);
 
-//        // adjust the ring buffer
-//        if (buffered_samples != m_buffer.get_max_buffered_samples())
-//        {
-//            m_buffer = pcm_ring_buffer(buffered_samples);
-//        }
-//        m_buffer.set_to(pcm_frame());
+        // adjust the ring buffer
+        if (buffered_samples != m_buffer.get_max_buffered_samples())
+        {
+            m_buffer = pcm_ring_buffer(buffered_samples);
+        }
+        m_buffer.set_to(pcm_frame());
 
-//        // create a new downsampler
-//        create_downsampler();
+        // create a new downsampler
+        create_downsampler();
 
-//        // Start the new audio output device.
-//        m_device = m_output->start();
+        // Start the new audio output device.
+        m_io_device = m_sink->start();
 
-//        // create the silence buffer
-//        assert(buffered_samples >= 0);
-//        m_silence = pcm_vector(static_cast<unsigned>(buffered_samples), pcm_frame());
-//    }
+        // create the silence buffer
+        assert(buffered_samples >= 0);
+        m_silence = pcm_vector(static_cast<unsigned>(buffered_samples), pcm_frame());
+    }
 }
 
 
 
 void age::qt_audio_output::create_downsampler()
 {
-    if (m_output != nullptr)
+    if (m_sink != nullptr)
     {
-        int output_sample_rate = 44100;//m_output->format().sampleRate();
+        int output_sample_rate = m_sink->format().sampleRate();
 
         downsampler* d = nullptr;
         switch (m_downsampler_quality)
@@ -262,29 +262,29 @@ void age::qt_audio_output::create_downsampler()
 
 int age::qt_audio_output::write_samples()
 {
-    assert(m_output != nullptr);
+    assert(m_sink != nullptr);
 
     int samples_written = 0;
 
     // don't try to write samples, if no audio device has been opened
     // (may happen, if there is no audio device available)
-    if (m_device != nullptr)
+    if (m_io_device != nullptr)
     {
         // check how many samples we can stream to the audio output device
-        int bytes_free = 0;//m_output->bytesFree();
+        int bytes_free = m_sink->bytesFree();
         if (bytes_free > 0)
         {
             int samples_free = bytes_free / sizeof_pcm_frame;
 
             // check how many samples we have available for streaming
-            int               samples_available = 0;
+            int              samples_available = 0;
             const pcm_frame* buffer            = m_buffer.get_buffered_samples_ptr(samples_available);
 
             // write samples to audio output device
             int         samples_to_write = qMin(samples_available, samples_free);
             const char* char_buffer      = reinterpret_cast<const char*>(buffer);
 
-            qint64 bytes_written = m_device->write(char_buffer, samples_to_write * sizeof_pcm_frame);
+            qint64 bytes_written = m_io_device->write(char_buffer, samples_to_write * sizeof_pcm_frame);
 
             // calculate the number of samples that were written
             qint64 tmp = bytes_written / sizeof_pcm_frame;

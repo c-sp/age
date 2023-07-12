@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-#include <QAudioDevice>
 #include <QChar> // QLatin1Char
 #include <QGroupBox>
 #include <QList>
@@ -171,8 +170,18 @@ age::qt_settings_audio::qt_settings_audio(QSharedPointer<qt_user_value_store> us
 //
 //---------------------------------------------------------
 
-void age::qt_settings_audio::set_active_audio_device(QAudioDevice device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
+void age::qt_settings_audio::set_active_audio_device(const QAudioDevice& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size)
 {
+    if (device.isNull())
+    {
+        m_label_device->setText("n/a");
+        m_label_device->setToolTip("");
+        m_label_format->setText("n/a");
+        m_label_buffer->setText("n/a");
+        m_label_fir_entries->setText("n/a");
+        return;
+    }
+
     QString device_name = device.description();
     m_label_device->setText(device_name);
     m_label_device->setToolTip(device_name);

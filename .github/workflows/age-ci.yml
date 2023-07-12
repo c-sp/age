@@ -33,7 +33,7 @@ jobs:
         run: g++ -v
 
       - name: build AGE
-        run: build/age_ci.sh build-qt release
+        run: build/age_ci.sh build-qt Release
 
       - name: upload Qt artifact
         uses: actions/upload-artifact@v3

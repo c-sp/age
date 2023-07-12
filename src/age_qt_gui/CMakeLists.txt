@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets Multimedia REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Widgets Openglwidgets Multimedia REQUIRED)
 
 add_executable(
         age_qt_gui
@@ -39,4 +39,5 @@ add_executable(
 
 set_target_properties(age_qt_gui PROPERTIES CXX_CLANG_TIDY "")
 
-target_link_libraries(age_qt_gui PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Multimedia age_emulator_gb age_common)
+target_link_libraries(age_qt_gui PRIVATE
+        Qt6::Core Qt6::Gui Qt6::Widgets Qt6::OpenGLWidgets Qt6::Multimedia age_emulator_gb age_common)

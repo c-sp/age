@@ -218,7 +218,7 @@ namespace age
     public:
         explicit qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
-        void set_active_audio_device(QAudioDevice device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size);
+        void set_active_audio_device(const QAudioDevice& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size);
 
         void toggle_mute();
         void increase_volume();
