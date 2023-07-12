@@ -22,7 +22,7 @@ jobs:
       - name: install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          modules: 'qtmultimedia'
+          modules: 'qtmultimedia qtopenglwidgets'
           version: '6.5.*'
           cache: true
 

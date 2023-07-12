@@ -118,7 +118,7 @@ build_qt()
     cd_new_tmp
     echo "running age_qt $1 build in \"$(pwd -P)\""
 
-    cmake -DQT_DEBUG_FIND_PACKAGE=ON -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
+    cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
     make -j -l 5 age_qt_gui
 
     ARTIFACT_DIR=$(mkdir_artifact age_qt_gui)
