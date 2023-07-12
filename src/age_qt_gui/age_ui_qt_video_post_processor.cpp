@@ -39,8 +39,6 @@ namespace
 age::qt_video_post_processor::qt_video_post_processor()
     : m_indices(QOpenGLBuffer::IndexBuffer)
 {
-    initializeOpenGLFunctions();
-
     set_native_frame_size(m_native_frame_size);
     assert(m_native_frames.size() == qt_video_frame_history_size);
 

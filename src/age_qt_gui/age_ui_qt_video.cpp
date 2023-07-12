@@ -207,8 +207,6 @@ void age::qt_video_output::set_bilinear_filter(bool bilinear_filter)
 
 void age::qt_video_output::initializeGL()
 {
-    initializeOpenGLFunctions();
-
     // OpenGL configuration
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
