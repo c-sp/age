@@ -138,6 +138,7 @@ void age::qt_emulation_runner::set_emulator(QSharedPointer<qt_emulator> new_emul
     assert(emu != nullptr);
 
     m_audio_output.set_input_sampling_rate(emu->get_pcm_sampling_rate());
+    emit_audio_output_activated();
 
     m_last_emulate_nanos = m_speed_last_nanos = m_timer.nsecsElapsed();
     m_emulated_cycles = m_speed_last_cycles = 0;
@@ -189,9 +190,9 @@ void age::qt_emulation_runner::set_emulator_paused(bool paused)
 
 
 
-void age::qt_emulation_runner::set_audio_output(QAudioDeviceInfo device, QAudioFormat format)
+void age::qt_emulation_runner::set_audio_device(QAudioDevice device, QAudioFormat format)
 {
-    m_audio_output.set_output(device, format);
+    m_audio_output.set_device(device, format);
     emit_audio_output_activated();
 }
 
@@ -358,10 +359,10 @@ void age::qt_emulation_runner::set_emulation_timer_interval()
 
 void age::qt_emulation_runner::emit_audio_output_activated()
 {
-    QAudioDeviceInfo device_info          = m_audio_output.get_device_info();
-    QAudioFormat     format               = m_audio_output.get_format();
-    int              buffer_size          = m_audio_output.get_buffer_size();
-    int              downsampler_fir_size = static_cast<int>(m_audio_output.get_downsampler_fir_size());
+    QAudioDevice device               = m_audio_output.get_device();
+    QAudioFormat format               = m_audio_output.get_format();
+    int          buffer_size          = m_audio_output.get_buffer_size();
+    int          downsampler_fir_size = static_cast<int>(m_audio_output.get_downsampler_fir_size());
 
-    emit audio_output_activated(device_info, format, buffer_size, downsampler_fir_size);
+    emit audio_device_activated(device, format, buffer_size, downsampler_fir_size);
 }

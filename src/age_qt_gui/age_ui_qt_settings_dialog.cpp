@@ -65,7 +65,7 @@ age::qt_settings_dialog::qt_settings_dialog(QSharedPointer<qt_user_value_store> 
     connect(m_settings_video, &qt_settings_video::frames_to_blend_changed, this, &qt_settings_dialog::emit_video_frames_to_blend_changed);
     connect(m_settings_video, &qt_settings_video::filter_chain_changed, this, &qt_settings_dialog::emit_video_post_processing_filter_changed);
 
-    connect(m_settings_audio, &qt_settings_audio::output_changed, this, &qt_settings_dialog::emit_audio_output_changed);
+    connect(m_settings_audio, &qt_settings_audio::device_changed, this, &qt_settings_dialog::emit_audio_device_changed);
     connect(m_settings_audio, &qt_settings_audio::volume_changed, this, &qt_settings_dialog::emit_audio_volume_changed);
     connect(m_settings_audio, &qt_settings_audio::latency_changed, this, &qt_settings_dialog::emit_audio_latency_changed);
     connect(m_settings_audio, &qt_settings_audio::downsampler_quality_changed, this, &qt_settings_dialog::emit_audio_downsampler_quality_changed);
@@ -187,9 +187,9 @@ void age::qt_settings_dialog::emit_settings_signals()
 //
 //---------------------------------------------------------
 
-void age::qt_settings_dialog::audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size)
+void age::qt_settings_dialog::audio_device_activated(QAudioDevice device, QAudioFormat format, int buffer_size, int downsampler_fir_size)
 {
-    m_settings_audio->set_active_audio_output(device, format, buffer_size, downsampler_fir_size);
+    m_settings_audio->set_active_audio_device(device, format, buffer_size, downsampler_fir_size);
 }
 
 void age::qt_settings_dialog::set_emulator_screen_size(int16_t width, int16_t height)
@@ -256,9 +256,9 @@ void age::qt_settings_dialog::emit_video_post_processing_filter_changed(qt_filte
 
 
 
-void age::qt_settings_dialog::emit_audio_output_changed(QAudioDeviceInfo device, QAudioFormat format)
+void age::qt_settings_dialog::emit_audio_device_changed(QAudioDevice device, QAudioFormat format)
 {
-    emit audio_output_changed(device, format);
+    emit audio_device_changed(device, format);
 }
 
 void age::qt_settings_dialog::emit_audio_volume_changed(int volume_percent)

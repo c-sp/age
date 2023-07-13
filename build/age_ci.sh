@@ -22,8 +22,8 @@ print_usage_and_exit()
     echo "  builds:"
     echo "    $0 $CMD_BUILD_GTEST $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_GTEST $CMAKE_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_BUILD_QT $QT_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_BUILD_QT $QT_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_BUILD_QT $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_BUILD_QT $CMAKE_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_DEBUG"
@@ -110,19 +110,19 @@ build_gtest()
 build_qt()
 {
     case $1 in
-        "${QT_BUILD_TYPE_DEBUG}") ;;
-        "${QT_BUILD_TYPE_RELEASE}") ;;
+        "${CMAKE_BUILD_TYPE_DEBUG}") ;;
+        "${CMAKE_BUILD_TYPE_RELEASE}") ;;
         *) print_usage_and_exit ;;
     esac
 
     cd_new_tmp
     echo "running age_qt $1 build in \"$(pwd -P)\""
 
-    qmake "CONFIG+=$1" "$REPO_DIR/src/age_qt_gui.pro"
-    make -j -l 5
+    cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
+    make -j -l 5 age_qt_gui
 
-    ARTIFACT_DIR=$(mkdir_artifact age_qt)
-    cp age "$ARTIFACT_DIR"
+    ARTIFACT_DIR=$(mkdir_artifact age_qt_gui)
+    cp age_qt_gui/age_qt_gui "$ARTIFACT_DIR"
 }
 
 build_tester()
@@ -250,9 +250,6 @@ run_tests()
 ##   script starting point
 ##
 ###############################################################################
-
-QT_BUILD_TYPE_DEBUG=debug
-QT_BUILD_TYPE_RELEASE=release
 
 CMAKE_BUILD_TYPE_DEBUG=Debug
 CMAKE_BUILD_TYPE_RELEASE=Release

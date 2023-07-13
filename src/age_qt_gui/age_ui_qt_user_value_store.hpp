@@ -26,7 +26,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "age_ui_qt.hpp"
+#include <age_types.hpp>
 
 
 

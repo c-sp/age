@@ -50,7 +50,7 @@ namespace age
         AGE_DISABLE_COPY(qt_main_window);
 
     public:
-        explicit qt_main_window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        explicit qt_main_window(QWidget* parent = nullptr, Qt::WindowFlags flags = {});
         ~qt_main_window() override;
 
     signals:

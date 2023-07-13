@@ -21,7 +21,7 @@
 //! \file
 //!
 
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
 #include <QAudioFormat>
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -44,11 +44,10 @@
 #include <QSharedPointer>
 #include <QSlider>
 #include <QString>
-#include <QWidget>
 #include <QtGui/qopengl.h> // GLint
+#include <QWidget>
 
-#include <age_types.hpp>
-
+#include "age_ui_qt.hpp"
 #include "age_ui_qt_user_value_store.hpp"
 
 
@@ -108,7 +107,7 @@ namespace age
     {
         Q_OBJECT
     public:
-        explicit qt_filter_widget(int widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        explicit qt_filter_widget(int widget_index, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
         void set_filter(qt_filter filter, GLint width, GLint height);
 
@@ -147,7 +146,7 @@ namespace age
         AGE_DISABLE_COPY(qt_settings_video);
 
     public:
-        explicit qt_settings_video(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        explicit qt_settings_video(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
         void set_emulator_screen_size(GLint width, GLint height);
 
@@ -217,9 +216,9 @@ namespace age
         AGE_DISABLE_COPY(qt_settings_audio);
 
     public:
-        explicit qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        explicit qt_settings_audio(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
-        void set_active_audio_output(const QAudioDeviceInfo& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size);
+        void set_active_audio_device(const QAudioDevice& device, const QAudioFormat& format, int buffer_size, int downsampler_fir_size);
 
         void toggle_mute();
         void increase_volume();
@@ -229,25 +228,24 @@ namespace age
 
     signals:
 
-        void output_changed(QAudioDeviceInfo device, QAudioFormat format);
+        void device_changed(QAudioDevice device, QAudioFormat format);
         void volume_changed(int volume_percent);
         void latency_changed(int latency_milliseconds);
         void downsampler_quality_changed(age::qt_downsampler_quality quality);
 
     private slots:
 
-        void devices_index_changed(const QString& text);
+        void devices_index_changed(int device_index);
         void mute_state_changed(int state);
         void volume_value_changed(int value);
         void latency_value_changed(int value);
         void downsampler_quality_index_changed(const QString& text);
 
     private:
-        void populate_devices_box(const QString& device_to_select);
+        void populate_devices_box(const QString& device_id_to_select);
         void update_volume(int volume);
 
-        [[nodiscard]] QAudioDeviceInfo get_device_info(const QString& device_name) const;
-        static QAudioFormat            find_suitable_format(const QAudioDeviceInfo& device_info);
+        static QAudioFormat find_suitable_format(const QAudioDevice& device);
 
         QSharedPointer<qt_user_value_store> m_user_value_store;
 
@@ -266,8 +264,6 @@ namespace age
         QSlider* m_slider_latency = nullptr;
         QLabel*  m_label_latency  = nullptr;
 
-        QAudioDeviceInfo       m_selected_device;
-        QAudioFormat           m_selected_device_format;
         int                    m_selected_volume              = 0;
         int                    m_selected_latency             = 0;
         qt_downsampler_quality m_selected_downsampler_quality = qt_downsampler_quality::high; // default value
@@ -289,7 +285,7 @@ namespace age
         AGE_DISABLE_COPY(qt_settings_keys);
 
     public:
-        explicit qt_settings_keys(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        explicit qt_settings_keys(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
         [[nodiscard]] qt_key_event get_event_for_key(Qt::Key key) const;
 
@@ -351,7 +347,7 @@ namespace age
         AGE_DISABLE_COPY(qt_settings_miscellaneous);
 
     public:
-        explicit qt_settings_miscellaneous(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+        explicit qt_settings_miscellaneous(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent = nullptr, Qt::WindowFlags flags = {});
 
         [[nodiscard]] bool show_menu_bar(bool fullscreen) const;
         [[nodiscard]] bool show_status_bar(bool fullscreen) const;
@@ -409,7 +405,7 @@ namespace age
         AGE_DISABLE_COPY(qt_settings_dialog);
 
     public:
-        qt_settings_dialog(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent, Qt::WindowFlags flags = nullptr);
+        qt_settings_dialog(QSharedPointer<qt_user_value_store> user_value_store, QWidget* parent, Qt::WindowFlags flags = {});
 
         [[nodiscard]] qt_key_event get_event_for_key(Qt::Key key) const;
         [[nodiscard]] QString      get_open_file_dialog_directory() const;
@@ -428,7 +424,7 @@ namespace age
         void video_frames_to_blend_changed(int frames_to_blend);
         void video_post_processing_filter_changed(age::qt_filter_list filter_list);
 
-        void audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
+        void audio_device_changed(QAudioDevice device, QAudioFormat format);
         void audio_volume_changed(int volume_percent);
         void audio_latency_changed(int latency_milliseconds);
         void audio_downsampler_quality_changed(age::qt_downsampler_quality quality);
@@ -442,7 +438,7 @@ namespace age
 
     public slots:
 
-        void audio_output_activated(QAudioDeviceInfo device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
+        void audio_device_activated(QAudioDevice device, QAudioFormat format, int buffer_size, int downsampler_fir_size);
         void set_emulator_screen_size(age::int16_t width, age::int16_t height);
 
 
@@ -457,7 +453,7 @@ namespace age
         void emit_video_frames_to_blend_changed(int frames_to_blend);
         void emit_video_post_processing_filter_changed(age::qt_filter_list filter_list);
 
-        void emit_audio_output_changed(QAudioDeviceInfo device, QAudioFormat format);
+        void emit_audio_device_changed(QAudioDevice device, QAudioFormat format);
         void emit_audio_volume_changed(int volume_percent);
         void emit_audio_latency_changed(int latency_milliseconds);
         void emit_audio_downsampler_quality_changed(age::qt_downsampler_quality quality);

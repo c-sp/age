@@ -91,8 +91,8 @@ endif ()
 set(CMAKE_FIND_FRAMEWORK LAST)
 
 # age_qt_gui requires Qt
-# (condition: Qt5Widgets_FOUND)
-find_package(Qt5 QUIET COMPONENTS Widgets)
+# (condition: Qt6Core_FOUND)
+find_package(Qt6 QUIET COMPONENTS Core)
 
 # age_tester requires libpng
 # (condition: PNG_FOUND)
@@ -113,11 +113,11 @@ add_subdirectory(age_common)
 add_subdirectory(age_emulator_gb)
 
 # age_qt_gui requires Qt
-if (Qt5Widgets_FOUND)
-    message(STATUS "Qt5 found => configuring age_qt_gui")
+if (Qt6Core_FOUND)
+    message(STATUS "Qt6 found => configuring age_qt_gui")
     add_subdirectory(age_qt_gui)
 else ()
-    message(STATUS "Qt5 not found => age_qt_gui not available")
+    message(STATUS "Qt6 not found => age_qt_gui not available")
 endif ()
 
 # age_tester requires libpng

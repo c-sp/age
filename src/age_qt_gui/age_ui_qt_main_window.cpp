@@ -87,7 +87,7 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
     connect(&m_emulation_runner_thread, &QThread::started, emulation_runner, &qt_emulation_runner::initialize);
     connect(&m_emulation_runner_thread, &QThread::finished, emulation_runner, &QObject::deleteLater);
 
-    connect(emulation_runner, &qt_emulation_runner::audio_output_activated, m_settings, &qt_settings_dialog::audio_output_activated);
+    connect(emulation_runner, &qt_emulation_runner::audio_device_activated, m_settings, &qt_settings_dialog::audio_device_activated);
     connect(emulation_runner, &qt_emulation_runner::emulator_screen_updated, video_output, &qt_video_output::new_frame);
     connect(emulation_runner, &qt_emulation_runner::emulator_speed, this, &qt_main_window::emulator_speed);
     connect(emulation_runner, &qt_emulation_runner::emulator_milliseconds, this, &qt_main_window::emulator_milliseconds);
@@ -102,7 +102,7 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
     connect(m_settings, &qt_settings_dialog::video_frames_to_blend_changed, video_output, &qt_video_output::set_blend_frames);
     connect(m_settings, &qt_settings_dialog::video_post_processing_filter_changed, video_output, &qt_video_output::set_post_processing_filter);
 
-    connect(m_settings, &qt_settings_dialog::audio_output_changed, emulation_runner, &qt_emulation_runner::set_audio_output);
+    connect(m_settings, &qt_settings_dialog::audio_device_changed, emulation_runner, &qt_emulation_runner::set_audio_device);
     connect(m_settings, &qt_settings_dialog::audio_volume_changed, emulation_runner, &qt_emulation_runner::set_audio_volume);
     connect(m_settings, &qt_settings_dialog::audio_latency_changed, emulation_runner, &qt_emulation_runner::set_audio_latency);
     connect(m_settings, &qt_settings_dialog::audio_downsampler_quality_changed, emulation_runner, &qt_emulation_runner::set_audio_downsampler_quality);

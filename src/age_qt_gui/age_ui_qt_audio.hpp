@@ -21,9 +21,9 @@
 //! \file
 //!
 
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
 #include <QAudioFormat>
-#include <QAudioOutput>
+#include <QAudioSink>
 #include <QIODevice>
 #include <QSharedPointer>
 
@@ -42,28 +42,19 @@ namespace age
     //!
     //! \brief The qt_audio_output class can be used for easily configurable audio streaming.
     //!
-    //! This class is based on Qt's QAudioOutput.
+    //! This class is based on Qt's QAudioSink.
     //! It can be configured in several ways (for details see the respective methods):
     //! - audio volume: set_volume()
     //! - audio data sampling rate: set_input_sampling_rate().
     //! - audio data resampling quality: set_resampling_quality()
     //! - audio latency: set_latency()
-    //! - audio device: set_output()
+    //! - audio device: set_device()
     //! - audio output format: set_output()
     //!
-    //! Before any audio streaming is possible, set_output() must be called at least once.
+    //! Before any audio streaming is possible, set_device() must be called at least once.
     //! The audio stream must be kept alive by regular stream_audio_data() calls.
-    //! The underlying QAudioOutput object is used in "push mode" (by not specifying any
-    //! QIODevice when calling QAudioOutput::start()).
-    //!
-    //! Hints regarding QAudioOutput:
-    //! - When trying "pull mode" (by using a custom QIODevice for buffering audio data),
-    //! there were frequent noticable audio lags caused by buffer underflows.
-    //! Apparently some of the timer events used for streaming audio data in "pull mode"
-    //! were massively delayed.
-    //! - QAudioOutput::setVolume() did not work very well on Windows. Calling this method
-    //! sometimes did not work at all and at other times caused CPU load spikes and audio
-    //! lags. That's why we use our own volume control: downsampler::set_volume().
+    //! The underlying QAudioSink object is used in "push mode" (by not specifying any
+    //! QIODevice when calling QAudioSink::start()).
     //!
     class qt_audio_output
     {
@@ -83,7 +74,7 @@ namespace age
         //! \brief Get information about the currently used audio output device.
         //! \return A QAudioDeviceInfo for the currently used audio output device.
         //!
-        [[nodiscard]] QAudioDeviceInfo get_device_info() const;
+        [[nodiscard]] QAudioDevice get_device() const;
 
         //!
         //! \brief Get the audio format used by the current audio output device.
@@ -162,10 +153,10 @@ namespace age
         //! qt_audio_output is capable of resampling the audio data to be
         //! streamed.
         //!
-        //! \param device_info A QAudioDeviceInfo for audio output device to use.
+        //! \param device A QAudioDeviceInfo for audio output device to use.
         //! \param format A QAudioFormat for the audio output format to use.
         //!
-        void set_output(QAudioDeviceInfo device_info, QAudioFormat format);
+        void set_device(QAudioDevice device, QAudioFormat format);
 
 
 
@@ -219,16 +210,16 @@ namespace age
         float                  m_volume               = 1;
         int                    m_latency_milliseconds = qt_audio_latency_milliseconds_min;
         qt_downsampler_quality m_downsampler_quality  = qt_downsampler_quality::low;
-        QAudioDeviceInfo       m_device_info;
+        QAudioDevice           m_device;
         QAudioFormat           m_format;
 
-        QSharedPointer<downsampler>  m_downsampler;
-        size_t                       m_downsampler_fir_size = 0;
-        pcm_ring_buffer              m_buffer{1};
-        QSharedPointer<QAudioOutput> m_output;
-        QIODevice*                   m_device = nullptr;
-        pcm_vector                   m_silence;
-        bool                         m_pause_streaming = false;
+        QSharedPointer<downsampler> m_downsampler;
+        size_t                      m_downsampler_fir_size = 0;
+        pcm_ring_buffer             m_buffer{1};
+        QSharedPointer<QAudioSink>  m_sink;
+        QIODevice*                  m_io_device = nullptr;
+        pcm_vector                  m_silence;
+        bool                        m_pause_streaming = false;
     };
 
 } // namespace age

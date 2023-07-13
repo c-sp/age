@@ -27,8 +27,6 @@
 age::qt_video_renderer::qt_video_renderer()
     : m_indices(QOpenGLBuffer::IndexBuffer)
 {
-    initializeOpenGLFunctions();
-
     // shader program
     qt_init_shader_program(m_program, ":/age_ui_qt_render_vsh.glsl", ":/age_ui_qt_render_fsh.glsl");
 

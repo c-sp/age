@@ -26,7 +26,6 @@
 #include <QMatrix4x4>
 #include <QOpenGLBuffer>
 #include <QOpenGLFramebufferObject>
-#include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLWidget>
@@ -57,7 +56,7 @@ namespace age
 
 
 
-    class qt_video_renderer : private QOpenGLFunctions
+    class qt_video_renderer
     {
     public:
         qt_video_renderer();
@@ -75,7 +74,7 @@ namespace age
 
 
 
-    class qt_video_post_processor : private QOpenGLFunctions
+    class qt_video_post_processor
     {
     public:
         qt_video_post_processor();
@@ -129,7 +128,7 @@ namespace age
 
 
 
-    class qt_video_output : public QOpenGLWidget, protected QOpenGLFunctions
+    class qt_video_output : public QOpenGLWidget
     {
         Q_OBJECT
 

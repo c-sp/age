@@ -1,6 +1,5 @@
 
 # IDE files
-*.pro.user*
 .idea
 
 # generated code
@@ -10,7 +9,6 @@ src/age_common/api/git_revision.hpp
 build/doxygen/html
 build/artifacts
 cmake-build-*
-build*Qt*
 
 # miscellaneous files
 Thumbs.db
