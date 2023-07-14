@@ -8,16 +8,19 @@ AGE is a Game Boy Emulator for Linux/Windows/macOS
 
 AGE requires a
 [C++20](https://en.cppreference.com/w/cpp/20)
-compatible compiler and these libraries/frameworks:
-* [Qt 5](https://www.qt.io/)
+compatible compiler and the following frameworks/libraries:
+* [Qt 6](https://www.qt.io/)
   for the desktop application
 * [libpng](http://www.libpng.org/pub/png/libpng.html)
   for automated testing
 
 Note that AGE makes use of
 [Type Punning](https://blog.regehr.org/archives/959)
-which according to the C++ standard actually results in undefined behavior.
-You need a compiler that allows type punning (like GCC or Clang)
+which for C++ results in undefined behavior as
+[only one union member can be "active"](https://en.cppreference.com/w/cpp/language/union).
+You need a compiler that allows type punning (like
+[GCC](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#Type%2Dpunning)
+or Clang)
 to build AGE.
 
 [AGE documentation](docs/README.md)
