@@ -43,6 +43,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_RUN_TESTS $TESTS_SAME_SUITE"
     echo "  miscellaneous:"
     echo "    $0 $CMD_DOXYGEN"
+    echo "    $0 $CMD_LIST_FILE_ADDED_TIMES"
     exit 1
 }
 
@@ -243,6 +244,22 @@ run_tests()
     ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "--$1" "$SUITE_DIR"
 }
 
+# I used this script to fix copyright statements based on the recommendations found here:
+# https://matija.suklje.name/how-and-why-to-properly-write-copyright-statements-in-your-code
+list_file_added_times()
+{
+    cd "$REPO_DIR"
+
+    # recursively iterate all files under version control
+    # (based on https://stackoverflow.com/a/59826804)
+    while read -d '' -r FILE_NAME; do
+        # get the time this file was added to git
+        # (based on https://stackoverflow.com/a/2390382)
+        FILE_ADDED_TIME=$(git log --follow --format=%as "$FILE_NAME" | tail -1)
+        echo "$FILE_ADDED_TIME - $FILE_NAME"
+    done < <(git ls-files -z)
+}
+
 
 
 ###############################################################################
@@ -271,6 +288,7 @@ CMD_BUILD_QT=build-qt
 CMD_BUILD_TESTER=build-tester
 CMD_BUILD_WASM=build-wasm
 CMD_DOXYGEN=doxygen
+CMD_LIST_FILE_ADDED_TIMES=list-file-added-times
 CMD_RUN_GTEST=run-gtest
 CMD_RUN_TESTS=run-tests
 
@@ -294,6 +312,7 @@ case ${CMD} in
     "${CMD_DOXYGEN}") run_doxygen ;;
     "${CMD_RUN_GTEST}") run_gtest "$@" ;;
     "${CMD_RUN_TESTS}") run_tests "$@" ;;
+    "${CMD_LIST_FILE_ADDED_TIMES}") list_file_added_times "$@" ;;
 
     *) print_usage_and_exit ;;
 esac
