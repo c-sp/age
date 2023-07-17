@@ -17,7 +17,7 @@
 #include "age_tester_run_tests.hpp"
 #include "age_tester_tasks.hpp"
 #include "age_tester_thread_pool.hpp"
-#include "age_tester_write_log.hpp"
+#include "modules/age_tester_write_log.hpp"
 
 #include <algorithm>
 #include <array>
@@ -25,6 +25,7 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <ranges>
 #include <regex>
 
 
@@ -173,7 +174,9 @@ namespace
 
 
 
-std::vector<age::tester::test_result> age::tester::run_tests(const options& opts, unsigned threads)
+std::vector<age::tester::test_result> age::tester::run_tests(const options&                        opts,
+                                                             const std::vector<age_tester_module>& modules,
+                                                             unsigned                              threads)
 {
     auto whitelist = opts.m_whitelist.length() ? new_matcher(opts.m_whitelist) : match_everything;
     auto blacklist = opts.m_blacklist.length() ? new_matcher(opts.m_blacklist) : match_nothing;
@@ -335,11 +338,49 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options& opts
             }
             if (opts.m_same_suite)
             {
-                find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_same_suite);
-                });
+                //find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
+                //    schedule_rom(rom_path, schedule_rom_same_suite);
+                //});
             }
         });
+
+        for (auto& mod : modules | std::views::filter(age_tester_module::is_module_enabled))
+        {
+            find_roms(opts.m_test_suite_path / mod.test_suite_directory(),
+                      matcher,
+                      [&](const std::filesystem::path& rom_path) {
+                          ++rom_count;
+                          std::vector<age_tester_test> tests = mod.create_tests(rom_path);
+
+                          // we don't allow auto_detect tests, the device type
+                          // must have been explicitly specified
+                          erase_if(tests, [](const age_tester_test& test) {
+                              return test.device_type() == gb_device_type::auto_detect;
+                          });
+
+                          // no tests to run -> mark this as failed test
+                          if (tests.empty())
+                          {
+                              results.push({rom_path.string() + " (no test scheduled)", false});
+                              return;
+                          }
+
+                          // schedule tests for this rom file
+                          for (auto& test : tests)
+                          {
+                              pool.queue_task([test, &opts, &results]() mutable {
+                                  auto begin = std::chrono::high_resolution_clock::now();
+
+                                  test.init_test(opts.m_log_categories);
+                                  test.run_test();
+                                  auto passed = test.test_succeeded();
+
+                                  auto end = std::chrono::high_resolution_clock::now();
+                                  results.push({test.test_name(), passed});
+                              });
+                          }
+                      });
+        }
 
         // by letting the thread pool go out of scope we wait for it to finish
     }

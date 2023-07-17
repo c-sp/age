@@ -18,6 +18,7 @@
 #define AGE_TESTER_RUN_TESTS_HPP
 
 #include "age_tester_arguments.hpp"
+#include "modules/age_tester_module.hpp"
 
 #include <string>
 #include <vector>
@@ -37,7 +38,9 @@ namespace age::tester
         {}
     };
 
-    std::vector<test_result> run_tests(const options& opts, unsigned threads);
+    std::vector<test_result> run_tests(const options& opts,
+                                       const std::vector<age_tester_module>& modules,
+                                       unsigned threads);
 
 } // namespace age::tester
 
