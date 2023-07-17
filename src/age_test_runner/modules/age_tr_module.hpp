@@ -63,7 +63,10 @@ namespace age::tr
 
     std::string                        normalize_path_separator(const std::filesystem::path& path);
     std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
+    std::filesystem::path              find_screenshot(const std::filesystem::path& rom_path,
+                                                       const std::string&           screenshot_suffix);
 
+    age_tr_module create_mealybug_module();
     age_tr_module create_same_suite_module();
 
 } // namespace age::tr

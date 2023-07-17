@@ -312,12 +312,6 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                     schedule_rom(rom_path, schedule_rom_little_things);
                 });
             }
-            if (opts.m_mealybug)
-            {
-                find_roms(opts.m_test_suite_path / "mealybug-tearoom-tests", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_mealybug);
-                });
-            }
             if (opts.m_mooneye)
             {
                 find_roms(opts.m_test_suite_path / "mooneye-test-suite", matcher, [&](const std::filesystem::path& rom_path) {
