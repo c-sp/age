@@ -1,6 +1,7 @@
 add_executable(
         age_test_runner
         modules/age_tr_module.cpp
+        modules/age_tr_module_mealybug.cpp
         modules/age_tr_module_same_suite.cpp
         modules/age_tr_test.cpp
         modules/age_tr_write_log.cpp

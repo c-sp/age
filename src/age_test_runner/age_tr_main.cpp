@@ -81,6 +81,7 @@ int main(int argc, char** argv)
     std::vector<char*> args(argv, argv + argc);
 
     std::vector<age::tr::age_tr_module> modules{
+        age::tr::create_mealybug_module(),
         age::tr::create_same_suite_module()};
 
     age::tr::options opts = age::tr::parse_arguments(args);
@@ -114,7 +115,8 @@ int main(int argc, char** argv)
 
     // notify the user about where we're about to look for test rom files
     check_run_all(opts);
-    modules[0].enable_module(opts.m_same_suite);
+    modules[0].enable_module(opts.m_mealybug);
+    modules[1].enable_module(opts.m_same_suite);
     std::cout << "test categories:"
               << (opts.m_acid2 ? " acid2" : "")
               << (opts.m_age ? " age" : "")

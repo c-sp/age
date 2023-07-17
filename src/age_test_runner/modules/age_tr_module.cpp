@@ -101,3 +101,19 @@ std::shared_ptr<age::uint8_vector> age::tr::load_rom_file(const std::filesystem:
         std::istreambuf_iterator<char>(rom_file),
         std::istreambuf_iterator<char>());
 }
+
+std::filesystem::path age::tr::find_screenshot(const std::filesystem::path& rom_path,
+                                               const std::string&           screenshot_suffix)
+{
+    auto base = rom_path;
+    base.replace_extension(); // remove file extension
+
+    auto screenshot = base;
+    screenshot += screenshot_suffix;
+    if (std::filesystem::is_regular_file(screenshot))
+    {
+        return screenshot;
+    }
+
+    return {};
+}
