@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_tasks.hpp"
+#include "age_tr_tasks.hpp"
 
 #include <gfx/age_png.hpp>
 
@@ -27,7 +27,7 @@
 
 
 
-bool age::tester::run_common_test(age::gb_emulator& emulator)
+bool age::tr::run_common_test(age::gb_emulator& emulator)
 {
     // used for Mooneye-GB, SameSuite and AGE test roms
     // (originally based on mooneye-gb/src/acceptance_tests/fixture.rs)
@@ -54,12 +54,12 @@ bool age::tester::run_common_test(age::gb_emulator& emulator)
 
 
 
-bool age::tester::has_executed_ld_b_b(const age::gb_emulator& emulator)
+bool age::tr::has_executed_ld_b_b(const age::gb_emulator& emulator)
 {
     return emulator.get_test_info().m_ld_b_b;
 }
 
-age::tester::run_test_t age::tester::run_until(const std::function<bool(const age::gb_emulator&)>& test_finished)
+age::tr::run_test_t age::tr::run_until(const std::function<bool(const age::gb_emulator&)>& test_finished)
 {
     return [=](age::gb_emulator& emulator) {
         int step_cycles = emulator.get_cycles_per_second() / 256;
@@ -73,7 +73,7 @@ age::tester::run_test_t age::tester::run_until(const std::function<bool(const ag
 
 
 
-age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::path& screenshot_png_path,
+age::tr::run_test_t age::tr::new_screenshot_test(const std::filesystem::path& screenshot_png_path,
                                                          const run_test_t&            run_test)
 {
     return [=](age::gb_emulator& emulator) {

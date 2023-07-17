@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_tasks.hpp"
+#include "age_tr_tasks.hpp"
 
 
 
@@ -45,7 +45,7 @@ namespace
 
 
 
-void age::tester::schedule_rom_mealybug(const std::filesystem::path& rom_path,
+void age::tr::schedule_rom_mealybug(const std::filesystem::path& rom_path,
                                         const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_module.hpp"
+#include "age_tr_module.hpp"
 
 
 
@@ -37,7 +37,7 @@ namespace
 
 
 
-age::tester::age_tester_module age::tester::create_same_suite_module()
+age::tr::age_tr_module age::tr::create_same_suite_module()
 {
     return {
         's',
@@ -48,7 +48,7 @@ age::tester::age_tester_module age::tester::create_same_suite_module()
             auto normalized_rom_path = normalize_path_separator(rom_path);
             auto rom_contents        = load_rom_file(rom_path);
 
-            std::vector<age::tester::age_tester_test> tests;
+            std::vector<age::tr::age_tr_test> tests;
             tests.emplace_back(
                 rom_path,
                 rom_contents,

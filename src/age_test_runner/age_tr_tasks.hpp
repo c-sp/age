@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_TASK_HPP
-#define AGE_TESTER_TASK_HPP
+#ifndef AGE_TR_TASK_HPP
+#define AGE_TR_TASK_HPP
 
 #include <age_types.hpp>
 #include <emulator/age_gb_emulator.hpp>
 
-#include "modules/age_tester_module.hpp"
+#include "modules/age_tr_module.hpp"
 
 #include <filesystem>
 #include <functional>
@@ -30,7 +30,7 @@
 
 
 
-namespace age::tester
+namespace age::tr
 {
     using run_test_t = std::function<bool(age::gb_emulator&)>;
 
@@ -98,8 +98,8 @@ namespace age::tester
     void schedule_rom_rtc3test(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_same_suite(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_TASK_HPP
+#endif // AGE_TR_TASK_HPP

@@ -15,17 +15,17 @@
 //
 
 #include "../age_emulator_gb/common/age_gb_clock.hpp"
-#include "age_tester_tasks.hpp"
+#include "age_tr_tasks.hpp"
 
 
 
 namespace
 {
-    age::tester::run_test_t new_rtc3test(const std::filesystem::path& screenshot_file,
+    age::tr::run_test_t new_rtc3test(const std::filesystem::path& screenshot_file,
                                          const std::vector<int>&      press_buttons,
                                          int                          test_seconds)
     {
-        return age::tester::new_screenshot_test(screenshot_file, [=](age::gb_emulator& emulator) {
+        return age::tr::new_screenshot_test(screenshot_file, [=](age::gb_emulator& emulator) {
             // wait for the main menu
             emulator.emulate(age::gb_clock_cycles_per_second);
 
@@ -81,7 +81,7 @@ namespace
 
 
 
-void age::tester::schedule_rom_rtc3test(const std::filesystem::path& rom_path,
+void age::tr::schedule_rom_rtc3test(const std::filesystem::path& rom_path,
                                         const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);

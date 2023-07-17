@@ -24,8 +24,8 @@ print_usage_and_exit()
     echo "    $0 $CMD_BUILD_GTEST $CMAKE_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_BUILD_QT $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_QT $CMAKE_BUILD_TYPE_RELEASE"
-    echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_DEBUG"
-    echo "    $0 $CMD_BUILD_TESTER $CMAKE_BUILD_TYPE_RELEASE"
+    echo "    $0 $CMD_BUILD_TEST_RUNNER $CMAKE_BUILD_TYPE_DEBUG"
+    echo "    $0 $CMD_BUILD_TEST_RUNNER $CMAKE_BUILD_TYPE_RELEASE"
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_DEBUG"
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
@@ -126,7 +126,7 @@ build_qt()
     cp age_qt_gui/age_qt_gui "$ARTIFACT_DIR"
 }
 
-build_tester()
+build_test_runner()
 {
     case $1 in
         "${CMAKE_BUILD_TYPE_DEBUG}") ;;
@@ -135,13 +135,13 @@ build_tester()
     esac
 
     cd_new_tmp
-    echo "running age_tester $1 build in \"$(pwd -P)\""
+    echo "running age_test_runner $1 build in \"$(pwd -P)\""
 
     cmake -DCMAKE_BUILD_TYPE="$1" "$REPO_DIR/src"
-    make -j -l 5 age_tester
+    make -j -l 5 age_test_runner
 
-    ARTIFACT_DIR=$(mkdir_artifact age_tester)
-    cp age_tester/age_tester "$ARTIFACT_DIR"
+    ARTIFACT_DIR=$(mkdir_artifact age_test_runner)
+    cp age_test_runner/age_test_runner "$ARTIFACT_DIR"
 }
 
 build_wasm()
@@ -218,7 +218,7 @@ run_tests()
     esac
 
     # the executable file must exist
-    TEST_EXEC="$(artifact_dir age_tester)/age_tester"
+    TEST_EXEC="$(artifact_dir age_test_runner)/age_test_runner"
     if ! [ -e "$TEST_EXEC" ]; then
         echo "The AGE test executable could not be found at:"
         echo "$TEST_EXEC"
@@ -285,7 +285,7 @@ TESTS_SAME_SUITE=same-suite
 
 CMD_BUILD_GTEST=build-gtest
 CMD_BUILD_QT=build-qt
-CMD_BUILD_TESTER=build-tester
+CMD_BUILD_TEST_RUNNER=build-test-runner
 CMD_BUILD_WASM=build-wasm
 CMD_DOXYGEN=doxygen
 CMD_LIST_FILE_ADDED_TIMES=list-file-added-times
@@ -307,7 +307,7 @@ fi
 case ${CMD} in
     "${CMD_BUILD_GTEST}") build_gtest "$@" ;;
     "${CMD_BUILD_QT}") build_qt "$@" ;;
-    "${CMD_BUILD_TESTER}") build_tester "$@" ;;
+    "${CMD_BUILD_TEST_RUNNER}") build_test_runner "$@" ;;
     "${CMD_BUILD_WASM}") build_wasm "$@" ;;
     "${CMD_DOXYGEN}") run_doxygen ;;
     "${CMD_RUN_GTEST}") run_gtest "$@" ;;

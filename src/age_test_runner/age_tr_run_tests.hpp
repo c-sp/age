@@ -14,18 +14,18 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_RUN_TESTS_HPP
-#define AGE_TESTER_RUN_TESTS_HPP
+#ifndef AGE_TR_RUN_TESTS_HPP
+#define AGE_TR_RUN_TESTS_HPP
 
-#include "age_tester_arguments.hpp"
-#include "modules/age_tester_module.hpp"
+#include "age_tr_arguments.hpp"
+#include "modules/age_tr_module.hpp"
 
 #include <string>
 #include <vector>
 
 
 
-namespace age::tester
+namespace age::tr
 {
     struct test_result
     {
@@ -38,12 +38,12 @@ namespace age::tester
         {}
     };
 
-    std::vector<test_result> run_tests(const options& opts,
-                                       const std::vector<age_tester_module>& modules,
-                                       unsigned threads);
+    std::vector<test_result> run_tests(const options&                    opts,
+                                       const std::vector<age_tr_module>& modules,
+                                       unsigned                          threads);
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_RUN_TESTS_HPP
+#endif // AGE_TR_RUN_TESTS_HPP

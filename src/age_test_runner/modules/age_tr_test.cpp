@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#include "age_tester_test.hpp"
-#include "age_tester_write_log.hpp"
+#include "age_tr_test.hpp"
+#include "age_tr_write_log.hpp"
 
 #include <gfx/age_png.hpp>
 
@@ -46,11 +46,11 @@ namespace
 
 
 
-age::tester::age_tester_test::age_tester_test(std::filesystem::path                        rom_path,
-                                              std::shared_ptr<const uint8_vector>          rom,
-                                              age::gb_device_type                          device_type,
-                                              std::function<bool(const age::gb_emulator&)> test_finished,
-                                              std::function<bool(const age::gb_emulator&)> test_succeeded)
+age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
+                                  std::shared_ptr<const uint8_vector>          rom,
+                                  age::gb_device_type                          device_type,
+                                  std::function<bool(const age::gb_emulator&)> test_finished,
+                                  std::function<bool(const age::gb_emulator&)> test_succeeded)
     : m_rom_path(std::move(rom_path)),
       m_rom(std::move(rom)),
       m_device_type(device_type),
@@ -62,12 +62,12 @@ age::tester::age_tester_test::age_tester_test(std::filesystem::path             
 {
 }
 
-age::gb_device_type age::tester::age_tester_test::device_type() const
+age::gb_device_type age::tr::age_tr_test::device_type() const
 {
     return m_device_type;
 }
 
-std::string age::tester::age_tester_test::test_name() const
+std::string age::tr::age_tr_test::test_name() const
 {
     std::string tn = m_rom_path;
     if (!m_additional_info.empty())
@@ -77,7 +77,7 @@ std::string age::tester::age_tester_test::test_name() const
     return tn + " " + get_device_type_string(m_device_type);
 }
 
-void age::tester::age_tester_test::init_test(const gb_log_categories& log_categories)
+void age::tr::age_tr_test::init_test(const gb_log_categories& log_categories)
 {
     if (m_emulator == nullptr)
     {
@@ -85,7 +85,7 @@ void age::tester::age_tester_test::init_test(const gb_log_categories& log_catego
     }
 }
 
-void age::tester::age_tester_test::run_test()
+void age::tr::age_tr_test::run_test()
 {
     int cycles_per_iteration = m_emulator->get_cycles_per_second() / 256;
     while (!m_test_finished(*m_emulator))
@@ -94,12 +94,12 @@ void age::tester::age_tester_test::run_test()
     }
 }
 
-bool age::tester::age_tester_test::test_succeeded()
+bool age::tr::age_tr_test::test_succeeded()
 {
     return m_test_succeeded(*m_emulator);
 }
 
-void age::tester::age_tester_test::write_logs()
+void age::tr::age_tr_test::write_logs()
 {
     std::filesystem::path log_path = m_rom_path;
     log_path.replace_extension(log_file_extension(m_device_type));
@@ -108,21 +108,21 @@ void age::tester::age_tester_test::write_logs()
 
 
 
-std::function<bool(const age::gb_emulator&)> age::tester::finished_after_cycle(int64_t cycle)
+std::function<bool(const age::gb_emulator&)> age::tr::finished_after_cycle(int64_t cycle)
 {
     return [=](const age::gb_emulator& emulator) {
         return emulator.get_emulated_cycles() >= cycle;
     };
 }
 
-std::function<bool(const age::gb_emulator&)> age::tester::finished_after_ld_b_b()
+std::function<bool(const age::gb_emulator&)> age::tr::finished_after_ld_b_b()
 {
     return [](const age::gb_emulator& emulator) {
         return emulator.get_test_info().m_ld_b_b;
     };
 }
 
-std::function<bool(const age::gb_emulator&)> age::tester::succeeded_with_screenshot(const std::filesystem::path& screenshot_path)
+std::function<bool(const age::gb_emulator&)> age::tr::succeeded_with_screenshot(const std::filesystem::path& screenshot_path)
 {
     return [=](const age::gb_emulator& emulator) {
         // load png
@@ -164,7 +164,7 @@ std::function<bool(const age::gb_emulator&)> age::tester::succeeded_with_screens
     };
 }
 
-std::function<bool(const age::gb_emulator&)> age::tester::succeeded_with_fibonacci_regs()
+std::function<bool(const age::gb_emulator&)> age::tr::succeeded_with_fibonacci_regs()
 {
     return [](const age::gb_emulator& emulator) {
         age::gb_test_info info = emulator.get_test_info();

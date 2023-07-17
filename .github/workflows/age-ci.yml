@@ -58,17 +58,17 @@ jobs:
           path: ${{ env.ARTIFACT_PATH }}
 
 
-  build-tester:
-    name: build tester binary
+  build-test-runner:
+    name: build test runner binary
     runs-on: ubuntu-22.04
     steps:
       - name: checkout code
         uses: actions/checkout@v3
 
-      - name: build tester binary
-        run: build/age_ci.sh build-tester Release
+      - name: build test runner binary
+        run: build/age_ci.sh build-test-runner Release
 
-      - name: upload tester artifact
+      - name: upload test runner artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}
@@ -121,7 +121,7 @@ jobs:
   test-age:
     name: run age-test-roms
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -139,7 +139,7 @@ jobs:
   test-acid2:
     name: run dmg-acid2 and cgb-acid2 tests
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -157,7 +157,7 @@ jobs:
   test-blargg:
     name: run Blargg's test suite
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -175,7 +175,7 @@ jobs:
   test-little-things:
     name: run little-things test
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -193,7 +193,7 @@ jobs:
   test-gambatte:
     name: run Gambatte test suite
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -211,7 +211,7 @@ jobs:
   test-mealybug:
     name: run Mealybug Tearoom tests
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -229,7 +229,7 @@ jobs:
   test-mooneye:
     name: run Mooneye Test Suite
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -247,7 +247,7 @@ jobs:
   test-mooneye-wilbertpol:
     name: run Mooneye Test Suite (wilbertpol)
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -265,7 +265,7 @@ jobs:
   test-rtc3test:
     name: run rtc3test
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3
@@ -283,7 +283,7 @@ jobs:
   test-same-suite:
     name: run SameSuite
     runs-on: ubuntu-22.04
-    needs: [ build-tester ]
+    needs: [ build-test-runner ]
     steps:
       - name: checkout code
         uses: actions/checkout@v3

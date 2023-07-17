@@ -16,7 +16,7 @@
 
 #include <git_revision.hpp>
 
-#include "age_tester_write_log.hpp"
+#include "age_tr_write_log.hpp"
 
 #include <algorithm>
 #include <bitset>
@@ -36,7 +36,7 @@ namespace
 
         std::stringstream result;
         result << "--------------------------------------------------------------------------------\n"
-               << "   emulation logs for: " << rom_path.filename().string() << " " << age::tester::get_device_type_string(device_type) << '\n'
+               << "   emulation logs for: " << rom_path.filename().string() << " " << age::tr::get_device_type_string(device_type) << '\n'
                << "           created on: " << std::put_time(tm, "%Y-%m-%dT%H:%M:%SZ") << '\n'
                << "     AGE git revision: " << GIT_REV << " (" << GIT_DATE << ")\n"
                << "--------------------------------------------------------------------------------\n"
@@ -114,7 +114,7 @@ namespace
 
 
 
-std::string age::tester::get_device_type_string(age::gb_device_type device_type)
+std::string age::tr::get_device_type_string(age::gb_device_type device_type)
 {
     switch (device_type)
     {
@@ -135,10 +135,10 @@ std::string age::tester::get_device_type_string(age::gb_device_type device_type)
 
 
 
-void age::tester::write_log([[maybe_unused]] const std::filesystem::path& log_path,
-                            std::vector<gb_log_entry>                     log_entries,
-                            const std::filesystem::path&                  rom_path,
-                            gb_device_type                                device_type)
+void age::tr::write_log([[maybe_unused]] const std::filesystem::path& log_path,
+                        std::vector<gb_log_entry>                     log_entries,
+                        const std::filesystem::path&                  rom_path,
+                        gb_device_type                                device_type)
 {
     if (log_entries.empty())
     {

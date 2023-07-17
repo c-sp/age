@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_ARGUMENTS_HPP
-#define AGE_TESTER_ARGUMENTS_HPP
+#ifndef AGE_TR_ARGUMENTS_HPP
+#define AGE_TR_ARGUMENTS_HPP
 
 #include <emulator/age_gb_types.hpp>
 #include <filesystem>
@@ -24,7 +24,7 @@
 
 
 
-namespace age::tester
+namespace age::tr
 {
     struct options
     {
@@ -66,8 +66,8 @@ namespace age::tester
 
     options parse_arguments(const std::vector<char*>& args);
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_ARGUMENTS_HPP
+#endif // AGE_TR_ARGUMENTS_HPP
