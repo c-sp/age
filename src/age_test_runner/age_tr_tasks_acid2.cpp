@@ -36,7 +36,7 @@ namespace
 
 
 void age::tr::schedule_rom_acid2_cgb(const std::filesystem::path& rom_path,
-                                         const schedule_test_t&       schedule)
+                                     const schedule_test_t&       schedule)
 {
     auto filename = rom_path.filename().string();
     if (filename != "cgb-acid2.gbc")
@@ -61,7 +61,7 @@ void age::tr::schedule_rom_acid2_cgb(const std::filesystem::path& rom_path,
 
 
 void age::tr::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
-                                         const schedule_test_t&       schedule)
+                                     const schedule_test_t&       schedule)
 {
     auto filename = rom_path.filename().string();
     if (filename != "dmg-acid2.gb")

@@ -74,7 +74,7 @@ age::tr::run_test_t age::tr::run_until(const std::function<bool(const age::gb_em
 
 
 age::tr::run_test_t age::tr::new_screenshot_test(const std::filesystem::path& screenshot_png_path,
-                                                         const run_test_t&            run_test)
+                                                 const run_test_t&            run_test)
 {
     return [=](age::gb_emulator& emulator) {
         run_test(emulator);

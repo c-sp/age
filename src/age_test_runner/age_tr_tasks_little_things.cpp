@@ -53,7 +53,7 @@ namespace
 
 
 void age::tr::schedule_rom_little_things(const std::filesystem::path& rom_path,
-                                             const schedule_test_t&       schedule)
+                                         const schedule_test_t&       schedule)
 {
     if (rom_path.filename().string() == "firstwhite.gb")
     {

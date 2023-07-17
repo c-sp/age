@@ -17,7 +17,6 @@ add_executable(
         age_tr_tasks_mooneye.cpp
         age_tr_tasks_mooneye_wilbertpol.cpp
         age_tr_tasks_rtc3test.cpp
-        age_tr_tasks_same_suite.cpp
         age_tr_thread_pool.hpp)
 
 # Find pthreads on e.g. Ubuntu,

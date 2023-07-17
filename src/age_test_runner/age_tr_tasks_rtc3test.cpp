@@ -22,8 +22,8 @@
 namespace
 {
     age::tr::run_test_t new_rtc3test(const std::filesystem::path& screenshot_file,
-                                         const std::vector<int>&      press_buttons,
-                                         int                          test_seconds)
+                                     const std::vector<int>&      press_buttons,
+                                     int                          test_seconds)
     {
         return age::tr::new_screenshot_test(screenshot_file, [=](age::gb_emulator& emulator) {
             // wait for the main menu
@@ -82,7 +82,7 @@ namespace
 
 
 void age::tr::schedule_rom_rtc3test(const std::filesystem::path& rom_path,
-                                        const schedule_test_t&       schedule)
+                                    const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);
 

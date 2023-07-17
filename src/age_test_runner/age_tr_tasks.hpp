@@ -96,7 +96,6 @@ namespace age::tr
     void schedule_rom_mooneye(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_mooneye_wilbertpol(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_rtc3test(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
-    void schedule_rom_same_suite(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
 
 } // namespace age::tr
 

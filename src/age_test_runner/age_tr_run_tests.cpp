@@ -336,12 +336,6 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                     schedule_rom(rom_path, schedule_rom_rtc3test);
                 });
             }
-            if (opts.m_same_suite)
-            {
-                //find_roms(opts.m_test_suite_path / "same-suite", matcher, [&](const std::filesystem::path& rom_path) {
-                //    schedule_rom(rom_path, schedule_rom_same_suite);
-                //});
-            }
         });
 
         for (auto& mod : modules | std::views::filter(age_tr_module::is_module_enabled))

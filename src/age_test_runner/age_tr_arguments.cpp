@@ -281,8 +281,8 @@ age::tr::options age::tr::parse_arguments(const std::vector<char*>& args)
     }};
 
     age::tr::options options{};
-    int                  c         = 0;
-    int                  longindex = 0;
+    int              c         = 0;
+    int              longindex = 0;
 
     // no getopt() error message on standard error
     opterr = 0;

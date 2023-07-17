@@ -280,7 +280,7 @@ namespace
                     // auto tile_index = (exp_index >= expected_result.size()) ? 0 : expected_result[exp_index];
 
                     ptrdiff_t tile_line_ofs = tile_index * 8 * 8 + tile_offset;
-                    auto tile = std::span<const uint8_t, 8>{tile_data.begin() + tile_line_ofs, 8};
+                    auto      tile          = std::span<const uint8_t, 8>{tile_data.begin() + tile_line_ofs, 8};
 
                     for (int tile_pixel = 0; tile_pixel < 8; ++tile_pixel, ++pixel_offset)
                     {
@@ -367,7 +367,7 @@ namespace
 
 
 void age::tr::schedule_rom_gambatte(const std::filesystem::path& rom_path,
-                                        const schedule_test_t&       schedule)
+                                    const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);
     auto filename     = rom_path.filename().string();
