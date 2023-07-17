@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_WRITE_LOG_HPP
-#define AGE_TESTER_WRITE_LOG_HPP
+#ifndef AGE_TR_WRITE_LOG_HPP
+#define AGE_TR_WRITE_LOG_HPP
 
 #include <emulator/age_gb_types.hpp>
 
@@ -24,7 +24,7 @@
 
 
 
-namespace age::tester
+namespace age::tr
 {
     std::string get_device_type_string(age::gb_device_type device_type);
 
@@ -33,8 +33,8 @@ namespace age::tester
                    const std::filesystem::path& rom_path,
                    gb_device_type               device_type);
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_WRITE_LOG_HPP
+#endif // AGE_TR_WRITE_LOG_HPP

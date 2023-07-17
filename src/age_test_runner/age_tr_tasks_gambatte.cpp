@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_tasks.hpp"
+#include "age_tr_tasks.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -251,7 +251,7 @@ namespace
         return {};
     }
 
-    age::tester::run_test_t new_hex_out_test(const age::uint8_vector& expected_result)
+    age::tr::run_test_t new_hex_out_test(const age::uint8_vector& expected_result)
     {
         return [=](age::gb_emulator& emulator) {
             run_test(emulator);
@@ -324,7 +324,7 @@ namespace
         }
     }
 
-    age::tester::run_test_t new_audio_test(bool expect_audio_out)
+    age::tr::run_test_t new_audio_test(bool expect_audio_out)
     {
         return [=](age::gb_emulator& emulator) {
             run_test(emulator);
@@ -366,7 +366,7 @@ namespace
 
 
 
-void age::tester::schedule_rom_gambatte(const std::filesystem::path& rom_path,
+void age::tr::schedule_rom_gambatte(const std::filesystem::path& rom_path,
                                         const schedule_test_t&       schedule)
 {
     auto rom_contents = load_rom_file(rom_path);

@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-#include "age_tester_run_tests.hpp"
-#include "age_tester_tasks.hpp"
-#include "age_tester_thread_pool.hpp"
-#include "modules/age_tester_write_log.hpp"
+#include "age_tr_run_tests.hpp"
+#include "age_tr_tasks.hpp"
+#include "age_tr_thread_pool.hpp"
+#include "modules/age_tr_write_log.hpp"
 
 #include <algorithm>
 #include <array>
@@ -154,7 +154,7 @@ namespace
             {
                 return;
             }
-            std::string path = age::tester::normalize_path_separator(file_path.string());
+            std::string path = age::tr::normalize_path_separator(file_path.string());
             if (use_file(path))
             {
                 file_callback(file_path);
@@ -167,16 +167,16 @@ namespace
     std::string with_device_type(const std::string&  rom_info,
                                  age::gb_device_type device_type)
     {
-        return rom_info + " " + age::tester::get_device_type_string(device_type);
+        return rom_info + " " + age::tr::get_device_type_string(device_type);
     }
 
 } // namespace
 
 
 
-std::vector<age::tester::test_result> age::tester::run_tests(const options&                        opts,
-                                                             const std::vector<age_tester_module>& modules,
-                                                             unsigned                              threads)
+std::vector<age::tr::test_result> age::tr::run_tests(const options&                    opts,
+                                                     const std::vector<age_tr_module>& modules,
+                                                     unsigned                          threads)
 {
     auto whitelist = opts.m_whitelist.length() ? new_matcher(opts.m_whitelist) : match_everything;
     auto blacklist = opts.m_blacklist.length() ? new_matcher(opts.m_blacklist) : match_nothing;
@@ -344,17 +344,17 @@ std::vector<age::tester::test_result> age::tester::run_tests(const options&     
             }
         });
 
-        for (auto& mod : modules | std::views::filter(age_tester_module::is_module_enabled))
+        for (auto& mod : modules | std::views::filter(age_tr_module::is_module_enabled))
         {
             find_roms(opts.m_test_suite_path / mod.test_suite_directory(),
                       matcher,
                       [&](const std::filesystem::path& rom_path) {
                           ++rom_count;
-                          std::vector<age_tester_test> tests = mod.create_tests(rom_path);
+                          std::vector<age_tr_test> tests = mod.create_tests(rom_path);
 
                           // we don't allow auto_detect tests, the device type
                           // must have been explicitly specified
-                          erase_if(tests, [](const age_tester_test& test) {
+                          erase_if(tests, [](const age_tr_test& test) {
                               return test.device_type() == gb_device_type::auto_detect;
                           });
 

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_module.hpp"
+#include "age_tr_module.hpp"
 
 #include <cassert>
 #include <fstream>
@@ -23,11 +23,11 @@
 
 
 
-age::tester::age_tester_module::age_tester_module(char           arg_short_name,
-                                                  std::string    arg_long_name,
-                                                  std::string    arg_description,
-                                                  std::string    test_suite_directory,
-                                                  create_tests_t create_tests)
+age::tr::age_tr_module::age_tr_module(char           arg_short_name,
+                                      std::string    arg_long_name,
+                                      std::string    arg_description,
+                                      std::string    test_suite_directory,
+                                      create_tests_t create_tests)
     : m_arg_short_name(std::string("") + arg_short_name),
       m_arg_long_name(std::move(arg_long_name)),
       m_arg_description(std::move(arg_description)),
@@ -41,49 +41,49 @@ age::tester::age_tester_module::age_tester_module(char           arg_short_name,
 
 
 
-const std::string& age::tester::age_tester_module::arg_short_name() const
+const std::string& age::tr::age_tr_module::arg_short_name() const
 {
     return m_arg_short_name;
 }
 
-const std::string& age::tester::age_tester_module::arg_long_name() const
+const std::string& age::tr::age_tr_module::arg_long_name() const
 {
     return m_arg_long_name;
 }
 
-const std::string& age::tester::age_tester_module::arg_description() const
+const std::string& age::tr::age_tr_module::arg_description() const
 {
     return m_arg_description;
 }
 
-const std::string& age::tester::age_tester_module::test_suite_directory() const
+const std::string& age::tr::age_tr_module::test_suite_directory() const
 {
     return m_test_suite_directory;
 }
 
-bool age::tester::age_tester_module::is_enabled() const
+bool age::tr::age_tr_module::is_enabled() const
 {
     return m_is_enabled;
 }
 
-std::vector<age::tester::age_tester_test> age::tester::age_tester_module::create_tests(const std::filesystem::path& rom_path) const
+std::vector<age::tr::age_tr_test> age::tr::age_tr_module::create_tests(const std::filesystem::path& rom_path) const
 {
     return m_create_tests(rom_path);
 }
 
-void age::tester::age_tester_module::enable_module(bool enabled)
+void age::tr::age_tr_module::enable_module(bool enabled)
 {
     m_is_enabled = enabled;
 }
 
-bool age::tester::age_tester_module::is_module_enabled(const age::tester::age_tester_module& module)
+bool age::tr::age_tr_module::is_module_enabled(const age::tr::age_tr_module& module)
 {
     return module.is_enabled();
 }
 
 
 
-std::string age::tester::normalize_path_separator(const std::filesystem::path& path)
+std::string age::tr::normalize_path_separator(const std::filesystem::path& path)
 {
     if constexpr (std::filesystem::path::preferred_separator == '/')
     {
@@ -94,7 +94,7 @@ std::string age::tester::normalize_path_separator(const std::filesystem::path& p
     return result;
 }
 
-std::shared_ptr<age::uint8_vector> age::tester::load_rom_file(const std::filesystem::path& rom_path)
+std::shared_ptr<age::uint8_vector> age::tr::load_rom_file(const std::filesystem::path& rom_path)
 {
     std::ifstream rom_file(rom_path, std::ios::in | std::ios::binary);
     return std::make_shared<uint8_vector>(

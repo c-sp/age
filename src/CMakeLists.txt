@@ -94,7 +94,7 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 # (condition: Qt6Core_FOUND)
 find_package(Qt6 QUIET COMPONENTS Core)
 
-# age_tester requires libpng
+# age_test_runner requires libpng
 # (condition: PNG_FOUND)
 find_package(PNG QUIET)
 if (PNG_FOUND)
@@ -120,12 +120,12 @@ else ()
     message(STATUS "Qt6 not found => age_qt_gui not available")
 endif ()
 
-# age_tester requires libpng
+# age_test_runner requires libpng
 if (PNG_FOUND)
-    message(STATUS "PNG found => configuring age_tester")
-    add_subdirectory(age_tester)
+    message(STATUS "PNG found => configuring age_test_runner")
+    add_subdirectory(age_test_runner)
 else ()
-    message(STATUS "PNG not found => age_tester not available")
+    message(STATUS "PNG not found => age_test_runner not available")
 endif ()
 
 # age_wasm requires emscripten

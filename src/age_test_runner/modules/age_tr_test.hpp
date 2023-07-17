@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_TEST_HPP
-#define AGE_TESTER_TEST_HPP
+#ifndef AGE_TR_TEST_HPP
+#define AGE_TR_TEST_HPP
 
 #include <age_types.hpp>
 #include <emulator/age_gb_emulator.hpp>
@@ -27,19 +27,19 @@
 
 
 
-namespace age::tester
+namespace age::tr
 {
-    class age_tester_test
+    class age_tr_test
     {
     public:
-        age_tester_test(std::filesystem::path                        rom_path,
-                        std::shared_ptr<const uint8_vector>          rom,
-                        gb_device_type                               device_type,
-                        std::function<bool(const age::gb_emulator&)> test_finished,
-                        std::function<bool(const age::gb_emulator&)> test_succeeded);
+        age_tr_test(std::filesystem::path                        rom_path,
+                    std::shared_ptr<const uint8_vector>          rom,
+                    gb_device_type                               device_type,
+                    std::function<bool(const age::gb_emulator&)> test_finished,
+                    std::function<bool(const age::gb_emulator&)> test_succeeded);
 
         gb_device_type device_type() const;
-        std::string test_name() const;
+        std::string    test_name() const;
 
         void init_test(const gb_log_categories& log_categories);
         void run_test();
@@ -67,8 +67,8 @@ namespace age::tester
     std::function<bool(const age::gb_emulator&)> succeeded_with_screenshot(const std::filesystem::path& screenshot_path);
     std::function<bool(const age::gb_emulator&)> succeeded_with_fibonacci_regs();
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_TASK_HPP
+#endif // AGE_TR_TEST_HPP

@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_MODULE_HPP
-#define AGE_TESTER_MODULE_HPP
+#ifndef AGE_TR_MODULE_HPP
+#define AGE_TR_MODULE_HPP
 
-#include "age_tester_test.hpp"
+#include "age_tr_test.hpp"
 
 #include <filesystem>
 #include <string>
@@ -25,18 +25,18 @@
 
 
 
-namespace age::tester
+namespace age::tr
 {
-    using create_tests_t = std::function<std::vector<age_tester_test>(const std::filesystem::path& rom_path)>;
+    using create_tests_t = std::function<std::vector<age_tr_test>(const std::filesystem::path& rom_path)>;
 
-    class age_tester_module
+    class age_tr_module
     {
     public:
-        age_tester_module(char           arg_short_name,
-                          std::string    arg_long_name,
-                          std::string    arg_description,
-                          std::string    test_suite_directory,
-                          create_tests_t create_tests);
+        age_tr_module(char           arg_short_name,
+                      std::string    arg_long_name,
+                      std::string    arg_description,
+                      std::string    test_suite_directory,
+                      create_tests_t create_tests);
 
         [[nodiscard]] const std::string& arg_short_name() const;
         [[nodiscard]] const std::string& arg_long_name() const;
@@ -44,11 +44,11 @@ namespace age::tester
         [[nodiscard]] const std::string& test_suite_directory() const;
         [[nodiscard]] bool               is_enabled() const;
 
-        std::vector<age_tester_test> create_tests(const std::filesystem::path& rom_path) const;
+        std::vector<age_tr_test> create_tests(const std::filesystem::path& rom_path) const;
 
         void enable_module(bool enabled);
 
-        static bool is_module_enabled(const age_tester_module& module);
+        static bool is_module_enabled(const age_tr_module& module);
 
     private:
         std::string    m_arg_short_name;
@@ -64,10 +64,10 @@ namespace age::tester
     std::string                        normalize_path_separator(const std::filesystem::path& path);
     std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
 
-    age_tester_module create_same_suite_module();
+    age_tr_module create_same_suite_module();
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_MODULE_HPP
+#endif // AGE_TR_MODULE_HPP

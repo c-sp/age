@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#ifndef AGE_TESTER_THREAD_POOL_HPP
-#define AGE_TESTER_THREAD_POOL_HPP
+#ifndef AGE_TR_THREAD_POOL_HPP
+#define AGE_TR_THREAD_POOL_HPP
 
 #include <condition_variable>
 #include <mutex>
@@ -25,7 +25,7 @@
 
 
 
-namespace age::tester
+namespace age::tr
 {
     template<typename Element>
     class blocking_vector
@@ -164,8 +164,8 @@ namespace age::tester
         }
     };
 
-} // namespace age::tester
+} // namespace age::tr
 
 
 
-#endif // AGE_TESTER_THREAD_POOL_HPP
+#endif // AGE_TR_THREAD_POOL_HPP

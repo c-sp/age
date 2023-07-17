@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_tasks.hpp"
+#include "age_tr_tasks.hpp"
 
 
 
@@ -37,10 +37,10 @@ namespace
 
 
 
-void age::tester::schedule_rom_same_suite(const std::filesystem::path& rom_path,
+void age::tr::schedule_rom_same_suite(const std::filesystem::path& rom_path,
                                           const schedule_test_t&       schedule)
 {
-    auto normalized_rom_path = age::tester::normalize_path_separator(rom_path.string());
+    auto normalized_rom_path = age::tr::normalize_path_separator(rom_path.string());
     auto rom_contents        = load_rom_file(rom_path);
 
     schedule({rom_contents, gb_device_type::cgb_e, run_common_test});

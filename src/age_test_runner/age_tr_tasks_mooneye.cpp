@@ -1,5 +1,5 @@
 //
-// © 2022 Christoph Sprenger <https://github.com/c-sp>
+// © 2021 Christoph Sprenger <https://github.com/c-sp>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#include "age_tester_tasks.hpp"
+#include "age_tr_tasks.hpp"
 
 #include <optional>
 #include <unordered_set>
@@ -109,36 +109,12 @@ namespace
         return result;
     }
 
-
-
-    bool run_test(age::gb_emulator& emulator)
-    {
-        // run the test
-        int cycles_per_step = emulator.get_cycles_per_second() / 256;
-        int max_cycles      = emulator.get_cycles_per_second() * 120;
-
-        for (int cycles = 0; cycles < max_cycles; cycles += cycles_per_step)
-        {
-            emulator.emulate(cycles_per_step);
-            // the test is finished when LD B, B has been executed
-            if (emulator.get_test_info().m_invalid_opcode == 0xED)
-            {
-                break;
-            }
-        }
-
-        // evaluate the test result
-        // (test passed => fibonacci sequence in cpu regs)
-        age::gb_test_info info = emulator.get_test_info();
-        return (3 == info.m_b) && (5 == info.m_c) && (8 == info.m_d) && (13 == info.m_e) && (21 == info.m_h) && (34 == info.m_l);
-    }
-
 } // namespace
 
 
 
-void age::tester::schedule_rom_mooneye_wilbertpol(const std::filesystem::path& rom_path,
-                                                  const schedule_test_t&       schedule)
+void age::tr::schedule_rom_mooneye(const std::filesystem::path& rom_path,
+                                       const schedule_test_t&       schedule)
 {
     auto filename     = rom_path.filename().string();
     auto rom_contents = load_rom_file(rom_path);
@@ -147,6 +123,6 @@ void age::tester::schedule_rom_mooneye_wilbertpol(const std::filesystem::path& r
     std::for_each(begin(device_types),
                   end(device_types),
                   [&](const auto& dev_type) {
-                      schedule({rom_contents, dev_type, run_test});
+                      schedule({rom_contents, dev_type, run_common_test});
                   });
 }

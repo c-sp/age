@@ -16,7 +16,7 @@
 
 #include <git_revision.hpp>
 
-#include "age_tester_arguments.hpp"
+#include "age_tr_arguments.hpp"
 
 #include <algorithm> // std::for_each
 #include <iostream>  // std::cout
@@ -114,7 +114,7 @@ namespace
 
 
 
-void age::tester::print_help(const std::vector<char*>& args)
+void age::tr::print_help(const std::vector<char*>& args)
 {
     std::string cmd_var(help_cmd_var);
     std::string git_var(help_git_var);
@@ -158,7 +158,7 @@ void age::tester::print_help(const std::vector<char*>& args)
 
 
 
-age::tester::options age::tester::parse_arguments(const std::vector<char*>& args)
+age::tr::options age::tr::parse_arguments(const std::vector<char*>& args)
 {
     // based on
     // https://en.wikipedia.org/wiki/Getopt#Using_GNU_extension_getopt_long
@@ -280,7 +280,7 @@ age::tester::options age::tester::parse_arguments(const std::vector<char*>& args
         },
     }};
 
-    age::tester::options options{};
+    age::tr::options options{};
     int                  c         = 0;
     int                  longindex = 0;
 

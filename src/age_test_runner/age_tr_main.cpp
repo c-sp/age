@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-#include "age_tester_arguments.hpp"
-#include "age_tester_run_tests.hpp"
-#include "modules/age_tester_module.hpp"
+#include "age_tr_arguments.hpp"
+#include "age_tr_run_tests.hpp"
+#include "modules/age_tr_module.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -26,7 +26,7 @@
 
 namespace
 {
-    void check_run_all(age::tester::options& options)
+    void check_run_all(age::tr::options& options)
     {
         bool run_all = !options.m_acid2
                        && !options.m_age
@@ -51,7 +51,7 @@ namespace
         options.m_same_suite |= run_all;
     }
 
-    void sort_and_print(std::vector<age::tester::test_result>& tests)
+    void sort_and_print(std::vector<age::tr::test_result>& tests)
     {
         std::vector<std::string> test_names;
 
@@ -80,16 +80,15 @@ int main(int argc, char** argv)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::vector<char*> args(argv, argv + argc);
 
-    std::vector<age::tester::age_tester_module> modules{
-        age::tester::create_same_suite_module()
-    };
+    std::vector<age::tr::age_tr_module> modules{
+        age::tr::create_same_suite_module()};
 
-    age::tester::options opts = age::tester::parse_arguments(args);
+    age::tr::options opts = age::tr::parse_arguments(args);
 
     // just print the help text
     if (opts.m_help)
     {
-        age::tester::print_help(args);
+        age::tr::print_help(args);
         return 0;
     }
 
@@ -109,7 +108,7 @@ int main(int argc, char** argv)
                       });
 
         std::cout << std::endl;
-        age::tester::print_help(args);
+        age::tr::print_help(args);
         return 1;
     }
 
@@ -153,7 +152,7 @@ int main(int argc, char** argv)
     std::cout << "using " << threads << " threads to run tests" << std::endl;
 
     // find test rom files & schedule test tasks
-    auto results = age::tester::run_tests(opts, modules, threads);
+    auto results = age::tr::run_tests(opts, modules, threads);
     if (results.empty())
     {
         std::cout << "no tests found!" << std::endl;
@@ -161,7 +160,7 @@ int main(int argc, char** argv)
     }
     std::cout << "finished " << results.size() << " test(s)" << std::endl;
 
-    std::vector<age::tester::test_result> passed_tests;
+    std::vector<age::tr::test_result> passed_tests;
     std::copy_if(begin(results),
                  end(results),
                  std::back_inserter(passed_tests),
@@ -175,7 +174,7 @@ int main(int argc, char** argv)
         sort_and_print(passed_tests);
     }
 
-    std::vector<age::tester::test_result> failed_tests;
+    std::vector<age::tr::test_result> failed_tests;
     std::copy_if(begin(results),
                  end(results),
                  std::back_inserter(failed_tests),
