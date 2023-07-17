@@ -109,7 +109,7 @@ namespace
 
 
 void age::tr::schedule_rom_age(const std::filesystem::path& rom_path,
-                                   const schedule_test_t&       schedule)
+                               const schedule_test_t&       schedule)
 {
     auto filename     = rom_path.filename().string();
     auto rom_contents = load_rom_file(rom_path);
