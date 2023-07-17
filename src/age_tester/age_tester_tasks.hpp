@@ -20,6 +20,8 @@
 #include <age_types.hpp>
 #include <emulator/age_gb_emulator.hpp>
 
+#include "modules/age_tester_module.hpp"
+
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -95,11 +97,6 @@ namespace age::tester
     void schedule_rom_mooneye_wilbertpol(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_rtc3test(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
     void schedule_rom_same_suite(const std::filesystem::path& rom_path, const schedule_test_t& schedule);
-
-
-
-    std::string                        normalize_path_separator(const std::string& path);
-    std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
 
 } // namespace age::tester
 

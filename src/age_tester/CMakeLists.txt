@@ -1,5 +1,9 @@
 add_executable(
         age_tester
+        modules/age_tester_module.cpp
+        modules/age_tester_module_same_suite.cpp
+        modules/age_tester_test.cpp
+        modules/age_tester_write_log.cpp
         age_tester_arguments.cpp
         age_tester_arguments.hpp
         age_tester_main.cpp
@@ -17,9 +21,7 @@ add_executable(
         age_tester_tasks_mooneye_wilbertpol.cpp
         age_tester_tasks_rtc3test.cpp
         age_tester_tasks_same_suite.cpp
-        age_tester_thread_pool.hpp
-        age_tester_write_log.cpp
-)
+        age_tester_thread_pool.hpp)
 
 # Find pthreads on e.g. Ubuntu,
 # based on:

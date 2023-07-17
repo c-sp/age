@@ -73,27 +73,6 @@ age::tester::run_test_t age::tester::run_until(const std::function<bool(const ag
 
 
 
-std::string age::tester::normalize_path_separator(const std::string& path)
-{
-    if constexpr (std::filesystem::path::preferred_separator == '/')
-    {
-        return path;
-    }
-    std::string result = path;
-    std::replace(begin(result), end(result), static_cast<char>(std::filesystem::path::preferred_separator), '/');
-    return result;
-}
-
-
-
-std::shared_ptr<age::uint8_vector> age::tester::load_rom_file(const std::filesystem::path& rom_path)
-{
-    std::ifstream rom_file(rom_path, std::ios::in | std::ios::binary);
-    return std::make_shared<age::uint8_vector>((std::istreambuf_iterator<char>(rom_file)), std::istreambuf_iterator<char>());
-}
-
-
-
 age::tester::run_test_t age::tester::new_screenshot_test(const std::filesystem::path& screenshot_png_path,
                                                          const run_test_t&            run_test)
 {

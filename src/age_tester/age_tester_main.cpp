@@ -16,6 +16,7 @@
 
 #include "age_tester_arguments.hpp"
 #include "age_tester_run_tests.hpp"
+#include "modules/age_tester_module.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -79,6 +80,10 @@ int main(int argc, char** argv)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::vector<char*> args(argv, argv + argc);
 
+    std::vector<age::tester::age_tester_module> modules{
+        age::tester::create_same_suite_module()
+    };
+
     age::tester::options opts = age::tester::parse_arguments(args);
 
     // just print the help text
@@ -110,6 +115,7 @@ int main(int argc, char** argv)
 
     // notify the user about where we're about to look for test rom files
     check_run_all(opts);
+    modules[0].enable_module(opts.m_same_suite);
     std::cout << "test categories:"
               << (opts.m_acid2 ? " acid2" : "")
               << (opts.m_age ? " age" : "")
@@ -147,7 +153,7 @@ int main(int argc, char** argv)
     std::cout << "using " << threads << " threads to run tests" << std::endl;
 
     // find test rom files & schedule test tasks
-    auto results = age::tester::run_tests(opts, threads);
+    auto results = age::tester::run_tests(opts, modules, threads);
     if (results.empty())
     {
         std::cout << "no tests found!" << std::endl;
