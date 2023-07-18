@@ -28,17 +28,29 @@ age::tr::age_tr_module::age_tr_module(char           arg_short_name,
                                       std::string    arg_description,
                                       std::string    test_suite_directory,
                                       create_tests_t create_tests)
+    : age_tr_module(arg_short_name,
+                    std::move(arg_long_name),
+                    std::move(arg_description),
+                    std::vector{test_suite_directory},
+                    std::move(create_tests))
+{
+}
+
+age::tr::age_tr_module::age_tr_module(char                     arg_short_name,
+                                      std::string              arg_long_name,
+                                      std::string              arg_description,
+                                      std::vector<std::string> test_suite_directories,
+                                      age::tr::create_tests_t  create_tests)
     : m_arg_short_name(std::string("") + arg_short_name),
       m_arg_long_name(std::move(arg_long_name)),
       m_arg_description(std::move(arg_description)),
-      m_test_suite_directory(std::move(test_suite_directory)),
+      m_test_suite_directories(std::move(test_suite_directories)),
       m_create_tests(std::move(create_tests))
 {
     assert(m_arg_short_name.length() == 1);
     assert(m_arg_long_name.length() > 1);
     assert(!m_arg_description.empty());
 }
-
 
 
 const std::string& age::tr::age_tr_module::arg_short_name() const
@@ -56,14 +68,9 @@ const std::string& age::tr::age_tr_module::arg_description() const
     return m_arg_description;
 }
 
-const std::string& age::tr::age_tr_module::test_suite_directory() const
+const std::vector<std::string>& age::tr::age_tr_module::test_suite_directories() const
 {
-    return m_test_suite_directory;
-}
-
-bool age::tr::age_tr_module::is_enabled() const
-{
-    return m_is_enabled;
+    return m_test_suite_directories;
 }
 
 std::vector<age::tr::age_tr_test> age::tr::age_tr_module::create_tests(const std::filesystem::path& rom_path) const
@@ -78,7 +85,7 @@ void age::tr::age_tr_module::enable_module(bool enabled)
 
 bool age::tr::age_tr_module::is_module_enabled(const age::tr::age_tr_module& module)
 {
-    return module.is_enabled();
+    return module.m_is_enabled;
 }
 
 

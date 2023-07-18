@@ -20,6 +20,8 @@
 #include "age_tr_test.hpp"
 
 #include <filesystem>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -38,25 +40,29 @@ namespace age::tr
                       std::string    test_suite_directory,
                       create_tests_t create_tests);
 
-        [[nodiscard]] const std::string& arg_short_name() const;
-        [[nodiscard]] const std::string& arg_long_name() const;
-        [[nodiscard]] const std::string& arg_description() const;
-        [[nodiscard]] const std::string& test_suite_directory() const;
-        [[nodiscard]] bool               is_enabled() const;
+        age_tr_module(char                     arg_short_name,
+                      std::string              arg_long_name,
+                      std::string              arg_description,
+                      std::vector<std::string> test_suite_directories,
+                      create_tests_t           create_tests);
 
-        std::vector<age_tr_test> create_tests(const std::filesystem::path& rom_path) const;
+        [[nodiscard]] const std::string&              arg_short_name() const;
+        [[nodiscard]] const std::string&              arg_long_name() const;
+        [[nodiscard]] const std::string&              arg_description() const;
+        [[nodiscard]] const std::vector<std::string>& test_suite_directories() const;
+        [[nodiscard]] std::vector<age_tr_test>        create_tests(const std::filesystem::path& rom_path) const;
 
         void enable_module(bool enabled);
 
         static bool is_module_enabled(const age_tr_module& module);
 
     private:
-        std::string    m_arg_short_name;
-        std::string    m_arg_long_name;
-        std::string    m_arg_description;
-        std::string    m_test_suite_directory;
-        bool           m_is_enabled;
-        create_tests_t m_create_tests;
+        std::string              m_arg_short_name;
+        std::string              m_arg_long_name;
+        std::string              m_arg_description;
+        std::vector<std::string> m_test_suite_directories;
+        bool                     m_is_enabled = false;
+        create_tests_t           m_create_tests;
     };
 
 
@@ -66,7 +72,11 @@ namespace age::tr
     std::filesystem::path              find_screenshot(const std::filesystem::path& rom_path,
                                                        const std::string&           screenshot_suffix);
 
+    age_tr_module create_acid2_module();
+    age_tr_module create_blargg_module();
+    age_tr_module create_little_things_module();
     age_tr_module create_mealybug_module();
+    age_tr_module create_rtc3test_module();
     age_tr_module create_same_suite_module();
 
 } // namespace age::tr

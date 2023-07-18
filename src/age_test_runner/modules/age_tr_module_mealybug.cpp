@@ -43,20 +43,8 @@ age::tr::age_tr_module age::tr::create_mealybug_module()
 
             if (is_mealybug_mbc_test(rom_path))
             {
-                tests.emplace_back(
-                    rom_path,
-                    rom_contents,
-                    gb_device_type::dmg,
-                    finished_after_ld_b_b(),
-                    succeeded_with_fibonacci_regs());
-
-                tests.emplace_back(
-                    rom_path,
-                    rom_contents,
-                    gb_device_type::cgb_abcd,
-                    finished_after_ld_b_b(),
-                    succeeded_with_fibonacci_regs());
-
+                tests.emplace_back(rom_path, rom_contents, gb_device_type::dmg);
+                tests.emplace_back(rom_path, rom_contents, gb_device_type::cgb_abcd);
                 return tests;
             }
 

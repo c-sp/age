@@ -27,19 +27,44 @@
 
 
 
-namespace age::tr
+namespace age::tr //! \todo remove ::tr, rename classes from "age_tr_..." to "tr_..."
 {
+    std::function<bool(const age::gb_emulator&)> finished_after_milliseconds(int64_t milliseconds);
+    std::function<bool(const age::gb_emulator&)> finished_after_ld_b_b();
+
+    std::function<bool(const age::gb_emulator&)> succeeded_with_screenshot(const std::filesystem::path& screenshot_path);
+    std::function<bool(const age::gb_emulator&)> succeeded_with_fibonacci_regs();
+
+
+
     class age_tr_test
     {
     public:
+        age_tr_test(std::filesystem::path               rom_path,
+                    std::shared_ptr<const uint8_vector> rom,
+                    gb_device_type                      device_type);
+
         age_tr_test(std::filesystem::path                        rom_path,
                     std::shared_ptr<const uint8_vector>          rom,
                     gb_device_type                               device_type,
                     std::function<bool(const age::gb_emulator&)> test_finished,
                     std::function<bool(const age::gb_emulator&)> test_succeeded);
 
-        gb_device_type device_type() const;
-        std::string    test_name() const;
+        age_tr_test(std::filesystem::path                        rom_path,
+                    std::shared_ptr<const uint8_vector>          rom,
+                    gb_device_type                               device_type,
+                    std::function<void(age::gb_emulator&)>       run_test,
+                    std::function<bool(const age::gb_emulator&)> test_succeeded);
+
+        age_tr_test(std::filesystem::path                        rom_path,
+                    std::shared_ptr<const uint8_vector>          rom,
+                    gb_device_type                               device_type,
+                    std::string                                  additional_info,
+                    std::function<void(age::gb_emulator&)>       run_test,
+                    std::function<bool(const age::gb_emulator&)> test_succeeded);
+
+        [[nodiscard]] gb_device_type device_type() const;
+        [[nodiscard]] std::string    test_name() const;
 
         void init_test(const gb_log_categories& log_categories);
         void run_test();
@@ -53,19 +78,11 @@ namespace age::tr
         gb_colors_hint                      m_colors_hint;
         std::string                         m_additional_info;
 
-        std::function<bool(const age::gb_emulator&)> m_test_finished;
+        std::function<void(age::gb_emulator&)>       m_run_test;
         std::function<bool(const age::gb_emulator&)> m_test_succeeded;
 
         std::shared_ptr<gb_emulator> m_emulator;
     };
-
-
-
-    std::function<bool(const age::gb_emulator&)> finished_after_cycle(int64_t cycle);
-    std::function<bool(const age::gb_emulator&)> finished_after_ld_b_b();
-
-    std::function<bool(const age::gb_emulator&)> succeeded_with_screenshot(const std::filesystem::path& screenshot_path);
-    std::function<bool(const age::gb_emulator&)> succeeded_with_fibonacci_regs();
 
 } // namespace age::tr
 

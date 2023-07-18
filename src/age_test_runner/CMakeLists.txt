@@ -1,7 +1,11 @@
 add_executable(
         age_test_runner
         modules/age_tr_module.cpp
+        modules/age_tr_module_acid2.cpp
+        modules/age_tr_module_blargg.cpp
+        modules/age_tr_module_little_things.cpp
         modules/age_tr_module_mealybug.cpp
+        modules/age_tr_module_rtc3test.cpp
         modules/age_tr_module_same_suite.cpp
         modules/age_tr_test.cpp
         modules/age_tr_write_log.cpp
@@ -9,15 +13,10 @@ add_executable(
         age_tr_main.cpp
         age_tr_run_tests.cpp
         age_tr_tasks.cpp
-        age_tr_tasks_acid2.cpp
         age_tr_tasks_age.cpp
-        age_tr_tasks_blargg.cpp
         age_tr_tasks_gambatte.cpp
-        age_tr_tasks_little_things.cpp
-        age_tr_tasks_mealybug.cpp
         age_tr_tasks_mooneye.cpp
         age_tr_tasks_mooneye_wilbertpol.cpp
-        age_tr_tasks_rtc3test.cpp
         age_tr_thread_pool.hpp)
 
 # Find pthreads on e.g. Ubuntu,

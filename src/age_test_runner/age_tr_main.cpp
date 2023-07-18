@@ -81,10 +81,22 @@ int main(int argc, char** argv)
     std::vector<char*> args(argv, argv + argc);
 
     std::vector<age::tr::age_tr_module> modules{
+        age::tr::create_acid2_module(),
+        age::tr::create_blargg_module(),
+        age::tr::create_little_things_module(),
         age::tr::create_mealybug_module(),
+        age::tr::create_rtc3test_module(),
         age::tr::create_same_suite_module()};
 
     age::tr::options opts = age::tr::parse_arguments(args);
+
+    check_run_all(opts);
+    modules[0].enable_module(opts.m_acid2);
+    modules[1].enable_module(opts.m_blargg);
+    modules[2].enable_module(opts.m_little_things);
+    modules[3].enable_module(opts.m_mealybug);
+    modules[4].enable_module(opts.m_rtc3test);
+    modules[5].enable_module(opts.m_same_suite);
 
     // just print the help text
     if (opts.m_help)
@@ -114,9 +126,6 @@ int main(int argc, char** argv)
     }
 
     // notify the user about where we're about to look for test rom files
-    check_run_all(opts);
-    modules[0].enable_module(opts.m_mealybug);
-    modules[1].enable_module(opts.m_same_suite);
     std::cout << "test categories:"
               << (opts.m_acid2 ? " acid2" : "")
               << (opts.m_age ? " age" : "")
