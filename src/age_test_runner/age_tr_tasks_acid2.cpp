@@ -18,23 +18,6 @@
 
 
 
-namespace
-{
-    std::filesystem::path find_screenshot(const std::filesystem::path& dir,
-                                          const std::string&           filename)
-    {
-        auto screenshot_path = dir / filename;
-        if (std::filesystem::is_regular_file(screenshot_path))
-        {
-            return screenshot_path;
-        }
-        return {};
-    }
-
-} // namespace
-
-
-
 void age::tr::schedule_rom_acid2_cgb(const std::filesystem::path& rom_path,
                                      const schedule_test_t&       schedule)
 {
@@ -45,7 +28,7 @@ void age::tr::schedule_rom_acid2_cgb(const std::filesystem::path& rom_path,
     }
     auto rom_contents = load_rom_file(rom_path);
 
-    auto cgb_screenshot = find_screenshot(rom_path.parent_path(), "cgb-acid2.png");
+    auto cgb_screenshot = find_screenshot(rom_path, ".png");
     if (!cgb_screenshot.empty())
     {
         schedule({rom_contents,
@@ -70,7 +53,7 @@ void age::tr::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
     }
     auto rom_contents = load_rom_file(rom_path);
 
-    auto cgb_screenshot = find_screenshot(rom_path.parent_path(), "dmg-acid2-cgb.png");
+    auto cgb_screenshot = find_screenshot(rom_path, "-cgb.png");
     if (!cgb_screenshot.empty())
     {
         schedule({rom_contents,
@@ -82,7 +65,7 @@ void age::tr::schedule_rom_acid2_dmg(const std::filesystem::path& rom_path,
                   new_screenshot_test(cgb_screenshot, run_until(has_executed_ld_b_b))});
     }
 
-    auto dmg_screenshot = find_screenshot(rom_path.parent_path(), "dmg-acid2-dmg.png");
+    auto dmg_screenshot = find_screenshot(rom_path, "-dmg.png");
     if (!dmg_screenshot.empty())
     {
         schedule({rom_contents,

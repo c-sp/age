@@ -20,33 +20,6 @@
 
 namespace
 {
-    std::filesystem::path find_screenshot(const std::filesystem::path& rom_path,
-                                          const std::string&           suffix)
-    {
-        auto rom_path_filename = std::filesystem::path{rom_path}.replace_extension().string();
-
-        for (const auto& entry : std::filesystem::directory_iterator{rom_path.parent_path()})
-        {
-            auto path = entry.path().string();
-
-            if (!entry.is_regular_file()
-                || (entry.path().extension().string() != ".png")
-                || (path.find(rom_path_filename) != 0)
-                || (path.find("_actual.png") != std::string::npos))
-            {
-                continue;
-            }
-
-            if (path.find(suffix, rom_path_filename.size()) != std::string::npos)
-            {
-                return path;
-            }
-        }
-        return {};
-    }
-
-
-
     int get_test_seconds(const std::string& screenshot_filename, age::gb_device_type device_type)
     {
         // see https://github.com/c-sp/gameboy-test-roms/blob/master/src/howto/blargg.md
@@ -109,14 +82,16 @@ void age::tr::schedule_rom_blargg(const std::filesystem::path& rom_path,
         }
     };
 
-    auto cgb_screenshot = find_screenshot(rom_path, "-cgb");
+    auto dmg_cgb_screenshot = find_screenshot(rom_path, "-dmg-cgb.png");
+
+    auto cgb_screenshot = dmg_cgb_screenshot.empty() ? find_screenshot(rom_path, "-cgb.png") : dmg_cgb_screenshot;
     if (!cgb_screenshot.empty())
     {
         schedule_test(gb_device_type::cgb_abcd, cgb_screenshot);
         schedule_test(gb_device_type::cgb_e, cgb_screenshot);
     }
 
-    auto dmg_screenshot = find_screenshot(rom_path, "-dmg");
+    auto dmg_screenshot = dmg_cgb_screenshot.empty() ? find_screenshot(rom_path, "-dmg.png") : dmg_cgb_screenshot;
     if (!dmg_screenshot.empty())
     {
         schedule_test(gb_device_type::dmg, dmg_screenshot);
