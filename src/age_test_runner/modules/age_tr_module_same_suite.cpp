@@ -49,21 +49,11 @@ age::tr::age_tr_module age::tr::create_same_suite_module()
             auto rom_contents        = load_rom_file(rom_path);
 
             std::vector<age::tr::age_tr_test> tests;
-            tests.emplace_back(
-                rom_path,
-                rom_contents,
-                gb_device_type::cgb_e,
-                finished_after_ld_b_b(),
-                succeeded_with_fibonacci_regs());
+            tests.emplace_back(rom_path, rom_contents, gb_device_type::cgb_e);
 
             if (allow_dmg_test(normalized_rom_path))
             {
-                tests.emplace_back(
-                    rom_path,
-                    rom_contents,
-                    gb_device_type::dmg,
-                    finished_after_ld_b_b(),
-                    succeeded_with_fibonacci_regs());
+                tests.emplace_back(rom_path, rom_contents, gb_device_type::dmg);
             }
 
             return tests;

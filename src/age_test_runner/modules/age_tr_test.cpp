@@ -46,10 +46,44 @@ namespace
 
 
 
+age::tr::age_tr_test::age_tr_test(std::filesystem::path               rom_path,
+                                  std::shared_ptr<const uint8_vector> rom,
+                                  gb_device_type                      device_type)
+    : age_tr_test(rom_path, rom, device_type, finished_after_ld_b_b(), succeeded_with_fibonacci_regs())
+{}
+
 age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
                                   std::shared_ptr<const uint8_vector>          rom,
                                   age::gb_device_type                          device_type,
                                   std::function<bool(const age::gb_emulator&)> test_finished,
+                                  std::function<bool(const age::gb_emulator&)> test_succeeded)
+    : age_tr_test(
+        rom_path,
+        rom,
+        device_type,
+        [=](age::gb_emulator& emulator) {
+            int cycles_per_iteration = emulator.get_cycles_per_second() / 256;
+            while (!test_finished(emulator))
+            {
+                emulator.emulate(cycles_per_iteration);
+            }
+        },
+        test_succeeded)
+{}
+
+age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
+                                  std::shared_ptr<const uint8_vector>          rom,
+                                  age::gb_device_type                          device_type,
+                                  std::function<void(age::gb_emulator&)>       run_test,
+                                  std::function<bool(const age::gb_emulator&)> test_succeeded)
+    : age_tr_test(rom_path, rom, device_type, {}, run_test, test_succeeded)
+{}
+
+age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
+                                  std::shared_ptr<const uint8_vector>          rom,
+                                  age::gb_device_type                          device_type,
+                                  std::string                                  additional_info,
+                                  std::function<void(age::gb_emulator&)>       run_test,
                                   std::function<bool(const age::gb_emulator&)> test_succeeded)
     : m_rom_path(std::move(rom_path)),
       m_rom(std::move(rom)),
@@ -57,10 +91,12 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
       m_colors_hint(device_type == gb_device_type::dmg
                         ? gb_colors_hint::dmg_greyscale
                         : gb_colors_hint::cgb_acid2),
-      m_test_finished(std::move(test_finished)),
+      m_additional_info(additional_info),
+      m_run_test(std::move(run_test)),
       m_test_succeeded(std::move(test_succeeded))
-{
-}
+{}
+
+
 
 age::gb_device_type age::tr::age_tr_test::device_type() const
 {
@@ -87,11 +123,7 @@ void age::tr::age_tr_test::init_test(const gb_log_categories& log_categories)
 
 void age::tr::age_tr_test::run_test()
 {
-    int cycles_per_iteration = m_emulator->get_cycles_per_second() / 256;
-    while (!m_test_finished(*m_emulator))
-    {
-        m_emulator->emulate(cycles_per_iteration);
-    }
+    m_run_test(*m_emulator);
 }
 
 bool age::tr::age_tr_test::test_succeeded()
@@ -108,10 +140,11 @@ void age::tr::age_tr_test::write_logs()
 
 
 
-std::function<bool(const age::gb_emulator&)> age::tr::finished_after_cycle(int64_t cycle)
+std::function<bool(const age::gb_emulator&)> age::tr::finished_after_milliseconds(age::int64_t milliseconds)
 {
     return [=](const age::gb_emulator& emulator) {
-        return emulator.get_emulated_cycles() >= cycle;
+        auto cycles = milliseconds * emulator.get_cycles_per_second() / 1000;
+        return emulator.get_emulated_cycles() >= cycles;
     };
 }
 
@@ -136,7 +169,7 @@ std::function<bool(const age::gb_emulator&)> age::tr::succeeded_with_screenshot(
         }
 
         // compare screen to screenshot
-        auto screen = emulator.get_screen_front_buffer();
+        const auto& screen = emulator.get_screen_front_buffer();
         if (screenshot.size() != screen.size())
         {
             std::cout << "screenshot size mismatch (expected "

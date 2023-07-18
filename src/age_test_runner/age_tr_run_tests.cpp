@@ -279,37 +279,16 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
         };
 
         pool.queue_task([&]() {
-            if (opts.m_acid2)
-            {
-                find_roms(opts.m_test_suite_path / "cgb-acid2", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_acid2_cgb);
-                });
-                find_roms(opts.m_test_suite_path / "dmg-acid2", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_acid2_dmg);
-                });
-            }
             if (opts.m_age)
             {
                 find_roms(opts.m_test_suite_path / "age-test-roms", matcher, [&](const std::filesystem::path& rom_path) {
                     schedule_rom(rom_path, schedule_rom_age);
                 });
             }
-            if (opts.m_blargg)
-            {
-                find_roms(opts.m_test_suite_path / "blargg", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_blargg);
-                });
-            }
             if (opts.m_gambatte)
             {
                 find_roms(opts.m_test_suite_path / "gambatte", matcher, [&](const std::filesystem::path& rom_path) {
                     schedule_rom(rom_path, schedule_rom_gambatte);
-                });
-            }
-            if (opts.m_little_things)
-            {
-                find_roms(opts.m_test_suite_path / "little-things-gb", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_little_things);
                 });
             }
             if (opts.m_mooneye)
@@ -324,50 +303,64 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                     schedule_rom(rom_path, schedule_rom_mooneye_wilbertpol);
                 });
             }
-            if (opts.m_rtc3test)
-            {
-                find_roms(opts.m_test_suite_path / "rtc3test", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_rtc3test);
-                });
-            }
         });
 
-        for (auto& mod : modules | std::views::filter(age_tr_module::is_module_enabled))
+        for (const auto& mod : modules | std::views::filter(age_tr_module::is_module_enabled))
         {
-            find_roms(opts.m_test_suite_path / mod.test_suite_directory(),
-                      matcher,
-                      [&](const std::filesystem::path& rom_path) {
-                          ++rom_count;
-                          std::vector<age_tr_test> tests = mod.create_tests(rom_path);
+            for (const auto& directory : mod.test_suite_directories())
+            {
+                find_roms(opts.m_test_suite_path / directory,
+                          matcher,
+                          [&](const std::filesystem::path& rom_path) {
+                              ++rom_count;
+                              std::vector<age_tr_test> tests = mod.create_tests(rom_path);
 
-                          // we don't allow auto_detect tests, the device type
-                          // must have been explicitly specified
-                          erase_if(tests, [](const age_tr_test& test) {
-                              return test.device_type() == gb_device_type::auto_detect;
-                          });
-
-                          // no tests to run -> mark this as failed test
-                          if (tests.empty())
-                          {
-                              results.push({rom_path.string() + " (no test scheduled)", false});
-                              return;
-                          }
-
-                          // schedule tests for this rom file
-                          for (auto& test : tests)
-                          {
-                              pool.queue_task([test, &opts, &results]() mutable {
-                                  auto begin = std::chrono::high_resolution_clock::now();
-
-                                  test.init_test(opts.m_log_categories);
-                                  test.run_test();
-                                  auto passed = test.test_succeeded();
-
-                                  auto end = std::chrono::high_resolution_clock::now();
-                                  results.push({test.test_name(), passed});
+                              // we don't allow auto_detect tests, the device type
+                              // must have been explicitly specified
+                              erase_if(tests, [](const age_tr_test& test) {
+                                  return test.device_type() == gb_device_type::auto_detect;
                               });
-                          }
-                      });
+
+                              // no tests to run -> mark this as failed test
+                              if (tests.empty())
+                              {
+                                  results.push({rom_path.string() + " (no test scheduled)", false});
+                                  return;
+                              }
+
+                              // silently ignore DMG/GBC tests, if requested
+                              erase_if(tests, [&](const age_tr_test& test) {
+                                  switch (test.device_type())
+                                  {
+                                      case gb_device_type::auto_detect:
+                                          break;
+
+                                      case gb_device_type::dmg:
+                                          return opts.m_cgb_only;
+
+                                      case gb_device_type::cgb_abcd:
+                                      case gb_device_type::cgb_e:
+                                          return opts.m_dmg_only;
+                                  }
+                                  return false;
+                              });
+
+                              // schedule tests for this rom file
+                              for (auto& test : tests)
+                              {
+                                  pool.queue_task([test, &opts, &results]() mutable {
+                                      auto begin = std::chrono::high_resolution_clock::now();
+
+                                      test.init_test(opts.m_log_categories);
+                                      test.run_test();
+                                      auto passed = test.test_succeeded();
+
+                                      auto end = std::chrono::high_resolution_clock::now();
+                                      results.push({test.test_name(), passed});
+                                  });
+                              }
+                          });
+            }
         }
 
         // by letting the thread pool go out of scope we wait for it to finish
