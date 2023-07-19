@@ -85,12 +85,28 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                                   std::string                                  additional_info,
                                   std::function<void(age::gb_emulator&)>       run_test,
                                   std::function<bool(const age::gb_emulator&)> test_succeeded)
+    : age_tr_test(rom_path,
+                  rom,
+                  device_type,
+                  device_type == gb_device_type::dmg
+                      ? gb_colors_hint::dmg_greyscale
+                      : gb_colors_hint::cgb_acid2,
+                  additional_info,
+                  run_test,
+                  test_succeeded)
+{}
+
+age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
+                                  std::shared_ptr<const uint8_vector>          rom,
+                                  age::gb_device_type                          device_type,
+                                  gb_colors_hint                               colors_hint,
+                                  std::string                                  additional_info,
+                                  std::function<void(age::gb_emulator&)>       run_test,
+                                  std::function<bool(const age::gb_emulator&)> test_succeeded)
     : m_rom_path(std::move(rom_path)),
       m_rom(std::move(rom)),
       m_device_type(device_type),
-      m_colors_hint(device_type == gb_device_type::dmg
-                        ? gb_colors_hint::dmg_greyscale
-                        : gb_colors_hint::cgb_acid2),
+      m_colors_hint(colors_hint),
       m_additional_info(additional_info),
       m_run_test(std::move(run_test)),
       m_test_succeeded(std::move(test_succeeded))
@@ -151,7 +167,9 @@ std::function<bool(const age::gb_emulator&)> age::tr::finished_after_millisecond
 std::function<bool(const age::gb_emulator&)> age::tr::finished_after_ld_b_b()
 {
     return [](const age::gb_emulator& emulator) {
-        return emulator.get_test_info().m_ld_b_b;
+        int max_cycles = emulator.get_cycles_per_second() * 120;
+        return emulator.get_test_info().m_ld_b_b
+               || emulator.get_emulated_cycles() >= max_cycles;
     };
 }
 

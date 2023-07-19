@@ -83,8 +83,11 @@ int main(int argc, char** argv)
     std::vector<age::tr::age_tr_module> modules{
         age::tr::create_acid2_module(),
         age::tr::create_blargg_module(),
+        age::tr::create_gambatte_module(),
         age::tr::create_little_things_module(),
         age::tr::create_mealybug_module(),
+        age::tr::create_mooneye_module(),
+        age::tr::create_mooneye_wilbertpol_module(),
         age::tr::create_rtc3test_module(),
         age::tr::create_same_suite_module()};
 
@@ -93,10 +96,13 @@ int main(int argc, char** argv)
     check_run_all(opts);
     modules[0].enable_module(opts.m_acid2);
     modules[1].enable_module(opts.m_blargg);
-    modules[2].enable_module(opts.m_little_things);
-    modules[3].enable_module(opts.m_mealybug);
-    modules[4].enable_module(opts.m_rtc3test);
-    modules[5].enable_module(opts.m_same_suite);
+    modules[2].enable_module(opts.m_gambatte);
+    modules[3].enable_module(opts.m_little_things);
+    modules[4].enable_module(opts.m_mealybug);
+    modules[5].enable_module(opts.m_mooneye);
+    modules[6].enable_module(opts.m_mooneye_wilbertpol);
+    modules[7].enable_module(opts.m_rtc3test);
+    modules[8].enable_module(opts.m_same_suite);
 
     // just print the help text
     if (opts.m_help)
