@@ -285,24 +285,6 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                     schedule_rom(rom_path, schedule_rom_age);
                 });
             }
-            if (opts.m_gambatte)
-            {
-                find_roms(opts.m_test_suite_path / "gambatte", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_gambatte);
-                });
-            }
-            if (opts.m_mooneye)
-            {
-                find_roms(opts.m_test_suite_path / "mooneye-test-suite", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_mooneye);
-                });
-            }
-            if (opts.m_mooneye_wilbertpol)
-            {
-                find_roms(opts.m_test_suite_path / "mooneye-test-suite-wilbertpol", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_mooneye_wilbertpol);
-                });
-            }
         });
 
         for (const auto& mod : modules | std::views::filter(age_tr_module::is_module_enabled))

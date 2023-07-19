@@ -23,6 +23,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 
@@ -67,15 +68,19 @@ namespace age::tr
 
 
 
-    std::string                        normalize_path_separator(const std::filesystem::path& path);
-    std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
-    std::filesystem::path              find_screenshot(const std::filesystem::path& rom_path,
-                                                       const std::string&           screenshot_suffix);
+    std::string                             normalize_path_separator(const std::filesystem::path& path);
+    std::shared_ptr<age::uint8_vector>      load_rom_file(const std::filesystem::path& rom_path);
+    std::filesystem::path                   find_screenshot(const std::filesystem::path& rom_path,
+                                                            const std::string&           screenshot_suffix);
+    std::unordered_set<age::gb_device_type> parse_device_types(const std::string& filename);
 
     age_tr_module create_acid2_module();
     age_tr_module create_blargg_module();
+    age_tr_module create_gambatte_module();
     age_tr_module create_little_things_module();
     age_tr_module create_mealybug_module();
+    age_tr_module create_mooneye_module();
+    age_tr_module create_mooneye_wilbertpol_module();
     age_tr_module create_rtc3test_module();
     age_tr_module create_same_suite_module();
 

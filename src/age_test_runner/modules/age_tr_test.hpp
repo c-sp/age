@@ -63,6 +63,14 @@ namespace age::tr //! \todo remove ::tr, rename classes from "age_tr_..." to "tr
                     std::function<void(age::gb_emulator&)>       run_test,
                     std::function<bool(const age::gb_emulator&)> test_succeeded);
 
+        age_tr_test(std::filesystem::path                        rom_path,
+                    std::shared_ptr<const uint8_vector>          rom,
+                    gb_device_type                               device_type,
+                    gb_colors_hint                               colors_hint,
+                    std::string                                  additional_info,
+                    std::function<void(age::gb_emulator&)>       run_test,
+                    std::function<bool(const age::gb_emulator&)> test_succeeded);
+
         [[nodiscard]] gb_device_type device_type() const;
         [[nodiscard]] std::string    test_name() const;
 

@@ -23,6 +23,55 @@
 
 
 
+namespace
+{
+    std::optional<age::gb_device_type> parse_cgb_type(char c)
+    {
+        switch (c)
+        {
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+                return {age::gb_device_type::cgb_abcd};
+
+            case 'E':
+                return {age::gb_device_type::cgb_e};
+
+            default:
+                return {};
+        }
+    }
+
+    std::unordered_set<age::gb_device_type> parse_cgb_types(const std::string& filename, size_t idx)
+    {
+        std::unordered_set<age::gb_device_type> result;
+
+        for (; idx < filename.size(); ++idx)
+        {
+            auto dev_type = parse_cgb_type(filename.at(idx));
+            if (!dev_type.has_value())
+            {
+                break;
+            }
+            result.insert(dev_type.value());
+        }
+
+        // if this test is not constrained to any CGB type,
+        // run it for all CGB types
+        if (result.empty())
+        {
+            result = {
+                age::gb_device_type::cgb_abcd,
+                age::gb_device_type::cgb_e,
+            };
+        }
+        return result;
+    }
+}
+
+
+
 age::tr::age_tr_module::age_tr_module(char           arg_short_name,
                                       std::string    arg_long_name,
                                       std::string    arg_description,
@@ -31,7 +80,7 @@ age::tr::age_tr_module::age_tr_module(char           arg_short_name,
     : age_tr_module(arg_short_name,
                     std::move(arg_long_name),
                     std::move(arg_description),
-                    std::vector{test_suite_directory},
+                    std::vector{std::move(test_suite_directory)},
                     std::move(create_tests))
 {
 }
@@ -123,4 +172,46 @@ std::filesystem::path age::tr::find_screenshot(const std::filesystem::path& rom_
     }
 
     return {};
+}
+
+
+std::unordered_set<age::gb_device_type> age::tr::parse_device_types(const std::string& filename)
+{
+    std::unordered_set<age::gb_device_type> result;
+
+    // test runs on all CGB types
+    if (filename.find("-C") != std::string::npos)
+    {
+        result.insert(age::gb_device_type::cgb_abcd);
+        result.insert(age::gb_device_type::cgb_e);
+    }
+
+    // test runs on specific CGB types
+    std::string cgb_prefix("-cgb");
+    auto        cgb_hint = filename.find(cgb_prefix);
+    if (cgb_hint != std::string::npos)
+    {
+        auto cgb_types = parse_cgb_types(filename, cgb_hint + cgb_prefix.size());
+        result.insert(begin(cgb_types), end(cgb_types));
+    }
+
+    // test runs on all DMG types
+    // (we don't distinguish DMG types at the moment)
+    if ((filename.find("-G") != std::string::npos) || (filename.find("-dmg") != std::string::npos))
+    {
+        result.insert(age::gb_device_type::dmg);
+    }
+
+    // if this test is not constrained to any device type,
+    // run it for all device types
+    if (result.empty())
+    {
+        result = {
+            age::gb_device_type::dmg,
+            age::gb_device_type::cgb_abcd,
+            age::gb_device_type::cgb_e,
+        };
+    }
+
+    return result;
 }
