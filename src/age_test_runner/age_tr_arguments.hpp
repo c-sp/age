@@ -17,7 +17,10 @@
 #ifndef AGE_TR_ARGUMENTS_HPP
 #define AGE_TR_ARGUMENTS_HPP
 
+#include "modules/age_tr_module.hpp"
+
 #include <emulator/age_gb_types.hpp>
+
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -28,17 +31,6 @@ namespace age::tr
 {
     struct options
     {
-        bool m_age                = false; //!< run age-test-roms
-        bool m_acid2              = false; //!< run cgb-acid2 and dmg-acid2 tests
-        bool m_blargg             = false; //!< run Blargg tests
-        bool m_gambatte           = false; //!< run Gambatte tests
-        bool m_little_things      = false; //!< run little-things-gb tests
-        bool m_mealybug           = false; //!< run Mealybug Tearoom tests
-        bool m_mooneye            = false; //!< run Mooneye test suite
-        bool m_mooneye_wilbertpol = false; //!< run Mooneye test suite adjusted by wilbertpol
-        bool m_rtc3test           = false; //!< run rtc3test
-        bool m_same_suite         = false; //!< run SameSuite tests
-
         bool m_cgb_only = false;
         bool m_dmg_only = false;
 
@@ -62,9 +54,11 @@ namespace age::tr
     };
 
 
-    void print_help(const std::vector<char*>& args);
+    void print_help(const std::string&                invoked_program,
+                    const std::vector<age_tr_module>& modules);
 
-    options parse_arguments(const std::vector<char*>& args);
+    options parse_arguments(const std::vector<char*>&   args,
+                            std::vector<age_tr_module>& modules);
 
 } // namespace age::tr
 

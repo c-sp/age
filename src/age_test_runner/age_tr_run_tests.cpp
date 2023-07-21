@@ -244,6 +244,11 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                                       test.run_test();
                                       auto passed = test.test_succeeded();
 
+                                      if (opts.m_write_logs)
+                                      {
+                                          test.write_logs();
+                                      }
+
                                       auto end = std::chrono::high_resolution_clock::now();
                                       results.push({test.test_name(), passed});
                                   });

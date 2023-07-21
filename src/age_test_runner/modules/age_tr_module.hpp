@@ -17,6 +17,7 @@
 #ifndef AGE_TR_MODULE_HPP
 #define AGE_TR_MODULE_HPP
 
+#include "../age_tr_cmd_option.hpp"
 #include "age_tr_test.hpp"
 
 #include <filesystem>
@@ -35,32 +36,29 @@ namespace age::tr
     class age_tr_module
     {
     public:
-        age_tr_module(char           arg_short_name,
-                      std::string    arg_long_name,
-                      std::string    arg_description,
+        age_tr_module(char           opt_short_name,
+                      std::string    opt_long_name,
+                      std::string    opt_description,
                       std::string    test_suite_directory,
                       create_tests_t create_tests);
 
-        age_tr_module(char                     arg_short_name,
-                      std::string              arg_long_name,
-                      std::string              arg_description,
+        age_tr_module(char                     opt_short_name,
+                      std::string              opt_long_name,
+                      std::string              opt_description,
                       std::vector<std::string> test_suite_directories,
                       create_tests_t           create_tests);
 
-        [[nodiscard]] const std::string&              arg_short_name() const;
-        [[nodiscard]] const std::string&              arg_long_name() const;
-        [[nodiscard]] const std::string&              arg_description() const;
+        [[nodiscard]] const age_tr_cmd_option&        cmd_option() const;
         [[nodiscard]] const std::vector<std::string>& test_suite_directories() const;
         [[nodiscard]] std::vector<age_tr_test>        create_tests(const std::filesystem::path& rom_path) const;
+        [[nodiscard]] bool                            is_enabled() const;
 
         void enable_module(bool enabled);
 
         static bool is_module_enabled(const age_tr_module& module);
 
     private:
-        std::string              m_arg_short_name;
-        std::string              m_arg_long_name;
-        std::string              m_arg_description;
+        age_tr_cmd_option        m_cmd_option;
         std::vector<std::string> m_test_suite_directories;
         bool                     m_is_enabled = false;
         create_tests_t           m_create_tests;
