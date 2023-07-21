@@ -49,7 +49,7 @@ namespace age::tr
             assert(!m_opt_description.empty());
         }
 
-        [[nodiscard]] const char         opt_short_name() const { return m_opt_short_name; }
+        [[nodiscard]] char               opt_short_name() const { return m_opt_short_name; }
         [[nodiscard]] const std::string& opt_long_name() const { return m_opt_long_name; }
         [[nodiscard]] bool               argument_required() const { return m_argument_required; }
         [[nodiscard]] const std::string& opt_description() const { return m_opt_description; }

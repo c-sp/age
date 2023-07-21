@@ -29,7 +29,7 @@ namespace
 
     // tile_data array contents copied from gambatte code
     // (gambatte/test/testrunner.cpp)
-    constexpr age::uint8_array<16U * 8 * 8> tile_data
+    constexpr age::uint8_array<16ULL * 8 * 8> tile_data
         = {{_, _, _, _, _, _, _, _,
             _, O, O, O, O, O, O, O,
             _, O, _, _, _, _, _, O,

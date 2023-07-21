@@ -49,7 +49,11 @@ namespace
 age::tr::age_tr_test::age_tr_test(std::filesystem::path               rom_path,
                                   std::shared_ptr<const uint8_vector> rom,
                                   gb_device_type                      device_type)
-    : age_tr_test(rom_path, rom, device_type, finished_after_ld_b_b(), succeeded_with_fibonacci_regs())
+    : age_tr_test(std::move(rom_path),
+                  std::move(rom),
+                  device_type,
+                  finished_after_ld_b_b(),
+                  succeeded_with_fibonacci_regs())
 {}
 
 age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
@@ -58,8 +62,8 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                                   std::function<bool(const age::gb_emulator&)> test_finished,
                                   std::function<bool(const age::gb_emulator&)> test_succeeded)
     : age_tr_test(
-        rom_path,
-        rom,
+        std::move(rom_path),
+        std::move(rom),
         device_type,
         [=](age::gb_emulator& emulator) {
             int cycles_per_iteration = emulator.get_cycles_per_second() / 256;
@@ -76,7 +80,12 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                                   age::gb_device_type                          device_type,
                                   std::function<void(age::gb_emulator&)>       run_test,
                                   std::function<bool(const age::gb_emulator&)> test_succeeded)
-    : age_tr_test(rom_path, rom, device_type, {}, run_test, test_succeeded)
+    : age_tr_test(std::move(rom_path),
+                  std::move(rom),
+                  device_type,
+                  {},
+                  run_test,
+                  test_succeeded)
 {}
 
 age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
@@ -85,13 +94,13 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                                   std::string                                  additional_info,
                                   std::function<void(age::gb_emulator&)>       run_test,
                                   std::function<bool(const age::gb_emulator&)> test_succeeded)
-    : age_tr_test(rom_path,
-                  rom,
+    : age_tr_test(std::move(rom_path),
+                  std::move(rom),
                   device_type,
                   device_type == gb_device_type::dmg
                       ? gb_colors_hint::dmg_greyscale
                       : gb_colors_hint::cgb_acid2,
-                  additional_info,
+                  std::move(additional_info),
                   run_test,
                   test_succeeded)
 {}
@@ -107,7 +116,7 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
       m_rom(std::move(rom)),
       m_device_type(device_type),
       m_colors_hint(colors_hint),
-      m_additional_info(additional_info),
+      m_additional_info(std::move(additional_info)),
       m_run_test(std::move(run_test)),
       m_test_succeeded(std::move(test_succeeded))
 {}

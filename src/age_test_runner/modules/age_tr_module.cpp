@@ -107,25 +107,25 @@ namespace
 
 
 
-age::tr::age_tr_module::age_tr_module(char           arg_short_name,
-                                      std::string    arg_long_name,
-                                      std::string    arg_description,
+age::tr::age_tr_module::age_tr_module(char           opt_short_name,
+                                      std::string    opt_long_name,
+                                      std::string    opt_description,
                                       std::string    test_suite_directory,
                                       create_tests_t create_tests)
-    : age_tr_module(arg_short_name,
-                    std::move(arg_long_name),
-                    std::move(arg_description),
+    : age_tr_module(opt_short_name,
+                    std::move(opt_long_name),
+                    std::move(opt_description),
                     std::vector{std::move(test_suite_directory)},
                     std::move(create_tests))
 {
 }
 
-age::tr::age_tr_module::age_tr_module(char                     arg_short_name,
-                                      std::string              arg_long_name,
-                                      std::string              arg_description,
+age::tr::age_tr_module::age_tr_module(char                     opt_short_name,
+                                      std::string              opt_long_name,
+                                      std::string              opt_description,
                                       std::vector<std::string> test_suite_directories,
                                       age::tr::create_tests_t  create_tests)
-    : m_cmd_option(arg_short_name, std::move(arg_long_name), std::move(arg_description)),
+    : m_cmd_option(opt_short_name, std::move(opt_long_name), std::move(opt_description)),
       m_test_suite_directories(std::move(test_suite_directories)),
       m_create_tests(std::move(create_tests))
 {

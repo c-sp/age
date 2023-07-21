@@ -66,12 +66,12 @@ namespace
                       });
     }
 
-    std::string invoked_program(const std::vector<char*> args)
+    std::string invoked_program(const std::vector<char*>& args)
     {
         return args.empty() ? "" : std::filesystem::path(args[0]).filename().string();
     }
 
-    void print_args_error(std::string                                invoked_program,
+    void print_args_error(const std::string&                         invoked_program,
                           const age::tr::options&                    opts,
                           const std::vector<age::tr::age_tr_module>& modules)
     {
