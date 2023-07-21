@@ -82,6 +82,7 @@ int main(int argc, char** argv)
 
     std::vector<age::tr::age_tr_module> modules{
         age::tr::create_acid2_module(),
+        age::tr::create_age_module(),
         age::tr::create_blargg_module(),
         age::tr::create_gambatte_module(),
         age::tr::create_little_things_module(),
@@ -95,14 +96,15 @@ int main(int argc, char** argv)
 
     check_run_all(opts);
     modules[0].enable_module(opts.m_acid2);
-    modules[1].enable_module(opts.m_blargg);
-    modules[2].enable_module(opts.m_gambatte);
-    modules[3].enable_module(opts.m_little_things);
-    modules[4].enable_module(opts.m_mealybug);
-    modules[5].enable_module(opts.m_mooneye);
-    modules[6].enable_module(opts.m_mooneye_wilbertpol);
-    modules[7].enable_module(opts.m_rtc3test);
-    modules[8].enable_module(opts.m_same_suite);
+    modules[1].enable_module(opts.m_age);
+    modules[2].enable_module(opts.m_blargg);
+    modules[3].enable_module(opts.m_gambatte);
+    modules[4].enable_module(opts.m_little_things);
+    modules[5].enable_module(opts.m_mealybug);
+    modules[6].enable_module(opts.m_mooneye);
+    modules[7].enable_module(opts.m_mooneye_wilbertpol);
+    modules[8].enable_module(opts.m_rtc3test);
+    modules[9].enable_module(opts.m_same_suite);
 
     // just print the help text
     if (opts.m_help)
@@ -175,7 +177,6 @@ int main(int argc, char** argv)
         std::cout << "no tests found!" << std::endl;
         return 1;
     }
-    std::cout << "finished " << results.size() << " test(s)" << std::endl;
 
     std::vector<age::tr::test_result> passed_tests;
     std::copy_if(begin(results),

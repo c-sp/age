@@ -2,6 +2,7 @@ add_executable(
         age_test_runner
         modules/age_tr_module.cpp
         modules/age_tr_module_acid2.cpp
+        modules/age_tr_module_age.cpp
         modules/age_tr_module_blargg.cpp
         modules/age_tr_module_gambatte.cpp
         modules/age_tr_module_little_things.cpp
@@ -15,8 +16,6 @@ add_executable(
         age_tr_arguments.cpp
         age_tr_main.cpp
         age_tr_run_tests.cpp
-        age_tr_tasks.cpp
-        age_tr_tasks_age.cpp
         age_tr_thread_pool.hpp)
 
 # Find pthreads on e.g. Ubuntu,

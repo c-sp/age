@@ -66,15 +66,8 @@ namespace age::tr
         create_tests_t           m_create_tests;
     };
 
-
-
-    std::string                             normalize_path_separator(const std::filesystem::path& path);
-    std::shared_ptr<age::uint8_vector>      load_rom_file(const std::filesystem::path& rom_path);
-    std::filesystem::path                   find_screenshot(const std::filesystem::path& rom_path,
-                                                            const std::string&           screenshot_suffix);
-    std::unordered_set<age::gb_device_type> parse_device_types(const std::string& filename);
-
     age_tr_module create_acid2_module();
+    age_tr_module create_age_module();
     age_tr_module create_blargg_module();
     age_tr_module create_gambatte_module();
     age_tr_module create_little_things_module();
@@ -83,6 +76,17 @@ namespace age::tr
     age_tr_module create_mooneye_wilbertpol_module();
     age_tr_module create_rtc3test_module();
     age_tr_module create_same_suite_module();
+
+
+
+    std::string                        normalize_path_separator(const std::filesystem::path& path);
+    std::shared_ptr<age::uint8_vector> load_rom_file(const std::filesystem::path& rom_path);
+
+    std::vector<std::filesystem::path> find_screenshots(const std::filesystem::path& rom_path);
+    std::filesystem::path              find_screenshot(const std::filesystem::path& rom_path,
+                                                       const std::string&           screenshot_suffix);
+
+    std::unordered_set<age::gb_device_type> parse_device_types(const std::string& filename);
 
 } // namespace age::tr
 

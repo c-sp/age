@@ -26,50 +26,85 @@
 
 namespace
 {
-    std::optional<age::gb_device_type> parse_cgb_type(char c)
-    {
-        switch (c)
-        {
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-                return {age::gb_device_type::cgb_abcd};
-
-            case 'E':
-                return {age::gb_device_type::cgb_e};
-
-            default:
-                return {};
-        }
-    }
-
-    std::unordered_set<age::gb_device_type> parse_cgb_types(const std::string& filename, size_t idx)
+    std::unordered_set<age::gb_device_type> parse_device_groups(const std::string& filename, size_t idx)
     {
         std::unordered_set<age::gb_device_type> result;
 
         for (; idx < filename.size(); ++idx)
         {
-            auto dev_type = parse_cgb_type(filename.at(idx));
-            if (!dev_type.has_value())
+            auto c = filename.at(idx);
+            if (c == 'G')
+            {
+                result.insert(age::gb_device_type::dmg);
+            }
+            else if (c == 'C')
+            {
+                result.insert(age::gb_device_type::cgb_abcd);
+                result.insert(age::gb_device_type::cgb_e);
+            }
+            else if (c != 'A' && c != 'S')
             {
                 break;
             }
-            result.insert(dev_type.value());
+        }
+        return result;
+    }
+
+    void parse_dmg_types(const std::string& filename, size_t idx, std::unordered_set<age::gb_device_type>& device_types)
+    {
+        size_t i = idx;
+        for (; i < filename.size(); ++i)
+        {
+            auto c = filename.at(i);
+            if (c == 'A' || c == 'B' || c == 'C')
+            {
+                device_types.insert(age::gb_device_type::dmg);
+            }
+            else if (c != '0')
+            {
+                break;
+            }
+        }
+
+        // if this test is not constrained to any DMG type,
+        // run it for all DMG types
+        // (we don't distinguish between DMG types at the moment)
+        if (i == idx)
+        {
+            device_types.insert(age::gb_device_type::dmg);
+        }
+    }
+
+    void parse_cgb_types(const std::string& filename, size_t idx, std::unordered_set<age::gb_device_type>& device_types)
+    {
+        size_t i = idx;
+        for (; i < filename.size(); ++i)
+        {
+            auto c = filename.at(i);
+            if (c == 'A' || c == 'B' || c == 'C' || c == 'D')
+            {
+                device_types.insert(age::gb_device_type::cgb_abcd);
+            }
+            else if (c == 'E')
+            {
+                device_types.insert(age::gb_device_type::cgb_e);
+            }
+            else if (c != '0')
+            {
+                break;
+            }
         }
 
         // if this test is not constrained to any CGB type,
         // run it for all CGB types
-        if (result.empty())
+        if (i == idx)
         {
-            result = {
-                age::gb_device_type::cgb_abcd,
-                age::gb_device_type::cgb_e,
-            };
+            device_types.insert(age::gb_device_type::cgb_abcd);
+            device_types.insert(age::gb_device_type::cgb_e);
         }
-        return result;
     }
-}
+
+} // namespace
 
 
 
@@ -159,6 +194,53 @@ std::shared_ptr<age::uint8_vector> age::tr::load_rom_file(const std::filesystem:
         std::istreambuf_iterator<char>());
 }
 
+
+
+std::vector<std::filesystem::path> age::tr::find_screenshots(const std::filesystem::path& rom_path)
+{
+    // mooneye test suite examples:
+    //  - sprite_priority.gb
+    //  - sprite_priority-cgb.png
+    //  - sprite_priority-dmg.png
+    //
+    // age-test-roms examples:
+    //  - m3-bg-scx-ds.gb
+    //  - m3-bg-scx-nocgb.gb
+    //  - m3-bg-scx.gb
+    //  - m3-bg-scx-cgbBCE.png
+    //  - m3-bg-scx-dmgC.png
+    //  - m3-bg-scx-ds-cgbBCE.png
+    //  - m3-bg-scx-nocgb-ncmBCE.png
+    //
+    std::vector<std::filesystem::path> screenshots;
+
+    auto rom_path_no_ext = std::filesystem::path{rom_path}.replace_extension().string(); // discard file extension
+
+    for (const auto& entry : std::filesystem::directory_iterator{rom_path.parent_path()})
+    {
+        if (!entry.is_regular_file() || (entry.path().extension().string() != ".png"))
+        {
+            continue;
+        }
+
+        auto path     = entry.path();
+        auto path_str = path.string();
+        if (path_str.ends_with("_actual.png"))
+        {
+            continue;
+        }
+
+        if (path_str.starts_with(rom_path_no_ext + "-dmg")
+            || path_str.starts_with(rom_path_no_ext + "-cgb")
+            || path_str.starts_with(rom_path_no_ext + "-ncm"))
+        {
+            screenshots.emplace_back(path);
+        }
+    }
+
+    return screenshots;
+}
+
 std::filesystem::path age::tr::find_screenshot(const std::filesystem::path& rom_path,
                                                const std::string&           screenshot_suffix)
 {
@@ -176,9 +258,32 @@ std::filesystem::path age::tr::find_screenshot(const std::filesystem::path& rom_
 }
 
 
+
 std::unordered_set<age::gb_device_type> age::tr::parse_device_types(const std::string& filename)
 {
     std::unordered_set<age::gb_device_type> result;
+
+    // test runs on specific CGB types
+    std::string cgb_prefix("-cgb");
+    auto        cgb_hint = filename.find(cgb_prefix);
+    if (cgb_hint != std::string::npos)
+    {
+        parse_cgb_types(filename, cgb_hint + cgb_prefix.size(), result);
+    }
+    std::string ncm_prefix("-ncm");
+    auto        ncm_hint = filename.find(ncm_prefix);
+    if (ncm_hint != std::string::npos)
+    {
+        parse_cgb_types(filename, ncm_hint + ncm_prefix.size(), result);
+    }
+
+    // test runs on specific DMG types
+    std::string dmg_prefix("-dmg");
+    auto        dmg_hint = filename.find(dmg_prefix);
+    if (dmg_hint != std::string::npos)
+    {
+        parse_dmg_types(filename, dmg_hint + dmg_prefix.size(), result);
+    }
 
     // test runs on all CGB types
     if (filename.find("-C") != std::string::npos)
@@ -187,18 +292,9 @@ std::unordered_set<age::gb_device_type> age::tr::parse_device_types(const std::s
         result.insert(age::gb_device_type::cgb_e);
     }
 
-    // test runs on specific CGB types
-    std::string cgb_prefix("-cgb");
-    auto        cgb_hint = filename.find(cgb_prefix);
-    if (cgb_hint != std::string::npos)
-    {
-        auto cgb_types = parse_cgb_types(filename, cgb_hint + cgb_prefix.size());
-        result.insert(begin(cgb_types), end(cgb_types));
-    }
-
     // test runs on all DMG types
-    // (we don't distinguish DMG types at the moment)
-    if ((filename.find("-G") != std::string::npos) || (filename.find("-dmg") != std::string::npos))
+    // (we don't distinguish between DMG types at the moment)
+    if (filename.find("-G") != std::string::npos)
     {
         result.insert(age::gb_device_type::dmg);
     }

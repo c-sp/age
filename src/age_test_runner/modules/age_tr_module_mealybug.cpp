@@ -49,13 +49,6 @@ age::tr::age_tr_module age::tr::create_mealybug_module()
             }
 
             auto cgb_screenshot = find_screenshot(rom_path, "_cgb_c.png");
-            auto dmg_screenshot = find_screenshot(rom_path, "_dmg_blob.png");
-
-            if (dmg_screenshot.empty() && cgb_screenshot.empty())
-            {
-                return tests;
-            }
-
             if (!cgb_screenshot.empty())
             {
                 tests.emplace_back(
@@ -65,6 +58,8 @@ age::tr::age_tr_module age::tr::create_mealybug_module()
                     finished_after_ld_b_b(),
                     succeeded_with_screenshot(cgb_screenshot));
             }
+
+            auto dmg_screenshot = find_screenshot(rom_path, "_dmg_blob.png");
             if (!dmg_screenshot.empty())
             {
                 tests.emplace_back(
