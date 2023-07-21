@@ -15,9 +15,7 @@
 //
 
 #include "age_tr_run_tests.hpp"
-#include "age_tr_tasks.hpp"
 #include "age_tr_thread_pool.hpp"
-#include "modules/age_tr_write_log.hpp"
 
 #include <algorithm>
 #include <array>
@@ -162,14 +160,6 @@ namespace
         });
     }
 
-
-
-    std::string with_device_type(const std::string&  rom_info,
-                                 age::gb_device_type device_type)
-    {
-        return rom_info + " " + age::tr::get_device_type_string(device_type);
-    }
-
 } // namespace
 
 
@@ -196,94 +186,11 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
             if ((diff.count() > 0.3) || (total == tasks_finished))
             {
                 last_update = now;
-                std::cout << "\rfinished " << tasks_finished << " of " << total << " tasks" << std::flush;
+                std::cout << "\rfinished " << tasks_finished << " of " << total << " test(s)" << std::flush;
                 if (total == tasks_finished)
                 {
                     std::cout << std::endl;
                 }
-            }
-        });
-
-        using schedule_rom_t = std::function<void(const std::filesystem::path&, const schedule_test_t&)>;
-
-        auto schedule_rom = [&pool, &results, &opts, &rom_count](const std::filesystem::path& rom_path,
-                                                                 const schedule_rom_t&        schedule_rom) {
-            ++rom_count;
-            pool.queue_task([&pool, &results, &opts, rom_path, schedule_rom]() {
-                int scheduled_count = 0;
-
-                schedule_rom(
-                    rom_path,
-                    [&pool, &results, &opts, rom_path, &scheduled_count](schedule_test_opts test_opts) {
-                        switch (test_opts.m_device_type)
-                        {
-                            case gb_device_type::auto_detect:
-                                return;
-
-                            case gb_device_type::dmg:
-                                if (opts.m_cgb_only)
-                                {
-                                    return;
-                                }
-                                break;
-
-                            case gb_device_type::cgb_abcd:
-                            case gb_device_type::cgb_e:
-                                if (opts.m_dmg_only)
-                                {
-                                    return;
-                                }
-                                break;
-                        }
-
-                        pool.queue_task([&results, &opts, rom_path, test_opts]() {
-                            std::unique_ptr<age::gb_emulator> emulator(new age::gb_emulator(*test_opts.m_rom, test_opts.m_device_type, test_opts.m_colors_hint, opts.m_log_categories));
-                            auto                              passed = test_opts.m_run_test(*emulator);
-
-                            std::string rom_info = rom_path.string();
-                            if (!test_opts.m_info.empty())
-                            {
-                                rom_info += ", " + test_opts.m_info;
-                            }
-
-                            results.push({with_device_type(rom_info, test_opts.m_device_type), passed});
-
-                            if (opts.m_write_logs)
-                            {
-                                std::filesystem::path log_path = rom_path;
-                                const auto*           log_ext  = [&]() {
-                                    switch (test_opts.m_device_type)
-                                    {
-                                        case gb_device_type::dmg:
-                                            return ".dmg.log";
-                                        case gb_device_type::cgb_abcd:
-                                            return ".cgb-abcd.log";
-                                        case gb_device_type::cgb_e:
-                                            return ".cgb-e.log";
-                                        default:
-                                            return ".log";
-                                    }
-                                }();
-                                log_path.replace_extension(log_ext);
-                                write_log(log_path, emulator->get_and_clear_log_entries(), rom_path, test_opts.m_device_type);
-                            }
-                        });
-                        ++scheduled_count;
-                    });
-
-                if (!scheduled_count)
-                {
-                    results.push({rom_path.string() + " (no test scheduled)", false});
-                }
-            });
-        };
-
-        pool.queue_task([&]() {
-            if (opts.m_age)
-            {
-                find_roms(opts.m_test_suite_path / "age-test-roms", matcher, [&](const std::filesystem::path& rom_path) {
-                    schedule_rom(rom_path, schedule_rom_age);
-                });
             }
         });
 
@@ -347,8 +254,8 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
 
         // by letting the thread pool go out of scope we wait for it to finish
     }
-    // wait for "finished X of Y tasks" logs to finish before logging this
-    std::cout << "found " << rom_count << " rom(s)" << std::endl;
+    // wait for "finished X of Y tests" logs to finish before logging this
+    std::cout << "tests were created from " << rom_count << " rom(s)" << std::endl;
 
     return results.copy();
 }

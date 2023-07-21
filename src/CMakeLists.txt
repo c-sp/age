@@ -169,6 +169,8 @@ add_executable(
         age_gtest
         age_emulator_gb/common/age_gb_events.test.cpp
         age_emulator_gb/lcd/palettes/age_gb_lcd_palettes_cgb.test.cpp
+        age_test_runner/modules/age_tr_module.cpp
+        age_test_runner/modules/age_tr_module.test.cpp
 )
 target_link_libraries(age_gtest age_emulator_gb age_common gtest_main)
 target_include_directories(age_gtest PUBLIC api)
