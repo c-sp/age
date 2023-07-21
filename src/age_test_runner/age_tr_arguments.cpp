@@ -17,6 +17,7 @@
 #include <git_revision.hpp>
 
 #include "age_tr_arguments.hpp"
+#include "age_tr_cmd_option.hpp"
 
 #include <algorithm> // std::for_each
 #include <iostream>  // std::cout
@@ -27,284 +28,202 @@
 
 namespace
 {
-    constexpr char opt_acid2              = 'a';
-    constexpr char opt_blargg             = 'b';
-    constexpr char opt_cgb_only           = 'c';
-    constexpr char opt_dmg_only           = 'd';
-    constexpr char opt_age                = 'e';
-    constexpr char opt_print_failed       = 'f';
-    constexpr char opt_gambatte           = 'g';
-    constexpr char opt_help               = 'h';
-    constexpr char opt_write_logs         = 'l';
-    constexpr char opt_mooneye            = 'm';
-    constexpr char opt_mealybug           = 'n';
-    constexpr char opt_mooneye_wilbertpol = 'o';
-    constexpr char opt_print_passed       = 'p';
-    constexpr char opt_rtc3test           = 'r';
-    constexpr char opt_same_suite         = 's';
-    constexpr char opt_little_things      = 't';
-    constexpr char opt_whitelist          = 'w';
-    constexpr char opt_blacklist          = 'x';
+    constexpr char opt_cgb_only     = 'c';
+    constexpr char opt_dmg_only     = 'd';
+    constexpr char opt_print_failed = 'f';
+    constexpr char opt_help         = 'h';
+    constexpr char opt_write_logs   = 'l';
+    constexpr char opt_print_passed = 'p';
+    constexpr char opt_whitelist    = 'w';
+    constexpr char opt_blacklist    = 'x';
 
-    constexpr const char* optstring = ":abcdefghilmnoprstw:x:";
-
-    constexpr const char* opt_long_acid2              = "acid2";
-    constexpr const char* opt_long_blargg             = "blargg";
-    constexpr const char* opt_long_cgb_only           = "cgb-only";
-    constexpr const char* opt_long_dmg_only           = "dmg-only";
-    constexpr const char* opt_long_age                = "age";
-    constexpr const char* opt_long_print_failed       = "print-failed";
-    constexpr const char* opt_long_gambatte           = "gambatte";
-    constexpr const char* opt_long_help               = "help";
-    constexpr const char* opt_long_write_logs         = "write-logs";
-    constexpr const char* opt_long_mooneye            = "mooneye";
-    constexpr const char* opt_long_mealybug           = "mealybug";
-    constexpr const char* opt_long_mooneye_wilbertpol = "mooneye-wilbertpol";
-    constexpr const char* opt_long_print_passed       = "print-passed";
-    constexpr const char* opt_long_rtc3test           = "rtc3test";
-    constexpr const char* opt_long_same_suite         = "same-suite";
-    constexpr const char* opt_long_little_things      = "little-things";
-    constexpr const char* opt_long_whitelist          = "whitelist";
-    constexpr const char* opt_long_blacklist          = "blacklist";
-
-    constexpr const char* help_cmd_var = "%cmd%";
-    constexpr const char* help_git_var = "%git%";
-    constexpr std::array  help_lines{
-        "Run (parts of) the gameboy-test-roms test suite with AGE.",
-        "See also:",
-        "  https://github.com/c-sp/gameboy-test-roms",
-        "  https://github.com/c-sp/AGE",
-        "",
-#ifndef AGE_COMPILE_LOGGER
-        "This test runner has been compiled without logging!",
+    std::vector<age::tr::age_tr_cmd_option> cmd_options()
+    {
+        return {
+            {opt_help, "help", "print this text"},
+            {opt_print_failed, "print-failed", "print failed tests"},
+            {opt_print_passed, "print-passed", "print passed tests"},
+            {opt_cgb_only, "cgb-only", "run only Game Boy Color (CGB) tests"},
+            {opt_dmg_only, "dmg-only", "run only Game Boy Classic (DMG) tests"},
+            {opt_whitelist, "whitelist", true, "whitelist file/regex"},
+            {opt_blacklist, "blacklist", true, "blacklist file/regex"},
+            {opt_write_logs,
+             "write-logs",
+#ifdef AGE_COMPILE_LOGGER
+             "write test log files"
+#else
+             "write test log files (not supported by this test runner!)"
 #endif
-        "AGE git revision: %git%",
-        "",
-        "Usage:",
-        "  %cmd% [options] [gameboy-test-roms path]",
-        "",
-        "  If no gameboy-test-roms path is specified",
-        "  the current working directory is used.",
-        "",
-        "Options:",
-        "  -h, --help             print this text",
-        "  -l, --write-logs       write test log files",
-        "  -f, --print-failed     print failed tests",
-        "  -p, --print-passed     print passed tests",
-        "  -c, --cgb-only         run only Game Boy Color tests",
-        "  -d, --dmg-only         run only Game Boy Classic tests",
-        "  -w, --whitelist <...>  whitelist file/regex",
-        "  -x, --blacklist <...>  blacklist file/regex",
-        "",
-        "Use the following category options to run only a subset of test roms.",
-        "Multiple categories can be picked simultaneously.",
-        "If no category is specified all tests will run.",
-        "  -a, --acid2              run cgb-acid-2 and dmg-acid-2 test roms",
-        "  -e, --age                run age test roms",
-        "  -b, --blargg             run Blarggs test roms",
-        "  -g, --gambatte           run Gambatte test roms",
-        "  -m, --mooneye            run Mooneye Test Suite",
-        "  -o, --mooneye-wilbertpol run Mooneye Test Suite adjusted by wilbertpol",
-        "  -n, --mealybug           run Mealybug Tearoom test roms",
-        "  -r, --rtc3test           run rtc3test test rom",
-        "  -s, --same-suite         run SameSuite test roms",
-        "  -t, --little-things      run little-things-gb test roms",
-    };
+            },
+        };
+    }
+
+    void print_options(const std::vector<age::tr::age_tr_cmd_option>& opts)
+    {
+        std::vector<age::tr::age_tr_cmd_option> sorted_opts = opts;
+        std::sort(sorted_opts.begin(), sorted_opts.end());
+
+        std::size_t col2_chars = 0;
+        for (const auto& opt : sorted_opts)
+        {
+            std::size_t chars = opt.opt_long_name().length()
+                                + (opt.argument_required() ? 6 : 0);
+            if (chars > col2_chars)
+            {
+                col2_chars = chars;
+            }
+        }
+
+        for (const auto& opt : sorted_opts)
+        {
+            auto col2 = opt.opt_long_name()
+                        + (opt.argument_required() ? " <...>" : "");
+            col2.resize(col2_chars, ' ');
+
+            std::cout << "  -" << opt.opt_short_name()
+                      << ", --" << col2
+                      << "  " << opt.opt_description()
+                      << std::endl;
+        }
+    }
+
 } // namespace
 
 
 
-void age::tr::print_help(const std::vector<char*>& args)
+void age::tr::print_help(const std::string&                invoked_program,
+                         const std::vector<age_tr_module>& modules)
 {
-    std::string cmd_var(help_cmd_var);
-    std::string git_var(help_git_var);
+    std::cout << "Run (parts of) the gameboy-test-roms test suite with AGE." << std::endl;
+    std::cout << "See also:" << std::endl;
+    std::cout << "  https://github.com/c-sp/gameboy-test-roms" << std::endl;
+    std::cout << "  https://github.com/c-sp/AGE" << std::endl;
+    std::cout << std::endl;
 
-    std::for_each(std::begin(help_lines),
-                  std::end(help_lines),
-                  [&](auto line) {
-                      std::string l(line);
+#ifndef AGE_COMPILE_LOGGER
+    std::cout << "This test runner has been compiled without logging!" << std::endl;
+#endif
+    std::string git_rev{GIT_REV};
+    std::string git_tag{GIT_TAG};
+    std::string git_branch{GIT_BRANCH};
+    std::string branch = !git_tag.empty()      ? git_tag + ", "
+                         : !git_branch.empty() ? git_branch + ", "
+                                               : "";
+    std::string git    = git_rev.empty()
+                             ? "unknown"
+                             : git_rev + " (" + branch + GIT_DATE + ")";
+    std::cout << "AGE git revision: " << git << std::endl;
+    std::cout << std::endl;
 
-                      // replace %cmd%
-                      auto cmd_var_idx = l.find(cmd_var);
-                      if (cmd_var_idx != std::string::npos)
-                      {
-                          auto cmd = args.empty() ? "" : std::filesystem::path(args[0]).filename().string();
-                          l.replace(cmd_var_idx, cmd_var.size(), cmd);
-                      }
+    std::cout << "Usage:" << std::endl;
+    std::cout << "  " << invoked_program << " [options] [gameboy-test-roms path]" << std::endl;
+    std::cout << std::endl;
 
-                      // replace %git%
-                      auto git_var_idx = l.find(git_var);
-                      if (git_var_idx != std::string::npos)
-                      {
-                          std::string git_rev{GIT_REV};
-                          std::string git_tag{GIT_TAG};
-                          std::string git_branch{GIT_BRANCH};
+    std::cout << "  If no gameboy-test-roms path is specified" << std::endl;
+    std::cout << "  the current working directory is used." << std::endl;
+    std::cout << std::endl;
 
+    std::cout << "Options:" << std::endl;
+    print_options(cmd_options());
+    std::cout << std::endl;
 
-                          std::string branch = !git_tag.empty()      ? git_tag + ", "
-                                               : !git_branch.empty() ? git_branch + ", "
-                                                                     : "";
-
-                          std::string git = git_rev.empty()
-                                                ? "unknown"
-                                                : git_rev + " (" + branch + GIT_DATE + ")";
-
-                          l.replace(git_var_idx, git_var.size(), git);
-                      }
-
-                      std::cout << l << std::endl;
-                  });
+    std::cout << "Use the following category options to run only a subset of test roms." << std::endl;
+    std::cout << "Multiple categories can be picked simultaneously." << std::endl;
+    std::cout << "If no category is specified all tests will run." << std::endl;
+    std::vector<age_tr_cmd_option> module_options;
+    std::transform(begin(modules),
+                   end(modules),
+                   std::back_inserter(module_options),
+                   [](const auto& mod) {
+                       return mod.cmd_option();
+                   });
+    print_options(module_options);
+    std::cout << std::endl;
 }
 
 
 
-age::tr::options age::tr::parse_arguments(const std::vector<char*>& args)
+age::tr::options age::tr::parse_arguments(const std::vector<char*>&   args,
+                                          std::vector<age_tr_module>& modules)
 {
-    // based on
+    // loosely based on
     // https://en.wikipedia.org/wiki/Getopt#Using_GNU_extension_getopt_long
 
-    std::array<option, 19> long_options{{
-        {
-            .name    = opt_long_acid2,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_acid2,
-        },
-        {
-            .name    = opt_long_blargg,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_blargg,
-        },
-        {
-            .name    = opt_long_cgb_only,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_cgb_only,
-        },
-        {
-            .name    = opt_long_dmg_only,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_dmg_only,
-        },
-        {
-            .name    = opt_long_age,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_age,
-        },
-        {
-            .name    = opt_long_print_failed,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_print_failed,
-        },
-        {
-            .name    = opt_long_gambatte,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_gambatte,
-        },
-        {
-            .name    = opt_long_help,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_help,
-        },
-        {
-            .name    = opt_long_write_logs,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_write_logs,
-        },
-        {
-            .name    = opt_long_mooneye,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_mooneye,
-        },
-        {
-            .name    = opt_long_mealybug,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_mealybug,
-        },
-        {
-            .name    = opt_long_mooneye_wilbertpol,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_mooneye_wilbertpol,
-        },
-        {
-            .name    = opt_long_print_passed,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_print_passed,
-        },
-        {
-            .name    = opt_long_rtc3test,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_rtc3test,
-        },
-        {
-            .name    = opt_long_same_suite,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_same_suite,
-        },
-        {
-            .name    = opt_long_little_things,
-            .has_arg = no_argument,
-            .flag    = nullptr,
-            .val     = opt_little_things,
-        },
-        {
-            .name    = opt_long_whitelist,
-            .has_arg = required_argument,
-            .flag    = nullptr,
-            .val     = opt_whitelist,
-        },
-        {
-            .name    = opt_long_blacklist,
-            .has_arg = required_argument,
-            .flag    = nullptr,
-            .val     = opt_blacklist,
-        },
-        {
-            .name    = nullptr,
-            .has_arg = 0,
-            .flag    = nullptr,
-            .val     = 0,
-        },
-    }};
+    // create a list of all options
+    std::vector<age_tr_cmd_option> all_cmd_options = cmd_options();
+    std::transform(begin(modules),
+                   end(modules),
+                   std::back_inserter(all_cmd_options),
+                   [](const auto& mod) {
+                       return mod.cmd_option();
+                   });
+    std::sort(begin(all_cmd_options), end(all_cmd_options));
 
-    age::tr::options options{};
+    // create option-list for getopt_long()
+    std::vector<option> long_options;
+    std::transform(begin(all_cmd_options),
+                   end(all_cmd_options),
+                   std::back_inserter(long_options),
+                   [](const auto& opt) {
+                       return option{
+                           .name    = opt.opt_long_name().c_str(),
+                           .has_arg = opt.argument_required() ? required_argument : no_argument,
+                           .flag    = nullptr,
+                           .val     = opt.opt_short_name(),
+                       };
+                   });
+    long_options.emplace_back(option{
+        .name    = nullptr,
+        .has_arg = 0,
+        .flag    = nullptr,
+        .val     = 0,
+    });
+
+    // create options-string for getopt_long()
+    std::string optstring = ":";
+    for (const auto& cmd_opt : all_cmd_options)
+    {
+        optstring += cmd_opt.opt_short_name();
+        if (cmd_opt.argument_required())
+        {
+            optstring += ":";
+        }
+    }
+
+    // no getopt_long() error message on standard error
+    opterr = 0;
+
+    age::tr::options options;
     int              c         = 0;
     int              longindex = 0;
-
-    // no getopt() error message on standard error
-    opterr = 0;
 
     // NOLINTNEXTLINE(concurrency-mt-unsafe)
     while ((c = getopt_long(static_cast<int>(args.size()),
                             args.data(),
-                            optstring,
+                            optstring.c_str(),
                             long_options.data(),
                             &longindex))
            != -1)
     {
+        // check for module option
+        age_tr_module* mod = nullptr;
+        for (auto& m : modules)
+        {
+            if (m.cmd_option().opt_short_name() == c)
+            {
+                mod = &m;
+                break;
+            }
+        }
+        if (mod != nullptr)
+        {
+            mod->enable_module(true);
+            continue;
+        }
+
+        // remaining options
         switch (c)
         {
-            case opt_acid2:
-                options.m_acid2 = true;
-                break;
-
-            case opt_blargg:
-                options.m_blargg = true;
-                break;
-
             case opt_cgb_only:
                 options.m_cgb_only = true;
                 break;
@@ -313,16 +232,8 @@ age::tr::options age::tr::parse_arguments(const std::vector<char*>& args)
                 options.m_dmg_only = true;
                 break;
 
-            case opt_age:
-                options.m_age = true;
-                break;
-
             case opt_print_failed:
                 options.m_print_failed = true;
-                break;
-
-            case opt_gambatte:
-                options.m_gambatte = true;
                 break;
 
             case opt_help:
@@ -333,32 +244,8 @@ age::tr::options age::tr::parse_arguments(const std::vector<char*>& args)
                 options.m_write_logs = true;
                 break;
 
-            case opt_mooneye:
-                options.m_mooneye = true;
-                break;
-
-            case opt_mealybug:
-                options.m_mealybug = true;
-                break;
-
-            case opt_mooneye_wilbertpol:
-                options.m_mooneye_wilbertpol = true;
-                break;
-
             case opt_print_passed:
                 options.m_print_passed = true;
-                break;
-
-            case opt_rtc3test:
-                options.m_rtc3test = true;
-                break;
-
-            case opt_same_suite:
-                options.m_same_suite = true;
-                break;
-
-            case opt_little_things:
-                options.m_little_things = true;
                 break;
 
             case opt_whitelist:

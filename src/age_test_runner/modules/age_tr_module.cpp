@@ -16,7 +16,6 @@
 
 #include "age_tr_module.hpp"
 
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -126,36 +125,26 @@ age::tr::age_tr_module::age_tr_module(char                     arg_short_name,
                                       std::string              arg_description,
                                       std::vector<std::string> test_suite_directories,
                                       age::tr::create_tests_t  create_tests)
-    : m_arg_short_name(std::string("") + arg_short_name),
-      m_arg_long_name(std::move(arg_long_name)),
-      m_arg_description(std::move(arg_description)),
+    : m_cmd_option(arg_short_name, std::move(arg_long_name), std::move(arg_description)),
       m_test_suite_directories(std::move(test_suite_directories)),
       m_create_tests(std::move(create_tests))
 {
-    assert(m_arg_short_name.length() == 1);
-    assert(m_arg_long_name.length() > 1);
-    assert(!m_arg_description.empty());
 }
 
 
-const std::string& age::tr::age_tr_module::arg_short_name() const
+const age::tr::age_tr_cmd_option& age::tr::age_tr_module::cmd_option() const
 {
-    return m_arg_short_name;
-}
-
-const std::string& age::tr::age_tr_module::arg_long_name() const
-{
-    return m_arg_long_name;
-}
-
-const std::string& age::tr::age_tr_module::arg_description() const
-{
-    return m_arg_description;
+    return m_cmd_option;
 }
 
 const std::vector<std::string>& age::tr::age_tr_module::test_suite_directories() const
 {
     return m_test_suite_directories;
+}
+
+bool age::tr::age_tr_module::is_enabled() const
+{
+    return m_is_enabled;
 }
 
 std::vector<age::tr::age_tr_test> age::tr::age_tr_module::create_tests(const std::filesystem::path& rom_path) const

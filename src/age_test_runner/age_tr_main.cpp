@@ -26,29 +26,24 @@
 
 namespace
 {
-    void check_run_all(age::tr::options& options)
+    void check_run_all(std::vector<age::tr::age_tr_module>& modules)
     {
-        bool run_all = !options.m_acid2
-                       && !options.m_age
-                       && !options.m_blargg
-                       && !options.m_gambatte
-                       && !options.m_little_things
-                       && !options.m_mealybug
-                       && !options.m_mooneye
-                       && !options.m_mooneye_wilbertpol
-                       && !options.m_rtc3test
-                       && !options.m_same_suite;
+        // any module enabled -> no change
+        auto any_enabled = std::find_if(begin(modules),
+                                        end(modules),
+                                        [](const auto& mod) {
+                                            return mod.is_enabled();
+                                        });
+        if (any_enabled != end(modules))
+        {
+            return;
+        }
 
-        options.m_acid2 |= run_all;
-        options.m_age |= run_all;
-        options.m_blargg |= run_all;
-        options.m_gambatte |= run_all;
-        options.m_little_things |= run_all;
-        options.m_mealybug |= run_all;
-        options.m_mooneye |= run_all;
-        options.m_mooneye_wilbertpol |= run_all;
-        options.m_rtc3test |= run_all;
-        options.m_same_suite |= run_all;
+        // no module enabled -> enable all modules
+        for (auto& mod : modules)
+        {
+            mod.enable_module(true);
+        }
     }
 
     void sort_and_print(std::vector<age::tr::test_result>& tests)
@@ -71,50 +66,14 @@ namespace
                       });
     }
 
-} // namespace
-
-
-
-int main(int argc, char** argv)
-{
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::vector<char*> args(argv, argv + argc);
-
-    std::vector<age::tr::age_tr_module> modules{
-        age::tr::create_acid2_module(),
-        age::tr::create_age_module(),
-        age::tr::create_blargg_module(),
-        age::tr::create_gambatte_module(),
-        age::tr::create_little_things_module(),
-        age::tr::create_mealybug_module(),
-        age::tr::create_mooneye_module(),
-        age::tr::create_mooneye_wilbertpol_module(),
-        age::tr::create_rtc3test_module(),
-        age::tr::create_same_suite_module()};
-
-    age::tr::options opts = age::tr::parse_arguments(args);
-
-    check_run_all(opts);
-    modules[0].enable_module(opts.m_acid2);
-    modules[1].enable_module(opts.m_age);
-    modules[2].enable_module(opts.m_blargg);
-    modules[3].enable_module(opts.m_gambatte);
-    modules[4].enable_module(opts.m_little_things);
-    modules[5].enable_module(opts.m_mealybug);
-    modules[6].enable_module(opts.m_mooneye);
-    modules[7].enable_module(opts.m_mooneye_wilbertpol);
-    modules[8].enable_module(opts.m_rtc3test);
-    modules[9].enable_module(opts.m_same_suite);
-
-    // just print the help text
-    if (opts.m_help)
+    std::string invoked_program(const std::vector<char*> args)
     {
-        age::tr::print_help(args);
-        return 0;
+        return args.empty() ? "" : std::filesystem::path(args[0]).filename().string();
     }
 
-    // terminate with error on unknown/invalid argument
-    if (!opts.m_unknown_options.empty() || !opts.m_invalid_arg_options.empty())
+    void print_args_error(std::string                                invoked_program,
+                          const age::tr::options&                    opts,
+                          const std::vector<age::tr::age_tr_module>& modules)
     {
         std::for_each(begin(opts.m_unknown_options),
                       end(opts.m_unknown_options),
@@ -129,20 +88,73 @@ int main(int argc, char** argv)
                       });
 
         std::cout << std::endl;
-        age::tr::print_help(args);
+        age::tr::print_help(invoked_program, modules);
+    }
+
+    void print_test_categories(const std::vector<age::tr::age_tr_module>& modules)
+    {
+        std::vector<std::string> categories;
+        for (const auto& mod : modules)
+        {
+            if (mod.is_enabled())
+            {
+                for (const auto& test_dir : mod.test_suite_directories())
+                {
+                    categories.push_back(test_dir);
+                }
+            }
+        }
+        std::sort(begin(categories), end(categories));
+
+        std::cout << "test categories:";
+        for (const auto& cat : categories)
+        {
+            std::cout << " " << cat;
+        }
+        std::cout << std::endl;
+    }
+
+} // namespace
+
+
+
+int main(int argc, char** argv)
+{
+    std::vector<age::tr::age_tr_module> modules{
+        age::tr::create_acid2_module(),
+        age::tr::create_age_module(),
+        age::tr::create_blargg_module(),
+        age::tr::create_gambatte_module(),
+        age::tr::create_little_things_module(),
+        age::tr::create_mealybug_module(),
+        age::tr::create_mooneye_module(),
+        age::tr::create_mooneye_wilbertpol_module(),
+        age::tr::create_rtc3test_module(),
+        age::tr::create_same_suite_module()};
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    std::vector<char*> args(argv, argv + argc);
+    age::tr::options   opts = age::tr::parse_arguments(args, modules);
+
+    check_run_all(modules);
+
+    // just print the help text
+    if (opts.m_help)
+    {
+        age::tr::print_help(invoked_program(args), modules);
+        return 0;
+    }
+
+    // terminate with error on unknown/invalid argument
+    if (!opts.m_unknown_options.empty() || !opts.m_invalid_arg_options.empty())
+    {
+        print_args_error(invoked_program(args), opts, modules);
         return 1;
     }
 
-    // notify the user about where we're about to look for test rom files
-    std::cout << "test categories:"
-              << (opts.m_acid2 ? " acid2" : "")
-              << (opts.m_age ? " age" : "")
-              << (opts.m_blargg ? " blargg" : "")
-              << (opts.m_gambatte ? " gambatte" : "")
-              << (opts.m_mealybug ? " mealybug-tearoom-tests" : "")
-              << (opts.m_mooneye ? " mooneye" : "")
-              << std::endl
-              << "looking for test roms in: " << opts.m_test_suite_path.string()
+    // notify the user about what we're going to do
+    print_test_categories(modules);
+    std::cout << "looking for test roms in: " << opts.m_test_suite_path.string()
               << std::endl;
 
 #ifndef AGE_COMPILE_LOGGER
