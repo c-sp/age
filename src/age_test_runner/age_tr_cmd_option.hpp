@@ -45,7 +45,6 @@ namespace age::tr
               m_argument_required(argument_required),
               m_opt_description(std::move(opt_description))
         {
-            assert(m_opt_short_name.length() == 1);
             assert(m_opt_long_name.length() > 1);
             assert(!m_opt_description.empty());
         }
