@@ -164,9 +164,9 @@ namespace
 
 
 
-std::vector<age::tr::test_result> age::tr::run_tests(const options&                    opts,
-                                                     const std::vector<age_tr_module>& modules,
-                                                     unsigned                          threads)
+age::tr::test_run_results age::tr::run_tests(const options&                    opts,
+                                             const std::vector<age_tr_module>& modules,
+                                             unsigned                          threads)
 {
     auto whitelist = opts.m_whitelist.length() ? new_matcher(opts.m_whitelist) : match_everything;
     auto blacklist = opts.m_blacklist.length() ? new_matcher(opts.m_blacklist) : match_nothing;
@@ -213,7 +213,8 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                               // no tests to run -> mark this as failed test
                               if (tests.empty())
                               {
-                                  results.push({rom_path.string() + " (no test scheduled)", false});
+                                  results.push({.m_test_passed = false,
+                                                .m_test_name   = rom_path.string() + " (no test scheduled)"});
                                   return;
                               }
 
@@ -250,7 +251,8 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
                                       }
 
                                       auto end = std::chrono::high_resolution_clock::now();
-                                      results.push({test.test_name(), passed});
+                                      results.push({.m_test_passed = passed,
+                                                    .m_test_name   = test.test_name()});
                                   });
                               }
                           });
@@ -259,8 +261,7 @@ std::vector<age::tr::test_result> age::tr::run_tests(const options&             
 
         // by letting the thread pool go out of scope we wait for it to finish
     }
-    // wait for "finished X of Y tests" logs to finish before logging this
-    std::cout << "tests were created from " << rom_count << " rom(s)" << std::endl;
 
-    return results.copy();
+    return {.m_test_results = results.copy(),
+            .m_rom_count    = rom_count};
 }

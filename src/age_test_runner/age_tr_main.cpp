@@ -153,6 +153,7 @@ int main(int argc, char** argv)
     }
 
     // notify the user about what we're going to do
+    std::cout << std::endl;
     print_test_categories(modules);
     std::cout << "looking for test roms in: " << opts.m_test_suite_path.string()
               << std::endl;
@@ -181,18 +182,23 @@ int main(int argc, char** argv)
     // check hardware concurrency
     unsigned threads = std::max(4U, std::thread::hardware_concurrency());
     std::cout << "using " << threads << " threads to run tests" << std::endl;
+    std::cout << std::endl;
 
     // find test rom files & schedule test tasks
     auto results = age::tr::run_tests(opts, modules, threads);
-    if (results.empty())
+
+    if (results.m_test_results.empty())
     {
-        std::cout << "no tests found!" << std::endl;
+        std::cout << "no test found!" << std::endl;
         return 1;
     }
 
+    std::cout << std::endl;
+    std::cout << "tests were created from " << results.m_rom_count << " rom(s)" << std::endl;
+
     std::vector<age::tr::test_result> passed_tests;
-    std::copy_if(begin(results),
-                 end(results),
+    std::copy_if(begin(results.m_test_results),
+                 end(results.m_test_results),
                  std::back_inserter(passed_tests),
                  [](auto& res) {
                      return res.m_test_passed;
@@ -205,8 +211,8 @@ int main(int argc, char** argv)
     }
 
     std::vector<age::tr::test_result> failed_tests;
-    std::copy_if(begin(results),
-                 end(results),
+    std::copy_if(begin(results.m_test_results),
+                 end(results.m_test_results),
                  std::back_inserter(failed_tests),
                  [](auto& res) {
                      return !res.m_test_passed;

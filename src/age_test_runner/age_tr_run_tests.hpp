@@ -31,16 +31,17 @@ namespace age::tr
     {
         bool        m_test_passed;
         std::string m_test_name;
-
-        test_result(std::string test_name, bool test_passed)
-            : m_test_name(std::move(test_name)),
-              m_test_passed(test_passed)
-        {}
     };
 
-    std::vector<test_result> run_tests(const options&                    opts,
-                                       const std::vector<age_tr_module>& modules,
-                                       unsigned                          threads);
+    struct test_run_results
+    {
+        std::vector<test_result> m_test_results;
+        int                      m_rom_count = 0;
+    };
+
+    test_run_results run_tests(const options&                    opts,
+                               const std::vector<age_tr_module>& modules,
+                               unsigned                          threads);
 
 } // namespace age::tr
 
