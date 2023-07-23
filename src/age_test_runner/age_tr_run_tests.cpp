@@ -168,6 +168,8 @@ age::tr::test_run_results age::tr::run_tests(const options&                    o
                                              const std::vector<age_tr_module>& modules,
                                              unsigned                          threads)
 {
+    auto begin_run = std::chrono::steady_clock::now();
+
     auto whitelist = opts.m_whitelist.length() ? new_matcher(opts.m_whitelist) : match_everything;
     auto blacklist = opts.m_blacklist.length() ? new_matcher(opts.m_blacklist) : match_nothing;
 
@@ -239,20 +241,37 @@ age::tr::test_run_results age::tr::run_tests(const options&                    o
                               for (auto& test : tests)
                               {
                                   pool.queue_task([test, &opts, &results]() mutable {
-                                      auto begin = std::chrono::high_resolution_clock::now();
-
+                                      auto begin_test = std::chrono::steady_clock::now();
                                       test.init_test(opts.m_log_categories);
+
+                                      auto begin_run = std::chrono::steady_clock::now();
                                       test.run_test();
-                                      auto passed = test.test_succeeded();
+
+                                      auto begin_evaluation = std::chrono::steady_clock::now();
+                                      auto passed           = test.test_succeeded();
+                                      auto end_evaluation   = std::chrono::steady_clock::now();
+
+                                      std::chrono::duration<double> run_duration_sec = begin_evaluation - begin_run;
+
+                                      double cycles_per_second = static_cast<double>(test.emulated_cycles())
+                                                                 / run_duration_sec.count();
+
+                                      test_result tr{.m_test_passed         = passed,
+                                                     .m_test_name           = test.test_name(),
+                                                     .m_init_duration       = begin_run - begin_test,
+                                                     .m_run_duration        = begin_evaluation - begin_run,
+                                                     .m_evaluation_duration = end_evaluation - begin_evaluation,
+                                                     .m_emulated_cycles     = test.emulated_cycles(),
+                                                     .m_cycles_per_second   = cycles_per_second};
 
                                       if (opts.m_write_logs)
                                       {
                                           test.write_logs();
+                                          auto end_write_logs      = std::chrono::steady_clock::now();
+                                          tr.m_write_logs_duration = end_write_logs - end_evaluation;
                                       }
 
-                                      auto end = std::chrono::high_resolution_clock::now();
-                                      results.push({.m_test_passed = passed,
-                                                    .m_test_name   = test.test_name()});
+                                      results.push(tr);
                                   });
                               }
                           });
@@ -262,6 +281,9 @@ age::tr::test_run_results age::tr::run_tests(const options&                    o
         // by letting the thread pool go out of scope we wait for it to finish
     }
 
-    return {.m_test_results = results.copy(),
-            .m_rom_count    = rom_count};
+    auto end_run = std::chrono::steady_clock::now();
+
+    return {.m_test_results   = results.copy(),
+            .m_rom_count      = rom_count,
+            .m_total_duration = end_run - begin_run};
 }

@@ -73,6 +73,7 @@ namespace age::tr //! \todo remove ::tr, rename classes from "age_tr_..." to "tr
 
         [[nodiscard]] gb_device_type device_type() const;
         [[nodiscard]] std::string    test_name() const;
+        [[nodiscard]] int64_t        emulated_cycles() const;
 
         void init_test(const gb_log_categories& log_categories);
         void run_test();

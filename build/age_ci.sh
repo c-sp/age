@@ -30,6 +30,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_BUILD_WASM $CMAKE_BUILD_TYPE_RELEASE"
     echo "  tests:"
     echo "    $0 $CMD_RUN_GTEST"
+    echo "    $0 $CMD_RUN_TESTS"
     echo "    $0 $CMD_RUN_TESTS $TESTS_ACID2"
     echo "    $0 $CMD_RUN_TESTS $TESTS_AGE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
@@ -214,6 +215,7 @@ run_tests()
         "${TESTS_MOONEYE_WILBERTPOL}") ;;
         "${TESTS_RTC3TEST}") ;;
         "${TESTS_SAME_SUITE}") ;;
+        "") ;;
         *) print_usage_and_exit ;;
     esac
 
@@ -241,7 +243,11 @@ run_tests()
     fi
 
     # run the tests
-    ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "--$1" "$SUITE_DIR"
+    if [ -n "$1" ]; then
+      ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "$TEST_CATEGORY" "$SUITE_DIR"
+    else
+      ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "$SUITE_DIR"
+    fi
 }
 
 # I used this script to fix copyright statements based on the recommendations found here:

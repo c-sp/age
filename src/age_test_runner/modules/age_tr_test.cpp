@@ -138,6 +138,11 @@ std::string age::tr::age_tr_test::test_name() const
     return tn + " " + get_device_type_string(m_device_type);
 }
 
+age::int64_t age::tr::age_tr_test::emulated_cycles() const
+{
+    return m_emulator->get_emulated_cycles();
+}
+
 void age::tr::age_tr_test::init_test(const gb_log_categories& log_categories)
 {
     if (m_emulator == nullptr)

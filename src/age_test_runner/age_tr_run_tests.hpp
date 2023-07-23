@@ -20,6 +20,7 @@
 #include "age_tr_arguments.hpp"
 #include "modules/age_tr_module.hpp"
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -29,14 +30,21 @@ namespace age::tr
 {
     struct test_result
     {
-        bool        m_test_passed;
-        std::string m_test_name;
+        bool                     m_test_passed;
+        std::string              m_test_name;
+        std::chrono::nanoseconds m_init_duration;
+        std::chrono::nanoseconds m_run_duration;
+        std::chrono::nanoseconds m_evaluation_duration;
+        std::chrono::nanoseconds m_write_logs_duration;
+        int64_t                  m_emulated_cycles;
+        double                   m_cycles_per_second;
     };
 
     struct test_run_results
     {
         std::vector<test_result> m_test_results;
         int                      m_rom_count = 0;
+        std::chrono::nanoseconds m_total_duration;
     };
 
     test_run_results run_tests(const options&                    opts,

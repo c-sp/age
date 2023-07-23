@@ -19,6 +19,7 @@
 #include "modules/age_tr_module.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <thread>
 
@@ -112,6 +113,40 @@ namespace
             std::cout << " " << cat;
         }
         std::cout << std::endl;
+    }
+
+    void print_cycles_per_second(age::tr::test_run_results results)
+    {
+        if (results.m_test_results.empty())
+        {
+            return;
+        }
+
+        double cps_mean = 0;
+        double cps_min  = std::numeric_limits<double>::max();
+        double cps_max  = std::numeric_limits<double>::min();
+        for (const auto& tr : results.m_test_results)
+        {
+            cps_mean += tr.m_cycles_per_second;
+            cps_min = std::min(cps_min, tr.m_cycles_per_second);
+            cps_max = std::max(cps_max, tr.m_cycles_per_second);
+        }
+        cps_mean /= static_cast<double>(results.m_test_results.size());
+
+        double sd2 = 0;
+        for (const auto& tr : results.m_test_results)
+        {
+            auto diff = tr.m_cycles_per_second - cps_mean;
+            sd2 += diff * diff;
+        }
+        sd2 /= static_cast<double>(results.m_test_results.size());
+        auto sd = std::sqrt(sd2);
+
+        std::cout << "emulated cycles per second: " << static_cast<int64_t>(cps_mean)
+                  << " (sd " << static_cast<int64_t>(sd)
+                  << ", min " << static_cast<int64_t>(cps_min)
+                  << ", max " << static_cast<int64_t>(cps_max)
+                  << ")" << std::endl;
     }
 
 } // namespace
@@ -223,6 +258,13 @@ int main(int argc, char** argv)
     {
         sort_and_print(failed_tests);
     }
+
+    std::cout << std::endl;
+    std::chrono::duration<double> total_duration_sec = results.m_total_duration;
+    std::cout << "total runtime with " << threads << " threads: "
+              << total_duration_sec.count() << " seconds"
+              << std::endl;
+    print_cycles_per_second(results);
 
     return failed_tests.empty() ? 0 : 1;
 }
