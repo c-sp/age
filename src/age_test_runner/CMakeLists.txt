@@ -16,7 +16,7 @@ add_executable(
         age_tr_arguments.cpp
         age_tr_main.cpp
         age_tr_run_tests.cpp
-        age_tr_thread_pool.hpp)
+        age_tr_thread_pool.hpp age_tr_print_stats.cpp)
 
 # Find pthreads on e.g. Ubuntu,
 # based on:

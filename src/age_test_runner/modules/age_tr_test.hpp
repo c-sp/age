@@ -44,11 +44,11 @@ namespace age::tr //! \todo remove ::tr, rename classes from "age_tr_..." to "tr
                     std::shared_ptr<const uint8_vector> rom,
                     gb_device_type                      device_type);
 
-        age_tr_test(std::filesystem::path                        rom_path,
-                    std::shared_ptr<const uint8_vector>          rom,
-                    gb_device_type                               device_type,
-                    std::function<bool(const age::gb_emulator&)> test_finished,
-                    std::function<bool(const age::gb_emulator&)> test_succeeded);
+        age_tr_test(std::filesystem::path                               rom_path,
+                    std::shared_ptr<const uint8_vector>                 rom,
+                    gb_device_type                                      device_type,
+                    const std::function<bool(const age::gb_emulator&)>& test_finished,
+                    std::function<bool(const age::gb_emulator&)>        test_succeeded);
 
         age_tr_test(std::filesystem::path                        rom_path,
                     std::shared_ptr<const uint8_vector>          rom,
@@ -72,7 +72,7 @@ namespace age::tr //! \todo remove ::tr, rename classes from "age_tr_..." to "tr
                     std::function<bool(const age::gb_emulator&)> test_succeeded);
 
         [[nodiscard]] gb_device_type device_type() const;
-        [[nodiscard]] std::string    test_name() const;
+        [[nodiscard]] std::string    test_name(const std::string& base_path) const;
         [[nodiscard]] int64_t        emulated_cycles() const;
 
         void init_test(const gb_log_categories& log_categories);

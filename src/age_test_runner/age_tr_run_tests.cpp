@@ -164,9 +164,9 @@ namespace
 
 
 
-age::tr::test_run_results age::tr::run_tests(const options&                    opts,
-                                             const std::vector<age_tr_module>& modules,
-                                             unsigned                          threads)
+age::tr::age_tr_test_run_results age::tr::run_tests(const options&                    opts,
+                                                    const std::vector<age_tr_module>& modules,
+                                                    unsigned                          threads)
 {
     auto begin_run = std::chrono::steady_clock::now();
 
@@ -177,8 +177,8 @@ age::tr::test_run_results age::tr::run_tests(const options&                    o
         return whitelist(path) && !blacklist(path);
     };
 
-    blocking_vector<test_result> results;
-    int                          rom_count = 0;
+    blocking_vector<age_tr_test_result> results;
+    int                                 rom_count = 0;
     {
         auto        last_update = std::chrono::system_clock::now();
         thread_pool pool(threads, [&](size_t task_queue_size, size_t tasks_running, size_t tasks_finished) {
@@ -256,13 +256,13 @@ age::tr::test_run_results age::tr::run_tests(const options&                    o
                                       double cycles_per_second = static_cast<double>(test.emulated_cycles())
                                                                  / run_duration_sec.count();
 
-                                      test_result tr{.m_test_passed         = passed,
-                                                     .m_test_name           = test.test_name(),
-                                                     .m_init_duration       = begin_run - begin_test,
-                                                     .m_run_duration        = begin_evaluation - begin_run,
-                                                     .m_evaluation_duration = end_evaluation - begin_evaluation,
-                                                     .m_emulated_cycles     = test.emulated_cycles(),
-                                                     .m_cycles_per_second   = cycles_per_second};
+                                      age_tr_test_result tr{.m_test_passed         = passed,
+                                                            .m_test_name           = test.test_name(opts.m_test_suite_path),
+                                                            .m_init_duration       = begin_run - begin_test,
+                                                            .m_run_duration        = begin_evaluation - begin_run,
+                                                            .m_evaluation_duration = end_evaluation - begin_evaluation,
+                                                            .m_emulated_cycles     = test.emulated_cycles(),
+                                                            .m_cycles_per_second   = static_cast<int64_t>(cycles_per_second)};
 
                                       if (opts.m_write_logs)
                                       {

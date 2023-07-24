@@ -15,11 +15,11 @@
 //
 
 #include "age_tr_arguments.hpp"
+#include "age_tr_print.hpp"
 #include "age_tr_run_tests.hpp"
 #include "modules/age_tr_module.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <iostream>
 #include <thread>
 
@@ -47,7 +47,7 @@ namespace
         }
     }
 
-    void sort_and_print(std::vector<age::tr::test_result>& tests)
+    void sort_and_print(std::vector<age::tr::age_tr_test_result>& tests)
     {
         std::vector<std::string> test_names;
 
@@ -107,46 +107,12 @@ namespace
         }
         std::sort(begin(categories), end(categories));
 
-        std::cout << "test categories:";
+        std::cout << "test categories:         ";
         for (const auto& cat : categories)
         {
             std::cout << " " << cat;
         }
         std::cout << std::endl;
-    }
-
-    void print_cycles_per_second(age::tr::test_run_results results)
-    {
-        if (results.m_test_results.empty())
-        {
-            return;
-        }
-
-        double cps_mean = 0;
-        double cps_min  = std::numeric_limits<double>::max();
-        double cps_max  = std::numeric_limits<double>::min();
-        for (const auto& tr : results.m_test_results)
-        {
-            cps_mean += tr.m_cycles_per_second;
-            cps_min = std::min(cps_min, tr.m_cycles_per_second);
-            cps_max = std::max(cps_max, tr.m_cycles_per_second);
-        }
-        cps_mean /= static_cast<double>(results.m_test_results.size());
-
-        double sd2 = 0;
-        for (const auto& tr : results.m_test_results)
-        {
-            auto diff = tr.m_cycles_per_second - cps_mean;
-            sd2 += diff * diff;
-        }
-        sd2 /= static_cast<double>(results.m_test_results.size());
-        auto sd = std::sqrt(sd2);
-
-        std::cout << "emulated cycles per second: " << static_cast<int64_t>(cps_mean)
-                  << " (sd " << static_cast<int64_t>(sd)
-                  << ", min " << static_cast<int64_t>(cps_min)
-                  << ", max " << static_cast<int64_t>(cps_max)
-                  << ")" << std::endl;
     }
 
 } // namespace
@@ -190,48 +156,46 @@ int main(int argc, char** argv)
     // notify the user about what we're going to do
     std::cout << std::endl;
     print_test_categories(modules);
-    std::cout << "looking for test roms in: " << opts.m_test_suite_path.string()
-              << std::endl;
+    std::cout << "looking for test roms in: " << opts.m_test_suite_path.string() << std::endl;
+
+    if (!opts.m_whitelist.empty())
+    {
+        std::cout << "whitelist:                " << opts.m_whitelist << std::endl;
+    }
+    if (!opts.m_blacklist.empty())
+    {
+        std::cout << "blacklist:                " << opts.m_blacklist << std::endl;
+    }
 
 #ifndef AGE_COMPILE_LOGGER
     opts.m_log_categories = {};
 #endif
     if (opts.m_log_categories.empty())
     {
-        std::cout << "test rom logs disabled" << std::endl;
+        std::cout << "test rom logs:            disabled" << std::endl;
     }
     else
     {
+        std::cout << "test rom logs:            TODO" << std::endl;
         //! \todo print log categories
-    }
-
-    if (!opts.m_whitelist.empty())
-    {
-        std::cout << "whitelist: " << opts.m_whitelist << std::endl;
-    }
-    if (!opts.m_blacklist.empty())
-    {
-        std::cout << "blacklist: " << opts.m_blacklist << std::endl;
     }
 
     // check hardware concurrency
     unsigned threads = std::max(4U, std::thread::hardware_concurrency());
-    std::cout << "using " << threads << " threads to run tests" << std::endl;
+    std::cout << "thread pool size:         " << threads << std::endl;
     std::cout << std::endl;
 
     // find test rom files & schedule test tasks
     auto results = age::tr::run_tests(opts, modules, threads);
-
     if (results.m_test_results.empty())
     {
         std::cout << "no test found!" << std::endl;
         return 1;
     }
 
-    std::cout << std::endl;
     std::cout << "tests were created from " << results.m_rom_count << " rom(s)" << std::endl;
 
-    std::vector<age::tr::test_result> passed_tests;
+    std::vector<age::tr::age_tr_test_result> passed_tests;
     std::copy_if(begin(results.m_test_results),
                  end(results.m_test_results),
                  std::back_inserter(passed_tests),
@@ -245,7 +209,7 @@ int main(int argc, char** argv)
         sort_and_print(passed_tests);
     }
 
-    std::vector<age::tr::test_result> failed_tests;
+    std::vector<age::tr::age_tr_test_result> failed_tests;
     std::copy_if(begin(results.m_test_results),
                  end(results.m_test_results),
                  std::back_inserter(failed_tests),
@@ -260,11 +224,7 @@ int main(int argc, char** argv)
     }
 
     std::cout << std::endl;
-    std::chrono::duration<double> total_duration_sec = results.m_total_duration;
-    std::cout << "total runtime with " << threads << " threads: "
-              << total_duration_sec.count() << " seconds"
-              << std::endl;
-    print_cycles_per_second(results);
+    print_stats(results);
 
     return failed_tests.empty() ? 0 : 1;
 }

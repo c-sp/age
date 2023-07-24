@@ -28,7 +28,7 @@
 
 namespace age::tr
 {
-    struct test_result
+    struct age_tr_test_result
     {
         bool                     m_test_passed;
         std::string              m_test_name;
@@ -37,19 +37,19 @@ namespace age::tr
         std::chrono::nanoseconds m_evaluation_duration;
         std::chrono::nanoseconds m_write_logs_duration;
         int64_t                  m_emulated_cycles;
-        double                   m_cycles_per_second;
+        int64_t                  m_cycles_per_second;
     };
 
-    struct test_run_results
+    struct age_tr_test_run_results
     {
-        std::vector<test_result> m_test_results;
-        int                      m_rom_count = 0;
-        std::chrono::nanoseconds m_total_duration;
+        std::vector<age_tr_test_result> m_test_results;
+        int                             m_rom_count = 0;
+        std::chrono::nanoseconds        m_total_duration;
     };
 
-    test_run_results run_tests(const options&                    opts,
-                               const std::vector<age_tr_module>& modules,
-                               unsigned                          threads);
+    age_tr_test_run_results run_tests(const options&                    opts,
+                                      const std::vector<age_tr_module>& modules,
+                                      unsigned                          threads);
 
 } // namespace age::tr
 

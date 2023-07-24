@@ -56,11 +56,11 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path               rom_path,
                   succeeded_with_fibonacci_regs())
 {}
 
-age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
-                                  std::shared_ptr<const uint8_vector>          rom,
-                                  age::gb_device_type                          device_type,
-                                  std::function<bool(const age::gb_emulator&)> test_finished,
-                                  std::function<bool(const age::gb_emulator&)> test_succeeded)
+age::tr::age_tr_test::age_tr_test(std::filesystem::path                               rom_path,
+                                  std::shared_ptr<const uint8_vector>                 rom,
+                                  age::gb_device_type                                 device_type,
+                                  const std::function<bool(const age::gb_emulator&)>& test_finished,
+                                  std::function<bool(const age::gb_emulator&)>        test_succeeded)
     : age_tr_test(
         std::move(rom_path),
         std::move(rom),
@@ -72,7 +72,7 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                 emulator.emulate(cycles_per_iteration);
             }
         },
-        test_succeeded)
+        std::move(test_succeeded))
 {}
 
 age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
@@ -84,8 +84,8 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                   std::move(rom),
                   device_type,
                   {},
-                  run_test,
-                  test_succeeded)
+                  std::move(run_test),
+                  std::move(test_succeeded))
 {}
 
 age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
@@ -101,8 +101,8 @@ age::tr::age_tr_test::age_tr_test(std::filesystem::path                        r
                       ? gb_colors_hint::dmg_greyscale
                       : gb_colors_hint::cgb_acid2,
                   std::move(additional_info),
-                  run_test,
-                  test_succeeded)
+                  std::move(run_test),
+                  std::move(test_succeeded))
 {}
 
 age::tr::age_tr_test::age_tr_test(std::filesystem::path                        rom_path,
@@ -128,9 +128,13 @@ age::gb_device_type age::tr::age_tr_test::device_type() const
     return m_device_type;
 }
 
-std::string age::tr::age_tr_test::test_name() const
+std::string age::tr::age_tr_test::test_name(const std::string& base_path) const
 {
     std::string tn = m_rom_path;
+    if (tn.starts_with(base_path))
+    {
+        tn = tn.substr(base_path.length() + 1); // +1 to remove the '/'
+    }
     if (!m_additional_info.empty())
     {
         tn += ", " + m_additional_info;
