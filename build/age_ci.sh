@@ -36,6 +36,7 @@ print_usage_and_exit()
     echo "    $0 $CMD_RUN_TESTS $TESTS_BLARGG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_FIRSTWHITE"
     echo "    $0 $CMD_RUN_TESTS $TESTS_GAMBATTE"
+    echo "    $0 $CMD_RUN_TESTS $TESTS_GBMICROTEST"
     echo "    $0 $CMD_RUN_TESTS $TESTS_LITTLE_THINGS"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MEALYBUG"
     echo "    $0 $CMD_RUN_TESTS $TESTS_MOONEYE"
@@ -209,6 +210,8 @@ run_tests()
         "${TESTS_BLARGG}") ;;
         "${TESTS_FIRSTWHITE}") ;;
         "${TESTS_GAMBATTE}") ;;
+        "${TESTS_GAMBATTE}") ;;
+        "${TESTS_GBMICROTEST}") ;;
         "${TESTS_LITTLE_THINGS}") ;;
         "${TESTS_MEALYBUG}") ;;
         "${TESTS_MOONEYE}") ;;
@@ -282,6 +285,7 @@ TESTS_AGE=age
 TESTS_BLARGG=blargg
 TESTS_FIRSTWHITE=firstwhite
 TESTS_GAMBATTE=gambatte
+TESTS_GBMICROTEST=gbmicrotest
 TESTS_LITTLE_THINGS=little-things
 TESTS_MEALYBUG=mealybug
 TESTS_MOONEYE=mooneye
