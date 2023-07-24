@@ -238,8 +238,8 @@ run_tests()
         echo "test suite not found at: $SUITE_DIR"
         echo "downloading test suites zip file"
         cd_artifact test-suites
-        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v5.1/game-boy-test-roms-v5.1.zip
-        unzip -q game-boy-test-roms-v5.1.zip
+        wget -q https://github.com/c-sp/gameboy-test-roms/releases/download/v6.0/game-boy-test-roms-v6.0.zip
+        unzip -q game-boy-test-roms-v6.0.zip
     fi
 
     # run the tests

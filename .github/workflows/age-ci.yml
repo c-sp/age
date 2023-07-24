@@ -208,6 +208,24 @@ jobs:
         run: build/age_ci.sh run-tests gambatte
 
 
+  test-gbmicrotest:
+    name: run GBMicrotest
+    runs-on: ubuntu-22.04
+    needs: [ build-test-runner ]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: run tests
+        run: build/age_ci.sh run-tests gbmicrotest
+
+
   test-mealybug:
     name: run Mealybug Tearoom tests
     runs-on: ubuntu-22.04
