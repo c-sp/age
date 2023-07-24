@@ -244,7 +244,7 @@ run_tests()
 
     # run the tests
     if [ -n "$1" ]; then
-      ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "$TEST_CATEGORY" "$SUITE_DIR"
+      ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "--$1" "$SUITE_DIR"
     else
       ${TEST_EXEC} --print-failed --print-passed --blacklist "$BUILD_DIR/test-blacklist.txt" "$SUITE_DIR"
     fi
