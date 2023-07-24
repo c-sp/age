@@ -125,6 +125,9 @@ age::gb_test_info age::gb_cpu::get_test_info() const
     result.m_e              = m_e;
     result.m_h              = m_h;
     result.m_l              = m_l;
+    result.m_ff80           = m_bus.read_byte(0xFF80);
+    result.m_ff81           = m_bus.read_byte(0xFF81);
+    result.m_ff82           = m_bus.read_byte(0xFF82);
 
     return result;
 }

@@ -68,6 +68,7 @@ namespace age::tr
     age_tr_module create_age_module();
     age_tr_module create_blargg_module();
     age_tr_module create_gambatte_module();
+    age_tr_module create_gbmicrotest_module();
     age_tr_module create_little_things_module();
     age_tr_module create_mealybug_module();
     age_tr_module create_mooneye_module();

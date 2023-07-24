@@ -5,6 +5,7 @@ add_executable(
         modules/age_tr_module_age.cpp
         modules/age_tr_module_blargg.cpp
         modules/age_tr_module_gambatte.cpp
+        modules/age_tr_module_gbmicrotest.cpp
         modules/age_tr_module_little_things.cpp
         modules/age_tr_module_mealybug.cpp
         modules/age_tr_module_mooneye.cpp

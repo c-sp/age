@@ -126,6 +126,7 @@ int main(int argc, char** argv)
         age::tr::create_age_module(),
         age::tr::create_blargg_module(),
         age::tr::create_gambatte_module(),
+        age::tr::create_gbmicrotest_module(),
         age::tr::create_little_things_module(),
         age::tr::create_mealybug_module(),
         age::tr::create_mooneye_module(),

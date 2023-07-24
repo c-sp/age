@@ -248,6 +248,84 @@
 
 ##################################################################
 ###
+###   GBMicrotest
+###
+
+### no test roms
+### (they don't finish with writing FF80, FF81 & FF82)
+###
+### TODO maybe we can convert some of these into screenshot-based tests at some time
+
+/gbmicrotest/000-oam_lock.gb
+/gbmicrotest/000-write_to_x8000.gb
+/gbmicrotest/001-vram_unlocked.gb
+/gbmicrotest/002-vram_locked.gb
+/gbmicrotest/004-tima_boot_phase.gb
+/gbmicrotest/004-tima_cycle_timer.gb
+/gbmicrotest/007-lcd_on_stat.gb
+/gbmicrotest/400-dma.gb
+/gbmicrotest/500-scx-timing.gb
+/gbmicrotest/800-ppu-latch-scx.gb
+/gbmicrotest/801-ppu-latch-scy.gb
+/gbmicrotest/802-ppu-latch-tileselect.gb
+/gbmicrotest/803-ppu-latch-bgdisplay.gb
+/gbmicrotest/audio_testbench.gb
+/gbmicrotest/cpu_bus_1.gb
+/gbmicrotest/dma_basic.gb
+/gbmicrotest/flood_vram.gb
+/gbmicrotest/lcdon_write_timing.gb
+/gbmicrotest/ly_while_lcd_off.gb
+/gbmicrotest/minimal.gb
+/gbmicrotest/oam_sprite_trashing.gb
+/gbmicrotest/poweron.gb
+/gbmicrotest/ppu_scx_vs_bgp.gb
+/gbmicrotest/ppu_sprite_testbench.gb
+/gbmicrotest/ppu_spritex_vs_scx.gb
+/gbmicrotest/ppu_win_vs_wx.gb
+/gbmicrotest/ppu_wx_early.gb
+/gbmicrotest/temp.gb
+/gbmicrotest/toggle_lcdc.gb
+/gbmicrotest/wave_write_to_0xC003.gb
+
+### failing tests
+
+/gbmicrotest/halt_op_dupe_delay.gb
+/gbmicrotest/int_hblank_halt_scx0.gb
+/gbmicrotest/int_hblank_halt_scx3.gb
+/gbmicrotest/int_hblank_halt_scx4.gb
+/gbmicrotest/int_hblank_halt_scx7.gb
+/gbmicrotest/int_hblank_incs_scx1.gb
+/gbmicrotest/int_hblank_incs_scx2.gb
+/gbmicrotest/int_hblank_incs_scx5.gb
+/gbmicrotest/int_hblank_incs_scx6.gb
+/gbmicrotest/int_hblank_nops_scx1.gb
+/gbmicrotest/int_hblank_nops_scx2.gb
+/gbmicrotest/int_hblank_nops_scx5.gb
+/gbmicrotest/int_hblank_nops_scx6.gb
+/gbmicrotest/line_153_lyc_int_a.gb
+/gbmicrotest/lyc1_write_timing_d.gb
+/gbmicrotest/mbc1_rom_banks.gb
+/gbmicrotest/mode2_stat_int_to_oam_unlock.gb
+/gbmicrotest/oam_int_if_level_c.gb
+/gbmicrotest/oam_write_l0_b.gb
+/gbmicrotest/oam_write_l0_d.gb
+/gbmicrotest/oam_write_l1_c.gb
+/gbmicrotest/stat_write_glitch_l0_a.gb
+/gbmicrotest/stat_write_glitch_l0_b.gb
+/gbmicrotest/stat_write_glitch_l143_b.gb
+/gbmicrotest/stat_write_glitch_l143_c.gb
+/gbmicrotest/stat_write_glitch_l143_d.gb
+/gbmicrotest/stat_write_glitch_l154_a.gb
+/gbmicrotest/stat_write_glitch_l154_b.gb
+/gbmicrotest/stat_write_glitch_l154_d.gb
+/gbmicrotest/stat_write_glitch_l1_b.gb
+/gbmicrotest/stat_write_glitch_l1_c.gb
+/gbmicrotest/vram_write_l1_a.gb
+
+
+
+##################################################################
+###
 ###   mealybug tearoom
 ###
 

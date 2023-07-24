@@ -118,6 +118,10 @@ namespace age
         uint8_t m_e = 0;
         uint8_t m_h = 0;
         uint8_t m_l = 0;
+
+        uint8_t m_ff80 = 0;
+        uint8_t m_ff81 = 0;
+        uint8_t m_ff82 = 0;
     };
 
 
