@@ -20,7 +20,7 @@ jobs:
     steps:
       # https://github.com/jurplel/install-qt-action
       - name: install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@v3
         with:
           # for a list of available modules see:
           # https://ddalcino.github.io/aqt-list-server/
