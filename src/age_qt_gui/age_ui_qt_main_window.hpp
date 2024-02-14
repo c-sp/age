@@ -75,13 +75,14 @@ namespace age
 
         QSharedPointer<qt_user_value_store> m_user_value_store = nullptr;
 
-        QAction* m_action_open          = nullptr;
-        QAction* m_action_open_dmg      = nullptr;
-        QAction* m_action_open_cgb_abcd = nullptr;
-        QAction* m_action_open_cgb_e    = nullptr;
-        QAction* m_action_settings      = nullptr;
-        QAction* m_action_fullscreen    = nullptr;
-        QAction* m_action_exit          = nullptr;
+        QAction* m_action_open              = nullptr;
+        QAction* m_action_open_dmg          = nullptr;
+        QAction* m_action_open_cgb_abcd     = nullptr;
+        QAction* m_action_open_cgb_e        = nullptr;
+        QAction* m_action_capture_gb_screen = nullptr;
+        QAction* m_action_settings          = nullptr;
+        QAction* m_action_fullscreen        = nullptr;
+        QAction* m_action_exit              = nullptr;
 
         qt_settings_dialog* m_settings = nullptr;
 
@@ -102,6 +103,7 @@ namespace age
         void menu_emulator_open_dmg();
         void menu_emulator_open_cgb_abcd();
         void menu_emulator_open_cgb_e();
+        void menu_emulator_captured_emulator_screen(pixel_vector captured_screen, int screen_width, int screen_height);
         void menu_emulator_settings();
         void menu_emulator_fullscreen();
         void menu_emulator_exit();

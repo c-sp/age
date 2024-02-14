@@ -23,7 +23,9 @@
 #include <QString>
 #include <QStringList>
 
+#include <gfx/age_png.hpp>
 #include <emulator/age_gb_emulator.hpp> // gb buttons
+#include <QStandardPaths>
 
 #include "age_ui_qt_emulation_runner.hpp"
 #include "age_ui_qt_main_window.hpp"
@@ -52,12 +54,13 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
 
     m_settings = new qt_settings_dialog(m_user_value_store, this, Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
-    m_action_open          = new QAction("open file", this);
-    m_action_open_dmg      = new QAction("open file as DMG", this);
-    m_action_open_cgb_abcd = new QAction("open file as CGB A/B/C/D", this);
-    m_action_open_cgb_e    = new QAction("open file as CGB E", this);
-    m_action_settings      = new QAction("settings", this);
-    m_action_fullscreen    = new QAction("fullscreen", this);
+    m_action_open              = new QAction("open file", this);
+    m_action_open_dmg          = new QAction("open file as DMG", this);
+    m_action_open_cgb_abcd     = new QAction("open file as CGB A/B/C/D", this);
+    m_action_open_cgb_e        = new QAction("open file as CGB E", this);
+    m_action_capture_gb_screen = new QAction("capture gb screen", this);
+    m_action_settings          = new QAction("settings", this);
+    m_action_fullscreen        = new QAction("fullscreen", this);
     m_action_fullscreen->setCheckable(true);
     m_action_fullscreen->setChecked(false);
     m_action_exit = new QAction("exit", this);
@@ -92,6 +95,8 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
     connect(emulation_runner, &qt_emulation_runner::emulator_speed, this, &qt_main_window::emulator_speed);
     connect(emulation_runner, &qt_emulation_runner::emulator_milliseconds, this, &qt_main_window::emulator_milliseconds);
 
+    connect(emulation_runner, &qt_emulation_runner::captured_emulator_screen, this, &qt_main_window::menu_emulator_captured_emulator_screen);
+
     // connect video output signals
 
     connect(video_output, &qt_video_output::fps, this, &qt_main_window::fps);
@@ -120,6 +125,7 @@ age::qt_main_window::qt_main_window(QWidget* parent, Qt::WindowFlags flags)
     connect(m_action_open_dmg, &QAction::triggered, this, &qt_main_window::menu_emulator_open_dmg);
     connect(m_action_open_cgb_abcd, &QAction::triggered, this, &qt_main_window::menu_emulator_open_cgb_abcd);
     connect(m_action_open_cgb_e, &QAction::triggered, this, &qt_main_window::menu_emulator_open_cgb_e);
+    connect(m_action_capture_gb_screen, &QAction::triggered, emulation_runner, &qt_emulation_runner::capture_emulator_screen);
     connect(m_action_settings, &QAction::triggered, this, &qt_main_window::menu_emulator_settings);
     connect(m_action_fullscreen, &QAction::triggered, this, &qt_main_window::menu_emulator_fullscreen);
     connect(m_action_exit, &QAction::triggered, this, &qt_main_window::menu_emulator_exit);
@@ -257,6 +263,8 @@ void age::qt_main_window::fill_menu(QMenu* menu)
     menu->addAction(m_action_open_cgb_abcd);
     menu->addAction(m_action_open_cgb_e);
     menu->addSeparator();
+    menu->addAction(m_action_capture_gb_screen);
+    menu->addSeparator();
     menu->addAction(m_action_settings);
     menu->addAction(m_action_fullscreen);
     menu->addSeparator();
@@ -388,6 +396,40 @@ void age::qt_main_window::menu_emulator_open_cgb_e()
 {
     open_file(gb_device_type::cgb_e);
     m_settings->set_pause_emulator(false);
+}
+
+void age::qt_main_window::menu_emulator_captured_emulator_screen(pixel_vector captured_screen,
+                                                                 int screen_width,
+                                                                 int screen_height)
+{
+    // no screen captured -> do nothing
+    if (captured_screen.empty())
+    {
+        return;
+    }
+
+    // screen captured -> select file to write
+    QString     file_name;
+    QFileDialog dialog(this,
+                       "save screenshot",
+                       QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
+                       "PNG files (*.png)");
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (dialog.exec())
+    {
+        QStringList files = dialog.selectedFiles();
+        if (!files.empty())
+        {
+            file_name = files.at(0);
+        }
+    }
+
+    // file selected -> write
+    if (file_name.length() > 0)
+    {
+        write_png_file(captured_screen, screen_width, screen_height, file_name.toStdString());
+    }
 }
 
 void age::qt_main_window::menu_emulator_settings()

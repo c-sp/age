@@ -58,6 +58,8 @@ namespace age
         void emulator_speed(int speed_percent);
         void emulator_milliseconds(qint64 emulated_milliseconds);
 
+        void captured_emulator_screen(pixel_vector screen, int screen_width, int screen_height);
+
     public slots:
 
         void initialize();
@@ -74,6 +76,7 @@ namespace age
         void set_audio_latency(int latency_milliseconds);
         void set_audio_downsampler_quality(age::qt_downsampler_quality quality);
 
+        void capture_emulator_screen();
 
 
     private slots:

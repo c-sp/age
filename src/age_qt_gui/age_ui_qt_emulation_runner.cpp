@@ -218,6 +218,22 @@ void age::qt_emulation_runner::set_audio_downsampler_quality(age::qt_downsampler
 
 
 
+void age::qt_emulation_runner::capture_emulator_screen()
+{
+    if (m_emulator != nullptr)
+    {
+        const auto emulator = m_emulator->get_emulator();
+
+        pixel_vector screen = emulator->get_screen_front_buffer();
+        int screen_width = emulator->get_screen_width();
+        int screen_height = emulator->get_screen_height();
+
+        emit captured_emulator_screen(screen, screen_width, screen_height);
+    }
+}
+
+
+
 //---------------------------------------------------------
 //
 //   private slots
