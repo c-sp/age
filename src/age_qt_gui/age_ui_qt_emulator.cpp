@@ -37,7 +37,7 @@ age::qt_emulator::qt_emulator(const QByteArray& rom_contents, gb_device_type dev
 {
     // create emulator
     uint8_vector                rom(rom_contents.begin(), rom_contents.end());
-    gb_log_categories           log_categories{gb_log_category::lc_memory};
+    gb_log_categories           log_categories{gb_log_category::lc_memory, gb_log_category::lc_timer, gb_log_category::lc_logpoint};
     QSharedPointer<gb_emulator> gb_emu = QSharedPointer<gb_emulator>(new gb_emulator(rom, device_type, gb_colors_hint::default_colors, log_categories));
 
     // load persistent ram, if supported by this cartridge

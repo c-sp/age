@@ -79,7 +79,7 @@ QVariant age::qt_user_value_store::get_value(const QString& key, const QVariant&
     {
         QString file_path = m_user_value_directory + key;
 
-        QFile file = {file_path};
+        QFile file{file_path};
         if (file.open(QIODevice::ReadOnly))
         {
             // do not load the file, if it exceeds the maximal number of bytes
@@ -109,7 +109,7 @@ bool age::qt_user_value_store::set_value(const QString& key, const QVariant& val
 
         QString file_path = m_user_value_directory + key;
 
-        QFile file = {file_path};
+        QFile file{file_path};
         if (file.open(QIODevice::WriteOnly))
         {
 

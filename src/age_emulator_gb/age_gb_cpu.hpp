@@ -64,6 +64,7 @@ namespace age
         void    tick_push_byte(int byte);
         uint8_t tick_read_byte(int address);
         void    execute_prefetched();
+        void    handle_logpoint() const;
 
         const gb_device&         m_device;
         gb_clock&                m_clock;

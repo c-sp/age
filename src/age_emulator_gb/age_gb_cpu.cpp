@@ -216,3 +216,27 @@ void age::gb_cpu::dispatch_interrupt()
                        << " (" << interrupt_name[interrupt_bit] << ")"
                        << " dispatched to " << log_hex16(m_pc);
 }
+
+
+
+void age::gb_cpu::handle_logpoint() const
+{
+    uint16_t          msg_ofs = ((uint16_t) m_d << 8) + m_e;
+    std::stringstream msg;
+
+    for (;;)
+    {
+        const auto byte = m_bus.read_byte(msg_ofs);
+        if ((byte < 32 || byte > 127) && (byte != 10))
+        {
+            break;
+        }
+        msg << static_cast<char>(byte);
+        msg_ofs++;
+    }
+
+    if (const auto msg_str = msg.str(); !msg_str.empty())
+    {
+        m_clock.log(gb_log_category::lc_logpoint) << msg_str;
+    }
+}

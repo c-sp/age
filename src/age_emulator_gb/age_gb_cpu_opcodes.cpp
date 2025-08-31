@@ -53,7 +53,7 @@ namespace
 #define STORE_HL(value)              \
     {                                \
         m_h = ((value) >> 8) & 0xFF; \
-        m_l = (value) &0xFF;         \
+        m_l = (value) & 0xFF;        \
     }                                \
     (void) 0 // no-op to force semicolon when using this macro
 
@@ -104,23 +104,23 @@ namespace
 
 // ----- memory access
 
-#define READ_BYTE(destination, address)                     \
-    {                                                       \
-        TICK_MACHINE_CYCLE;                                 \
-        (destination) = m_bus.read_byte((address) &0xFFFF); \
-    }                                                       \
+#define READ_BYTE(destination, address)                      \
+    {                                                        \
+        TICK_MACHINE_CYCLE;                                  \
+        (destination) = m_bus.read_byte((address) & 0xFFFF); \
+    }                                                        \
     (void) 0 // no-op to force semicolon when using this macro
 
-#define WRITE_BYTE(address, value)                          \
-    {                                                       \
-        TICK_MACHINE_CYCLE;                                 \
-        m_bus.write_byte((address) &0xFFFF, (value) &0xFF); \
-    }                                                       \
+#define WRITE_BYTE(address, value)                            \
+    {                                                         \
+        TICK_MACHINE_CYCLE;                                   \
+        m_bus.write_byte((address) & 0xFFFF, (value) & 0xFF); \
+    }                                                         \
     (void) 0 // no-op to force semicolon when using this macro
 
 #define WRITE_WORD(address, value)                                   \
     {                                                                \
-        WRITE_BYTE((address) &0xFFFF, (value) &0xFF);                \
+        WRITE_BYTE((address) & 0xFFFF, (value) & 0xFF);              \
         WRITE_BYTE(((address) + 1) & 0xFFFF, ((value) >> 8) & 0xFF); \
     }                                                                \
     (void) 0 // no-op to force semicolon when using this macro
@@ -174,12 +174,12 @@ namespace
 // ----- jumps
 
 // RST
-#define RST(opcode)            \
-    {                          \
-        TICK_MACHINE_CYCLE;    \
-        PUSH_PC;               \
-        m_pc = (opcode) &0x38; \
-    }                          \
+#define RST(opcode)             \
+    {                           \
+        TICK_MACHINE_CYCLE;     \
+        PUSH_PC;                \
+        m_pc = (opcode) & 0x38; \
+    }                           \
     (void) 0 // no-op to force semicolon when using this macro
 
 // JP
@@ -569,11 +569,11 @@ namespace
 
 // bit-test 8 bit value
 // carry = unmodified, subtract = cleared, half = set, zero calculated
-#define BIT(value, opcode)                          \
-    {                                               \
-        m_zero_indicator = (value) &CB_BIT(opcode); \
-        m_hcs_flags = m_hcs_operand = 0x08;         \
-    }                                               \
+#define BIT(value, opcode)                           \
+    {                                                \
+        m_zero_indicator = (value) & CB_BIT(opcode); \
+        m_hcs_flags = m_hcs_operand = 0x08;          \
+    }                                                \
     (void) 0 // no-op to force semicolon when using this macro
 
 #define BIT_MEM_HL(opcode)         \
@@ -755,7 +755,7 @@ namespace
         m_zero_indicator  = value;                 \
         m_carry_indicator = m_zero_indicator << 8; \
         m_zero_indicator >>= 1;                    \
-        m_zero_indicator += (value) &0x80;         \
+        m_zero_indicator += (value) & 0x80;        \
         (value) = m_zero_indicator & 0xFF;         \
     }                                              \
     (void) 0 // no-op to force semicolon when using this macro
@@ -897,7 +897,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x33:
             ++m_sp;
             TICK_MACHINE_CYCLE;
-            break;                             // INC SP
+            break; // INC SP
 
         case 0x0B: DEC_BYTES(m_b, m_c); break; // DEC BC
         case 0x1B: DEC_BYTES(m_d, m_e); break; // DEC DE
@@ -909,14 +909,14 @@ void age::gb_cpu::execute_prefetched()
 
             // loads
 
-        case 0x06: POP_BYTE_AT_PC(m_b); break;     // LD B, x
-        case 0x0E: POP_BYTE_AT_PC(m_c); break;     // LD C, x
-        case 0x16: POP_BYTE_AT_PC(m_d); break;     // LD D, x
-        case 0x1E: POP_BYTE_AT_PC(m_e); break;     // LD E, x
-        case 0x26: POP_BYTE_AT_PC(m_h); break;     // LD H, x
-        case 0x2E: POP_BYTE_AT_PC(m_l); break;     // LD L, x
-        case 0x36: LD_IMM8_MEM_HL; break;          // LD [HL], x
-        case 0x3E: POP_BYTE_AT_PC(m_a); break;     // LD A, x
+        case 0x06: POP_BYTE_AT_PC(m_b); break; // LD B, x
+        case 0x0E: POP_BYTE_AT_PC(m_c); break; // LD C, x
+        case 0x16: POP_BYTE_AT_PC(m_d); break; // LD D, x
+        case 0x1E: POP_BYTE_AT_PC(m_e); break; // LD E, x
+        case 0x26: POP_BYTE_AT_PC(m_h); break; // LD H, x
+        case 0x2E: POP_BYTE_AT_PC(m_l); break; // LD L, x
+        case 0x36: LD_IMM8_MEM_HL; break;      // LD [HL], x
+        case 0x3E: POP_BYTE_AT_PC(m_a); break; // LD A, x
 
         case 0x40: m_ld_b_b = true; break;         // LD B, B
         case 0x41: m_b = m_c; break;               // LD B, C
@@ -938,7 +938,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x50: m_d = m_b; break;
         case 0x51: m_d = m_c; break;
-        case 0x52: break;
+        case 0x52: handle_logpoint(); break;
         case 0x53: m_d = m_e; break;
         case 0x54: m_d = m_h; break;
         case 0x55: m_d = m_l; break;
@@ -994,7 +994,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x12: WRITE_BYTE(LOAD_DE, m_a); break; // LD [DE], A
         case 0x1A: READ_BYTE(m_a, LOAD_DE); break;  // LD A, [DE]
 
-        case 0xF8: LD_HL_SP_ADD; break;             // LD HL, SP + x
+        case 0xF8: LD_HL_SP_ADD; break; // LD HL, SP + x
         case 0xF9:
             m_sp = LOAD_HL & 0xFFFF;
             TICK_MACHINE_CYCLE;
@@ -1261,7 +1261,7 @@ void age::gb_cpu::execute_prefetched()
             TICK_MACHINE_CYCLE;
             PUSH_BYTE(m_a);
             {
-                uint8_t f=0;
+                uint8_t f = 0;
                 STORE_FLAGS_TO(f);
                 PUSH_BYTE(f);
             }
@@ -1280,7 +1280,7 @@ void age::gb_cpu::execute_prefetched()
             POP_BYTE(m_h);
             break; // POP HL
         case 0xF1: {
-            uint8_t f=0;
+            uint8_t f = 0;
             POP_BYTE(f);
             LOAD_FLAGS_FROM(f);
         }
@@ -1296,7 +1296,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x00: break; // NOP
 
-        case 0x10: {      // STOP
+        case 0x10: { // STOP
             m_interrupts.log() << "STOP encountered (no STOP M-cycle executed yet)";
             READ_BYTE(m_prefetched_opcode, m_pc);
             m_interrupts.log() << "STOP: prefetched op code " << log_hex8(m_prefetched_opcode);
@@ -1329,7 +1329,7 @@ void age::gb_cpu::execute_prefetched()
         case 0x3F:
             m_carry_indicator ^= 0x100;
             m_hcs_flags = m_hcs_operand = 0;
-            break;   // CCF
+            break; // CCF
 
         case 0x76: { // HALT
             auto msg = m_interrupts.log();
@@ -1377,7 +1377,7 @@ void age::gb_cpu::execute_prefetched()
 
         case 0x27: // DAA
         {
-            uint8_t f=0;
+            uint8_t f = 0;
             STORE_FLAGS_TO(f);
             // calculate correction based on carry flags
             uint8_t correction = ((f & gb_carry_flag) > 0) ? 0x60 : 0;

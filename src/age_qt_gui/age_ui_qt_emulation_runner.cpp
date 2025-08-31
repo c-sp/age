@@ -58,8 +58,15 @@ namespace
 
     void log_entry(const age::gb_log_entry& entry)
     {
+        unsigned       div = entry.m_div_clock;
+        std::bitset<4> div4{div >> 12};
+        std::bitset<4> div3{div >> 8};
+        std::bitset<4> div2{div >> 4};
+        std::bitset<4> div1{div};
+
         std::stringstream prefix_str;
         prefix_str << std::setw(9) << entry.m_clock << std::setw(0)
+                   << "  " << div4 << "'" << div3 << "'" << div2 << "'" << div1
                    << "  " << std::left << std::setw(10) << category_str(entry.m_category) << std::setw(0) << std::right
                    << "  ";
 
@@ -73,13 +80,13 @@ namespace
         while (end != std::string::npos)
         {
             auto line = entry.m_message.substr(start, end - start);
-            std::cout << prefix << line;
+            std::cout << prefix << line << '\n';
 
             start = end + 1;
             end   = entry.m_message.find('\n', start);
         }
 
-        std::cout << prefix << entry.m_message.substr(start, end);
+        std::cout << prefix << entry.m_message.substr(start, end) << '\n';
     }
 
 } // namespace
@@ -224,9 +231,9 @@ void age::qt_emulation_runner::capture_emulator_screen()
     {
         const auto emulator = m_emulator->get_emulator();
 
-        pixel_vector screen = emulator->get_screen_front_buffer();
-        int screen_width = emulator->get_screen_width();
-        int screen_height = emulator->get_screen_height();
+        pixel_vector screen        = emulator->get_screen_front_buffer();
+        int          screen_width  = emulator->get_screen_width();
+        int          screen_height = emulator->get_screen_height();
 
         emit captured_emulator_screen(screen, screen_width, screen_height);
     }

@@ -303,7 +303,7 @@ void age::qt_main_window::open_file(gb_device_type device_type)
         // load file
         QByteArray file_contents;
         {
-            QFile file = {file_name};
+            QFile file{file_name};
             if (file.open(QIODevice::ReadOnly) && (file.size() <= max_file_bytes))
             {
                 file_contents = file.readAll();
