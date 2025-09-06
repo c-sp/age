@@ -16,6 +16,7 @@
 
 #include "age_ui_qt_emulation_runner.hpp"
 
+#include <bitset>
 #include <cassert>
 #include <iomanip>
 #include <iostream>

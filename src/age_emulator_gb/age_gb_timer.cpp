@@ -80,24 +80,32 @@ age::uint8_t age::gb_timer::read_tac() const
 
 age::uint8_t age::gb_timer::read_tima()
 {
-    if (m_clk_timer_zero != gb_no_clock_cycle)
+    if (m_clk_timer_zero == gb_no_clock_cycle)
     {
-        // calculate current TIMA value
-        update_timer_state();
-
-        // If there was a timer overflow on this very clock cycle,
-        // TIMA equals zero.
-        //
-        // Mooneye GB tests:
-        //      acceptance/timer/tima_reload
-        if (m_clk_last_overflow == m_clock.get_clock_cycle())
-        {
-            log() << "read TIMA 0 due to recent timer overflow";
-            return 0;
-        }
+        log() << "read TIMA == " << log_hex8(m_tima);
+        return m_tima;
     }
 
-    log() << "read TIMA == " << log_hex8(m_tima);
+    // calculate current TIMA value
+    update_timer_state();
+
+    // If there was a timer overflow on this very clock cycle,
+    // TIMA equals zero.
+    //
+    // Mooneye GB tests:
+    //      acceptance/timer/tima_reload
+    auto current_clk = m_clock.get_clock_cycle();
+    if (m_clk_last_overflow == current_clk)
+    {
+        log() << "read TIMA 0 due to recent timer overflow";
+        return 0;
+    }
+
+    log() << "read TIMA == " << log_hex8(m_tima)
+          << ", next increment in "
+          << log_in_clks(
+                 ((((current_clk - m_clk_timer_zero) >> m_clock_shift) + 1) << m_clock_shift) + m_clk_timer_zero - current_clk,
+                 current_clk);
     return m_tima;
 }
 
